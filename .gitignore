@@ -1,0 +1,11 @@
+/out/
+/resources/public/js/**
+/target/
+\#*\#
+.\#*
+.settings
+.idea
+*.iml
+node_modules/
+dist/
+/package-lock.json

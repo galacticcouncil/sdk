@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "outDir": "./out"
+  }
+}

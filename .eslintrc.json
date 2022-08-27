@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "plugins": [
+    "es",
+    "prettier",
+    "promise"
+  ],
+  "extends": [
+    "prettier",
+    "plugin:promise/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": "error"
+  }
+}
