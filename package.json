@@ -9,15 +9,18 @@
   "types": "dist/types/index.d.ts",
   "scripts": {
     "ts-types": "tsc --emitDeclarationOnly --outDir dist/types/",
+    "test": "jest",
     "build": "node ./esbuild.mjs && npm run ts-types",
     "cleanup": "rimraf out && rimraf dist"
   },
   "devDependencies": {
     "@esbuild-kit/esm-loader": "^2.4.2",
+    "@types/jest": "^28.1.8",
     "esbuild": "^0.14.53",
     "esbuild-wasm": "^0.15.2",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.8",
     "tsx": "^3.8.2",
     "typescript": "^4.7.4"
   },
@@ -25,6 +28,7 @@
     "@polkadot/api": "^9.0.1",
     "bignumber.js": "^9.1.0",
     "capi": "^0.1.0-beta.12",
-    "hydra-dx-wasm": "https://github.com/galacticcouncil/HydraDX-wasm#0e3d625c22c32525a4619047223cac019c0cfa46"
+    "hydra-dx-wasm": "https://github.com/galacticcouncil/HydraDX-wasm#0e3d625c22c32525a4619047223cac019c0cfa46",
+    "lodash.clonedeep": "^4.5.0"
   }
 }

@@ -1,11 +1,5 @@
 import esbuild from "esbuild";
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from "fs";
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const dist = join(process.cwd(), "dist");
@@ -15,11 +9,7 @@ if (!existsSync(dist)) {
 }
 
 const entryPoints = readdirSync(join(process.cwd(), "src"))
-  .filter(
-    (file) =>
-      file.endsWith(".ts") &&
-      statSync(join(process.cwd(), "src", file)).isFile()
-  )
+  .filter((file) => file.endsWith(".ts") && statSync(join(process.cwd(), "src", file)).isFile())
   .map((file) => `src/${file}`);
 
 // ESM bundles with code splitting
@@ -50,12 +40,7 @@ esbuild
   .catch(() => process.exit(1));
 
 // An entry file for CJS
-writeFileSync(
-  join(dist, "index.js"),
-  "export * from './esm/index.js';");
+writeFileSync(join(dist, "index.js"), "export * from './esm/index.js';");
 
 // An entry file for ESM
-writeFileSync(
-  join(dist, "index.cjs.js"),
-  "module.exports = require('./cjs/index.cjs.js');"
-);
+writeFileSync(join(dist, "index.cjs.js"), "module.exports = require('./cjs/index.cjs.js');");
