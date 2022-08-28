@@ -29,14 +29,27 @@ export interface PoolPair {
   balanceOut: BigNumber;
 }
 
-export interface Pool {
+export type PoolBase = {
+  address: string;
   type: PoolType;
-  getPoolPairs(): Promise<PoolPair[]>;
-  getSellPrice(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
-  getBuyPrice(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
+  swapFee: string;
+  tokens: PoolToken[];
+};
+
+export type PoolToken = {
+  id: string;
+  balance: string;
+  decimals: number;
+  symbol: string;
+};
+
+export interface Pool extends PoolBase {
+  parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
+  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
+  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
   getSpotPrice(poolPair: PoolPair): BigNumber;
 }
 
 export interface PoolService {
-  getPools(): Pool[];
+  getPools(): Promise<PoolBase[]>;
 }

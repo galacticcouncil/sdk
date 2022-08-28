@@ -1,6 +1,5 @@
-import { Pool, PoolService } from "../types";
+import { PoolBase, PoolService } from "../types";
 import { XykPolkadotClient } from "./xyk/xykPolkadotClient";
-import { XykPool } from "./xyk/xykPool";
 
 import { ApiPromise } from "@polkadot/api";
 
@@ -11,9 +10,10 @@ export class PolkadotPoolService implements PoolService {
     this.api = api;
   }
 
-  getPools(): Pool[] {
-    const pools: Pool[] = [];
-    pools.push(new XykPool(new XykPolkadotClient(this.api)));
-    return pools;
+  async getPools(): Promise<PoolBase[]> {
+    const pools: PoolBase[][] = [];
+    const xykPools = await new XykPolkadotClient(this.api).getPools();
+    pools.push(xykPools);
+    return pools.flat();
   }
 }

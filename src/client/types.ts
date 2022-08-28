@@ -1,4 +1,4 @@
-import type { Struct } from "@polkadot/types-codec";
+import type { Bytes, Compact, Struct, bool, u32, u64, u8 } from "@polkadot/types-codec";
 import type { Balance } from "@polkadot/types/interfaces/runtime";
 
 /** @name TokensAccountData */

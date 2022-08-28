@@ -22,12 +22,8 @@ export class PolkadotClient {
     return asset[1].toHuman() as string[];
   }
 
-  async getAssetMetadata(tokenKey: string): Promise<string> {
-    const { symbol } =
-      await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(
-        tokenKey
-      );
-    return symbol.toString();
+  async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
+    return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
   }
 
   async getSystemAccountBalance(accountId: string): Promise<string> {
@@ -37,14 +33,8 @@ export class PolkadotClient {
     return free.toString();
   }
 
-  async getTokenAccountBalance(
-    accountId: string,
-    tokenKey: string
-  ): Promise<string> {
-    const { free } = await this.api.query.tokens.accounts<TokensAccountData>(
-      accountId,
-      tokenKey
-    );
+  async getTokenAccountBalance(accountId: string, tokenKey: string): Promise<string> {
+    const { free } = await this.api.query.tokens.accounts<TokensAccountData>(accountId, tokenKey);
     return free.toString();
   }
 }
