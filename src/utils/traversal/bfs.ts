@@ -71,26 +71,4 @@ export class Bfs {
     }
     return paths;
   }
-
-  /**
-   * Build and populate graph
-   *
-   * @param nodes - nodes
-   * @param edges - edges
-   * @returns - graph
-   */
-  buildAndPopulateGraph(nodes: string[], edges: Set<string[]>): number[][] {
-    const graph: number[][] = [];
-    for (let j = 0; j < nodes.length; j++) {
-      graph.push([]);
-    }
-
-    for (const [from, to] of edges) {
-      const fromNumber = parseInt(from);
-      const toNumber = parseInt(to);
-      graph[fromNumber].push(toNumber);
-    }
-
-    return graph;
-  }
 }

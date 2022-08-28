@@ -1,5 +1,5 @@
 import { RouteSuggester } from "../../src/router/suggester";
-import { PoolBase } from "../../src/types";
+import { PoolBase, PoolType } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 
 describe("Router suggester for XYK pool", () => {
@@ -18,7 +18,7 @@ describe("Router suggester for XYK pool", () => {
       [
         {
           poolId: "bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3",
-          poolType: "XYK",
+          poolType: PoolType.XYK,
           tokenIn: "1",
           tokenOut: "2",
           fee: "0.3",
@@ -27,14 +27,14 @@ describe("Router suggester for XYK pool", () => {
       [
         {
           poolId: "bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ",
-          poolType: "XYK",
+          poolType: PoolType.XYK,
           tokenIn: "1",
           tokenOut: "0",
           fee: "0.3",
         },
         {
           poolId: "bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq",
-          poolType: "XYK",
+          poolType: PoolType.XYK,
           tokenIn: "0",
           tokenOut: "2",
           fee: "0.3",

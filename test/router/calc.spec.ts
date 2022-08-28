@@ -1,4 +1,4 @@
-import { getNodesAndEdges } from "../../src/router/filtering";
+import { getNodesAndEdges } from "../../src/router/calc";
 import { PoolBase } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 

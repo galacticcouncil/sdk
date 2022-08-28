@@ -6,8 +6,6 @@ export type NodeEdges = {
   [node: string]: Edge[];
 };
 
-export type Hops = Edge[];
-
 /**
  * Calculate nodes & edges from substrate pools
  *

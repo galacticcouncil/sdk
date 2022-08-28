@@ -1,7 +1,7 @@
-import { Bfs, node } from "../../src/router/bfs";
+import { Bfs, Path } from "../../src/router/bfs";
 
 describe("Breadth First Search for router", () => {
-  const g: node[][] = [];
+  const g: Path[] = [];
   const size = 4;
 
   beforeEach(() => {

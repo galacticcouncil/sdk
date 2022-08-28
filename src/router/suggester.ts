@@ -1,7 +1,7 @@
 import { Hop, PoolBase } from "../types";
-import { Bfs, node } from "./bfs";
+import { Bfs, Node, Path } from "./bfs";
 
-import { getNodesAndEdges, Edge } from "./filtering";
+import { getNodesAndEdges, Edge } from "./calc";
 
 export class RouteSuggester {
   getProposals(tokenIn: string, tokenOut: string, pools: PoolBase[]): Hop[][] {
@@ -17,7 +17,7 @@ export class RouteSuggester {
     return this.parseHops(possiblePaths, poolById);
   }
 
-  private toHop(from: node, to: node, pool: PoolBase | undefined): Hop {
+  private toHop(from: Node, to: Node, pool: PoolBase | undefined): Hop {
     return {
       poolId: to[1],
       poolType: pool?.type,
@@ -27,7 +27,7 @@ export class RouteSuggester {
     } as Hop;
   }
 
-  private parseHops(possiblePaths: node[][], poolById: Map<string, PoolBase>): Hop[][] {
+  private parseHops(possiblePaths: Path[], poolById: Map<string, PoolBase>): Hop[][] {
     const paths: Hop[][] = [];
     for (const path of possiblePaths) {
       const hops: Hop[] = [];

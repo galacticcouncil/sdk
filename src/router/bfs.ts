@@ -1,6 +1,7 @@
 import { Queue } from "../utils/queue";
 
-export type node = [number, string];
+export type Path = Node[];
+export type Node = [id: number, from: string];
 
 /**
  * Breadth First Search.
@@ -18,7 +19,7 @@ export class Bfs {
    * @param path - path
    * @returns true if node in path, otherwise false
    */
-  isNotVisited(x: number, path: node[]): boolean {
+  isNotVisited(x: number, path: Path): boolean {
     let notVisited: boolean = true;
     path.forEach((pv) => {
       if (pv[0] === x) {
@@ -36,14 +37,15 @@ export class Bfs {
    * @param dst - destination node
    * @returns paths
    */
-  findPaths(g: node[][], src: number, dst: number): node[][] {
-    // Store the results
-    const paths: node[][] = [];
+  findPaths(g: Path[], src: number, dst: number): Path[] {
+    // Store the result paths
+    const paths: Path[] = [];
     // Store the traversing paths
-    const queue = new Queue<node[]>();
+    const queue = new Queue<Path>();
     // Store the current path
-    const currentPath: node[] = [];
+    const currentPath: Path = [];
 
+    // First node of path has no from (initial)
     currentPath.push([src, ""]);
     queue.enqueue(currentPath);
 
@@ -61,7 +63,7 @@ export class Bfs {
         paths.push(path);
       }
 
-      // Traverse to all nodes connected to current node and push path to queue
+      // Traverse to all nodes connected to current one and push path to queue
       const lastNode = g[last[0]];
       lastNode.forEach((segment) => {
         if (this.isNotVisited(segment[0], path)) {
@@ -77,12 +79,12 @@ export class Bfs {
   /**
    * Build and populate graph
    *
-   * @param nodes - nodes
-   * @param edges - edges
-   * @returns - graph
+   * @param nodes - list of tokens
+   * @param edges - list of all edges [id, from, to]
+   * @returns - traversal graph
    */
-  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): node[][] {
-    const graph: node[][] = [];
+  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {
+    const graph: Path[] = [];
     for (let j = 0; j < nodes.length; j++) {
       graph.push([]);
     }

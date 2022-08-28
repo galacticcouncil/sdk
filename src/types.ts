@@ -43,10 +43,6 @@ export interface PoolService {
   getPools(): Promise<PoolBase[]>;
 }
 
-export type Path = {
-  hops: Hop[];
-};
-
 export type Hop = {
   poolType: PoolType;
   poolId: string;
