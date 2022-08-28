@@ -3,10 +3,12 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 export abstract class PolkadotExecutor {
   protected readonly apiUrl: string;
   protected readonly desc: string;
+  protected readonly pretty: boolean;
 
-  constructor(apiUrl: string, desc: string) {
+  constructor(apiUrl: string, desc: string, pretty?: boolean) {
     this.apiUrl = apiUrl;
     this.desc = desc;
+    this.pretty = pretty || false;
   }
 
   async run() {
@@ -25,7 +27,13 @@ export abstract class PolkadotExecutor {
           console.log("Running script...");
           console.log(this.desc);
           this.script(api)
-            .then((output: any) => console.log(output))
+            .then((output: any) => {
+              if (this.pretty) {
+                console.log(output ? JSON.stringify(output, null, 2) : "");
+              } else {
+                console.log(output);
+              }
+            })
             .finally(() => api.disconnect());
         });
     } catch (error) {

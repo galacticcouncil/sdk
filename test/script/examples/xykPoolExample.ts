@@ -1,14 +1,11 @@
 import { ApiPromise } from "@polkadot/api";
 import { PolkadotExecutor } from "../executor";
-import { XykPool } from "../../../src/pools/xyk/xykPool";
-import { XykPolkadotClient } from "../../../src/pools/xyk/xykPolkadotClient";
+import { XykPolkadotClient } from "../../../src/pool/xyk/xykPolkadotClient";
 
-class XykPoolPairs extends PolkadotExecutor {
+class XykPools extends PolkadotExecutor {
   script(api: ApiPromise): Promise<any> {
-    const xykClient = new XykPolkadotClient(api);
-    const xykPool = new XykPool(xykClient);
-    return xykPool.getPoolPairs();
+    return new XykPolkadotClient(api).getPools();
   }
 }
 
-new XykPoolPairs("wss://rpc.basilisk.cloud", "Return XYK pool pairs").run();
+new XykPools("wss://rpc.basilisk.cloud", "Return XYK pools", true).run();
