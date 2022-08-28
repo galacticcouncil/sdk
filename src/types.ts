@@ -1,21 +1,10 @@
 import { BigNumber } from "./utils/bignumber";
 
-export interface Asset {
-  key: string;
-  name: string;
-}
-
 export enum PoolType {
   XYK = "XYK",
   LBP = "LBP",
   Stable = "Stable",
   Omni = "Omni",
-}
-
-export interface PoolAsset {
-  id: string;
-  assetIn: string;
-  assetOut: string;
 }
 
 export interface PoolPair {
@@ -53,3 +42,15 @@ export interface Pool extends PoolBase {
 export interface PoolService {
   getPools(): Promise<PoolBase[]>;
 }
+
+export type Path = {
+  hops: Hop[];
+};
+
+export type Hop = {
+  poolType: PoolType;
+  poolId: string;
+  tokenIn: string;
+  tokenOut: string;
+  fee: string;
+};

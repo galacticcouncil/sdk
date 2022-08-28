@@ -1,4 +1,6 @@
-import { Queue } from "../queue";
+import { Queue } from "../utils/queue";
+
+export type node = [number, string];
 
 /**
  * Breadth First Search.
@@ -16,10 +18,10 @@ export class Bfs {
    * @param path - path
    * @returns true if node in path, otherwise false
    */
-  isNotVisited(x: number, path: number[]): boolean {
+  isNotVisited(x: number, path: node[]): boolean {
     let notVisited: boolean = true;
     path.forEach((pv) => {
-      if (pv === x) {
+      if (pv[0] === x) {
         notVisited = false;
       }
     });
@@ -34,15 +36,15 @@ export class Bfs {
    * @param dst - destination node
    * @returns paths
    */
-  findPaths(g: number[][], src: number, dst: number): number[][] {
+  findPaths(g: node[][], src: number, dst: number): node[][] {
     // Store the results
-    const paths: number[][] = [];
+    const paths: node[][] = [];
     // Store the traversing paths
-    const queue = new Queue<number[]>();
+    const queue = new Queue<node[]>();
     // Store the current path
-    const currentPath: number[] = [];
+    const currentPath: node[] = [];
 
-    currentPath.push(src);
+    currentPath.push([src, ""]);
     queue.enqueue(currentPath);
 
     while (queue.size() > 0) {
@@ -55,14 +57,14 @@ export class Bfs {
       const last = path[path.length - 1];
 
       // If last node is the desired destination save to paths
-      if (last === dst) {
+      if (last[0] === dst) {
         paths.push(path);
       }
 
       // Traverse to all nodes connected to current node and push path to queue
-      const lastNode = g[last];
+      const lastNode = g[last[0]];
       lastNode.forEach((segment) => {
-        if (this.isNotVisited(segment, path)) {
+        if (this.isNotVisited(segment[0], path)) {
           const newpath = [...path];
           newpath.push(segment);
           queue.enqueue(newpath);
@@ -79,16 +81,16 @@ export class Bfs {
    * @param edges - edges
    * @returns - graph
    */
-  buildAndPopulateGraph(nodes: string[], edges: Set<string[]>): number[][] {
-    const graph: number[][] = [];
+  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): node[][] {
+    const graph: node[][] = [];
     for (let j = 0; j < nodes.length; j++) {
       graph.push([]);
     }
 
-    for (const [from, to] of edges) {
+    for (const [address, from, to] of edges) {
       const fromNumber = parseInt(from);
       const toNumber = parseInt(to);
-      graph[fromNumber].push(toNumber);
+      graph[fromNumber].push([toNumber, address]);
     }
 
     return graph;

@@ -1,6 +1,6 @@
 import { getNodesAndEdges } from "../../src/router/filtering";
 import { PoolBase } from "../../src/types";
-import { xykPools } from "../data.ts/xykPools";
+import { xykPools } from "../data/xykPools";
 
 describe("Router filtering for XYK pool", () => {
   let pools: PoolBase[];
