@@ -5,8 +5,11 @@ import { getNodesAndEdges, Edge } from "./graph";
 
 export class RouteSuggester {
   /**
-   * Proposals are ideal paths from tokenIn to tokenOut calculated from all
-   * permutations of tokens of given pool.
+   * Proposals are ideal paths from
+   * 1) tokenIn to tokenOut
+   * 2) tokenIn (all possible paths are requested)
+   *
+   * calculated from all permutations of tokens of given pool.
    *
    * E.g. permutation of pool A={1,3} is 2, such as {1,3}, {3,1} where 1 are 3
    * are pool assets(tokens)
@@ -14,18 +17,22 @@ export class RouteSuggester {
    * Filtering of valid paths and corresponding asset pairs is done by router itself!!!
    *
    * @param tokenIn - tokenIn
-   * @param tokenOut - tokenOut
+   * @param tokenOut - tokenOut or undefined if all possible paths from tokenIn are requested
    * @param pools - substrate based pools
-   * @returns all posible path proposals from tokenIn to tokenOut
+   * @returns all possible path proposals
    */
-  getProposals(tokenIn: string, tokenOut: string, pools: PoolBase[]): Edge[][] {
+  getProposals(tokenIn: string, tokenOut: string | undefined, pools: PoolBase[]): Edge[][] {
     const nodeEdges = getNodesAndEdges(pools);
-    const tokensToSwap = Object.keys(nodeEdges);
-    const possibleSwaps: Edge[] = tokensToSwap.map((node) => nodeEdges[node]).flat();
+    const poolAssets = Object.keys(nodeEdges);
+    const possiblePairs: Edge[] = poolAssets.map((node) => nodeEdges[node]).flat();
 
     const bfs = new Bfs();
-    const possibleSwapsGraph = bfs.buildAndPopulateGraph(tokensToSwap, possibleSwaps);
-    const possiblePaths = bfs.findPaths(possibleSwapsGraph, parseInt(tokenIn), parseInt(tokenOut));
+    const bfsGraph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);
+    const possiblePaths = bfs.findPaths(
+      bfsGraph,
+      parseInt(tokenIn),
+      tokenOut ? parseInt(tokenOut) : undefined
+    );
     return this.parsePaths(possiblePaths);
   }
 

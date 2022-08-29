@@ -1,5 +1,7 @@
 import { BigNumber } from "./utils/bignumber";
 
+export type PoolAsset = { token: string; symbol: string };
+
 export enum PoolType {
   XYK = "XYK",
   LBP = "LBP",
@@ -54,5 +56,8 @@ export type Hop = {
 
 export interface Router {
   getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]>;
+  getAllAssets(): Promise<PoolAsset[]>;
+  getAssetPairs(token: string): Promise<PoolAsset[]>;
+
   //getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: string);
 }

@@ -34,10 +34,10 @@ export class Bfs {
    *
    * @param g - routes graph containing nodes & corresponding edges
    * @param src - source node
-   * @param dst - destination node
+   * @param dst - destination node or undefined if requesting all posible paths from src
    * @returns paths
    */
-  findPaths(g: Path[], src: number, dst: number): Path[] {
+  findPaths(g: Path[], src: number, dst: number | undefined): Path[] {
     // Store the result paths
     const paths: Path[] = [];
     // Store the traversing paths
@@ -58,8 +58,11 @@ export class Bfs {
 
       const last = path[path.length - 1];
 
+      // If destination is undefined save all traversal to paths
       // If last node is the desired destination save to paths
-      if (last[0] === dst) {
+      if (dst === undefined) {
+        paths.push(path);
+      } else if (last[0] === dst) {
         paths.push(path);
       }
 
@@ -79,8 +82,8 @@ export class Bfs {
   /**
    * Build and populate graph
    *
-   * @param nodes - list of tokens
-   * @param edges - list of all edges [id, from, to]
+   * @param nodes - list of pool assets
+   * @param edges - list of all edges [id, from, to] between assets
    * @returns - traversal graph
    */
   buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {

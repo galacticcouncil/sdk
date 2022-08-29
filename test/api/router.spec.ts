@@ -49,4 +49,25 @@ describe("Router", () => {
       ],
     ]);
   });
+
+  it("Should return all assets from given XYK pool", async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    const result = await router.getAllAssets();
+    expect(result).toStrictEqual([
+      { token: "0", symbol: "BSX" },
+      { token: "2", symbol: "AUSD" },
+      { token: "1", symbol: "KSM" },
+    ]);
+  });
+
+  it("Should return all assets pair reacheable from token 1 in given XYK pool", async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    const result = await router.getAssetPairs("1");
+    expect(result).toStrictEqual([
+      { token: "2", symbol: "AUSD" },
+      { token: "0", symbol: "BSX" },
+    ]);
+  });
 });
