@@ -26,6 +26,7 @@ export class TradeRouter implements Router {
 
   async getAssetPairs(token: string): Promise<PoolAsset[]> {
     const pools = await this.poolService.getPools();
+    if (pools.length === 0) return [];
     const assets = await this.getAssets();
     const poolsMap = this.getPoolMap(pools);
     const hops = this.getPaths(token, undefined, poolsMap, pools);
@@ -35,6 +36,7 @@ export class TradeRouter implements Router {
 
   async getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]> {
     const pools = await this.poolService.getPools();
+    if (pools.length === 0) return [];
     const poolsMap = this.getPoolMap(pools);
     return this.getPaths(tokenIn, tokenOut, poolsMap, pools);
   }
@@ -45,6 +47,7 @@ export class TradeRouter implements Router {
 
   private async getAssets(): Promise<Map<string, PoolAsset>> {
     const pools = await this.poolService.getPools();
+    if (pools.length === 0) return new Map<string, PoolAsset>();
     const assets = pools
       .map((pool: PoolBase) => {
         return pool.tokens.map(({ id, symbol }) => {
