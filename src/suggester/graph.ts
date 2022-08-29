@@ -1,6 +1,6 @@
 import { PoolBase } from "../types";
 
-export type Edge = [string, string, string];
+export type Edge = [address: string, from: string, to: string];
 
 export type NodeEdges = {
   [node: string]: Edge[];

@@ -19,6 +19,10 @@ export class XykPool implements Pool {
     this.tokens = tokens;
   }
 
+  validPair(_tokenIn: string, _tokenOut: string): boolean {
+    return true;
+  }
+
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair {
     throw new Error("Method not implemented.");
   }

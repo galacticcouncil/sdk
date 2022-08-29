@@ -1,19 +1,26 @@
-import { RouteSuggester } from "../../src/router/suggester";
-import { PoolBase, PoolType } from "../../src/types";
+import { TradeRouter } from "../../src/api/router";
+import { PoolBase, PoolService, PoolType, Router } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 
-describe("Router suggester for XYK pool", () => {
-  let pools: PoolBase[];
-  let suggester: RouteSuggester;
+describe("Router", () => {
+  let poolService: PoolService;
+  let router: Router;
+
+  class MockedPoolService implements PoolService {
+    getPools(): Promise<PoolBase[]> {
+      return Promise.resolve(xykPools);
+    }
+  }
 
   beforeEach(() => {
-    pools = xykPools;
-    suggester = new RouteSuggester();
+    poolService = new MockedPoolService();
+    router = new TradeRouter(poolService);
   });
 
-  it("Should return suggested hops from token 1 to 2", () => {
-    expect(pools).toBeDefined();
-    const result = suggester.getProposals("1", "2", pools);
+  it("Should return suggested hops from token 1 to 2 for given XYK pool", async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    const result = await router.getAllPaths("1", "2");
     expect(result).toStrictEqual([
       [
         {

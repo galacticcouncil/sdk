@@ -1,8 +1,8 @@
-import { getNodesAndEdges } from "../../src/router/calc";
+import { getNodesAndEdges } from "../../src/suggester/graph";
 import { PoolBase } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 
-describe("Router filtering for XYK pool", () => {
+describe("Suggester graph utility", () => {
   let pools: PoolBase[];
 
   beforeEach(() => {

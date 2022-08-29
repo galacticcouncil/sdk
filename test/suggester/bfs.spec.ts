@@ -1,6 +1,6 @@
-import { Bfs, Path } from "../../src/router/bfs";
+import { Bfs, Path } from "../../src/suggester/bfs";
 
-describe("Breadth First Search for router", () => {
+describe("Suggester Breadth First Search algorithm", () => {
   const g: Path[] = [];
   const size = 4;
 
@@ -17,7 +17,7 @@ describe("Breadth First Search for router", () => {
     g[2].push([1, "bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3"]);
   });
 
-  it("Should find all possible routes from 1 to 2 with edge type", () => {
+  it("Should find all possible paths from node 1 to node 2 with edge type", () => {
     const result = new Bfs().findPaths(g, 1, 2);
     expect(result).toStrictEqual([
       [

@@ -33,6 +33,7 @@ export type PoolToken = {
 };
 
 export interface Pool extends PoolBase {
+  validPair(tokenIn: string, tokenOut: string): boolean;
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
@@ -50,3 +51,8 @@ export type Hop = {
   tokenOut: string;
   fee: string;
 };
+
+export interface Router {
+  getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]>;
+  //getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: string);
+}
