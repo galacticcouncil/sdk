@@ -34,10 +34,10 @@ export class Bfs {
    *
    * @param g - routes graph containing nodes & corresponding edges
    * @param src - source node
-   * @param dst - destination node or undefined if requesting all posible paths from src
+   * @param dst - destination node or null if requesting all posible paths from src
    * @returns paths
    */
-  findPaths(g: Path[], src: number, dst: number | undefined): Path[] {
+  findPaths(g: Path[], src: number, dst: number | null): Path[] {
     // Store the result paths
     const paths: Path[] = [];
     // Store the traversing paths
@@ -52,7 +52,7 @@ export class Bfs {
     while (queue.size() > 0) {
       const path = queue.dequeue();
 
-      if (path === undefined) {
+      if (path == null) {
         return paths;
       }
 
@@ -60,7 +60,7 @@ export class Bfs {
 
       // If destination is undefined save all traversal to paths
       // If last node is the desired destination save to paths
-      if (dst === undefined) {
+      if (dst === null) {
         paths.push(path);
       } else if (last[0] === dst) {
         paths.push(path);

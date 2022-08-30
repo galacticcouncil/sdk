@@ -1,6 +1,7 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from "../../types";
-import { BigNumber, bnum } from "../../utils/bignumber";
+import { BigNumber, bnum, scale } from "../../utils/bignumber";
 import mathXyk from "hydra-dx-wasm/build/xyk/nodejs";
+import { feeValue, normalizeAmount } from "../../utils/calc";
 
 export class XykPool implements Pool {
   type: PoolType;
@@ -24,7 +25,23 @@ export class XykPool implements Pool {
   }
 
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair {
-    throw new Error("Method not implemented.");
+    const tokensMap = new Map(this.tokens.map((token) => [token.id, token]));
+    const tokenInMeta = tokensMap.get(tokenIn);
+    const tokenOutMeta = tokensMap.get(tokenOut);
+
+    if (tokenInMeta == null) throw new Error("Pool does not contain tokenIn");
+    if (tokenOutMeta == null) throw new Error("Pool does not contain tokenOut");
+
+    const balanceIn = bnum(tokenInMeta.balance);
+    const balanceOut = bnum(tokenOutMeta.balance);
+
+    return {
+      swapFee: feeValue(this.swapFee),
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
+      balanceIn: normalizeAmount(balanceIn, tokenInMeta.decimals),
+      balanceOut: normalizeAmount(balanceOut, tokenOutMeta.decimals),
+    } as PoolPair;
   }
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
@@ -32,10 +49,21 @@ export class XykPool implements Pool {
   }
 
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
-    throw new Error("Method not implemented.");
+    const price = mathXyk.calculate_out_given_in(
+      poolPair.balanceIn.toString(),
+      poolPair.balanceOut.toString(),
+      amountIn.toString()
+    );
+    return bnum(price);
   }
 
   getSpotPrice(poolPair: PoolPair): BigNumber {
-    throw new Error("Method not implemented.");
+    const oneWithPrecision = "1000";
+    const price = mathXyk.get_spot_price(
+      poolPair.balanceIn.toString(),
+      poolPair.balanceOut.toString(),
+      scale(bnum(1), 12).toString()
+    );
+    return bnum(price);
   }
 }

@@ -1,19 +1,14 @@
 import { Router } from "../../src/api/router";
-import { PoolBase, PoolService, PoolType } from "../../src/types";
-import { xykPools } from "../data/xykPools";
+import { PoolService, PoolType } from "../../src/types";
+import { bnum, scale } from "../../src/utils/bignumber";
+import { MockXykPoolService } from "../lib/mockXykPoolService";
 
 describe("Router", () => {
   let poolService: PoolService;
   let router: Router;
 
-  class MockedPoolService implements PoolService {
-    getPools(): Promise<PoolBase[]> {
-      return Promise.resolve(xykPools);
-    }
-  }
-
   beforeEach(() => {
-    poolService = new MockedPoolService();
+    poolService = new MockXykPoolService();
     router = new Router(poolService);
   });
 
@@ -69,5 +64,19 @@ describe("Router", () => {
       { token: "2", symbol: "AUSD" },
       { token: "0", symbol: "BSX" },
     ]);
+  });
+
+  it("Should throw error if not-existing asset used in given XYK pool", async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    await expect(async () => {
+      await router.getAssetPairs("not-existing");
+    }).rejects.toThrow("Token is not supported");
+  });
+
+  it("Should return best sell price swaps", async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    const result = await router.getBestSellPrice("1", "2", scale(bnum("1"), 12));
   });
 });

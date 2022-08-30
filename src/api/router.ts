@@ -1,7 +1,9 @@
-import { PoolService, PoolBase, Hop, Pool, PoolAsset } from "../types";
-import { RouteSuggester } from "../suggester/suggester";
-import { Edge } from "../suggester/graph";
-import * as PoolFactory from "../pool/poolFactory";
+import { PoolService, PoolBase, Hop, Pool, PoolAsset, Swap } from "../types";
+import { RouteSuggester } from "../suggester";
+import { Edge } from "../suggester";
+import * as PoolFactory from "../pool";
+import { BigNumber, scale } from "../utils/bignumber";
+import { applyTradeFee, TradeType } from "../utils/calc";
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
@@ -44,8 +46,9 @@ export class Router {
     const pools = await this.poolService.getPools();
     if (pools.length === 0) return [];
     const assets = await this.getAssets();
+    this.validateToken(token, "Token", assets);
     const poolsMap = this.getPoolMap(pools);
-    const hops = this.getPaths(token, undefined, poolsMap, pools);
+    const hops = this.getPaths(token, null, poolsMap, pools);
     const dest = hops.map((hop) => hop[hop.length - 1].tokenOut);
     return this.toPoolAssets([...new Set(dest)], assets);
   }
@@ -60,8 +63,65 @@ export class Router {
   async getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]> {
     const pools = await this.poolService.getPools();
     if (pools.length === 0) return [];
+    const assets = await this.getAssets();
+    this.validateToken(tokenIn, "TokenIn", assets);
+    this.validateToken(tokenIn, "TokenOut", assets);
     const poolsMap = this.getPoolMap(pools);
     return this.getPaths(tokenIn, tokenOut, poolsMap, pools);
+  }
+
+  /**
+   * Calculate and return all possible swaps(sells) for tokenIn>tokenOut
+   *
+   * @param {string} tokenIn - Storage key of tokenIn
+   * @param {string} tokenOut - Storage key of tokenOut
+   * @param {BigNumber} amountIn - Amount of tokenIn to sell for tokenOut
+   * @returns Possible swaps(sells) of given token pair
+   */
+  async getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: BigNumber): Promise<Swap[]> {
+    const pools = await this.poolService.getPools();
+    if (pools.length === 0) return [];
+    const assets = await this.getAssets();
+    this.validateToken(tokenIn, "TokenIn", assets);
+    this.validateToken(tokenOut, "TokenOut", assets);
+    const poolsMap = this.getPoolMap(pools);
+    const paths = this.getPaths(tokenIn, tokenOut, poolsMap, pools);
+    const swaps = paths.map((path) => this.toSwaps(amountIn, path, poolsMap));
+    console.log(JSON.stringify(swaps, null, 2));
+
+    return [];
+  }
+
+  private toSwaps(amountIn: BigNumber, path: Hop[], poolsMap: Map<string, Pool>): Swap[] {
+    const swaps: Swap[] = [];
+    for (let i = 0; i < path.length; i++) {
+      const hop = path[i];
+      const pool = poolsMap.get(hop.poolId);
+      if (pool == null) throw new Error("Pool does not exit");
+
+      let aIn: BigNumber;
+      if (i > 0) {
+        aIn = swaps[i - 1].final; // amount of previous swap is entry to next one
+      } else {
+        aIn = amountIn;
+      }
+
+      const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
+      const calculated = pool.calculateOutGivenIn(poolPair, aIn);
+      const final = applyTradeFee(calculated, poolPair.swapFee, TradeType.Sell);
+      const spotPrice = pool.getSpotPrice(poolPair);
+      console.log(scale(calculated, -12).toString());
+      console.log(scale(final, -12).toString());
+
+      swaps.push({
+        amount: aIn,
+        calculated: calculated,
+        final: final.decimalPlaces(0, 1),
+        fee: calculated.multipliedBy(poolPair.swapFee).decimalPlaces(0, 1),
+        spotPrice: spotPrice,
+      } as Swap);
+    }
+    return swaps;
   }
 
   private async getAssets(): Promise<Map<string, PoolAsset>> {
@@ -79,7 +139,7 @@ export class Router {
 
   private getPaths(
     tokenIn: string,
-    tokenOut: string | undefined,
+    tokenOut: string | null,
     poolsMap: Map<string, Pool>,
     pools: PoolBase[]
   ): Hop[][] {
@@ -95,6 +155,17 @@ export class Router {
    */
   private getPoolMap(pools: PoolBase[]) {
     return new Map<string, Pool>(pools.map((i) => [i.address, PoolFactory.get(i)]));
+  }
+
+  /**
+   * Ckeck if input asset is valid and throw expection if not
+   *
+   * @param token - token
+   * @param tokenType - token type (in/out)
+   * @param assets - supported assets
+   */
+  private validateToken(token: string, tokenType: string, assets: Map<string, PoolAsset>) {
+    if (assets.get(token) == null) throw new Error(tokenType + " is not supported");
   }
 
   /**

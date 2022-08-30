@@ -2,10 +2,9 @@ import { ApiPromise } from "@polkadot/api";
 
 import type { StorageKey } from "@polkadot/types";
 import type { AnyTuple, Codec } from "@polkadot/types/types";
-
-import { AssetMetadata } from "@polkadot/types/interfaces";
+import type { AssetMetadata } from "@polkadot/types/interfaces";
+import type { TokensAccountData } from "./types";
 import "@polkadot/api-augment";
-import { TokensAccountData } from "./types";
 
 export class PolkadotClient {
   protected readonly api: ApiPromise;

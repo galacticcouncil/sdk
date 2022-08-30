@@ -10,9 +10,6 @@ export enum PoolType {
 }
 
 export interface PoolPair {
-  id: string;
-  address: string;
-  poolType: PoolType;
   swapFee: BigNumber;
   tokenIn: string;
   tokenOut: string;
@@ -52,4 +49,12 @@ export type Hop = {
   tokenIn: string;
   tokenOut: string;
   fee: string;
+};
+
+export type Swap = {
+  amount: BigNumber;
+  calculated: BigNumber;
+  final: BigNumber;
+  fee: BigNumber;
+  spotPrice: BigNumber;
 };

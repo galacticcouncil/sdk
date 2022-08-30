@@ -1,8 +1,7 @@
-import { PolkadotClient } from "../../client/polkadot";
+import { PolkadotClient } from "../../client";
 import type { StorageKey } from "@polkadot/types";
 import type { AnyTuple, Codec } from "@polkadot/types/types";
 import { PoolBase, PoolToken, PoolType } from "../../types";
-import "@polkadot/api-augment";
 
 export class XykPolkadotClient extends PolkadotClient {
   async getPools(): Promise<PoolBase[]> {
