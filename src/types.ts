@@ -53,11 +53,3 @@ export type Hop = {
   tokenOut: string;
   fee: string;
 };
-
-export interface Router {
-  getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]>;
-  getAllAssets(): Promise<PoolAsset[]>;
-  getAssetPairs(token: string): Promise<PoolAsset[]>;
-
-  //getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: string);
-}

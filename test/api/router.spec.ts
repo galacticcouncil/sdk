@@ -1,5 +1,5 @@
-import { TradeRouter } from "../../src/api/router";
-import { PoolBase, PoolService, PoolType, Router } from "../../src/types";
+import { Router } from "../../src/api/router";
+import { PoolBase, PoolService, PoolType } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 
 describe("Router", () => {
@@ -14,7 +14,7 @@ describe("Router", () => {
 
   beforeEach(() => {
     poolService = new MockedPoolService();
-    router = new TradeRouter(poolService);
+    router = new Router(poolService);
   });
 
   it("Should return suggested hops from token 1 to 2 for given XYK pool", async () => {

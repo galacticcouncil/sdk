@@ -1,29 +1,45 @@
-import { PoolService, PoolBase, Hop, Pool, Router, PoolAsset } from "../types";
+import { PoolService, PoolBase, Hop, Pool, PoolAsset } from "../types";
 import { RouteSuggester } from "../suggester/suggester";
 import { Edge } from "../suggester/graph";
 import * as PoolFactory from "../pool/poolFactory";
 
-export class TradeRouter implements Router {
+export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly poolService: PoolService;
 
   /**
-   * @param {PoolService} poolService - Fetch pool data from substrate based pools
+   * @param poolService - Fetch pool data from substrate based pools
    */
   constructor(poolService: PoolService) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
   }
 
+  /**
+   * Return all pools
+   *
+   * @returns {PoolBase[]} List of all substrate based pools
+   */
   getPools(): Promise<PoolBase[]> {
     return this.poolService.getPools();
   }
 
+  /**
+   * Return list of all available assets from substrate based pools
+   *
+   * @returns {PoolAsset[]} List of all available assets
+   */
   async getAllAssets(): Promise<PoolAsset[]> {
     const asset = await this.getAssets();
     return [...new Map(asset).values()];
   }
 
+  /**
+   * Calculate and return list of all assets, given token can be trade with
+   *
+   * @param {string} token - Storage key of token
+   * @returns {PoolAsset[]} List of all available assets, given token can be trade with
+   */
   async getAssetPairs(token: string): Promise<PoolAsset[]> {
     const pools = await this.poolService.getPools();
     if (pools.length === 0) return [];
@@ -34,15 +50,18 @@ export class TradeRouter implements Router {
     return this.toPoolAssets([...new Set(dest)], assets);
   }
 
+  /**
+   * Calculate and return all possible paths for best swap tokenIn>tokenOut
+   *
+   * @param {string} tokenIn - Storage key of tokenIn
+   * @param {string} tokenOut - Storage key of tokenOut
+   * @returns {<Hop[][]>} All possible paths containing route hops
+   */
   async getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]> {
     const pools = await this.poolService.getPools();
     if (pools.length === 0) return [];
     const poolsMap = this.getPoolMap(pools);
     return this.getPaths(tokenIn, tokenOut, poolsMap, pools);
-  }
-
-  private getPoolMap(pools: PoolBase[]) {
-    return new Map<string, Pool>(pools.map((i) => [i.address, PoolFactory.get(i)]));
   }
 
   private async getAssets(): Promise<Map<string, PoolAsset>> {
@@ -66,9 +85,16 @@ export class TradeRouter implements Router {
   ): Hop[][] {
     const routeProposals = this.routeSuggester.getProposals(tokenIn, tokenOut, pools);
     const routes = routeProposals
-      .filter((path: Edge[]) => path.length > 0 && this.validPath(path, poolsMap))
+      .filter((path: Edge[]) => this.validPath(path, poolsMap))
       .map((path: Edge[]) => this.toHops(path, poolsMap));
     return routes;
+  }
+
+  /**
+   * Create pool map from substrate based pools
+   */
+  private getPoolMap(pools: PoolBase[]) {
+    return new Map<string, Pool>(pools.map((i) => [i.address, PoolFactory.get(i)]));
   }
 
   /**
@@ -79,13 +105,16 @@ export class TradeRouter implements Router {
    * @returns only valid paths
    */
   private validPath(proposedPath: Edge[], poolsMap: Map<string, Pool>): boolean {
-    return proposedPath
-      .map((edge: Edge) => this.validEdge(edge, poolsMap))
-      .reduce((prev, curr) => prev && curr);
+    return (
+      proposedPath.length > 0 &&
+      proposedPath
+        .map((edge: Edge) => this.validEdge(edge, poolsMap))
+        .reduce((prev, curr) => prev && curr)
+    );
   }
 
   /**
-   * Check if edge (token pair) is valid
+   * Check if edge (token pair) of corresponding pool is valid combination
    *
    * @param edge - current edge (token pair)
    * @param poolsMap - pools map
