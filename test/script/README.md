@@ -1,6 +1,6 @@
 # Test Scripts
 
-SDK Examples and testing helpers.
+SDK Examples and testing helpers. Examples use real chain data.
 
 ## Run
 
