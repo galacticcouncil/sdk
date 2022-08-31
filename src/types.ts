@@ -36,7 +36,8 @@ export interface Pool extends PoolBase {
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
-  getSpotPrice(poolPair: PoolPair): BigNumber;
+  getSpotPriceIn(poolPair: PoolPair): BigNumber;
+  getSpotPriceOut(poolPair: PoolPair): BigNumber;
 }
 
 export interface PoolService {

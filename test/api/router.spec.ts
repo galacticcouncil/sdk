@@ -71,13 +71,13 @@ describe("Router", () => {
     expect(router).toBeDefined();
     await expect(async () => {
       await router.getAssetPairs("not-existing");
-    }).rejects.toThrow("Token is not supported");
+    }).rejects.toThrow("not-existing is not supported token");
   });
 
   it("Should return best sell price swaps", async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const result = await router.getBestSellPrice("1", "2", scale(bnum("1"), 12));
-    console.log(result);
+    // TODO write test assertions
   });
 });

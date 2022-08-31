@@ -45,7 +45,21 @@ export class XykPool implements Pool {
   }
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
-    throw new Error("Method not implemented.");
+    const price = mathXyk.calculate_in_given_out(
+      poolPair.balanceIn.toString(),
+      poolPair.balanceOut.toString(),
+      amountOut.toString()
+    );
+    return bnum(price);
+  }
+
+  getSpotPriceIn(poolPair: PoolPair): BigNumber {
+    const price = mathXyk.get_spot_price(
+      poolPair.balanceOut.toString(),
+      poolPair.balanceIn.toString(),
+      scale(bnum(1), 12).toString()
+    );
+    return bnum(price);
   }
 
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
@@ -57,8 +71,7 @@ export class XykPool implements Pool {
     return bnum(price);
   }
 
-  getSpotPrice(poolPair: PoolPair): BigNumber {
-    const oneWithPrecision = "1000";
+  getSpotPriceOut(poolPair: PoolPair): BigNumber {
     const price = mathXyk.get_spot_price(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
