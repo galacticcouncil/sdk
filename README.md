@@ -10,8 +10,6 @@ Main components:
 
 ### Router
 
-**Note:** All amount args are formatted as bignumber 1^12!!!
-
 ```typescript
 getPools(): PoolBase[]
 getAllAssets(): PoolAsset[]
@@ -21,11 +19,12 @@ getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: BigNumber): Swap[]
 getBestBuyPrice(tokenIn: string, tokenOut: string, amountOut: BigNumber): Swap[]
 ```
 
-For type signature visit [types.ts](src/types.ts)
+For type signature visit [types.ts](src/types.ts)<br /> 
+**Note:** All amount args are formatted as bignumber 1^12!!!
 
 ### Trader
 
-Not supported yet.
+Not supported yet. ⏳
 
 ## Examples
 
@@ -35,7 +34,7 @@ To demonstrate full working example on real chain see [script](test/script/) sec
 
 * api - Router & Trader impl
 * client - Substrate chain based clients 
-* pool - Pool swap logic, math, aggs, clients
+* pool - Pool specific logic, math, clients
 * suggester - Route proposing, graph utils, BFS, DFS
 * utils - bignumber, math, collections
 
@@ -43,7 +42,7 @@ To demonstrate full working example on real chain see [script](test/script/) sec
 
 Where we are right now.
 
-- 🧪 Already out, not stable yet
+- 🧪 Done
 - 🛠 Work in progress
 - ⏳ Planning to build
 
