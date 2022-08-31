@@ -1,7 +1,7 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from "../../types";
 import { BigNumber, bnum, scale } from "../../utils/bignumber";
 import mathXyk from "hydra-dx-wasm/build/xyk/nodejs";
-import { feeValue, normalizeAmount } from "../../utils/calc";
+import { tradeFee, normalizeAmount } from "../../utils/math";
 
 export class XykPool implements Pool {
   type: PoolType;
@@ -36,7 +36,7 @@ export class XykPool implements Pool {
     const balanceOut = bnum(tokenOutMeta.balance);
 
     return {
-      swapFee: feeValue(this.swapFee),
+      swapFee: tradeFee(this.swapFee),
       tokenIn: tokenIn,
       tokenOut: tokenOut,
       balanceIn: normalizeAmount(balanceIn, tokenInMeta.decimals),

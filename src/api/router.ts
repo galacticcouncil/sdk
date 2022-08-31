@@ -1,9 +1,9 @@
 import { PoolService, PoolBase, Hop, Pool, PoolAsset, Swap } from "../types";
 import { RouteSuggester } from "../suggester";
 import { Edge } from "../suggester";
-import * as PoolFactory from "../pool";
-import { BigNumber, scale } from "../utils/bignumber";
-import { applyTradeFee, TradeType } from "../utils/calc";
+import { PoolFactory } from "../pool";
+import { BigNumber } from "../utils/bignumber";
+import { calculateTradeFee } from "../utils/math";
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
@@ -71,7 +71,7 @@ export class Router {
   }
 
   /**
-   * Calculate and return all possible swaps(sells) for tokenIn>tokenOut
+   * Calculate and return best possible sell price for tokenIn>tokenOut
    *
    * @param {string} tokenIn - Storage key of tokenIn
    * @param {string} tokenOut - Storage key of tokenOut
@@ -86,13 +86,25 @@ export class Router {
     this.validateToken(tokenOut, "TokenOut", assets);
     const poolsMap = this.getPoolMap(pools);
     const paths = this.getPaths(tokenIn, tokenOut, poolsMap, pools);
-    const swaps = paths.map((path) => this.toSwaps(amountIn, path, poolsMap));
-    console.log(JSON.stringify(swaps, null, 2));
-
-    return [];
+    const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
+    const sorted = swaps.sort((a, b) => {
+      const swapAFinal = a[a.length - 1].final;
+      const swapBFinal = b[b.length - 1].final;
+      return swapAFinal.isGreaterThan(swapBFinal) ? -1 : 1;
+    });
+    return sorted[0];
   }
 
-  private toSwaps(amountIn: BigNumber, path: Hop[], poolsMap: Map<string, Pool>): Swap[] {
+  /**
+   * Calculate and return sell swaps for given path
+   * Amount of previous swap(final) is entry to next one.
+   *
+   * @param amountIn - Amount of tokenIn to sell for tokenOut
+   * @param path - current path
+   * @param poolsMap - pools map
+   * @returns Sell swaps for given path
+   */
+  private toSellSwaps(amountIn: BigNumber, path: Hop[], poolsMap: Map<string, Pool>): Swap[] {
     const swaps: Swap[] = [];
     for (let i = 0; i < path.length; i++) {
       const hop = path[i];
@@ -101,23 +113,23 @@ export class Router {
 
       let aIn: BigNumber;
       if (i > 0) {
-        aIn = swaps[i - 1].final; // amount of previous swap is entry to next one
+        aIn = swaps[i - 1].final;
       } else {
         aIn = amountIn;
       }
 
       const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
       const calculated = pool.calculateOutGivenIn(poolPair, aIn);
-      const final = applyTradeFee(calculated, poolPair.swapFee, TradeType.Sell);
+      const fee = calculateTradeFee(calculated, poolPair.swapFee);
       const spotPrice = pool.getSpotPrice(poolPair);
-      console.log(scale(calculated, -12).toString());
-      console.log(scale(final, -12).toString());
 
       swaps.push({
+        tokenIn: hop.tokenIn,
+        tokenOut: hop.tokenOut,
         amount: aIn,
         calculated: calculated,
-        final: final.decimalPlaces(0, 1),
-        fee: calculated.multipliedBy(poolPair.swapFee).decimalPlaces(0, 1),
+        final: calculated.minus(fee),
+        fee: fee,
         spotPrice: spotPrice,
       } as Swap);
     }

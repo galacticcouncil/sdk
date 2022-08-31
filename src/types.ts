@@ -52,6 +52,8 @@ export type Hop = {
 };
 
 export type Swap = {
+  tokenIn: string;
+  tokenOut: string;
   amount: BigNumber;
   calculated: BigNumber;
   final: BigNumber;

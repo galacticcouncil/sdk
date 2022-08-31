@@ -1,3 +1,3 @@
 export { PolkadotPoolService } from "./polkadotPoolService";
-export * from "./poolFactory";
+export { PoolFactory } from "./poolFactory";
 export { XykPool } from "./xyk/xykPool";

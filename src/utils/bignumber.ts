@@ -1,8 +1,11 @@
 import { BigNumber } from "bignumber.js";
+
+export const DECIMAL_PLACES = 12;
+
 BigNumber.config({
   EXPONENTIAL_AT: [-100, 100],
   ROUNDING_MODE: 1,
-  DECIMAL_PLACES: 12,
+  DECIMAL_PLACES: DECIMAL_PLACES,
 });
 
 export const ZERO = bnum(0);

@@ -78,5 +78,6 @@ describe("Router", () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const result = await router.getBestSellPrice("1", "2", scale(bnum("1"), 12));
+    console.log(result);
   });
 });
