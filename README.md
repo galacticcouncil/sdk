@@ -44,7 +44,7 @@ const router = new Router(poolService);
 
 // Do something
 const result = await router.getAllAssets();
-console.log(result;
+console.log(result);
 ```
 
 To demonstrate full working example on real chain see [script](test/script/) section.
