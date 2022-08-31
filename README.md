@@ -28,6 +28,25 @@ Not supported yet. ⏳
 
 ## Examples
 
+```typescript
+// Import
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { PolkadotPoolService } from "@galactic/pool";
+import { Router } from "@galactic/api"";
+
+// Initialize Polkadot API
+const wsProvider = new WsProvider('wss://rpc.basilisk.cloud');
+const api = await ApiPromise.create({ provider: wsProvider });
+
+// Initialize Router 
+const poolService = new PolkadotPoolService(api);
+const router = new Router(poolService);
+
+// Do something
+const result = await router.getAllAssets();
+console.log(result;
+```
+
 To demonstrate full working example on real chain see [script](test/script/) section.
 
 ## Packaging
@@ -40,7 +59,7 @@ To demonstrate full working example on real chain see [script](test/script/) sec
 
 ## Roadmap
 
-Where we are right now.
+Component list and current status here ⬇️
 
 - 🧪 Done
 - 🛠 Work in progress
