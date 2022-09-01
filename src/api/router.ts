@@ -71,7 +71,7 @@ export class Router {
    * @param {string} tokenIn - Storage key of tokenIn
    * @param {string} tokenOut - Storage key of tokenOut
    * @param {BigNumber} amountIn - Amount of tokenIn to sell for tokenOut
-   * @returns Possible swaps(sells) of given token pair
+   * @returns Best possible swaps(sells) of given token pair
    */
   async getBestSellPrice(tokenIn: string, tokenOut: string, amountIn: BigNumber): Promise<Swap[]> {
     const pools = await this.poolService.getPools();
@@ -89,7 +89,7 @@ export class Router {
 
   /**
    * Calculate and return sell swaps for given path
-   * - amount of previous swap(final) is entry to next one
+   * - final amount of previous swap is entry to next one
    *
    * @param amountIn - Amount of tokenIn to sell for tokenOut
    * @param path - current path
@@ -134,7 +134,7 @@ export class Router {
    * @param {string} tokenIn - Storage key of tokenIn
    * @param {string} tokenOut - Storage key of tokenOut
    * @param {BigNumber} amountOut - Amount of tokenOut to buy for tokenIn
-   * @returns Possible swaps(sells) of given token pair
+   * @returns Best possible swaps(buys) of given token pair
    */
   async getBestBuyPrice(tokenIn: string, tokenOut: string, amountOut: BigNumber): Promise<Swap[]> {
     const pools = await this.poolService.getPools();
@@ -152,7 +152,7 @@ export class Router {
 
   /**
    * Calculate and return buy swaps for given path
-   * - amount of previous swap(final) is entry to next one
+   * - final amount of previous swap is entry to next one
    * - calculation is done backwards
    *
    * @param amountOut - Amount of tokenOut to buy for tokenIn
@@ -192,6 +192,11 @@ export class Router {
     return swaps;
   }
 
+  /**
+   * Return map of all available assets from substrate based pools
+   *
+   * @returns Map of all available assets
+   */
   private async getAssets(): Promise<Map<string, PoolAsset>> {
     const pools = await this.poolService.getPools();
     if (pools.length === 0) return new Map<string, PoolAsset>();
@@ -205,6 +210,15 @@ export class Router {
     return new Map(assets.map((asset) => [asset.token, asset]));
   }
 
+  /**
+   * Calculate and return all possible paths for best swap tokenIn>tokenOut
+   *
+   * @param tokenIn - Storage key of tokenIn
+   * @param tokenOut - Storage key of tokenOut
+   * @param poolsMap - pools map
+   * @param pools - pools
+   * @returns All possible paths containing route hops
+   */
   private getPaths(
     tokenIn: string,
     tokenOut: string | null,
