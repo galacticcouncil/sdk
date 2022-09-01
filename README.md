@@ -4,11 +4,11 @@ Galactic SDK is set of modules crafted with love to ease Basilisk & HydraDX chai
 Main components: 
 
 **Router** - off-chain optimization of orders across pools for best price execution. Router does not perform any on-chain transations.<br /> 
-**Trader** - on-chain transaction executor using data from router to perform best possible swap execution across pools.
+**Trader** - on-chain transaction executor using data from router to perform best possible swap execution.
 
-## API
+## Router
 
-### Router
+### API
 
 ```typescript
 getPools(): PoolBase[]
@@ -22,11 +22,7 @@ getBestBuyPrice(tokenIn: string, tokenOut: string, amountOut: BigNumber): Swap[]
 For type signature visit [types.ts](src/types.ts)<br /> 
 **Note:** All amount args are formatted as bignumber 1^12!!!
 
-### Trader
-
-Not supported yet. ⏳
-
-## Examples
+### Usage
 
 ```typescript
 // Import
@@ -47,7 +43,13 @@ const result = await router.getAllAssets();
 console.log(result);
 ```
 
-To demonstrate full working example on real chain see [script](test/script/) section.
+## Trader
+
+Not supported yet. ⏳
+
+## Examples
+
+To demonstrate full working examples on real chain see [script](test/script/) section.
 
 ## Packaging
 
