@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { ApiPromise, WsProvider } from '@polkadot/api';
 
 export abstract class PolkadotExecutor {
   protected readonly apiUrl: string;
@@ -19,17 +19,17 @@ export abstract class PolkadotExecutor {
       });
 
       api
-        .on("connected", () => console.log("API connected"))
-        .on("disconnected", () => console.log("API disconnected"))
-        .on("error", () => console.log("API error"))
-        .on("ready", () => {
-          console.log("API ready");
-          console.log("Running script...");
+        .on('connected', () => console.log('API connected'))
+        .on('disconnected', () => console.log('API disconnected'))
+        .on('error', () => console.log('API error'))
+        .on('ready', () => {
+          console.log('API ready');
+          console.log('Running script...');
           console.log(this.desc);
           this.script(api)
             .then((output: any) => {
               if (this.pretty) {
-                console.log(output ? JSON.stringify(output, null, 2) : "");
+                console.log(output ? JSON.stringify(output, null, 2) : '');
               } else {
                 console.log(output);
               }

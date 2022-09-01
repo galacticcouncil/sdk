@@ -1,7 +1,7 @@
-import { PoolBase, PoolService } from "../types";
-import { XykPolkadotClient } from "./xyk/xykPolkadotClient";
+import { PoolBase, PoolService } from '../types';
+import { XykPolkadotClient } from './xyk/xykPolkadotClient';
 
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise } from '@polkadot/api';
 
 export class PolkadotPoolService implements PoolService {
   private readonly api: ApiPromise;

@@ -1,7 +1,7 @@
-import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from "../../types";
-import { BigNumber, bnum, scale } from "../../utils/bignumber";
-import mathXyk from "hydra-dx-wasm/build/xyk/nodejs";
-import { tradeFee, normalizeAmount } from "../../utils/math";
+import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
+import { BigNumber, bnum, scale } from '../../utils/bignumber';
+import mathXyk from 'hydra-dx-wasm/build/xyk/nodejs';
+import { tradeFee, normalizeAmount } from '../../utils/math';
 
 export class XykPool implements Pool {
   type: PoolType;
@@ -29,8 +29,8 @@ export class XykPool implements Pool {
     const tokenInMeta = tokensMap.get(tokenIn);
     const tokenOutMeta = tokensMap.get(tokenOut);
 
-    if (tokenInMeta == null) throw new Error("Pool does not contain tokenIn");
-    if (tokenOutMeta == null) throw new Error("Pool does not contain tokenOut");
+    if (tokenInMeta == null) throw new Error('Pool does not contain tokenIn');
+    if (tokenOutMeta == null) throw new Error('Pool does not contain tokenOut');
 
     const balanceIn = bnum(tokenInMeta.balance);
     const balanceOut = bnum(tokenOutMeta.balance);

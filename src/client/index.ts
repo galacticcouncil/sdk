@@ -1,1 +1,1 @@
-export { PolkadotClient } from "./polkadot";
+export { PolkadotClient } from './polkadot';

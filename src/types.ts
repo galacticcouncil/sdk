@@ -1,12 +1,12 @@
-import { BigNumber } from "./utils/bignumber";
+import { BigNumber } from './utils/bignumber';
 
 export type PoolAsset = { token: string; symbol: string };
 
 export enum PoolType {
-  XYK = "XYK",
-  LBP = "LBP",
-  Stable = "Stable",
-  Omni = "Omni",
+  XYK = 'XYK',
+  LBP = 'LBP',
+  Stable = 'Stable',
+  Omni = 'Omni',
 }
 
 export interface PoolPair {

@@ -1,26 +1,31 @@
-import { PolkadotClient } from "../../client";
-import type { StorageKey } from "@polkadot/types";
-import type { AnyTuple, Codec } from "@polkadot/types/types";
-import { PoolBase, PoolToken, PoolType } from "../../types";
+import { PolkadotClient } from '../../client';
+import type { StorageKey } from '@polkadot/types';
+import type { AnyTuple, Codec } from '@polkadot/types/types';
+import { PoolBase, PoolToken, PoolType } from '../../types';
 
 export class XykPolkadotClient extends PolkadotClient {
   async getPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.xyk.poolAssets.entries();
-    const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Codec]) => {
-      const poolAddress = this.getStorageKey(asset, 0);
-      const poolEntries = this.getStorageEntryArray(asset);
-      const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
-      return {
-        address: poolAddress,
-        type: PoolType.XYK,
-        swapFee: this.getSwapFee(),
-        tokens: poolTokens,
-      } as PoolBase;
-    });
+    const pools = poolAssets.map(
+      async (asset: [StorageKey<AnyTuple>, Codec]) => {
+        const poolAddress = this.getStorageKey(asset, 0);
+        const poolEntries = this.getStorageEntryArray(asset);
+        const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
+        return {
+          address: poolAddress,
+          type: PoolType.XYK,
+          swapFee: this.getSwapFee(),
+          tokens: poolTokens,
+        } as PoolBase;
+      }
+    );
     return Promise.all(pools);
   }
 
-  async getPoolTokens(poolAddress: string, assetKeys: string[]): Promise<PoolToken[]> {
+  async getPoolTokens(
+    poolAddress: string,
+    assetKeys: string[]
+  ): Promise<PoolToken[]> {
     const poolTokens = assetKeys.map(async (id) => {
       const balance = await this.getBalance(poolAddress, id);
       const metadata = await super.getAssetMetadata(id);
@@ -28,15 +33,15 @@ export class XykPolkadotClient extends PolkadotClient {
       return {
         id,
         balance: balance,
-        decimals: metadataJson ? metadataJson.decimals : "12",
-        symbol: metadataJson ? metadataJson.symbol : "BSX",
+        decimals: metadataJson ? metadataJson.decimals : '12',
+        symbol: metadataJson ? metadataJson.symbol : 'BSX',
       } as PoolToken;
     });
     return Promise.all(poolTokens);
   }
 
   getBalance(poolAddress: string, assetKey: string): Promise<string> {
-    if (assetKey === "0") {
+    if (assetKey === '0') {
       return this.getSystemAccountBalance(poolAddress);
     } else {
       return this.getTokenAccountBalance(poolAddress, assetKey);
@@ -45,6 +50,9 @@ export class XykPolkadotClient extends PolkadotClient {
 
   getSwapFee(): string {
     const exchangeFee = this.api.consts.xyk.getExchangeFee;
-    return ((exchangeFee[0].toNumber() / exchangeFee[1].toNumber()) * 100).toString();
+    return (
+      (exchangeFee[0].toNumber() / exchangeFee[1].toNumber()) *
+      100
+    ).toString();
   }
 }

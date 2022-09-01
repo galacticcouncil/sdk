@@ -1,4 +1,4 @@
-import { Queue } from "../utils/queue";
+import { Queue } from '../utils/queue';
 
 export type Path = Node[];
 export type Node = [id: number, from: string];
@@ -46,7 +46,7 @@ export class Bfs {
     const currentPath: Path = [];
 
     // First node of path has no from (initial)
-    currentPath.push([src, ""]);
+    currentPath.push([src, '']);
     queue.enqueue(currentPath);
 
     while (queue.size() > 0) {
@@ -86,7 +86,10 @@ export class Bfs {
    * @param edges - list of all edges [id, from, to] between assets
    * @returns - traversal graph
    */
-  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {
+  buildAndPopulateGraph(
+    nodes: string[],
+    edges: [string, string, string][]
+  ): Path[] {
     const graph: Path[] = [];
     for (let j = 0; j < nodes.length; j++) {
       graph.push([]);

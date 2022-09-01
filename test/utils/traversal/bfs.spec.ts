@@ -1,6 +1,6 @@
-import { Bfs } from "../../../src/utils/traversal/bfs";
+import { Bfs } from '../../../src/utils/traversal/bfs';
 
-describe("Breadth First Search", () => {
+describe('Breadth First Search', () => {
   const g: number[][] = [];
   const size = 4;
 
@@ -17,7 +17,7 @@ describe("Breadth First Search", () => {
     g[2].push(1);
   });
 
-  it("Should find all possible routes from 2 to 3", () => {
+  it('Should find all possible routes from 2 to 3', () => {
     const result = new Bfs().findPaths(g, 2, 3);
     expect(result).toStrictEqual([
       [2, 0, 3],

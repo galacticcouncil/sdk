@@ -1,4 +1,4 @@
-import { PoolBase } from "../types";
+import { PoolBase } from '../types';
 
 export type Edge = [address: string, from: string, to: string];
 

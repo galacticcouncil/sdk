@@ -1,7 +1,7 @@
-import { PoolBase } from "../types";
-import { Bfs, Node, Path } from "./bfs";
+import { PoolBase } from '../types';
+import { Bfs, Node, Path } from './bfs';
 
-import { getNodesAndEdges, Edge } from "./graph";
+import { getNodesAndEdges, Edge } from './graph';
 
 export class RouteSuggester {
   /**
@@ -21,10 +21,16 @@ export class RouteSuggester {
    * @param pools - substrate based pools
    * @returns all possible path proposals
    */
-  getProposals(tokenIn: string, tokenOut: string | null, pools: PoolBase[]): Edge[][] {
+  getProposals(
+    tokenIn: string,
+    tokenOut: string | null,
+    pools: PoolBase[]
+  ): Edge[][] {
     const nodeEdges = getNodesAndEdges(pools);
     const poolAssets = Object.keys(nodeEdges);
-    const possiblePairs: Edge[] = poolAssets.map((node) => nodeEdges[node]).flat();
+    const possiblePairs: Edge[] = poolAssets
+      .map((node) => nodeEdges[node])
+      .flat();
 
     const bfs = new Bfs();
     const bfsGraph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);

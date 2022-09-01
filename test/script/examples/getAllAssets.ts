@@ -1,7 +1,7 @@
-import { ApiPromise } from "@polkadot/api";
-import { PolkadotExecutor } from "../executor";
-import { PolkadotPoolService } from "../../../src/pool";
-import { Router } from "../../../src/api";
+import { ApiPromise } from '@polkadot/api';
+import { PolkadotExecutor } from '../executor';
+import { PolkadotPoolService } from '../../../src/pool';
+import { Router } from '../../../src/api';
 
 class GetAllAssetsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
@@ -11,4 +11,4 @@ class GetAllAssetsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllAssetsExample("wss://rpc.basilisk.cloud", "Get all paths").run();
+new GetAllAssetsExample('wss://rpc.basilisk.cloud', 'Get all paths').run();

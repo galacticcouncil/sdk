@@ -1,10 +1,10 @@
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise } from '@polkadot/api';
 
-import type { StorageKey } from "@polkadot/types";
-import type { AnyTuple, Codec } from "@polkadot/types/types";
-import type { AssetMetadata } from "@polkadot/types/interfaces";
-import type { TokensAccountData } from "./types";
-import "@polkadot/api-augment";
+import type { StorageKey } from '@polkadot/types';
+import type { AnyTuple, Codec } from '@polkadot/types/types';
+import type { AssetMetadata } from '@polkadot/types/interfaces';
+import type { TokensAccountData } from './types';
+import '@polkadot/api-augment';
 
 export class PolkadotClient {
   protected readonly api: ApiPromise;
@@ -22,7 +22,9 @@ export class PolkadotClient {
   }
 
   async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
-    return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
+    return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(
+      tokenKey
+    );
   }
 
   async getSystemAccountBalance(accountId: string): Promise<string> {
@@ -32,8 +34,14 @@ export class PolkadotClient {
     return free.toString();
   }
 
-  async getTokenAccountBalance(accountId: string, tokenKey: string): Promise<string> {
-    const { free } = await this.api.query.tokens.accounts<TokensAccountData>(accountId, tokenKey);
+  async getTokenAccountBalance(
+    accountId: string,
+    tokenKey: string
+  ): Promise<string> {
+    const { free } = await this.api.query.tokens.accounts<TokensAccountData>(
+      accountId,
+      tokenKey
+    );
     return free.toString();
   }
 }

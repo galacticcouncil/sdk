@@ -1,4 +1,4 @@
-import { BigNumber } from "bignumber.js";
+import { BigNumber } from 'bignumber.js';
 
 export const DECIMAL_PLACES = 12;
 
@@ -10,7 +10,7 @@ BigNumber.config({
 
 export const ZERO = bnum(0);
 export const ONE = bnum(1);
-export const INFINITY = bnum("Infinity");
+export const INFINITY = bnum('Infinity');
 
 export function scale(input: BigNumber, decimalPlaces: number): BigNumber {
   const scalePow = new BigNumber(decimalPlaces.toString());

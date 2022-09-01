@@ -1,5 +1,5 @@
-import { PoolBase, PoolService } from "../../src/types";
-import { xykPools } from "../data/xykPools";
+import { PoolBase, PoolService } from '../../src/types';
+import { xykPools } from '../data/xykPools';
 
 export class MockXykPoolService implements PoolService {
   getPools(): Promise<PoolBase[]> {
