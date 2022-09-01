@@ -1,4 +1,4 @@
-import { RouteSuggester } from "../../src/suggester/suggester";
+import { RouteSuggester } from "../../src/suggester";
 import { PoolBase } from "../../src/types";
 import { xykPools } from "../data/xykPools";
 

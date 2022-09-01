@@ -1,2 +1,3 @@
 export { RouteSuggester } from "./suggester";
-export { Edge } from "./graph";
+export { Bfs, Path } from "./bfs";
+export { Edge, getNodesAndEdges } from "./graph";

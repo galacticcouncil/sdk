@@ -1,4 +1,4 @@
-import { Bfs, Path } from "../../src/suggester/bfs";
+import { Bfs, Path } from "../../src/suggester";
 
 describe("Suggester Breadth First Search algorithm", () => {
   const g: Path[] = [];

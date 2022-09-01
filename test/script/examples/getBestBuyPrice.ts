@@ -1,7 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
 import { PolkadotExecutor } from "../executor";
-import { PolkadotPoolService } from "../../../src/pool/polkadotPoolService";
-import { Router } from "../../../src/api/router";
+import { PolkadotPoolService } from "../../../src/pool";
+import { Router } from "../../../src/api";
 import { bnum, scale } from "../../../src/utils/bignumber";
 
 class GetBestBuyPriceExample extends PolkadotExecutor {
