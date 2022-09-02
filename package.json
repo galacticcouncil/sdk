@@ -1,11 +1,11 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-beta.3",
   "private": false,
   "description": "Galactic SDK",
   "author": "Pavol Noha <palo@hydradx.io>",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
     "test": "jest",

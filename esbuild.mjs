@@ -2,15 +2,23 @@ import esbuild from 'esbuild';
 import resolve from 'esbuild-plugin-resolve';
 import { wasmLoader } from 'esbuild-plugin-wasm';
 
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
+const dist = join(process.cwd(), 'dist');
+
+if (!existsSync(dist)) {
+  mkdirSync(dist);
+}
+
 // ESM bundle
 esbuild
   .build({
     entryPoints: ['src/index.ts'],
-    outdir: 'dist/esm',
+    outfile: 'dist/index.esm.js',
     bundle: true,
     sourcemap: true,
     minify: true,
-    splitting: true,
     plugins: [
       resolve({
         './math/nodejs': './math/bundler',
@@ -26,7 +34,7 @@ esbuild
 esbuild
   .build({
     entryPoints: ['src/index.ts'],
-    outfile: 'dist/cjs/index.js',
+    outfile: 'dist/index.js',
     bundle: true,
     sourcemap: true,
     minify: true,
