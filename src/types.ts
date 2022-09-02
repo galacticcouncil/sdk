@@ -52,12 +52,10 @@ export type Hop = {
   fee: string;
 };
 
-export type Swap = {
-  tokenIn: string;
-  tokenOut: string;
-  amount: BigNumber;
-  calculated: BigNumber;
-  final: BigNumber;
-  fee: BigNumber;
+export type Swap = Hop & {
+  swapAmount: BigNumber;
+  returnAmount: BigNumber;
+  returnFinalAmount: BigNumber;
+  swapFee: BigNumber;
   spotPrice: BigNumber;
 };

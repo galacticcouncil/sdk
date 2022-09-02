@@ -86,8 +86,8 @@ export class Router {
       this.toSellSwaps(amountIn, path, poolsMap)
     );
     const sorted = swaps.sort((a, b) => {
-      const swapAFinal = a[a.length - 1].final;
-      const swapBFinal = b[b.length - 1].final;
+      const swapAFinal = a[a.length - 1].returnFinalAmount;
+      const swapBFinal = b[b.length - 1].returnFinalAmount;
       return swapAFinal.isGreaterThan(swapBFinal) ? -1 : 1;
     });
     return sorted[0];
@@ -115,7 +115,7 @@ export class Router {
 
       let aIn: BigNumber;
       if (i > 0) {
-        aIn = swaps[i - 1].final;
+        aIn = swaps[i - 1].returnFinalAmount;
       } else {
         aIn = amountIn;
       }
@@ -126,12 +126,11 @@ export class Router {
       const spotPrice = pool.getSpotPriceOut(poolPair);
 
       swaps.push({
-        tokenIn: hop.tokenIn,
-        tokenOut: hop.tokenOut,
-        amount: aIn,
-        calculated: calculated,
-        final: calculated.minus(fee),
-        fee: fee,
+        ...hop,
+        swapAmount: aIn,
+        returnAmount: calculated,
+        returnFinalAmount: calculated.minus(fee),
+        swapFee: fee,
         spotPrice: spotPrice,
       } as Swap);
     }
@@ -159,8 +158,8 @@ export class Router {
       this.toBuySwaps(amountOut, path, poolsMap)
     );
     const sorted = swaps.sort((a, b) => {
-      const swapAFinal = a[0].final;
-      const swapBFinal = b[0].final;
+      const swapAFinal = a[0].returnFinalAmount;
+      const swapBFinal = b[0].returnFinalAmount;
       return swapAFinal.isGreaterThan(swapBFinal) ? 1 : -1;
     });
     return sorted[0];
@@ -191,7 +190,7 @@ export class Router {
       if (i == path.length - 1) {
         aOut = amountOut;
       } else {
-        aOut = swaps[0].final;
+        aOut = swaps[0].returnFinalAmount;
       }
 
       const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
@@ -200,12 +199,11 @@ export class Router {
       const spotPrice = pool.getSpotPriceIn(poolPair);
 
       swaps.unshift({
-        tokenIn: hop.tokenIn,
-        tokenOut: hop.tokenOut,
-        amount: aOut,
-        calculated: calculated,
-        final: calculated.plus(fee),
-        fee: fee,
+        ...hop,
+        swapAmount: aOut,
+        returnAmount: calculated,
+        returnFinalAmount: calculated.plus(fee),
+        swapFee: fee,
         spotPrice: spotPrice,
       } as Swap);
     }
