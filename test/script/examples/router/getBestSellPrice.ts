@@ -1,8 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { PolkadotExecutor } from '../executor';
-import { PolkadotPoolService } from '../../../src/pool';
-import { Router } from '../../../src/api';
-import { bnum, scale } from '../../../src/utils/bignumber';
+import { PolkadotExecutor } from '../../executor';
+import { PolkadotPoolService } from '../../../../src/pool';
+import { Router } from '../../../../src/api';
+import { bnum, scale } from '../../../../src/utils/bignumber';
 
 class GetBestSellPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {

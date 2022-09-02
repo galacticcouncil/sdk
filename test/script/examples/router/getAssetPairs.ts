@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
-import { PolkadotExecutor } from '../executor';
-import { PolkadotPoolService } from '../../../src/pool';
-import { Router } from '../../../src/api';
+import { PolkadotExecutor } from '../../executor';
+import { PolkadotPoolService } from '../../../../src/pool';
+import { Router } from '../../../../src/api';
 
 class GetAssetPairsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
