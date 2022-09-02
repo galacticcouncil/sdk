@@ -1,0 +1,9 @@
+.*
+.*.json
+esbuild.mjs                               
+jest.config.mjs
+tsconfig.json
+test
+demo
+coverage
+src
