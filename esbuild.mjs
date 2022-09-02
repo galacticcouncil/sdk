@@ -1,5 +1,6 @@
 import esbuild from 'esbuild';
-import { esbuildPluginAliasPath } from 'esbuild-plugin-alias-path';
+import resolve from 'esbuild-plugin-resolve';
+import { wasmLoader } from 'esbuild-plugin-wasm';
 
 // ESM bundle
 esbuild
@@ -11,12 +12,10 @@ esbuild
     minify: true,
     splitting: true,
     plugins: [
-      esbuildPluginAliasPath({
-        alias: {
-          'hydra-dx-wasm/build/xyk/nodejs':
-            'node_modules/hydra-dx-wasm/build/xyk/bundler',
-        },
+      resolve({
+        './math/nodejs': './math/bundler',
       }),
+      wasmLoader({ mode: 'deferred' }),
     ],
     format: 'esm',
     target: ['esnext'],

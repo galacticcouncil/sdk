@@ -1,6 +1,6 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
-import mathXyk from 'hydra-dx-wasm/build/xyk/nodejs';
+import math from './math/nodejs';
 import { tradeFee, normalizeAmount } from '../../utils/math';
 
 export class XykPool implements Pool {
@@ -45,7 +45,7 @@ export class XykPool implements Pool {
   }
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
-    const price = mathXyk.calculate_in_given_out(
+    const price = math.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       amountOut.toString()
@@ -54,7 +54,7 @@ export class XykPool implements Pool {
   }
 
   getSpotPriceIn(poolPair: PoolPair): BigNumber {
-    const price = mathXyk.get_spot_price(
+    const price = math.getSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
       scale(bnum(1), 12).toString()
@@ -63,7 +63,7 @@ export class XykPool implements Pool {
   }
 
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
-    const price = mathXyk.calculate_out_given_in(
+    const price = math.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       amountIn.toString()
@@ -72,7 +72,7 @@ export class XykPool implements Pool {
   }
 
   getSpotPriceOut(poolPair: PoolPair): BigNumber {
-    const price = mathXyk.get_spot_price(
+    const price = math.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       scale(bnum(1), 12).toString()
