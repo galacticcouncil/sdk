@@ -1,13 +1,16 @@
 export default {
-  roots: ["<rootDir>/test"],
-  testMatch: ["**/__tests__/**/*.+(ts|js)", "**/?(*.)+(spec|test).+(ts|js)"],
+  roots: ['<rootDir>/test'],
+  modulePaths: ['<rootDir>'],
+  moduleDirectories: ['node_modules'],
+  moduleNameMapper: {},
+  testMatch: ['**/__tests__/**/*.+(ts|js)', '**/?(*.)+(spec|test).+(ts|js)'],
   transform: {
-    "^.+\\.(ts)$": "ts-jest",
+    '^.+\\.(ts)$': 'es-jest',
   },
-  collectCoverageFrom: ["**/*.{js,ts}", "!**/*.d.ts", "!**/node_modules/**"],
+  collectCoverageFrom: ['**/*.{js,ts}', '!**/*.d.ts', '!**/node_modules/**'],
   globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
     },
   },
 };
