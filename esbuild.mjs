@@ -2,7 +2,7 @@ import esbuild from 'esbuild';
 import resolve from 'esbuild-plugin-resolve';
 import { wasmLoader } from 'esbuild-plugin-wasm';
 
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 const dist = join(process.cwd(), 'dist');
@@ -23,7 +23,7 @@ esbuild
       resolve({
         './math/nodejs': './math/bundler',
       }),
-      wasmLoader({ mode: 'deferred' }),
+      wasmLoader({ mode: 'embedded' }),
     ],
     format: 'esm',
     target: ['esnext'],
