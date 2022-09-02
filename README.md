@@ -7,6 +7,7 @@ Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chai
 <br />
 Table of content:
 
+- [Installation](#installation)
 - [Components](#components)
   - [Router](#router)
   - [Trader](#trader)
@@ -14,6 +15,12 @@ Table of content:
 - [Packaging](#packaging)
 - [Roadmap](#roadmap)
 - [Issue reporting](#issue-reporting)
+
+## Installation
+
+Install with [npm](https://www.npmjs.com/):
+
+`npm install @galacticcouncil/sdk`
 
 ## Components
 
