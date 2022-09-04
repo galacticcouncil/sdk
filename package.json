@@ -9,6 +9,8 @@
   "types": "dist/types/index.d.ts",
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:badges": "npm run test:coverage && generateBadges",
     "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
     "cleanup": "rimraf out && rimraf dist"
   },
@@ -18,6 +20,7 @@
     "esbuild": "^0.14.53",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
+    "node-jest-badges": "^1.3.3",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.8",

@@ -7,7 +7,12 @@ export default {
   transform: {
     '^.+\\.(ts)$': 'es-jest',
   },
-  collectCoverageFrom: ['**/*.{js,ts}', '!**/*.d.ts', '!**/node_modules/**'],
+  collectCoverageFrom: [
+    'src/**/*.{js,ts}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+  ],
+  coverageReporters: ['json-summary'],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.json',
