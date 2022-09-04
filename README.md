@@ -1,6 +1,9 @@
 <h1><code>Galactic SDK</code></h1>
 <p>
-  <a href="https://badge.fury.io/js/@galacticcouncil%2Fsdk"><img src="https://badge.fury.io/js/@galacticcouncil%2Fsdk.svg" alt="npm version" height="18"></a>
+
+[![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
+[![npm downloads](https://img.shields.io/npm/dw/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
+
 </p>
 Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chains integration.
 <br />
