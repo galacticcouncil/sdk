@@ -1,5 +1,4 @@
 import esbuild from 'esbuild';
-import resolve from 'esbuild-plugin-resolve';
 import { wasmLoader } from 'esbuild-plugin-wasm';
 
 import { existsSync, mkdirSync } from 'fs';
@@ -19,13 +18,9 @@ esbuild
     bundle: true,
     sourcemap: true,
     minify: true,
-    plugins: [
-      resolve({
-        './math/nodejs': './math/bundler',
-      }),
-      wasmLoader({ mode: 'embedded' }),
-    ],
+    plugins: [wasmLoader({ mode: 'embedded' })],
     format: 'esm',
+    platform: 'browser',
     target: ['esnext'],
   })
   .catch(() => process.exit(1));

@@ -2,7 +2,7 @@ import {
   calculate_in_given_out,
   calculate_out_given_in,
   get_spot_price,
-} from 'hydra-dx-wasm/build/xyk/bundler';
+} from '@galacticcouncil/math-xyk';
 
 function getSpotPrice(a: string, b: string, c: string): string {
   return get_spot_price(a, b, c);
