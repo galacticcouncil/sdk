@@ -72,7 +72,7 @@ SDK Examples and testing helpers.
 
 ### Run
 
-Run: `$ npx tsx ./test/script/examples/${{examplePackage}}/${{exampleName}}.ts` with valid example package & name.
+Run: `$ npx tsx ./test/script/examples/<examplePackage>/<exampleName>.ts` with valid example package & name.
 
 To demonstrate full working examples on real chain see [script](test/script/examples) section.
 
