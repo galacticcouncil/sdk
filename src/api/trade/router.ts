@@ -1,11 +1,11 @@
-import { PoolService, PoolBase, Hop, Pool, PoolAsset, Swap } from '../types';
-import { RouteSuggester } from '../suggester';
-import { Edge } from '../suggester';
-import { PoolFactory } from '../pool';
-import { BigNumber } from '../utils/bignumber';
-import { calculateTradeFee } from '../utils/math';
+import { PoolService, PoolBase, Hop, Pool, PoolAsset, Swap } from '../../types';
+import { RouteSuggester } from '../../suggester';
+import { Edge } from '../../suggester';
+import { PoolFactory } from '../../pool';
+import { BigNumber } from '../../utils/bignumber';
+import { calculateTradeFee } from '../../utils/math';
 
-export class Router {
+export class TradeRouter {
   private readonly routeSuggester: RouteSuggester;
   private readonly poolService: PoolService;
 

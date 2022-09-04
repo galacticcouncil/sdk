@@ -9,10 +9,9 @@ Table of content:
 
 - [Installation](#installation)
 - [Components](#components)
-  - [Router](#router)
-  - [Trader](#trader)
+  - [TradeRouter](#traderouter)
+  - [TradeExecutor](#tradeexecutor)
 - [Examples](#examples)
-- [Packaging](#packaging)
 - [Roadmap](#roadmap)
 - [Issue reporting](#issue-reporting)
 
@@ -24,7 +23,7 @@ Install with [npm](https://www.npmjs.com/):
 
 ## Components
 
-### Router
+### TradeRouter
 
 Off-chain optimization of orders across pools for best price execution. Router does not perform any on-chain transations.
 
@@ -40,15 +39,13 @@ getBestBuyPrice(tokenIn: string, tokenOut: string, amountOut: BigNumber): Swap[]
 ```
 
 For type signature visit [types.ts](src/types.ts)<br />
-**Note:** All amount args are formatted as bignumber 1^12!!!
 
 #### Usage
 
 ```typescript
 // Import
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { PolkadotPoolService } from '@galactic/pool';
-import { Router } from '@galactic/api';
+import { TradeRouter, PolkadotPoolService } from '@galacticcouncil/sdk';
 
 // Initialize Polkadot API
 const wsProvider = new WsProvider('wss://rpc.basilisk.cloud');
@@ -56,14 +53,14 @@ const api = await ApiPromise.create({ provider: wsProvider });
 
 // Initialize Router
 const poolService = new PolkadotPoolService(api);
-const router = new Router(poolService);
+const tradeRouter = new TradeRouter(poolService);
 
 // Do something
-const result = await router.getAllAssets();
+const result = await tradeRouter.getAllAssets();
 console.log(result);
 ```
 
-### Trader
+### TradeExecutor
 
 On-chain transaction executor using data from router to perform best possible trade.
 
@@ -79,14 +76,6 @@ Run: `$ npx tsx ./test/script/examples/${{examplePackage}}/${{exampleName}}.ts` 
 
 To demonstrate full working examples on real chain see [script](test/script/examples) section.
 
-## Packaging
-
-- api - Router & Trader impl
-- client - Substrate chain based clients
-- pool - Pool specific logic, math, clients
-- suggester - Route proposing, graph utils, BFS, DFS
-- utils - bignumber, math, collections
-
 ## Roadmap
 
 Component list and current status ⬇️
@@ -95,16 +84,16 @@ Component list and current status ⬇️
 - 🛠 Work in progress
 - ⏳ Planning to build
 
-| Name     |  Type  |     |
-| -------- | :----: | --: |
-| Router   |  API   |  🧪 |
-| Trader   |  API   |   🛠 |
-| Polkadot | Client |  🧪 |
-| Capi     | Client |  ⏳ |
-| XYK      |  Pool  |  🧪 |
-| LBP      |  Pool  |  ⏳ |
-| Stable   |  Pool  |  ⏳ |
-| Omni     |  Pool  |  ⏳ |
+| Name          |  Type  |     |
+| ------------- | :----: | --: |
+| TradeRouter   |  API   |  🧪 |
+| TradeExecutor |  API   |   🛠 |
+| Polkadot      | Client |  🧪 |
+| Capi          | Client |  ⏳ |
+| XYK           |  Pool  |  🧪 |
+| LBP           |  Pool  |  ⏳ |
+| Stable        |  Pool  |  ⏳ |
+| Omni          |  Pool  |  ⏳ |
 
 ## Issue reporting
 

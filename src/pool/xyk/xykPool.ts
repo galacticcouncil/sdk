@@ -1,7 +1,7 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
-import math from './math/nodejs';
 import { tradeFee, normalizeAmount } from '../../utils/math';
+import math from './xykMath';
 
 export class XykPool implements Pool {
   type: PoolType;
