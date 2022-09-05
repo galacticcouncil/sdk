@@ -1,4 +1,12 @@
-import { PoolService, PoolBase, Hop, Pool, PoolAsset, Swap } from '../../types';
+import {
+  PoolService,
+  PoolBase,
+  Hop,
+  Pool,
+  PoolAsset,
+  Swap,
+  SwapOptions,
+} from '../../types';
 import { RouteSuggester } from '../../suggester';
 import { Edge } from '../../suggester';
 import { PoolFactory } from '../../pool';
@@ -8,13 +16,24 @@ import { calculateTradeFee } from '../../utils/math';
 export class TradeRouter {
   private readonly routeSuggester: RouteSuggester;
   private readonly poolService: PoolService;
+  private readonly swapOptions: SwapOptions;
+
+  private readonly defaultSwapOptions: SwapOptions = {
+    onlyPools: [],
+    maxHops: 4,
+  };
 
   /**
    * @param poolService - Fetch pool data from substrate based pools
+   * @param swapOptions - Optional swap options for router
    */
-  constructor(poolService: PoolService) {
+  constructor(poolService: PoolService, swapOptions?: SwapOptions) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
+    this.swapOptions = {
+      ...this.defaultSwapOptions,
+      ...swapOptions,
+    };
   }
 
   /**
@@ -22,8 +41,11 @@ export class TradeRouter {
    *
    * @returns {PoolBase[]} List of all substrate based pools
    */
-  getPools(): Promise<PoolBase[]> {
-    return this.poolService.getPools();
+  async getPools(): Promise<PoolBase[]> {
+    const pools = await this.poolService.getPools();
+    const poolTypes = new Set(this.swapOptions.onlyPools);
+    if (poolTypes.size === 0) return pools;
+    return pools.filter((p: PoolBase) => poolTypes.has(p.type));
   }
 
   /**
@@ -43,7 +65,7 @@ export class TradeRouter {
    * @returns {PoolAsset[]} List of all available assets, given token can be trade with
    */
   async getAssetPairs(token: string): Promise<PoolAsset[]> {
-    const pools = await this.poolService.getPools();
+    const pools = await this.getPools();
     if (pools.length === 0) return [];
     const { assets, poolsMap } = await this.validateToken(token, pools);
     const hops = this.getPaths(token, null, poolsMap, pools);
@@ -59,7 +81,7 @@ export class TradeRouter {
    * @returns {<Hop[][]>} All possible paths containing route hops
    */
   async getAllPaths(tokenIn: string, tokenOut: string): Promise<Hop[][]> {
-    const pools = await this.poolService.getPools();
+    const pools = await this.getPools();
     if (pools.length === 0) return [];
     const { poolsMap } = await this.validateTokenPair(tokenIn, tokenOut, pools);
     return this.getPaths(tokenIn, tokenOut, poolsMap, pools);
@@ -78,7 +100,7 @@ export class TradeRouter {
     tokenOut: string,
     amountIn: BigNumber
   ): Promise<Swap[]> {
-    const pools = await this.poolService.getPools();
+    const pools = await this.getPools();
     if (pools.length === 0) return [];
     const { poolsMap } = await this.validateTokenPair(tokenIn, tokenOut, pools);
     const paths = this.getPaths(tokenIn, tokenOut, poolsMap, pools);
@@ -150,7 +172,7 @@ export class TradeRouter {
     tokenOut: string,
     amountOut: BigNumber
   ): Promise<Swap[]> {
-    const pools = await this.poolService.getPools();
+    const pools = await this.getPools();
     if (pools.length === 0) return [];
     const { poolsMap } = await this.validateTokenPair(tokenIn, tokenOut, pools);
     const paths = this.getPaths(tokenIn, tokenOut, poolsMap, pools);
@@ -216,7 +238,7 @@ export class TradeRouter {
    * @returns Map of all available assets
    */
   private async getAssets(): Promise<Map<string, PoolAsset>> {
-    const pools = await this.poolService.getPools();
+    const pools = await this.getPools();
     if (pools.length === 0) return new Map<string, PoolAsset>();
     const assets = pools
       .map((pool: PoolBase) => {

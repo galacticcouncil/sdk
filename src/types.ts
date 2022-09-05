@@ -59,3 +59,8 @@ export type Swap = Hop & {
   swapFee: BigNumber;
   spotPrice: BigNumber;
 };
+
+export type SwapOptions = {
+  onlyPools: PoolType[];
+  maxHops: number;
+};
