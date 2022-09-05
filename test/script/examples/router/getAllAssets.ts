@@ -11,4 +11,4 @@ class GetAllAssetsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllAssetsExample('wss://rpc.basilisk.cloud', 'Get all paths').run();
+new GetAllAssetsExample('wss://rpc.basilisk.cloud', 'Get all assets').run();
