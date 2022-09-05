@@ -9,8 +9,12 @@ export default {
   },
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
+    '!src/client/**',
+    '!src/pool/polkadotPoolService.ts',
+    '!src/pool/xyk/xykPolkadotClient.ts',
     '!**/*.d.ts',
     '!**/node_modules/**',
+    '!**/polkadot.ts',
   ],
   coverageReporters: ['json-summary'],
   globals: {
