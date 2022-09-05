@@ -1,0 +1,31 @@
+name: Build SDK
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests with coverage report
+        run: npm run test:coverage
+      - name: Generate coverage badges
+        uses: jpb06/jest-badges-action@latest
+          with:
+            branches: master
+      - name: Build SDK
+        run: npm run build
