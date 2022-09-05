@@ -16,7 +16,7 @@ esbuild
     outfile: 'dist/index.esm.js',
     bundle: true,
     sourcemap: true,
-    minify: false,
+    minify: true,
     plugins: [wasmLoader({ mode: 'embedded' })],
     format: 'esm',
     platform: 'browser',
