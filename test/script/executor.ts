@@ -33,7 +33,9 @@ export abstract class PolkadotExecutor {
               } else {
                 console.log(output);
               }
+              return null;
             })
+            .catch((e) => console.log(e))
             .finally(() => api.disconnect());
         });
     } catch (error) {

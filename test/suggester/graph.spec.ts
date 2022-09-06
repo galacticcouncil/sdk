@@ -2,8 +2,9 @@ import { getNodesAndEdges } from '../../src/suggester';
 import { PoolBase } from '../../src/types';
 import { xykPools } from '../data/xykPools';
 import { xykPools as xykPoolsDev } from '../data/xykPoolsDev';
+import { stablePools } from '../data/stablePools';
 
-describe('Suggester graph utility', () => {
+describe('Suggester graph utility XYK', () => {
   let pools: PoolBase[];
 
   beforeEach(() => {
@@ -30,7 +31,7 @@ describe('Suggester graph utility', () => {
   });
 });
 
-describe('Suggester graph utility DEV', () => {
+describe('Suggester graph utility XYK-DEV', () => {
   let pools: PoolBase[];
 
   beforeEach(() => {
@@ -55,6 +56,43 @@ describe('Suggester graph utility DEV', () => {
         ['bXmKSSACEp9rm8NuUAyDHiW2AjcLzZ4pvuRczz2ZJNkWVqFFm', '2', '3'],
       ],
       '3': [['bXmKSSACEp9rm8NuUAyDHiW2AjcLzZ4pvuRczz2ZJNkWVqFFm', '3', '2']],
+    });
+  });
+});
+
+describe('Suggester graph utility Stable', () => {
+  let pools: PoolBase[];
+
+  beforeEach(() => {
+    pools = stablePools;
+  });
+
+  it('Should be map of nodes & bidirectional edges', () => {
+    expect(pools).toBeDefined();
+    const result = getNodesAndEdges(pools);
+    expect(result).toStrictEqual({
+      '0': [
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '0', '1'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '0', '2'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '0', '3'],
+      ],
+      '1': [
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '1', '0'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '1', '2'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '1', '3'],
+        ['bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3', '1', '2'],
+      ],
+      '2': [
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '2', '0'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '2', '1'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '2', '3'],
+        ['bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3', '2', '1'],
+      ],
+      '3': [
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '3', '0'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '3', '1'],
+        ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', '3', '2'],
+      ],
     });
   });
 });
