@@ -61,6 +61,5 @@ export type Swap = Hop & {
 };
 
 export type SwapOptions = {
-  onlyPools?: PoolType[];
-  maxHops?: number;
+  includeOnly?: PoolType[];
 };

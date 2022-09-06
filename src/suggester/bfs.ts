@@ -3,6 +3,8 @@ import { Queue } from '../utils/queue';
 export type Path = Node[];
 export type Node = [id: number, from: string];
 
+const MAX_SIZE_OF_PATH = 4;
+
 /**
  * Breadth First Search.
  *
@@ -53,6 +55,11 @@ export class Bfs {
       const path = queue.dequeue();
 
       if (path == null) {
+        return paths;
+      }
+
+      // Max number of edges to get from src to dst
+      if (path.length > MAX_SIZE_OF_PATH) {
         return paths;
       }
 

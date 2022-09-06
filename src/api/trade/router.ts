@@ -19,8 +19,7 @@ export class TradeRouter {
   private readonly swapOptions: SwapOptions;
 
   private readonly defaultSwapOptions: SwapOptions = {
-    onlyPools: [],
-    maxHops: 4,
+    includeOnly: [],
   };
 
   /**
@@ -43,7 +42,7 @@ export class TradeRouter {
    */
   async getPools(): Promise<PoolBase[]> {
     const pools = await this.poolService.getPools();
-    const poolTypes = new Set(this.swapOptions.onlyPools);
+    const poolTypes = new Set(this.swapOptions.includeOnly);
     if (poolTypes.size === 0) return pools;
     return pools.filter((p: PoolBase) => poolTypes.has(p.type));
   }
