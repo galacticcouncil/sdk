@@ -2,7 +2,7 @@ import { RouteSuggester } from '../../src/suggester';
 import { PoolBase } from '../../src/types';
 import { xykPools } from '../data/xykPools';
 
-describe('Suggester proposals', () => {
+describe('Suggester proposals for XYK pool', () => {
   let pools: PoolBase[];
   let suggester: RouteSuggester;
 
@@ -11,7 +11,7 @@ describe('Suggester proposals', () => {
     suggester = new RouteSuggester();
   });
 
-  it('Should return suggested hops from token 1 to 2 for given XYK pool', () => {
+  it('Should return suggested hops from token 1 to 2', () => {
     expect(pools).toBeDefined();
     const result = suggester.getProposals('1', '2', pools);
     expect(result).toStrictEqual([

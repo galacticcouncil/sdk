@@ -3,7 +3,7 @@ import { PoolService, PoolType } from '../../../src/types';
 import { bnum, scale } from '../../../src/utils/bignumber';
 import { MockXykPoolService } from '../../lib/mockXykPoolService';
 
-describe('Router', () => {
+describe('Router with mocked XYK pool service', () => {
   let poolService: PoolService;
   let router: TradeRouter;
 
@@ -12,7 +12,7 @@ describe('Router', () => {
     router = new TradeRouter(poolService);
   });
 
-  it('Should return suggested hops from token 1 (KSM) to 2 (aUSD) for given XYK pool', async () => {
+  it('Should return suggested hops from token 1 (KSM) to 2 (aUSD)', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const result = await router.getAllPaths('1', '2');
@@ -45,7 +45,7 @@ describe('Router', () => {
     ]);
   });
 
-  it('Should return all assets from given XYK pool', async () => {
+  it('Should return all assets in pool', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const result = await router.getAllAssets();
@@ -56,7 +56,7 @@ describe('Router', () => {
     ]);
   });
 
-  it('Should return all assets pair reacheable from token 1 (KSM) in given XYK pool', async () => {
+  it('Should return all assets pair reacheable from token 1 (KSM)', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const result = await router.getAssetPairs('1');
@@ -66,7 +66,7 @@ describe('Router', () => {
     ]);
   });
 
-  it('Should throw error if not-existing asset used in given XYK pool', async () => {
+  it('Should throw error if not-existing asset used in given pool', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     await expect(async () => {

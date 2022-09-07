@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PolkadotExecutor } from '../../executor';
+import { ApiUrl, PolkadotExecutor } from '../../executor';
 import { PolkadotPoolService } from '../../../../src/pool';
 import { TradeRouter } from '../../../../src/api';
 
@@ -11,4 +11,4 @@ class GetAllPathsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllPathsExample('wss://rpc.basilisk.cloud', 'Get all paths').run();
+new GetAllPathsExample(ApiUrl.Basilisk, 'Get all paths').run();

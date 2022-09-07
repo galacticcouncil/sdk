@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PolkadotExecutor } from '../../executor';
+import { ApiUrl, PolkadotExecutor } from '../../executor';
 import { PolkadotPoolService } from '../../../../src/pool';
 import { TradeRouter } from '../../../../src/api';
 
@@ -11,4 +11,4 @@ class GetAssetPairsExample extends PolkadotExecutor {
   }
 }
 
-new GetAssetPairsExample('wss://rpc.basilisk.cloud', 'Get asset pairs').run();
+new GetAssetPairsExample(ApiUrl.Basilisk, 'Get asset pairs').run();

@@ -1,11 +1,17 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
+export enum ApiUrl {
+  Basilisk = 'wss://rpc.basilisk.cloud',
+  Basilisk_Dev = 'wss://rpc01.hydration.dev',
+  Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
+}
+
 export abstract class PolkadotExecutor {
-  protected readonly apiUrl: string;
+  protected readonly apiUrl: ApiUrl;
   protected readonly desc: string;
   protected readonly pretty: boolean;
 
-  constructor(apiUrl: string, desc: string, pretty?: boolean) {
+  constructor(apiUrl: ApiUrl, desc: string, pretty?: boolean) {
     this.apiUrl = apiUrl;
     this.desc = desc;
     this.pretty = pretty || false;

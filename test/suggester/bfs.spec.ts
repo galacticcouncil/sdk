@@ -2,7 +2,7 @@ import { Bfs, Path, Edge } from '../../src/suggester';
 import { getNodesAndEdges } from '../../src/suggester';
 import { stablePools } from '../data/stablePools';
 
-describe('Suggester Breadth First Search algorithm', () => {
+describe('Bfs graph', () => {
   const g: Path[] = [];
   const size = 4;
 
@@ -35,7 +35,7 @@ describe('Suggester Breadth First Search algorithm', () => {
   });
 });
 
-describe('Suggester Breadth First Search algorithm from node-edges', () => {
+describe('Bfs graph created from node-edges', () => {
   let bfs: Bfs;
 
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PolkadotExecutor } from '../../executor';
+import { ApiUrl, PolkadotExecutor } from '../../executor';
 import { PolkadotPoolService } from '../../../../src/pool';
 import { TradeRouter } from '../../../../src/api';
 import { bnum, scale } from '../../../../src/utils/bignumber';
@@ -12,8 +12,4 @@ class GetBestSellPriceExample extends PolkadotExecutor {
   }
 }
 
-new GetBestSellPriceExample(
-  'wss://rpc.basilisk.cloud',
-  'Get best sell price',
-  true
-).run();
+new GetBestSellPriceExample(ApiUrl.Basilisk, 'Get best sell price', true).run();

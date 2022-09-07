@@ -4,7 +4,7 @@ import { xykPools } from '../data/xykPools';
 import { xykPools as xykPoolsDev } from '../data/xykPoolsDev';
 import { stablePools } from '../data/stablePools';
 
-describe('Suggester graph utility XYK', () => {
+describe('Suggester graph for XYK pool', () => {
   let pools: PoolBase[];
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('Suggester graph utility XYK', () => {
   });
 });
 
-describe('Suggester graph utility XYK-DEV', () => {
+describe('Suggester graph for XYK pool - (DEV)', () => {
   let pools: PoolBase[];
 
   beforeEach(() => {
@@ -60,7 +60,7 @@ describe('Suggester graph utility XYK-DEV', () => {
   });
 });
 
-describe('Suggester graph utility Stable', () => {
+describe('Suggester graph for Stable pool', () => {
   let pools: PoolBase[];
 
   beforeEach(() => {
