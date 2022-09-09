@@ -1,1 +1,2 @@
-export { TradeRouter } from './trade/router';
+export { Router } from './router';
+export { TradeRouter } from './tradeRouter';

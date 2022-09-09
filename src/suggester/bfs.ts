@@ -93,10 +93,7 @@ export class Bfs {
    * @param edges - list of all edges [id, from, to] between assets
    * @returns - traversal graph
    */
-  buildAndPopulateGraph(
-    nodes: string[],
-    edges: [string, string, string][]
-  ): Path[] {
+  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {
     const graph: Path[] = [];
     for (let j = 0; j < nodes.length; j++) {
       graph.push([]);

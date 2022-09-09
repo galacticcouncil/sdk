@@ -45,9 +45,7 @@ describe('Bfs graph created from node-edges', () => {
   it('Should find all possible paths from node 1 to node 2 with edge type', () => {
     const nodeEdges = getNodesAndEdges(stablePools);
     const poolAssets = Object.keys(nodeEdges);
-    const possiblePairs: Edge[] = poolAssets
-      .map((node) => nodeEdges[node])
-      .flat();
+    const possiblePairs: Edge[] = poolAssets.map((node) => nodeEdges[node]).flat();
     const graph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);
     const result = bfs.findPaths(graph, 1, 2);
     expect(result).toStrictEqual([

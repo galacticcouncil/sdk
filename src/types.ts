@@ -13,6 +13,8 @@ export interface PoolPair {
   swapFee: BigNumber;
   tokenIn: string;
   tokenOut: string;
+  decimalsIn: number;
+  decimalsOut: number;
   balanceIn: BigNumber;
   balanceOut: BigNumber;
 }
@@ -49,17 +51,29 @@ export type Hop = {
   poolId: string;
   tokenIn: string;
   tokenOut: string;
-  fee: string;
+  feePercentage: string;
 };
 
-export type Swap = Hop & {
-  swapAmount: BigNumber;
+export type Swap = Humanizer &
+  Hop & {
+    tokenInDecimals: number;
+    tokenOutDecimals: number;
+    swapAmount: BigNumber;
+    returnAmount: BigNumber;
+    returnFinalAmount: BigNumber;
+    swapFee: BigNumber;
+    spotPrice: BigNumber;
+    priceImpact: BigNumber;
+  };
+
+export type Trade = Humanizer & {
+  tradeAmount: BigNumber;
   returnAmount: BigNumber;
-  returnFinalAmount: BigNumber;
-  swapFee: BigNumber;
   spotPrice: BigNumber;
+  priceImpact: BigNumber;
+  swaps: Swap[];
 };
 
-export type SwapOptions = {
-  includeOnly?: PoolType[];
-};
+export interface Humanizer {
+  toHuman(): any;
+}

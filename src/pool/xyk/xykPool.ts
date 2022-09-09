@@ -1,6 +1,6 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
-import { tradeFee, normalizeAmount } from '../../utils/math';
+import { tradeFee } from '../../utils/math';
 import math from './xykMath';
 
 export class XykPool implements Pool {
@@ -39,8 +39,10 @@ export class XykPool implements Pool {
       swapFee: tradeFee(this.swapFee),
       tokenIn: tokenIn,
       tokenOut: tokenOut,
-      balanceIn: normalizeAmount(balanceIn, tokenInMeta.decimals),
-      balanceOut: normalizeAmount(balanceOut, tokenOutMeta.decimals),
+      decimalsIn: tokenInMeta.decimals,
+      decimalsOut: tokenOutMeta.decimals,
+      balanceIn: balanceIn,
+      balanceOut: balanceOut,
     } as PoolPair;
   }
 
@@ -57,7 +59,7 @@ export class XykPool implements Pool {
     const price = math.getSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
-      scale(bnum(1), 12).toString()
+      scale(bnum(1), poolPair.decimalsOut).toString()
     );
     return bnum(price);
   }
@@ -75,7 +77,7 @@ export class XykPool implements Pool {
     const price = math.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      scale(bnum(1), 12).toString()
+      scale(bnum(1), poolPair.decimalsIn).toString()
     );
     return bnum(price);
   }
