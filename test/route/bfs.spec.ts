@@ -1,5 +1,5 @@
-import { Bfs, Path, Edge } from '../../src/suggester';
-import { getNodesAndEdges } from '../../src/suggester';
+import { Bfs, Path, Edge } from '../../src/route';
+import { getNodesAndEdges } from '../../src/route';
 import { stablePools } from '../data/stablePools';
 
 describe('Bfs graph', () => {

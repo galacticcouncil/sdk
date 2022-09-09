@@ -63,14 +63,14 @@ export type Swap = Humanizer &
     returnFinalAmount: BigNumber;
     swapFee: BigNumber;
     spotPrice: BigNumber;
-    priceImpact: BigNumber;
+    priceImpactPercentage: BigNumber;
   };
 
 export type Trade = Humanizer & {
   tradeAmount: BigNumber;
   returnAmount: BigNumber;
   spotPrice: BigNumber;
-  priceImpact: BigNumber;
+  priceImpactPercentage: BigNumber;
   swaps: Swap[];
 };
 

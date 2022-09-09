@@ -1,4 +1,4 @@
-import { getNodesAndEdges } from '../../src/suggester';
+import { getNodesAndEdges } from '../../src/route';
 import { PoolBase } from '../../src/types';
 import { xykPools } from '../data/xykPools';
 import { xykPools as xykPoolsDev } from '../data/xykPoolsDev';
