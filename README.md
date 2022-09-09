@@ -38,8 +38,8 @@ getPools(): PoolBase[]
 getAllAssets(): PoolAsset[]
 getAssetPairs(token: string): PoolAsset[]
 getAllPaths(tokenIn: string, tokenOut: string): Hop[][]
-getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Trade
-getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Trade
+getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Sell
+getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Buy
 ```
 
 For type signature visit [types.ts](src/types.ts)<br />

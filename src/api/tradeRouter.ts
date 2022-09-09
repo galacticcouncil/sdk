@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { Hop, Pool, Swap, Trade } from '../types';
+import { Hop, Pool, SellSwap, BuySwap, Sell, Buy } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculateTradeFee, calculatePriceImpact, formatAmount } from '../utils/math';
 
@@ -12,15 +12,15 @@ export class TradeRouter extends Router {
    * @param {BigNumber} amountIn - Amount of tokenIn to sell for tokenOut
    * @returns Best possible sell trade of given token pair
    */
-  async getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | string | number): Promise<Trade> {
+  async getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | string | number): Promise<Sell> {
     const pools = await super.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(tokenIn, tokenOut, pools);
     const paths = super.getPaths(tokenIn, tokenOut, poolsMap, pools);
     const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
     const bestRoute = swaps.sort((a, b) => {
-      const swapAFinal = a[a.length - 1].returnFinalAmount;
-      const swapBFinal = b[b.length - 1].returnFinalAmount;
+      const swapAFinal = a[a.length - 1].finalAmount;
+      const swapBFinal = b[b.length - 1].finalAmount;
       return swapAFinal.isGreaterThan(swapBFinal) ? -1 : 1;
     })[0];
 
@@ -28,32 +28,32 @@ export class TradeRouter extends Router {
     const lastRoute = bestRoute[bestRoute.length - 1];
 
     const bestRouteSpotPrice = bestRoute
-      .map((s: Swap) => s.spotPrice.shiftedBy(-1 * s.tokenOutDecimals))
+      .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.tokenOutDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const bestRoutePriceImpact = bestRoute
-      .map((s: Swap) => calculatePriceImpact(s.swapAmount, s.tokenInDecimals, s.spotPrice, s.returnAmount))
+      .map((s: SellSwap) => calculatePriceImpact(s.amountIn, s.tokenInDecimals, s.spotPrice, s.calculatedOut))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b))
       .decimalPlaces(2);
 
     const normalizedBestRouteSpotPrice = scale(bestRouteSpotPrice, lastRoute.tokenOutDecimals).decimalPlaces(0, 1);
 
     return {
-      tradeAmount: firstRoute.swapAmount,
-      returnAmount: lastRoute.returnFinalAmount,
+      amountIn: firstRoute.amountIn,
+      finalAmount: lastRoute.finalAmount,
       spotPrice: normalizedBestRouteSpotPrice,
       priceImpactPercentage: bestRoutePriceImpact,
       swaps: bestRoute,
       toHuman() {
         return {
-          tradeAmount: formatAmount(firstRoute.swapAmount, firstRoute.tokenInDecimals),
-          returnAmount: formatAmount(lastRoute.returnFinalAmount, lastRoute.tokenOutDecimals),
+          amountIn: formatAmount(firstRoute.amountIn, firstRoute.tokenInDecimals),
+          finalAmount: formatAmount(lastRoute.finalAmount, lastRoute.tokenOutDecimals),
           spotPrice: formatAmount(normalizedBestRouteSpotPrice, lastRoute.tokenOutDecimals),
           priceImpactPercentage: bestRoutePriceImpact.toString(),
-          swaps: bestRoute.map((s: Swap) => s.toHuman()),
+          swaps: bestRoute.map((s: SellSwap) => s.toHuman()),
         };
       },
-    } as Trade;
+    } as Sell;
   }
 
   /**
@@ -65,8 +65,8 @@ export class TradeRouter extends Router {
    * @param poolsMap - pools map
    * @returns Sell swaps for given path with corresponding pool pairs
    */
-  private toSellSwaps(amountIn: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): Swap[] {
-    const swaps: Swap[] = [];
+  private toSellSwaps(amountIn: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): SellSwap[] {
+    const swaps: SellSwap[] = [];
     for (let i = 0; i < path.length; i++) {
       const hop = path[i];
       const pool = poolsMap.get(hop.poolId);
@@ -76,7 +76,7 @@ export class TradeRouter extends Router {
 
       let aIn: BigNumber;
       if (i > 0) {
-        aIn = swaps[i - 1].returnFinalAmount;
+        aIn = swaps[i - 1].finalAmount;
       } else {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn);
       }
@@ -91,24 +91,24 @@ export class TradeRouter extends Router {
         ...hop,
         tokenInDecimals: poolPair.decimalsIn,
         tokenOutDecimals: poolPair.decimalsOut,
-        swapAmount: aIn,
-        returnAmount: calculated,
-        returnFinalAmount: final,
+        amountIn: aIn,
+        calculatedOut: calculated,
+        finalAmount: final,
         swapFee: fee,
         spotPrice: spotPrice,
         priceImpactPercentage: priceImpact,
         toHuman() {
           return {
             ...hop,
-            swapAmount: formatAmount(aIn, poolPair.decimalsIn),
-            returnAmount: formatAmount(calculated, poolPair.decimalsOut),
-            returnFinalAmount: formatAmount(final, poolPair.decimalsOut),
+            amountIn: formatAmount(aIn, poolPair.decimalsIn),
+            calculatedAmount: formatAmount(calculated, poolPair.decimalsOut),
+            finalAmount: formatAmount(final, poolPair.decimalsOut),
             swapFee: formatAmount(fee, poolPair.decimalsOut),
             spotPrice: formatAmount(spotPrice, poolPair.decimalsOut),
             priceImpactPercentage: priceImpact.toString(),
           };
         },
-      } as Swap);
+      } as SellSwap);
     }
     return swaps;
   }
@@ -121,15 +121,16 @@ export class TradeRouter extends Router {
    * @param {BigNumber} amountOut - Amount of tokenOut to buy for tokenIn
    * @returns Best possible buy trade of given token pair
    */
-  async getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | string | number): Promise<Trade> {
+  async getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | string | number): Promise<Buy> {
     const pools = await super.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(tokenIn, tokenOut, pools);
     const paths = super.getPaths(tokenIn, tokenOut, poolsMap, pools);
     const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
+
     const bestRoute = swaps.sort((a, b) => {
-      const swapAFinal = a[0].returnFinalAmount;
-      const swapBFinal = b[0].returnFinalAmount;
+      const swapAFinal = a[a.length - 1].finalAmount;
+      const swapBFinal = b[b.length - 1].finalAmount;
       return swapAFinal.isGreaterThan(swapBFinal) ? 1 : -1;
     })[0];
 
@@ -137,32 +138,32 @@ export class TradeRouter extends Router {
     const lastRoute = bestRoute[bestRoute.length - 1];
 
     const bestRouteSpotPrice = bestRoute
-      .map((s: Swap) => s.spotPrice.shiftedBy(-1 * s.tokenInDecimals))
+      .map((s: BuySwap) => s.spotPrice.shiftedBy(-1 * s.tokenInDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const bestRoutePriceImpact = bestRoute
-      .map((s: Swap) => calculatePriceImpact(s.swapAmount, s.tokenOutDecimals, s.spotPrice, s.returnAmount))
+      .map((s: BuySwap) => calculatePriceImpact(s.amountOut, s.tokenOutDecimals, s.spotPrice, s.calculatedIn))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b))
       .decimalPlaces(2);
 
     const normalizedBestRouteSpotPrice = scale(bestRouteSpotPrice, firstRoute.tokenInDecimals).decimalPlaces(0, 1);
 
     return {
-      tradeAmount: lastRoute.swapAmount,
-      returnAmount: firstRoute.returnFinalAmount,
+      amountOut: firstRoute.amountOut,
+      finalAmount: lastRoute.finalAmount,
       spotPrice: normalizedBestRouteSpotPrice,
       priceImpactPercentage: bestRoutePriceImpact,
       swaps: bestRoute,
       toHuman() {
         return {
-          tradeAmount: formatAmount(lastRoute.swapAmount, lastRoute.tokenOutDecimals),
-          returnAmount: formatAmount(firstRoute.returnFinalAmount, firstRoute.tokenInDecimals),
+          amountOut: formatAmount(firstRoute.amountOut, lastRoute.tokenOutDecimals),
+          finalAmount: formatAmount(lastRoute.finalAmount, firstRoute.tokenInDecimals),
           spotPrice: formatAmount(normalizedBestRouteSpotPrice, firstRoute.tokenInDecimals),
           priceImpactPercentage: bestRoutePriceImpact.toString(),
-          swaps: bestRoute.map((s: Swap) => s.toHuman()),
+          swaps: bestRoute.map((s: BuySwap) => s.toHuman()),
         };
       },
-    } as Trade;
+    } as Buy;
   }
 
   /**
@@ -175,8 +176,8 @@ export class TradeRouter extends Router {
    * @param poolsMap - pools map
    * @returns Buy swaps for given path
    */
-  private toBuySwaps(amountOut: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): Swap[] {
-    const swaps: Swap[] = [];
+  private toBuySwaps(amountOut: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): BuySwap[] {
+    const swaps: BuySwap[] = [];
     for (let i = path.length - 1; i >= 0; i--) {
       const hop = path[i];
       const pool = poolsMap.get(hop.poolId);
@@ -188,7 +189,7 @@ export class TradeRouter extends Router {
       if (i == path.length - 1) {
         aOut = scale(bnum(amountOut), poolPair.decimalsOut);
       } else {
-        aOut = swaps[0].returnFinalAmount;
+        aOut = swaps[swaps.length - 1].finalAmount;
       }
 
       const calculated = pool.calculateInGivenOut(poolPair, aOut);
@@ -197,28 +198,28 @@ export class TradeRouter extends Router {
       const spotPrice = pool.getSpotPriceIn(poolPair);
       const priceImpact = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculated);
 
-      swaps.unshift({
+      swaps.push({
         ...hop,
         tokenInDecimals: poolPair.decimalsIn,
         tokenOutDecimals: poolPair.decimalsOut,
-        swapAmount: aOut,
-        returnAmount: calculated,
-        returnFinalAmount: final,
+        amountOut: aOut,
+        calculatedIn: calculated,
+        finalAmount: final,
         swapFee: fee,
         spotPrice: spotPrice,
         priceImpactPercentage: priceImpact,
         toHuman() {
           return {
             ...hop,
-            swapAmount: formatAmount(aOut, poolPair.decimalsOut),
-            returnAmount: formatAmount(calculated, poolPair.decimalsIn),
-            returnFinalAmount: formatAmount(final, poolPair.decimalsIn),
+            amountOut: formatAmount(aOut, poolPair.decimalsOut),
+            calculatedIn: formatAmount(calculated, poolPair.decimalsIn),
+            finalAmount: formatAmount(final, poolPair.decimalsIn),
             swapFee: formatAmount(fee, poolPair.decimalsIn),
             spotPrice: formatAmount(spotPrice, poolPair.decimalsIn),
             priceImpactPercentage: priceImpact.toString(),
           };
         },
-      } as Swap);
+      } as BuySwap);
     }
     return swaps;
   }

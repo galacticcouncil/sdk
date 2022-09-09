@@ -54,24 +54,40 @@ export type Hop = {
   feePercentage: string;
 };
 
-export type Swap = Humanizer &
+type Swap = Humanizer &
   Hop & {
     tokenInDecimals: number;
     tokenOutDecimals: number;
-    swapAmount: BigNumber;
-    returnAmount: BigNumber;
-    returnFinalAmount: BigNumber;
+    finalAmount: BigNumber;
     swapFee: BigNumber;
     spotPrice: BigNumber;
     priceImpactPercentage: BigNumber;
   };
 
-export type Trade = Humanizer & {
-  tradeAmount: BigNumber;
-  returnAmount: BigNumber;
+export type SellSwap = Swap & {
+  amountIn: BigNumber;
+  calculatedOut: BigNumber;
+};
+
+export type BuySwap = Swap & {
+  amountOut: BigNumber;
+  calculatedIn: BigNumber;
+};
+
+type Trade = Humanizer & {
+  finalAmount: BigNumber;
   spotPrice: BigNumber;
   priceImpactPercentage: BigNumber;
-  swaps: Swap[];
+};
+
+export type Sell = Trade & {
+  amountIn: BigNumber;
+  swaps: SellSwap[];
+};
+
+export type Buy = Trade & {
+  amountOut: BigNumber;
+  swaps: BuySwap[];
 };
 
 export interface Humanizer {
