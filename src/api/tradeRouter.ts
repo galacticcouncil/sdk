@@ -31,12 +31,13 @@ export class TradeRouter extends Router {
       .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.tokenOutDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
-    const bestRoutePriceImpact = bestRoute
-      .map((s: SellSwap) => calculatePriceImpact(s.amountIn, s.tokenInDecimals, s.spotPrice, s.calculatedOut))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b))
-      .decimalPlaces(2);
-
     const normalizedBestRouteSpotPrice = scale(bestRouteSpotPrice, lastRoute.tokenOutDecimals).decimalPlaces(0, 1);
+    const bestRoutePriceImpact = calculatePriceImpact(
+      firstRoute.amountIn,
+      firstRoute.tokenInDecimals,
+      normalizedBestRouteSpotPrice,
+      lastRoute.calculatedOut
+    );
 
     return {
       amountIn: firstRoute.amountIn,
@@ -141,12 +142,13 @@ export class TradeRouter extends Router {
       .map((s: BuySwap) => s.spotPrice.shiftedBy(-1 * s.tokenInDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
-    const bestRoutePriceImpact = bestRoute
-      .map((s: BuySwap) => calculatePriceImpact(s.amountOut, s.tokenOutDecimals, s.spotPrice, s.calculatedIn))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b))
-      .decimalPlaces(2);
-
     const normalizedBestRouteSpotPrice = scale(bestRouteSpotPrice, firstRoute.tokenInDecimals).decimalPlaces(0, 1);
+    const bestRoutePriceImpact = calculatePriceImpact(
+      firstRoute.amountOut,
+      firstRoute.tokenOutDecimals,
+      normalizedBestRouteSpotPrice,
+      lastRoute.calculatedIn
+    );
 
     return {
       amountOut: firstRoute.amountOut,
