@@ -188,7 +188,7 @@ export class Router {
         poolType: pool?.type,
         tokenIn: from,
         tokenOut: to,
-        feePercentage: pool?.swapFee,
+        tradeFeePct: pool?.tradeFee,
       } as Hop;
     });
   }

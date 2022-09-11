@@ -4,7 +4,7 @@ export const stablePools = [
   {
     address: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
     type: PoolType.Stable,
-    swapFee: '0.3',
+    tradeFee: '0.3',
     tokens: [
       {
         id: '0',
@@ -35,7 +35,7 @@ export const stablePools = [
   {
     address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
     type: PoolType.Stable,
-    swapFee: '0.3',
+    tradeFee: '0.3',
     tokens: [
       {
         id: '2',

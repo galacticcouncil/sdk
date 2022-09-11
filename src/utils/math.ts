@@ -1,7 +1,7 @@
 import { BigNumber, bnum } from './bignumber';
 
-export function tradeFee(percentage: string): BigNumber {
-  return bnum(parseFloat(percentage) / 100);
+export function pctToBn(pct: string): BigNumber {
+  return bnum(parseFloat(pct) / 100);
 }
 
 export function calculateTradeFee(amount: BigNumber, tradeFee: BigNumber): BigNumber {

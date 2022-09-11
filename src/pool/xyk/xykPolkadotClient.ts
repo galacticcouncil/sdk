@@ -13,7 +13,7 @@ export class XykPolkadotClient extends PolkadotClient {
       return {
         address: poolAddress,
         type: PoolType.XYK,
-        swapFee: this.getSwapFee(),
+        tradeFee: this.getTradeFee(),
         tokens: poolTokens,
       } as PoolBase;
     });
@@ -43,7 +43,7 @@ export class XykPolkadotClient extends PolkadotClient {
     }
   }
 
-  getSwapFee(): string {
+  getTradeFee(): string {
     const exchangeFee = this.api.consts.xyk.getExchangeFee;
     return ((exchangeFee[0].toNumber() / exchangeFee[1].toNumber()) * 100).toString();
   }

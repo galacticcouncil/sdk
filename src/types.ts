@@ -10,7 +10,7 @@ export enum PoolType {
 }
 
 export interface PoolPair {
-  swapFee: BigNumber;
+  tradeFee: BigNumber;
   tokenIn: string;
   tokenOut: string;
   decimalsIn: number;
@@ -22,7 +22,7 @@ export interface PoolPair {
 export type PoolBase = {
   address: string;
   type: PoolType;
-  swapFee: string;
+  tradeFee: string;
   tokens: PoolToken[];
 };
 
@@ -51,43 +51,41 @@ export type Hop = {
   poolId: string;
   tokenIn: string;
   tokenOut: string;
-  feePercentage: string;
+  tradeFeePct: string;
 };
 
-type Swap = Humanizer &
+export type Swap = Humanizer &
   Hop & {
     tokenInDecimals: number;
     tokenOutDecimals: number;
+    amountIn: BigNumber;
+    amountOut: BigNumber;
     finalAmount: BigNumber;
-    swapFee: BigNumber;
+    tradeFee: BigNumber;
     spotPrice: BigNumber;
-    priceImpactPercentage: BigNumber;
+    priceImpactPct: BigNumber;
   };
 
 export type SellSwap = Swap & {
-  amountIn: BigNumber;
   calculatedOut: BigNumber;
 };
 
 export type BuySwap = Swap & {
-  amountOut: BigNumber;
   calculatedIn: BigNumber;
 };
 
-type Trade = Humanizer & {
-  finalAmount: BigNumber;
-  spotPrice: BigNumber;
-  priceImpactPercentage: BigNumber;
-};
+export enum TradeType {
+  Buy = 'Buy',
+  Sell = 'Sell',
+}
 
-export type Sell = Trade & {
+export type Trade = Humanizer & {
+  type: TradeType;
   amountIn: BigNumber;
-  swaps: SellSwap[];
-};
-
-export type Buy = Trade & {
   amountOut: BigNumber;
-  swaps: BuySwap[];
+  spotPrice: BigNumber;
+  priceImpactPct: BigNumber;
+  swaps: Swap[];
 };
 
 export interface Humanizer {

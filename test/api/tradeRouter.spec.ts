@@ -19,10 +19,10 @@ describe('TradeRouter with mocked XYK pool service', () => {
     const firstRoute = sellHuman.swaps[0];
     const lastRoute = sellHuman.swaps[sell.swaps.length - 1];
     expect(sellHuman.amountIn).toEqual(firstRoute.amountIn);
-    expect(sellHuman.finalAmount).toEqual(lastRoute.finalAmount);
+    expect(sellHuman.amountOut).toEqual(lastRoute.amountOut);
 
     sellHuman.swaps.reduce((a: SellSwap, b: SellSwap) => {
-      expect(a.finalAmount).toEqual(b.amountIn);
+      expect(a.amountOut).toEqual(b.amountIn);
     });
   });
 
@@ -34,10 +34,10 @@ describe('TradeRouter with mocked XYK pool service', () => {
     const firstRoute = buyHuman.swaps[0];
     const lastRoute = buyHuman.swaps[buy.swaps.length - 1];
     expect(buyHuman.amountOut).toEqual(firstRoute.amountOut);
-    expect(buyHuman.finalAmount).toEqual(lastRoute.finalAmount);
+    expect(buyHuman.amountIn).toEqual(lastRoute.amountIn);
 
     buyHuman.swaps.reduce((a: BuySwap, b: BuySwap) => {
-      expect(a.finalAmount).toEqual(b.amountOut);
+      expect(a.amountIn).toEqual(b.amountOut);
     });
   });
 });

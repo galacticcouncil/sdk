@@ -3,7 +3,7 @@ import { PoolType } from '../../src/types';
 export const xykPool = {
   address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
   type: PoolType.XYK,
-  swapFee: '0.3',
+  tradeFee: '0.3',
   tokens: [
     {
       id: '1',

@@ -1,22 +1,22 @@
 import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
-import { tradeFee } from '../../utils/math';
+import { pctToBn } from '../../utils/math';
 import math from './xykMath';
 
 export class XykPool implements Pool {
   type: PoolType;
   address: string;
-  swapFee: string;
+  tradeFee: string;
   tokens: PoolToken[];
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(pool.address, pool.swapFee, pool.tokens);
+    return new XykPool(pool.address, pool.tradeFee, pool.tokens);
   }
 
   constructor(address: string, swapFee: string, tokens: PoolToken[]) {
     this.type = PoolType.XYK;
     this.address = address;
-    this.swapFee = swapFee;
+    this.tradeFee = swapFee;
     this.tokens = tokens;
   }
 
@@ -36,7 +36,7 @@ export class XykPool implements Pool {
     const balanceOut = bnum(tokenOutMeta.balance);
 
     return {
-      swapFee: tradeFee(this.swapFee),
+      tradeFee: pctToBn(this.tradeFee),
       tokenIn: tokenIn,
       tokenOut: tokenOut,
       decimalsIn: tokenInMeta.decimals,
