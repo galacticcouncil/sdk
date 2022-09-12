@@ -38,6 +38,7 @@ getPools(): PoolBase[]
 getAllAssets(): PoolAsset[]
 getAssetPairs(token: string): PoolAsset[]
 getAllPaths(tokenIn: string, tokenOut: string): Hop[][]
+getBestSpotPrice(tokenIn: string, tokenOut: string): Amount
 getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Trade
 getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Trade
 ```

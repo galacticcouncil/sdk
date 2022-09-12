@@ -91,3 +91,8 @@ export type Trade = Humanizer & {
 export interface Humanizer {
   toHuman(): any;
 }
+
+export interface Amount {
+  amount: BigNumber;
+  decimals: number;
+}

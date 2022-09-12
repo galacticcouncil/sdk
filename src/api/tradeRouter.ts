@@ -1,9 +1,54 @@
 import { Router } from './router';
-import { Hop, Pool, SellSwap, BuySwap, Trade, Swap, TradeType } from '../types';
+import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculateTradeFee, calculatePriceImpact, formatAmount } from '../utils/math';
 
 export class TradeRouter extends Router {
+  /**
+   * Calculate and return best possible spot price for tokenIn>tokenOut
+   *
+   * @param {string} tokenIn - Storage key of tokenIn
+   * @param {string} tokenOut - Storage key of tokenOut
+   * @return Best possible spot price of given token pair
+   */
+  async getBestSpotPrice(tokenIn: string, tokenOut: string): Promise<Amount> {
+    const pools = await super.getPools();
+    if (pools.length === 0) throw new Error('No pools configured');
+    const { poolsMap } = await super.validateTokenPair(tokenIn, tokenOut, pools);
+    const paths = super.getPaths(tokenIn, tokenOut, poolsMap, pools);
+    const spotPriceList = paths.map((path) => this.getSpotPrice(path, poolsMap));
+    return spotPriceList.sort((a, b) => {
+      const spA = a.amount;
+      const spB = b.amount;
+      return spA.isGreaterThan(spB) ? -1 : 1;
+    })[0];
+  }
+
+  /**
+   * Calculate and return spot price for given path
+   *
+   * @param path - current path
+   * @param poolsMap - pools map
+   * @returns Spot price for given path
+   */
+  private getSpotPrice(path: Hop[], poolsMap: Map<string, Pool>): Amount {
+    const sPrices: Amount[] = [];
+    for (let i = 0; i < path.length; i++) {
+      const hop = path[i];
+      const pool = poolsMap.get(hop.poolId);
+      if (pool == null) throw new Error('Pool does not exit');
+      const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
+      const spotPrice = pool.getSpotPriceOut(poolPair);
+      sPrices.push({ amount: spotPrice, decimals: poolPair.decimalsOut } as Amount);
+    }
+
+    const spotPrice = sPrices
+      .map((a: Amount) => a.amount.shiftedBy(-1 * a.decimals))
+      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
+    const spotPriceDecimals = sPrices[sPrices.length - 1].decimals;
+    return { amount: scale(spotPrice, spotPriceDecimals).decimalPlaces(0, 1), decimals: spotPriceDecimals };
+  }
+
   /**
    * Calculate and return best possible sell trade for tokenIn>tokenOut
    *
