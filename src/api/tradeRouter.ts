@@ -37,8 +37,10 @@ export class TradeRouter extends Router {
       const hop = path[i];
       const pool = poolsMap.get(hop.poolId);
       if (pool == null) throw new Error('Pool does not exit');
+
       const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
       const spotPrice = pool.getSpotPriceOut(poolPair);
+
       sPrices.push({ amount: spotPrice, decimals: poolPair.decimalsOut } as Amount);
     }
 
