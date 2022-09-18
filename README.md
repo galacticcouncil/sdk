@@ -96,7 +96,7 @@ Component list and current status ⬇️
 | Polkadot      | Client |  🧪 |
 | Capi          | Client |  ⏳ |
 | XYK           |  Pool  |  🧪 |
-| LBP           |  Pool  |  ⏳ |
+| LBP           |  Pool  |   🛠 |
 | Stable        |  Pool  |  ⏳ |
 | Omni          |  Pool  |  ⏳ |
 
