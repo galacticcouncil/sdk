@@ -47,7 +47,9 @@ export class Router {
    * @returns {PoolAsset[]} List of all available assets
    */
   async getAllAssets(): Promise<PoolAsset[]> {
-    const asset = await this.getAssets();
+    const pools = await this.getPools();
+    if (pools.length === 0) throw new Error('No pools configured');
+    const asset = await this.getAssets(pools);
     return [...new Map(asset).values()];
   }
 
@@ -83,11 +85,10 @@ export class Router {
   /**
    * Return map of all available assets from substrate based pools
    *
+   * @param pools - pools
    * @returns Map of all available assets
    */
-  protected async getAssets(): Promise<Map<string, PoolAsset>> {
-    const pools = await this.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
+  protected async getAssets(pools: PoolBase[]): Promise<Map<string, PoolAsset>> {
     const assets = pools
       .map((pool: PoolBase) => {
         return pool.tokens.map(({ id, symbol }) => {
@@ -128,7 +129,7 @@ export class Router {
    * @returns Pool assets & map
    */
   protected async validateTokenPair(tokenIn: string, tokenOut: string, pools: PoolBase[]) {
-    const assets = await this.getAssets();
+    const assets = await this.getAssets(pools);
     if (assets.get(tokenIn) == null) throw new Error(tokenIn + ' is not supported token');
     if (assets.get(tokenOut) == null) throw new Error(tokenOut + ' is not supported token');
     const poolsMap = this.getPoolMap(pools);
@@ -142,7 +143,7 @@ export class Router {
    * @returns Pool assets & map
    */
   protected async validateToken(token: string, pools: PoolBase[]) {
-    const assets = await this.getAssets();
+    const assets = await this.getAssets(pools);
     if (assets.get(token) == null) throw new Error(token + ' is not supported token');
     const poolsMap = this.getPoolMap(pools);
     return { assets, poolsMap };

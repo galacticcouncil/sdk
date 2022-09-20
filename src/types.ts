@@ -23,6 +23,10 @@ export type PoolBase = {
   type: PoolType;
   tradeFee: PoolFee;
   tokens: PoolToken[];
+
+  // LBP specific fields
+  repayFee?: PoolFee;
+  repayFeeApply?: boolean;
 };
 
 export type PoolFee = [numerator: number, denominator: number];

@@ -16,16 +16,34 @@ export class LbpPool implements Pool {
   address: string;
   tradeFee: PoolFee;
   tokens: WeightedPoolToken[];
+  repayFee: PoolFee;
+  repayFeeApply: boolean;
 
   static fromPool(pool: PoolBase): LbpPool {
-    return new LbpPool(pool.address, pool.tradeFee, pool.tokens as WeightedPoolToken[]);
+    if (!pool.repayFee) throw new Error('LBP Pool missing repayFee');
+    if (!pool.repayFeeApply) throw new Error('LBP Pool missing repayFeeApply');
+    return new LbpPool(
+      pool.address,
+      pool.tradeFee,
+      pool.tokens as WeightedPoolToken[],
+      pool.repayFee,
+      pool.repayFeeApply
+    );
   }
 
-  constructor(address: string, swapFee: PoolFee, tokens: WeightedPoolToken[]) {
+  constructor(
+    address: string,
+    swapFee: PoolFee,
+    tokens: WeightedPoolToken[],
+    repayFee: PoolFee,
+    repayFeeApply: boolean
+  ) {
     this.type = PoolType.LBP;
     this.address = address;
     this.tradeFee = swapFee;
     this.tokens = tokens;
+    this.repayFee = repayFee;
+    this.repayFeeApply = repayFeeApply;
   }
 
   validPair(_tokenIn: string, _tokenOut: string): boolean {
@@ -100,7 +118,11 @@ export class LbpPool implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber): BigNumber {
-    const fee = math.calculatePoolTradeFee(amount.toString(), this.tradeFee[0], this.tradeFee[1]);
+    const fee = math.calculatePoolTradeFee(
+      amount.toString(),
+      this.repayFeeApply ? this.repayFee[0] : this.tradeFee[0],
+      this.repayFeeApply ? this.repayFee[1] : this.tradeFee[1]
+    );
     return bnum(fee);
   }
 }

@@ -10,7 +10,7 @@ interface LbpPoolData {
   readonly assets: string[];
   readonly feeCollector: string;
   readonly fee: number[];
-  readonly repayTarget: number;
+  readonly repayTarget: string;
   readonly initialWeight: number;
   readonly finalWeight: number;
   readonly start: number;
@@ -29,10 +29,13 @@ export class LbpPolkadotClient extends PolkadotClient {
       const linearWeight = await this.getLinearWeight(poolEntry);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
+      const accumulatedAsset = poolTokens[0].id;
       return {
         address: poolAddress,
         type: PoolType.LBP,
         tradeFee: poolEntry.fee as PoolFee,
+        repayFee: this.getRepayFee(),
+        repayFeeApply: await this.isRepayFeeApplied(accumulatedAsset, poolEntry),
         tokens: [
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
           { ...poolTokens[1], weight: assetBWeight } as WeightedPoolToken,
@@ -51,5 +54,21 @@ export class LbpPolkadotClient extends PolkadotClient {
       poolEntry.finalWeight.toString(),
       currentBlock.toString()
     );
+  }
+
+  getRepayFee(): PoolFee {
+    const repayFee = this.api.consts.lbp.repayFee;
+    return repayFee.toJSON() as PoolFee;
+  }
+
+  async isRepayFeeApplied(assetKey: string, poolEntry: LbpPoolData): Promise<boolean> {
+    const repayTarget = bnum(poolEntry.repayTarget);
+    try {
+      const balance = await this.getAccountBalance(assetKey, poolEntry.feeCollector);
+      const feeCollectorBalance = bnum(balance);
+      return feeCollectorBalance.isLessThan(repayTarget);
+    } catch (err) {
+      return true;
+    }
   }
 }

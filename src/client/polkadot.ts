@@ -31,10 +31,7 @@ export class PolkadotClient {
 
   async getPoolTokens(poolAddress: string, assetKeys: string[]): Promise<PoolToken[]> {
     const poolTokens = assetKeys.map(async (id) => {
-      const balance =
-        id === '0'
-          ? await this.getSystemAccountBalance(poolAddress)
-          : await this.getTokenAccountBalance(poolAddress, id);
+      const balance = await this.getAccountBalance(poolAddress, id);
       const metadata = await this.getAssetMetadata(id);
       const metadataJson = metadata.toHuman();
       return {
@@ -49,6 +46,12 @@ export class PolkadotClient {
 
   async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
     return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
+  }
+
+  async getAccountBalance(accountId: string, tokenKey: string): Promise<string> {
+    return tokenKey === '0'
+      ? await this.getSystemAccountBalance(accountId)
+      : await this.getTokenAccountBalance(accountId, tokenKey);
   }
 
   async getSystemAccountBalance(accountId: string): Promise<string> {
