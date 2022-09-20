@@ -1,9 +1,9 @@
-import { PoolType } from '../../src/types';
+import { PoolFee, PoolType } from '../../src/types';
 
 export const xykPool = {
   address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
   type: PoolType.XYK,
-  tradeFee: '0.3',
+  tradeFee: [3, 1000] as PoolFee,
   tokens: [
     {
       id: '1',

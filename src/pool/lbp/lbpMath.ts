@@ -1,9 +1,9 @@
 import {
   calculate_in_given_out,
   calculate_out_given_in,
-  get_spot_price,
   calculate_linear_weights,
   calculate_pool_trade_fee,
+  get_spot_price,
 } from '@galacticcouncil/math-lbp';
 
 function getSpotPrice(s: string, b: string, s_w: string, b_w: string, a: string): string {

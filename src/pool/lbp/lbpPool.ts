@@ -1,6 +1,5 @@
-import { Pool, PoolBase, PoolPair, PoolToken, PoolType } from '../../types';
+import { Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
-import { pctToBn } from '../../utils/math';
 import math from './lbpMath';
 
 export type WeightedPoolPair = PoolPair & {
@@ -15,14 +14,14 @@ export type WeightedPoolToken = PoolToken & {
 export class LbpPool implements Pool {
   type: PoolType;
   address: string;
-  tradeFee: string;
+  tradeFee: PoolFee;
   tokens: WeightedPoolToken[];
 
   static fromPool(pool: PoolBase): LbpPool {
     return new LbpPool(pool.address, pool.tradeFee, pool.tokens as WeightedPoolToken[]);
   }
 
-  constructor(address: string, swapFee: string, tokens: WeightedPoolToken[]) {
+  constructor(address: string, swapFee: PoolFee, tokens: WeightedPoolToken[]) {
     this.type = PoolType.LBP;
     this.address = address;
     this.tradeFee = swapFee;
@@ -45,7 +44,6 @@ export class LbpPool implements Pool {
     const balanceOut = bnum(tokenOutMeta.balance);
 
     return {
-      tradeFee: pctToBn(this.tradeFee),
       tokenIn: tokenIn,
       tokenOut: tokenOut,
       decimalsIn: tokenInMeta.decimals,
@@ -99,5 +97,10 @@ export class LbpPool implements Pool {
       scale(bnum(1), poolPair.decimalsIn).toString()
     );
     return bnum(price);
+  }
+
+  calculateTradeFee(amount: BigNumber): BigNumber {
+    const fee = math.calculatePoolTradeFee(amount.toString(), this.tradeFee[0], this.tradeFee[1]);
+    return bnum(fee);
   }
 }

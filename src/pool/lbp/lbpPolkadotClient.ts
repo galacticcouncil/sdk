@@ -1,7 +1,7 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import { PolkadotClient } from '../../client';
-import { PoolBase, PoolType } from '../../types';
+import { PoolBase, PoolFee, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
 import { WeightedPoolToken } from './lbpPool';
 import math from './lbpMath';
@@ -32,7 +32,7 @@ export class LbpPolkadotClient extends PolkadotClient {
       return {
         address: poolAddress,
         type: PoolType.LBP,
-        tradeFee: this.getTradeFee(poolEntry.fee),
+        tradeFee: poolEntry.fee as PoolFee,
         tokens: [
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
           { ...poolTokens[1], weight: assetBWeight } as WeightedPoolToken,
@@ -40,11 +40,6 @@ export class LbpPolkadotClient extends PolkadotClient {
       } as PoolBase;
     });
     return Promise.all(pools);
-  }
-
-  getTradeFee([numerator, denominator]: number[]): string {
-    const res = bnum(numerator).div(bnum(denominator));
-    return res.multipliedBy(100).toString();
   }
 
   async getLinearWeight(poolEntry: LbpPoolData): Promise<string> {

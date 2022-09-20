@@ -1,7 +1,7 @@
 import { Router } from './router';
 import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
-import { calculateTradeFee, calculatePriceImpact, formatAmount } from '../utils/math';
+import { calculatePriceImpact, formatAmount } from '../utils/math';
 
 export class TradeRouter extends Router {
   /**
@@ -133,7 +133,7 @@ export class TradeRouter extends Router {
       }
 
       const calculated = pool.calculateOutGivenIn(poolPair, aIn);
-      const fee = calculateTradeFee(calculated, poolPair.tradeFee);
+      const fee = pool.calculateTradeFee(calculated);
       const final = calculated.minus(fee);
       const spotPrice = pool.getSpotPriceOut(poolPair);
       const priceImpact = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculated);
@@ -247,7 +247,7 @@ export class TradeRouter extends Router {
       }
 
       const calculated = pool.calculateInGivenOut(poolPair, aOut);
-      const fee = calculateTradeFee(calculated, poolPair.tradeFee);
+      const fee = pool.calculateTradeFee(calculated);
       const final = calculated.plus(fee);
       const spotPrice = pool.getSpotPriceIn(poolPair);
       const priceImpact = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculated);

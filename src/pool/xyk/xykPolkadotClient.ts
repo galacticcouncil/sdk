@@ -1,8 +1,7 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import { PolkadotClient } from '../../client';
-import { PoolBase, PoolType } from '../../types';
-import { bnum } from '../../utils/bignumber';
+import { PoolBase, PoolType, PoolFee } from '../../types';
 
 export class XykPolkadotClient extends PolkadotClient {
   async getPools(): Promise<PoolBase[]> {
@@ -21,10 +20,8 @@ export class XykPolkadotClient extends PolkadotClient {
     return Promise.all(pools);
   }
 
-  getTradeFee(): string {
+  getTradeFee(): PoolFee {
     const exFee = this.api.consts.xyk.getExchangeFee;
-    const [numerator, denominator] = exFee.toJSON() as number[];
-    const res = bnum(numerator).div(bnum(denominator));
-    return res.multipliedBy(100).toString();
+    return exFee.toJSON() as PoolFee;
   }
 }

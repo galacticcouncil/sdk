@@ -136,7 +136,7 @@ export class Router {
   }
 
   /**
-   * Ckeck if input asset is valid and throw expection if not
+   * Ckeck if input asset is valid and throw exception if not
    *
    * @param token - Storage key of token
    * @returns Pool assets & map
@@ -188,7 +188,6 @@ export class Router {
         poolType: pool?.type,
         tokenIn: from,
         tokenOut: to,
-        tradeFeePct: pool?.tradeFee,
       } as Hop;
     });
   }

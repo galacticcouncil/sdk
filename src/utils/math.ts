@@ -1,12 +1,4 @@
-import { BigNumber, bnum } from './bignumber';
-
-export function pctToBn(pct: string): BigNumber {
-  return bnum(parseFloat(pct) / 100);
-}
-
-export function calculateTradeFee(amount: BigNumber, tradeFee: BigNumber): BigNumber {
-  return amount.multipliedBy(tradeFee).decimalPlaces(0, 1);
-}
+import { BigNumber } from './bignumber';
 
 /**
  * Percentage Difference Formula

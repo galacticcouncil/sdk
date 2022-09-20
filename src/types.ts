@@ -10,7 +10,6 @@ export enum PoolType {
 }
 
 export interface PoolPair {
-  tradeFee: BigNumber;
   tokenIn: string;
   tokenOut: string;
   decimalsIn: number;
@@ -22,9 +21,11 @@ export interface PoolPair {
 export type PoolBase = {
   address: string;
   type: PoolType;
-  tradeFee: string;
+  tradeFee: PoolFee;
   tokens: PoolToken[];
 };
+
+export type PoolFee = [numerator: number, denominator: number];
 
 export type PoolToken = {
   id: string;
@@ -38,6 +39,7 @@ export interface Pool extends PoolBase {
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
+  calculateTradeFee(amount: BigNumber): BigNumber;
   getSpotPriceIn(poolPair: PoolPair): BigNumber;
   getSpotPriceOut(poolPair: PoolPair): BigNumber;
 }
@@ -51,7 +53,6 @@ export type Hop = {
   poolId: string;
   tokenIn: string;
   tokenOut: string;
-  tradeFeePct: string;
 };
 
 export type Swap = Humanizer &

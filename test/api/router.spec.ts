@@ -22,7 +22,6 @@ describe('Router with mocked XYK pool service', () => {
           poolType: PoolType.XYK,
           tokenIn: '1',
           tokenOut: '2',
-          tradeFeePct: '0.3',
         },
       ],
       [
@@ -31,14 +30,12 @@ describe('Router with mocked XYK pool service', () => {
           poolType: PoolType.XYK,
           tokenIn: '1',
           tokenOut: '0',
-          tradeFeePct: '0.3',
         },
         {
           poolId: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
           poolType: PoolType.XYK,
           tokenIn: '0',
           tokenOut: '2',
-          tradeFeePct: '0.3',
         },
       ],
     ]);

@@ -1,10 +1,10 @@
-import { PoolType } from '../../src/types';
+import { PoolFee, PoolType } from '../../src/types';
 
 export const xykPools = [
   {
     address: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
     type: PoolType.XYK,
-    tradeFee: '0.3',
+    tradeFee: [3, 1000] as PoolFee,
     tokens: [
       {
         id: '0',
@@ -23,7 +23,7 @@ export const xykPools = [
   {
     address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
     type: PoolType.XYK,
-    tradeFee: '0.3',
+    tradeFee: [3, 1000] as PoolFee,
     tokens: [
       {
         id: '1',
@@ -42,7 +42,7 @@ export const xykPools = [
   {
     address: 'bXmKSSACEp9rm8NuUAyDHiW2AjcLzZ4pvuRczz2ZJNkWVqFFm',
     type: PoolType.XYK,
-    tradeFee: '0.3',
+    tradeFee: [3, 1000] as PoolFee,
     tokens: [
       {
         id: '2',
@@ -61,7 +61,7 @@ export const xykPools = [
   {
     address: 'bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ',
     type: PoolType.XYK,
-    tradeFee: '0.3',
+    tradeFee: [3, 1000] as PoolFee,
     tokens: [
       {
         id: '0',
