@@ -94,8 +94,9 @@ export class Bfs {
    * @returns - traversal graph
    */
   buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {
+    const lastNodeId = nodes[nodes.length - 1];
     const graph: Path[] = [];
-    for (let j = 0; j < nodes.length; j++) {
+    for (let j = 0; j <= parseInt(lastNodeId); j++) {
       graph.push([]);
     }
 
@@ -104,7 +105,6 @@ export class Bfs {
       const toNumber = parseInt(to);
       graph[fromNumber].push([toNumber, address]);
     }
-
     return graph;
   }
 }
