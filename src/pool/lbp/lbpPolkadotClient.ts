@@ -68,6 +68,7 @@ export class LbpPolkadotClient extends PolkadotClient {
       const feeCollectorBalance = bnum(balance);
       return feeCollectorBalance.isLessThan(repayTarget);
     } catch (err) {
+      // Collector account is empty (No trade has been executed yet)
       return true;
     }
   }

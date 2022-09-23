@@ -1,4 +1,5 @@
-import { BigNumber } from './bignumber';
+import { PoolFee } from '../types';
+import { BigNumber, bnum } from './bignumber';
 
 /**
  * Percentage Difference Formula
@@ -25,4 +26,9 @@ export function calculatePriceImpact(
 
 export function formatAmount(amount: BigNumber, decimals: number): string {
   return amount.shiftedBy(-1 * decimals).toString();
+}
+
+export function formatTradeFee(fee: PoolFee): BigNumber {
+  const tradeFee = (fee[0] / fee[1]) * 100;
+  return bnum(tradeFee);
 }

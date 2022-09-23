@@ -9,6 +9,15 @@ export enum PoolType {
   Omni = 'Omni',
 }
 
+export enum PoolError {
+  TradingLimitReached = 'TradingLimitReached',
+  InsufficientTradingAmount = 'InsufficientTradingAmount',
+  InsufficientBalance = 'InsufficientBalance',
+  MaxInRatioExceeded = 'MaxInRatioExceeded',
+  AssetAmountNotReachedLimit = 'AssetAmountNotReachedLimit',
+  AssetAmountExceededLimit = 'AssetAmountExceededLimit',
+}
+
 export interface PoolPair {
   tokenIn: string;
   tokenOut: string;
@@ -38,14 +47,34 @@ export type PoolToken = {
   symbol: string;
 };
 
+export type PoolSell = {
+  calculatedOut: BigNumber;
+};
+
+export type PoolBuy = {
+  calculatedIn: BigNumber;
+};
+
+export type Transfer = {
+  amountIn: BigNumber;
+  amountOut: BigNumber;
+  fee: BigNumber;
+  errors: PoolError[];
+};
+
+export type SellTransfer = Transfer & PoolSell;
+export type BuyTransfer = Transfer & PoolBuy;
+
 export interface Pool extends PoolBase {
   validPair(tokenIn: string, tokenOut: string): boolean;
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
+  validateBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer;
+  validateSell(poolPair: PoolPair, amountOut: BigNumber): SellTransfer;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
+  spotPriceInGivenOut(poolPair: PoolPair): BigNumber;
+  spotPriceOutGivenIn(poolPair: PoolPair): BigNumber;
   calculateTradeFee(amount: BigNumber): BigNumber;
-  getSpotPriceIn(poolPair: PoolPair): BigNumber;
-  getSpotPriceOut(poolPair: PoolPair): BigNumber;
 }
 
 export interface PoolService {
@@ -65,19 +94,13 @@ export type Swap = Humanizer &
     tokenOutDecimals: number;
     amountIn: BigNumber;
     amountOut: BigNumber;
-    finalAmount: BigNumber;
-    tradeFee: BigNumber;
     spotPrice: BigNumber;
+    tradeFeePct: BigNumber;
     priceImpactPct: BigNumber;
   };
 
-export type SellSwap = Swap & {
-  calculatedOut: BigNumber;
-};
-
-export type BuySwap = Swap & {
-  calculatedIn: BigNumber;
-};
+export type SellSwap = Swap & PoolSell;
+export type BuySwap = Swap & PoolBuy;
 
 export enum TradeType {
   Buy = 'Buy',
@@ -97,7 +120,7 @@ export interface Humanizer {
   toHuman(): any;
 }
 
-export interface Amount {
+export type Amount = {
   amount: BigNumber;
   decimals: number;
-}
+};

@@ -1,5 +1,6 @@
-import { Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType } from '../../types';
-import { BigNumber, bnum, scale } from '../../utils/bignumber';
+import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
+import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
+import { formatTradeFee } from '../../utils/math';
 import math from './xykMath';
 
 export class XykPool implements Pool {
@@ -44,20 +45,32 @@ export class XykPool implements Pool {
     } as PoolPair;
   }
 
+  validateBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer {
+    const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
+    const fee = this.calculateTradeFee(calculatedIn);
+    const amountIn = calculatedIn.plus(fee);
+    const tradeFee = formatTradeFee(this.tradeFee);
+    return { amountIn: amountIn, calculatedIn: calculatedIn, amountOut: amountOut, fee: tradeFee } as BuyTransfer;
+  }
+
+  validateSell(poolPair: PoolPair, amountIn: BigNumber): SellTransfer {
+    const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
+    const fee = this.calculateTradeFee(calculatedOut);
+    const amountOut = calculatedOut.minus(fee);
+    const tradeFee = formatTradeFee(this.tradeFee);
+    return {
+      amountIn: amountIn,
+      calculatedOut: calculatedOut,
+      amountOut: amountOut,
+      fee: tradeFee,
+    } as SellTransfer;
+  }
+
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
     const price = math.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       amountOut.toString()
-    );
-    return bnum(price);
-  }
-
-  getSpotPriceIn(poolPair: PoolPair): BigNumber {
-    const price = math.getSpotPrice(
-      poolPair.balanceOut.toString(),
-      poolPair.balanceIn.toString(),
-      scale(bnum(1), poolPair.decimalsOut).toString()
     );
     return bnum(price);
   }
@@ -71,11 +84,20 @@ export class XykPool implements Pool {
     return bnum(price);
   }
 
-  getSpotPriceOut(poolPair: PoolPair): BigNumber {
+  spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
+    const price = math.getSpotPrice(
+      poolPair.balanceOut.toString(),
+      poolPair.balanceIn.toString(),
+      scale(ONE, poolPair.decimalsOut).toString()
+    );
+    return bnum(price);
+  }
+
+  spotPriceOutGivenIn(poolPair: PoolPair): BigNumber {
     const price = math.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      scale(bnum(1), poolPair.decimalsIn).toString()
+      scale(ONE, poolPair.decimalsIn).toString()
     );
     return bnum(price);
   }

@@ -1,5 +1,6 @@
-import { Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType } from '../../types';
-import { BigNumber, bnum, scale } from '../../utils/bignumber';
+import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
+import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
+import { formatTradeFee } from '../../utils/math';
 import math from './lbpMath';
 
 export type WeightedPoolPair = PoolPair & {
@@ -73,6 +74,56 @@ export class LbpPool implements Pool {
     } as WeightedPoolPair;
   }
 
+  /**
+   * Validate buy transfer
+   *
+   * a) Accumulated asset is bought (out) from the pool for distributed asset (in) - User(Buyer) bears the fee
+   * b) Distributed asset is bought (out) from the pool for accumualted asset (in) - Pool bears the fee
+   */
+  validateBuy(poolPair: WeightedPoolPair, amountOut: BigNumber): BuyTransfer {
+    const feeAsset = this.tokens[0].id;
+    if (feeAsset === poolPair.tokenOut) {
+      const fee = this.calculateTradeFee(amountOut);
+      const amountOutPlusFee = amountOut.plus(fee);
+      const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
+      const tradeFee = formatTradeFee(this.repayFeeApply ? this.repayFee : this.tradeFee);
+      return {
+        amountIn: calculatedIn,
+        calculatedIn: calculatedIn,
+        amountOut: amountOut,
+        fee: tradeFee,
+      } as BuyTransfer;
+    } else {
+      const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
+      return { amountIn: calculatedIn, calculatedIn: calculatedIn, amountOut: amountOut, fee: ZERO } as BuyTransfer;
+    }
+  }
+
+  /**
+   * Validate sell transfer
+   *
+   * a) Accumulated asset is sold (in) to the pool for distributed asset (out) - Pool bears the fee
+   * b) Distributed asset is sold (in) to the pool for accumualted asset (out) - User(Seller) bears the fee
+   */
+  validateSell(poolPair: WeightedPoolPair, amountIn: BigNumber): SellTransfer {
+    const feeAsset = this.tokens[0].id;
+    if (feeAsset === poolPair.tokenIn) {
+      const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
+      return {
+        amountIn: amountIn,
+        calculatedOut: calculatedOut,
+        amountOut: calculatedOut,
+        fee: ZERO,
+      } as SellTransfer;
+    } else {
+      const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
+      const fee = this.calculateTradeFee(calculatedOut);
+      const amountOut = calculatedOut.minus(fee);
+      const tradeFee = formatTradeFee(this.repayFeeApply ? this.repayFee : this.tradeFee);
+      return { amountIn: amountIn, calculatedOut: calculatedOut, amountOut: amountOut, fee: tradeFee } as SellTransfer;
+    }
+  }
+
   calculateInGivenOut(poolPair: WeightedPoolPair, amountOut: BigNumber): BigNumber {
     const price = math.calculateInGivenOut(
       poolPair.balanceOut.toString(),
@@ -80,17 +131,6 @@ export class LbpPool implements Pool {
       poolPair.weightOut.toString(),
       poolPair.weightIn.toString(),
       amountOut.toString()
-    );
-    return bnum(price);
-  }
-
-  getSpotPriceIn(poolPair: WeightedPoolPair): BigNumber {
-    const price = math.calculateInGivenOut(
-      poolPair.balanceOut.toString(),
-      poolPair.balanceIn.toString(),
-      poolPair.weightOut.toString(),
-      poolPair.weightIn.toString(),
-      scale(bnum(1), poolPair.decimalsIn).toString()
     );
     return bnum(price);
   }
@@ -106,13 +146,24 @@ export class LbpPool implements Pool {
     return bnum(price);
   }
 
-  getSpotPriceOut(poolPair: WeightedPoolPair): BigNumber {
+  spotPriceInGivenOut(poolPair: WeightedPoolPair): BigNumber {
+    const price = math.calculateInGivenOut(
+      poolPair.balanceOut.toString(),
+      poolPair.balanceIn.toString(),
+      poolPair.weightOut.toString(),
+      poolPair.weightIn.toString(),
+      scale(ONE, poolPair.decimalsIn).toString()
+    );
+    return bnum(price);
+  }
+
+  spotPriceOutGivenIn(poolPair: WeightedPoolPair): BigNumber {
     const price = math.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
       poolPair.weightOut.toString(),
-      scale(bnum(1), poolPair.decimalsIn).toString()
+      scale(ONE, poolPair.decimalsIn).toString()
     );
     return bnum(price);
   }

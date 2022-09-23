@@ -1,7 +1,7 @@
 import { Router } from './router';
 import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
-import { calculatePriceImpact, formatAmount } from '../utils/math';
+import { calculatePriceImpact, formatAmount, formatTradeFee } from '../utils/math';
 
 export class TradeRouter extends Router {
   /**
@@ -39,7 +39,7 @@ export class TradeRouter extends Router {
       if (pool == null) throw new Error('Pool does not exit');
 
       const poolPair = pool.parsePoolPair(hop.tokenIn, hop.tokenOut);
-      const spotPrice = pool.getSpotPriceOut(poolPair);
+      const spotPrice = pool.spotPriceOutGivenIn(poolPair);
 
       sPrices.push({ amount: spotPrice, decimals: poolPair.decimalsOut } as Amount);
     }
@@ -132,30 +132,28 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn);
       }
 
-      const calculated = pool.calculateOutGivenIn(poolPair, aIn);
-      const fee = pool.calculateTradeFee(calculated);
-      const final = calculated.minus(fee);
-      const spotPrice = pool.getSpotPriceOut(poolPair);
-      const priceImpact = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculated);
+      const { amountOut, calculatedOut, fee } = pool.validateSell(poolPair, aIn);
+      const spotPrice = pool.spotPriceOutGivenIn(poolPair);
+      const priceImpact = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
 
       swaps.push({
         ...hop,
         tokenInDecimals: poolPair.decimalsIn,
         tokenOutDecimals: poolPair.decimalsOut,
         amountIn: aIn,
-        calculatedOut: calculated,
-        amountOut: final,
-        tradeFee: fee,
+        calculatedOut: calculatedOut,
+        amountOut: amountOut,
         spotPrice: spotPrice,
+        tradeFeePct: fee,
         priceImpactPct: priceImpact,
         toHuman() {
           return {
             ...hop,
             amountIn: formatAmount(aIn, poolPair.decimalsIn),
-            calculatedOut: formatAmount(calculated, poolPair.decimalsOut),
-            amountOut: formatAmount(final, poolPair.decimalsOut),
-            tradeFee: formatAmount(fee, poolPair.decimalsOut),
+            calculatedOut: formatAmount(calculatedOut, poolPair.decimalsOut),
+            amountOut: formatAmount(amountOut, poolPair.decimalsOut),
             spotPrice: formatAmount(spotPrice, poolPair.decimalsOut),
+            tradeFeePct: fee.toString(),
             priceImpactPct: priceImpact.toString(),
           };
         },
@@ -246,30 +244,28 @@ export class TradeRouter extends Router {
         aOut = swaps[swaps.length - 1].amountIn;
       }
 
-      const calculated = pool.calculateInGivenOut(poolPair, aOut);
-      const fee = pool.calculateTradeFee(calculated);
-      const final = calculated.plus(fee);
-      const spotPrice = pool.getSpotPriceIn(poolPair);
-      const priceImpact = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculated);
+      const { amountIn, calculatedIn, fee } = pool.validateBuy(poolPair, aOut);
+      const spotPrice = pool.spotPriceInGivenOut(poolPair);
+      const priceImpact = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 
       swaps.push({
         ...hop,
         tokenInDecimals: poolPair.decimalsIn,
         tokenOutDecimals: poolPair.decimalsOut,
         amountOut: aOut,
-        calculatedIn: calculated,
-        amountIn: final,
-        tradeFee: fee,
+        calculatedIn: calculatedIn,
+        amountIn: amountIn,
         spotPrice: spotPrice,
+        tradeFeePct: fee,
         priceImpactPct: priceImpact,
         toHuman() {
           return {
             ...hop,
             amountOut: formatAmount(aOut, poolPair.decimalsOut),
-            calculatedIn: formatAmount(calculated, poolPair.decimalsIn),
-            amountIn: formatAmount(final, poolPair.decimalsIn),
-            tradeFee: formatAmount(fee, poolPair.decimalsIn),
+            calculatedIn: formatAmount(calculatedIn, poolPair.decimalsIn),
+            amountIn: formatAmount(amountIn, poolPair.decimalsIn),
             spotPrice: formatAmount(spotPrice, poolPair.decimalsIn),
+            tradeFeePct: fee.toString(),
             priceImpactPct: priceImpact.toString(),
           };
         },
