@@ -1,6 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 
-export type PoolAsset = { token: string; symbol: string };
+export type PoolAsset = { id: string; symbol: string };
 
 export enum PoolType {
   XYK = 'XYK',
@@ -19,8 +19,8 @@ export enum PoolError {
 }
 
 export interface PoolPair {
-  tokenIn: string;
-  tokenOut: string;
+  assetIn: string;
+  assetOut: string;
   decimalsIn: number;
   decimalsOut: number;
   balanceIn: BigNumber;
@@ -40,11 +40,9 @@ export type PoolBase = {
 
 export type PoolFee = [numerator: number, denominator: number];
 
-export type PoolToken = {
-  id: string;
+export type PoolToken = PoolAsset & {
   balance: string;
   decimals: number;
-  symbol: string;
 };
 
 export type PoolSell = {
@@ -79,19 +77,21 @@ export interface Pool extends PoolBase {
 
 export interface PoolService {
   getPools(): Promise<PoolBase[]>;
+  buy(assetIn: string, assetOut: string, amountOut: BigNumber, maxAmountIn: BigNumber, route: Hop[]): void;
+  sell(assetIn: string, assetOut: string, amountIn: BigNumber, minAmountOut: BigNumber, route: Hop[]): void;
 }
 
 export type Hop = {
   poolType: PoolType;
   poolId: string;
-  tokenIn: string;
-  tokenOut: string;
+  assetIn: string;
+  assetOut: string;
 };
 
-export type Swap = Humanizer &
-  Hop & {
-    tokenInDecimals: number;
-    tokenOutDecimals: number;
+export type Swap = Hop &
+  Humanizer & {
+    assetInDecimals: number;
+    assetOutDecimals: number;
     amountIn: BigNumber;
     amountOut: BigNumber;
     spotPrice: BigNumber;
@@ -107,14 +107,26 @@ export enum TradeType {
   Sell = 'Sell',
 }
 
-export type Trade = Humanizer & {
-  type: TradeType;
-  amountIn: BigNumber;
-  amountOut: BigNumber;
-  spotPrice: BigNumber;
-  priceImpactPct: BigNumber;
-  swaps: Swap[];
-};
+export type Trade = TradeExecutor &
+  Humanizer & {
+    type: TradeType;
+    amountIn: BigNumber;
+    amountOut: BigNumber;
+    spotPrice: BigNumber;
+    priceImpactPct: BigNumber;
+    swaps: Swap[];
+  };
+
+export interface TradeExecutor {
+  /**
+   * Execute trade sell/buy with trade limit.
+   * BUY : The max amount of assetIn to spend on the buy
+   * SELL : The minimum amount of assetOut to receive
+   *
+   * @param tradeLimit represents minimum/maximum of asset user gets based on trade type
+   */
+  execute(tradeLimit: BigNumber): any;
+}
 
 export interface Humanizer {
   toHuman(): any;

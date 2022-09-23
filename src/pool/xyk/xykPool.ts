@@ -36,8 +36,8 @@ export class XykPool implements Pool {
     const balanceOut = bnum(tokenOutMeta.balance);
 
     return {
-      tokenIn: tokenIn,
-      tokenOut: tokenOut,
+      assetIn: tokenIn,
+      assetOut: tokenOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
       balanceIn: balanceIn,

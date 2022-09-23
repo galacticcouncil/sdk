@@ -63,8 +63,8 @@ export class LbpPool implements Pool {
     const balanceOut = bnum(tokenOutMeta.balance);
 
     return {
-      tokenIn: tokenIn,
-      tokenOut: tokenOut,
+      assetIn: tokenIn,
+      assetOut: tokenOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
       weightIn: tokenInMeta.weight,
@@ -82,7 +82,7 @@ export class LbpPool implements Pool {
    */
   validateBuy(poolPair: WeightedPoolPair, amountOut: BigNumber): BuyTransfer {
     const feeAsset = this.tokens[0].id;
-    if (feeAsset === poolPair.tokenOut) {
+    if (feeAsset === poolPair.assetOut) {
       const fee = this.calculateTradeFee(amountOut);
       const amountOutPlusFee = amountOut.plus(fee);
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
@@ -107,7 +107,7 @@ export class LbpPool implements Pool {
    */
   validateSell(poolPair: WeightedPoolPair, amountIn: BigNumber): SellTransfer {
     const feeAsset = this.tokens[0].id;
-    if (feeAsset === poolPair.tokenIn) {
+    if (feeAsset === poolPair.assetIn) {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       return {
         amountIn: amountIn,

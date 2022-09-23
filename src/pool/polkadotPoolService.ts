@@ -1,8 +1,9 @@
-import { PoolBase, PoolService } from '../types';
+import { Hop, PoolBase, PoolService } from '../types';
 import { XykPolkadotClient } from './xyk/xykPolkadotClient';
 import { LbpPolkadotClient } from './lbp/lbpPolkadotClient';
 
 import { ApiPromise } from '@polkadot/api';
+import { BigNumber } from '../utils/bignumber';
 
 export class PolkadotPoolService implements PoolService {
   private readonly api: ApiPromise;
@@ -18,5 +19,20 @@ export class PolkadotPoolService implements PoolService {
     pools.push(xykPools);
     pools.push(lbpPools);
     return pools.flat();
+  }
+
+  sell(assetIn: string, assetOut: string, amountIn: BigNumber, minAmountOut: BigNumber, route: Hop[]) {
+    console.log('Sell executed!');
+    console.log(route);
+    const tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), route);
+    console.log(tx);
+    console.log(tx.toHex());
+  }
+
+  buy(assetIn: string, assetOut: string, amountOut: BigNumber, maxAmountIn: BigNumber, route: Hop[]) {
+    console.log('Buy executed!');
+    const tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), route);
+    console.log(tx);
+    console.log(tx.toHex());
   }
 }

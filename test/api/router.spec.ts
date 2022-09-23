@@ -20,22 +20,22 @@ describe('Router with mocked XYK pool service', () => {
         {
           poolId: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
           poolType: PoolType.XYK,
-          tokenIn: '1',
-          tokenOut: '2',
+          assetIn: '1',
+          assetOut: '2',
         },
       ],
       [
         {
           poolId: 'bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ',
           poolType: PoolType.XYK,
-          tokenIn: '1',
-          tokenOut: '0',
+          assetIn: '1',
+          assetOut: '0',
         },
         {
           poolId: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
           poolType: PoolType.XYK,
-          tokenIn: '0',
-          tokenOut: '2',
+          assetIn: '0',
+          assetOut: '2',
         },
       ],
     ]);
@@ -46,9 +46,9 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAllAssets();
     expect(result).toStrictEqual([
-      { token: '0', symbol: 'BSX' },
-      { token: '2', symbol: 'AUSD' },
-      { token: '1', symbol: 'KSM' },
+      { id: '0', symbol: 'BSX' },
+      { id: '2', symbol: 'AUSD' },
+      { id: '1', symbol: 'KSM' },
     ]);
   });
 
@@ -57,8 +57,8 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAssetPairs('1');
     expect(result).toStrictEqual([
-      { token: '2', symbol: 'AUSD' },
-      { token: '0', symbol: 'BSX' },
+      { id: '2', symbol: 'AUSD' },
+      { id: '0', symbol: 'BSX' },
     ]);
   });
 
