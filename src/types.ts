@@ -56,7 +56,7 @@ export type PoolBuy = {
 export type Transfer = {
   amountIn: BigNumber;
   amountOut: BigNumber;
-  fee: BigNumber;
+  feePct: number;
   errors: PoolError[];
 };
 
@@ -113,8 +113,8 @@ export type Swap = Hop &
     amountIn: BigNumber;
     amountOut: BigNumber;
     spotPrice: BigNumber;
-    tradeFeePct: BigNumber;
-    priceImpactPct: BigNumber;
+    tradeFeePct: number;
+    priceImpactPct: number;
   };
 
 export type SellSwap = Swap & PoolSell;
@@ -130,7 +130,7 @@ export interface Trade extends Humanizer {
   amountIn: BigNumber;
   amountOut: BigNumber;
   spotPrice: BigNumber;
-  priceImpactPct: BigNumber;
+  priceImpactPct: number;
   swaps: Swap[];
   toTx(tradeLimit: BigNumber): Transaction;
 }

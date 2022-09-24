@@ -1,34 +1,24 @@
-import { PoolFee } from '../types';
-import { BigNumber, bnum } from './bignumber';
+import { BigNumber } from './bignumber';
 
 /**
  * Percentage Difference Formula
  *
  * (|𝑉1−𝑉2| / [(𝑉1+𝑉2)/2]) × 100
  *
- * @param amount - Amount of token in/out
- * @param decimals - Decimals of given token
+ * @param amount - Amount of asset in/out
+ * @param decimals - Decimals of given asset
  * @param spotPrice - Spot price
- * @param calculatedPrice - Calculated price
+ * @param calculatedAmount - Calculated amount of asset out/in
  * @returns Price impact percentage
  */
 export function calculatePriceImpact(
   amount: BigNumber,
   decimals: number,
   spotPrice: BigNumber,
-  calculatedPrice: BigNumber
+  calculatedAmount: BigNumber
 ): BigNumber {
   const v1 = amount.shiftedBy(-1 * decimals).multipliedBy(spotPrice);
-  const v2 = calculatedPrice;
+  const v2 = calculatedAmount;
   const impact = v1.minus(v2).abs().div(v1.plus(v2).div(2)).multipliedBy(100);
   return impact.decimalPlaces(2);
-}
-
-export function formatAmount(amount: BigNumber, decimals: number): string {
-  return amount.shiftedBy(-1 * decimals).toString();
-}
-
-export function formatTradeFee(fee: PoolFee): BigNumber {
-  const tradeFee = (fee[0] / fee[1]) * 100;
-  return bnum(tradeFee);
 }

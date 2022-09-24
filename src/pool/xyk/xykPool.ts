@@ -1,6 +1,6 @@
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
 import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
-import { formatTradeFee } from '../../utils/math';
+import { toPct } from '../../utils/mapper';
 import math from './xykMath';
 
 export class XykPool implements Pool {
@@ -49,20 +49,20 @@ export class XykPool implements Pool {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const fee = this.calculateTradeFee(calculatedIn);
     const amountIn = calculatedIn.plus(fee);
-    const tradeFee = formatTradeFee(this.tradeFee);
-    return { amountIn: amountIn, calculatedIn: calculatedIn, amountOut: amountOut, fee: tradeFee } as BuyTransfer;
+    const feePct = toPct(this.tradeFee);
+    return { amountIn: amountIn, calculatedIn: calculatedIn, amountOut: amountOut, feePct: feePct } as BuyTransfer;
   }
 
   validateSell(poolPair: PoolPair, amountIn: BigNumber): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const fee = this.calculateTradeFee(calculatedOut);
     const amountOut = calculatedOut.minus(fee);
-    const tradeFee = formatTradeFee(this.tradeFee);
+    const feePct = toPct(this.tradeFee);
     return {
       amountIn: amountIn,
       calculatedOut: calculatedOut,
       amountOut: amountOut,
-      fee: tradeFee,
+      feePct: feePct,
     } as SellTransfer;
   }
 

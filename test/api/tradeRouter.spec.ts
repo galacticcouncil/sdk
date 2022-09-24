@@ -39,13 +39,13 @@ describe('TradeRouter with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const buy = await router.getBestBuy('0', '2', 1);
     const buyHuman = buy.toHuman();
-    const firstRoute = buyHuman.swaps[0];
-    const lastRoute = buyHuman.swaps[buy.swaps.length - 1];
+    const firstRoute = buyHuman.swaps[buy.swaps.length - 1];
+    const lastRoute = buyHuman.swaps[0];
     expect(buyHuman.amountOut).toEqual(firstRoute.amountOut);
     expect(buyHuman.amountIn).toEqual(lastRoute.amountIn);
 
     buyHuman.swaps.reduce((a: BuySwap, b: BuySwap) => {
-      expect(a.amountIn).toEqual(b.amountOut);
+      expect(a.amountOut).toEqual(b.amountIn);
     });
   });
 });

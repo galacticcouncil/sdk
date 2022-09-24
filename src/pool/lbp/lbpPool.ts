@@ -1,6 +1,6 @@
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
-import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { formatTradeFee } from '../../utils/math';
+import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
+import { toPct } from '../../utils/mapper';
 import math from './lbpMath';
 
 export type WeightedPoolPair = PoolPair & {
@@ -86,16 +86,16 @@ export class LbpPool implements Pool {
       const fee = this.calculateTradeFee(amountOut);
       const amountOutPlusFee = amountOut.plus(fee);
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
-      const tradeFee = formatTradeFee(this.repayFeeApply ? this.repayFee : this.tradeFee);
+      const feePct = toPct(this.repayFeeApply ? this.repayFee : this.tradeFee);
       return {
         amountIn: calculatedIn,
         calculatedIn: calculatedIn,
         amountOut: amountOut,
-        fee: tradeFee,
+        feePct: feePct,
       } as BuyTransfer;
     } else {
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
-      return { amountIn: calculatedIn, calculatedIn: calculatedIn, amountOut: amountOut, fee: ZERO } as BuyTransfer;
+      return { amountIn: calculatedIn, calculatedIn: calculatedIn, amountOut: amountOut, feePct: 0 } as BuyTransfer;
     }
   }
 
@@ -113,14 +113,19 @@ export class LbpPool implements Pool {
         amountIn: amountIn,
         calculatedOut: calculatedOut,
         amountOut: calculatedOut,
-        fee: ZERO,
+        feePct: 0,
       } as SellTransfer;
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut);
       const amountOut = calculatedOut.minus(fee);
-      const tradeFee = formatTradeFee(this.repayFeeApply ? this.repayFee : this.tradeFee);
-      return { amountIn: amountIn, calculatedOut: calculatedOut, amountOut: amountOut, fee: tradeFee } as SellTransfer;
+      const feePct = toPct(this.repayFeeApply ? this.repayFee : this.tradeFee);
+      return {
+        amountIn: amountIn,
+        calculatedOut: calculatedOut,
+        amountOut: amountOut,
+        feePct: feePct,
+      } as SellTransfer;
     }
   }
 
