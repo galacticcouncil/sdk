@@ -189,8 +189,8 @@ export class TradeRouter extends Router {
     const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
 
     const bestRoute = swaps.sort((a, b) => {
-      const swapAFinal = a[a.length - 1].amountIn;
-      const swapBFinal = b[b.length - 1].amountIn;
+      const swapAFinal = a[0].amountIn;
+      const swapBFinal = b[0].amountIn;
       return swapAFinal.isGreaterThan(swapBFinal) ? 1 : -1;
     })[0];
 
@@ -203,17 +203,17 @@ export class TradeRouter extends Router {
 
     const bestRouteSpotPrice = scale(spotPrice, firstRoute.assetInDecimals).decimalPlaces(0, 1);
     const bestRoutePriceImpact = calculatePriceImpact(
-      firstRoute.amountOut,
-      firstRoute.assetOutDecimals,
+      lastRoute.amountOut,
+      lastRoute.assetOutDecimals,
       bestRouteSpotPrice,
-      lastRoute.calculatedIn
+      firstRoute.calculatedIn
     );
 
     const buyTx = (maxAmountIn: BigNumber): Transaction => {
       return this.poolService.buildBuyTx(
         assetIn,
         assetOut,
-        firstRoute.amountOut,
+        lastRoute.amountOut,
         maxAmountIn,
         bestRoute.map((hop: Hop) => hop)
       );
@@ -221,8 +221,8 @@ export class TradeRouter extends Router {
 
     return {
       type: TradeType.Buy,
-      amountOut: firstRoute.amountOut,
-      amountIn: lastRoute.amountIn,
+      amountOut: lastRoute.amountOut,
+      amountIn: firstRoute.amountIn,
       spotPrice: bestRouteSpotPrice,
       priceImpactPct: bestRoutePriceImpact,
       swaps: bestRoute,
@@ -230,8 +230,8 @@ export class TradeRouter extends Router {
       toHuman() {
         return {
           type: TradeType.Buy,
-          amountOut: formatAmount(firstRoute.amountOut, lastRoute.assetOutDecimals),
-          amountIn: formatAmount(lastRoute.amountIn, firstRoute.assetInDecimals),
+          amountOut: formatAmount(lastRoute.amountOut, lastRoute.assetOutDecimals),
+          amountIn: formatAmount(firstRoute.amountIn, firstRoute.assetInDecimals),
           spotPrice: formatAmount(bestRouteSpotPrice, firstRoute.assetInDecimals),
           priceImpactPct: bestRoutePriceImpact.toString(),
           swaps: bestRoute.map((s: BuySwap) => s.toHuman()),
@@ -263,14 +263,14 @@ export class TradeRouter extends Router {
       if (i == path.length - 1) {
         aOut = scale(bnum(amountOut), poolPair.decimalsOut);
       } else {
-        aOut = swaps[swaps.length - 1].amountIn;
+        aOut = swaps[0].amountIn;
       }
 
       const { amountIn, calculatedIn, fee } = pool.validateBuy(poolPair, aOut);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
       const priceImpact = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 
-      swaps.push({
+      swaps.unshift({
         ...hop,
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
