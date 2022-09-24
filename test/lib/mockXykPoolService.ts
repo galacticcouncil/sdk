@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { AssetPair, PoolBase, PoolService, Trade } from '../../src/types';
+import { Hop, PoolBase, PoolService, Transaction } from '../../src/types';
 import { xykPools } from '../data/xykPools';
 
 export class MockXykPoolService implements PoolService {
@@ -7,11 +7,23 @@ export class MockXykPoolService implements PoolService {
     return Promise.resolve(xykPools);
   }
 
-  buy(assetIn: string, assetOut: string, amountOut: BigNumber, maxAmountIn: BigNumber, route: AssetPair[]): void {
+  buildBuyTx(
+    _assetIn: string,
+    _assetOut: string,
+    _amountOut: BigNumber,
+    _maxAmountIn: BigNumber,
+    _route: Hop[]
+  ): Transaction {
     throw new Error('Method not implemented.');
   }
 
-  sell(assetIn: string, assetOut: string, amountIn: BigNumber, minAmountOut: BigNumber, route: AssetPair[]): void {
+  buildSellTx(
+    _assetIn: string,
+    _assetOut: string,
+    _amountIn: BigNumber,
+    _minAmountOut: BigNumber,
+    _route: Hop[]
+  ): Transaction {
     throw new Error('Method not implemented.');
   }
 }

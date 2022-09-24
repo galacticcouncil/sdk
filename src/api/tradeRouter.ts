@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount } from '../types';
+import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculatePriceImpact, formatAmount } from '../utils/math';
 
@@ -87,8 +87,8 @@ export class TradeRouter extends Router {
       lastRoute.calculatedOut
     );
 
-    const executeSell = (minAmountOut: BigNumber) => {
-      this.poolService.sell(
+    const sellTx = (minAmountOut: BigNumber): Transaction => {
+      return this.poolService.buildSellTx(
         assetIn,
         assetOut,
         firstRoute.amountIn,
@@ -104,7 +104,7 @@ export class TradeRouter extends Router {
       spotPrice: bestRouteSpotPrice,
       priceImpactPct: bestRoutePriceImpact,
       swaps: bestRoute,
-      execute: executeSell,
+      toTx: sellTx,
       toHuman() {
         return {
           type: TradeType.Sell,
@@ -209,8 +209,8 @@ export class TradeRouter extends Router {
       lastRoute.calculatedIn
     );
 
-    const executeBuy = (maxAmountIn: BigNumber) => {
-      this.poolService.buy(
+    const buyTx = (maxAmountIn: BigNumber): Transaction => {
+      return this.poolService.buildBuyTx(
         assetIn,
         assetOut,
         firstRoute.amountOut,
@@ -226,7 +226,7 @@ export class TradeRouter extends Router {
       spotPrice: bestRouteSpotPrice,
       priceImpactPct: bestRoutePriceImpact,
       swaps: bestRoute,
-      execute: executeBuy,
+      toTx: buyTx,
       toHuman() {
         return {
           type: TradeType.Buy,

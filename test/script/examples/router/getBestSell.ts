@@ -1,13 +1,17 @@
 import { ApiPromise } from '@polkadot/api';
 import { ApiUrl, PolkadotExecutor } from '../../executor';
-import { PolkadotPoolService } from '../../../../src/pool';
+import { PolkadotApiPoolService } from '../../../../src/pool';
 import { TradeRouter } from '../../../../src/api';
+import { ZERO } from '../../../../src/utils/bignumber';
 
 class GetBestSellPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const poolService = new PolkadotPoolService(api);
+    const poolService = new PolkadotApiPoolService(api);
     const router = new TradeRouter(poolService);
-    return router.getBestSell('1', '2', 1);
+    const bestSell = await router.getBestSell('1', '2', 1);
+    const transaction = bestSell.toTx(ZERO);
+    console.log('Transaction hash: ' + transaction.hex);
+    return bestSell;
   }
 }
 

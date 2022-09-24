@@ -77,8 +77,26 @@ export interface Pool extends PoolBase {
 
 export interface PoolService {
   getPools(): Promise<PoolBase[]>;
-  buy(assetIn: string, assetOut: string, amountOut: BigNumber, maxAmountIn: BigNumber, route: Hop[]): void;
-  sell(assetIn: string, assetOut: string, amountIn: BigNumber, minAmountOut: BigNumber, route: Hop[]): void;
+  buildBuyTx(
+    assetIn: string,
+    assetOut: string,
+    amountOut: BigNumber,
+    maxAmountIn: BigNumber,
+    route: Hop[]
+  ): Transaction;
+  buildSellTx(
+    assetIn: string,
+    assetOut: string,
+    amountIn: BigNumber,
+    minAmountOut: BigNumber,
+    route: Hop[]
+  ): Transaction;
+}
+
+export interface Transaction {
+  hex: string;
+  name?: string;
+  get<T>(): T;
 }
 
 export type Hop = {
@@ -107,25 +125,14 @@ export enum TradeType {
   Sell = 'Sell',
 }
 
-export type Trade = TradeExecutor &
-  Humanizer & {
-    type: TradeType;
-    amountIn: BigNumber;
-    amountOut: BigNumber;
-    spotPrice: BigNumber;
-    priceImpactPct: BigNumber;
-    swaps: Swap[];
-  };
-
-export interface TradeExecutor {
-  /**
-   * Execute trade sell/buy with trade limit.
-   * BUY : The max amount of assetIn to spend on the buy
-   * SELL : The minimum amount of assetOut to receive
-   *
-   * @param tradeLimit represents minimum/maximum of asset user gets based on trade type
-   */
-  execute(tradeLimit: BigNumber): any;
+export interface Trade extends Humanizer {
+  type: TradeType;
+  amountIn: BigNumber;
+  amountOut: BigNumber;
+  spotPrice: BigNumber;
+  priceImpactPct: BigNumber;
+  swaps: Swap[];
+  toTx(tradeLimit: BigNumber): Transaction;
 }
 
 export interface Humanizer {
