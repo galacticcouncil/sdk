@@ -14,7 +14,7 @@ interface TokensAccountData extends Struct {
   readonly frozen: Balance;
 }
 
-export class PolkadotClient {
+export class PolkadotApiClient {
   protected readonly api: ApiPromise;
 
   constructor(api: ApiPromise) {

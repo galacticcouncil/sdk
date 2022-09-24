@@ -1,6 +1,6 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
-import { PolkadotClient } from '../../client';
+import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolFee, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
 import { WeightedPoolToken } from './lbpPool';
@@ -17,7 +17,7 @@ interface LbpPoolData {
   readonly end: number;
 }
 
-export class LbpPolkadotClient extends PolkadotClient {
+export class LbpPolkadotApiClient extends PolkadotApiClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
 
   async getPools(): Promise<PoolBase[]> {

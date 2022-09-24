@@ -1,9 +1,9 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
-import { PolkadotClient } from '../../client';
+import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolType, PoolFee } from '../../types';
 
-export class XykPolkadotClient extends PolkadotClient {
+export class XykPolkadotApiClient extends PolkadotApiClient {
   async getPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.xyk.poolAssets.entries();
     const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Codec]) => {
