@@ -131,17 +131,17 @@ export class LbpPool implements Pool {
 
   calculateInGivenOut(poolPair: WeightedPoolPair, amountOut: BigNumber): BigNumber {
     const price = math.calculateInGivenOut(
-      poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
-      poolPair.weightOut.toString(),
+      poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
+      poolPair.weightOut.toString(),
       amountOut.toString()
     );
     return bnum(price);
   }
 
   calculateOutGivenIn(poolPair: WeightedPoolPair, amountIn: BigNumber): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = math.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
@@ -152,7 +152,7 @@ export class LbpPool implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: WeightedPoolPair): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = math.getSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
       poolPair.weightOut.toString(),
@@ -163,7 +163,7 @@ export class LbpPool implements Pool {
   }
 
   spotPriceOutGivenIn(poolPair: WeightedPoolPair): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = math.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
