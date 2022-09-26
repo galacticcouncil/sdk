@@ -1,5 +1,6 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
+import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
 import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolFee, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
@@ -27,6 +28,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
       const linearWeight = await this.getLinearWeight(poolEntry);
+      console.log(linearWeight);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
       const accumulatedAsset = poolTokens[0].id;
@@ -46,13 +48,14 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
   }
 
   async getLinearWeight(poolEntry: LbpPoolData): Promise<string> {
-    const currentBlock = await this.api.query.system.number();
+    const validationData = await this.api.query.parachainSystem.validationData();
+    const data = validationData.toJSON() as unknown as PersistedValidationData;
     return math.calculateLinearWeights(
       poolEntry.start.toString(),
       poolEntry.end.toString(),
       poolEntry.initialWeight.toString(),
       poolEntry.finalWeight.toString(),
-      currentBlock.toString()
+      data.relayParentNumber.toString()
     );
   }
 
