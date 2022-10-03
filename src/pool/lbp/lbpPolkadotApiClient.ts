@@ -28,7 +28,6 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
       const linearWeight = await this.getLinearWeight(poolEntry);
-      console.log(linearWeight);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
       const accumulatedAsset = poolTokens[0].id;
