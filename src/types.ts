@@ -76,7 +76,7 @@ export interface Pool extends PoolBase {
 }
 
 export interface PoolService {
-  getPools(): Promise<PoolBase[]>;
+  getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
   buildBuyTx(
     assetIn: string,
     assetOut: string,

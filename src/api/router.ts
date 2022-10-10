@@ -35,10 +35,8 @@ export class Router {
    * @returns {PoolBase[]} List of all substrate based pools
    */
   async getPools(): Promise<PoolBase[]> {
-    const pools = await this.poolService.getPools();
-    const poolTypes = new Set(this.routerOptions.includeOnly);
-    if (poolTypes.size === 0) return pools;
-    return pools.filter((p: PoolBase) => poolTypes.has(p.type));
+    const includeOnly = this.routerOptions.includeOnly;
+    return await this.poolService.getPools(includeOnly);
   }
 
   /**

@@ -44,6 +44,17 @@ export class PolkadotApiClient {
     return Promise.all(poolTokens);
   }
 
+  async syncPoolTokens(poolAddress: string, poolTokens: PoolToken[]): Promise<PoolToken[]> {
+    const syncedPoolTokens = poolTokens.map(async (poolToken: PoolToken) => {
+      const balance = await this.getAccountBalance(poolAddress, poolToken.id);
+      return {
+        ...poolToken,
+        balance: balance,
+      } as PoolToken;
+    });
+    return Promise.all(syncedPoolTokens);
+  }
+
   async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
     return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
   }
