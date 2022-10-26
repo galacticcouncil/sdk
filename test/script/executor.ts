@@ -2,8 +2,10 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 export enum ApiUrl {
   Basilisk = 'wss://rpc.basilisk.cloud',
+  Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
   Basilisk_Dev = 'wss://rpc01.hydration.dev',
   Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
+  Basilisk_Rococo_UK = 'wss://rococo-basilisk-rpc04.hydration.dev',
 }
 
 export abstract class PolkadotExecutor {
