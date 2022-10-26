@@ -157,7 +157,7 @@ export class LbpPool implements Pool {
       poolPair.balanceIn.toString(),
       poolPair.weightOut.toString(),
       poolPair.weightIn.toString(),
-      scale(ONE, poolPair.decimalsIn).toString()
+      scale(ONE, poolPair.decimalsOut).toString()
     );
     return bnum(price);
   }
