@@ -130,6 +130,8 @@ export interface Trade extends Humanizer {
   amountIn: BigNumber;
   amountOut: BigNumber;
   spotPrice: BigNumber;
+  tradeFee: BigNumber;
+  tradeFeePct: number;
   priceImpactPct: number;
   swaps: Swap[];
   toTx(tradeLimit: BigNumber): Transaction;

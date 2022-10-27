@@ -1,7 +1,7 @@
 import { Router } from './router';
 import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
-import { calculatePriceImpact } from '../utils/math';
+import { calculatePriceImpact, calculateSellFee, calculateBuyFee } from '../utils/math';
 import { toHuman } from '../utils/mapper';
 
 export class TradeRouter extends Router {
@@ -88,6 +88,11 @@ export class TradeRouter extends Router {
       lastRoute.calculatedOut
     );
 
+    const delta0Y = this.calculateDelta0Y(firstRoute.amountIn, bestRoute, poolsMap);
+    const deltaY = lastRoute.amountOut;
+    const tradeFeePct = calculateSellFee(delta0Y, deltaY);
+    const tradeFee = delta0Y.minus(deltaY);
+
     const sellTx = (minAmountOut: BigNumber): Transaction => {
       return this.poolService.buildSellTx(
         assetIn,
@@ -103,6 +108,8 @@ export class TradeRouter extends Router {
       amountIn: firstRoute.amountIn,
       amountOut: lastRoute.amountOut,
       spotPrice: bestRouteSpotPrice,
+      tradeFee: tradeFee,
+      tradeFeePct: tradeFeePct.toNumber(),
       priceImpactPct: bestRoutePriceImpactPct.toNumber(),
       swaps: bestRoute,
       toTx: sellTx,
@@ -112,6 +119,8 @@ export class TradeRouter extends Router {
           amountIn: toHuman(firstRoute.amountIn, firstRoute.assetInDecimals),
           amountOut: toHuman(lastRoute.amountOut, lastRoute.assetOutDecimals),
           spotPrice: toHuman(bestRouteSpotPrice, lastRoute.assetOutDecimals),
+          tradeFee: toHuman(tradeFee, lastRoute.assetOutDecimals),
+          tradeFeePct: tradeFeePct.toNumber(),
           priceImpactPct: bestRoutePriceImpactPct.toNumber(),
           swaps: bestRoute.map((s: SellSwap) => s.toHuman()),
         };
@@ -120,12 +129,39 @@ export class TradeRouter extends Router {
   }
 
   /**
+   * Calculate the amount out for best possible trade if fees are zero
+   *
+   * @param amountIn - Amount of assetIn to sell for assetOut
+   * @param bestRoute - Best possible trade route (sell)
+   * @param poolsMap - Pools map
+   * @returns the amount out for best possible trade if fees are zero
+   */
+  private calculateDelta0Y(amountIn: BigNumber, bestRoute: SellSwap[], poolsMap: Map<string, Pool>) {
+    const amounts: BigNumber[] = [];
+    for (let i = 0; i < bestRoute.length; i++) {
+      const swap = bestRoute[i];
+      const pool = poolsMap.get(swap.poolId);
+      if (pool == null) throw new Error('Pool does not exit');
+      const poolPair = pool.parsePoolPair(swap.assetIn, swap.assetOut);
+      let aIn: BigNumber;
+      if (i > 0) {
+        aIn = amounts[i - 1];
+      } else {
+        aIn = amountIn;
+      }
+      const calculatedOut = pool.calculateOutGivenIn(poolPair, aIn);
+      amounts.push(calculatedOut);
+    }
+    return amounts[amounts.length - 1];
+  }
+
+  /**
    * Calculate and return sell swaps for given path
    * - final amount of previous swap is entry to next one
    *
    * @param amountIn - Amount of assetIn to sell for assetOut
-   * @param path - current path
-   * @param poolsMap - pools map
+   * @param path - Current path
+   * @param poolsMap - Pools map
    * @returns Sell swaps for given path with corresponding pool pairs
    */
   private toSellSwaps(amountIn: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): SellSwap[] {
@@ -210,6 +246,11 @@ export class TradeRouter extends Router {
       lastRoute.calculatedIn
     );
 
+    const delta0X = this.calculateDelta0X(firstRoute.amountOut, bestRoute, poolsMap);
+    const deltaX = lastRoute.amountIn;
+    const tradeFeePct = calculateBuyFee(delta0X, deltaX);
+    const tradeFee = deltaX.minus(delta0X);
+
     const buyTx = (maxAmountIn: BigNumber): Transaction => {
       return this.poolService.buildBuyTx(
         assetIn,
@@ -225,6 +266,8 @@ export class TradeRouter extends Router {
       amountOut: firstRoute.amountOut,
       amountIn: lastRoute.amountIn,
       spotPrice: bestRouteSpotPrice,
+      tradeFee: tradeFee,
+      tradeFeePct: tradeFeePct.toNumber(),
       priceImpactPct: bestRoutePriceImpactPct.toNumber(),
       swaps: bestRoute,
       toTx: buyTx,
@@ -234,6 +277,8 @@ export class TradeRouter extends Router {
           amountOut: toHuman(firstRoute.amountOut, firstRoute.assetOutDecimals),
           amountIn: toHuman(lastRoute.amountIn, lastRoute.assetInDecimals),
           spotPrice: toHuman(bestRouteSpotPrice, lastRoute.assetInDecimals),
+          tradeFee: toHuman(tradeFee, lastRoute.assetInDecimals),
+          tradeFeePct: tradeFeePct.toNumber(),
           priceImpactPct: bestRoutePriceImpactPct.toNumber(),
           swaps: bestRoute.map((s: BuySwap) => s.toHuman()),
         };
@@ -242,13 +287,40 @@ export class TradeRouter extends Router {
   }
 
   /**
+   * Calculate the amount in for best possible trade if fees are zero
+   *
+   * @param amountOut - Amount of assetOut to buy for assetIn
+   * @param bestRoute - Best possible trade route (buy)
+   * @param poolsMap - Pools map
+   * @returns the amount in for best possible trade if fees are zero
+   */
+  private calculateDelta0X(amountOut: BigNumber, bestRoute: BuySwap[], poolsMap: Map<string, Pool>) {
+    const amounts: BigNumber[] = [];
+    for (let i = bestRoute.length - 1; i >= 0; i--) {
+      const swap = bestRoute[i];
+      const pool = poolsMap.get(swap.poolId);
+      if (pool == null) throw new Error('Pool does not exit');
+      const poolPair = pool.parsePoolPair(swap.assetIn, swap.assetOut);
+      let aOut: BigNumber;
+      if (i == bestRoute.length - 1) {
+        aOut = amountOut;
+      } else {
+        aOut = amounts[0];
+      }
+      const calculatedIn = pool.calculateInGivenOut(poolPair, aOut);
+      amounts.unshift(calculatedIn);
+    }
+    return amounts[0];
+  }
+
+  /**
    * Calculate and return buy swaps for given path
    * - final amount of previous swap is entry to next one
    * - calculation is done backwards (swaps in reversed order)
    *
    * @param amountOut - Amount of assetOut to buy for assetIn
-   * @param path - current path
-   * @param poolsMap - pools map
+   * @param path - Current path
+   * @param poolsMap - Pools map
    * @returns Buy swaps for given path
    */
   private toBuySwaps(amountOut: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): BuySwap[] {

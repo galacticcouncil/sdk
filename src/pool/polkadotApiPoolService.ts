@@ -18,8 +18,6 @@ export class PolkadotApiPoolService implements PoolService {
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
-    console.log(includeOnly);
-
     if (includeOnly.length == 0) {
       const pools = await Promise.all([this.xykClient.getPools(), this.lbpClient.getPools()]);
       return pools.flat();
