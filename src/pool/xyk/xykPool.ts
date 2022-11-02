@@ -1,4 +1,14 @@
-import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
+import {
+  BuyTransfer,
+  Pool,
+  PoolBase,
+  PoolError,
+  PoolFee,
+  PoolPair,
+  PoolToken,
+  PoolType,
+  SellTransfer,
+} from '../../types';
 import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 import math from './xykMath';
@@ -8,16 +18,36 @@ export class XykPool implements Pool {
   address: string;
   tradeFee: PoolFee;
   tokens: PoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(pool.address, pool.tradeFee, pool.tokens);
+    return new XykPool(
+      pool.address,
+      pool.tradeFee,
+      pool.tokens,
+      pool.maxInRatio,
+      pool.maxOutRatio,
+      pool.minTradingLimit
+    );
   }
 
-  constructor(address: string, swapFee: PoolFee, tokens: PoolToken[]) {
+  constructor(
+    address: string,
+    swapFee: PoolFee,
+    tokens: PoolToken[],
+    maxInRation: number,
+    maxOutRatio: number,
+    minTradeLimit: number
+  ) {
     this.type = PoolType.XYK;
     this.address = address;
     this.tradeFee = swapFee;
     this.tokens = tokens;
+    this.maxInRatio = maxInRation;
+    this.maxOutRatio = maxOutRatio;
+    this.minTradingLimit = minTradeLimit;
   }
 
   validPair(_tokenIn: string, _tokenOut: string): boolean {
@@ -50,7 +80,30 @@ export class XykPool implements Pool {
     const fee = this.calculateTradeFee(calculatedIn);
     const amountIn = calculatedIn.plus(fee);
     const feePct = toPct(this.tradeFee);
-    return { amountIn: amountIn, calculatedIn: calculatedIn, amountOut: amountOut, feePct: feePct } as BuyTransfer;
+
+    const errors: PoolError[] = [];
+
+    if (amountOut.isLessThan(this.minTradingLimit)) {
+      errors.push(PoolError.InsufficientTradingAmount);
+    }
+
+    const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
+    if (amountOut.isGreaterThan(poolOutReserve)) {
+      errors.push(PoolError.MaxOutRatioExceeded);
+    }
+
+    const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
+    if (amountIn.isGreaterThan(poolInReserve)) {
+      errors.push(PoolError.MaxInRatioExceeded);
+    }
+
+    return {
+      amountIn: amountIn,
+      calculatedIn: calculatedIn,
+      amountOut: amountOut,
+      feePct: feePct,
+      errors: errors,
+    } as BuyTransfer;
   }
 
   validateSell(poolPair: PoolPair, amountIn: BigNumber): SellTransfer {
@@ -58,11 +111,29 @@ export class XykPool implements Pool {
     const fee = this.calculateTradeFee(calculatedOut);
     const amountOut = calculatedOut.minus(fee);
     const feePct = toPct(this.tradeFee);
+
+    const errors: PoolError[] = [];
+
+    if (amountIn.isLessThan(this.minTradingLimit)) {
+      errors.push(PoolError.InsufficientTradingAmount);
+    }
+
+    const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
+    if (amountIn.isGreaterThan(poolInReserve)) {
+      errors.push(PoolError.MaxInRatioExceeded);
+    }
+
+    const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
+    if (amountOut.isGreaterThan(poolOutReserve)) {
+      errors.push(PoolError.MaxOutRatioExceeded);
+    }
+
     return {
       amountIn: amountIn,
       calculatedOut: calculatedOut,
       amountOut: amountOut,
       feePct: feePct,
+      errors: errors,
     } as SellTransfer;
   }
 

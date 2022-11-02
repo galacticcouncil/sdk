@@ -193,7 +193,7 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn);
       }
 
-      const { amountOut, calculatedOut, feePct } = pool.validateSell(poolPair, aIn);
+      const { amountOut, calculatedOut, feePct, errors } = pool.validateSell(poolPair, aIn);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
       const priceImpactPct = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
 
@@ -207,6 +207,7 @@ export class TradeRouter extends Router {
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         priceImpactPct: priceImpactPct.toNumber(),
+        errors: errors,
         toHuman() {
           return {
             ...hop,
@@ -355,7 +356,7 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const { amountIn, calculatedIn, feePct } = pool.validateBuy(poolPair, aOut);
+      const { amountIn, calculatedIn, feePct, errors } = pool.validateBuy(poolPair, aOut);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
       const priceImpactPct = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 
@@ -369,6 +370,7 @@ export class TradeRouter extends Router {
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         priceImpactPct: priceImpactPct.toNumber(),
+        errors: errors,
         toHuman() {
           return {
             ...hop,

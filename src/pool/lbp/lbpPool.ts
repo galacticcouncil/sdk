@@ -17,6 +17,9 @@ export class LbpPool implements Pool {
   address: string;
   tradeFee: PoolFee;
   tokens: WeightedPoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
   repayFee: PoolFee;
   repayFeeApply: boolean;
 
@@ -27,6 +30,9 @@ export class LbpPool implements Pool {
       pool.address,
       pool.tradeFee,
       pool.tokens as WeightedPoolToken[],
+      pool.maxInRatio,
+      pool.maxOutRatio,
+      pool.minTradingLimit,
       pool.repayFee,
       pool.repayFeeApply
     );
@@ -36,6 +42,9 @@ export class LbpPool implements Pool {
     address: string,
     swapFee: PoolFee,
     tokens: WeightedPoolToken[],
+    maxInRation: number,
+    maxOutRatio: number,
+    minTradeLimit: number,
     repayFee: PoolFee,
     repayFeeApply: boolean
   ) {
@@ -43,6 +52,9 @@ export class LbpPool implements Pool {
     this.address = address;
     this.tradeFee = swapFee;
     this.tokens = tokens;
+    this.maxInRatio = maxInRation;
+    this.maxOutRatio = maxOutRatio;
+    this.minTradingLimit = minTradeLimit;
     this.repayFee = repayFee;
     this.repayFeeApply = repayFeeApply;
   }

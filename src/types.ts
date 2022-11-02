@@ -10,12 +10,9 @@ export enum PoolType {
 }
 
 export enum PoolError {
-  TradingLimitReached = 'TradingLimitReached',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
-  InsufficientBalance = 'InsufficientBalance',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
-  AssetAmountNotReachedLimit = 'AssetAmountNotReachedLimit',
-  AssetAmountExceededLimit = 'AssetAmountExceededLimit',
+  MaxOutRatioExceeded = 'MaxOutRatioExceeded',
 }
 
 export interface PoolPair {
@@ -32,7 +29,9 @@ export type PoolBase = {
   type: PoolType;
   tradeFee: PoolFee;
   tokens: PoolToken[];
-
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
   // LBP specific fields
   repayFee?: PoolFee;
   repayFeeApply?: boolean;
@@ -115,6 +114,7 @@ export type Swap = Hop &
     spotPrice: BigNumber;
     tradeFeePct: number;
     priceImpactPct: number;
+    errors: PoolError[];
   };
 
 export type SellSwap = Swap & PoolSell;

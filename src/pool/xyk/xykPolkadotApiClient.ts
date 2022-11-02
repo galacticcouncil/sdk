@@ -23,11 +23,17 @@ export class XykPolkadotApiClient extends PolkadotApiClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntries = this.getStorageEntryArray(asset);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
+      const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
+      const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
+      const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
       return {
         address: poolAddress,
         type: PoolType.XYK,
         tradeFee: this.getTradeFee(),
         tokens: poolTokens,
+        maxInRatio: maxInRatio,
+        maxOutRatio: maxOutRatio,
+        minTradingLimit: minTradingLimit,
       } as PoolBase;
     });
     return Promise.all(pools);

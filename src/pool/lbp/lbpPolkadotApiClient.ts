@@ -41,6 +41,9 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
       this.poolsData.set(poolAddress, poolEntry);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
+      const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
+      const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
+      const minTradingLimit = this.api.consts.lbp.minTradingLimit.toJSON() as number;
       const linearWeight = await this.getLinearWeight(poolEntry);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
@@ -55,6 +58,9 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
           { ...poolTokens[1], weight: assetBWeight } as WeightedPoolToken,
         ],
+        maxInRatio: maxInRatio,
+        maxOutRatio: maxOutRatio,
+        minTradingLimit: minTradingLimit,
       } as PoolBase;
     });
     return Promise.all(pools);
