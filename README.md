@@ -92,7 +92,7 @@ Component list and current status ⬇️
 | Name          |  Type  |     |
 | ------------- | :----: | --: |
 | TradeRouter   |  API   |  🧪 |
-| TradeExecutor |  API   |   🛠 |
+| TradeExecutor |  API   |  🧪 |
 | Polkadot      | Client |  🧪 |
 | Capi          | Client |  ⏳ |
 | XYK           |  Pool  |  🧪 |
