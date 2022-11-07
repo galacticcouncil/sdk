@@ -77,11 +77,16 @@ export class TradeRouter extends Router {
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
     const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
 
-    const bestRoute = swaps.sort((a, b) => {
+    const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[a.length - 1].amountOut;
       const swapBFinal = b[b.length - 1].amountOut;
       return swapAFinal.isGreaterThan(swapBFinal) ? -1 : 1;
-    })[0];
+    });
+
+    // Find best sell swap without errors, if there is none return first one found
+    const bestRoute =
+      sortedResults.find((route: SellSwap[]) => route.every((swap: SellSwap) => swap.errors.length == 0)) ||
+      sortedResults[0];
 
     const firstRoute = bestRoute[0];
     const lastRoute = bestRoute[bestRoute.length - 1];
@@ -217,6 +222,7 @@ export class TradeRouter extends Router {
             spotPrice: toHuman(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             priceImpactPct: priceImpactPct.toNumber(),
+            errors: errors,
           };
         },
       } as SellSwap);
@@ -239,11 +245,16 @@ export class TradeRouter extends Router {
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
     const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
 
-    const bestRoute = swaps.sort((a, b) => {
+    const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[0].amountIn;
       const swapBFinal = b[0].amountIn;
       return swapAFinal.isGreaterThan(swapBFinal) ? 1 : -1;
-    })[0];
+    });
+
+    // Find best buy swap without errors, if there is none return first one found
+    const bestRoute =
+      sortedResults.find((route: BuySwap[]) => route.every((swap: BuySwap) => swap.errors.length == 0)) ||
+      sortedResults[0];
 
     const firstRoute = bestRoute[bestRoute.length - 1];
     const lastRoute = bestRoute[0];
@@ -380,6 +391,7 @@ export class TradeRouter extends Router {
             spotPrice: toHuman(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             priceImpactPct: priceImpactPct.toNumber(),
+            errors: errors,
           };
         },
       } as BuySwap);
