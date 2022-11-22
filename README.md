@@ -102,4 +102,4 @@ Component list and current status ⬇️
 
 ## Issue reporting
 
-In case of unexpected sdk behaviour, please create well-written issue [here](https://https://github.com/nohaapav/router-sdk/issues/new). It makes it easier to find & fix the problem accordingly.
+In case of unexpected sdk behaviour, please create well-written issue [here](https://https://github.com/galacticcouncil/sdk/issues/new). It makes it easier to find & fix the problem accordingly.
