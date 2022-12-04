@@ -25,7 +25,6 @@ export class RouteSuggester {
     const nodeEdges = getNodesAndEdges(pools);
     const poolAssets = Object.keys(nodeEdges);
     const possiblePairs: Edge[] = poolAssets.map((node) => nodeEdges[node]).flat();
-
     const bfs = new Bfs();
     const bfsGraph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);
     const possiblePaths = bfs.findPaths(bfsGraph, parseInt(tokenIn), tokenOut ? parseInt(tokenOut) : null);

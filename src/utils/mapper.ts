@@ -8,3 +8,7 @@ export function toHuman(amount: BigNumber, decimals: number): string {
 export function toPct(fee: PoolFee): number {
   return (fee[0] / fee[1]) * 100;
 }
+
+export function toPermill(fee: PoolFee): number {
+  return fee[0] / fee[1];
+}

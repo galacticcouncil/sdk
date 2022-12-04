@@ -39,7 +39,6 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
     const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Codec]) => {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
-      this.poolsData.set(poolAddress, poolEntry);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
       const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
       const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
@@ -48,6 +47,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
       const accumulatedAsset = poolTokens[0].id;
+      this.poolsData.set(poolAddress, poolEntry);
       return {
         address: poolAddress,
         type: PoolType.LBP,
