@@ -14,6 +14,15 @@ interface TokensAccountData extends Struct {
   readonly frozen: Balance;
 }
 
+interface AssetDetail extends Struct {
+  readonly name: string;
+  readonly assetType: string;
+  readonly existentialDeposit: Balance;
+  readonly locked: boolean;
+}
+
+const DEFAULT_DECIMALS = 12;
+
 export class PolkadotApiClient {
   protected readonly api: ApiPromise;
 
@@ -34,6 +43,19 @@ export class PolkadotApiClient {
       const balance = await this.getAccountBalance(poolAddress, id);
       const metadata = await this.getAssetMetadata(id);
       const metadataJson = metadata.toHuman();
+
+      // Fallback if missing assetMetadata entry
+      if (metadataJson == null) {
+        const detail = await this.getAssetDetail(id);
+        const detailJson = detail.toHuman();
+        return {
+          id: id.toString(),
+          balance: balance,
+          decimals: DEFAULT_DECIMALS,
+          symbol: detailJson.name,
+        } as PoolToken;
+      }
+
       return {
         id: id.toString(),
         balance: balance,
@@ -57,6 +79,10 @@ export class PolkadotApiClient {
 
   async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
     return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
+  }
+
+  async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
+    return await this.api.query.assetRegistry.assets<AssetDetail>(tokenKey);
   }
 
   async getAccountBalance(accountId: string, tokenKey: string): Promise<string> {
