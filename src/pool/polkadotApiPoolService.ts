@@ -49,6 +49,10 @@ export class PolkadotApiPoolService implements PoolService {
     return pools.flat();
   }
 
+  isOmnipoolTx(route: Hop[]) {
+    return route.length == 1 && route[0].poolType == PoolType.Omni;
+  }
+
   buildBuyTx(
     assetIn: string,
     assetOut: string,
@@ -58,9 +62,9 @@ export class PolkadotApiPoolService implements PoolService {
   ): Transaction {
     let tx: SubmittableExtrinsic;
 
-    // Currently we have no support in router for OmniPool buy
-    if (route.length == 1 && route[0].poolType == PoolType.Omni) {
-      tx = this.api.tx.omnipool.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed());
+    // Currently we have no support in router for OmniPool buy tx
+    if (this.isOmnipoolTx(route)) {
+      tx = this.api.tx.omnipool.buy(assetOut, assetIn, amountOut.toFixed(), maxAmountIn.toFixed());
     } else {
       tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), route);
     }
@@ -80,9 +84,9 @@ export class PolkadotApiPoolService implements PoolService {
   ): Transaction {
     let tx: SubmittableExtrinsic;
 
-    // Currently we have no support in router for OmniPool sell
-    if (route.length == 1 && route[0].poolType == PoolType.Omni) {
-      tx = this.api.tx.omnipool.buy(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
+    // Currently we have no support in router for OmniPool sell tx
+    if (this.isOmnipoolTx(route)) {
+      tx = this.api.tx.omnipool.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
     } else {
       tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), route);
     }
