@@ -5,6 +5,9 @@ export const stablePools = [
     address: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
     type: PoolType.Stable,
     tradeFee: [3, 1000] as PoolFee,
+    maxInRatio: 3000,
+    maxOutRatio: 3000,
+    minTradingLimit: 1000,
     tokens: [
       {
         id: '0',
@@ -36,6 +39,9 @@ export const stablePools = [
     address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
     type: PoolType.Stable,
     tradeFee: [3, 1000] as PoolFee,
+    maxInRatio: 3000,
+    maxOutRatio: 3000,
+    minTradingLimit: 1000,
     tokens: [
       {
         id: '2',
