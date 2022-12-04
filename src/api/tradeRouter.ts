@@ -167,7 +167,7 @@ export class TradeRouter extends Router {
       } else {
         aIn = amountIn;
       }
-      const calculatedOut = pool.calculateOutGivenIn(poolPair, aIn);
+      const calculatedOut = pool.calculateOutGivenIn(poolPair, aIn, false);
       amounts.push(calculatedOut);
     }
     return amounts[amounts.length - 1];
@@ -335,7 +335,7 @@ export class TradeRouter extends Router {
       } else {
         aOut = amounts[0];
       }
-      const calculatedIn = pool.calculateInGivenOut(poolPair, aOut);
+      const calculatedIn = pool.calculateInGivenOut(poolPair, aOut, false);
       amounts.unshift(calculatedIn);
     }
     return amounts[0];

@@ -35,6 +35,9 @@ export type PoolBase = {
   // LBP specific fields
   repayFee?: PoolFee;
   repayFeeApply?: boolean;
+  // Omnipool specific fields
+  assetFee?: PoolFee;
+  protocolFee?: PoolFee;
 };
 
 export type PoolFee = [numerator: number, denominator: number];
@@ -67,8 +70,8 @@ export interface Pool extends PoolBase {
   parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
   validateBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer;
   validateSell(poolPair: PoolPair, amountOut: BigNumber): SellTransfer;
-  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
-  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
+  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber;
+  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber;
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber;
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber;
   calculateTradeFee(amount: BigNumber): BigNumber;
