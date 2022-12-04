@@ -15,16 +15,16 @@ const MAX_SIZE_OF_PATH = 4;
  */
 export class Bfs {
   /**
-   * Check if current node is already present in path
+   * Check if current node is present in path or traversal within the same pool was already done
    *
    * @param x - current node
    * @param path - path
    * @returns true if node in path, otherwise false
    */
-  isNotVisited(x: number, path: Path): boolean {
+  isNotVisited(x: Node, path: Path): boolean {
     let notVisited: boolean = true;
     path.forEach((pv) => {
-      if (pv[0] === x) {
+      if (pv[0] === x[0] || pv[1] === x[1]) {
         notVisited = false;
       }
     });
@@ -76,7 +76,7 @@ export class Bfs {
       // Traverse to all nodes connected to current one and push path to queue
       const lastNode = g[last[0]];
       lastNode.forEach((segment) => {
-        if (this.isNotVisited(segment[0], path)) {
+        if (this.isNotVisited(segment, path)) {
           const newpath = [...path];
           newpath.push(segment);
           queue.enqueue(newpath);
