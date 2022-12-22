@@ -3,7 +3,6 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 ![Coverage](./badges/coverage-jest%20coverage.svg)
-[![CodeFactor](https://www.codefactor.io/repository/github/galacticcouncil/sdk/badge)](https://www.codefactor.io/repository/github/galacticcouncil/sdk)
 
 </p>
 Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chains integration.
@@ -27,9 +26,13 @@ Install with [npm](https://www.npmjs.com/):
 
 ## Components
 
+## Router
+
+Off-chain routing, build to find the all possible trading routes across the the pools. Building block for TradeRouter.
+
 ### TradeRouter
 
-Off-chain optimization of orders across pools for best price execution. Router does not perform any on-chain transations.
+Off-chain optimization of orders across pools for best price execution. TradeRouter does not perform any on-chain transations.
 
 #### API
 
@@ -56,20 +59,14 @@ import { TradeRouter, PolkadotApiPoolService } from '@galacticcouncil/sdk';
 const wsProvider = new WsProvider('wss://rpc.basilisk.cloud');
 const api = await ApiPromise.create({ provider: wsProvider });
 
-// Initialize Router
+// Initialize Trade Router
 const poolService = new PolkadotApiPoolService(api);
-const tradeRouter = new TradeRouter(poolService);
+const tradeRouter = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
 
 // Do something
 const result = await tradeRouter.getAllAssets();
 console.log(result);
 ```
-
-### TradeExecutor
-
-On-chain transaction executor using data from router to perform best possible trade.
-
-Not supported yet. 🛠
 
 ## Examples
 
@@ -89,16 +86,16 @@ Component list and current status ⬇️
 - 🛠 Work in progress
 - ⏳ Planning to build
 
-| Name          |  Type  |     |
-| ------------- | :----: | --: |
-| TradeRouter   |  API   |  🧪 |
-| TradeExecutor |  API   |  🧪 |
-| Polkadot      | Client |  🧪 |
-| Capi          | Client |  ⏳ |
-| XYK           |  Pool  |  🧪 |
-| Omni          |  Pool  |  🧪 |
-| LBP           |  Pool  |   🛠 |
-| Stable        |  Pool  |  ⏳ |
+| Name        |  Type  |     |
+| ----------- | :----: | --: |
+| Router      |  API   |  🧪 |
+| TradeRouter |  API   |  🧪 |
+| Polkadot    | Client |  🧪 |
+| Capi        | Client |  ⏳ |
+| XYK         |  Pool  |  🧪 |
+| Omni        |  Pool  |  🧪 |
+| LBP         |  Pool  |   🛠 |
+| Stable      |  Pool  |  ⏳ |
 
 ## Issue reporting
 
