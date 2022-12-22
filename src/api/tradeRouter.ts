@@ -195,7 +195,7 @@ export class TradeRouter extends Router {
       if (i > 0) {
         aIn = swaps[i - 1].amountOut;
       } else {
-        aIn = scale(bnum(amountIn), poolPair.decimalsIn);
+        aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
       }
 
       const { amountOut, calculatedOut, feePct, errors } = pool.validateSell(poolPair, aIn);
@@ -362,7 +362,7 @@ export class TradeRouter extends Router {
 
       let aOut: BigNumber;
       if (i == path.length - 1) {
-        aOut = scale(bnum(amountOut), poolPair.decimalsOut);
+        aOut = scale(bnum(amountOut), poolPair.decimalsOut).decimalPlaces(0, 1);
       } else {
         aOut = swaps[0].amountIn;
       }
