@@ -6,12 +6,26 @@ import type { AssetMetadata } from '@polkadot/types/interfaces';
 import type { Balance } from '@polkadot/types/interfaces/runtime';
 import type { Struct } from '@polkadot/types-codec';
 import type { PoolToken } from '../types';
-import '@polkadot/api-augment';
 
 interface TokensAccountData extends Struct {
   readonly free: Balance;
   readonly reserved: Balance;
   readonly frozen: Balance;
+}
+
+interface AccountInfo extends Struct {
+  readonly nonce: number;
+  readonly consumers: number;
+  readonly providers: number;
+  readonly sufficients: number;
+  readonly data: AccountData;
+}
+
+interface AccountData extends Struct {
+  readonly free: Balance;
+  readonly reserved: Balance;
+  readonly miscFrozen: Balance;
+  readonly feeFrozen: Balance;
 }
 
 interface AssetDetail extends Struct {
@@ -94,7 +108,7 @@ export class PolkadotApiClient {
   async getSystemAccountBalance(accountId: string): Promise<string> {
     const {
       data: { free },
-    } = await this.api.query.system.account(accountId);
+    } = await this.api.query.system.account<AccountInfo>(accountId);
     return free.toString();
   }
 
