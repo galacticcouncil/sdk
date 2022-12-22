@@ -1,5 +1,4 @@
-<h1><code>Galactic SDK</code></h1>
-<p>
+# Galactic SDK
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 ![Coverage](./badges/coverage-jest%20coverage.svg)
