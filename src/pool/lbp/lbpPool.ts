@@ -1,5 +1,5 @@
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
-import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
+import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 import math from './lbpMath';
 
@@ -147,9 +147,10 @@ export class LbpPool implements Pool {
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
       poolPair.weightOut.toString(),
-      amountOut.toString()
+      amountOut.toFixed(0)
     );
-    return bnum(price);
+    const priceBN = bnum(price);
+    return priceBN.isNegative() ? ZERO : priceBN;
   }
 
   calculateOutGivenIn(poolPair: WeightedPoolPair, amountIn: BigNumber): BigNumber {
@@ -158,9 +159,10 @@ export class LbpPool implements Pool {
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
       poolPair.weightOut.toString(),
-      amountIn.toString()
+      amountIn.toFixed(0)
     );
-    return bnum(price);
+    const priceBN = bnum(price);
+    return priceBN.isNegative() ? ZERO : priceBN;
   }
 
   spotPriceInGivenOut(poolPair: WeightedPoolPair): BigNumber {

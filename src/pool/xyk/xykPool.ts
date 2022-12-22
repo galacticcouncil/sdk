@@ -9,7 +9,7 @@ import {
   PoolType,
   SellTransfer,
 } from '../../types';
-import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
+import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 import math from './xykMath';
 
@@ -141,18 +141,20 @@ export class XykPool implements Pool {
     const price = math.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      amountOut.toString()
+      amountOut.toFixed(0)
     );
-    return bnum(price);
+    const priceBN = bnum(price);
+    return priceBN.isNegative() ? ZERO : priceBN;
   }
 
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
     const price = math.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      amountIn.toString()
+      amountIn.toFixed(0)
     );
-    return bnum(price);
+    const priceBN = bnum(price);
+    return priceBN.isNegative() ? ZERO : priceBN;
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
