@@ -12,8 +12,8 @@ Table of content:
 
 - [Installation](#installation)
 - [Components](#components)
+  - [Router](#router)
   - [TradeRouter](#traderouter)
-  - [TradeExecutor](#tradeexecutor)
 - [Examples](#examples)
 - [Roadmap](#roadmap)
 - [Issue reporting](#issue-reporting)
