@@ -4,7 +4,7 @@ export const DECIMAL_PLACES = 12;
 
 BigNumber.config({
   EXPONENTIAL_AT: [-100, 100],
-  ROUNDING_MODE: 1,
+  ROUNDING_MODE: 4,
   DECIMAL_PLACES: DECIMAL_PLACES,
 });
 
