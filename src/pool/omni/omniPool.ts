@@ -13,6 +13,8 @@ import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { toPermill } from '../../utils/mapper';
 import math from './omniMath';
 
+const RUNTIME_DECIMALS = 18;
+
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: BigNumber;
   hubReservesOut: BigNumber;
@@ -204,15 +206,9 @@ export class OmniPool implements Pool {
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString()
     );
-
-    if (poolPair.decimalsIn > poolPair.decimalsOut) {
-      const shiftBy = poolPair.decimalsIn - poolPair.decimalsOut;
-      return bnum(price)
-        .shiftedBy(-1 * shiftBy)
-        .decimalPlaces(0, 1);
-    } else {
-      return bnum(price);
-    }
+    return bnum(price)
+      .shiftedBy(-1 * (RUNTIME_DECIMALS - poolPair.decimalsOut))
+      .decimalPlaces(0, 1);
   }
 
   spotPriceOutGivenIn(poolPair: OmniPoolPair): BigNumber {
@@ -222,15 +218,9 @@ export class OmniPool implements Pool {
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString()
     );
-
-    if (poolPair.decimalsOut > poolPair.decimalsIn) {
-      const shiftBy = poolPair.decimalsOut - poolPair.decimalsIn;
-      return bnum(price)
-        .shiftedBy(-1 * shiftBy)
-        .decimalPlaces(0, 1);
-    } else {
-      return bnum(price);
-    }
+    return bnum(price)
+      .shiftedBy(-1 * (RUNTIME_DECIMALS - poolPair.decimalsIn))
+      .decimalPlaces(0, 1);
   }
 
   calculateTradeFee(amount: BigNumber): BigNumber {
