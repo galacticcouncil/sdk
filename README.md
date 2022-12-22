@@ -28,7 +28,7 @@ Install with [npm](https://www.npmjs.com/):
 
 ## Router
 
-Off-chain routing, build to find the all possible trading routes across the the pools. Building block for TradeRouter.
+Off-chain routing, build to find the most suitable routes across the the pools. Building block for TradeRouter.
 
 ### TradeRouter
 
