@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.0.1-beta.20",
+  "version": "0.0.1",
   "private": false,
   "description": "Galactic SDK",
   "author": "Pavol Noha <palo@hydradx.io>",
@@ -26,10 +26,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@galacticcouncil/math-lbp": "^0.0.3",
-    "@galacticcouncil/math-omnipool": "^0.0.3",
-    "@galacticcouncil/math-xyk": "^0.0.3",
-    "@polkadot/api": "^9.0.1",
+    "@galacticcouncil/math-lbp": "^0.0.4",
+    "@galacticcouncil/math-omnipool": "^0.0.4",
+    "@galacticcouncil/math-xyk": "^0.0.4",
+    "@polkadot/api": "^9.9.1",
     "bignumber.js": "^9.1.0",
     "capi": "^0.1.0-beta.12",
     "lodash.clonedeep": "^4.5.0"
