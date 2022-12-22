@@ -2,7 +2,17 @@ import {
   calculate_in_given_out,
   calculate_out_given_in,
   calculate_pool_trade_fee,
+  calculate_spot_price,
 } from '@galacticcouncil/math-omnipool';
+
+export function calculateSpotPrice(
+  assetInBalance: string,
+  assetInHubReserve: string,
+  assetOutBalance: string,
+  assetOutHubReserve: string
+): string {
+  return calculate_spot_price(assetInBalance, assetInHubReserve, assetOutBalance, assetOutHubReserve);
+}
 
 export function calculateInGivenOut(
   assetInBalance: string,
@@ -57,6 +67,7 @@ export function calculatePoolTradeFee(a: string, fee_numerator: number, fee_deno
 }
 
 export default {
+  calculateSpotPrice,
   calculateInGivenOut,
   calculateOutGivenIn,
   calculatePoolTradeFee,
