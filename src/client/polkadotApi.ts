@@ -6,6 +6,7 @@ import type { AssetMetadata } from '@polkadot/types/interfaces';
 import type { Balance } from '@polkadot/types/interfaces/runtime';
 import type { Struct } from '@polkadot/types-codec';
 import type { PoolToken } from '../types';
+import '@polkadot/api-augment'; // TODO: Get rid of this!!!
 
 interface TokensAccountData extends Struct {
   readonly free: Balance;

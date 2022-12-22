@@ -30,10 +30,6 @@ Install with [npm](https://www.npmjs.com/):
 
 Off-chain routing, build to find the most suitable routes across the the pools. Building block for TradeRouter.
 
-### TradeRouter
-
-Off-chain optimization of orders across pools for best price execution. TradeRouter does not perform any on-chain transations.
-
 #### API
 
 ```typescript
@@ -41,6 +37,15 @@ getPools(): PoolBase[]
 getAllAssets(): PoolAsset[]
 getAssetPairs(token: string): PoolAsset[]
 getAllPaths(tokenIn: string, tokenOut: string): Hop[][]
+```
+
+### TradeRouter
+
+Off-chain optimization of orders across pools for best price execution. TradeRouter does not perform any on-chain transations.
+
+#### API
+
+```typescript
 getBestSpotPrice(tokenIn: string, tokenOut: string): Amount
 getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Trade
 getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Trade
