@@ -29,9 +29,11 @@
     "@galacticcouncil/math-lbp": "^0.0.4",
     "@galacticcouncil/math-omnipool": "^0.0.4",
     "@galacticcouncil/math-xyk": "^0.0.4",
-    "@polkadot/api": "^9.9.1",
     "bignumber.js": "^9.1.0",
-    "capi": "^0.1.0-beta.12",
     "lodash.clonedeep": "^4.5.0"
+  },
+  "peerDependencies": {
+    "@polkadot/api": "^9.9.1",
+    "capi": "^0.1.0-beta.12"
   }
 }

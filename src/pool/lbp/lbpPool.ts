@@ -1,3 +1,4 @@
+import { PoolConfigNotFound } from '../../errors';
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
@@ -24,8 +25,8 @@ export class LbpPool implements Pool {
   repayFeeApply: boolean;
 
   static fromPool(pool: PoolBase): LbpPool {
-    if (!pool.repayFee) throw new Error('LBP Pool missing repayFee');
-    if (!pool.repayFeeApply) throw new Error('LBP Pool missing repayFeeApply');
+    if (!pool.repayFee) throw new PoolConfigNotFound(PoolType.LBP, 'repayFee');
+    if (!pool.repayFeeApply) throw new PoolConfigNotFound(PoolType.LBP, 'repayFeeApply');
     return new LbpPool(
       pool.address,
       pool.tradeFee,

@@ -3,7 +3,7 @@ import type { AnyTuple, Codec } from '@polkadot/types/types';
 import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
 import { PolkadotApiClient } from '../../client';
-import { PoolBase, PoolType, PoolFee, PoolToken } from '../../types';
+import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
 import { OmniPoolToken } from './omniPool';
 import { bnum } from '../../utils/bignumber';
 
@@ -37,11 +37,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
     const poolEntries = poolAssets.map((asset: [StorageKey<AnyTuple>, Codec]) => {
       return this.getStorageKey(asset, 0);
     });
-
     const poolAddress = this.getPoolId();
-    const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
-    const minTradingLimit = this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;
     const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
     const poolTokensState = poolTokens.map((token: PoolToken, index: number) => {
       const assetData = poolAssets[index][1].toJSON() as unknown as OmniAssetData;
@@ -58,9 +54,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
       assetFee: this.getAssetFee(),
       protocolFee: this.getProtocolFee(),
       tokens: poolTokensState,
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
+      ...this.getPoolLimits(),
     } as PoolBase;
   }
 
@@ -101,5 +95,12 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
 
   getPoolId(): string {
     return encodeAddress(stringToU8a('modlomnipool'.padEnd(32, '\0')), HYDRA_ADDRESS_PREFIX);
+  }
+
+  getPoolLimits(): PoolLimits {
+    const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
+    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
+    const minTradingLimit = this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;
+    return { maxInRatio: maxInRatio, maxOutRatio: maxOutRatio, minTradingLimit: minTradingLimit } as PoolLimits;
   }
 }

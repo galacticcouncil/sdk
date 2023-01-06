@@ -1,3 +1,4 @@
+import { PoolConfigNotFound } from '../../errors';
 import {
   BuyTransfer,
   Pool,
@@ -39,8 +40,8 @@ export class OmniPool implements Pool {
   protocolFee: PoolFee;
 
   static fromPool(pool: PoolBase): OmniPool {
-    if (!pool.assetFee) throw new Error('OmniPool missing assetFee');
-    if (!pool.protocolFee) throw new Error('OmniPool missing protocolFee');
+    if (!pool.assetFee) throw new PoolConfigNotFound(PoolType.Omni, 'assetFee');
+    if (!pool.protocolFee) throw new PoolConfigNotFound(PoolType.Omni, 'protocolFee');
     return new OmniPool(
       pool.address,
       pool.tradeFee,

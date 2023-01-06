@@ -40,6 +40,8 @@ export type PoolBase = {
   protocolFee?: PoolFee;
 };
 
+export type PoolLimits = Pick<PoolBase, 'maxInRatio' | 'maxOutRatio' | 'minTradingLimit'>;
+
 export type PoolFee = [numerator: number, denominator: number];
 
 export type PoolToken = PoolAsset & {

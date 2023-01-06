@@ -7,6 +7,7 @@ import type { Balance } from '@polkadot/types/interfaces/runtime';
 import type { Struct } from '@polkadot/types-codec';
 import type { PoolToken } from '../types';
 import '@polkadot/api-augment'; // TODO: Get rid of this!!!
+import BigNumber from 'bignumber.js';
 
 interface TokensAccountData extends Struct {
   readonly free: Balance;
@@ -99,6 +100,27 @@ export class PolkadotApiClient {
   async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
     return await this.api.query.assetRegistry.assets<AssetDetail>(tokenKey);
   }
+
+  calculateFreeBalance(free: BigNumber, miscFrozen: BigNumber, feeFrozen: BigNumber): string {
+    const maxFrozenBalance = miscFrozen.gt(feeFrozen) ? miscFrozen : feeFrozen;
+    return free.minus(maxFrozenBalance).toFixed();
+  }
+
+  /*   async getSystemAccountBalance(address: string): Promise<string> {
+    const res = await this.api.query.system.account(address);
+    const freeBalance = new BigNumber(res.data.free.toHex());
+    const miscFrozenBalance = new BigNumber(res.data.miscFrozen.toHex());
+    const feeFrozenBalance = new BigNumber(res.data.feeFrozen.toHex());
+    return this.calculateFreeBalance(freeBalance, miscFrozenBalance, feeFrozenBalance);
+  }
+
+  async getTokenAccountBalance(address: string, assetId: string): Promise<string> {
+    const res = (await this.api.query.tokens.accounts(address, assetId)) as any;
+    const freeBalance = new BigNumber(res.free.toHex());
+    const reservedBalance = new BigNumber(res.reserved.toHex());
+    const frozenBalance = new BigNumber(res.frozen.toHex());
+    return this.calculateFreeBalance(freeBalance, reservedBalance, frozenBalance);
+  } */
 
   async getAccountBalance(accountId: string, tokenKey: string): Promise<string> {
     return tokenKey === '0'

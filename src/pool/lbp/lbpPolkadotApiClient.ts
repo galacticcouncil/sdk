@@ -2,7 +2,7 @@ import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
 import { PolkadotApiClient } from '../../client';
-import { PoolBase, PoolFee, PoolType } from '../../types';
+import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
 import { WeightedPoolToken } from './lbpPool';
 import math from './lbpMath';
@@ -40,9 +40,6 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
-      const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
-      const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
-      const minTradingLimit = this.api.consts.lbp.minTradingLimit.toJSON() as number;
       const linearWeight = await this.getLinearWeight(poolEntry);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
@@ -58,9 +55,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
           { ...poolTokens[1], weight: assetBWeight } as WeightedPoolToken,
         ],
-        maxInRatio: maxInRatio,
-        maxOutRatio: maxOutRatio,
-        minTradingLimit: minTradingLimit,
+        ...this.getPoolLimits(),
       } as PoolBase;
     });
     return Promise.all(pools);
@@ -98,11 +93,6 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
     );
   }
 
-  getRepayFee(): PoolFee {
-    const repayFee = this.api.consts.lbp.repayFee;
-    return repayFee.toJSON() as PoolFee;
-  }
-
   async isRepayFeeApplied(assetKey: string, poolEntry: LbpPoolData): Promise<boolean> {
     const repayTarget = bnum(poolEntry.repayTarget);
     try {
@@ -113,5 +103,17 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
       // Collector account is empty (No trade has been executed yet)
       return true;
     }
+  }
+
+  getRepayFee(): PoolFee {
+    const repayFee = this.api.consts.lbp.repayFee;
+    return repayFee.toJSON() as PoolFee;
+  }
+
+  getPoolLimits(): PoolLimits {
+    const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
+    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
+    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
+    return { maxInRatio: maxInRatio, maxOutRatio: maxOutRatio, minTradingLimit: minTradingLimit } as PoolLimits;
   }
 }

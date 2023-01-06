@@ -1,7 +1,7 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import { PolkadotApiClient } from '../../client';
-import { PoolBase, PoolType, PoolFee } from '../../types';
+import { PoolBase, PoolType, PoolFee, PoolLimits } from '../../types';
 
 export class XykPolkadotApiClient extends PolkadotApiClient {
   private pools: PoolBase[] = [];
@@ -23,17 +23,12 @@ export class XykPolkadotApiClient extends PolkadotApiClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntries = this.getStorageEntryArray(asset);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
-      const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
-      const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
-      const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
       return {
         address: poolAddress,
         type: PoolType.XYK,
         tradeFee: this.getTradeFee(),
         tokens: poolTokens,
-        maxInRatio: maxInRatio,
-        maxOutRatio: maxOutRatio,
-        minTradingLimit: minTradingLimit,
+        ...this.getPoolLimits(),
       } as PoolBase;
     });
     return Promise.all(pools);
@@ -52,5 +47,12 @@ export class XykPolkadotApiClient extends PolkadotApiClient {
   getTradeFee(): PoolFee {
     const exFee = this.api.consts.xyk.getExchangeFee;
     return exFee.toJSON() as PoolFee;
+  }
+
+  getPoolLimits(): PoolLimits {
+    const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
+    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
+    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
+    return { maxInRatio: maxInRatio, maxOutRatio: maxOutRatio, minTradingLimit: minTradingLimit } as PoolLimits;
   }
 }
