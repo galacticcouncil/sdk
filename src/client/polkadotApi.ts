@@ -67,7 +67,7 @@ export class PolkadotApiClient {
           id: id.toString(),
           balance: balance,
           decimals: DEFAULT_DECIMALS,
-          symbol: detailJson.name,
+          symbol: detailJson ? detailJson.name : 'HDX', // Temporary fix for missing HDX in asset reg
         } as PoolToken;
       }
 
