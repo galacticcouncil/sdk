@@ -8,6 +8,7 @@ export enum ApiUrl {
   Basilisk_Rococo_UK = 'wss://rococo-basilisk-rpc04.hydration.dev',
   Hydra_Dev = 'wss://hydradx-devnet-rpc.play.hydration.cloud',
   Hydra_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
+  Hydra = 'wss://rpc.hydradx.cloud',
 }
 
 export abstract class PolkadotExecutor {
