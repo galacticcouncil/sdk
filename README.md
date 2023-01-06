@@ -1,5 +1,4 @@
-<h1><code>Galactic SDK</code></h1>
-<p>
+# Galactic SDK
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 ![Coverage](./badges/coverage-jest%20coverage.svg)
@@ -12,8 +11,8 @@ Table of content:
 
 - [Installation](#installation)
 - [Components](#components)
+  - [Router](#router)
   - [TradeRouter](#traderouter)
-  - [TradeExecutor](#tradeexecutor)
 - [Examples](#examples)
 - [Roadmap](#roadmap)
 - [Issue reporting](#issue-reporting)
@@ -28,7 +27,7 @@ Install with [npm](https://www.npmjs.com/):
 
 ### Router
 
-Off-chain routing, build to find the most suitable routes across the the pools. Building block for TradeRouter.
+Off-chain routing, build to find the most suitable routes across the pools. Building block for TradeRouter.
 
 #### API
 
