@@ -6,8 +6,8 @@ import type { AssetMetadata } from '@polkadot/types/interfaces';
 import type { Balance } from '@polkadot/types/interfaces/runtime';
 import type { Struct } from '@polkadot/types-codec';
 import type { PoolToken } from '../types';
-import '@polkadot/api-augment'; // TODO: Get rid of this!!!
-import BigNumber from 'bignumber.js';
+import { SYSTEM_ASSET_ID } from '../consts';
+import '@polkadot/api-augment';
 
 interface TokensAccountData extends Struct {
   readonly free: Balance;
@@ -30,15 +30,6 @@ interface AccountData extends Struct {
   readonly feeFrozen: Balance;
 }
 
-interface AssetDetail extends Struct {
-  readonly name: string;
-  readonly assetType: string;
-  readonly existentialDeposit: Balance;
-  readonly locked: boolean;
-}
-
-const DEFAULT_DECIMALS = 12;
-
 export class PolkadotApiClient {
   protected readonly api: ApiPromise;
 
@@ -60,20 +51,19 @@ export class PolkadotApiClient {
       const metadata = await this.getAssetMetadata(id);
       const metadataJson = metadata.toHuman();
 
-      // Fallback if missing assetMetadata entry
-      if (metadataJson == null) {
-        const detail = await this.getAssetDetail(id);
-        const detailJson = detail.toHuman();
+      if (SYSTEM_ASSET_ID == id) {
+        const defaultDecimals = this.api.registry.chainDecimals[0];
+        const defaultAsset = this.api.registry.chainTokens[0];
         return {
-          id: id.toString(),
+          id: id,
           balance: balance,
-          decimals: DEFAULT_DECIMALS,
-          symbol: detailJson ? detailJson.name : 'HDX', // Temporary fix for missing HDX in asset reg
+          decimals: defaultDecimals,
+          symbol: defaultAsset,
         } as PoolToken;
       }
 
       return {
-        id: id.toString(),
+        id: id,
         balance: balance,
         decimals: metadataJson.decimals,
         symbol: metadataJson.symbol,
@@ -97,33 +87,8 @@ export class PolkadotApiClient {
     return await this.api.query.assetRegistry.assetMetadataMap<AssetMetadata>(tokenKey);
   }
 
-  async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
-    return await this.api.query.assetRegistry.assets<AssetDetail>(tokenKey);
-  }
-
-  calculateFreeBalance(free: BigNumber, miscFrozen: BigNumber, feeFrozen: BigNumber): string {
-    const maxFrozenBalance = miscFrozen.gt(feeFrozen) ? miscFrozen : feeFrozen;
-    return free.minus(maxFrozenBalance).toFixed();
-  }
-
-  /*   async getSystemAccountBalance(address: string): Promise<string> {
-    const res = await this.api.query.system.account(address);
-    const freeBalance = new BigNumber(res.data.free.toHex());
-    const miscFrozenBalance = new BigNumber(res.data.miscFrozen.toHex());
-    const feeFrozenBalance = new BigNumber(res.data.feeFrozen.toHex());
-    return this.calculateFreeBalance(freeBalance, miscFrozenBalance, feeFrozenBalance);
-  }
-
-  async getTokenAccountBalance(address: string, assetId: string): Promise<string> {
-    const res = (await this.api.query.tokens.accounts(address, assetId)) as any;
-    const freeBalance = new BigNumber(res.free.toHex());
-    const reservedBalance = new BigNumber(res.reserved.toHex());
-    const frozenBalance = new BigNumber(res.frozen.toHex());
-    return this.calculateFreeBalance(freeBalance, reservedBalance, frozenBalance);
-  } */
-
   async getAccountBalance(accountId: string, tokenKey: string): Promise<string> {
-    return tokenKey === '0'
+    return tokenKey === SYSTEM_ASSET_ID
       ? await this.getSystemAccountBalance(accountId)
       : await this.getTokenAccountBalance(accountId, tokenKey);
   }
