@@ -13,7 +13,7 @@ import {
 } from '../../types';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { toPermill } from '../../utils/mapper';
-import math from './omniMath';
+import { OmniMath } from './omniMath';
 
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: BigNumber;
@@ -168,7 +168,7 @@ export class OmniPool implements Pool {
   }
 
   calculateInGivenOut(poolPair: OmniPoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = OmniMath.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString(),
       poolPair.sharesIn.toString(),
@@ -184,7 +184,7 @@ export class OmniPool implements Pool {
   }
 
   calculateOutGivenIn(poolPair: OmniPoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber {
-    const price = math.calculateOutGivenIn(
+    const price = OmniMath.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString(),
       poolPair.sharesIn.toString(),
@@ -200,7 +200,7 @@ export class OmniPool implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: OmniPoolPair): BigNumber {
-    const price = math.calculateSpotPrice(
+    const price = OmniMath.calculateSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString(),
       poolPair.balanceIn.toString(),
@@ -212,7 +212,7 @@ export class OmniPool implements Pool {
   }
 
   spotPriceOutGivenIn(poolPair: OmniPoolPair): BigNumber {
-    const price = math.calculateSpotPrice(
+    const price = OmniMath.calculateSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString(),
       poolPair.balanceOut.toString(),

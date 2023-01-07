@@ -5,7 +5,7 @@ import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
 import { WeightedPoolToken } from './lbpPool';
-import math from './lbpMath';
+import { LbpMath } from './lbpMath';
 
 interface LbpPoolData {
   readonly assets: string[];
@@ -84,7 +84,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
   async getLinearWeight(poolEntry: LbpPoolData): Promise<string> {
     const validationData = await this.api.query.parachainSystem.validationData();
     const data = validationData.toJSON() as unknown as PersistedValidationData;
-    return math.calculateLinearWeights(
+    return LbpMath.calculateLinearWeights(
       poolEntry.start.toString(),
       poolEntry.end.toString(),
       poolEntry.initialWeight.toString(),

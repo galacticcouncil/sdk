@@ -11,7 +11,7 @@ import {
 } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
-import math from './xykMath';
+import { XykMath } from './xykMath';
 
 export class XykPool implements Pool {
   type: PoolType;
@@ -138,7 +138,7 @@ export class XykPool implements Pool {
   }
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = XykMath.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       amountOut.toFixed(0)
@@ -148,7 +148,7 @@ export class XykPool implements Pool {
   }
 
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
-    const price = math.calculateOutGivenIn(
+    const price = XykMath.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       amountIn.toFixed(0)
@@ -158,7 +158,7 @@ export class XykPool implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
-    const price = math.getSpotPrice(
+    const price = XykMath.getSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
       scale(ONE, poolPair.decimalsOut).toString()
@@ -167,7 +167,7 @@ export class XykPool implements Pool {
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber {
-    const price = math.getSpotPrice(
+    const price = XykMath.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       scale(ONE, poolPair.decimalsIn).toString()
@@ -176,7 +176,7 @@ export class XykPool implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber): BigNumber {
-    const fee = math.calculatePoolTradeFee(amount.toString(), this.tradeFee[0], this.tradeFee[1]);
+    const fee = XykMath.calculatePoolTradeFee(amount.toString(), this.tradeFee[0], this.tradeFee[1]);
     return bnum(fee);
   }
 }

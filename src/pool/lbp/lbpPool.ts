@@ -2,7 +2,7 @@ import { PoolConfigNotFound } from '../../errors';
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
-import math from './lbpMath';
+import { LbpMath } from './lbpMath';
 
 export type WeightedPoolPair = PoolPair & {
   weightIn: BigNumber;
@@ -143,7 +143,7 @@ export class LbpPool implements Pool {
   }
 
   calculateInGivenOut(poolPair: WeightedPoolPair, amountOut: BigNumber): BigNumber {
-    const price = math.calculateInGivenOut(
+    const price = LbpMath.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
@@ -155,7 +155,7 @@ export class LbpPool implements Pool {
   }
 
   calculateOutGivenIn(poolPair: WeightedPoolPair, amountIn: BigNumber): BigNumber {
-    const price = math.calculateOutGivenIn(
+    const price = LbpMath.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
@@ -167,7 +167,7 @@ export class LbpPool implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: WeightedPoolPair): BigNumber {
-    const price = math.getSpotPrice(
+    const price = LbpMath.getSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString(),
       poolPair.weightOut.toString(),
@@ -178,7 +178,7 @@ export class LbpPool implements Pool {
   }
 
   spotPriceOutGivenIn(poolPair: WeightedPoolPair): BigNumber {
-    const price = math.getSpotPrice(
+    const price = LbpMath.getSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
@@ -189,7 +189,7 @@ export class LbpPool implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber): BigNumber {
-    const fee = math.calculatePoolTradeFee(
+    const fee = LbpMath.calculatePoolTradeFee(
       amount.toString(),
       this.repayFeeApply ? this.repayFee[0] : this.tradeFee[0],
       this.repayFeeApply ? this.repayFee[1] : this.tradeFee[1]
