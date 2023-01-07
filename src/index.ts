@@ -1,5 +1,6 @@
 export { Router, TradeRouter } from './api';
-export { PolkadotApiPoolService, PoolFactory, XykPool } from './pool';
+export * from './pool';
 export * from './types';
 export * from './errors';
+export * from './consts';
 export * from './utils/bignumber';
