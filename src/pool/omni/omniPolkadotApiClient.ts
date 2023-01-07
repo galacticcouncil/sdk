@@ -6,9 +6,7 @@ import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
 import { OmniPoolToken } from './omniPool';
 import { bnum } from '../../utils/bignumber';
-
-const DENOMINATOR = 1000;
-const HYDRA_ADDRESS_PREFIX = 63;
+import { DENOMINATOR, HYDRADX_SS58_PREFIX } from '../../consts';
 
 interface OmniAssetData {
   readonly hubReserve: number;
@@ -94,7 +92,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
   }
 
   getPoolId(): string {
-    return encodeAddress(stringToU8a('modlomnipool'.padEnd(32, '\0')), HYDRA_ADDRESS_PREFIX);
+    return encodeAddress(stringToU8a('modlomnipool'.padEnd(32, '\0')), HYDRADX_SS58_PREFIX);
   }
 
   getPoolLimits(): PoolLimits {

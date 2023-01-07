@@ -1,3 +1,4 @@
+import { RUNTIME_DECIMALS } from '../../consts';
 import { PoolConfigNotFound } from '../../errors';
 import {
   BuyTransfer,
@@ -13,8 +14,6 @@ import {
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { toPermill } from '../../utils/mapper';
 import math from './omniMath';
-
-const RUNTIME_DECIMALS = 18;
 
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: BigNumber;
