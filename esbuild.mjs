@@ -1,6 +1,6 @@
 import esbuild from 'esbuild';
 import { wasmLoader } from 'esbuild-plugin-wasm';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -8,6 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+
+const polkadotDeps = [];
+readdirSync('node_modules/@polkadot').forEach((pckg) => {
+  polkadotDeps.push('@polkadot/' + pckg);
+});
 
 const dist = join(process.cwd(), 'dist');
 if (!existsSync(dist)) {
@@ -25,7 +30,7 @@ esbuild
     format: 'esm',
     platform: 'browser',
     target: ['esnext'],
-    external: Object.keys(packageJson.peerDependencies),
+    external: Object.keys(packageJson.peerDependencies).concat(polkadotDeps),
   })
   .catch(() => process.exit(1));
 
@@ -38,6 +43,6 @@ esbuild
     minify: true,
     platform: 'node',
     target: ['node18'],
-    external: Object.keys(packageJson.peerDependencies),
+    external: Object.keys(packageJson.peerDependencies).concat(polkadotDeps),
   })
   .catch(() => process.exit(1));
