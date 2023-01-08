@@ -96,9 +96,13 @@ Component list and current status ⬇️
 | TradeRouter |  API   |  🧪 |
 | Polkadot    | Client |  🧪 |
 | Capi        | Client |  ⏳ |
+| XYK         |  Math  |  🧪 |
 | XYK         |  Pool  |  🧪 |
+| Omni        |  Math  |  🧪 |
 | Omni        |  Pool  |  🧪 |
-| LBP         |  Pool  |   🛠 |
+| LBP         |  Math  |  🧪 |
+| LBP         |  Pool  |  🛠 |
+| Stable      |  Math  |  ⏳ |
 | Stable      |  Pool  |  ⏳ |
 
 ## Issue reporting
