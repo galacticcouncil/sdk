@@ -3,6 +3,7 @@ import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction, Sw
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculatePriceImpact, calculateSellFee, calculateBuyFee } from '../utils/math';
 import { toHuman } from '../utils/mapper';
+import { RouteNotFound } from '../errors';
 
 export class TradeRouter extends Router {
   /**
@@ -75,8 +76,9 @@ export class TradeRouter extends Router {
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(assetIn, assetOut, pools);
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
+    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
 
+    const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
     const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[a.length - 1].amountOut;
       const swapBFinal = b[b.length - 1].amountOut;
@@ -243,8 +245,9 @@ export class TradeRouter extends Router {
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(assetIn, assetOut, pools);
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
+    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
 
+    const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
     const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[0].amountIn;
       const swapBFinal = b[0].amountIn;
