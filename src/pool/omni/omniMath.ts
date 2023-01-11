@@ -1,8 +1,11 @@
 import {
   calculate_in_given_out,
+  calculate_lrna_in_given_out,
   calculate_out_given_in,
+  calculate_out_given_lrna_in,
   calculate_pool_trade_fee,
   calculate_spot_price,
+  calculate_lrna_spot_price,
   calculate_shares,
   calculate_liquidity_out,
   calculate_liquidity_lrna_out,
@@ -23,6 +26,10 @@ export class OmniMath {
     assetOutHubReserve: string
   ): string {
     return calculate_spot_price(assetInBalance, assetInHubReserve, assetOutBalance, assetOutHubReserve);
+  }
+
+  static calculateLrnaSpotPrice(assetBalance: string, assetHubReserve: string): string {
+    return calculate_lrna_spot_price(assetBalance, assetHubReserve);
   }
 
   static calculateInGivenOut(
@@ -49,6 +56,16 @@ export class OmniMath {
     );
   }
 
+  static calculateLrnaInGivenOut(
+    assetOutBalance: string,
+    assetOutHubReserve: string,
+    assetOutShares: string,
+    amountOut: string,
+    assetFee: string
+  ): string {
+    return calculate_lrna_in_given_out(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
+  }
+
   static calculateOutGivenIn(
     assetInBalance: string,
     assetInHubReserve: string,
@@ -71,6 +88,16 @@ export class OmniMath {
       assetFee,
       protocolFee
     );
+  }
+
+  static calculateOutGivenLrnaIn(
+    assetOutBalance: string,
+    assetOutHubReserve: string,
+    assetOutShares: string,
+    amountOut: string,
+    assetFee: string
+  ): string {
+    return calculate_out_given_lrna_in(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
   }
 
   static calculatePoolTradeFee(amount: string, feeNumerator: number, feeDenominator: number): string {
