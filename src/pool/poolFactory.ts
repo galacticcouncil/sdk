@@ -1,6 +1,6 @@
 import { Pool, PoolBase, PoolType } from '../types';
-import { LbpPool } from './lbp/lbpPool';
-import { OmniPool } from './omni/omniPool';
+import { LbpPool, LbpPoolBase } from './lbp/lbpPool';
+import { OmniPool, OmniPoolBase } from './omni/omniPool';
 import { XykPool } from './xyk/xykPool';
 
 export class PoolFactory {
@@ -9,9 +9,9 @@ export class PoolFactory {
       case PoolType.XYK:
         return XykPool.fromPool(pool);
       case PoolType.Omni:
-        return OmniPool.fromPool(pool);
+        return OmniPool.fromPool(pool as OmniPoolBase);
       case PoolType.LBP:
-        return LbpPool.fromPool(pool);
+        return LbpPool.fromPool(pool as LbpPoolBase);
       default: {
         throw new Error('Pool type ' + pool.type + ' is not supported yet');
       }

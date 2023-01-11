@@ -32,12 +32,6 @@ export type PoolBase = {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  // LBP specific fields
-  repayFee?: PoolFee;
-  repayFeeApply?: boolean;
-  // Omnipool specific fields
-  assetFee?: PoolFee;
-  protocolFee?: PoolFee;
 };
 
 export type PoolLimits = Pick<PoolBase, 'maxInRatio' | 'maxOutRatio' | 'minTradingLimit'>;

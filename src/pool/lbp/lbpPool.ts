@@ -13,6 +13,11 @@ export type WeightedPoolToken = PoolToken & {
   weight: BigNumber;
 };
 
+export type LbpPoolBase = PoolBase & {
+  repayFee: PoolFee;
+  repayFeeApply: boolean;
+};
+
 export class LbpPool implements Pool {
   type: PoolType;
   address: string;
@@ -24,7 +29,7 @@ export class LbpPool implements Pool {
   repayFee: PoolFee;
   repayFeeApply: boolean;
 
-  static fromPool(pool: PoolBase): LbpPool {
+  static fromPool(pool: LbpPoolBase): LbpPool {
     if (!pool.repayFee) throw new PoolConfigNotFound(PoolType.LBP, 'repayFee');
     if (!pool.repayFeeApply) throw new PoolConfigNotFound(PoolType.LBP, 'repayFeeApply');
     return new LbpPool(
