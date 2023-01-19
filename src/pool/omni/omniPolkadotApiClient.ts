@@ -18,11 +18,9 @@ interface OmniAssetData {
 export class OmniPolkadotApiClient extends PolkadotApiClient {
   private pools: PoolBase[] = [];
   private _poolLoaded = false;
-  private hubAssetId: string;
 
   constructor(api: ApiPromise) {
     super(api);
-    this.hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
   }
 
   async getPools(): Promise<PoolBase[]> {
@@ -38,40 +36,46 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
   }
 
   async loadPool(): Promise<PoolBase> {
+    const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolEntries = poolAssets
       .map((asset: [StorageKey<AnyTuple>, Codec]) => {
         return this.getStorageKey(asset, 0);
       })
-      .concat(this.hubAssetId);
+      .concat(hubAssetId);
     const poolAddress = this.getPoolId();
     const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
-    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens);
+    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {
       address: poolAddress,
       type: PoolType.Omni,
       tradeFee: this.getTradeFee(),
       assetFee: this.getAssetFee(),
       protocolFee: this.getProtocolFee(),
-      hubAssetId: this.hubAssetId,
+      hubAssetId: hubAssetId,
       tokens: poolTokensState,
       ...this.getPoolLimits(),
     } as PoolBase;
   }
 
   async syncPool(): Promise<PoolBase> {
+    const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolTokens = await this.syncPoolTokens(this.pools[0].address, this.pools[0].tokens);
-    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens);
+    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {
       ...this.pools[0],
       tokens: poolTokensState,
     } as PoolBase;
   }
 
-  private getPoolTokenState(poolAssets: [StorageKey<AnyTuple>, Codec][], poolTokens: PoolToken[]): PoolToken[] {
+  private getPoolTokenState(
+    poolAssets: [StorageKey<AnyTuple>, Codec][],
+    poolTokens: PoolToken[],
+    hubAssetId: string
+  ): PoolToken[] {
     return poolTokens.map((token: PoolToken, index: number) => {
-      if (this.hubAssetId === token.id) {
+      if (hubAssetId === token.id) {
         return token;
       }
       const assetData = poolAssets[index][1].toJSON() as unknown as OmniAssetData;
