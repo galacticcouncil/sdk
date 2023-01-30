@@ -1,7 +1,7 @@
 import { Pool, PoolBase, PoolType } from '../types';
-import { LbpPool, LbpPoolBase } from './lbp/lbpPool';
-import { OmniPool, OmniPoolBase } from './omni/omniPool';
-import { XykPool } from './xyk/xykPool';
+import { LbpPool, LbpPoolBase } from './lbp/LbpPool';
+import { OmniPool, OmniPoolBase } from './omni/OmniPool';
+import { XykPool } from './xyk/XykPool';
 
 export class PoolFactory {
   static get(pool: PoolBase): Pool {

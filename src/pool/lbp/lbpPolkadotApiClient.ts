@@ -4,8 +4,8 @@ import type { PersistedValidationData } from '@polkadot/types/interfaces/paracha
 import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
-import { WeightedPoolToken } from './lbpPool';
-import { LbpMath } from './lbpMath';
+import { WeightedPoolToken } from './LbpPool';
+import { LbpMath } from './LbpMath';
 
 interface LbpPoolData {
   readonly assets: string[];

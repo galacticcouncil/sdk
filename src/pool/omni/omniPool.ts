@@ -13,7 +13,7 @@ import {
 } from '../../types';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { toPermill } from '../../utils/mapper';
-import { OmniMath } from './omniMath';
+import { OmniMath } from './OmniMath';
 
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: BigNumber;

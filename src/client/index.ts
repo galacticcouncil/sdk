@@ -1,1 +1,1 @@
-export { PolkadotApiClient } from './polkadotApi';
+export { PolkadotApiClient } from './PolkadotApi';

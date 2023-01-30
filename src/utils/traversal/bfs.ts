@@ -1,4 +1,4 @@
-import { Queue } from '../queue';
+import { Queue } from '../Queue';
 
 /**
  * Breadth First Search.

@@ -5,7 +5,7 @@ import { stringToU8a } from '@polkadot/util';
 import { ApiPromise } from '@polkadot/api';
 import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
-import { OmniPoolToken } from './omniPool';
+import { OmniPoolToken } from './OmniPool';
 import { bnum } from '../../utils/bignumber';
 import { DENOMINATOR, HYDRADX_SS58_PREFIX } from '../../consts';
 

@@ -1,8 +1,8 @@
-export { PolkadotApiPoolService } from './polkadotApiPoolService';
-export { PoolFactory } from './poolFactory';
-export { XykPool } from './xyk/xykPool';
-export { XykMath } from './xyk/xykMath';
-export { OmniPool } from './omni/omniPool';
-export { OmniMath } from './omni/omniMath';
-export { LbpPool } from './lbp/lbpPool';
-export { LbpMath } from './lbp/lbpMath';
+export { PolkadotApiPoolService } from './PolkadotApiPoolService';
+export { PoolFactory } from './PoolFactory';
+export { XykPool } from './xyk/XykPool';
+export { XykMath } from './xyk/XykMath';
+export { OmniPool } from './omni/OmniPool';
+export { OmniMath } from './omni/OmniMath';
+export { LbpPool } from './lbp/LbpPool';
+export { LbpMath } from './lbp/LbpMath';

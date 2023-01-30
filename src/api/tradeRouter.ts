@@ -1,4 +1,4 @@
-import { Router } from './router';
+import { Router } from './Router';
 import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction, Swap } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculatePriceImpact, calculateSellFee, calculateBuyFee } from '../utils/math';

@@ -1,7 +1,7 @@
 import { Hop, PoolBase, PoolService, PoolType, Transaction } from '../types';
-import { XykPolkadotApiClient } from './xyk/xykPolkadotApiClient';
-import { LbpPolkadotApiClient } from './lbp/lbpPolkadotApiClient';
-import { OmniPolkadotApiClient } from './omni/omniPolkadotApiClient';
+import { XykPolkadotApiClient } from './xyk/XykPolkadotApiClient';
+import { LbpPolkadotApiClient } from './lbp/LbpPolkadotApiClient';
+import { OmniPolkadotApiClient } from './omni/OmniPolkadotApiClient';
 
 import { BigNumber } from '../utils/bignumber';
 import { ApiPromise } from '@polkadot/api';
