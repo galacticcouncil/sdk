@@ -1,0 +1,2092 @@
+{
+    "0": [
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        }
+    ],
+    "1000": [
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "no1",
+            "symbol": "no1",
+            "decimals": 20,
+            "currencyID": "1"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "Mr. Beast Coin",
+            "symbol": "BEAST",
+            "decimals": 8,
+            "currencyID": "10"
+        },
+        {
+            "asset": {
+                "Token": "100"
+            },
+            "name": "Wrapped Ether",
+            "symbol": "WETH",
+            "decimals": 18,
+            "currencyID": "100"
+        },
+        {
+            "asset": {
+                "Token": "1000"
+            },
+            "name": "BRZ Token",
+            "symbol": "BRZ",
+            "decimals": 6,
+            "currencyID": "1000"
+        },
+        {
+            "asset": {
+                "Token": "101"
+            },
+            "name": "DOTMATIONS",
+            "symbol": "DOTMA",
+            "decimals": 0,
+            "currencyID": "101"
+        },
+        {
+            "asset": {
+                "Token": "123"
+            },
+            "name": "123",
+            "symbol": "123",
+            "decimals": 20,
+            "currencyID": "123"
+        },
+        {
+            "asset": {
+                "Token": "1337"
+            },
+            "name": "USD Coin",
+            "symbol": "USDC",
+            "decimals": 6,
+            "currencyID": "1337"
+        },
+        {
+            "asset": {
+                "Token": "1984"
+            },
+            "name": "Tether USD",
+            "symbol": "USDt",
+            "decimals": 6,
+            "currencyID": "1984",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "BTC",
+            "symbol": "BTC",
+            "decimals": 20,
+            "currencyID": "2"
+        },
+        {
+            "asset": {
+                "Token": "20090103"
+            },
+            "name": "BTC",
+            "symbol": "BTC",
+            "decimals": 20,
+            "currencyID": "20090103"
+        },
+        {
+            "asset": {
+                "Token": "21"
+            },
+            "name": "Wrapped Bitcoin",
+            "symbol": "WBTC",
+            "decimals": 8,
+            "currencyID": "21"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 20,
+            "currencyID": "3"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Efinity Token",
+            "symbol": "EFI",
+            "decimals": 18,
+            "currencyID": "4"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "PLX",
+            "symbol": "PLX",
+            "decimals": 9,
+            "currencyID": "5"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "Cooperative Liquidity Token",
+            "symbol": "LPHP",
+            "decimals": 2,
+            "currencyID": "6"
+        },
+        {
+            "asset": {
+                "Token": "666"
+            },
+            "name": "Danger Coin",
+            "symbol": "DANGER",
+            "decimals": 8,
+            "currencyID": "666"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "lucky7",
+            "symbol": "lucky7",
+            "decimals": 20,
+            "currencyID": "7"
+        },
+        {
+            "asset": {
+                "Token": "77"
+            },
+            "name": "Turquoise",
+            "symbol": "TRQ",
+            "decimals": 18,
+            "currencyID": "77"
+        },
+        {
+            "asset": {
+                "Token": "777"
+            },
+            "name": "777",
+            "symbol": "777",
+            "decimals": 20,
+            "currencyID": "777"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "JOE",
+            "symbol": "JOE",
+            "decimals": 9,
+            "currencyID": "8"
+        },
+        {
+            "asset": {
+                "Token": "862812"
+            },
+            "name": "Virto Bloque",
+            "symbol": "CUBO",
+            "decimals": 9,
+            "currencyID": "862812"
+        },
+        {
+            "asset": {
+                "Token": "868367"
+            },
+            "name": "Virto SwapCash",
+            "symbol": "VSC",
+            "decimals": 9,
+            "currencyID": "868367"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "Polkadot Index",
+            "symbol": "PINT",
+            "decimals": 12,
+            "currencyID": "9"
+        },
+        {
+            "asset": {
+                "Token": "999"
+            },
+            "name": "gold",
+            "symbol": "gold",
+            "decimals": 20,
+            "currencyID": "999"
+        },
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        }
+    ],
+    "2000": [
+        {
+            "asset": {
+                "Erc20": "0x07df96d1341a7d16ba1ad431e2c847d978bc2bce"
+            },
+            "name": "USD Coin (Portal from Ethereum)",
+            "symbol": "USDCet",
+            "decimals": 6,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0207df96d1341a7d16ba1ad431e2c847d978bc2bce\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0x54a37a01cd75b616d63e0ab665bffdb0143c52ae"
+            },
+            "name": "DAI Stablecoin (Portal)",
+            "symbol": "DAI",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0254a37a01cd75b616d63e0ab665bffdb0143c52ae\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0x5a4d6acdc4e3e5ab15717f407afe957f7a242578"
+            },
+            "name": "Wrapped Ether (Portal)",
+            "symbol": "WETH",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x025a4d6acdc4e3e5ab15717f407afe957f7a242578\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0xc80084af223c8b598536178d9361dc55bfda6818"
+            },
+            "name": "Wrapped Bitcoin (Portal)",
+            "symbol": "WBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x02c80084af223c8b598536178d9361dc55bfda6818\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0xf4c723e61709d90f89939c1852f516e373d418a8"
+            },
+            "name": "ApeCoin (Portal)",
+            "symbol": "APE",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x02f4c723e61709d90f89939c1852f516e373d418a8\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "0"
+            },
+            "name": "Moonbeam",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "Parallel",
+            "symbol": "PARA",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"generalKey\":\"0x50415241\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "10"
+            },
+            "name": "Unique Network",
+            "symbol": "UNQ",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2037}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "2"
+            },
+            "name": "Astar Native Token",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "3"
+            },
+            "name": "interBTC",
+            "symbol": "IBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "4"
+            },
+            "name": "Interlay",
+            "symbol": "INTR",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0002\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "5"
+            },
+            "name": "Wrapped Bitcoin",
+            "symbol": "WBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":21}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "6"
+            },
+            "name": "Wrapped Ether",
+            "symbol": "WETH",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":100}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "7"
+            },
+            "name": "Equilibrium",
+            "symbol": "EQ",
+            "decimals": 9,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "8"
+            },
+            "name": "Equilibrium USD",
+            "symbol": "EQD",
+            "decimals": 9,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "9"
+            },
+            "name": "Phala Token",
+            "symbol": "PHA",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2035}]"
+        },
+        {
+            "asset": {
+                "LiquidCrowdloan": "13"
+            },
+            "name": "Liquid Crowdloan DOT",
+            "symbol": "LcDOT",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x040d000000\"}]"
+        },
+        {
+            "asset": {
+                "StableAsset": "0"
+            },
+            "name": "Tapio DOT",
+            "symbol": "tDOT",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token": "ACA"
+            },
+            "name": "Acala",
+            "symbol": "ACA",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "AUSD"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "Polkadot",
+            "symbol": "DOT",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "LDOT"
+            },
+            "name": "Liquid DOT",
+            "symbol": "LDOT",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0003\"}]"
+        },
+        {
+            "asset": {
+                "Token": "TAP"
+            },
+            "name": "Tapio",
+            "symbol": "TAP",
+            "decimals": 12
+        }
+    ],
+    "2002": [
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "PARA",
+            "symbol": "PARA",
+            "decimals": 12,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"generalKey\":\"0x50415241\"}]"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "Astar",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "currencyID": "12",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        },
+        {
+            "asset": {
+                "Token": "CLV"
+            },
+            "name": "CLV",
+            "symbol": "CLV",
+            "decimals": 18
+        }
+    ],
+    "2004": [
+        {
+            "asset": {
+                "Token": "101170542313601871197860408087030232491"
+            },
+            "name": "Interlay",
+            "symbol": "xcINTR",
+            "decimals": 10,
+            "currencyID": "101170542313601871197860408087030232491",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0002\"}]"
+        },
+        {
+            "asset": {
+                "Token": "110021739665376159354538090254163045594"
+            },
+            "name": "Acala Dollar",
+            "symbol": "xcaUSD",
+            "decimals": 12,
+            "currencyID": "110021739665376159354538090254163045594",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "120637696315203257380661607956669368914"
+            },
+            "name": "interBTC",
+            "symbol": "xcIBTC",
+            "decimals": 8,
+            "currencyID": "120637696315203257380661607956669368914",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "125699734534028342599692732320197985871"
+            },
+            "name": "Darwinia Parachain Token",
+            "symbol": "xcRING",
+            "decimals": 18,
+            "currencyID": "125699734534028342599692732320197985871",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2046},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "132685552157663328694213725410064821485"
+            },
+            "name": "Phala Token",
+            "symbol": "xcPHA",
+            "decimals": 12,
+            "currencyID": "132685552157663328694213725410064821485",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2035}]"
+        },
+        {
+            "asset": {
+                "Token": "165823357460190568952172802245839421906"
+            },
+            "name": "BNC",
+            "symbol": "xcBNC",
+            "decimals": 12,
+            "currencyID": "165823357460190568952172802245839421906",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "187224307232923873519830480073807488153"
+            },
+            "name": "Equilibrium Dollar",
+            "symbol": "xcEQD",
+            "decimals": 9,
+            "currencyID": "187224307232923873519830480073807488153",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "Token": "190590555344745888270686124937537713878"
+            },
+            "name": "Equilibrium Token",
+            "symbol": "xcEQ",
+            "decimals": 9,
+            "currencyID": "190590555344745888270686124937537713878",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011}]"
+        },
+        {
+            "asset": {
+                "Token": "224077081838586484055667086558292981199"
+            },
+            "name": "Astar",
+            "symbol": "xcASTR",
+            "decimals": 18,
+            "currencyID": "224077081838586484055667086558292981199",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        },
+        {
+            "asset": {
+                "Token": "224821240862170613278369189818311486111"
+            },
+            "name": "Acala",
+            "symbol": "xcACA",
+            "decimals": 12,
+            "currencyID": "224821240862170613278369189818311486111",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "228256396637196286254896220398224702687"
+            },
+            "name": "Ethereum",
+            "symbol": "xcETH.multi",
+            "decimals": 18,
+            "currencyID": "228256396637196286254896220398224702687",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":108},{\"generalIndex\":\"0xabb8953ac77edece4a6e251a849c7cdf\"}]"
+        },
+        {
+            "asset": {
+                "Token": "270195117769614861929703564202131636628"
+            },
+            "name": "Raresama POOP",
+            "symbol": "POOP",
+            "decimals": 18,
+            "currencyID": "270195117769614861929703564202131636628",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":108},{\"generalIndex\":\"0xcb45afd30a637967995394cc88c0c194\"}]"
+        },
+        {
+            "asset": {
+                "Token": "278750993613512357835566279094880339619"
+            },
+            "name": "Wrapped BTC",
+            "symbol": "xcWBTC.multi",
+            "decimals": 8,
+            "currencyID": "278750993613512357835566279094880339619",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":108},{\"generalIndex\":\"0xd1b57d12738e41eae0124e285e5e86a3\"}]"
+        },
+        {
+            "asset": {
+                "Token": "311091173110107856861649819128533077277"
+            },
+            "name": "Tether USD",
+            "symbol": "xcUSDT",
+            "decimals": 6,
+            "currencyID": "311091173110107856861649819128533077277",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "32615670524745285411807346420584982855"
+            },
+            "name": "PARA",
+            "symbol": "xcPARA",
+            "decimals": 12,
+            "currencyID": "32615670524745285411807346420584982855",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"generalKey\":\"0x50415241\"}]"
+        },
+        {
+            "asset": {
+                "Token": "337110116006454532607322340792629567158"
+            },
+            "name": "USD Coin",
+            "symbol": "xcUSDC.multi",
+            "decimals": 6,
+            "currencyID": "337110116006454532607322340792629567158",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":108},{\"generalIndex\":\"0xfd9d0bf45a2947a519a741c4b9e99eb6\"}]"
+        },
+        {
+            "asset": {
+                "Token": "42259045809535163221576417993425387648"
+            },
+            "name": "xcDOT",
+            "symbol": "xcDOT",
+            "decimals": 10,
+            "currencyID": "42259045809535163221576417993425387648",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "GLMR"
+            },
+            "name": "GLMR",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        }
+    ],
+    "2006": [
+        {
+            "asset": {
+                "Token": "1326"
+            },
+            "name": "aASTR",
+            "symbol": "aASTR",
+            "decimals": 18,
+            "currencyID": "1326"
+        },
+        {
+            "asset": {
+                "Token": "1327"
+            },
+            "name": "UNCHAIN",
+            "symbol": "CHAI",
+            "decimals": 18,
+            "currencyID": "1327"
+        },
+        {
+            "asset": {
+                "Token": "1328"
+            },
+            "name": "Algem",
+            "symbol": "ALGM",
+            "decimals": 18,
+            "currencyID": "1328"
+        },
+        {
+            "asset": {
+                "Token": "1329"
+            },
+            "name": "puripuricoin",
+            "symbol": "PPC",
+            "decimals": 8,
+            "currencyID": "1329"
+        },
+        {
+            "asset": {
+                "Token": "1330"
+            },
+            "name": "MochiMochiCoin",
+            "symbol": "MMC",
+            "decimals": 2,
+            "currencyID": "1330"
+        },
+        {
+            "asset": {
+                "Token": "1331"
+            },
+            "name": "stakedDOT",
+            "symbol": "sDOT",
+            "decimals": 10,
+            "currencyID": "1331"
+        },
+        {
+            "asset": {
+                "Token": "1332"
+            },
+            "name": "sDOT",
+            "symbol": "sDOT",
+            "decimals": 10,
+            "currencyID": "1332"
+        },
+        {
+            "asset": {
+                "Token": "1333"
+            },
+            "name": "love",
+            "symbol": "ASTR",
+            "decimals": 20,
+            "currencyID": "1333"
+        },
+        {
+            "asset": {
+                "Token": "1334"
+            },
+            "name": "Token",
+            "symbol": "TOK",
+            "decimals": 18,
+            "currencyID": "1334"
+        },
+        {
+            "asset": {
+                "Token": "1335"
+            },
+            "name": "Mock Polkadot",
+            "symbol": "MDOT",
+            "decimals": 10,
+            "currencyID": "1335"
+        },
+        {
+            "asset": {
+                "Token": "1336"
+            },
+            "name": "Test Polkadot",
+            "symbol": "TDOT",
+            "decimals": 18,
+            "currencyID": "1336"
+        },
+        {
+            "asset": {
+                "Token": "1337"
+            },
+            "name": "DEMOASSET",
+            "symbol": "XC20",
+            "decimals": 18,
+            "currencyID": "1337"
+        },
+        {
+            "asset": {
+                "Token": "1338"
+            },
+            "name": "TestToken",
+            "symbol": "TST",
+            "decimals": 18,
+            "currencyID": "1338"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551616"
+            },
+            "name": "Acala",
+            "symbol": "ACA",
+            "decimals": 12,
+            "currencyID": "18446744073709551616",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551617"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "18446744073709551617",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551618"
+            },
+            "name": "Liquid DOT",
+            "symbol": "LDOT",
+            "decimals": 10,
+            "currencyID": "18446744073709551618",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0003\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551619"
+            },
+            "name": "Glimmer",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "currencyID": "18446744073709551619",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551620"
+            },
+            "name": "interBTC",
+            "symbol": "IBTC",
+            "decimals": 8,
+            "currencyID": "18446744073709551620",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551621"
+            },
+            "name": "INTR",
+            "symbol": "INTR",
+            "decimals": 10,
+            "currencyID": "18446744073709551621",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0002\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551622"
+            },
+            "name": "Phala Token",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "18446744073709551622",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2035}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551623"
+            },
+            "name": "Bifrost Native Coin",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "18446744073709551623",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551624"
+            },
+            "name": "Voucher DOT",
+            "symbol": "vDOT",
+            "decimals": 10,
+            "currencyID": "18446744073709551624",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0900\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551625"
+            },
+            "name": "Clover Finance",
+            "symbol": "CLV",
+            "decimals": 18,
+            "currencyID": "18446744073709551625",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2002}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551626"
+            },
+            "name": "Voucher Slot DOT",
+            "symbol": "vsDOT",
+            "decimals": 10,
+            "currencyID": "18446744073709551626",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0403\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551627"
+            },
+            "name": "Darwinia Native Token",
+            "symbol": "RING",
+            "decimals": 18,
+            "currencyID": "18446744073709551627",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2046},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551628"
+            },
+            "name": "Equilibrium Native Token",
+            "symbol": "EQ",
+            "decimals": 9,
+            "currencyID": "18446744073709551628",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551629"
+            },
+            "name": "Equilibrium USD",
+            "symbol": "EQD",
+            "decimals": 9,
+            "currencyID": "18446744073709551629",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551630"
+            },
+            "name": "HydraDX",
+            "symbol": "HDX",
+            "decimals": 12,
+            "currencyID": "18446744073709551630",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2034},{\"generalIndex\":0}]"
+        },
+        {
+            "asset": {
+                "Token": "340282366920938463463374607431768211455"
+            },
+            "name": "Polkadot",
+            "symbol": "DOT",
+            "decimals": 10,
+            "currencyID": "340282366920938463463374607431768211455",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "4294969280"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "4294969280",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "862812"
+            },
+            "name": "VirtoCubo",
+            "symbol": "CUBO",
+            "decimals": 9,
+            "currencyID": "862812"
+        },
+        {
+            "asset": {
+                "Token": "868367"
+            },
+            "name": "VirtoSwapCash",
+            "symbol": "VSC",
+            "decimals": 9,
+            "currencyID": "868367"
+        },
+        {
+            "asset": {
+                "Token": "ASTR"
+            },
+            "name": "ASTR",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        }
+    ],
+    "2011": [
+        {
+            "asset": {
+                "Token": "TOKEN"
+            },
+            "name": "TOKEN",
+            "symbol": "TOKEN",
+            "decimals": 9
+        }
+    ],
+    "2012": [
+        {
+            "asset": {
+                "Token": "1001"
+            },
+            "name": "sDOT",
+            "symbol": "sDOT",
+            "decimals": 10,
+            "currencyID": "1001",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"generalKey\":\"0x73444f54\"}]"
+        },
+        {
+            "asset": {
+                "Token": "101"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10,
+            "currencyID": "101",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "102"
+            },
+            "name": "USDT",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "102",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "104"
+            },
+            "name": "AUSD",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "104"
+        },
+        {
+            "asset": {
+                "Token": "106"
+            },
+            "name": "lcDOT",
+            "symbol": "lcDOT",
+            "decimals": 10,
+            "currencyID": "106",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x040d000000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "108"
+            },
+            "name": "ACA",
+            "symbol": "ACA",
+            "decimals": 12,
+            "currencyID": "108",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "110"
+            },
+            "name": "LDOT",
+            "symbol": "LDOT",
+            "decimals": 10,
+            "currencyID": "110",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0003\"}]"
+        },
+        {
+            "asset": {
+                "Token": "112"
+            },
+            "name": "ASTR",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "currencyID": "112"
+        },
+        {
+            "asset": {
+                "Token": "114"
+            },
+            "name": "GLMR",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "currencyID": "114",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "115"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "115",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2035}]"
+        },
+        {
+            "asset": {
+                "Token": "120"
+            },
+            "name": "INTR",
+            "symbol": "INTR",
+            "decimals": 10,
+            "currencyID": "120",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0002\"}]"
+        },
+        {
+            "asset": {
+                "Token": "122"
+            },
+            "name": "IBTC",
+            "symbol": "IBTC",
+            "decimals": 8,
+            "currencyID": "122",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "130"
+            },
+            "name": "CLV",
+            "symbol": "CLV",
+            "decimals": 18,
+            "currencyID": "130",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2002}]"
+        },
+        {
+            "asset": {
+                "Token": "200060013"
+            },
+            "name": "cDOT-6/13",
+            "symbol": "cDOT-6/13",
+            "decimals": 10,
+            "currencyID": "200060013",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"palletInstance\":6},{\"generalIndex\":200060013}]"
+        },
+        {
+            "asset": {
+                "Token": "200070014"
+            },
+            "name": "cDOT-7/14",
+            "symbol": "cDOT-7/14",
+            "decimals": 10,
+            "currencyID": "200070014",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"palletInstance\":6},{\"generalIndex\":200070014}]"
+        },
+        {
+            "asset": {
+                "Token": "200080015"
+            },
+            "name": "cDOT-8/15",
+            "symbol": "cDOT-8/15",
+            "decimals": 10,
+            "currencyID": "200080015",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"palletInstance\":6},{\"generalIndex\":200080015}]"
+        },
+        {
+            "asset": {
+                "Token": "200090016"
+            },
+            "name": "cDOT-9/16",
+            "symbol": "cDOT-9/16",
+            "decimals": 10,
+            "currencyID": "200090016",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"palletInstance\":6},{\"generalIndex\":200090016}]"
+        },
+        {
+            "asset": {
+                "Token": "200100017"
+            },
+            "name": "cDOT-10/17",
+            "symbol": "cDOT-10/17",
+            "decimals": 10,
+            "currencyID": "200100017",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"palletInstance\":6},{\"generalIndex\":200100017}]"
+        },
+        {
+            "asset": {
+                "Token": "200110018"
+            },
+            "name": "cDOT-11/18",
+            "symbol": "cDOT-11/18",
+            "decimals": 10,
+            "currencyID": "200110018"
+        },
+        {
+            "asset": {
+                "Token": "4294957296"
+            },
+            "name": "DOT_U",
+            "symbol": "DOT_U",
+            "decimals": 10,
+            "currencyID": "4294957296"
+        },
+        {
+            "asset": {
+                "Token": "6002"
+            },
+            "name": "LP-DOT/PARA",
+            "symbol": "LP-DOT/PARA",
+            "decimals": 12,
+            "currencyID": "6002"
+        },
+        {
+            "asset": {
+                "Token": "6003"
+            },
+            "name": "LP-DOT/sDOT",
+            "symbol": "LP-DOT/sDOT",
+            "decimals": 12,
+            "currencyID": "6003"
+        },
+        {
+            "asset": {
+                "Token": "6004"
+            },
+            "name": "LP-DOT/cDOT-6/13",
+            "symbol": "LP-DOT/cDOT-6/13",
+            "decimals": 12,
+            "currencyID": "6004"
+        },
+        {
+            "asset": {
+                "Token": "6005"
+            },
+            "name": "LP-DOT/cDOT-7/14",
+            "symbol": "LP-DOT/cDOT-7/14",
+            "decimals": 12,
+            "currencyID": "6005"
+        },
+        {
+            "asset": {
+                "Token": "6006"
+            },
+            "name": "LP-PARA/cDOT-6/13",
+            "symbol": "LP-PARA/cDOT-6/13",
+            "decimals": 12,
+            "currencyID": "6006"
+        },
+        {
+            "asset": {
+                "Token": "6007"
+            },
+            "name": "LP-DOT/cDOT-8/15",
+            "symbol": "LP-DOT/cDOT-8/15",
+            "decimals": 12,
+            "currencyID": "6007"
+        },
+        {
+            "asset": {
+                "Token": "6008"
+            },
+            "name": "LP-GLMR/PARA",
+            "symbol": "LP-GLMR/PARA",
+            "decimals": 12,
+            "currencyID": "6008"
+        },
+        {
+            "asset": {
+                "Token": "6009"
+            },
+            "name": "LP-PHA/PARA",
+            "symbol": "LP-PHA/PARA",
+            "decimals": 12,
+            "currencyID": "6009"
+        },
+        {
+            "asset": {
+                "Token": "6010"
+            },
+            "name": "LP-USDT/PARA",
+            "symbol": "LP-USDT/PARA",
+            "decimals": 12,
+            "currencyID": "6010"
+        },
+        {
+            "asset": {
+                "Token": "6011"
+            },
+            "name": "LP-lcDOT/PARA",
+            "symbol": "LP-lcDOT/PARA",
+            "decimals": 12,
+            "currencyID": "6011"
+        },
+        {
+            "asset": {
+                "Token": "6012"
+            },
+            "name": "LP-PARA/cDOT-7/14",
+            "symbol": "LP-PARA/cDOT-7/14",
+            "decimals": 12,
+            "currencyID": "6012"
+        },
+        {
+            "asset": {
+                "Token": "6013"
+            },
+            "name": "LP-PARA/cDOT-8/15",
+            "symbol": "LP-PARA/cDOT-8/15",
+            "decimals": 12,
+            "currencyID": "6013"
+        },
+        {
+            "asset": {
+                "Token": "6014"
+            },
+            "name": "LP-ACA/PARA",
+            "symbol": "LP-ACA/PARA",
+            "decimals": 12,
+            "currencyID": "6014"
+        },
+        {
+            "asset": {
+                "Token": "6015"
+            },
+            "name": "LP-LDOT/PARA",
+            "symbol": "LP-LDOT/PARA",
+            "decimals": 12,
+            "currencyID": "6015"
+        },
+        {
+            "asset": {
+                "Token": "6016"
+            },
+            "name": "LP-INTR/PARA",
+            "symbol": "LP-INTR/PARA",
+            "decimals": 12,
+            "currencyID": "6016"
+        },
+        {
+            "asset": {
+                "Token": "6017"
+            },
+            "name": "LP-IBTC/PARA",
+            "symbol": "LP-IBTC/PARA",
+            "decimals": 12,
+            "currencyID": "6017"
+        },
+        {
+            "asset": {
+                "Token": "PARA"
+            },
+            "name": "PARA",
+            "symbol": "PARA",
+            "decimals": 12
+        }
+    ],
+    "2013": [
+        {
+            "asset": {
+                "Token": "LIT"
+            },
+            "name": "LIT",
+            "symbol": "LIT",
+            "decimals": 12
+        }
+    ],
+    "2019": [
+        {
+            "asset": {
+                "Token": "LAYR"
+            },
+            "name": "LAYR",
+            "symbol": "LAYR",
+            "decimals": 12
+        }
+    ],
+    "2021": [
+        {
+            "asset": {
+                "Token": "EFI"
+            },
+            "name": "EFI",
+            "symbol": "EFI",
+            "decimals": 18
+        }
+    ],
+    "2026": [
+        {
+            "asset": {
+                "Token": "NODL"
+            },
+            "name": "NODL",
+            "symbol": "NODL",
+            "decimals": 11
+        }
+    ],
+    "2030": [
+        {
+            "asset": {
+                "Token": "BNC"
+            },
+            "name": "BNC",
+            "symbol": "BNC",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token2": "0"
+            },
+            "name": "Polkadot DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token2": "1"
+            },
+            "name": "Moonbeam Native Token",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token2": "2"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token2": "3"
+            },
+            "name": "Astar",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        },
+        {
+            "asset": {
+                "Token2": "4"
+            },
+            "name": "Filecoin Network Token",
+            "symbol": "FIL",
+            "decimals": 18
+        },
+        {
+            "asset": {
+                "VSBond2": "02000613"
+            },
+            "name": "vsBOND-DOT-2000-6-13",
+            "symbol": "vsBOND-DOT-2000-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02003714"
+            },
+            "name": "vsBOND-DOT-2003-7-14",
+            "symbol": "vsBOND-DOT-2003-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02004613"
+            },
+            "name": "vsBOND-DOT-2004-6-13",
+            "symbol": "vsBOND-DOT-2004-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02006613"
+            },
+            "name": "vsBOND-DOT-2006-6-13",
+            "symbol": "vsBOND-DOT-2006-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "020081017"
+            },
+            "name": "vsBOND-DOT-2008-10-17",
+            "symbol": "vsBOND-DOT-2008-10-17",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02008714"
+            },
+            "name": "vsBOND-DOT-2008-7-14",
+            "symbol": "vsBOND-DOT-2008-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02013613"
+            },
+            "name": "vsBOND-DOT-2013-6-13",
+            "symbol": "vsBOND-DOT-2013-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02013714"
+            },
+            "name": "vsBOND-DOT-2013-7-14",
+            "symbol": "vsBOND-DOT-2013-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02013815"
+            },
+            "name": "vsBOND-DOT-2013-8-15",
+            "symbol": "vsBOND-DOT-2013-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02015613"
+            },
+            "name": "vsBOND-DOT-2015-6-13",
+            "symbol": "vsBOND-DOT-2015-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02018613"
+            },
+            "name": "vsBOND-DOT-2018-6-13",
+            "symbol": "vsBOND-DOT-2018-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02019714"
+            },
+            "name": "vsBOND-DOT-2019-7-14",
+            "symbol": "vsBOND-DOT-2019-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02021613"
+            },
+            "name": "vsBOND-DOT-2021-6-13",
+            "symbol": "vsBOND-DOT-2021-6-13",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02021714"
+            },
+            "name": "vsBOND-DOT-2021-7-14",
+            "symbol": "vsBOND-DOT-2021-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02026714"
+            },
+            "name": "vsBOND-DOT-2026-7-14",
+            "symbol": "vsBOND-DOT-2026-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02027714"
+            },
+            "name": "vsBOND-DOT-2027-7-14",
+            "symbol": "vsBOND-DOT-2027-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02027815"
+            },
+            "name": "vsBOND-DOT-2027-8-15",
+            "symbol": "vsBOND-DOT-2027-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02030815"
+            },
+            "name": "vsBOND-DOT-2030-8-15",
+            "symbol": "vsBOND-DOT-2030-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02031714"
+            },
+            "name": "vsBOND-DOT-2031-7-14",
+            "symbol": "vsBOND-DOT-2031-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02032714"
+            },
+            "name": "vsBOND-DOT-2032-7-14",
+            "symbol": "vsBOND-DOT-2032-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02034714"
+            },
+            "name": "vsBOND-DOT-2034-7-14",
+            "symbol": "vsBOND-DOT-2034-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02035714"
+            },
+            "name": "vsBOND-DOT-2035-7-14",
+            "symbol": "vsBOND-DOT-2035-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02036714"
+            },
+            "name": "vsBOND-DOT-2036-7-14",
+            "symbol": "vsBOND-DOT-2036-7-14",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02037815"
+            },
+            "name": "vsBOND-DOT-2037-8-15",
+            "symbol": "vsBOND-DOT-2037-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02039916"
+            },
+            "name": "vsBOND-DOT-2039-9-16",
+            "symbol": "vsBOND-DOT-2039-9-16",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02040815"
+            },
+            "name": "vsBOND-DOT-2040-8-15",
+            "symbol": "vsBOND-DOT-2040-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "02043815"
+            },
+            "name": "vsBOND-DOT-2043-8-15",
+            "symbol": "vsBOND-DOT-2043-8-15",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "020511017"
+            },
+            "name": "vsBOND-DOT-2051-10-17",
+            "symbol": "vsBOND-DOT-2051-10-17",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSBond2": "020901017"
+            },
+            "name": "vsBOND-DOT-2090-10-17",
+            "symbol": "vsBOND-DOT-2090-10-17",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "VSToken2": "0"
+            },
+            "name": "Voucher Slot DOT",
+            "symbol": "vsDOT",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0403\"}]"
+        },
+        {
+            "asset": {
+                "VToken2": "0"
+            },
+            "name": "Voucher DOT",
+            "symbol": "vDOT",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0900\"}]"
+        },
+        {
+            "asset": {
+                "VToken2": "1"
+            },
+            "name": "Voucher GLMR",
+            "symbol": "vGLMR",
+            "decimals": 18
+        }
+    ],
+    "2031": [
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "Tether USDT",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": {
+                "ForeignAsset": "1"
+            },
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "2"
+            },
+            "name": "Axelar USDC",
+            "symbol": "xcUSDC",
+            "decimals": 6,
+            "currencyID": {
+                "ForeignAsset": "2"
+            }
+        },
+        {
+            "asset": {
+                "ForeignAsset": "3"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": {
+                "ForeignAsset": "3"
+            },
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "4"
+            },
+            "name": "Glimmer",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "currencyID": {
+                "ForeignAsset": "4"
+            },
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "CFG"
+            },
+            "name": "CFG",
+            "symbol": "CFG",
+            "decimals": 18
+        }
+    ],
+    "2032": [
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "Liquid DOT",
+            "symbol": "LDOT",
+            "decimals": 10,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0003\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "2"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token": "IBTC"
+            },
+            "name": "IBTC",
+            "symbol": "IBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "INTR"
+            },
+            "name": "INTR",
+            "symbol": "INTR",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2032},{\"generalKey\":\"0x0002\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KBTC"
+            },
+            "name": "KBTC",
+            "symbol": "KBTC",
+            "decimals": 8
+        },
+        {
+            "asset": {
+                "Token": "KINT"
+            },
+            "name": "KINT",
+            "symbol": "KINT",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12
+        }
+    ],
+    "2034": [
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "LRNA",
+            "symbol": "LRNA",
+            "decimals": 12,
+            "currencyID": "1"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "DAI",
+            "symbol": "DAI",
+            "decimals": 18,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0254a37a01cd75b616d63e0ab665bffdb0143c52ae\"}]"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "WBTC",
+            "symbol": "WBTC",
+            "decimals": 8,
+            "currencyID": "3",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x02c80084af223c8b598536178d9361dc55bfda6818\"}]"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "WETH",
+            "symbol": "WETH",
+            "decimals": 18,
+            "currencyID": "4",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x025a4d6acdc4e3e5ab15717f407afe957f7a242578\"}]"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10,
+            "currencyID": "5",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "APE",
+            "symbol": "APE",
+            "decimals": 18,
+            "currencyID": "6",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x02f4c723e61709d90f89939c1852f516e373d418a8\"}]"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "USDC",
+            "symbol": "USDC",
+            "decimals": 6,
+            "currencyID": "7",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0207df96d1341a7d16ba1ad431e2c847d978bc2bce\"}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "8",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2035}]"
+        },
+        {
+            "asset": {
+                "Token": "HDX"
+            },
+            "name": "HDX",
+            "symbol": "HDX",
+            "decimals": 12
+        }
+    ],
+    "2035": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "Polkadot Native Token",
+            "symbol": "DOT",
+            "decimals": 18,
+            "currencyID": "0",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "Glimmer",
+            "symbol": "GLMR",
+            "decimals": 18,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2004},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "Equilibrium USD",
+            "symbol": "EQD",
+            "decimals": 9,
+            "currencyID": "10",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "HydraDX",
+            "symbol": "HDX",
+            "decimals": 12,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2034},{\"generalIndex\":0}]"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "PARA",
+            "symbol": "PARA",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2012},{\"generalKey\":\"0x50415241\"}]"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "Acala Dollar",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "3",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Acala Liquid DOT",
+            "symbol": "LDOT",
+            "decimals": 10,
+            "currencyID": "4",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0003\"}]"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "Acala Native Token",
+            "symbol": "ACA",
+            "decimals": 12,
+            "currencyID": "5",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2000},{\"generalKey\":\"0x0000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "Astar",
+            "symbol": "ASTR",
+            "decimals": 18,
+            "currencyID": "6",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2006}]"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "Darwinia Parachain Token",
+            "symbol": "RING",
+            "decimals": 18,
+            "currencyID": "7",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2046},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "Bifrost Native Coin",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "8",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2030},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "Equilibrium",
+            "symbol": "EQ",
+            "decimals": 9,
+            "currencyID": "9",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2011}]"
+        },
+        {
+            "asset": {
+                "Token": "PHA"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12
+        }
+    ],
+    "2037": [
+        {
+            "asset": {
+                "Token": "UNQ"
+            },
+            "name": "UNQ",
+            "symbol": "UNQ",
+            "decimals": 18
+        }
+    ],
+    "2039": [
+        {
+            "asset": {
+                "Token": "TEER"
+            },
+            "name": "TEER",
+            "symbol": "TEER",
+            "decimals": 12
+        }
+    ],
+    "2043": [
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "TRAC",
+            "symbol": "TRAC",
+            "decimals": 18,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2043},{\"generalIndex\":1}]"
+        },
+        {
+            "asset": {
+                "Token": "OTP"
+            },
+            "name": "OTP",
+            "symbol": "OTP",
+            "decimals": 12
+        }
+    ],
+    "2046": [
+        {
+            "asset": {
+                "Token": "RING"
+            },
+            "name": "RING",
+            "symbol": "RING",
+            "decimals": 18
+        }
+    ],
+    "2052": [
+        {
+            "asset": {
+                "Token": "KYL"
+            },
+            "name": "KYL",
+            "symbol": "KYL",
+            "decimals": 18
+        }
+    ]
+}

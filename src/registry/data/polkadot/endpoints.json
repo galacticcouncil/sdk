@@ -1,5 +1,5 @@
-{
-    "polkadot-0": {
+[
+    {
         "chainkey": "polkadot-0",
         "name": "Polkadot",
         "id": "polkadot",
@@ -17,7 +17,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-1000": {
+    {
         "chainkey": "polkadot-1000",
         "name": "Statemint",
         "id": "statemint",
@@ -32,7 +32,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2000": {
+    {
         "chainkey": "polkadot-2000",
         "name": "Acala",
         "id": "acala",
@@ -47,7 +47,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2002": {
+    {
         "chainkey": "polkadot-2002",
         "name": "Clover",
         "id": "clover",
@@ -57,7 +57,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2004": {
+    {
         "chainkey": "polkadot-2004",
         "name": "Moonbeam",
         "id": "moonbeam",
@@ -72,7 +72,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2006": {
+    {
         "chainkey": "polkadot-2006",
         "name": "Astar",
         "id": "astar",
@@ -89,7 +89,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2011": {
+    {
         "chainkey": "polkadot-2011",
         "name": "Equilibrium",
         "id": "equilibrium",
@@ -100,7 +100,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2012": {
+    {
         "chainkey": "polkadot-2012",
         "name": "Parallel",
         "id": "parallel",
@@ -110,7 +110,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2013": {
+    {
         "chainkey": "polkadot-2013",
         "name": "Litentry",
         "id": "litentry",
@@ -121,7 +121,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2019": {
+    {
         "chainkey": "polkadot-2019",
         "name": "Composable Finance",
         "id": "composableFinance",
@@ -131,7 +131,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2021": {
+    {
         "chainkey": "polkadot-2021",
         "name": "Efinity",
         "id": "efinity",
@@ -143,7 +143,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2026": {
+    {
         "chainkey": "polkadot-2026",
         "name": "Nodle",
         "id": "nodle",
@@ -155,7 +155,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2030": {
+    {
         "chainkey": "polkadot-2030",
         "name": "Bifrost",
         "id": "bifrost",
@@ -166,7 +166,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2031": {
+    {
         "chainkey": "polkadot-2031",
         "name": "Centrifuge",
         "id": "centrifuge",
@@ -177,7 +177,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2032": {
+    {
         "chainkey": "polkadot-2032",
         "name": "Interlay",
         "id": "interlay",
@@ -188,7 +188,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2034": {
+    {
         "chainkey": "polkadot-2034",
         "name": "HydraDX",
         "id": "hydra",
@@ -199,7 +199,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2035": {
+    {
         "chainkey": "polkadot-2035",
         "name": "Phala Network",
         "id": "phala",
@@ -210,7 +210,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2037": {
+    {
         "chainkey": "polkadot-2037",
         "name": "Unique Network",
         "id": "unique",
@@ -222,7 +222,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2039": {
+    {
         "chainkey": "polkadot-2039",
         "name": "Integritee Shell",
         "id": "integritee",
@@ -232,7 +232,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2043": {
+    {
         "chainkey": "polkadot-2043",
         "name": "OriginTrail",
         "id": "origintrail-parachain",
@@ -242,7 +242,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2046": {
+    {
         "chainkey": "polkadot-2046",
         "name": "Darwinia",
         "id": "darwinia",
@@ -252,7 +252,7 @@
         ],
         "relaychain": "polkadot"
     },
-    "polkadot-2052": {
+    {
         "chainkey": "polkadot-2052",
         "name": "Kylin",
         "id": "kylin",
@@ -262,4 +262,4 @@
         ],
         "relaychain": "polkadot"
     }
-}
+]

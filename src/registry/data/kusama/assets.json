@@ -1,0 +1,4069 @@
+{
+    "0": [
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12
+        }
+    ],
+    "1000": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "Polkadog",
+            "symbol": "DOG",
+            "decimals": 6,
+            "currencyID": "0"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "Listen Token",
+            "symbol": "L T",
+            "decimals": 14,
+            "currencyID": "1"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "USDC",
+            "symbol": "USDC",
+            "decimals": 4,
+            "currencyID": "10"
+        },
+        {
+            "asset": {
+                "Token": "100"
+            },
+            "name": "Chralt",
+            "symbol": "Chralt",
+            "decimals": 0,
+            "currencyID": "100"
+        },
+        {
+            "asset": {
+                "Token": "1000"
+            },
+            "name": "SPARK TOKEN",
+            "symbol": "SPARK",
+            "decimals": 10,
+            "currencyID": "1000"
+        },
+        {
+            "asset": {
+                "Token": "101"
+            },
+            "name": " ---",
+            "symbol": "---",
+            "decimals": 0,
+            "currencyID": "101"
+        },
+        {
+            "asset": {
+                "Token": "102"
+            },
+            "name": "DREx distributed renewable ",
+            "symbol": "DRX",
+            "decimals": 0,
+            "currencyID": "102"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "USDT",
+            "symbol": "USDT",
+            "decimals": 4,
+            "currencyID": "11"
+        },
+        {
+            "asset": {
+                "Token": "1107"
+            },
+            "name": "polkaholic.io Token",
+            "symbol": "HOLIC",
+            "decimals": 12,
+            "currencyID": "1107"
+        },
+        {
+            "asset": {
+                "Token": "111"
+            },
+            "name": "NO1",
+            "symbol": "NO1",
+            "decimals": 20,
+            "currencyID": "111"
+        },
+        {
+            "asset": {
+                "Token": "1111"
+            },
+            "name": "Mantiev Token",
+            "symbol": "MTVD",
+            "decimals": 20,
+            "currencyID": "1111"
+        },
+        {
+            "asset": {
+                "Token": "11111"
+            },
+            "name": "1KV.CLUB",
+            "symbol": "KVC",
+            "decimals": 12,
+            "currencyID": "11111"
+        },
+        {
+            "asset": {
+                "Token": "1123"
+            },
+            "name": "XEntropy",
+            "symbol": "XEN",
+            "decimals": 10,
+            "currencyID": "1123"
+        },
+        {
+            "asset": {
+                "Token": "1155"
+            },
+            "name": "WitekCoin",
+            "symbol": "WITEK",
+            "decimals": 18,
+            "currencyID": "1155"
+        },
+        {
+            "asset": {
+                "Token": "117"
+            },
+            "name": "InvArch Tinkernet",
+            "symbol": "TNKR",
+            "decimals": 10,
+            "currencyID": "117"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "BUSD",
+            "symbol": "BUSD",
+            "decimals": 4,
+            "currencyID": "12"
+        },
+        {
+            "asset": {
+                "Token": "1225"
+            },
+            "name": "GOD",
+            "symbol": "GOD",
+            "decimals": 20,
+            "currencyID": "1225"
+        },
+        {
+            "asset": {
+                "Token": "123"
+            },
+            "name": "NFT",
+            "symbol": "NFT",
+            "decimals": 20,
+            "currencyID": "123"
+        },
+        {
+            "asset": {
+                "Token": "1234"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 10,
+            "currencyID": "1234"
+        },
+        {
+            "asset": {
+                "Token": "12345"
+            },
+            "name": "Drexall",
+            "symbol": "DREX",
+            "decimals": 10,
+            "currencyID": "12345"
+        },
+        {
+            "asset": {
+                "Token": "13"
+            },
+            "name": "LuckyNumber",
+            "symbol": "LN",
+            "decimals": 13,
+            "currencyID": "13"
+        },
+        {
+            "asset": {
+                "Token": "1337"
+            },
+            "name": "Test In Prod",
+            "symbol": "TIP",
+            "decimals": 10,
+            "currencyID": "1337"
+        },
+        {
+            "asset": {
+                "Token": "138"
+            },
+            "name": "Abc",
+            "symbol": "Abc",
+            "decimals": 20,
+            "currencyID": "138"
+        },
+        {
+            "asset": {
+                "Token": "14"
+            },
+            "name": "Polkadot",
+            "symbol": "DOT",
+            "decimals": 10,
+            "currencyID": "14"
+        },
+        {
+            "asset": {
+                "Token": "1420"
+            },
+            "name": "Hydrogen line",
+            "symbol": "HYDR",
+            "decimals": 10,
+            "currencyID": "1420"
+        },
+        {
+            "asset": {
+                "Token": "1441"
+            },
+            "name": "Spot access token",
+            "symbol": "SPOT",
+            "decimals": 0,
+            "currencyID": "1441"
+        },
+        {
+            "asset": {
+                "Token": "15"
+            },
+            "name": "Web3",
+            "symbol": "Web3",
+            "decimals": 20,
+            "currencyID": "15"
+        },
+        {
+            "asset": {
+                "Token": "16"
+            },
+            "name": "PolarisDAO",
+            "symbol": "ARIS",
+            "decimals": 8,
+            "currencyID": "16"
+        },
+        {
+            "asset": {
+                "Token": "1607"
+            },
+            "name": "Stargazing",
+            "symbol": "STRGZN",
+            "decimals": 0,
+            "currencyID": "1607"
+        },
+        {
+            "asset": {
+                "Token": "168"
+            },
+            "name": "Tokens",
+            "symbol": "Tokens",
+            "decimals": 20,
+            "currencyID": "168"
+        },
+        {
+            "asset": {
+                "Token": "1688"
+            },
+            "name": "ali",
+            "symbol": "ali",
+            "decimals": 20,
+            "currencyID": "1688"
+        },
+        {
+            "asset": {
+                "Token": "17"
+            },
+            "name": "MEME",
+            "symbol": "MEME",
+            "decimals": 18,
+            "currencyID": "17"
+        },
+        {
+            "asset": {
+                "Token": "18"
+            },
+            "name": "HEIHEI",
+            "symbol": "HEI",
+            "decimals": 10,
+            "currencyID": "18"
+        },
+        {
+            "asset": {
+                "Token": "188"
+            },
+            "name": "Zenlink Network Token",
+            "symbol": "ZLK",
+            "decimals": 12,
+            "currencyID": "188"
+        },
+        {
+            "asset": {
+                "Token": "19"
+            },
+            "name": "Shot",
+            "symbol": "SHOT",
+            "decimals": 12,
+            "currencyID": "19"
+        },
+        {
+            "asset": {
+                "Token": "1984"
+            },
+            "name": "Tether USD",
+            "symbol": "USDt",
+            "decimals": 6,
+            "currencyID": "1984",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "19840"
+            },
+            "name": "Tether USD",
+            "symbol": "USDt",
+            "decimals": 3,
+            "currencyID": "19840"
+        },
+        {
+            "asset": {
+                "Token": "1999"
+            },
+            "name": "Fanaria - Most Advanced NFT",
+            "symbol": "ADVERT2",
+            "decimals": 10,
+            "currencyID": "1999"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "Polkanuannuan",
+            "symbol": "PNN",
+            "decimals": 10,
+            "currencyID": "2"
+        },
+        {
+            "asset": {
+                "Token": "20"
+            },
+            "name": "0x4265726c696e20464b4b205061726164697365f09f988e",
+            "symbol": "BFKK",
+            "decimals": 20,
+            "currencyID": "20"
+        },
+        {
+            "asset": {
+                "Token": "2021"
+            },
+            "name": "wave network",
+            "symbol": "WAVE",
+            "decimals": 4,
+            "currencyID": "2021"
+        },
+        {
+            "asset": {
+                "Token": "2048"
+            },
+            "name": "Robonomics web Services",
+            "symbol": "RWS",
+            "decimals": 8,
+            "currencyID": "2048"
+        },
+        {
+            "asset": {
+                "Token": "2049"
+            },
+            "name": "DoAndroidsDreamOfElectricSheep?",
+            "symbol": "Android",
+            "decimals": 0,
+            "currencyID": "2049"
+        },
+        {
+            "asset": {
+                "Token": "2050"
+            },
+            "name": "Carbon Unit Token",
+            "symbol": "CUT",
+            "decimals": 9,
+            "currencyID": "2050"
+        },
+        {
+            "asset": {
+                "Token": "2077"
+            },
+            "name": "Robonomics",
+            "symbol": "XRT",
+            "decimals": 8,
+            "currencyID": "2077"
+        },
+        {
+            "asset": {
+                "Token": "21"
+            },
+            "name": "ELEVATE_DAO",
+            "symbol": "ELEV",
+            "decimals": 10,
+            "currencyID": "21"
+        },
+        {
+            "asset": {
+                "Token": "214"
+            },
+            "name": "LOVE",
+            "symbol": "LOVE",
+            "decimals": 20,
+            "currencyID": "214"
+        },
+        {
+            "asset": {
+                "Token": "22"
+            },
+            "name": "Smoothie",
+            "symbol": "STH",
+            "decimals": 6,
+            "currencyID": "22"
+        },
+        {
+            "asset": {
+                "Token": "220204"
+            },
+            "name": "STATEMINE",
+            "symbol": "STM",
+            "decimals": 10,
+            "currencyID": "220204"
+        },
+        {
+            "asset": {
+                "Token": "222"
+            },
+            "name": "Planet Neo Token",
+            "symbol": "PNEO",
+            "decimals": 12,
+            "currencyID": "222"
+        },
+        {
+            "asset": {
+                "Token": "223"
+            },
+            "name": "BILLCOIN",
+            "symbol": "BILL",
+            "decimals": 8,
+            "currencyID": "223"
+        },
+        {
+            "asset": {
+                "Token": "224"
+            },
+            "name": "SikCoin",
+            "symbol": "SIK",
+            "decimals": 8,
+            "currencyID": "224"
+        },
+        {
+            "asset": {
+                "Token": "23"
+            },
+            "name": "DLTKOJO",
+            "symbol": "KOJO",
+            "decimals": 3,
+            "currencyID": "23"
+        },
+        {
+            "asset": {
+                "Token": "24"
+            },
+            "name": "PolkaTest",
+            "symbol": "test",
+            "decimals": 1,
+            "currencyID": "24"
+        },
+        {
+            "asset": {
+                "Token": "25"
+            },
+            "name": "Polkababes",
+            "symbol": "BABE",
+            "decimals": 10,
+            "currencyID": "25"
+        },
+        {
+            "asset": {
+                "Token": "26"
+            },
+            "name": "BUNGA BUNGA",
+            "symbol": "BUNGA",
+            "decimals": 8,
+            "currencyID": "26"
+        },
+        {
+            "asset": {
+                "Token": "27"
+            },
+            "name": "Valhello.app",
+            "symbol": "RUNE",
+            "decimals": 10,
+            "currencyID": "27"
+        },
+        {
+            "asset": {
+                "Token": "28"
+            },
+            "name": "Ladycoin",
+            "symbol": "LAC",
+            "decimals": 7,
+            "currencyID": "28"
+        },
+        {
+            "asset": {
+                "Token": "29"
+            },
+            "name": "COUPONS",
+            "symbol": "CODES",
+            "decimals": 10,
+            "currencyID": "29"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "Catsama",
+            "symbol": "Meow",
+            "decimals": 6,
+            "currencyID": "3"
+        },
+        {
+            "asset": {
+                "Token": "30"
+            },
+            "name": "Fucho",
+            "symbol": "GOL",
+            "decimals": 8,
+            "currencyID": "30"
+        },
+        {
+            "asset": {
+                "Token": "300"
+            },
+            "name": "PolkaWarriors",
+            "symbol": "PWS",
+            "decimals": 18,
+            "currencyID": "300"
+        },
+        {
+            "asset": {
+                "Token": "3077"
+            },
+            "name": "AutomatedCoffeeToken",
+            "symbol": "ACT",
+            "decimals": 0,
+            "currencyID": "3077"
+        },
+        {
+            "asset": {
+                "Token": "31"
+            },
+            "name": "Genki",
+            "symbol": "ki",
+            "decimals": 18,
+            "currencyID": "31"
+        },
+        {
+            "asset": {
+                "Token": "314159"
+            },
+            "name": "Retreat",
+            "symbol": "RTT",
+            "decimals": 2,
+            "currencyID": "314159"
+        },
+        {
+            "asset": {
+                "Token": "32"
+            },
+            "name": "Favor",
+            "symbol": "FAV",
+            "decimals": 0,
+            "currencyID": "32"
+        },
+        {
+            "asset": {
+                "Token": "33"
+            },
+            "name": "Ladyboi",
+            "symbol": "BUSSY",
+            "decimals": 10,
+            "currencyID": "33"
+        },
+        {
+            "asset": {
+                "Token": "333"
+            },
+            "name": "Token",
+            "symbol": "Token",
+            "decimals": 20,
+            "currencyID": "333"
+        },
+        {
+            "asset": {
+                "Token": "34"
+            },
+            "name": "PLX",
+            "symbol": "PLX",
+            "decimals": 9,
+            "currencyID": "34"
+        },
+        {
+            "asset": {
+                "Token": "345"
+            },
+            "name": "345",
+            "symbol": "345",
+            "decimals": 20,
+            "currencyID": "345"
+        },
+        {
+            "asset": {
+                "Token": "35"
+            },
+            "name": "Lucky Friday",
+            "symbol": "LUCKY",
+            "decimals": 10,
+            "currencyID": "35"
+        },
+        {
+            "asset": {
+                "Token": "36"
+            },
+            "name": "Ruined Records Token",
+            "symbol": "RRT",
+            "decimals": 0,
+            "currencyID": "36"
+        },
+        {
+            "asset": {
+                "Token": "360"
+            },
+            "name": "uni",
+            "symbol": "uni",
+            "decimals": 20,
+            "currencyID": "360"
+        },
+        {
+            "asset": {
+                "Token": "365"
+            },
+            "name": "time",
+            "symbol": "time",
+            "decimals": 20,
+            "currencyID": "365"
+        },
+        {
+            "asset": {
+                "Token": "37"
+            },
+            "name": "Munchkin",
+            "symbol": "MNCH",
+            "decimals": 18,
+            "currencyID": "37"
+        },
+        {
+            "asset": {
+                "Token": "3721"
+            },
+            "name": "fast",
+            "symbol": "fast",
+            "decimals": 20,
+            "currencyID": "3721"
+        },
+        {
+            "asset": {
+                "Token": "374"
+            },
+            "name": "wETH",
+            "symbol": "wETH",
+            "decimals": 18,
+            "currencyID": "374"
+        },
+        {
+            "asset": {
+                "Token": "377"
+            },
+            "name": "KAA test",
+            "symbol": "KAA",
+            "decimals": 2,
+            "currencyID": "377"
+        },
+        {
+            "asset": {
+                "Token": "38"
+            },
+            "name": "Entropy",
+            "symbol": "ENT",
+            "decimals": 0,
+            "currencyID": "38"
+        },
+        {
+            "asset": {
+                "Token": "383"
+            },
+            "name": "KODA",
+            "symbol": "KODA",
+            "decimals": 12,
+            "currencyID": "383"
+        },
+        {
+            "asset": {
+                "Token": "39"
+            },
+            "name": "DotScanner.com",
+            "symbol": "DSCAN",
+            "decimals": 8,
+            "currencyID": "39"
+        },
+        {
+            "asset": {
+                "Token": "3943"
+            },
+            "name": "GoldMark",
+            "symbol": "GMK",
+            "decimals": 0,
+            "currencyID": "3943"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Happy",
+            "symbol": "HAPPY",
+            "decimals": 10,
+            "currencyID": "4"
+        },
+        {
+            "asset": {
+                "Token": "40"
+            },
+            "name": "Eric",
+            "symbol": "ERIC",
+            "decimals": 10,
+            "currencyID": "40"
+        },
+        {
+            "asset": {
+                "Token": "41"
+            },
+            "name": "GooseCoin",
+            "symbol": "GOOSE",
+            "decimals": 12,
+            "currencyID": "41"
+        },
+        {
+            "asset": {
+                "Token": "42"
+            },
+            "name": "No Risk - No Fun",
+            "symbol": "NRNF",
+            "decimals": 12,
+            "currencyID": "42"
+        },
+        {
+            "asset": {
+                "Token": "420"
+            },
+            "name": "BLAZE",
+            "symbol": "BLAZE",
+            "decimals": 10,
+            "currencyID": "420"
+        },
+        {
+            "asset": {
+                "Token": "42069"
+            },
+            "name": "0xf09f91b6e2989520696e7465726e20636f696e20f09fa5b6f09f8c9d",
+            "symbol": "INTRN",
+            "decimals": 18,
+            "currencyID": "42069"
+        },
+        {
+            "asset": {
+                "Token": "4206969"
+            },
+            "name": "Polka SHIBA INU",
+            "symbol": "SHIB",
+            "decimals": 10,
+            "currencyID": "4206969"
+        },
+        {
+            "asset": {
+                "Token": "4294967291"
+            },
+            "name": "MAX PRIME",
+            "symbol": "PRIME",
+            "decimals": 7,
+            "currencyID": "4294967291"
+        },
+        {
+            "asset": {
+                "Token": "43"
+            },
+            "name": "Tricky-NFT.art Treasure Token",
+            "symbol": "TTT",
+            "decimals": 2,
+            "currencyID": "43"
+        },
+        {
+            "asset": {
+                "Token": "44"
+            },
+            "name": "Most Advanced Coin",
+            "symbol": "ADVNCE",
+            "decimals": 10,
+            "currencyID": "44"
+        },
+        {
+            "asset": {
+                "Token": "45"
+            },
+            "name": "CRIB",
+            "symbol": "CRIB",
+            "decimals": 15,
+            "currencyID": "45"
+        },
+        {
+            "asset": {
+                "Token": "46"
+            },
+            "name": "FANARIA",
+            "symbol": "FAN",
+            "decimals": 10,
+            "currencyID": "46"
+        },
+        {
+            "asset": {
+                "Token": "47"
+            },
+            "name": "Euro",
+            "symbol": "EUR",
+            "decimals": 12,
+            "currencyID": "47"
+        },
+        {
+            "asset": {
+                "Token": "49"
+            },
+            "name": "ENDIANNESS",
+            "symbol": "DIAN",
+            "decimals": 10,
+            "currencyID": "49"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "BeerCoin",
+            "symbol": "BEER",
+            "decimals": 12,
+            "currencyID": "5"
+        },
+        {
+            "asset": {
+                "Token": "50"
+            },
+            "name": "PromoTeam",
+            "symbol": "PROMO",
+            "decimals": 18,
+            "currencyID": "50"
+        },
+        {
+            "asset": {
+                "Token": "520"
+            },
+            "name": "Love",
+            "symbol": "0xe299a5e299a5e299a5",
+            "decimals": 10,
+            "currencyID": "520"
+        },
+        {
+            "asset": {
+                "Token": "5201314"
+            },
+            "name": "belove",
+            "symbol": "belove",
+            "decimals": 20,
+            "currencyID": "5201314"
+        },
+        {
+            "asset": {
+                "Token": "55"
+            },
+            "name": "DIVING",
+            "symbol": "MTS",
+            "decimals": 8,
+            "currencyID": "55"
+        },
+        {
+            "asset": {
+                "Token": "567"
+            },
+            "name": "Chrawnna Coin",
+            "symbol": "CHRWNA",
+            "decimals": 10,
+            "currencyID": "567"
+        },
+        {
+            "asset": {
+                "Token": "598"
+            },
+            "name": "Eren Yilmaz",
+            "symbol": "EREN",
+            "decimals": 10,
+            "currencyID": "598"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "ZKP DAO",
+            "symbol": "ZKPD",
+            "decimals": 10,
+            "currencyID": "6"
+        },
+        {
+            "asset": {
+                "Token": "60"
+            },
+            "name": "GavCoin",
+            "symbol": "GAV",
+            "decimals": 4,
+            "currencyID": "60"
+        },
+        {
+            "asset": {
+                "Token": "61"
+            },
+            "name": "CRYPTONITAS",
+            "symbol": "CRY",
+            "decimals": 12,
+            "currencyID": "61"
+        },
+        {
+            "asset": {
+                "Token": "64"
+            },
+            "name": "oh!",
+            "symbol": "oh!",
+            "decimals": 4,
+            "currencyID": "64"
+        },
+        {
+            "asset": {
+                "Token": "66"
+            },
+            "name": "DAI",
+            "symbol": "DAI",
+            "decimals": 20,
+            "currencyID": "66"
+        },
+        {
+            "asset": {
+                "Token": "666"
+            },
+            "name": "Evil Corp",
+            "symbol": "BAD",
+            "decimals": 10,
+            "currencyID": "666"
+        },
+        {
+            "asset": {
+                "Token": "677"
+            },
+            "name": "GEAR BONUS",
+            "symbol": "GRB",
+            "decimals": 0,
+            "currencyID": "677"
+        },
+        {
+            "asset": {
+                "Token": "6789"
+            },
+            "name": "drhuongtx",
+            "symbol": "VHM",
+            "decimals": 16,
+            "currencyID": "6789"
+        },
+        {
+            "asset": {
+                "Token": "68"
+            },
+            "name": "Fanaria on Twitter: @FanariaNFT",
+            "symbol": "ADVERT",
+            "decimals": 10,
+            "currencyID": "68"
+        },
+        {
+            "asset": {
+                "Token": "69"
+            },
+            "name": "NICE",
+            "symbol": "NICE",
+            "decimals": 10,
+            "currencyID": "69"
+        },
+        {
+            "asset": {
+                "Token": "69420"
+            },
+            "name": "Chaos",
+            "symbol": "CHAOS",
+            "decimals": 10,
+            "currencyID": "69420"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "DogeSeven",
+            "symbol": "DOS",
+            "decimals": 1,
+            "currencyID": "7"
+        },
+        {
+            "asset": {
+                "Token": "70"
+            },
+            "name": "MarLira",
+            "symbol": "MAR",
+            "decimals": 5,
+            "currencyID": "70"
+        },
+        {
+            "asset": {
+                "Token": "71"
+            },
+            "name": "OAK Network Token",
+            "symbol": "OAK",
+            "decimals": 10,
+            "currencyID": "71"
+        },
+        {
+            "asset": {
+                "Token": "75"
+            },
+            "name": "ohzomdmrkyc.gybvn",
+            "symbol": "cipher",
+            "decimals": 10,
+            "currencyID": "75"
+        },
+        {
+            "asset": {
+                "Token": "759"
+            },
+            "name": "bLd",
+            "symbol": "bLd",
+            "decimals": 18,
+            "currencyID": "759"
+        },
+        {
+            "asset": {
+                "Token": "77"
+            },
+            "name": "Crypto",
+            "symbol": "Crypto",
+            "decimals": 20,
+            "currencyID": "77"
+        },
+        {
+            "asset": {
+                "Token": "777"
+            },
+            "name": "Heaven",
+            "symbol": "GOD",
+            "decimals": 0,
+            "currencyID": "777"
+        },
+        {
+            "asset": {
+                "Token": "7777"
+            },
+            "name": "lucky7",
+            "symbol": "lucky7",
+            "decimals": 20,
+            "currencyID": "7777"
+        },
+        {
+            "asset": {
+                "Token": "777777"
+            },
+            "name": "DeFi The World",
+            "symbol": "DEFI",
+            "decimals": 8,
+            "currencyID": "777777"
+        },
+        {
+            "asset": {
+                "Token": "7777777"
+            },
+            "name": "king",
+            "symbol": "king",
+            "decimals": 20,
+            "currencyID": "7777777"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "RMRK.app",
+            "symbol": "RMRK",
+            "decimals": 10,
+            "currencyID": "8"
+        },
+        {
+            "asset": {
+                "Token": "80"
+            },
+            "name": "Basically Indivisible Token",
+            "symbol": "BIT",
+            "decimals": 0,
+            "currencyID": "80"
+        },
+        {
+            "asset": {
+                "Token": "80815"
+            },
+            "name": "Kusama File Coin",
+            "symbol": "KSMFS",
+            "decimals": 10,
+            "currencyID": "80815"
+        },
+        {
+            "asset": {
+                "Token": "80816"
+            },
+            "name": "RUEPP Coin",
+            "symbol": "RUEPP",
+            "decimals": 10,
+            "currencyID": "80816"
+        },
+        {
+            "asset": {
+                "Token": "80817"
+            },
+            "name": "FRALEY Coin",
+            "symbol": "FRALEY",
+            "decimals": 10,
+            "currencyID": "80817"
+        },
+        {
+            "asset": {
+                "Token": "841"
+            },
+            "name": "YAYOI",
+            "symbol": "YAYOI",
+            "decimals": 10,
+            "currencyID": "841"
+        },
+        {
+            "asset": {
+                "Token": "862812"
+            },
+            "name": "Virto CUBO",
+            "symbol": "CUBO",
+            "decimals": 9,
+            "currencyID": "862812"
+        },
+        {
+            "asset": {
+                "Token": "863012"
+            },
+            "name": "VIrto COP",
+            "symbol": "VCOP",
+            "decimals": 2,
+            "currencyID": "863012"
+        },
+        {
+            "asset": {
+                "Token": "87"
+            },
+            "name": "Xexr",
+            "symbol": "XEXR",
+            "decimals": 6,
+            "currencyID": "87"
+        },
+        {
+            "asset": {
+                "Token": "88"
+            },
+            "name": "BTC",
+            "symbol": "BTC",
+            "decimals": 20,
+            "currencyID": "88"
+        },
+        {
+            "asset": {
+                "Token": "8848"
+            },
+            "name": "top",
+            "symbol": "top",
+            "decimals": 20,
+            "currencyID": "8848"
+        },
+        {
+            "asset": {
+                "Token": "888"
+            },
+            "name": "LUCK",
+            "symbol": "LUCK",
+            "decimals": 10,
+            "currencyID": "888"
+        },
+        {
+            "asset": {
+                "Token": "88888"
+            },
+            "name": "SHIBATALES",
+            "symbol": "BAILEGO",
+            "decimals": 0,
+            "currencyID": "88888"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "TakeTime",
+            "symbol": "TOT",
+            "decimals": 1,
+            "currencyID": "9"
+        },
+        {
+            "asset": {
+                "Token": "90"
+            },
+            "name": "Satoshi",
+            "symbol": "SATS",
+            "decimals": 1,
+            "currencyID": "90"
+        },
+        {
+            "asset": {
+                "Token": "9000"
+            },
+            "name": "KPOTS",
+            "symbol": "KPOTS",
+            "decimals": 6,
+            "currencyID": "9000"
+        },
+        {
+            "asset": {
+                "Token": "91"
+            },
+            "name": "Tamo Junto",
+            "symbol": "TMJ",
+            "decimals": 8,
+            "currencyID": "91"
+        },
+        {
+            "asset": {
+                "Token": "911"
+            },
+            "name": "911",
+            "symbol": "911",
+            "decimals": 20,
+            "currencyID": "911"
+        },
+        {
+            "asset": {
+                "Token": "95834"
+            },
+            "name": "TEST123231",
+            "symbol": "LUL",
+            "decimals": 12,
+            "currencyID": "95834"
+        },
+        {
+            "asset": {
+                "Token": "99"
+            },
+            "name": "BITCOIN",
+            "symbol": "BITCOIN",
+            "decimals": 20,
+            "currencyID": "99"
+        },
+        {
+            "asset": {
+                "Token": "999"
+            },
+            "name": "CBDC",
+            "symbol": "CBDC",
+            "decimals": 10,
+            "currencyID": "999"
+        },
+        {
+            "asset": {
+                "Token": "9999"
+            },
+            "name": "BTC",
+            "symbol": "BTC",
+            "decimals": 20,
+            "currencyID": "9999"
+        },
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12
+        }
+    ],
+    "2000": [
+        {
+            "asset": {
+                "Erc20": "0x1f3a10587a20114ea25ba1b388ee2dd4a337ce27"
+            },
+            "name": "USD Coin (Portal from Ethereum)",
+            "symbol": "USDCet",
+            "decimals": 6,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x021f3a10587a20114ea25ba1b388ee2dd4a337ce27\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0x4bb6afb5fa2b07a5d1c499e1c3ddb5a15e709a71"
+            },
+            "name": "DAI Stablecoin (Portal)",
+            "symbol": "DAI",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x024bb6afb5fa2b07a5d1c499e1c3ddb5a15e709a71\"}]"
+        },
+        {
+            "asset": {
+                "Erc20": "0xe20683ad1ed8bbeed7e1ae74be10f19d8045b530"
+            },
+            "name": "Acala Dollar (Portal)",
+            "symbol": "waUSD",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x02e20683ad1ed8bbeed7e1ae74be10f19d8045b530\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "0"
+            },
+            "name": "RMRK",
+            "symbol": "RMRK",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":8}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "PolarisDAO",
+            "symbol": "ARIS",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":16}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "10"
+            },
+            "name": "Calamari",
+            "symbol": "KMA",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2084}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "11"
+            },
+            "name": "Basilisk",
+            "symbol": "BSX",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2090},{\"generalIndex\":0}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "12"
+            },
+            "name": "Altair",
+            "symbol": "AIR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2088},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "13"
+            },
+            "name": "Crab Parachain Token",
+            "symbol": "CRAB",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2105},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "14"
+            },
+            "name": "Genshiro Native Token",
+            "symbol": "GENS",
+            "decimals": 9,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2024}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "15"
+            },
+            "name": "Equilibrium USD",
+            "symbol": "EQD",
+            "decimals": 9,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2024},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "16"
+            },
+            "name": "Turing",
+            "symbol": "TUR",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2114}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "17"
+            },
+            "name": "Pichiu",
+            "symbol": "PCHU",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2102},{\"generalKey\":\"0x50434855\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "18"
+            },
+            "name": "Shiden Native Token",
+            "symbol": "SDN",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "19"
+            },
+            "name": "Listen",
+            "symbol": "LT",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2118},{\"generalKey\":\"0x4c54\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "2"
+            },
+            "name": "Quartz",
+            "symbol": "QTZ",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2095}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "20"
+            },
+            "name": "Litmus Native Token",
+            "symbol": "LIT",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2106},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "3"
+            },
+            "name": "Moonriver",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "4"
+            },
+            "name": "Heiko",
+            "symbol": "HKO",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"generalKey\":\"0x484b4f\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "5"
+            },
+            "name": "Crust Shadow Native Token",
+            "symbol": "CSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2012}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "6"
+            },
+            "name": "KICO",
+            "symbol": "KICO",
+            "decimals": 14,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2107},{\"generalKey\":\"0x4b49434f\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "7"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "8"
+            },
+            "name": "Integritee Trusted Execution Environment",
+            "symbol": "TEER",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2015},{\"generalKey\":\"0x54454552\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "9"
+            },
+            "name": "Metaverse.Network Pioneer",
+            "symbol": "NEER",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2096},{\"generalKey\":\"0x000000000000000000\"}]"
+        },
+        {
+            "asset": {
+                "StableAsset": "0"
+            },
+            "name": "Taiga KSM",
+            "symbol": "taiKSM",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "StableAsset": "1"
+            },
+            "name": "Taiga 3USD",
+            "symbol": "3USD",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "BNC"
+            },
+            "name": "Bifrost Native Token",
+            "symbol": "BNC",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "KAR"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KBTC"
+            },
+            "name": "Kintsugi Wrapped BTC",
+            "symbol": "KBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KINT"
+            },
+            "name": "Kintsugi Native Token",
+            "symbol": "KINT",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "KUSD"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "LKSM"
+            },
+            "name": "Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "Token": "PHA"
+            },
+            "name": "Phala Native Token",
+            "symbol": "PHA",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "TAI"
+            },
+            "name": "Taiga",
+            "symbol": "TAI",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "VSKSM"
+            },
+            "name": "Bifrost Voucher Slot KSM",
+            "symbol": "VSKSM",
+            "decimals": 12
+        }
+    ],
+    "2001": [
+        {
+            "asset": {
+                "Native": "BNC"
+            },
+            "name": "Bifrost",
+            "symbol": "BNC",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Stable": "KUSD"
+            },
+            "name": "Karura Dollar",
+            "symbol": "KUSD",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "BNC"
+            },
+            "name": "BNC",
+            "symbol": "BNC",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token": "KAR"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "KUSD"
+            },
+            "name": "KUSD",
+            "symbol": "KUSD",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "Token": "MOVR"
+            },
+            "name": "Moonriver Native Token",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "PHA"
+            },
+            "name": "Phala Native Token",
+            "symbol": "PHA",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "RMRK"
+            },
+            "name": "RMRK Token",
+            "symbol": "RMRK",
+            "decimals": 10,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":8}]"
+        },
+        {
+            "asset": {
+                "Token": "ZLK"
+            },
+            "name": "Zenlink Network Token",
+            "symbol": "ZLK",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0207\"}]"
+        },
+        {
+            "asset": {
+                "Token2": "0"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token2": "1"
+            },
+            "name": "Kintsugi",
+            "symbol": "KINT",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token2": "2"
+            },
+            "name": "kintsugiBTC",
+            "symbol": "KBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token2": "3"
+            },
+            "name": "Shiden",
+            "symbol": "SDN",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "Token2": "4"
+            },
+            "name": "Mangata Native Token",
+            "symbol": "MGX",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2110},{\"generalKey\":\"0x00000000\"}]"
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "BNC",
+                    "2,001",
+                    "13",
+                    "20"
+                ]
+            },
+            "name": "vsBOND-BNC-2001-13-20",
+            "symbol": "vsBOND-BNC-2001-13-20",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,011",
+                    "19",
+                    "26"
+                ]
+            },
+            "name": "vsBOND-KSM-2011-19-26",
+            "symbol": "vsBOND-KSM-2011-19-26",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,085",
+                    "15",
+                    "22"
+                ]
+            },
+            "name": "vsBOND-KSM-2085-15-22",
+            "symbol": "vsBOND-KSM-2085-15-22",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,087",
+                    "17",
+                    "24"
+                ]
+            },
+            "name": "vsBOND-KSM-2087-17-24",
+            "symbol": "vsBOND-KSM-2087-17-24",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,088",
+                    "15",
+                    "22"
+                ]
+            },
+            "name": "vsBOND-KSM-2088-15-22",
+            "symbol": "vsBOND-KSM-2088-15-22",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,090",
+                    "15",
+                    "22"
+                ]
+            },
+            "name": "vsBOND-KSM-2090-15-22",
+            "symbol": "vsBOND-KSM-2090-15-22",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,092",
+                    "15",
+                    "22"
+                ]
+            },
+            "name": "vsBOND-KSM-2092-15-22",
+            "symbol": "vsBOND-KSM-2092-15-22",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,095",
+                    "17",
+                    "24"
+                ]
+            },
+            "name": "vsBOND-KSM-2095-17-24",
+            "symbol": "vsBOND-KSM-2095-17-24",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,096",
+                    "17",
+                    "24"
+                ]
+            },
+            "name": "vsBOND-KSM-2096-17-24",
+            "symbol": "vsBOND-KSM-2096-17-24",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,100",
+                    "18",
+                    "25"
+                ]
+            },
+            "name": "vsBOND-KSM-2100-18-25",
+            "symbol": "vsBOND-KSM-2100-18-25",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,101",
+                    "18",
+                    "25"
+                ]
+            },
+            "name": "vsBOND-KSM-2101-18-25",
+            "symbol": "vsBOND-KSM-2101-18-25",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,102",
+                    "19",
+                    "26"
+                ]
+            },
+            "name": "vsBOND-KSM-2102-19-26",
+            "symbol": "vsBOND-KSM-2102-19-26",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,102",
+                    "20",
+                    "27"
+                ]
+            },
+            "name": "vsBOND-KSM-2102-20-27",
+            "symbol": "vsBOND-KSM-2102-20-27",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,102",
+                    "21",
+                    "28"
+                ]
+            },
+            "name": "vsBOND-KSM-2102-21-28",
+            "symbol": "vsBOND-KSM-2102-21-28",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,106",
+                    "19",
+                    "26"
+                ]
+            },
+            "name": "vsBOND-KSM-2106-19-26",
+            "symbol": "vsBOND-KSM-2106-19-26",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,110",
+                    "28",
+                    "34"
+                ]
+            },
+            "name": "vsBOND-KSM-2110-28-34",
+            "symbol": "vsBOND-KSM-2110-28-34",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,114",
+                    "20",
+                    "27"
+                ]
+            },
+            "name": "vsBOND-KSM-2114-20-27",
+            "symbol": "vsBOND-KSM-2114-20-27",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,118",
+                    "22",
+                    "29"
+                ]
+            },
+            "name": "vsBOND-KSM-2118-22-29",
+            "symbol": "vsBOND-KSM-2118-22-29",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,119",
+                    "22",
+                    "29"
+                ]
+            },
+            "name": "vsBOND-KSM-2119-22-29",
+            "symbol": "vsBOND-KSM-2119-22-29",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,121",
+                    "22",
+                    "29"
+                ]
+            },
+            "name": "vsBOND-KSM-2121-22-29",
+            "symbol": "vsBOND-KSM-2121-22-29",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,124",
+                    "23",
+                    "30"
+                ]
+            },
+            "name": "vsBOND-KSM-2124-23-30",
+            "symbol": "vsBOND-KSM-2124-23-30",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,125",
+                    "23",
+                    "30"
+                ]
+            },
+            "name": "vsBOND-KSM-2125-23-30",
+            "symbol": "vsBOND-KSM-2125-23-30",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,127",
+                    "23",
+                    "30"
+                ]
+            },
+            "name": "vsBOND-KSM-2127-23-30",
+            "symbol": "vsBOND-KSM-2127-23-30",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,129",
+                    "24",
+                    "31"
+                ]
+            },
+            "name": "vsBOND-KSM-2129-24-31",
+            "symbol": "vsBOND-KSM-2129-24-31",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,256",
+                    "27",
+                    "34"
+                ]
+            },
+            "name": "vsBOND-KSM-2256-27-34",
+            "symbol": "vsBOND-KSM-2256-27-34",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSBond": [
+                    "KSM",
+                    "2,259",
+                    "27",
+                    "34"
+                ]
+            },
+            "name": "vsBOND-KSM-2259-27-34",
+            "symbol": "vsBOND-KSM-2259-27-34",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VSToken": "KSM"
+            },
+            "name": "Bifrost Voucher Slot Voucher Slot KSM",
+            "symbol": "VSvsKSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0404\"}]"
+        },
+        {
+            "asset": {
+                "VToken": "BNC"
+            },
+            "name": "Voucher BNC",
+            "symbol": "vBNC",
+            "decimals": 12
+        },
+        {
+            "asset": {
+                "VToken": "KSM"
+            },
+            "name": "Voucher KSM",
+            "symbol": "vKSM",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0104\"}]"
+        },
+        {
+            "asset": {
+                "VToken": "MOVR"
+            },
+            "name": "Voucher MOVR",
+            "symbol": "vMOVR",
+            "decimals": 18
+        }
+    ],
+    "2004": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "0",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "Turing",
+            "symbol": "TUR",
+            "decimals": 10,
+            "currencyID": "10",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2114}]"
+        },
+        {
+            "asset": {
+                "Token": "10000"
+            },
+            "name": "Wrapped PHA",
+            "symbol": "wPHA",
+            "decimals": 12,
+            "currencyID": "10000"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "Crab Parachain Token",
+            "symbol": "CRAB",
+            "decimals": 18,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2105},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "Shiden",
+            "symbol": "SDN",
+            "decimals": 18,
+            "currencyID": "12",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "Token": "13"
+            },
+            "name": "Pioneer NEER",
+            "symbol": "NEER",
+            "decimals": 18,
+            "currencyID": "13",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2096},{\"generalKey\":\"0x000000000000000000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "14"
+            },
+            "name": "Pioneer BIT",
+            "symbol": "BIT",
+            "decimals": 18,
+            "currencyID": "14",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2096},{\"generalKey\":\"0x020000000000000000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "Bifrost",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "Zenlink",
+            "symbol": "ZLK",
+            "decimals": 18,
+            "currencyID": "3",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0207\"}]"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Acala USD",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "4",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "Basilisk",
+            "symbol": "BSX",
+            "decimals": 12,
+            "currencyID": "5",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2090},{\"generalKey\":\"0x00000000\"}]"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "Moonriver Token",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "6",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "HKO",
+            "symbol": "HKO",
+            "decimals": 12,
+            "currencyID": "7",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"generalKey\":\"0x484b4f\"}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "Calamari",
+            "symbol": "KMA",
+            "decimals": 12,
+            "currencyID": "8",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2084}]"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "Basilisk",
+            "symbol": "BSX",
+            "decimals": 12,
+            "currencyID": "9",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2090},{\"generalIndex\":0}]"
+        },
+        {
+            "asset": {
+                "Token": "PHA"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12
+        }
+    ],
+    "2007": [
+        {
+            "asset": {
+                "Token": "18446744073709551616"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "18446744073709551616",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551618"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "18446744073709551618",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551619"
+            },
+            "name": "Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "18446744073709551619",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551620"
+            },
+            "name": "Moonriver",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "18446744073709551620",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551621"
+            },
+            "name": "kintsugiBTC",
+            "symbol": "KBTC",
+            "decimals": 8,
+            "currencyID": "18446744073709551621",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551622"
+            },
+            "name": "KINT",
+            "symbol": "KINT",
+            "decimals": 12,
+            "currencyID": "18446744073709551622",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551623"
+            },
+            "name": "Phala Token",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "18446744073709551623",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551624"
+            },
+            "name": "Crust Shadow Native Token",
+            "symbol": "CSM",
+            "decimals": 12,
+            "currencyID": "18446744073709551624",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2012}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551625"
+            },
+            "name": "Crab Native Token",
+            "symbol": "CRAB",
+            "decimals": 18,
+            "currencyID": "18446744073709551625",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2105},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551626"
+            },
+            "name": "Sakura",
+            "symbol": "SKU",
+            "decimals": 18,
+            "currencyID": "18446744073709551626",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2016}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551627"
+            },
+            "name": "Bifrost Native Coin",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "18446744073709551627",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551628"
+            },
+            "name": "Voucher KSM",
+            "symbol": "vKSM",
+            "decimals": 12,
+            "currencyID": "18446744073709551628",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0104\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551629"
+            },
+            "name": "Voucher Slot KSM",
+            "symbol": "vsKSM",
+            "decimals": 12,
+            "currencyID": "18446744073709551629",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0404\"}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551630"
+            },
+            "name": "Genshiro Native Token",
+            "symbol": "GENS",
+            "decimals": 9,
+            "currencyID": "18446744073709551630",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2024}]"
+        },
+        {
+            "asset": {
+                "Token": "18446744073709551631"
+            },
+            "name": "Equilibrium USD",
+            "symbol": "EQD",
+            "decimals": 9,
+            "currencyID": "18446744073709551631",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2024},{\"generalKey\":\"0x657164\"}]"
+        },
+        {
+            "asset": {
+                "Token": "311"
+            },
+            "name": "Sygma",
+            "symbol": "SYG",
+            "decimals": 10,
+            "currencyID": "311"
+        },
+        {
+            "asset": {
+                "Token": "312"
+            },
+            "name": "xcText",
+            "symbol": "XCT",
+            "decimals": 18,
+            "currencyID": "312"
+        },
+        {
+            "asset": {
+                "Token": "313"
+            },
+            "name": "ShiDog",
+            "symbol": "SDG",
+            "decimals": 0,
+            "currencyID": "313"
+        },
+        {
+            "asset": {
+                "Token": "314"
+            },
+            "name": "FOO",
+            "symbol": "BAR",
+            "decimals": 10,
+            "currencyID": "314"
+        },
+        {
+            "asset": {
+                "Token": "315"
+            },
+            "name": "UNCHAIN",
+            "symbol": "CHAI",
+            "decimals": 18,
+            "currencyID": "315"
+        },
+        {
+            "asset": {
+                "Token": "340282366920938463463374607431768211455"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "340282366920938463463374607431768211455",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "4294969280"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "4294969280",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "SDN"
+            },
+            "name": "SDN",
+            "symbol": "SDN",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"polkadot\"},{\"parachain\":2007}]"
+        }
+    ],
+    "2011": [],
+    "2012": [
+        {
+            "asset": {
+                "Token": "108036400430056508975016746969135344601"
+            },
+            "name": "Robonomics Token",
+            "symbol": "XRT",
+            "decimals": 9,
+            "currencyID": "108036400430056508975016746969135344601",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2048}]"
+        },
+        {
+            "asset": {
+                "Token": "10810581592933651521121702237638664357"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "10810581592933651521121702237638664357",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "16797826370226091782818345603793389938"
+            },
+            "name": "Shiden",
+            "symbol": "SDN",
+            "decimals": 18,
+            "currencyID": "16797826370226091782818345603793389938",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "Token": "173481220575862801646329923366065693029"
+            },
+            "name": "Crab Parachain Token",
+            "symbol": "CRAB",
+            "decimals": 18,
+            "currencyID": "173481220575862801646329923366065693029",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2105},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "214920334981412447805621250067209749032"
+            },
+            "name": "Acala Dollar",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "214920334981412447805621250067209749032",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "232263652204149413431520870009560565298"
+            },
+            "name": "Moonriver",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "232263652204149413431520870009560565298",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "319623561105283008236062145480775032445"
+            },
+            "name": "Bifrost Native Coin",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "319623561105283008236062145480775032445",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "CSM"
+            },
+            "name": "CSM",
+            "symbol": "CSM",
+            "decimals": 12
+        }
+    ],
+    "2015": [
+        {
+            "asset": {
+                "Token": "TEER"
+            },
+            "name": "TEER",
+            "symbol": "TEER",
+            "decimals": 12
+        }
+    ],
+    "2023": [
+        {
+            "asset": {
+                "Token": "105075627293246237499203909093923548958"
+            },
+            "name": "TEER",
+            "symbol": "xcTEER",
+            "decimals": 12,
+            "currencyID": "105075627293246237499203909093923548958",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2015},{\"generalKey\":\"0x54454552\"}]"
+        },
+        {
+            "asset": {
+                "Token": "108036400430056508975016746969135344601"
+            },
+            "name": "Robonomics Native Token",
+            "symbol": "xcXRT",
+            "decimals": 9,
+            "currencyID": "108036400430056508975016746969135344601",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2048}]"
+        },
+        {
+            "asset": {
+                "Token": "10810581592933651521121702237638664357"
+            },
+            "name": "Karura",
+            "symbol": "xcKAR",
+            "decimals": 12,
+            "currencyID": "10810581592933651521121702237638664357",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "108457044225666871745333730479173774551"
+            },
+            "name": "Crust Shadow Native Token",
+            "symbol": "xcCSM",
+            "decimals": 12,
+            "currencyID": "108457044225666871745333730479173774551",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2012}]"
+        },
+        {
+            "asset": {
+                "Token": "16797826370226091782818345603793389938"
+            },
+            "name": "Shiden",
+            "symbol": "xcSDN",
+            "decimals": 18,
+            "currencyID": "16797826370226091782818345603793389938",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "Token": "173481220575862801646329923366065693029"
+            },
+            "name": "Crab Parachain Token",
+            "symbol": "xcCRAB",
+            "decimals": 18,
+            "currencyID": "173481220575862801646329923366065693029",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2105},{\"palletInstance\":5}]"
+        },
+        {
+            "asset": {
+                "Token": "175400718394635817552109270754364440562"
+            },
+            "name": "Kintsugi Native Token",
+            "symbol": "xcKINT",
+            "decimals": 12,
+            "currencyID": "175400718394635817552109270754364440562",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token": "182365888117048807484804376330534607370"
+            },
+            "name": "xcRMRK",
+            "symbol": "xcRMRK",
+            "decimals": 10,
+            "currencyID": "182365888117048807484804376330534607370",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":8}]"
+        },
+        {
+            "asset": {
+                "Token": "189307976387032586987344677431204943363"
+            },
+            "name": "Phala Token",
+            "symbol": "xcPHA",
+            "decimals": 12,
+            "currencyID": "189307976387032586987344677431204943363",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "213357169630950964874127107356898319277"
+            },
+            "name": "Calamari",
+            "symbol": "xcKMA",
+            "decimals": 12,
+            "currencyID": "213357169630950964874127107356898319277",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2084}]"
+        },
+        {
+            "asset": {
+                "Token": "214920334981412447805621250067209749032"
+            },
+            "name": "Acala Dollar",
+            "symbol": "xcAUSD",
+            "decimals": 12,
+            "currencyID": "214920334981412447805621250067209749032",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "311091173110107856861649819128533077277"
+            },
+            "name": "Tether USD",
+            "symbol": "xcUSDT",
+            "decimals": 6,
+            "currencyID": "311091173110107856861649819128533077277",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "319623561105283008236062145480775032445"
+            },
+            "name": "xcBNC",
+            "symbol": "xcBNC",
+            "decimals": 12,
+            "currencyID": "319623561105283008236062145480775032445",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "328179947973504579459046439826496046832"
+            },
+            "name": "Kintsugi Wrapped BTC",
+            "symbol": "xcKBTC",
+            "decimals": 8,
+            "currencyID": "328179947973504579459046439826496046832",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token": "42259045809535163221576417993425387648"
+            },
+            "name": "xcKSM",
+            "symbol": "xcKSM",
+            "decimals": 12,
+            "currencyID": "42259045809535163221576417993425387648",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "65216491554813189869575508812319036608"
+            },
+            "name": "LIT",
+            "symbol": "xcLIT",
+            "decimals": 12,
+            "currencyID": "65216491554813189869575508812319036608",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2106},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "76100021443485661246318545281171740067"
+            },
+            "name": "HKO",
+            "symbol": "xcHKO",
+            "decimals": 12,
+            "currencyID": "76100021443485661246318545281171740067",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"generalKey\":\"0x484b4f\"}]"
+        },
+        {
+            "asset": {
+                "Token": "MOVR"
+            },
+            "name": "MOVR",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        }
+    ],
+    "2048": [
+        {
+            "asset": {
+                "Token": "4294967291"
+            },
+            "name": "Crust Shadow Native Token",
+            "symbol": "CSM",
+            "decimals": 12,
+            "currencyID": "4294967291"
+        },
+        {
+            "asset": {
+                "Token": "4294967292"
+            },
+            "name": "Karura Native Token",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "4294967292"
+        },
+        {
+            "asset": {
+                "Token": "4294967293"
+            },
+            "name": "Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "4294967293"
+        },
+        {
+            "asset": {
+                "Token": "4294967294"
+            },
+            "name": "Acala Dollar",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "4294967294"
+        },
+        {
+            "asset": {
+                "Token": "4294967295"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "4294967295"
+        },
+        {
+            "asset": {
+                "Token": "XRT"
+            },
+            "name": "XRT",
+            "symbol": "XRT",
+            "decimals": 9
+        }
+    ],
+    "2084": [
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "Karura Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "10",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "Moonriver",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "12",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "13"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "13",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "Karura Native Token",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "8",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "Acala Dollar",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "9",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KMA"
+            },
+            "name": "KMA",
+            "symbol": "KMA",
+            "decimals": 12
+        }
+    ],
+    "2085": [
+        {
+            "asset": {
+                "Token": "100"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "100",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "1000"
+            },
+            "name": "sKSM",
+            "symbol": "sKSM",
+            "decimals": 12,
+            "currencyID": "1000",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"palletInstance\":6},{\"generalIndex\":1000}]"
+        },
+        {
+            "asset": {
+                "Token": "100150022"
+            },
+            "name": "cKSM-15/22",
+            "symbol": "cKSM-15/22",
+            "decimals": 12,
+            "currencyID": "100150022"
+        },
+        {
+            "asset": {
+                "Token": "100200027"
+            },
+            "name": "cKSM-20/27",
+            "symbol": "cKSM-20/27",
+            "decimals": 12,
+            "currencyID": "100200027"
+        },
+        {
+            "asset": {
+                "Token": "100210028"
+            },
+            "name": "cKSM-21/28",
+            "symbol": "cKSM-21/28",
+            "decimals": 12,
+            "currencyID": "100210028"
+        },
+        {
+            "asset": {
+                "Token": "100220029"
+            },
+            "name": "cKSM-22/29",
+            "symbol": "cKSM-22/29",
+            "decimals": 12,
+            "currencyID": "100220029"
+        },
+        {
+            "asset": {
+                "Token": "100230030"
+            },
+            "name": "cKSM-23/30",
+            "symbol": "cKSM-23/30",
+            "decimals": 12,
+            "currencyID": "100230030"
+        },
+        {
+            "asset": {
+                "Token": "102"
+            },
+            "name": "USDT",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "102",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "103"
+            },
+            "name": "AUSD",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "103"
+        },
+        {
+            "asset": {
+                "Token": "107"
+            },
+            "name": "KAR",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "107",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "109"
+            },
+            "name": "LKSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "109",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "Token": "111"
+            },
+            "name": "SDN",
+            "symbol": "SDN",
+            "decimals": 18,
+            "currencyID": "111"
+        },
+        {
+            "asset": {
+                "Token": "113"
+            },
+            "name": "MOVR",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "113",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "Token": "115"
+            },
+            "name": "PHA",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "115",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "119"
+            },
+            "name": "KINT",
+            "symbol": "KINT",
+            "decimals": 12,
+            "currencyID": "119",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token": "121"
+            },
+            "name": "KBTC",
+            "symbol": "KBTC",
+            "decimals": 8,
+            "currencyID": "121",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token": "123"
+            },
+            "name": "GENS",
+            "symbol": "GENS",
+            "decimals": 9,
+            "currencyID": "123"
+        },
+        {
+            "asset": {
+                "Token": "125"
+            },
+            "name": "TUR",
+            "symbol": "TUR",
+            "decimals": 10,
+            "currencyID": "125"
+        },
+        {
+            "asset": {
+                "Token": "4294957295"
+            },
+            "name": "KSM_U",
+            "symbol": "KSM_U",
+            "decimals": 12,
+            "currencyID": "4294957295"
+        },
+        {
+            "asset": {
+                "Token": "5002"
+            },
+            "name": "LP-KSM/HKO",
+            "symbol": "LP-KSM/HKO",
+            "decimals": 12,
+            "currencyID": "5002"
+        },
+        {
+            "asset": {
+                "Token": "5003"
+            },
+            "name": "LP-KSM/sKSM",
+            "symbol": "LP-KSM/sKSM",
+            "decimals": 12,
+            "currencyID": "5003"
+        },
+        {
+            "asset": {
+                "Token": "5004"
+            },
+            "name": "LP-KSM/cKSM-20/27",
+            "symbol": "LP-KSM/cKSM-20/27",
+            "decimals": 12,
+            "currencyID": "5004"
+        },
+        {
+            "asset": {
+                "Token": "5005"
+            },
+            "name": "LP-MOVR/HKO",
+            "symbol": "LP-MOVR/HKO",
+            "decimals": 12,
+            "currencyID": "5005"
+        },
+        {
+            "asset": {
+                "Token": "5006"
+            },
+            "name": "LP-PHA/HKO",
+            "symbol": "LP-PHA/HKO",
+            "decimals": 12,
+            "currencyID": "5006"
+        },
+        {
+            "asset": {
+                "Token": "5007"
+            },
+            "name": "LP-USDT/HKO",
+            "symbol": "LP-USDT/HKO",
+            "decimals": 12,
+            "currencyID": "5007"
+        },
+        {
+            "asset": {
+                "Token": "5008"
+            },
+            "name": "LP-KAR/HKO",
+            "symbol": "LP-KAR/HKO",
+            "decimals": 12,
+            "currencyID": "5008"
+        },
+        {
+            "asset": {
+                "Token": "5009"
+            },
+            "name": "LP-LKSM/HKO",
+            "symbol": "LP-LKSM/HKO",
+            "decimals": 12,
+            "currencyID": "5009"
+        },
+        {
+            "asset": {
+                "Token": "5010"
+            },
+            "name": "LP-KINT/HKO",
+            "symbol": "LP-KINT/HKO",
+            "decimals": 12,
+            "currencyID": "5010"
+        },
+        {
+            "asset": {
+                "Token": "5011"
+            },
+            "name": "LP-KBTC/HKO",
+            "symbol": "LP-KBTC/HKO",
+            "decimals": 12,
+            "currencyID": "5011"
+        },
+        {
+            "asset": {
+                "Token": "HKO"
+            },
+            "name": "HKO",
+            "symbol": "HKO",
+            "decimals": 12
+        }
+    ],
+    "2087": [
+        {
+            "asset": {
+                "Token": "PICA"
+            },
+            "name": "PICA",
+            "symbol": "PICA",
+            "decimals": 12
+        }
+    ],
+    "2088": [
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": {
+                "ForeignAsset": "1"
+            },
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "AIR"
+            },
+            "name": "AIR",
+            "symbol": "AIR",
+            "decimals": 18
+        },
+        {
+            "asset": {
+                "Token": "AUSD"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "AUSD",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        }
+    ],
+    "2090": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "BSX",
+            "symbol": "BSX",
+            "decimals": 12,
+            "currencyID": "0"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "wETH",
+            "symbol": "wETH",
+            "decimals": 18,
+            "currencyID": "10",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x02ece0cc38021e734bef1d5da071b027ac2f71181f\"}]"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "wBTC",
+            "symbol": "wBTC",
+            "decimals": 8,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0266291c7d88d2ed9a708147bae4e0814a76705e2f\"}]"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "wUSDT",
+            "symbol": "wUSDT",
+            "decimals": 6,
+            "currencyID": "12",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0254e183e533fd3c6e72debb2d1cab451d017faf72\"}]"
+        },
+        {
+            "asset": {
+                "Token": "13"
+            },
+            "name": "DAI",
+            "symbol": "DAI",
+            "decimals": 18,
+            "currencyID": "13",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x024bb6afb5fa2b07a5d1c499e1c3ddb5a15e709a70\"}]"
+        },
+        {
+            "asset": {
+                "Token": "14"
+            },
+            "name": "USDT",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "14",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "aUSD",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "TNKR",
+            "symbol": "TNKR",
+            "decimals": 12,
+            "currencyID": "6",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2125},{\"generalIndex\":0}]"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "USDCet",
+            "symbol": "USDCet",
+            "decimals": 6,
+            "currencyID": "9",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x021f3a10587a20114ea25ba1b388ee2dd4a337ce27\"}]"
+        },
+        {
+            "asset": {
+                "Token": "BSX"
+            },
+            "name": "BSX",
+            "symbol": "BSX",
+            "decimals": 12
+        }
+    ],
+    "2092": [
+        {
+            "asset": {
+                "ForeignAsset": "1"
+            },
+            "name": "Acala Dollar",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "2"
+            },
+            "name": "Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "3"
+            },
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "currencyID": "3",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":1000},{\"palletInstance\":50},{\"generalIndex\":1984}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "4"
+            },
+            "name": "Moonriver Token",
+            "symbol": "MOVR",
+            "decimals": 18,
+            "currencyID": "4",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2023},{\"palletInstance\":10}]"
+        },
+        {
+            "asset": {
+                "ForeignAsset": "5"
+            },
+            "name": "Voucher KSM",
+            "symbol": "VKSM",
+            "decimals": 12,
+            "currencyID": "5",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0104\"}]"
+        },
+        {
+            "asset": {
+                "Token": "DOT"
+            },
+            "name": "DOT",
+            "symbol": "DOT",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token": "IBTC"
+            },
+            "name": "IBTC",
+            "symbol": "IBTC",
+            "decimals": 8
+        },
+        {
+            "asset": {
+                "Token": "INTR"
+            },
+            "name": "INTR",
+            "symbol": "INTR",
+            "decimals": 10
+        },
+        {
+            "asset": {
+                "Token": "KBTC"
+            },
+            "name": "KBTC",
+            "symbol": "KBTC",
+            "decimals": 8,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000b\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KINT"
+            },
+            "name": "KINT",
+            "symbol": "KINT",
+            "decimals": 12,
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2092},{\"generalKey\":\"0x000c\"}]"
+        },
+        {
+            "asset": {
+                "Token": "KSM"
+            },
+            "name": "KSM",
+            "symbol": "KSM",
+            "decimals": 12
+        }
+    ],
+    "2095": [
+        {
+            "asset": {
+                "Token": "QTZ"
+            },
+            "name": "QTZ",
+            "symbol": "QTZ",
+            "decimals": 18
+        }
+    ],
+    "2096": [
+        {
+            "asset": {
+                "Token": "NEER"
+            },
+            "name": "NEER",
+            "symbol": "NEER",
+            "decimals": 18
+        }
+    ],
+    "2100": [
+        {
+            "asset": {
+                "Token": "SUB"
+            },
+            "name": "SUB",
+            "symbol": "SUB",
+            "decimals": 10
+        }
+    ],
+    "2101": [
+        {
+            "asset": {
+                "Token": "ZTG"
+            },
+            "name": "ZTG",
+            "symbol": "ZTG",
+            "decimals": 10
+        }
+    ],
+    "2102": [
+        {
+            "asset": {
+                "Token": "PCHU"
+            },
+            "name": "PCHU",
+            "symbol": "PCHU",
+            "decimals": 18
+        }
+    ],
+    "2105": [
+        {
+            "asset": {
+                "Token": "CRAB"
+            },
+            "name": "CRAB",
+            "symbol": "CRAB",
+            "decimals": 18
+        }
+    ],
+    "2106": [
+        {
+            "asset": {
+                "Token": "LIT"
+            },
+            "name": "LIT",
+            "symbol": "LIT",
+            "decimals": 12
+        }
+    ],
+    "2110": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "Mangata",
+            "symbol": "MGX",
+            "decimals": 18,
+            "currencyID": "0"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18,
+            "currencyID": "1"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "LiquidityPoolToken0x0000000A",
+            "symbol": "TKN0x00000005-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "10"
+        },
+        {
+            "asset": {
+                "Token": "11"
+            },
+            "name": "Imbue",
+            "symbol": "IMBU",
+            "decimals": 12,
+            "currencyID": "11",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2121},{\"generalKey\":\"0x0096\"}]"
+        },
+        {
+            "asset": {
+                "Token": "12"
+            },
+            "name": "LiquidityPoolToken0x0000000C",
+            "symbol": "TKN0x00000000-TKN0x0000000B",
+            "decimals": 18,
+            "currencyID": "12"
+        },
+        {
+            "asset": {
+                "Token": "13"
+            },
+            "name": "LiquidityPoolToken0x0000000D",
+            "symbol": "TKN0x0000000B-TKN0x00000004",
+            "decimals": 18,
+            "currencyID": "13"
+        },
+        {
+            "asset": {
+                "Token": "14"
+            },
+            "name": "Bifrost Native Token",
+            "symbol": "BNC",
+            "decimals": 12,
+            "currencyID": "14",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0001\"}]"
+        },
+        {
+            "asset": {
+                "Token": "15"
+            },
+            "name": "Voucher KSM",
+            "symbol": "vKSM",
+            "decimals": 12,
+            "currencyID": "15",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0104\"}]"
+        },
+        {
+            "asset": {
+                "Token": "16"
+            },
+            "name": "Voucher Slot KSM",
+            "symbol": "vsKSM",
+            "decimals": 12,
+            "currencyID": "16",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0404\"}]"
+        },
+        {
+            "asset": {
+                "Token": "17"
+            },
+            "name": "LiquidityPoolToken0x00000011",
+            "symbol": "TKN0x00000000-TKN0x0000000E",
+            "decimals": 18,
+            "currencyID": "17"
+        },
+        {
+            "asset": {
+                "Token": "18"
+            },
+            "name": "LiquidityPoolToken0x00000012",
+            "symbol": "TKN0x00000010-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "18"
+        },
+        {
+            "asset": {
+                "Token": "19"
+            },
+            "name": "LiquidityPoolToken0x00000013",
+            "symbol": "TKN0x00000010-TKN0x00000004",
+            "decimals": 18,
+            "currencyID": "19"
+        },
+        {
+            "asset": {
+                "Token": "20"
+            },
+            "name": "LiquidityPoolToken0x00000014",
+            "symbol": "TKN0x00000004-TKN0x0000000E",
+            "decimals": 18,
+            "currencyID": "20"
+        },
+        {
+            "asset": {
+                "Token": "21"
+            },
+            "name": "LiquidityPoolToken0x00000015",
+            "symbol": "TKN0x0000000F-TKN0x00000004",
+            "decimals": 18,
+            "currencyID": "21"
+        },
+        {
+            "asset": {
+                "Token": "22"
+            },
+            "name": "LiquidityPoolToken0x00000016",
+            "symbol": "TKN0x00000010-TKN0x0000000F",
+            "decimals": 18,
+            "currencyID": "22"
+        },
+        {
+            "asset": {
+                "Token": "23"
+            },
+            "name": "Voucher BNC",
+            "symbol": "vBNC",
+            "decimals": 12,
+            "currencyID": "23",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0101\"}]"
+        },
+        {
+            "asset": {
+                "Token": "24"
+            },
+            "name": "LiquidityPoolToken0x00000018",
+            "symbol": "TKN0x0000000F-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "24"
+        },
+        {
+            "asset": {
+                "Token": "25"
+            },
+            "name": "LiquidityPoolToken0x00000019",
+            "symbol": "TKN0x00000010-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "25"
+        },
+        {
+            "asset": {
+                "Token": "26"
+            },
+            "name": "Zenlink",
+            "symbol": "ZLK",
+            "decimals": 18,
+            "currencyID": "26",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2001},{\"generalKey\":\"0x0207\"}]"
+        },
+        {
+            "asset": {
+                "Token": "27"
+            },
+            "name": "LiquidityPoolToken0x0000001B",
+            "symbol": "TKN0x0000001A-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "27"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "LiquidityPoolToken0x00000003",
+            "symbol": "TKN0x00000000-TKN0x00000002",
+            "decimals": 18,
+            "currencyID": "3"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Kusama Native",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "4"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "LiquidityPoolToken0x00000005",
+            "symbol": "TKN0x00000004-TKN0x00000000",
+            "decimals": 18,
+            "currencyID": "5"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "6"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "Turing native token",
+            "symbol": "TUR",
+            "decimals": 10,
+            "currencyID": "7",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2114}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "LiquidityPoolToken0x00000008",
+            "symbol": "TKN0x00000000-TKN0x00000007",
+            "decimals": 18,
+            "currencyID": "8"
+        },
+        {
+            "asset": {
+                "Token": "9"
+            },
+            "name": "LiquidityPoolToken0x00000009",
+            "symbol": "TKN0x00000004-TKN0x00000007",
+            "decimals": 18,
+            "currencyID": "9"
+        },
+        {
+            "asset": {
+                "Token": "MGX"
+            },
+            "name": "MGX",
+            "symbol": "MGX",
+            "decimals": 18
+        }
+    ],
+    "2113": [
+        {
+            "asset": {
+                "Token": "KAB"
+            },
+            "name": "KAB",
+            "symbol": "KAB",
+            "decimals": 12
+        }
+    ],
+    "2114": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "Native",
+            "symbol": "TUR",
+            "decimals": 10,
+            "currencyID": "0",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2114}]"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "Kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "1",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "AUSD",
+            "symbol": "AUSD",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0081\"}]"
+        },
+        {
+            "asset": {
+                "Token": "3"
+            },
+            "name": "Karura",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "3",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0080\"}]"
+        },
+        {
+            "asset": {
+                "Token": "4"
+            },
+            "name": "Liquid KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "4",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2000},{\"generalKey\":\"0x0083\"}]"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "Heiko",
+            "symbol": "HKO",
+            "decimals": 12,
+            "currencyID": "5",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"generalKey\":\"0x484b4f\"}]"
+        },
+        {
+            "asset": {
+                "Token": "6"
+            },
+            "name": "SKSM",
+            "symbol": "SKSM",
+            "decimals": 12,
+            "currencyID": "6",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2085},{\"generalKey\":\"0x734b534d\"}]"
+        },
+        {
+            "asset": {
+                "Token": "7"
+            },
+            "name": "Phala",
+            "symbol": "PHA",
+            "decimals": 12,
+            "currencyID": "7",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2004}]"
+        },
+        {
+            "asset": {
+                "Token": "8"
+            },
+            "name": "Shiden",
+            "symbol": "SDN",
+            "decimals": 18,
+            "currencyID": "8",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},{\"parachain\":2007}]"
+        },
+        {
+            "asset": {
+                "Token": "TUR"
+            },
+            "name": "TUR",
+            "symbol": "TUR",
+            "decimals": 10
+        }
+    ],
+    "2115": [
+        {
+            "asset": {
+                "Token": "DORA"
+            },
+            "name": "DORA",
+            "symbol": "DORA",
+            "decimals": 12
+        }
+    ],
+    "2118": [
+        {
+            "asset": {
+                "Token": "0"
+            },
+            "name": "listen",
+            "symbol": "LT",
+            "decimals": 12,
+            "currencyID": "0"
+        },
+        {
+            "asset": {
+                "Token": "1"
+            },
+            "name": "like",
+            "symbol": "LIKE",
+            "decimals": 12,
+            "currencyID": "1"
+        },
+        {
+            "asset": {
+                "Token": "10"
+            },
+            "name": "KICO",
+            "symbol": "KICO",
+            "decimals": 14,
+            "currencyID": "10"
+        },
+        {
+            "asset": {
+                "Token": "100"
+            },
+            "name": "kisten",
+            "symbol": "KT",
+            "decimals": 12,
+            "currencyID": "100"
+        },
+        {
+            "asset": {
+                "Token": "128"
+            },
+            "name": "Karura Token",
+            "symbol": "KAR",
+            "decimals": 12,
+            "currencyID": "128"
+        },
+        {
+            "asset": {
+                "Token": "129"
+            },
+            "name": "Acala Dollar",
+            "symbol": "aUSD",
+            "decimals": 12,
+            "currencyID": "129"
+        },
+        {
+            "asset": {
+                "Token": "131"
+            },
+            "name": "Liquid Staking KSM",
+            "symbol": "LKSM",
+            "decimals": 12,
+            "currencyID": "131"
+        },
+        {
+            "asset": {
+                "Token": "2"
+            },
+            "name": "kusama",
+            "symbol": "KSM",
+            "decimals": 12,
+            "currencyID": "2",
+            "xcmInteriorKey": "[{\"network\":\"kusama\"},\"here\"]"
+        },
+        {
+            "asset": {
+                "Token": "5"
+            },
+            "name": "usdt",
+            "symbol": "USDT",
+            "decimals": 12,
+            "currencyID": "5"
+        },
+        {
+            "asset": {
+                "Token": "LT"
+            },
+            "name": "LT",
+            "symbol": "LT",
+            "decimals": 12
+        }
+    ],
+    "2119": [
+        {
+            "asset": {
+                "Token": "BAJU"
+            },
+            "name": "BAJU",
+            "symbol": "BAJU",
+            "decimals": 12
+        }
+    ],
+    "2121": [
+        {
+            "asset": {
+                "Token": "IMBU"
+            },
+            "name": "IMBU",
+            "symbol": "IMBU",
+            "decimals": 12
+        }
+    ],
+    "2222": [
+        {
+            "asset": {
+                "Token": "MITO"
+            },
+            "name": "MITO",
+            "symbol": "MITO",
+            "decimals": 12
+        }
+    ]
+}

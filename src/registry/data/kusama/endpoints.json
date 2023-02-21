@@ -1,5 +1,5 @@
-{
-    "kusama-0": {
+[
+    {
         "chainkey": "kusama-0",
         "name": "Kusama",
         "id": "kusama",
@@ -17,7 +17,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-1000": {
+    {
         "chainkey": "kusama-1000",
         "name": "Statemine",
         "id": "statemine",
@@ -32,7 +32,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2000": {
+    {
         "chainkey": "kusama-2000",
         "name": "Karura",
         "id": "karura",
@@ -48,7 +48,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2001": {
+    {
         "chainkey": "kusama-2001",
         "name": "Bifrost",
         "id": "bifrost",
@@ -60,7 +60,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2004": {
+    {
         "chainkey": "kusama-2004",
         "name": "Khala Network",
         "id": "khala",
@@ -73,7 +73,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2007": {
+    {
         "chainkey": "kusama-2007",
         "name": "Shiden",
         "id": "shiden",
@@ -88,7 +88,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2011": {
+    {
         "chainkey": "kusama-2011",
         "name": "SORA",
         "id": "sora_ksm",
@@ -98,7 +98,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2012": {
+    {
         "chainkey": "kusama-2012",
         "name": "Crust Shadow",
         "id": "shadow",
@@ -108,7 +108,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2015": {
+    {
         "chainkey": "kusama-2015",
         "name": "Integritee Network",
         "id": "integritee",
@@ -119,7 +119,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2023": {
+    {
         "chainkey": "kusama-2023",
         "name": "Moonriver",
         "id": "moonriver",
@@ -133,7 +133,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2048": {
+    {
         "chainkey": "kusama-2048",
         "name": "Robonomics",
         "id": "robonomics",
@@ -146,7 +146,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2084": {
+    {
         "chainkey": "kusama-2084",
         "name": "Calamari",
         "id": "calamari",
@@ -156,7 +156,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2085": {
+    {
         "chainkey": "kusama-2085",
         "name": "Parallel Heiko",
         "id": "heiko",
@@ -166,7 +166,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2087": {
+    {
         "chainkey": "kusama-2087",
         "name": "Picasso",
         "id": "picasso",
@@ -176,7 +176,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2088": {
+    {
         "chainkey": "kusama-2088",
         "name": "Altair",
         "id": "altair",
@@ -187,7 +187,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2090": {
+    {
         "chainkey": "kusama-2090",
         "name": "Basilisk",
         "id": "basilisk",
@@ -198,7 +198,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2092": {
+    {
         "chainkey": "kusama-2092",
         "name": "Kintsugi BTC",
         "id": "kintsugi",
@@ -209,7 +209,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2095": {
+    {
         "chainkey": "kusama-2095",
         "name": "QUARTZ by UNIQUE",
         "id": "quartz",
@@ -221,7 +221,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2096": {
+    {
         "chainkey": "kusama-2096",
         "name": "Bit.Country Pioneer",
         "id": "bitcountryPioneer",
@@ -231,7 +231,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2100": {
+    {
         "chainkey": "kusama-2100",
         "name": "SubsocialX",
         "id": "subsocialX",
@@ -239,7 +239,7 @@
         "WSEndpoints": [],
         "relaychain": "kusama"
     },
-    "kusama-2101": {
+    {
         "chainkey": "kusama-2101",
         "name": "Zeitgeist",
         "id": "zeitgeist",
@@ -250,7 +250,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2102": {
+    {
         "chainkey": "kusama-2102",
         "name": "Pichiu",
         "id": "pichiu",
@@ -261,7 +261,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2105": {
+    {
         "chainkey": "kusama-2105",
         "name": "Darwinia Crab",
         "id": "crab",
@@ -271,7 +271,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2106": {
+    {
         "chainkey": "kusama-2106",
         "name": "Litmus",
         "id": "litmus",
@@ -281,7 +281,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2110": {
+    {
         "chainkey": "kusama-2110",
         "name": "Mangata",
         "id": "mangata",
@@ -292,7 +292,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2113": {
+    {
         "chainkey": "kusama-2113",
         "name": "Kabocha",
         "id": "kabocha",
@@ -302,7 +302,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2114": {
+    {
         "chainkey": "kusama-2114",
         "name": "Turing Network",
         "id": "turing",
@@ -313,7 +313,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2115": {
+    {
         "chainkey": "kusama-2115",
         "name": "Dora Factory",
         "id": "dorafactory",
@@ -323,7 +323,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2118": {
+    {
         "chainkey": "kusama-2118",
         "name": "Listen Network",
         "id": "listen",
@@ -334,7 +334,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2119": {
+    {
         "chainkey": "kusama-2119",
         "name": "Bajun Network",
         "id": "bajun",
@@ -346,7 +346,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2121": {
+    {
         "chainkey": "kusama-2121",
         "name": "Imbue Network",
         "id": "imbue",
@@ -356,7 +356,7 @@
         ],
         "relaychain": "kusama"
     },
-    "kusama-2222": {
+    {
         "chainkey": "kusama-2222",
         "name": "DAO IPCI",
         "id": "ipci",
@@ -366,4 +366,4 @@
         ],
         "relaychain": "kusama"
     }
-}
+]

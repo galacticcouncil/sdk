@@ -1,31 +1,20 @@
 import { Chain, ChainAsset } from './types';
-import { readJsonOrReturnEmptyObject } from './utils';
+import polkadotEndpoints from './data/polkadot/endpoints.json';
+import polkadotAssets from './data/polkadot/assets.json';
+import kusamaEndpoints from './data/kusama/endpoints.json';
+import kusamaAssets from './data/polkadot/assets.json';
 
-export class Registry {
-  private chains: Chain[] = [];
-  private assets: Record<number, ChainAsset[]> = {};
+abstract class Registry {
+  protected chains: Chain[] = [];
+  protected assets: Record<number, ChainAsset[]> = {};
 
-  constructor(relay: string) {
-    this.initChains(relay);
-    this.initAssets(relay);
+  constructor() {
+    this.initChains();
+    this.initAssets();
   }
 
-  private initChains(relay: string) {
-    const json = readJsonOrReturnEmptyObject(`./registry/${relay}/endpoints.json`);
-    Object.keys(json).forEach((chainKey: string) => {
-      const chain = json[chainKey];
-      this.chains.push(chain);
-    });
-  }
-
-  private initAssets(relay: string) {
-    this.chains.forEach((chain: Chain) => {
-      const json = readJsonOrReturnEmptyObject(`./registry/${relay}/assets/${relay}_${chain.paraID}_assets.json`);
-      const assets: ChainAsset[] = [];
-      Object.assign(assets, json);
-      this.assets[chain.paraID] = assets;
-    });
-  }
+  protected abstract initChains(): void;
+  protected abstract initAssets(): void;
 
   getChains(): Chain[] {
     return this.chains;
@@ -37,5 +26,35 @@ export class Registry {
 
   getAssets(chainId: number): ChainAsset[] {
     return this.assets[chainId];
+  }
+}
+
+export class PolkadotRegistry extends Registry {
+  protected initChains(): void {
+    Object.keys(polkadotEndpoints).forEach((chainKey: string) => {
+      const chain = polkadotEndpoints[chainKey];
+      this.chains.push(chain);
+    });
+  }
+  protected initAssets(): void {
+    this.chains.forEach((chain: Chain) => {
+      const assets: ChainAsset[] = polkadotAssets[chain.paraID];
+      this.assets[chain.paraID] = assets;
+    });
+  }
+}
+
+export class KusamaRegistry extends Registry {
+  protected initChains(): void {
+    Object.keys(kusamaEndpoints).forEach((chainKey: string) => {
+      const chain = polkadotEndpoints[chainKey];
+      this.chains.push(chain);
+    });
+  }
+  protected initAssets(): void {
+    this.chains.forEach((chain: Chain) => {
+      const assets: ChainAsset[] = kusamaAssets[chain.paraID];
+      this.assets[chain.paraID] = assets;
+    });
   }
 }

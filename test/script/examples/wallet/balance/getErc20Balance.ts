@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { ApiUrl, PolkadotExecutor } from '../../../executor';
 import { Erc20BalanceAdapter } from '../../../../../src/wallet';
-import { ChainAsset, Registry } from '../../../../../src/registry';
+import { ChainAsset, PolkadotRegistry } from '../../../../../src/registry';
 import { AcalaEvmProvider } from '../../../../../src/wallet/evm/AcalaEvmProvider';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,7 +10,7 @@ const ACALA_EVM_PROVIDER = 'https://rpc.evm.acala.network';
 
 class Erc20BalanceAdapterExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const registry = new Registry('polkadot');
+    const registry = new PolkadotRegistry();
     const acalaEvmProvider = new AcalaEvmProvider(api, ACALA_EVM_PROVIDER);
     const adapter = new Erc20BalanceAdapter(acalaEvmProvider);
 
