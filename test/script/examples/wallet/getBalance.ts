@@ -8,7 +8,7 @@ import { Wallet } from '../../../../src/wallet/Wallet';
 const ACALA_PARACHAIN_ID = 2000;
 const ACALA_EVM_PROVIDER = 'https://rpc.evm.acala.network';
 
-class Erc20BalanceAdapterExample extends PolkadotExecutor {
+class WalletBalanceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const registry = new Registry('polkadot');
     const evmProvider = new AcalaEvmProvider(api, ACALA_EVM_PROVIDER);
@@ -21,4 +21,4 @@ class Erc20BalanceAdapterExample extends PolkadotExecutor {
   }
 }
 
-new Erc20BalanceAdapterExample(ApiUrl.Acala, 'Get balance', true).run();
+new WalletBalanceExample(ApiUrl.Acala, 'Get balance', true).run();
