@@ -3,8 +3,9 @@ import { AssetBalance } from '../../types';
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
 import { Observable } from 'rxjs';
 import { ChainAsset } from '../../registry';
+import { BalanceAdapter } from '../types';
 
-export abstract class NativeBalanceAdapter {
+export abstract class NativeBalanceAdapter implements BalanceAdapter {
   readonly nativeToken: string;
   readonly decimals: number;
   readonly ed: BigNumber;

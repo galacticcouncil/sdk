@@ -33,9 +33,9 @@ export class StorageConfigNotFound extends Error {
 }
 
 export class SubscriptionNotSupported extends Error {
-  constructor(subscritpionType: string) {
+  constructor(subscriptionType: string) {
     super();
-    this.message = `Subscription type "${subscritpionType}" not supported`;
+    this.message = `Subscription type "${subscriptionType}" not supported`;
     this.name = 'SubscriptionNotSupported';
   }
 }

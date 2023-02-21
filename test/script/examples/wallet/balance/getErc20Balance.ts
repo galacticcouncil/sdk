@@ -2,6 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { ApiUrl, PolkadotExecutor } from '../../../executor';
 import { Erc20BalanceAdapter } from '../../../../../src/wallet';
 import { ChainAsset, Registry } from '../../../../../src/registry';
+import { AcalaEvmProvider } from '../../../../../src/wallet/evm/AcalaEvmProvider';
 import { firstValueFrom } from 'rxjs';
 
 const ACALA_PARACHAIN_ID = 2000;
@@ -10,11 +11,12 @@ const ACALA_EVM_PROVIDER = 'https://rpc.evm.acala.network';
 class Erc20BalanceAdapterExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const registry = new Registry('polkadot');
-    const adapter = new Erc20BalanceAdapter(api, ACALA_EVM_PROVIDER);
+    const acalaEvmProvider = new AcalaEvmProvider(api, ACALA_EVM_PROVIDER);
+    const adapter = new Erc20BalanceAdapter(acalaEvmProvider);
 
     const acalaAssets = registry.getAssets(ACALA_PARACHAIN_ID);
-    const weth = acalaAssets.find((asset: ChainAsset) => asset.symbol == 'WETH' && asset.asset['Erc20']);
-    const ob = adapter.getObserver(weth!, '0x6dBA3F038becC02f4FC81EF25b3059D55a28caBc');
+    const dai = acalaAssets.find((asset: ChainAsset) => asset.symbol == 'DAI' && asset.asset['Erc20']);
+    const ob = adapter.getObserver(dai!, '5FkNiM6iAQ6rrNk9muuWbSnfWufdJ5wdRa4uQmkxnCAit88n');
 
     return firstValueFrom(ob);
   }
