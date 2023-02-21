@@ -17,7 +17,7 @@ export class Erc20BalanceAdapter implements BalanceAdapter {
   public getObserver(asset: ChainAsset, address: string): Observable<AssetBalance> {
     const balance$ = new Subject<AssetBalance>();
     const observer = balance$.pipe(shareReplay(1));
-    const token = new Contract(asset.asset.Erc20, ["function balanceOf(address) view returns (uint256)"], this.client);
+    const token = new Contract(asset.asset.Erc20, ['function balanceOf(address) view returns (uint256)'], this.client);
 
     const run = async () => {
       const evmAddress = await this.evmProvider.toEvmAddress(address);
