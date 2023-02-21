@@ -144,3 +144,10 @@ export type Amount = {
   amount: BigNumber;
   decimals: number;
 };
+
+export interface AssetBalance {
+  free: BigNumber;
+  locked: BigNumber;
+  reserved: BigNumber;
+  available: BigNumber;
+}
