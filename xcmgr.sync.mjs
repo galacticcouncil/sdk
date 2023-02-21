@@ -1,44 +1,37 @@
-import fetch from 'node-fetch';
-import { mkdirSync, existsSync } from 'fs';
-import { pairs2Map, writeJsonSync } from './utils';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
 
 const XCMGAR_REPO = 'https://raw.githubusercontent.com/colorfulnotion/xcm-global-registry/main';
 const RELAY_CHAINS = ['kusama', 'polkadot'];
 const DEST = './src/registry/data';
 
-const fetchPublicEndpoints = async (relay: string) => {
+function pairs2Map(pairs) {
+  const result = new Map();
+  pairs.forEach((pair) => result.set(pair[0], pair[1]));
+  return result;
+}
+
+const writeJsonSync = (path, data) => {
+  writeFileSync(path, JSON.stringify(data, null, 4));
+};
+
+const fetchPublicEndpoints = async (relay) => {
   const response = await fetch(`${XCMGAR_REPO}/publicEndpoints/${relay}_publicEndpoints.json`);
   return await response.json();
 };
 
-const fetchXcAssets = async (relay: string, chainKey: string) => {
+// TODO: Fetch XcAssets
+const fetchXcAssets = async (relay, chainKey) => {
   const response = await fetch(`${XCMGAR_REPO}/xcAssets/${relay}/${chainKey}_xcAssets.json`);
   return await response.json();
 };
 
-const fetchAssets = async (relay: string, chainKey: string) => {
+const fetchAssets = async (relay, chainKey) => {
   const response = await fetch(`${XCMGAR_REPO}/assets/${relay}/${chainKey}_assets.json`);
   return await response.json();
 };
 
-const syncXcAssets = async (relay: string, chainKeys: string[]) => {
-  const fld = `${DEST}/${relay}/xcAssets`;
-  if (!existsSync(fld)) {
-    mkdirSync(fld);
-  }
-  chainKeys
-    .map((chainKey) => chainKey.replace('-', '_'))
-    .forEach(async (chainKey) => {
-      try {
-        const xcAssets = await fetchXcAssets(relay, chainKey);
-        const XC_ASSETS_FILE_PATH = `${DEST}/${relay}/xcAssets/${chainKey}_xcAssets.json`;
-        writeJsonSync(XC_ASSETS_FILE_PATH, xcAssets);
-      } catch (err) {}
-    });
-};
-
-const syncAssets = async (relay: string, chainKeys: string[]) => {
-  const assets: [string, any][] = await Promise.all(
+const syncAssets = async (relay, chainKeys) => {
+  const assets = await Promise.all(
     chainKeys
       .map((chainKey) => chainKey.replace('-', '_'))
       .map(async (chainKey) => {
@@ -56,7 +49,7 @@ const syncAssets = async (relay: string, chainKeys: string[]) => {
 };
 
 (async () => {
-  RELAY_CHAINS.forEach(async (relay: string) => {
+  RELAY_CHAINS.forEach(async (relay) => {
     const fld = `${DEST}/${relay}`;
     if (!existsSync(fld)) {
       mkdirSync(fld);
@@ -64,7 +57,6 @@ const syncAssets = async (relay: string, chainKeys: string[]) => {
     const ENDPOINT_FILE_PATH = `${DEST}/${relay}/endpoints.json`;
     const endpoints = await fetchPublicEndpoints(relay);
 
-    //await syncXcAssets(relay, Object.keys(endpoints));
     await syncAssets(relay, Object.keys(endpoints));
 
     writeJsonSync(ENDPOINT_FILE_PATH, Object.values(endpoints));

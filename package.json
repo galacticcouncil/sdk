@@ -13,7 +13,7 @@
     "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "xcmgr:sync": "npx tsx ./src/registry/sync.ts"
+    "xcmgr:sync": "node ./xcmgr.sync.mjs"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
