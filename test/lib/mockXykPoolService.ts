@@ -1,5 +1,5 @@
-import BigNumber from 'bignumber.js';
 import { Hop, PoolBase, PoolService, Transaction } from '../../src/types';
+import { BigNumber } from '../../src/utils/bignumber';
 import { xykPools } from '../data/xykPools';
 
 export class MockXykPoolService implements PoolService {
