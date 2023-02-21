@@ -8,10 +8,12 @@
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
+    "cleanup": "rimraf out && rimraf dist",
+    "copy:assets": "cp -R ./src/registry/kusama/ ./dist/kusama/ && cp -R ./src/registry/polkadot/ ./dist/polkadot/",
+    "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
-    "cleanup": "rimraf out && rimraf dist"
+    "xcmgr:sync": "npx tsx ./src/registry/sync.ts"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
@@ -19,6 +21,7 @@
     "esbuild": "^0.14.53",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
+    "node-fetch": "^2.6.9",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.8",
@@ -30,7 +33,8 @@
     "@galacticcouncil/math-omnipool": "^0.0.7",
     "@galacticcouncil/math-xyk": "^0.0.7",
     "bignumber.js": "^9.1.0",
-    "lodash.clonedeep": "^4.5.0"
+    "lodash.clonedeep": "^4.5.0",
+    "web3": "^1.8.2"
   },
   "peerDependencies": {
     "@polkadot/api": "^9.9.1",
