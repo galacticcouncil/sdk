@@ -2,7 +2,7 @@ import { Chain, ChainAsset } from './types';
 import polkadotEndpoints from './data/polkadot/endpoints.json';
 import polkadotAssets from './data/polkadot/assets.json';
 import kusamaEndpoints from './data/kusama/endpoints.json';
-import kusamaAssets from './data/polkadot/assets.json';
+import kusamaAssets from './data/kusama/assets.json';
 
 abstract class Registry {
   protected chains: Chain[] = [];
@@ -47,7 +47,7 @@ export class PolkadotRegistry extends Registry {
 export class KusamaRegistry extends Registry {
   protected initChains(): void {
     Object.keys(kusamaEndpoints).forEach((chainKey: string) => {
-      const chain = polkadotEndpoints[chainKey];
+      const chain = kusamaEndpoints[chainKey];
       this.chains.push(chain);
     });
   }
