@@ -6,7 +6,7 @@ import { AcalaEvmProvider } from '../../../../../src/wallet/evm/AcalaEvmProvider
 import { firstValueFrom } from 'rxjs';
 
 const ACALA_PARACHAIN_ID = 2000;
-const ACALA_EVM_PROVIDER = 'https://rpc.evm.acala.network';
+const ACALA_EVM_PROVIDER = 'wss://eth-rpc-acala.aca-api.network/ws';
 
 class Erc20BalanceAdapterExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
