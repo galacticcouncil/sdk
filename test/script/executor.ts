@@ -1,14 +1,13 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 export enum ApiUrl {
+  Local = 'ws://localhost:8000',
   Basilisk = 'wss://rpc.basilisk.cloud',
   Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
-  Basilisk_Dev = 'wss://rpc01.hydration.dev',
   Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
   Basilisk_Rococo_UK = 'wss://rococo-basilisk-rpc04.hydration.dev',
-  HydraDx_Dev = 'wss://hydradx-devnet-rpc.play.hydration.cloud',
-  HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
   HydraDx = 'wss://rpc.hydradx.cloud',
+  HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
   Acala = 'wss://acala-polkadot.api.onfinality.io/public-ws',
 }
 

@@ -26,14 +26,6 @@ export class Erc20BalanceAdapter implements BalanceAdapter {
 
     const run = async () => {
       const evmAddress = await this.evmProvider.toEvmAddress(address);
-      const balance = await contract.balanceOf(evmAddress);
-      balance$.next({
-        free: bnum(balance),
-        locked: ZERO,
-        reserved: ZERO,
-        available: bnum(balance),
-      });
-
       const updateBalance = async () => {
         const balance = await contract.balanceOf(evmAddress);
         balance$.next({
@@ -43,6 +35,7 @@ export class Erc20BalanceAdapter implements BalanceAdapter {
           available: bnum(balance),
         });
       };
+      await updateBalance();
 
       this.client.on('block', async (_n) => {
         updateBalance();
