@@ -101,9 +101,32 @@ Component list and current status ⬇️
 | Omni        |  Math  |  🧪 |
 | Omni        |  Pool  |  🧪 |
 | LBP         |  Math  |  🧪 |
-| LBP         |  Pool  |  🛠 |
+| LBP         |  Pool  |   🛠 |
 | Stable      |  Math  |  ⏳ |
 | Stable      |  Pool  |  ⏳ |
+
+## Development and Build
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) (**version 18 or higher**)
+
+### Build & Release
+
+```sh
+npm install # to install all dependencies
+npm run pckg:release # to release patch version (default)
+npm run pckg:publish # to publish npm package
+```
+
+#### Other
+
+To release minor or major version of the SDK use following commands.
+
+```sh
+npm run pckg:release -- --release-as minor # Release minor version. E.g. 1.0.23 -> 1.1.0
+npm run pckg:release -- --release-as major # Release major version. E.g. 1.0.23 -> 2.0.0
+```
 
 ## Issue reporting
 
