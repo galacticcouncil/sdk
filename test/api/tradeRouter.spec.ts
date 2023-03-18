@@ -19,6 +19,13 @@ describe('TradeRouter with mocked XYK pool service', () => {
     expect(bestSpotPrice?.decimals).toEqual(12);
   });
 
+  it('Should return undefined is same token pair token 1 (KSM) & 1 (KSM)', async () => {
+    expect(poolService).toBeDefined();
+    expect(router).toBeDefined();
+    const bestSpotPrice = await router.getBestSpotPrice('1', '1');
+    expect(bestSpotPrice === undefined);
+  });
+
   it('Should return best sell trade between token 1 (KSM) & 2 (aUSD)', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
