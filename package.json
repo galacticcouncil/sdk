@@ -8,12 +8,19 @@
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "cleanup": "rimraf out && rimraf dist",
-    "copy:assets": "cp -R ./src/registry/kusama/ ./dist/kusama/ && cp -R ./src/registry/polkadot/ ./dist/polkadot/",
     "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
+    "cleanup": "rimraf out && rimraf dist",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "pckg:build": "npm run cleanup && npm run build",
+    "pckg:release": "npm run pckg:build && standard-version",
+    "pckg:publish": "git push origin master && npm publish",
     "xcmgr:sync": "node ./xcmgr.sync.mjs"
+  },
+  "standard-version": {
+    "skip": {
+      "changelog": true
+    }
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
@@ -23,6 +30,7 @@
     "fs-extra": "^10.1.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
+    "standard-version": "^9.5.0",
     "ts-jest": "^28.0.8",
     "tsx": "^3.8.2",
     "typescript": "^4.7.4"
