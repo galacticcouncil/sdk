@@ -198,13 +198,17 @@ export class TradeRouter extends Router {
    *
    * @param {string} assetIn - Storage key of tokenIn
    * @param {string} assetOut - Storage key of tokenOut
-   * @return Best possible spot price of given token pair
+   * @return Best possible spot price of given token pair, or undefined if given pair not supported
    */
-  async getBestSpotPrice(assetIn: string, assetOut: string): Promise<Amount> {
+  async getBestSpotPrice(assetIn: string, assetOut: string): Promise<Amount | undefined> {
     const pools = await super.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(assetIn, assetOut, pools);
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
+
+    if (paths.length === 0) {
+      return Promise.resolve(undefined);
+    }
 
     const swaps = paths.map((path) => this.toSellSwaps('1', path, poolsMap));
     const bestRoute = this.findBestSellRoute(swaps);
