@@ -8,7 +8,7 @@ class GetBestSpotPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PolkadotApiPoolService(api);
     const router = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
-    return router.getBestSpotPrice('1', '2');
+    return router.getBestSpotPrice('1', '14');
   }
 }
 

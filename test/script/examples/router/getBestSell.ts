@@ -9,7 +9,7 @@ class GetBestSellPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PolkadotApiPoolService(api);
     const router = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
-    const bestSell = await router.getBestSell('1', '2', 1);
+    const bestSell = await router.getBestSell('1', '14', 1);
     const transaction = bestSell.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
     return bestSell;
