@@ -13,7 +13,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "pckg:build": "npm run cleanup && npm run build",
-    "pckg:release": "npm run pckg:build && standard-version",
+    "pckg:release": "npm run pckg:build && standard-version --tag-prefix=''",
     "pckg:publish": "git push origin master && npm publish",
     "xcmgr:sync": "node ./xcmgr.sync.mjs"
   },
