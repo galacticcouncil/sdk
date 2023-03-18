@@ -10,13 +10,13 @@ export const xykPool = {
   tokens: [
     {
       id: '1',
-      balance: '3684960401086',
+      balance: '4000000000000',
       decimals: 12,
       symbol: 'KSM',
     },
     {
       id: '2',
-      balance: '174291804564300',
+      balance: '175000000000000',
       decimals: 12,
       symbol: 'AUSD',
     },

@@ -11,25 +11,25 @@ export const stablePools = [
     tokens: [
       {
         id: '0',
-        balance: '235315220453344458259',
+        balance: '235000000000000000000',
         decimals: 12,
         symbol: 'DAI',
       },
       {
         id: '1',
-        balance: '34783100690381537',
+        balance: '35000000000000000',
         decimals: 12,
         symbol: 'USDC',
       },
       {
         id: '2',
-        balance: '34783100690381537',
+        balance: '35000000000000000',
         decimals: 12,
         symbol: 'USDT',
       },
       {
         id: '3',
-        balance: '174291804564300',
+        balance: '175000000000000',
         decimals: 12,
         symbol: 'FRAX',
       },
@@ -45,13 +45,13 @@ export const stablePools = [
     tokens: [
       {
         id: '2',
-        balance: '3684960401086',
+        balance: '4000000000000',
         decimals: 12,
         symbol: 'USDT',
       },
       {
         id: '1',
-        balance: '174291804564300',
+        balance: '175000000000000',
         decimals: 12,
         symbol: 'USDC',
       },

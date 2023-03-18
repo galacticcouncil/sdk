@@ -11,13 +11,13 @@ export const xykPools = [
     tokens: [
       {
         id: '0',
-        balance: '235315220453344458259',
+        balance: '235000000000000000000',
         decimals: 12,
         symbol: 'BSX',
       },
       {
         id: '2',
-        balance: '34783100690381537',
+        balance: '35000000000000000',
         decimals: 12,
         symbol: 'AUSD',
       },
@@ -33,13 +33,13 @@ export const xykPools = [
     tokens: [
       {
         id: '1',
-        balance: '3684960401086',
+        balance: '4000000000000',
         decimals: 12,
         symbol: 'KSM',
       },
       {
         id: '2',
-        balance: '174291804564300',
+        balance: '175000000000000',
         decimals: 12,
         symbol: 'AUSD',
       },
@@ -55,13 +55,13 @@ export const xykPools = [
     tokens: [
       {
         id: '0',
-        balance: '261138390134511806721',
+        balance: '265000000000000000000',
         decimals: 12,
         symbol: 'BSX',
       },
       {
         id: '1',
-        balance: '842366824680338',
+        balance: '845000000000000',
         decimals: 12,
         symbol: 'KSM',
       },
