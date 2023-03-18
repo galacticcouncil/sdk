@@ -205,7 +205,6 @@ export class TradeRouter extends Router {
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await super.validateTokenPair(assetIn, assetOut, pools);
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
 
     const swaps = paths.map((path) => this.toSellSwaps('1', path, poolsMap));
     const bestRoute = this.findBestSellRoute(swaps);
