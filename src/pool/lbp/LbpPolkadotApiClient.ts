@@ -34,7 +34,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
     return this.pools;
   }
 
-  async loadPools(): Promise<PoolBase[]> {
+  private async loadPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.lbp.poolData.entries();
     const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Codec]) => {
       const poolAddress = this.getStorageKey(asset, 0);
@@ -61,7 +61,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
     return Promise.all(pools);
   }
 
-  async syncPools(): Promise<PoolBase[]> {
+  private async syncPools(): Promise<PoolBase[]> {
     const syncedPools = this.pools.map(async (pool: PoolBase) => {
       const poolEntry = this.poolsData.get(pool.address);
       const poolTokens = await this.syncPoolTokens(pool.address, pool.tokens);
