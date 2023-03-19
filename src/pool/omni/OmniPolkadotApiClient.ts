@@ -35,7 +35,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
     return this.pools;
   }
 
-  async loadPool(): Promise<PoolBase> {
+  private async loadPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolEntries = poolAssets
@@ -58,7 +58,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
     } as PoolBase;
   }
 
-  async syncPool(): Promise<PoolBase> {
+  private async syncPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolTokens = await this.syncPoolTokens(this.pools[0].address, this.pools[0].tokens);

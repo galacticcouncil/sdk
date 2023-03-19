@@ -45,7 +45,7 @@ export class PolkadotApiClient {
     return asset[1].toHuman() as string[];
   }
 
-  async getPoolTokens(poolAddress: string, assetKeys: string[]): Promise<PoolToken[]> {
+  protected async getPoolTokens(poolAddress: string, assetKeys: string[]): Promise<PoolToken[]> {
     const poolTokens = assetKeys.map(async (id) => {
       const balance = await this.getAccountBalance(poolAddress, id);
       const metadata = await this.getAssetMetadata(id);
@@ -72,7 +72,7 @@ export class PolkadotApiClient {
     return Promise.all(poolTokens);
   }
 
-  async syncPoolTokens(poolAddress: string, poolTokens: PoolToken[]): Promise<PoolToken[]> {
+  protected async syncPoolTokens(poolAddress: string, poolTokens: PoolToken[]): Promise<PoolToken[]> {
     const syncedPoolTokens = poolTokens.map(async (poolToken: PoolToken) => {
       const balance = await this.getAccountBalance(poolAddress, poolToken.id);
       return {
