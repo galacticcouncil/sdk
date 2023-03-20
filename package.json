@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "private": false,
   "description": "Galactic SDK",
   "author": "Pavol Noha <palo@hydradx.io>",
@@ -44,7 +44,6 @@
   },
   "peerDependencies": {
     "@polkadot/api": "^9.9.1",
-    "capi": "^0.1.0-beta.12",
     "ethers": "^6.0.5"
   }
 }
