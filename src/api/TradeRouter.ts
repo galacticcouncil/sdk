@@ -198,7 +198,7 @@ export class TradeRouter extends Router {
    *
    * @param {string} assetIn - Storage key of tokenIn
    * @param {string} assetOut - Storage key of tokenOut
-   * @return Best possible spot price of given token pair, or undefined if given pair not supported
+   * @return Best possible spot price of given token pair, or undefined if given pair trade not supported
    */
   async getBestSpotPrice(assetIn: string, assetOut: string): Promise<Amount | undefined> {
     const pools = await super.getPools();
@@ -218,7 +218,8 @@ export class TradeRouter extends Router {
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const spotPriceDecimals = bestRoute[bestRoute.length - 1].assetOutDecimals;
-    return { amount: scale(spotPrice, spotPriceDecimals).decimalPlaces(0, 1), decimals: spotPriceDecimals };
+    const spotPriceAmount = scale(spotPrice, spotPriceDecimals).decimalPlaces(0, 1);
+    return { amount: spotPriceAmount, decimals: spotPriceDecimals };
   }
 
   /**
