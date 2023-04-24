@@ -115,7 +115,8 @@ export class OmniMath {
     positionAmount: string,
     positionShares: string,
     positionPrice: string,
-    sharesToRemove: string
+    sharesToRemove: string,
+    withdrawalFee: string
   ): string {
     return calculate_liquidity_out(
       assetReserve,
@@ -124,7 +125,8 @@ export class OmniMath {
       positionAmount,
       positionShares,
       positionPrice,
-      sharesToRemove
+      sharesToRemove,
+      withdrawalFee
     );
   }
 
@@ -135,7 +137,8 @@ export class OmniMath {
     positionAmount: string,
     positionShares: string,
     positionPrice: string,
-    sharesToRemove: string
+    sharesToRemove: string,
+    withdrawalFee: string
   ): string {
     return calculate_liquidity_lrna_out(
       assetReserve,
@@ -144,7 +147,8 @@ export class OmniMath {
       positionAmount,
       positionShares,
       positionPrice,
-      sharesToRemove
+      sharesToRemove,
+      withdrawalFee
     );
   }
 
