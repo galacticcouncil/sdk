@@ -39,6 +39,7 @@
     "@galacticcouncil/math-lbp": "^0.0.7",
     "@galacticcouncil/math-omnipool": "^0.0.7",
     "@galacticcouncil/math-xyk": "^0.0.7",
+    "@galacticcouncil/math-ema": "file:../hydra-wasm/packages/ema",
     "bignumber.js": "^9.1.0",
     "lodash.clonedeep": "^4.5.0"
   },
