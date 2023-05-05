@@ -20,6 +20,7 @@ type OraclePeriod = 'LastBlock' | 'Short' | 'TenMinutes' | 'Hour' | 'Day' | 'Wee
 
 export class EmaLowPrecisionMath {
   // Smoothing factors for the currently supported oracle periods.
+  // Taken from https://github.com/galacticcouncil/warehouse/blob/0047e9ceff47b2a058ae9ecc25da96d1e827a26a/ema-oracle/src/types.rs#L198-L207
   static readonly LastBlock: string = '170141183460469231731687303715884105728';
   static readonly Short: string = '34028236692093846346337460743176821146';
   static readonly TenMinutes: string = '3369132345751865974884897103284833777';
@@ -61,8 +62,8 @@ export class OracleMath {
     updateWith: OracleEntry,
     period: OraclePeriod
   ): LowPrecisionOracleEntry {
-    if (outdated.timestamp > updateWith.timestamp) {
-      throw new Error('invalid timestamp');
+    if (outdated.timestamp >= updateWith.timestamp) {
+      throw new Error('invalid timestamp (outdated should be older)');
     }
     let iterations = BigNumber.max(updateWith.timestamp.minus(outdated.timestamp), 0).toString();
     let smoothing = OracleMath.SmoothingForPeriod[period];
