@@ -67,6 +67,9 @@ export class OracleMath {
     }
     let iterations = BigNumber.max(updateWith.timestamp.minus(outdated.timestamp), 0).toString();
     let smoothing = OracleMath.SmoothingForPeriod.get(period);
+    if (!smoothing) {
+      throw new Error('unknown period');
+    }
     let [prevN, prevD] = outdated.price;
     let [incomingN, incomingD] = updateWith.price;
     let price = bnum(
