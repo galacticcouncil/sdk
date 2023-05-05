@@ -1,4 +1,4 @@
-import { EmaLowPrecisionMath } from '../../src/oracle';
+import { EmaLowPrecisionMath, OracleMath, OraclePeriod } from '../../src/oracle';
 import { BigNumber, bnum } from '../../src/utils/bignumber';
 
 function smoothingFromPeriod(period: number): BigNumber {
@@ -29,7 +29,7 @@ describe('EMA Math', () => {
   });
 
   it('Should return correct price EMA for hard-coded period', async () => {
-    let smoothing = EmaLowPrecisionMath.Short;
+    let smoothing = OracleMath.SmoothingForPeriod.get(OraclePeriod.Short);
     let startPriceN = bnum('100');
     let startPriceD = bnum(1);
     let incomingPriceN = bnum('1100');
@@ -48,7 +48,7 @@ describe('EMA Math', () => {
   });
 
   it('Should return correct balance EMA for hard-coded period', async () => {
-    let smoothing = EmaLowPrecisionMath.Short;
+    let smoothing = OracleMath.SmoothingForPeriod.get(OraclePeriod.Short);
     let startBalance = bnum('100000000');
     let incomingBalance = bnum('1100000000');
     let iterations = bnum(1);

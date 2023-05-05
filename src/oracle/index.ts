@@ -1,1 +1,1 @@
-export { OracleMath, EmaLowPrecisionMath } from './OracleMath';
+export { EmaLowPrecisionMath, LowPrecisionOracleEntry, OracleEntry, OracleMath, OraclePeriod } from './OracleMath';
