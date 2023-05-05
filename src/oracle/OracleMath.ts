@@ -30,13 +30,13 @@ export class EmaLowPrecisionMath {
 
   static iteratedPriceEma(
     iterations: string,
-    prev_n: string,
-    prev_d: string,
-    incoming_n: string,
-    incoming_d: string,
+    prevN: string,
+    prevD: string,
+    incomingN: string,
+    incomingD: string,
     smoothing: string
   ): string {
-    return low_precision_iterated_price_ema(iterations, prev_n, prev_d, incoming_n, incoming_d, smoothing);
+    return low_precision_iterated_price_ema(iterations, prevN, prevD, incomingN, incomingD, smoothing);
   }
 
   static iteratedBalanceEma(iterations: string, prev: string, incoming: string, smoothing: string): string {
