@@ -73,7 +73,7 @@ export interface Pool extends PoolBase {
   calculateTradeFee(amount: BigNumber): BigNumber;
 }
 
-export interface PoolService {
+export interface IPoolService {
   getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
   buildBuyTx(
     assetIn: string,
