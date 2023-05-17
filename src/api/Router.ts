@@ -1,4 +1,4 @@
-import { PoolService, PoolBase, Hop, Pool, PoolAsset, PoolType } from '../types';
+import { IPoolService, PoolBase, Hop, Pool, PoolAsset, PoolType } from '../types';
 import { RouteSuggester } from '../route';
 import { Edge } from '../route';
 import { PoolFactory } from '../pool';
@@ -10,7 +10,7 @@ export type RouterOptions = {
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routerOptions: RouterOptions;
-  protected readonly poolService: PoolService;
+  protected readonly poolService: IPoolService;
 
   private readonly defaultRouterOptions: RouterOptions = {
     includeOnly: [],
@@ -20,7 +20,7 @@ export class Router {
    * @param poolService - Fetch pool data from substrate based pools
    * @param routerOptions - Optional router options
    */
-  constructor(poolService: PoolService, routerOptions?: RouterOptions) {
+  constructor(poolService: IPoolService, routerOptions?: RouterOptions) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
     this.routerOptions = {

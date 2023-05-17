@@ -1,23 +1,24 @@
-import { Hop, PoolBase, PoolService, PoolType, Transaction } from '../types';
-import { XykPolkadotApiClient } from './xyk/XykPolkadotApiClient';
-import { LbpPolkadotApiClient } from './lbp/LbpPolkadotApiClient';
-import { OmniPolkadotApiClient } from './omni/OmniPolkadotApiClient';
+import { LbpPoolApiClient } from './lbp/LbpPoolApiClient';
+import { OmniPoolApiClient } from './omni/OmniPoolApiClient';
+import { XykPoolApiClient } from './xyk/XykPoolApiClient';
 
+import { Hop, PoolBase, IPoolService, PoolType, Transaction } from '../types';
 import { BigNumber } from '../utils/bignumber';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-export class PolkadotApiPoolService implements PoolService {
+export class PoolService implements IPoolService {
   protected readonly api: ApiPromise;
-  protected readonly xykClient: XykPolkadotApiClient;
-  protected readonly omniClient: OmniPolkadotApiClient;
-  protected readonly lbpClient: LbpPolkadotApiClient;
+  protected readonly xykClient: XykPoolApiClient;
+  protected readonly omniClient: OmniPoolApiClient;
+  protected readonly lbpClient: LbpPoolApiClient;
 
   constructor(api: ApiPromise) {
     this.api = api;
-    this.xykClient = new XykPolkadotApiClient(this.api);
-    this.omniClient = new OmniPolkadotApiClient(this.api);
-    this.lbpClient = new LbpPolkadotApiClient(this.api);
+    this.xykClient = new XykPoolApiClient(this.api);
+    this.omniClient = new OmniPoolApiClient(this.api);
+    this.lbpClient = new LbpPoolApiClient(this.api);
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
@@ -49,7 +50,7 @@ export class PolkadotApiPoolService implements PoolService {
     return pools.flat();
   }
 
-  isOmnipoolTx(route: Hop[]) {
+  private isOmnipoolTx(route: Hop[]) {
     return route.length == 1 && route[0].poolType == PoolType.Omni;
   }
 

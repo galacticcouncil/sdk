@@ -1,9 +1,10 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
-import { PolkadotApiClient } from '../../client';
 import { PoolBase, PoolType, PoolFee, PoolLimits } from '../../types';
 
-export class XykPolkadotApiClient extends PolkadotApiClient {
+import { PoolApiClient } from '../PoolApiClient';
+
+export class XykPoolApiClient extends PoolApiClient {
   private pools: PoolBase[] = [];
   private _poolsLoaded = false;
 

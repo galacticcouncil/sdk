@@ -2,6 +2,7 @@ import { PoolConfigNotFound } from '../../errors';
 import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
+
 import { LbpMath } from './LbpMath';
 
 export type WeightedPoolPair = PoolPair & {

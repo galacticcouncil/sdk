@@ -1,27 +1,31 @@
 import type { StorageKey } from '@polkadot/types';
-import type { AnyTuple, Codec } from '@polkadot/types/types';
+import type { AnyTuple } from '@polkadot/types/types';
+import type { Option, Struct, u128, u8 } from '@polkadot/types-codec';
 import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
-import { ApiPromise } from '@polkadot/api';
-import { PolkadotApiClient } from '../../client';
-import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
-import { OmniPoolToken } from './OmniPool';
-import { bnum } from '../../utils/bignumber';
 import { DENOMINATOR, HYDRADX_SS58_PREFIX } from '../../consts';
+import { bnum } from '../../utils/bignumber';
+import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
 
-interface OmniAssetData {
-  readonly hubReserve: number;
-  readonly shares: number;
-  readonly protocolShares: number;
+import { OmniPoolToken } from './OmniPool';
+
+import { PoolApiClient } from '../PoolApiClient';
+
+interface PalletOmnipoolAssetState extends Struct {
+  readonly hubReserve: u128;
+  readonly shares: u128;
+  readonly protocolShares: u128;
+  readonly cap: u128;
+  readonly tradable: PalletOmnipoolTradability;
 }
 
-export class OmniPolkadotApiClient extends PolkadotApiClient {
+interface PalletOmnipoolTradability extends Struct {
+  readonly bits: u8;
+}
+
+export class OmniPoolApiClient extends PoolApiClient {
   private pools: PoolBase[] = [];
   private _poolLoaded = false;
-
-  constructor(api: ApiPromise) {
-    super(api);
-  }
 
   async getPools(): Promise<PoolBase[]> {
     if (this._poolLoaded) {
@@ -37,9 +41,9 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
 
   private async loadPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
-    const poolAssets = await this.api.query.omnipool.assets.entries();
+    const poolAssets = await this.api.query.omnipool.assets.entries<Option<PalletOmnipoolAssetState>>();
     const poolEntries = poolAssets
-      .map((asset: [StorageKey<AnyTuple>, Codec]) => {
+      .map((asset: [StorageKey<AnyTuple>, Option<PalletOmnipoolAssetState>]) => {
         return this.getStorageKey(asset, 0);
       })
       .concat(hubAssetId);
@@ -60,7 +64,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
 
   private async syncPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
-    const poolAssets = await this.api.query.omnipool.assets.entries();
+    const poolAssets = await this.api.query.omnipool.assets.entries<Option<PalletOmnipoolAssetState>>();
     const poolTokens = await this.syncPoolTokens(this.pools[0].address, this.pools[0].tokens);
     const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {
@@ -70,7 +74,7 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
   }
 
   private getPoolTokenState(
-    poolAssets: [StorageKey<AnyTuple>, Codec][],
+    poolAssets: [StorageKey<AnyTuple>, Option<PalletOmnipoolAssetState>][],
     poolTokens: PoolToken[],
     hubAssetId: string
   ): PoolToken[] {
@@ -78,11 +82,12 @@ export class OmniPolkadotApiClient extends PolkadotApiClient {
       if (hubAssetId === token.id) {
         return token;
       }
-      const assetData = poolAssets[index][1].toJSON() as unknown as OmniAssetData;
+      const assetData: Option<PalletOmnipoolAssetState> = poolAssets[index][1];
+      const state = assetData.unwrap();
       return {
         ...token,
-        hubReserves: bnum(assetData.hubReserve),
-        shares: bnum(assetData.shares),
+        hubReserves: bnum(state.hubReserve.toString()),
+        shares: bnum(state.shares.toString()),
       } as OmniPoolToken;
     });
   }

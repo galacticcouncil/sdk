@@ -1,4 +1,4 @@
-export { PolkadotApiPoolService } from './PolkadotApiPoolService';
+export { PoolService } from './PoolService';
 export { PoolFactory } from './PoolFactory';
 export { XykPool } from './xyk/XykPool';
 export { XykMath } from './xyk/XykMath';

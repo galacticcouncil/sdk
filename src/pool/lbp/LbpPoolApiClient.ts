@@ -1,12 +1,15 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
-import { PolkadotApiClient } from '../../client';
-import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 import { bnum, scale } from '../../utils/bignumber';
-import { WeightedPoolToken } from './LbpPool';
-import { LbpMath } from './LbpMath';
+import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 
+import { LbpMath } from './LbpMath';
+import { WeightedPoolToken } from './LbpPool';
+
+import { PoolApiClient } from '../PoolApiClient';
+
+// TODO - use runtime types
 interface LbpPoolData {
   readonly assets: string[];
   readonly feeCollector: string;
@@ -18,7 +21,7 @@ interface LbpPoolData {
   readonly end: number;
 }
 
-export class LbpPolkadotApiClient extends PolkadotApiClient {
+export class LbpPoolApiClient extends PoolApiClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
   private poolsData: Map<string, LbpPoolData> = new Map([]);
   private pools: PoolBase[] = [];
@@ -97,7 +100,7 @@ export class LbpPolkadotApiClient extends PolkadotApiClient {
     const repayTarget = bnum(poolEntry.repayTarget);
     try {
       const balance = await this.getAccountBalance(assetKey, poolEntry.feeCollector);
-      const feeCollectorBalance = bnum(balance);
+      const feeCollectorBalance = balance.amount;
       return feeCollectorBalance.isLessThan(repayTarget);
     } catch (err) {
       // Collector account is empty (No trade has been executed yet)

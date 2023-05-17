@@ -1,8 +1,8 @@
-import { Hop, PoolBase, PoolService, Transaction } from '../../src/types';
+import { Hop, PoolBase, IPoolService, Transaction } from '../../src/types';
 import { BigNumber } from '../../src/utils/bignumber';
 import { xykPools } from '../data/xykPools';
 
-export class MockXykPoolService implements PoolService {
+export class MockXykPoolService implements IPoolService {
   getPools(): Promise<PoolBase[]> {
     return Promise.resolve(xykPools);
   }

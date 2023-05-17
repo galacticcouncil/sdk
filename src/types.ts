@@ -151,3 +151,14 @@ export interface AssetBalance {
   reserved: BigNumber;
   available: BigNumber;
 }
+
+export interface AssetMetadata {
+  symbol: string;
+  decimals: number;
+}
+
+export interface AssetDetail {
+  name: string;
+  existentialDeposit: string;
+  locked: boolean;
+}
