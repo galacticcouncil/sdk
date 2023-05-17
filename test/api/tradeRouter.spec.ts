@@ -1,9 +1,9 @@
 import { TradeRouter } from '../../src/api';
-import { PoolService, SellSwap, BuySwap } from '../../src/types';
+import { IPoolService, SellSwap, BuySwap } from '../../src/types';
 import { MockXykPoolService } from '../lib/mockXykPoolService';
 
 describe('TradeRouter with mocked XYK pool service', () => {
-  let poolService: PoolService;
+  let poolService: IPoolService;
   let router: TradeRouter;
 
   beforeEach(() => {

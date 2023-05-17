@@ -1,9 +1,9 @@
 import { Router } from '../../src/api';
-import { PoolService, PoolType } from '../../src/types';
+import { IPoolService, PoolType } from '../../src/types';
 import { MockXykPoolService } from '../lib/mockXykPoolService';
 
 describe('Router with mocked XYK pool service', () => {
-  let poolService: PoolService;
+  let poolService: IPoolService;
   let router: Router;
 
   beforeEach(() => {
