@@ -16,4 +16,4 @@ class GetBestBuyPriceExample extends PolkadotExecutor {
   }
 }
 
-new GetBestBuyPriceExample(ApiUrl.HydraDx_Rococo, 'Get best buy price (Omni)', true).run();
+new GetBestBuyPriceExample(ApiUrl.HydraDx, 'Get best buy price (Omni)', true).run();

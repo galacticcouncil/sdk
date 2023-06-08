@@ -10,7 +10,13 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "outDir": "./dist/"
+    "outDir": "./dist/",
+    "baseUrl": "src",
+    "paths": {
+      "@hydradx/api/augment": ["src/interfaces/augment-api.ts"],
+      "@hydradx/types/augment": ["src/interfaces/augment-types.ts"],
+      "@hydradx/types/lookup": ["src/interfaces/types-lookup.ts"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

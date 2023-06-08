@@ -1,5 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
+
 import '@polkadot/api-augment';
+import '@galacticcouncil/api-augment/hydradx';
+import '@galacticcouncil/api-augment/basilisk';
 
 export abstract class PolkadotApiClient {
   protected readonly api: ApiPromise;

@@ -3,9 +3,9 @@ import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import type { PoolToken } from '../types';
 
-import { BalanceApiClient } from '../client';
+import { BalanceClient } from '../client';
 
-export abstract class PoolApiClient extends BalanceApiClient {
+export abstract class PoolClient extends BalanceClient {
   constructor(api: ApiPromise) {
     super(api);
   }

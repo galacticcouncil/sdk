@@ -160,5 +160,4 @@ export interface AssetMetadata {
 export interface AssetDetail {
   name: string;
   existentialDeposit: string;
-  locked: boolean;
 }

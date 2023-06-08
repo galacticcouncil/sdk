@@ -7,7 +7,7 @@ import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
 import { LbpMath } from './LbpMath';
 import { WeightedPoolToken } from './LbpPool';
 
-import { PoolApiClient } from '../PoolApiClient';
+import { PoolClient } from '../PoolClient';
 
 // TODO - use runtime types
 interface LbpPoolData {
@@ -21,7 +21,7 @@ interface LbpPoolData {
   readonly end: number;
 }
 
-export class LbpPoolApiClient extends PoolApiClient {
+export class LbpPoolClient extends PoolClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
   private poolsData: Map<string, LbpPoolData> = new Map([]);
   private pools: PoolBase[] = [];

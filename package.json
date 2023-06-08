@@ -23,6 +23,7 @@
     }
   },
   "devDependencies": {
+    "@galacticcouncil/api-augment": "^0.0.2",
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
     "esbuild": "^0.14.53",
@@ -32,6 +33,7 @@
     "rimraf": "^3.0.2",
     "standard-version": "^9.5.0",
     "ts-jest": "^28.0.8",
+    "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
     "typescript": "^4.7.4"
   },

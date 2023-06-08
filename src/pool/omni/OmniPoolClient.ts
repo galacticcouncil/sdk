@@ -1,6 +1,7 @@
 import type { StorageKey } from '@polkadot/types';
+import type { PalletOmnipoolAssetState } from '@polkadot/types/lookup';
 import type { AnyTuple } from '@polkadot/types/types';
-import type { Option, Struct, u128, u8 } from '@polkadot/types-codec';
+import type { Option } from '@polkadot/types-codec';
 import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
 import { DENOMINATOR, HYDRADX_SS58_PREFIX } from '../../consts';
@@ -9,21 +10,9 @@ import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types'
 
 import { OmniPoolToken } from './OmniPool';
 
-import { PoolApiClient } from '../PoolApiClient';
+import { PoolClient } from '../PoolClient';
 
-interface PalletOmnipoolAssetState extends Struct {
-  readonly hubReserve: u128;
-  readonly shares: u128;
-  readonly protocolShares: u128;
-  readonly cap: u128;
-  readonly tradable: PalletOmnipoolTradability;
-}
-
-interface PalletOmnipoolTradability extends Struct {
-  readonly bits: u8;
-}
-
-export class OmniPoolApiClient extends PoolApiClient {
+export class OmniPoolClient extends PoolClient {
   private pools: PoolBase[] = [];
   private _poolLoaded = false;
 
@@ -41,7 +30,7 @@ export class OmniPoolApiClient extends PoolApiClient {
 
   private async loadPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
-    const poolAssets = await this.api.query.omnipool.assets.entries<Option<PalletOmnipoolAssetState>>();
+    const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolEntries = poolAssets
       .map((asset: [StorageKey<AnyTuple>, Option<PalletOmnipoolAssetState>]) => {
         return this.getStorageKey(asset, 0);
@@ -64,7 +53,7 @@ export class OmniPoolApiClient extends PoolApiClient {
 
   private async syncPool(): Promise<PoolBase> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
-    const poolAssets = await this.api.query.omnipool.assets.entries<Option<PalletOmnipoolAssetState>>();
+    const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolTokens = await this.syncPoolTokens(this.pools[0].address, this.pools[0].tokens);
     const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {

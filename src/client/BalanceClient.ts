@@ -1,18 +1,11 @@
-import type { Struct, u128 } from '@polkadot/types-codec';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber, ZERO } from '../utils/bignumber';
 import { Amount } from '../types';
 
-import { AssetApiClient } from './AssetApiClient';
+import { AssetClient } from './AssetClient';
 
-interface OrmlTokensAccountData extends Struct {
-  readonly free: u128;
-  readonly reserved: u128;
-  readonly frozen: u128;
-}
-
-export class BalanceApiClient extends AssetApiClient {
+export class BalanceClient extends AssetClient {
   constructor(api: ApiPromise) {
     super(api);
   }
@@ -35,7 +28,7 @@ export class BalanceApiClient extends AssetApiClient {
   }
 
   async getTokenAccountBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts<OrmlTokensAccountData>(accountId, tokenKey);
+    const { free, reserved, frozen } = await this.api.query.tokens.accounts(accountId, tokenKey);
     return this.calculateFreeBalance(free.toString(), ZERO.toFixed(), frozen.toString());
   }
 
