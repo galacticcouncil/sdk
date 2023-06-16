@@ -57,7 +57,7 @@ For type signature visit [types.ts](src/types.ts)<br />
 ```typescript
 // Import
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
+import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
 // Initialize Polkadot API
 const wsProvider = new WsProvider('wss://rpc.basilisk.cloud');
