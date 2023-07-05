@@ -27,7 +27,7 @@ export class XykPoolClient extends PoolClient {
       return {
         address: poolAddress,
         type: PoolType.XYK,
-        tradeFee: this.getTradeFee(),
+        exchangeFee: this.getExchangeFee(),
         tokens: poolTokens,
         ...this.getPoolLimits(),
       } as PoolBase;
@@ -45,7 +45,7 @@ export class XykPoolClient extends PoolClient {
     return Promise.all(syncedPools);
   }
 
-  getTradeFee(): PoolFee {
+  getExchangeFee(): PoolFee {
     const exFee = this.api.consts.xyk.getExchangeFee;
     return exFee.toJSON() as PoolFee;
   }

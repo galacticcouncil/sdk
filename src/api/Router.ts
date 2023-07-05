@@ -176,7 +176,7 @@ export class Router {
    * @returns true if edge (token pair) is valid, otherwise false
    */
   private validEdge([id, from, to]: Edge, poolsMap: Map<string, Pool>): boolean {
-    return poolsMap.get(id)?.validPair(from, to) || false;
+    return poolsMap.get(id)?.validatePair(from, to) || false;
   }
 
   private toHops(path: Edge[], poolsMap: Map<string, Pool>): Hop[] {

@@ -27,7 +27,6 @@ export interface PoolPair {
 export type PoolBase = {
   address: string;
   type: PoolType;
-  tradeFee: PoolFee;
   tokens: PoolToken[];
   maxInRatio: number;
   maxOutRatio: number;
@@ -62,15 +61,14 @@ export type SellTransfer = Transfer & PoolSell;
 export type BuyTransfer = Transfer & PoolBuy;
 
 export interface Pool extends PoolBase {
-  validPair(tokenIn: string, tokenOut: string): boolean;
-  parsePoolPair(tokenIn: string, tokenOut: string): PoolPair;
-  validateBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer;
-  validateSell(poolPair: PoolPair, amountOut: BigNumber): SellTransfer;
+  validatePair(tokenIn: string, tokenOut: string): boolean;
+  parsePair(tokenIn: string, tokenOut: string): PoolPair;
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer;
+  validateAndSell(poolPair: PoolPair, amountOut: BigNumber): SellTransfer;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber;
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber;
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber;
-  calculateTradeFee(amount: BigNumber): BigNumber;
 }
 
 export interface IPoolService {

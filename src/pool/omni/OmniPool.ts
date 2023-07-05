@@ -37,7 +37,6 @@ export type OmniPoolBase = PoolBase & {
 export class OmniPool implements Pool {
   type: PoolType;
   address: string;
-  tradeFee: PoolFee;
   tokens: OmniPoolToken[];
   maxInRatio: number;
   maxOutRatio: number;
@@ -51,7 +50,6 @@ export class OmniPool implements Pool {
     if (!pool.protocolFee) throw new PoolConfigNotFound(PoolType.Omni, 'protocolFee');
     return new OmniPool(
       pool.address,
-      pool.tradeFee,
       pool.tokens as OmniPoolToken[],
       pool.maxInRatio,
       pool.maxOutRatio,
@@ -64,7 +62,6 @@ export class OmniPool implements Pool {
 
   constructor(
     address: string,
-    swapFee: PoolFee,
     tokens: OmniPoolToken[],
     maxInRation: number,
     maxOutRatio: number,
@@ -75,7 +72,6 @@ export class OmniPool implements Pool {
   ) {
     this.type = PoolType.Omni;
     this.address = address;
-    this.tradeFee = swapFee;
     this.tokens = tokens;
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
@@ -85,7 +81,7 @@ export class OmniPool implements Pool {
     this.hubAssetId = hubAssetId;
   }
 
-  validPair(_tokenIn: string, tokenOut: string): boolean {
+  validatePair(_tokenIn: string, tokenOut: string): boolean {
     // Buying LRNA not allowed
     if (this.hubAssetId == tokenOut) {
       return false;
@@ -93,7 +89,7 @@ export class OmniPool implements Pool {
     return true;
   }
 
-  parsePoolPair(tokenIn: string, tokenOut: string): OmniPoolPair {
+  parsePair(tokenIn: string, tokenOut: string): OmniPoolPair {
     const tokensMap = new Map(this.tokens.map((token) => [token.id, token]));
     const tokenInMeta = tokensMap.get(tokenIn);
     const tokenOutMeta = tokensMap.get(tokenOut);
@@ -118,7 +114,7 @@ export class OmniPool implements Pool {
     } as OmniPoolPair;
   }
 
-  validateBuy(poolPair: OmniPoolPair, amountOut: BigNumber): BuyTransfer {
+  validateAndBuy(poolPair: OmniPoolPair, amountOut: BigNumber): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut, false);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, true);
 
@@ -150,7 +146,7 @@ export class OmniPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateSell(poolPair: OmniPoolPair, amountIn: BigNumber): SellTransfer {
+  validateAndSell(poolPair: OmniPoolPair, amountIn: BigNumber): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn, false);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, true);
 
@@ -290,9 +286,5 @@ export class OmniPool implements Pool {
     return bnum(price)
       .shiftedBy(-1 * (RUNTIME_DECIMALS - poolPair.decimalsIn))
       .decimalPlaces(0, 1);
-  }
-
-  calculateTradeFee(amount: BigNumber): BigNumber {
-    throw new Error('Not supported in OmniPool');
   }
 }

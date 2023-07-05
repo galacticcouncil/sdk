@@ -51,7 +51,7 @@ export class LbpPoolClient extends PoolClient {
       return {
         address: poolAddress,
         type: PoolType.LBP,
-        tradeFee: poolEntry.fee as PoolFee,
+        fee: poolEntry.fee as PoolFee,
         repayFee: this.getRepayFee(),
         repayFeeApply: await this.isRepayFeeApplied(accumulatedAsset, poolEntry),
         tokens: [

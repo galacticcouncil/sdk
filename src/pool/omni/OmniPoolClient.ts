@@ -42,7 +42,6 @@ export class OmniPoolClient extends PoolClient {
     return {
       address: poolAddress,
       type: PoolType.Omni,
-      tradeFee: this.getTradeFee(),
       assetFee: this.getAssetFee(),
       protocolFee: this.getProtocolFee(),
       hubAssetId: hubAssetId,
@@ -81,22 +80,28 @@ export class OmniPoolClient extends PoolClient {
     });
   }
 
-  getTradeFee(): PoolFee {
-    const assetFee = this.getAssetFee();
-    const protocolFee = this.getProtocolFee();
-    return [assetFee[0] + protocolFee[0], DENOMINATOR] as PoolFee;
-  }
-
   getAssetFee(): PoolFee {
-    const assetFee = this.api.consts.omnipool.assetFee;
-    const assetFeeNo = assetFee.toJSON() as number;
-    return [assetFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+    try {
+      const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
+      return [assetFee.minFee.toNumber() / DENOMINATOR, DENOMINATOR] as PoolFee;
+    } catch {
+      // TODO: Remove catch block when dyn fees on mainnet
+      const assetFee = this.api.consts.omnipool.assetFee;
+      const assetFeeNo = assetFee.toJSON() as number;
+      return [assetFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+    }
   }
 
   getProtocolFee(): PoolFee {
-    const protocolFee = this.api.consts.omnipool.protocolFee;
-    const protocolFeeNo = protocolFee.toJSON() as number;
-    return [protocolFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+    try {
+      const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
+      return [protocolFee.minFee.toNumber() / DENOMINATOR, DENOMINATOR] as PoolFee;
+    } catch {
+      // TODO: Remove catch block when dyn fees on mainnet
+      const protocolFee = this.api.consts.omnipool.protocolFee;
+      const protocolFeeNo = protocolFee.toJSON() as number;
+      return [protocolFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+    }
   }
 
   getPoolId(): string {

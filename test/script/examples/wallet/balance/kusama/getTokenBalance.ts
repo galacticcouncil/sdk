@@ -14,10 +14,7 @@ class TokenBalanceAdapterExample extends PolkadotExecutor {
     const adapter = new TokenBalanceAdapter(api);
 
     const chainAssets = registry.getAssets(chainId);
-    console.log(chainAssets);
     const chainAsset = chainAssets.find((asset: ChainAsset) => asset.symbol == assetSymbol);
-    console.log(chainAsset);
-
     const ob = adapter.getObserver(chainAsset!, 'Ed6e66kkcbjEPtpxk7JHTTRJx2xhm4Yka3pE2BuJRRpo9jp');
 
     return firstValueFrom(ob);

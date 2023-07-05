@@ -14,48 +14,52 @@ import { toPct } from '../../utils/mapper';
 
 import { XykMath } from './XykMath';
 
+export type XykPoolBase = PoolBase & {
+  exchangeFee: PoolFee;
+};
+
 export class XykPool implements Pool {
   type: PoolType;
   address: string;
-  tradeFee: PoolFee;
   tokens: PoolToken[];
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
+  exchangeFee: PoolFee;
 
-  static fromPool(pool: PoolBase): XykPool {
+  static fromPool(pool: XykPoolBase): XykPool {
     return new XykPool(
       pool.address,
-      pool.tradeFee,
       pool.tokens,
       pool.maxInRatio,
       pool.maxOutRatio,
-      pool.minTradingLimit
+      pool.minTradingLimit,
+      pool.exchangeFee
     );
   }
 
   constructor(
     address: string,
-    swapFee: PoolFee,
     tokens: PoolToken[],
     maxInRation: number,
     maxOutRatio: number,
-    minTradeLimit: number
+    minTradeLimit: number,
+    exchangeFee: PoolFee
   ) {
     this.type = PoolType.XYK;
     this.address = address;
-    this.tradeFee = swapFee;
     this.tokens = tokens;
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
+    this.exchangeFee = exchangeFee;
   }
 
-  validPair(_tokenIn: string, _tokenOut: string): boolean {
+  validatePair(_tokenIn: string, _tokenOut: string): boolean {
     return true;
   }
 
-  parsePoolPair(tokenIn: string, tokenOut: string): PoolPair {
+  parsePair(tokenIn: string, tokenOut: string): PoolPair {
     const tokensMap = new Map(this.tokens.map((token) => [token.id, token]));
     const tokenInMeta = tokensMap.get(tokenIn);
     const tokenOutMeta = tokensMap.get(tokenOut);
@@ -76,11 +80,11 @@ export class XykPool implements Pool {
     } as PoolPair;
   }
 
-  validateBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer {
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const fee = this.calculateTradeFee(calculatedIn);
     const amountIn = calculatedIn.plus(fee);
-    const feePct = toPct(this.tradeFee);
+    const feePct = toPct(this.exchangeFee);
 
     const errors: PoolError[] = [];
 
@@ -107,11 +111,11 @@ export class XykPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateSell(poolPair: PoolPair, amountIn: BigNumber): SellTransfer {
+  validateAndSell(poolPair: PoolPair, amountIn: BigNumber): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const fee = this.calculateTradeFee(calculatedOut);
     const amountOut = calculatedOut.minus(fee);
-    const feePct = toPct(this.tradeFee);
+    const feePct = toPct(this.exchangeFee);
 
     const errors: PoolError[] = [];
 
@@ -177,7 +181,7 @@ export class XykPool implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber): BigNumber {
-    const fee = XykMath.calculatePoolTradeFee(amount.toString(), this.tradeFee[0], this.tradeFee[1]);
+    const fee = XykMath.calculatePoolTradeFee(amount.toString(), this.exchangeFee[0], this.exchangeFee[1]);
     return bnum(fee);
   }
 }

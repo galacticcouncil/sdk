@@ -123,7 +123,7 @@ export class TradeRouter extends Router {
       const swap = bestRoute[i];
       const pool = poolsMap.get(swap.poolId);
       if (pool == null) throw new Error('Pool does not exit');
-      const poolPair = pool.parsePoolPair(swap.assetIn, swap.assetOut);
+      const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
       let aIn: BigNumber;
       if (i > 0) {
         aIn = amounts[i - 1];
@@ -152,7 +152,7 @@ export class TradeRouter extends Router {
       const pool = poolsMap.get(hop.poolId);
       if (pool == null) throw new Error('Pool does not exit');
 
-      const poolPair = pool.parsePoolPair(hop.assetIn, hop.assetOut);
+      const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);
 
       let aIn: BigNumber;
       if (i > 0) {
@@ -161,7 +161,7 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
       }
 
-      const { amountOut, calculatedOut, feePct, errors } = pool.validateSell(poolPair, aIn);
+      const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
       const priceImpactPct = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
 
@@ -329,7 +329,7 @@ export class TradeRouter extends Router {
       const swap = bestRoute[i];
       const pool = poolsMap.get(swap.poolId);
       if (pool == null) throw new Error('Pool does not exit');
-      const poolPair = pool.parsePoolPair(swap.assetIn, swap.assetOut);
+      const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
       let aOut: BigNumber;
       if (i == bestRoute.length - 1) {
         aOut = amountOut;
@@ -359,7 +359,7 @@ export class TradeRouter extends Router {
       const pool = poolsMap.get(hop.poolId);
       if (pool == null) throw new Error('Pool does not exit');
 
-      const poolPair = pool.parsePoolPair(hop.assetIn, hop.assetOut);
+      const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);
 
       let aOut: BigNumber;
       if (i == path.length - 1) {
@@ -368,7 +368,7 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const { amountIn, calculatedIn, feePct, errors } = pool.validateBuy(poolPair, aOut);
+      const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
       const priceImpactPct = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 
