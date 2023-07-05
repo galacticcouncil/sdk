@@ -10,7 +10,7 @@ describe('Xyk Pool', () => {
 
   it('Should return valid PoolPair for assets 1 & 2', async () => {
     expect(pool).toBeDefined();
-    const result = pool.parsePoolPair('1', '2');
+    const result = pool.parsePair('1', '2');
     expect(result.assetIn).toStrictEqual(xykPool.tokens[0].id);
     expect(result.balanceIn.toString()).toStrictEqual(xykPool.tokens[0].balance);
     expect(result.assetOut).toStrictEqual(xykPool.tokens[1].id);
