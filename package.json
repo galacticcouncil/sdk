@@ -23,7 +23,7 @@
     }
   },
   "devDependencies": {
-    "@galacticcouncil/api-augment": "^0.0.3",
+    "@galacticcouncil/api-augment": "^0.0.4",
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
     "esbuild": "^0.14.53",
