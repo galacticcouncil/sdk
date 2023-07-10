@@ -1,4 +1,4 @@
-import { DENOMINATOR } from 'consts';
+import { DENOMINATOR } from '../consts';
 import { PoolFee } from '../types';
 import { BigNumber } from './bignumber';
 

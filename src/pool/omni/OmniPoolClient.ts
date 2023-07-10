@@ -6,7 +6,7 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { toPoolFee } from 'utils/mapper';
+import { toPoolFee } from '../../utils/mapper';
 import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits, PoolFees } from '../../types';
 
 import { OmniPoolFees, OmniPoolToken } from './OmniPool';

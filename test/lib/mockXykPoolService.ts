@@ -1,10 +1,14 @@
-import { Hop, PoolBase, IPoolService, Transaction } from '../../src/types';
+import { Hop, PoolBase, IPoolService, Transaction, PoolFees, PoolType } from '../../src/types';
 import { BigNumber } from '../../src/utils/bignumber';
 import { xykPools } from '../data/xykPools';
 
 export class MockXykPoolService implements IPoolService {
-  getPools(): Promise<PoolBase[]> {
+  getPools(_includeOnly?: PoolType[]): Promise<PoolBase[]> {
     return Promise.resolve(xykPools);
+  }
+
+  getDynamicFees(_asset: string, _poolType: PoolType): Promise<PoolFees | null> {
+    return Promise.resolve(null);
   }
 
   buildBuyTx(
