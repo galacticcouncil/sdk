@@ -2,7 +2,7 @@ import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
 
-import { Hop, PoolBase, IPoolService, PoolType, Transaction } from '../types';
+import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 import { ApiPromise } from '@polkadot/api';
@@ -50,7 +50,14 @@ export class PoolService implements IPoolService {
     return pools.flat();
   }
 
-  private isOmnipoolTx(route: Hop[]) {
+  async getDynamicFees(asset: string, poolType: PoolType): Promise<PoolFees | null> {
+    if (poolType === PoolType.Omni) {
+      return await this.omniClient.getDynamicFees(asset);
+    }
+    return null;
+  }
+
+  private isDirectOmnipoolTrade(route: Hop[]) {
     return route.length == 1 && route[0].poolType == PoolType.Omni;
   }
 
@@ -63,8 +70,8 @@ export class PoolService implements IPoolService {
   ): Transaction {
     let tx: SubmittableExtrinsic;
 
-    // Currently we have no support in router for OmniPool buy tx
-    if (this.isOmnipoolTx(route)) {
+    // In case of direct trade in omnipool we skip router (cheaper tx)
+    if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.buy(assetOut, assetIn, amountOut.toFixed(), maxAmountIn.toFixed());
     } else {
       tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), route);
@@ -85,8 +92,8 @@ export class PoolService implements IPoolService {
   ): Transaction {
     let tx: SubmittableExtrinsic;
 
-    // Currently we have no support in router for OmniPool sell tx
-    if (this.isOmnipoolTx(route)) {
+    // In case of direct trade in omnipool we skip router (cheaper tx)
+    if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
     } else {
       tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), route);

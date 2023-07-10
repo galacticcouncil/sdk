@@ -28,6 +28,7 @@ export type PoolBase = {
   address: string;
   type: PoolType;
   tokens: PoolToken[];
+  fees: PoolFees;
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
@@ -36,6 +37,8 @@ export type PoolBase = {
 export type PoolLimits = Pick<PoolBase, 'maxInRatio' | 'maxOutRatio' | 'minTradingLimit'>;
 
 export type PoolFee = [numerator: number, denominator: number];
+
+export type PoolFees = {}; // marker interface
 
 export type PoolToken = PoolAsset & {
   balance: string;
@@ -63,16 +66,17 @@ export type BuyTransfer = Transfer & PoolBuy;
 export interface Pool extends PoolBase {
   validatePair(tokenIn: string, tokenOut: string): boolean;
   parsePair(tokenIn: string, tokenOut: string): PoolPair;
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyTransfer;
-  validateAndSell(poolPair: PoolPair, amountOut: BigNumber): SellTransfer;
-  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber;
-  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber;
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, dynamicFees: PoolFees | null): BuyTransfer;
+  validateAndSell(poolPair: PoolPair, amountOut: BigNumber, dynamicFees: PoolFees | null): SellTransfer;
+  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
+  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber;
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber;
 }
 
 export interface IPoolService {
   getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
+  getDynamicFees(asset: string, poolType: PoolType): Promise<PoolFees | null>;
   buildBuyTx(
     assetIn: string,
     assetOut: string,

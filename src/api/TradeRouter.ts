@@ -50,7 +50,8 @@ export class TradeRouter extends Router {
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
     if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
 
-    const swaps = paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap));
+    const sellSwaps = paths.map(async (path) => await this.toSellSwaps(amountIn, path, poolsMap));
+    const swaps = await Promise.all(sellSwaps);
     const bestRoute = this.findBestSellRoute(swaps);
 
     const firstSwap = bestRoute[0];
@@ -130,7 +131,7 @@ export class TradeRouter extends Router {
       } else {
         aIn = amountIn;
       }
-      const calculatedOut = pool.calculateOutGivenIn(poolPair, aIn, false);
+      const calculatedOut = pool.calculateOutGivenIn(poolPair, aIn);
       amounts.push(calculatedOut);
     }
     return amounts[amounts.length - 1];
@@ -145,7 +146,11 @@ export class TradeRouter extends Router {
    * @param poolsMap - Pools map
    * @returns Sell swaps for given path with corresponding pool pairs
    */
-  private toSellSwaps(amountIn: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): SellSwap[] {
+  private async toSellSwaps(
+    amountIn: BigNumber | string | number,
+    path: Hop[],
+    poolsMap: Map<string, Pool>
+  ): Promise<SellSwap[]> {
     const swaps: SellSwap[] = [];
     for (let i = 0; i < path.length; i++) {
       const hop = path[i];
@@ -161,7 +166,8 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
       }
 
-      const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn);
+      const dynFees = await this.poolService.getDynamicFees(poolPair.assetOut, pool.type);
+      const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn, dynFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
       const priceImpactPct = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
 
@@ -210,7 +216,8 @@ export class TradeRouter extends Router {
       return Promise.resolve(undefined);
     }
 
-    const swaps = paths.map((path) => this.toSellSwaps('1', path, poolsMap));
+    const sellSwaps = paths.map(async (path) => await this.toSellSwaps('1', path, poolsMap));
+    const swaps = await Promise.all(sellSwaps);
     const bestRoute = this.findBestSellRoute(swaps);
 
     const spotPrice = bestRoute
@@ -256,7 +263,8 @@ export class TradeRouter extends Router {
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
     if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
 
-    const swaps = paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap));
+    const buySwaps = paths.map(async (path) => await this.toBuySwaps(amountOut, path, poolsMap));
+    const swaps = await Promise.all(buySwaps);
     const bestRoute = this.findBestBuyRoute(swaps);
 
     const firstSwap = bestRoute[bestRoute.length - 1];
@@ -336,7 +344,7 @@ export class TradeRouter extends Router {
       } else {
         aOut = amounts[0];
       }
-      const calculatedIn = pool.calculateInGivenOut(poolPair, aOut, false);
+      const calculatedIn = pool.calculateInGivenOut(poolPair, aOut);
       amounts.unshift(calculatedIn);
     }
     return amounts[0];
@@ -352,7 +360,11 @@ export class TradeRouter extends Router {
    * @param poolsMap - Pools map
    * @returns Buy swaps for given path
    */
-  private toBuySwaps(amountOut: BigNumber | string | number, path: Hop[], poolsMap: Map<string, Pool>): BuySwap[] {
+  private async toBuySwaps(
+    amountOut: BigNumber | string | number,
+    path: Hop[],
+    poolsMap: Map<string, Pool>
+  ): Promise<BuySwap[]> {
     const swaps: BuySwap[] = [];
     for (let i = path.length - 1; i >= 0; i--) {
       const hop = path[i];
@@ -368,7 +380,8 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut);
+      const dynFees = await this.poolService.getDynamicFees(poolPair.assetIn, pool.type);
+      const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut, dynFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
       const priceImpactPct = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 

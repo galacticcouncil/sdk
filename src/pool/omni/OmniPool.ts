@@ -1,18 +1,18 @@
 import { RUNTIME_DECIMALS } from '../../consts';
-import { PoolConfigNotFound } from '../../errors';
 import {
   BuyTransfer,
   Pool,
   PoolBase,
   PoolError,
   PoolFee,
+  PoolFees,
   PoolPair,
   PoolToken,
   PoolType,
   SellTransfer,
 } from '../../types';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
-import { toPermill } from '../../utils/mapper';
+import { toDecimals } from '../../utils/mapper';
 
 import { OmniMath } from './OmniMath';
 
@@ -28,9 +28,12 @@ export type OmniPoolToken = PoolToken & {
   shares: BigNumber;
 };
 
-export type OmniPoolBase = PoolBase & {
+export type OmniPoolFees = PoolFees & {
   assetFee: PoolFee;
   protocolFee: PoolFee;
+};
+
+export type OmniPoolBase = PoolBase & {
   hubAssetId: string;
 };
 
@@ -41,21 +44,17 @@ export class OmniPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  assetFee: PoolFee;
-  protocolFee: PoolFee;
+  fees: OmniPoolFees;
   hubAssetId: string;
 
   static fromPool(pool: OmniPoolBase): OmniPool {
-    if (!pool.assetFee) throw new PoolConfigNotFound(PoolType.Omni, 'assetFee');
-    if (!pool.protocolFee) throw new PoolConfigNotFound(PoolType.Omni, 'protocolFee');
     return new OmniPool(
       pool.address,
       pool.tokens as OmniPoolToken[],
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
-      pool.assetFee,
-      pool.protocolFee,
+      pool.fees as OmniPoolFees,
       pool.hubAssetId
     );
   }
@@ -66,8 +65,7 @@ export class OmniPool implements Pool {
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
-    assetFee: PoolFee,
-    protocolFee: PoolFee,
+    fees: OmniPoolFees,
     hubAssetId: string
   ) {
     this.type = PoolType.Omni;
@@ -76,8 +74,7 @@ export class OmniPool implements Pool {
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    this.assetFee = assetFee;
-    this.protocolFee = protocolFee;
+    this.fees = fees;
     this.hubAssetId = hubAssetId;
   }
 
@@ -114,9 +111,10 @@ export class OmniPool implements Pool {
     } as OmniPoolPair;
   }
 
-  validateAndBuy(poolPair: OmniPoolPair, amountOut: BigNumber): BuyTransfer {
-    const calculatedIn = this.calculateInGivenOut(poolPair, amountOut, false);
-    const amountIn = this.calculateInGivenOut(poolPair, amountOut, true);
+  validateAndBuy(poolPair: OmniPoolPair, amountOut: BigNumber, dynamicFees: OmniPoolFees): BuyTransfer {
+    const fees = dynamicFees ?? this.fees;
+    const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
+    const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
 
     const fee = amountIn.minus(calculatedIn);
     const feePct = calculatedIn === ZERO ? ZERO : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(2);
@@ -146,9 +144,10 @@ export class OmniPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: OmniPoolPair, amountIn: BigNumber): SellTransfer {
-    const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn, false);
-    const amountOut = this.calculateOutGivenIn(poolPair, amountIn, true);
+  validateAndSell(poolPair: OmniPoolPair, amountIn: BigNumber, dynamicFees: OmniPoolFees): SellTransfer {
+    const fees = dynamicFees ?? this.fees;
+    const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
+    const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 
     const fee = calculatedOut.minus(amountOut);
     const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(2);
@@ -178,9 +177,9 @@ export class OmniPool implements Pool {
     } as SellTransfer;
   }
 
-  calculateInGivenOut(poolPair: OmniPoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber {
+  calculateInGivenOut(poolPair: OmniPoolPair, amountOut: BigNumber, fees?: OmniPoolFees): BigNumber {
     if (poolPair.assetIn == this.hubAssetId) {
-      return this.calculateLrnaInGivenOut(poolPair, amountOut, applyFee);
+      return this.calculateLrnaInGivenOut(poolPair, amountOut, fees);
     }
 
     const price = OmniMath.calculateInGivenOut(
@@ -191,28 +190,28 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      applyFee ? toPermill(this.assetFee).toString() : ZERO.toString(),
-      applyFee ? toPermill(this.protocolFee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString(),
+      fees ? toDecimals(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateLrnaInGivenOut(poolPair: OmniPoolPair, amountOut: BigNumber, applyFee: boolean): BigNumber {
+  calculateLrnaInGivenOut(poolPair: OmniPoolPair, amountOut: BigNumber, fees?: OmniPoolFees): BigNumber {
     const price = OmniMath.calculateLrnaInGivenOut(
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      applyFee ? toPermill(this.assetFee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateOutGivenIn(poolPair: OmniPoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber {
+  calculateOutGivenIn(poolPair: OmniPoolPair, amountIn: BigNumber, fees?: OmniPoolFees): BigNumber {
     if (poolPair.assetIn == this.hubAssetId) {
-      return this.calculateOutGivenLrnaIn(poolPair, amountIn, applyFee);
+      return this.calculateOutGivenLrnaIn(poolPair, amountIn, fees);
     }
 
     const price = OmniMath.calculateOutGivenIn(
@@ -223,20 +222,20 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      applyFee ? toPermill(this.assetFee).toString() : ZERO.toString(),
-      applyFee ? toPermill(this.protocolFee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString(),
+      fees ? toDecimals(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateOutGivenLrnaIn(poolPair: OmniPoolPair, amountIn: BigNumber, applyFee: boolean): BigNumber {
+  calculateOutGivenLrnaIn(poolPair: OmniPoolPair, amountIn: BigNumber, fees?: OmniPoolFees): BigNumber {
     const price = OmniMath.calculateOutGivenLrnaIn(
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      applyFee ? toPermill(this.assetFee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;

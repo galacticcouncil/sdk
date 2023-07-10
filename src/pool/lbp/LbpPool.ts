@@ -1,5 +1,14 @@
-import { PoolConfigNotFound } from '../../errors';
-import { BuyTransfer, Pool, PoolBase, PoolFee, PoolPair, PoolToken, PoolType, SellTransfer } from '../../types';
+import {
+  BuyTransfer,
+  Pool,
+  PoolBase,
+  PoolFee,
+  PoolFees,
+  PoolPair,
+  PoolToken,
+  PoolType,
+  SellTransfer,
+} from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 
@@ -14,9 +23,12 @@ export type WeightedPoolToken = PoolToken & {
   weight: BigNumber;
 };
 
-export type LbpPoolBase = PoolBase & {
-  fee: PoolFee;
+export type LbpPoolFees = PoolFees & {
+  exchangeFee: PoolFee;
   repayFee: PoolFee;
+};
+
+export type LbpPoolBase = PoolBase & {
   repayFeeApply: boolean;
 };
 
@@ -27,21 +39,17 @@ export class LbpPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  fee: PoolFee;
-  repayFee: PoolFee;
+  fees: LbpPoolFees;
   repayFeeApply: boolean;
 
   static fromPool(pool: LbpPoolBase): LbpPool {
-    if (!pool.repayFee) throw new PoolConfigNotFound(PoolType.LBP, 'repayFee');
-    if (!pool.repayFeeApply) throw new PoolConfigNotFound(PoolType.LBP, 'repayFeeApply');
     return new LbpPool(
       pool.address,
       pool.tokens as WeightedPoolToken[],
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
-      pool.fee,
-      pool.repayFee,
+      pool.fees as LbpPoolFees,
       pool.repayFeeApply
     );
   }
@@ -52,8 +60,7 @@ export class LbpPool implements Pool {
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
-    fee: PoolFee,
-    repayFee: PoolFee,
+    fees: LbpPoolFees,
     repayFeeApply: boolean
   ) {
     this.type = PoolType.LBP;
@@ -62,8 +69,7 @@ export class LbpPool implements Pool {
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    this.fee = fee;
-    this.repayFee = repayFee;
+    this.fees = fees;
     this.repayFeeApply = repayFeeApply;
   }
 
@@ -100,13 +106,14 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is bought (out) from the pool for distributed asset (in) - User(Buyer) bears the fee
    * b) Distributed asset is bought (out) from the pool for accumualted asset (in) - Pool bears the fee
    */
-  validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber): BuyTransfer {
+  validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber, dynamicFees: LbpPoolFees): BuyTransfer {
     const feeAsset = this.tokens[0].id;
     if (feeAsset === poolPair.assetOut) {
-      const fee = this.calculateTradeFee(amountOut);
+      const fees: LbpPoolFees = dynamicFees ?? this.fees;
+      const fee = this.calculateTradeFee(amountOut, fees);
+      const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOutPlusFee = amountOut.plus(fee);
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
-      const feePct = toPct(this.repayFeeApply ? this.repayFee : this.fee);
       return {
         amountIn: calculatedIn,
         calculatedIn: calculatedIn,
@@ -125,7 +132,7 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is sold (in) to the pool for distributed asset (out) - Pool bears the fee
    * b) Distributed asset is sold (in) to the pool for accumualted asset (out) - User(Seller) bears the fee
    */
-  validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber): SellTransfer {
+  validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber, dynamicFees: LbpPoolFees): SellTransfer {
     const feeAsset = this.tokens[0].id;
     if (feeAsset === poolPair.assetIn) {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
@@ -137,9 +144,10 @@ export class LbpPool implements Pool {
       } as SellTransfer;
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
-      const fee = this.calculateTradeFee(calculatedOut);
+      const fees: LbpPoolFees = dynamicFees ?? this.fees;
+      const fee = this.calculateTradeFee(calculatedOut, fees);
+      const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOut = calculatedOut.minus(fee);
-      const feePct = toPct(this.repayFeeApply ? this.repayFee : this.fee);
       return {
         amountIn: amountIn,
         calculatedOut: calculatedOut,
@@ -195,11 +203,11 @@ export class LbpPool implements Pool {
     return bnum(price);
   }
 
-  calculateTradeFee(amount: BigNumber): BigNumber {
+  calculateTradeFee(amount: BigNumber, fees: LbpPoolFees): BigNumber {
     const fee = LbpMath.calculatePoolTradeFee(
       amount.toString(),
-      this.repayFeeApply ? this.repayFee[0] : this.fee[0],
-      this.repayFeeApply ? this.repayFee[1] : this.fee[1]
+      this.repayFeeApply ? fees.repayFee[0] : fees.exchangeFee[0],
+      this.repayFeeApply ? fees.repayFee[1] : fees.exchangeFee[1]
     );
     return bnum(fee);
   }

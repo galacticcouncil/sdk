@@ -2,10 +2,10 @@ import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
 import { bnum, scale } from '../../utils/bignumber';
-import { PoolBase, PoolFee, PoolLimits, PoolType } from '../../types';
+import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
 
 import { LbpMath } from './LbpMath';
-import { WeightedPoolToken } from './LbpPool';
+import { LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
 import { PoolClient } from '../PoolClient';
 
@@ -43,6 +43,7 @@ export class LbpPoolClient extends PoolClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
+      const poolFees = this.getPoolFees(poolEntry);
       const linearWeight = await this.getLinearWeight(poolEntry);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
@@ -51,8 +52,7 @@ export class LbpPoolClient extends PoolClient {
       return {
         address: poolAddress,
         type: PoolType.LBP,
-        fee: poolEntry.fee as PoolFee,
-        repayFee: this.getRepayFee(),
+        fees: poolFees,
         repayFeeApply: await this.isRepayFeeApplied(accumulatedAsset, poolEntry),
         tokens: [
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
@@ -106,6 +106,13 @@ export class LbpPoolClient extends PoolClient {
       // Collector account is empty (No trade has been executed yet)
       return true;
     }
+  }
+
+  getPoolFees(poolEntry: LbpPoolData): PoolFees {
+    return {
+      repayFee: this.getRepayFee(),
+      exchangeFee: poolEntry.fee as PoolFee,
+    } as LbpPoolFees;
   }
 
   getRepayFee(): PoolFee {

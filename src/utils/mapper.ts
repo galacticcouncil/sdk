@@ -1,3 +1,4 @@
+import { DENOMINATOR } from 'consts';
 import { PoolFee } from '../types';
 import { BigNumber } from './bignumber';
 
@@ -9,6 +10,10 @@ export function toPct(fee: PoolFee): number {
   return (fee[0] / fee[1]) * 100;
 }
 
-export function toPermill(fee: PoolFee): number {
+export function toDecimals(fee: PoolFee): number {
   return fee[0] / fee[1];
+}
+
+export function toPoolFee(permill: number): PoolFee {
+  return [permill / DENOMINATOR, DENOMINATOR] as PoolFee;
 }

@@ -1,8 +1,9 @@
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
-import { PoolBase, PoolType, PoolFee, PoolLimits } from '../../types';
+import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees } from '../../types';
 
 import { PoolClient } from '../PoolClient';
+import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient {
   private pools: PoolBase[] = [];
@@ -24,10 +25,11 @@ export class XykPoolClient extends PoolClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntries = this.getStorageEntryArray(asset);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
+      const poolFees = this.getPoolFees();
       return {
         address: poolAddress,
         type: PoolType.XYK,
-        exchangeFee: this.getExchangeFee(),
+        fees: poolFees,
         tokens: poolTokens,
         ...this.getPoolLimits(),
       } as PoolBase;
@@ -43,6 +45,12 @@ export class XykPoolClient extends PoolClient {
       } as PoolBase;
     });
     return Promise.all(syncedPools);
+  }
+
+  getPoolFees(): PoolFees {
+    return {
+      exchangeFee: this.getExchangeFee(),
+    } as XykPoolFees;
   }
 
   getExchangeFee(): PoolFee {

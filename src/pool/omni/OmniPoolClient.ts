@@ -4,11 +4,12 @@ import type { AnyTuple } from '@polkadot/types/types';
 import type { Option } from '@polkadot/types-codec';
 import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
-import { DENOMINATOR, HYDRADX_SS58_PREFIX } from '../../consts';
+import { HYDRADX_SS58_PREFIX } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits } from '../../types';
+import { toPoolFee } from 'utils/mapper';
+import { PoolBase, PoolType, PoolFee, PoolToken, PoolLimits, PoolFees } from '../../types';
 
-import { OmniPoolToken } from './OmniPool';
+import { OmniPoolFees, OmniPoolToken } from './OmniPool';
 
 import { PoolClient } from '../PoolClient';
 
@@ -39,11 +40,11 @@ export class OmniPoolClient extends PoolClient {
     const poolAddress = this.getPoolId();
     const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
     const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
+    const poolFees = this.getPoolFees();
     return {
       address: poolAddress,
       type: PoolType.Omni,
-      assetFee: this.getAssetFee(),
-      protocolFee: this.getProtocolFee(),
+      fees: poolFees,
       hubAssetId: hubAssetId,
       tokens: poolTokensState,
       ...this.getPoolLimits(),
@@ -80,27 +81,53 @@ export class OmniPoolClient extends PoolClient {
     });
   }
 
+  getPoolFees(): PoolFees {
+    return {
+      assetFee: this.getAssetFee(),
+      protocolFee: this.getProtocolFee(),
+    } as OmniPoolFees;
+  }
+
   getAssetFee(): PoolFee {
     try {
       const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
-      return [assetFee.minFee.toNumber() / DENOMINATOR, DENOMINATOR] as PoolFee;
+      const assetFeeNo = assetFee.minFee.toNumber();
+      return toPoolFee(assetFeeNo);
     } catch {
-      // TODO: Remove catch block when dyn fees on mainnet
+      // TODO: Remove catch block fallback when dyn fees on mainnet
       const assetFee = this.api.consts.omnipool.assetFee;
       const assetFeeNo = assetFee.toJSON() as number;
-      return [assetFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+      return toPoolFee(assetFeeNo);
     }
   }
 
   getProtocolFee(): PoolFee {
     try {
       const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
-      return [protocolFee.minFee.toNumber() / DENOMINATOR, DENOMINATOR] as PoolFee;
+      const protocolFeeNo = protocolFee.minFee.toNumber();
+      return toPoolFee(protocolFeeNo);
     } catch {
-      // TODO: Remove catch block when dyn fees on mainnet
+      // TODO: Remove catch block fallback when dyn fees on mainnet
       const protocolFee = this.api.consts.omnipool.protocolFee;
       const protocolFeeNo = protocolFee.toJSON() as number;
-      return [protocolFeeNo / DENOMINATOR, DENOMINATOR] as PoolFee;
+      return toPoolFee(protocolFeeNo);
+    }
+  }
+
+  async getDynamicFees(asset: string): Promise<OmniPoolFees | null> {
+    try {
+      const fee = await this.api.query.dynamicFees.assetFee(asset);
+      if (fee.isSome) {
+        const { assetFee, protocolFee } = fee.unwrap();
+        return {
+          assetFee: toPoolFee(assetFee.toNumber()),
+          protocolFee: toPoolFee(protocolFee.toNumber()),
+        } as OmniPoolFees;
+      }
+      return null;
+    } catch {
+      // TODO: Remove catch block fallback when dyn fees on mainnet
+      return null;
     }
   }
 
