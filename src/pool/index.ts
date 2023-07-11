@@ -1,3 +1,4 @@
+export { CachingPoolService } from './CachingPoolService';
 export { PoolService } from './PoolService';
 export { PoolFactory } from './PoolFactory';
 export { XykPool } from './xyk/XykPool';
