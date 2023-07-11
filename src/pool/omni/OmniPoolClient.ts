@@ -40,11 +40,9 @@ export class OmniPoolClient extends PoolClient {
     const poolAddress = this.getPoolId();
     const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
     const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
-    const poolFees = this.getPoolFees();
     return {
       address: poolAddress,
       type: PoolType.Omni,
-      fees: poolFees,
       hubAssetId: hubAssetId,
       tokens: poolTokensState,
       ...this.getPoolLimits(),
@@ -81,61 +79,69 @@ export class OmniPoolClient extends PoolClient {
     });
   }
 
-  getPoolFees(): PoolFees {
-    return {
-      assetFee: this.getAssetFee(),
-      protocolFee: this.getProtocolFee(),
-    } as OmniPoolFees;
+  async getPoolFees(feeAsset: string, _address: string): Promise<PoolFees> {
+    const dynamicFees = await this.getDynamicFees(feeAsset);
+    if (dynamicFees && dynamicFees.isSome) {
+      const { assetFee, protocolFee } = dynamicFees.unwrap();
+      const afp = this.api.consts.dynamicFees.assetFeeParameters;
+      const pfp = this.api.consts.dynamicFees.protocolFeeParameters;
+      const min = afp.minFee.toNumber() + pfp.minFee.toNumber();
+      const max = afp.maxFee.toNumber() + pfp.maxFee.toNumber();
+
+      return {
+        assetFee: toPoolFee(assetFee.toNumber()),
+        protocolFee: toPoolFee(protocolFee.toNumber()),
+        min: toPoolFee(min),
+        max: toPoolFee(max),
+      } as OmniPoolFees;
+    } else {
+      return {
+        assetFee: this.getAssetFee(),
+        protocolFee: this.getProtocolFee(),
+      } as OmniPoolFees;
+    }
   }
 
-  getAssetFee(): PoolFee {
+  private getAssetFee(): PoolFee {
+    let assetFeeNo: number;
     try {
       const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
-      const assetFeeNo = assetFee.minFee.toNumber();
-      return toPoolFee(assetFeeNo);
+      assetFeeNo = assetFee.minFee.toNumber();
     } catch {
-      // TODO: Remove catch block fallback when dyn fees on mainnet
+      // TODO: Remove fallback when dyn fees pallet on mainnet
       const assetFee = this.api.consts.omnipool.assetFee;
-      const assetFeeNo = assetFee.toJSON() as number;
-      return toPoolFee(assetFeeNo);
+      assetFeeNo = assetFee.toJSON() as number;
     }
+    return toPoolFee(assetFeeNo);
   }
 
-  getProtocolFee(): PoolFee {
+  private getProtocolFee(): PoolFee {
+    let protocolFeeNo: number;
     try {
       const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
-      const protocolFeeNo = protocolFee.minFee.toNumber();
-      return toPoolFee(protocolFeeNo);
+      protocolFeeNo = protocolFee.minFee.toNumber();
     } catch {
-      // TODO: Remove catch block fallback when dyn fees on mainnet
+      // TODO: Remove fallback when dyn fees pallet on mainnet
       const protocolFee = this.api.consts.omnipool.protocolFee;
-      const protocolFeeNo = protocolFee.toJSON() as number;
-      return toPoolFee(protocolFeeNo);
+      protocolFeeNo = protocolFee.toJSON() as number;
     }
+    return toPoolFee(protocolFeeNo);
   }
 
-  async getDynamicFees(asset: string): Promise<OmniPoolFees | null> {
+  private getDynamicFees(asset: string) {
     try {
-      const fee = await this.api.query.dynamicFees.assetFee(asset);
-      if (fee.isSome) {
-        const { assetFee, protocolFee } = fee.unwrap();
-        return {
-          assetFee: toPoolFee(assetFee.toNumber()),
-          protocolFee: toPoolFee(protocolFee.toNumber()),
-        } as OmniPoolFees;
-      }
-      return null;
+      return this.api.query.dynamicFees.assetFee(asset);
     } catch {
-      // TODO: Remove catch block fallback when dyn fees on mainnet
+      // TODO: Remove fallback when dyn fees pallet on mainnet
       return null;
     }
   }
 
-  getPoolId(): string {
+  private getPoolId(): string {
     return encodeAddress(stringToU8a('modlomnipool'.padEnd(32, '\0')), HYDRADX_SS58_PREFIX);
   }
 
-  getPoolLimits(): PoolLimits {
+  private getPoolLimits(): PoolLimits {
     const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
     const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
     const minTradingLimit = this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;

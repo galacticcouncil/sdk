@@ -28,7 +28,6 @@ export type PoolBase = {
   address: string;
   type: PoolType;
   tokens: PoolToken[];
-  fees: PoolFees;
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
@@ -38,7 +37,11 @@ export type PoolLimits = Pick<PoolBase, 'maxInRatio' | 'maxOutRatio' | 'minTradi
 
 export type PoolFee = [numerator: number, denominator: number];
 
-export type PoolFees = {}; // marker interface
+// Pool fee marker interface
+export type PoolFees = {
+  min?: PoolFee;
+  max?: PoolFee;
+};
 
 export type PoolToken = PoolAsset & {
   balance: string;
@@ -76,7 +79,7 @@ export interface Pool extends PoolBase {
 
 export interface IPoolService {
   getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
-  getDynamicFees(asset: string, poolType: PoolType): Promise<PoolFees | null>;
+  getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees>;
   buildBuyTx(
     assetIn: string,
     assetOut: string,
@@ -114,6 +117,7 @@ export type Swap = Hop &
     amountOut: BigNumber;
     spotPrice: BigNumber;
     tradeFeePct: number;
+    tradeFeeRange?: [number, number];
     priceImpactPct: number;
     errors: PoolError[];
   };

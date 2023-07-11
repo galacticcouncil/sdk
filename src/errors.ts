@@ -1,5 +1,13 @@
 import { PoolType } from './types';
 
+export class PoolNotFound extends Error {
+  constructor(poolType: PoolType) {
+    super();
+    this.message = `${poolType} pool invalid`;
+    this.name = 'PoolNotFound';
+  }
+}
+
 export class PoolConfigNotFound extends Error {
   constructor(poolType: PoolType, param: string) {
     super();

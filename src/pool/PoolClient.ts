@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
-import type { PoolToken } from '../types';
+import type { PoolBase, PoolFees, PoolToken } from '../types';
 
 import { BalanceClient } from '../client';
 
@@ -9,6 +9,9 @@ export abstract class PoolClient extends BalanceClient {
   constructor(api: ApiPromise) {
     super(api);
   }
+
+  abstract getPools(): Promise<PoolBase[]>;
+  abstract getPoolFees(feeAsset: string, address: string): Promise<PoolFees>;
 
   protected getStorageKey(asset: [StorageKey<AnyTuple>, Codec], index: number): string {
     return (asset[0].toHuman() as string[])[index];

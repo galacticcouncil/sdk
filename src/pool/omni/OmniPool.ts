@@ -44,7 +44,6 @@ export class OmniPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  fees: OmniPoolFees;
   hubAssetId: string;
 
   static fromPool(pool: OmniPoolBase): OmniPool {
@@ -54,7 +53,6 @@ export class OmniPool implements Pool {
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
-      pool.fees as OmniPoolFees,
       pool.hubAssetId
     );
   }
@@ -65,7 +63,6 @@ export class OmniPool implements Pool {
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
-    fees: OmniPoolFees,
     hubAssetId: string
   ) {
     this.type = PoolType.Omni;
@@ -74,7 +71,6 @@ export class OmniPool implements Pool {
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    this.fees = fees;
     this.hubAssetId = hubAssetId;
   }
 
@@ -111,8 +107,7 @@ export class OmniPool implements Pool {
     } as OmniPoolPair;
   }
 
-  validateAndBuy(poolPair: OmniPoolPair, amountOut: BigNumber, dynamicFees: OmniPoolFees): BuyTransfer {
-    const fees = dynamicFees ?? this.fees;
+  validateAndBuy(poolPair: OmniPoolPair, amountOut: BigNumber, fees: OmniPoolFees): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
 
@@ -144,8 +139,7 @@ export class OmniPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: OmniPoolPair, amountIn: BigNumber, dynamicFees: OmniPoolFees): SellTransfer {
-    const fees = dynamicFees ?? this.fees;
+  validateAndSell(poolPair: OmniPoolPair, amountIn: BigNumber, fees: OmniPoolFees): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 

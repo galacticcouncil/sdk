@@ -2,8 +2,9 @@ import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
 
-import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees } from '../types';
+import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees, Pool } from '../types';
 import { BigNumber } from '../utils/bignumber';
+import { PoolNotFound } from '../errors';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -50,11 +51,17 @@ export class PoolService implements IPoolService {
     return pools.flat();
   }
 
-  async getDynamicFees(asset: string, poolType: PoolType): Promise<PoolFees | null> {
-    if (poolType === PoolType.Omni) {
-      return await this.omniClient.getDynamicFees(asset);
+  async getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {
+    switch (pool.type) {
+      case PoolType.XYK:
+        return this.xykClient.getPoolFees(feeAsset, pool.address);
+      case PoolType.Omni:
+        return this.omniClient.getPoolFees(feeAsset, pool.address);
+      case PoolType.LBP:
+        return this.lbpClient.getPoolFees(feeAsset, pool.address);
+      default:
+        throw new PoolNotFound(pool.type);
     }
-    return null;
   }
 
   private isDirectOmnipoolTrade(route: Hop[]) {

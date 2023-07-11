@@ -26,7 +26,7 @@ export class XykPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  fees: XykPoolFees;
+  //fees: XykPoolFees;
 
   static fromPool(pool: PoolBase): XykPool {
     return new XykPool(
@@ -34,8 +34,8 @@ export class XykPool implements Pool {
       pool.tokens,
       pool.maxInRatio,
       pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.fees as XykPoolFees
+      pool.minTradingLimit
+      //pool.fees as XykPoolFees
     );
   }
 
@@ -44,8 +44,8 @@ export class XykPool implements Pool {
     tokens: PoolToken[],
     maxInRation: number,
     maxOutRatio: number,
-    minTradeLimit: number,
-    fees: XykPoolFees
+    minTradeLimit: number
+    //fees: XykPoolFees
   ) {
     this.type = PoolType.XYK;
     this.address = address;
@@ -53,7 +53,7 @@ export class XykPool implements Pool {
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    this.fees = fees;
+    //this.fees = fees;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {
@@ -81,10 +81,10 @@ export class XykPool implements Pool {
     } as PoolPair;
   }
 
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, dynamicFees: XykPoolFees): BuyTransfer {
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, fees: XykPoolFees): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
-    const fees: XykPoolFees = dynamicFees ?? this.fees;
+    //const fees: XykPoolFees = dynamicFees ?? this.fees;
     const fee = this.calculateTradeFee(calculatedIn, fees);
     const feePct = toPct(fees.exchangeFee);
     const amountIn = calculatedIn.plus(fee);
@@ -114,10 +114,10 @@ export class XykPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: PoolPair, amountIn: BigNumber, dynamicFees: XykPoolFees): SellTransfer {
+  validateAndSell(poolPair: PoolPair, amountIn: BigNumber, fees: XykPoolFees): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
-    const fees: XykPoolFees = dynamicFees ?? this.fees;
+    //const fees: XykPoolFees = dynamicFees ?? this.fees;
     const fee = this.calculateTradeFee(calculatedOut, fees);
     const feePct = toPct(fees.exchangeFee);
     const amountOut = calculatedOut.minus(fee);

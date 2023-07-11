@@ -1,29 +1,19 @@
 import type { StorageKey } from '@polkadot/types';
-import type { AnyTuple, Codec } from '@polkadot/types/types';
+import type { AnyTuple } from '@polkadot/types/types';
+import type { PalletLbpPool } from '@polkadot/types/lookup';
+import type { Option } from '@polkadot/types-codec';
 import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
 import { bnum, scale } from '../../utils/bignumber';
 import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
 
 import { LbpMath } from './LbpMath';
-import { LbpPoolFees, WeightedPoolToken } from './LbpPool';
+import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
 import { PoolClient } from '../PoolClient';
 
-// TODO - use runtime types
-interface LbpPoolData {
-  readonly assets: string[];
-  readonly feeCollector: string;
-  readonly fee: number[];
-  readonly repayTarget: string;
-  readonly initialWeight: number;
-  readonly finalWeight: number;
-  readonly start: number;
-  readonly end: number;
-}
-
 export class LbpPoolClient extends PoolClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
-  private poolsData: Map<string, LbpPoolData> = new Map([]);
+  private poolsData: Map<string, PalletLbpPool> = new Map([]);
   private pools: PoolBase[] = [];
   private _poolsLoaded = false;
 
@@ -39,11 +29,11 @@ export class LbpPoolClient extends PoolClient {
 
   private async loadPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.lbp.poolData.entries();
-    const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Codec]) => {
+    const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Option<PalletLbpPool>]) => {
       const poolAddress = this.getStorageKey(asset, 0);
-      const poolEntry = asset[1].toJSON() as unknown as LbpPoolData;
-      const poolTokens = await this.getPoolTokens(poolAddress, poolEntry.assets);
-      const poolFees = this.getPoolFees(poolEntry);
+      const poolEntry = asset[1].unwrap();
+      const poolAssets = poolEntry.assets.map((a) => a.toString());
+      const poolTokens = await this.getPoolTokens(poolAddress, poolAssets);
       const linearWeight = await this.getLinearWeight(poolEntry);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
@@ -52,7 +42,7 @@ export class LbpPoolClient extends PoolClient {
       return {
         address: poolAddress,
         type: PoolType.LBP,
-        fees: poolFees,
+        fee: poolEntry.fee.toJSON() as PoolFee,
         repayFeeApply: await this.isRepayFeeApplied(accumulatedAsset, poolEntry),
         tokens: [
           { ...poolTokens[0], weight: assetAWeight } as WeightedPoolToken,
@@ -84,7 +74,7 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(syncedPools);
   }
 
-  async getLinearWeight(poolEntry: LbpPoolData): Promise<string> {
+  private async getLinearWeight(poolEntry: PalletLbpPool): Promise<string> {
     const validationData = await this.api.query.parachainSystem.validationData();
     const data = validationData.toJSON() as unknown as PersistedValidationData;
     return LbpMath.calculateLinearWeights(
@@ -96,10 +86,10 @@ export class LbpPoolClient extends PoolClient {
     );
   }
 
-  async isRepayFeeApplied(assetKey: string, poolEntry: LbpPoolData): Promise<boolean> {
-    const repayTarget = bnum(poolEntry.repayTarget);
+  private async isRepayFeeApplied(assetKey: string, poolEntry: PalletLbpPool): Promise<boolean> {
+    const repayTarget = bnum(poolEntry.repayTarget.toString());
     try {
-      const balance = await this.getAccountBalance(assetKey, poolEntry.feeCollector);
+      const balance = await this.getAccountBalance(assetKey, poolEntry.feeCollector.toString());
       const feeCollectorBalance = balance.amount;
       return feeCollectorBalance.isLessThan(repayTarget);
     } catch (err) {
@@ -108,19 +98,20 @@ export class LbpPoolClient extends PoolClient {
     }
   }
 
-  getPoolFees(poolEntry: LbpPoolData): PoolFees {
+  async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
+    const pool = this.pools.find((pool) => pool.address === address) as LbpPoolBase;
     return {
       repayFee: this.getRepayFee(),
-      exchangeFee: poolEntry.fee as PoolFee,
+      exchangeFee: pool.fee as PoolFee,
     } as LbpPoolFees;
   }
 
-  getRepayFee(): PoolFee {
+  private getRepayFee(): PoolFee {
     const repayFee = this.api.consts.lbp.repayFee;
     return repayFee.toJSON() as PoolFee;
   }
 
-  getPoolLimits(): PoolLimits {
+  private getPoolLimits(): PoolLimits {
     const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
     const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
     const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;

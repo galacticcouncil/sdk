@@ -29,6 +29,7 @@ export type LbpPoolFees = PoolFees & {
 };
 
 export type LbpPoolBase = PoolBase & {
+  fee: PoolFee;
   repayFeeApply: boolean;
 };
 
@@ -39,7 +40,7 @@ export class LbpPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  fees: LbpPoolFees;
+  fee: PoolFee;
   repayFeeApply: boolean;
 
   static fromPool(pool: LbpPoolBase): LbpPool {
@@ -49,7 +50,7 @@ export class LbpPool implements Pool {
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
-      pool.fees as LbpPoolFees,
+      pool.fee,
       pool.repayFeeApply
     );
   }
@@ -60,7 +61,7 @@ export class LbpPool implements Pool {
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
-    fees: LbpPoolFees,
+    fee: PoolFee,
     repayFeeApply: boolean
   ) {
     this.type = PoolType.LBP;
@@ -69,7 +70,7 @@ export class LbpPool implements Pool {
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    this.fees = fees;
+    this.fee = fee;
     this.repayFeeApply = repayFeeApply;
   }
 
@@ -106,10 +107,9 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is bought (out) from the pool for distributed asset (in) - User(Buyer) bears the fee
    * b) Distributed asset is bought (out) from the pool for accumualted asset (in) - Pool bears the fee
    */
-  validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber, dynamicFees: LbpPoolFees): BuyTransfer {
+  validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber, fees: LbpPoolFees): BuyTransfer {
     const feeAsset = this.tokens[0].id;
     if (feeAsset === poolPair.assetOut) {
-      const fees: LbpPoolFees = dynamicFees ?? this.fees;
       const fee = this.calculateTradeFee(amountOut, fees);
       const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOutPlusFee = amountOut.plus(fee);
@@ -132,7 +132,7 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is sold (in) to the pool for distributed asset (out) - Pool bears the fee
    * b) Distributed asset is sold (in) to the pool for accumualted asset (out) - User(Seller) bears the fee
    */
-  validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber, dynamicFees: LbpPoolFees): SellTransfer {
+  validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber, fees: LbpPoolFees): SellTransfer {
     const feeAsset = this.tokens[0].id;
     if (feeAsset === poolPair.assetIn) {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
@@ -144,7 +144,6 @@ export class LbpPool implements Pool {
       } as SellTransfer;
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
-      const fees: LbpPoolFees = dynamicFees ?? this.fees;
       const fee = this.calculateTradeFee(calculatedOut, fees);
       const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOut = calculatedOut.minus(fee);

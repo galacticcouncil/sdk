@@ -1,8 +1,8 @@
 import { Router } from './Router';
-import { Hop, Pool, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction, Swap } from '../types';
+import { Hop, Pool, PoolFees, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction, Swap } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import { calculatePriceImpact, calculateSellFee, calculateBuyFee } from '../utils/math';
-import { toHuman } from '../utils/mapper';
+import { toHuman, toPct } from '../utils/mapper';
 import { RouteNotFound } from '../errors';
 
 export class TradeRouter extends Router {
@@ -33,6 +33,36 @@ export class TradeRouter extends Router {
       sortedResults.find((route: SellSwap[]) => route.every((swap: SellSwap) => swap.errors.length == 0)) ||
       sortedResults[0]
     );
+  }
+
+  /**
+   * Return route fee range [min,max] in case pool is using dynamic fees
+   *
+   * @param swaps - Trade routes
+   * @returns min & max fee range if swap through the pool with dynamic fees support
+   */
+  private getRouteFeeRange(swaps: Swap[]): [number, number] | undefined {
+    const hasDynFee = swaps.filter((s: Swap) => s.tradeFeeRange).length > 0;
+    if (hasDynFee) {
+      const min = swaps.map((s: Swap) => s.tradeFeeRange?.[0] ?? s.tradeFeePct).reduce((a: number, b: number) => a + b);
+      const max = swaps.map((s: Swap) => s.tradeFeeRange?.[1] ?? s.tradeFeePct).reduce((a: number, b: number) => a + b);
+      return [min, max];
+    }
+  }
+
+  /**
+   * Return pool fee range [min,max] in case pool is using dynamic fees
+   *
+   * @param fees - Pool fees
+   * @returns min & max fee range if swap through the pool with dynamic fees support
+   */
+  private getPoolFeeRange(fees: PoolFees): [number, number] | undefined {
+    const feeMin = fees.min ? toPct(fees.min) : undefined;
+    const feeMax = fees.max ? toPct(fees.max) : undefined;
+    if (feeMin && feeMax) {
+      return [feeMin, feeMax];
+    }
+    return undefined;
   }
 
   /**
@@ -74,6 +104,7 @@ export class TradeRouter extends Router {
     const deltaY = lastSwap.amountOut;
     const tradeFeePct = isDirect ? lastSwap.tradeFeePct : calculateSellFee(delta0Y, deltaY).toNumber();
     const tradeFee = delta0Y.minus(deltaY);
+    const tradeFeeRange = this.getRouteFeeRange(bestRoute);
 
     const sellTx = (minAmountOut: BigNumber): Transaction => {
       return this.poolService.buildSellTx(
@@ -92,6 +123,7 @@ export class TradeRouter extends Router {
       spotPrice: bestRouteSpotPrice,
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
+      tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpactPct.toNumber(),
       swaps: bestRoute,
       toTx: sellTx,
@@ -103,6 +135,7 @@ export class TradeRouter extends Router {
           spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetOutDecimals),
           tradeFee: toHuman(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
+          tradeFeeRange: tradeFeeRange,
           priceImpactPct: bestRoutePriceImpactPct.toNumber(),
           swaps: bestRoute.map((s: SellSwap) => s.toHuman()),
         };
@@ -166,8 +199,9 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
       }
 
-      const dynFees = await this.poolService.getDynamicFees(poolPair.assetOut, pool.type);
-      const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn, dynFees);
+      const poolFees = await this.poolService.getPoolFees(poolPair.assetOut, pool);
+      const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn, poolFees);
+      const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
       const priceImpactPct = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
 
@@ -180,6 +214,7 @@ export class TradeRouter extends Router {
         amountOut: amountOut,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
+        tradeFeeRange: feePctRange,
         priceImpactPct: priceImpactPct.toNumber(),
         errors: errors,
         toHuman() {
@@ -190,6 +225,7 @@ export class TradeRouter extends Router {
             amountOut: toHuman(amountOut, poolPair.decimalsOut),
             spotPrice: toHuman(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
+            tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct.toNumber(),
             errors: errors,
           };
@@ -287,6 +323,7 @@ export class TradeRouter extends Router {
     const deltaX = lastSwap.amountIn;
     const tradeFeePct = isDirect ? lastSwap.tradeFeePct : calculateBuyFee(delta0X, deltaX);
     const tradeFee = deltaX.minus(delta0X);
+    const tradeFeeRange = this.getRouteFeeRange(bestRoute);
 
     const buyTx = (maxAmountIn: BigNumber): Transaction => {
       return this.poolService.buildBuyTx(
@@ -305,6 +342,7 @@ export class TradeRouter extends Router {
       spotPrice: bestRouteSpotPrice,
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
+      tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpactPct.toNumber(),
       swaps: bestRoute,
       toTx: buyTx,
@@ -316,6 +354,7 @@ export class TradeRouter extends Router {
           spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetInDecimals),
           tradeFee: toHuman(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
+          tradeFeeRange: tradeFeeRange,
           priceImpactPct: bestRoutePriceImpactPct.toNumber(),
           swaps: bestRoute.map((s: BuySwap) => s.toHuman()),
         };
@@ -380,8 +419,9 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const dynFees = await this.poolService.getDynamicFees(poolPair.assetIn, pool.type);
-      const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut, dynFees);
+      const poolFees = await this.poolService.getPoolFees(poolPair.assetIn, pool);
+      const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut, poolFees);
+      const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
       const priceImpactPct = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
 
@@ -394,6 +434,7 @@ export class TradeRouter extends Router {
         amountIn: amountIn,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
+        tradeFeeRange: feePctRange,
         priceImpactPct: priceImpactPct.toNumber(),
         errors: errors,
         toHuman() {
@@ -404,6 +445,7 @@ export class TradeRouter extends Router {
             amountIn: toHuman(amountIn, poolPair.decimalsIn),
             spotPrice: toHuman(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
+            tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct.toNumber(),
             errors: errors,
           };

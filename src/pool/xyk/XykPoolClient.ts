@@ -25,11 +25,9 @@ export class XykPoolClient extends PoolClient {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntries = this.getStorageEntryArray(asset);
       const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
-      const poolFees = this.getPoolFees();
       return {
         address: poolAddress,
         type: PoolType.XYK,
-        fees: poolFees,
         tokens: poolTokens,
         ...this.getPoolLimits(),
       } as PoolBase;
@@ -47,18 +45,18 @@ export class XykPoolClient extends PoolClient {
     return Promise.all(syncedPools);
   }
 
-  getPoolFees(): PoolFees {
+  async getPoolFees(_feeAsset: string, _address: string): Promise<PoolFees> {
     return {
       exchangeFee: this.getExchangeFee(),
     } as XykPoolFees;
   }
 
-  getExchangeFee(): PoolFee {
+  private getExchangeFee(): PoolFee {
     const exFee = this.api.consts.xyk.getExchangeFee;
     return exFee.toJSON() as PoolFee;
   }
 
-  getPoolLimits(): PoolLimits {
+  private getPoolLimits(): PoolLimits {
     const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
     const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
     const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
