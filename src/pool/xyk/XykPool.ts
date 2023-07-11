@@ -26,34 +26,18 @@ export class XykPool implements Pool {
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
-  //fees: XykPoolFees;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(
-      pool.address,
-      pool.tokens,
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-      //pool.fees as XykPoolFees
-    );
+    return new XykPool(pool.address, pool.tokens, pool.maxInRatio, pool.maxOutRatio, pool.minTradingLimit);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number
-    //fees: XykPoolFees
-  ) {
+  constructor(address: string, tokens: PoolToken[], maxInRation: number, maxOutRatio: number, minTradeLimit: number) {
     this.type = PoolType.XYK;
     this.address = address;
     this.tokens = tokens;
     this.maxInRatio = maxInRation;
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
-    //this.fees = fees;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {
@@ -84,7 +68,6 @@ export class XykPool implements Pool {
   validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, fees: XykPoolFees): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
-    //const fees: XykPoolFees = dynamicFees ?? this.fees;
     const fee = this.calculateTradeFee(calculatedIn, fees);
     const feePct = toPct(fees.exchangeFee);
     const amountIn = calculatedIn.plus(fee);
@@ -117,7 +100,6 @@ export class XykPool implements Pool {
   validateAndSell(poolPair: PoolPair, amountIn: BigNumber, fees: XykPoolFees): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
-    //const fees: XykPoolFees = dynamicFees ?? this.fees;
     const fee = this.calculateTradeFee(calculatedOut, fees);
     const feePct = toPct(fees.exchangeFee);
     const amountOut = calculatedOut.minus(fee);

@@ -1,15 +1,10 @@
 import { XykPoolFees } from '../../src/pool/xyk/XykPool';
 import { PoolFee, PoolType } from '../../src/types';
 
-const fees: XykPoolFees = {
-  exchangeFee: [3, 1000] as PoolFee,
-};
-
 export const xykPools = [
   {
     address: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
     type: PoolType.XYK,
-    fees: fees,
     maxInRatio: 3000,
     maxOutRatio: 3000,
     minTradingLimit: 1000,
@@ -31,7 +26,6 @@ export const xykPools = [
   {
     address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
     type: PoolType.XYK,
-    fees: fees,
     maxInRatio: 3000,
     maxOutRatio: 3000,
     minTradingLimit: 1000,
@@ -53,7 +47,6 @@ export const xykPools = [
   {
     address: 'bXmKSSACEp9rm8NuUAyDHiW2AjcLzZ4pvuRczz2ZJNkWVqFFm',
     type: PoolType.XYK,
-    fees: fees,
     maxInRatio: 3000,
     maxOutRatio: 3000,
     minTradingLimit: 1000,
@@ -75,7 +68,6 @@ export const xykPools = [
   {
     address: 'bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ',
     type: PoolType.XYK,
-    fees: fees,
     maxInRatio: 3000,
     maxOutRatio: 3000,
     minTradingLimit: 1000,
