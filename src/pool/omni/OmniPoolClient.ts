@@ -80,21 +80,31 @@ export class OmniPoolClient extends PoolClient {
   }
 
   async getPoolFees(feeAsset: string, _address: string): Promise<PoolFees> {
-    const dynamicFees = await this.getDynamicFees(feeAsset);
-    if (dynamicFees && dynamicFees.isSome) {
-      const { assetFee, protocolFee } = dynamicFees.unwrap();
+    try {
+      const dynamicFees = await this.api.query.dynamicFees.assetFee(feeAsset);
       const afp = this.api.consts.dynamicFees.assetFeeParameters;
       const pfp = this.api.consts.dynamicFees.protocolFeeParameters;
       const min = afp.minFee.toNumber() + pfp.minFee.toNumber();
       const max = afp.maxFee.toNumber() + pfp.maxFee.toNumber();
 
-      return {
-        assetFee: toPoolFee(assetFee.toNumber()),
-        protocolFee: toPoolFee(protocolFee.toNumber()),
-        min: toPoolFee(min),
-        max: toPoolFee(max),
-      } as OmniPoolFees;
-    } else {
+      if (dynamicFees.isSome) {
+        const { assetFee, protocolFee } = dynamicFees.unwrap();
+        return {
+          assetFee: toPoolFee(assetFee.toNumber()),
+          protocolFee: toPoolFee(protocolFee.toNumber()),
+          min: toPoolFee(min),
+          max: toPoolFee(max),
+        } as OmniPoolFees;
+      } else {
+        return {
+          assetFee: this.getAssetFee(),
+          protocolFee: this.getProtocolFee(),
+          min: toPoolFee(min),
+          max: toPoolFee(max),
+        } as OmniPoolFees;
+      }
+    } catch {
+      // TODO: Remove fallback when dyn fees pallet on mainnet
       return {
         assetFee: this.getAssetFee(),
         protocolFee: this.getProtocolFee(),
@@ -126,15 +136,6 @@ export class OmniPoolClient extends PoolClient {
       protocolFeeNo = protocolFee.toJSON() as number;
     }
     return toPoolFee(protocolFeeNo);
-  }
-
-  private getDynamicFees(asset: string) {
-    try {
-      return this.api.query.dynamicFees.assetFee(asset);
-    } catch {
-      // TODO: Remove fallback when dyn fees pallet on mainnet
-      return null;
-    }
   }
 
   private getPoolId(): string {
