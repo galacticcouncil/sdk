@@ -126,6 +126,7 @@ To release minor or major version of the SDK use following commands.
 ```sh
 npm run pckg:release -- --release-as minor # Release minor version. E.g. 1.0.23 -> 1.1.0
 npm run pckg:release -- --release-as major # Release major version. E.g. 1.0.23 -> 2.0.0
+npm run pckg:release -- --release-as 1.1.0 # Release specific version (1.1.0)
 ```
 
 ## Issue reporting

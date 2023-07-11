@@ -10,12 +10,12 @@
   "scripts": {
     "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
     "cleanup": "rimraf out && rimraf dist",
+    "release": "standard-version --tag-prefix=''",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "pckg:build": "npm run cleanup && npm run build",
     "pckg:beta": "npm run pckg:build && npm publish --tag beta",
-    "release": "standard-version --tag-prefix=''",
-    "pckg:release": "npm run pckg:build && standard-version --tag-prefix=''",
+    "pckg:release": "npm run pckg:build && npm release",
     "pckg:publish": "git push --follow-tags origin master && npm publish",
     "xcmgr:sync": "node ./xcmgr.sync.mjs"
   },
