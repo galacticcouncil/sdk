@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.5.0-beta.1",
+  "version": "0.5.0",
   "private": false,
   "description": "Galactic SDK",
   "author": "Pavol Noha <palo@hydradx.io>",

@@ -1,4 +1,4 @@
-import { XykPool } from '../../../src/pool';
+import { XykPool } from '../../../src/pool/xyk/XykPool';
 import { xykPool } from '../../data/xykPool';
 
 describe('Xyk Pool', () => {
