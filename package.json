@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": false,
   "description": "Galactic SDK",
   "author": "Pavol Noha <palo@hydradx.io>",
@@ -15,7 +15,7 @@
     "test:coverage": "jest --coverage",
     "pckg:build": "npm run cleanup && npm run build",
     "pckg:beta": "npm run pckg:build && npm publish --tag beta",
-    "pckg:release": "npm run pckg:build && npm release",
+    "pckg:release": "npm run pckg:build && standard-version --tag-prefix=''",
     "pckg:publish": "git push --follow-tags origin master && npm publish",
     "xcmgr:sync": "node ./xcmgr.sync.mjs"
   },
