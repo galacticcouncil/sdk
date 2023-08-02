@@ -112,7 +112,9 @@ export class TradeRouter extends Router {
         assetOut,
         firstSwap.amountIn,
         minAmountOut,
-        bestRoute.map((hop: Hop) => hop)
+        bestRoute.map(({ assetIn, assetOut, pool, poolId }: SellSwap) => {
+          return { assetIn, assetOut, pool, poolId } as Hop;
+        })
       );
     };
 
@@ -331,7 +333,9 @@ export class TradeRouter extends Router {
         assetOut,
         firstSwap.amountOut,
         maxAmountIn,
-        bestRoute.map((hop: Hop) => hop)
+        bestRoute.map(({ assetIn, assetOut, pool, poolId }: BuySwap) => {
+          return { assetIn, assetOut, pool, poolId } as Hop;
+        })
       );
     };
 

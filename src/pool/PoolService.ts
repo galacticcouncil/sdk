@@ -65,7 +65,7 @@ export class PoolService implements IPoolService {
   }
 
   private isDirectOmnipoolTrade(route: Hop[]) {
-    return route.length == 1 && route[0].poolType == PoolType.Omni;
+    return route.length == 1 && route[0].pool == PoolType.Omni;
   }
 
   buildBuyTx(

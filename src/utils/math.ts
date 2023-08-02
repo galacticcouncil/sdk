@@ -38,7 +38,7 @@ export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
 }
 
 /**
- * The total fee paid for a buy transaction
+ * The total fee paid for a ‘buy‘ transaction
  * Suppose the trader is buying Y using X
  *
  * fee = (deltaX / delta0X) - 1

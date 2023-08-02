@@ -3,13 +3,14 @@ import { BigNumber } from './utils/bignumber';
 export type PoolAsset = { id: string; symbol: string };
 
 export enum PoolType {
-  XYK = 'XYK',
-  LBP = 'LBP',
-  Stable = 'Stable',
-  Omni = 'Omni',
+  XYK = 'Xyk',
+  LBP = 'Lbp',
+  Stable = 'Stableswap',
+  Omni = 'Omnipool',
 }
 
 export enum PoolError {
+  UnknownError = 'UnknownError',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
@@ -103,7 +104,7 @@ export interface Transaction {
 }
 
 export type Hop = {
-  poolType: PoolType;
+  pool: PoolType;
   poolId: string;
   assetIn: string;
   assetOut: string;

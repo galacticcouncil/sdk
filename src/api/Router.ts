@@ -184,7 +184,7 @@ export class Router {
       const pool = poolsMap.get(id);
       return {
         poolId: id,
-        poolType: pool?.type,
+        pool: pool?.type,
         assetIn: from,
         assetOut: to,
       } as Hop;
