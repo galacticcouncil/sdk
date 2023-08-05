@@ -1,7 +1,7 @@
 import { Router } from './Router';
 import { Hop, Pool, PoolFees, SellSwap, BuySwap, Trade, TradeType, Amount, Transaction, Swap } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
-import { calculatePriceImpact, calculateSellFee, calculateBuyFee } from '../utils/math';
+import { calculateSellFee, calculateBuyFee, calculateDiffToRef } from '../utils/math';
 import { toHuman, toPct } from '../utils/mapper';
 import { RouteNotFound } from '../errors';
 
@@ -93,12 +93,9 @@ export class TradeRouter extends Router {
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetOutDecimals).decimalPlaces(0, 1);
-    const bestRoutePriceImpactPct = calculatePriceImpact(
-      firstSwap.amountIn,
-      firstSwap.assetInDecimals,
-      bestRouteSpotPrice,
-      lastSwap.calculatedOut
-    );
+
+    const swapAmount = firstSwap.amountIn.shiftedBy(-1 * firstSwap.assetInDecimals).multipliedBy(bestRouteSpotPrice);
+    const bestRoutePriceImpact = calculateDiffToRef(lastSwap.calculatedOut, swapAmount);
 
     const delta0Y = isDirect ? lastSwap.calculatedOut : this.calculateDelta0Y(firstSwap.amountIn, bestRoute, poolsMap);
     const deltaY = lastSwap.amountOut;
@@ -126,7 +123,7 @@ export class TradeRouter extends Router {
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
-      priceImpactPct: bestRoutePriceImpactPct.toNumber(),
+      priceImpactPct: bestRoutePriceImpact.toNumber(),
       swaps: bestRoute,
       toTx: sellTx,
       toHuman() {
@@ -138,7 +135,7 @@ export class TradeRouter extends Router {
           tradeFee: toHuman(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
-          priceImpactPct: bestRoutePriceImpactPct.toNumber(),
+          priceImpactPct: bestRoutePriceImpact.toNumber(),
           swaps: bestRoute.map((s: SellSwap) => s.toHuman()),
         };
       },
@@ -205,7 +202,8 @@ export class TradeRouter extends Router {
       const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(poolPair, aIn, poolFees);
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
-      const priceImpactPct = calculatePriceImpact(aIn, poolPair.decimalsIn, spotPrice, calculatedOut);
+      const swapAmount = aIn.shiftedBy(-1 * poolPair.decimalsIn).multipliedBy(spotPrice);
+      const priceImpactPct = calculateDiffToRef(calculatedOut, swapAmount);
 
       swaps.push({
         ...hop,
@@ -314,12 +312,14 @@ export class TradeRouter extends Router {
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetInDecimals).decimalPlaces(0, 1);
-    const bestRoutePriceImpactPct = calculatePriceImpact(
-      firstSwap.amountOut,
-      firstSwap.assetOutDecimals,
-      bestRouteSpotPrice,
-      lastSwap.calculatedIn
-    );
+
+    const swapAmount = firstSwap.amountOut.shiftedBy(-1 * firstSwap.assetOutDecimals).multipliedBy(bestRouteSpotPrice);
+    let bestRoutePriceImpact: number;
+    if (lastSwap.calculatedIn.isZero()) {
+      bestRoutePriceImpact = -100;
+    } else {
+      bestRoutePriceImpact = calculateDiffToRef(swapAmount, lastSwap.calculatedIn).toNumber();
+    }
 
     const delta0X = isDirect ? lastSwap.calculatedIn : this.calculateDelta0X(firstSwap.amountOut, bestRoute, poolsMap);
     const deltaX = lastSwap.amountIn;
@@ -347,7 +347,7 @@ export class TradeRouter extends Router {
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
-      priceImpactPct: bestRoutePriceImpactPct.toNumber(),
+      priceImpactPct: bestRoutePriceImpact,
       swaps: bestRoute,
       toTx: buyTx,
       toHuman() {
@@ -359,7 +359,7 @@ export class TradeRouter extends Router {
           tradeFee: toHuman(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
-          priceImpactPct: bestRoutePriceImpactPct.toNumber(),
+          priceImpactPct: bestRoutePriceImpact,
           swaps: bestRoute.map((s: BuySwap) => s.toHuman()),
         };
       },
@@ -427,7 +427,14 @@ export class TradeRouter extends Router {
       const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(poolPair, aOut, poolFees);
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
-      const priceImpactPct = calculatePriceImpact(aOut, poolPair.decimalsOut, spotPrice, calculatedIn);
+
+      const swapAmount = aOut.shiftedBy(-1 * poolPair.decimalsOut).multipliedBy(spotPrice);
+      let priceImpactPct: number;
+      if (calculatedIn.isZero()) {
+        priceImpactPct = -100;
+      } else {
+        priceImpactPct = calculateDiffToRef(swapAmount, calculatedIn).toNumber();
+      }
 
       swaps.unshift({
         ...hop,
@@ -439,7 +446,7 @@ export class TradeRouter extends Router {
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
-        priceImpactPct: priceImpactPct.toNumber(),
+        priceImpactPct: priceImpactPct,
         errors: errors,
         toHuman() {
           return {
@@ -450,7 +457,7 @@ export class TradeRouter extends Router {
             spotPrice: toHuman(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
-            priceImpactPct: priceImpactPct.toNumber(),
+            priceImpactPct: priceImpactPct,
             errors: errors,
           };
         },
