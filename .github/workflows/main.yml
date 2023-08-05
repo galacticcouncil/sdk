@@ -23,9 +23,5 @@ jobs:
         run: npm install
       - name: Run tests with coverage report
         run: npm run test:coverage
-      - name: Generate coverage badges
-        uses: jpb06/jest-badges-action@latest
-        with:
-          branches: master
       - name: Build SDK
         run: npm run build
