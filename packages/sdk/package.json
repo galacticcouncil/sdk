@@ -39,7 +39,8 @@
     "build": "tsup",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "dev": "npm run build -- --watch",
-    "link": "npm ln"
+    "link": "npm ln",
+    "test": "jest"
   },
   "devDependencies": {
     "@galacticcouncil/api-augment": "^0.0.4"

@@ -16,7 +16,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "link": "turbo run link"
+    "link": "turbo run link",
+    "test": "turbo run test"
   },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^0.1.3",

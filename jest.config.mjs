@@ -1,4 +1,4 @@
-export default {
+export const config = {
   roots: ['<rootDir>/test'],
   modulePaths: ['<rootDir>'],
   moduleDirectories: ['node_modules'],
@@ -9,18 +9,6 @@ export default {
   transform: {
     '^.+\\.(ts)$': 'es-jest',
   },
-  collectCoverageFrom: [
-    'src/**/*.{js,ts}',
-    '!src/client/**',
-    '!src/pool/CachingPoolService.ts',
-    '!src/pool/PoolService.ts',
-    '!src/pool/xyk/XykPoolClient.ts',
-    '!src/pool/lbp/LbpPoolClient.ts',
-    '!src/pool/omni/OmniPoolClient.ts',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-  ],
-  coverageReporters: ['json-summary'],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.json',
