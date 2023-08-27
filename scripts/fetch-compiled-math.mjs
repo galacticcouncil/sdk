@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import { mkdirSync, existsSync, appendFileSync } from 'fs';
 
 const PARAM_PREFIX = '--';
 
@@ -20,8 +20,8 @@ const BUILD_FOLDER = 'build';
 const fetchResource = async (math, target, file) => {
   const path = [WASM_REPO, WASM_BRANCH, WASM_BUILD, math, target, file];
   const resp = await fetch(path.join('/'));
-  const content = await resp.text();
-  return content;
+  const arrayBuffer = await resp.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 };
 
 const main = async () => {
@@ -38,9 +38,10 @@ const main = async () => {
     const [target, input, output] = conf;
     const file = await fetchResource(mathParam, target, input);
     const outPath = [BUILD_FOLDER, output];
-    writeFileSync(outPath.join('/'), file);
-    console.log(`${input} fetched ✅`);
+    appendFileSync(outPath.join('/'), file);
+    console.log(`${input} fetched`);
   }
+  console.log(`Math ${mathParam} ready ✅`);
 };
 
 const parseArgs = (args) => {
@@ -56,4 +57,3 @@ const parseArgs = (args) => {
 };
 
 await main();
-console.log('Finito');
