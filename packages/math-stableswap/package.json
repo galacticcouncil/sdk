@@ -1,0 +1,41 @@
+{
+  "name": "@galacticcouncil/math-stableswap",
+  "version": "0.1.4",
+  "description": "Stableswap pool math",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/math-stableswap",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydradx",
+    "basilisk",
+    "math",
+    "stableswap"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "type": "module",
+  "main": "./build/index.cjs",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./build/index.d.ts",
+        "default": "./build/index.mjs"
+      },
+      "require": {
+        "types": "./build/index.d.ts",
+        "default": "./build/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "node ../../scripts/fetch-compiled-math.mjs --name stableswap"
+  }
+}

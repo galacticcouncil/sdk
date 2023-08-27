@@ -59,7 +59,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
 // Initialize Polkadot API
-const wsProvider = new WsProvider('wss://rpc.basilisk.cloud');
+const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
 const api = await ApiPromise.create({ provider: wsProvider });
 
 // Initialize Trade Router
@@ -93,14 +93,12 @@ Component list and current status ⬇️
 | ----------- | :----: | --: |
 | Router      |  API   |  🧪 |
 | TradeRouter |  API   |  🧪 |
-| Polkadot    | Client |  🧪 |
-| Capi        | Client |  ⏳ |
 | XYK         |  Math  |  🧪 |
 | XYK         |  Pool  |  🧪 |
 | Omni        |  Math  |  🧪 |
 | Omni        |  Pool  |  🧪 |
 | LBP         |  Math  |  🧪 |
-| LBP         |  Pool  |   🛠 |
+| LBP         |  Pool  |  🛠 |
 | Stable      |  Math  |  ⏳ |
 | Stable      |  Pool  |  ⏳ |
 

@@ -1,23 +1,14 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "declaration": true,
-    "target": "es2021",
+    "target": "es2022",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "declaration": true,
     "strict": true,
-    "noImplicitAny": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowJs": true,
-    "outDir": "./dist/",
-    "baseUrl": "src",
-    "paths": {
-      "@hydradx/api/augment": ["src/interfaces/augment-api.ts"],
-      "@hydradx/types/augment": ["src/interfaces/augment-types.ts"],
-      "@hydradx/types/lookup": ["src/interfaces/types-lookup.ts"]
-    }
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts"]
+  "exclude": ["node_modules", "dist", "build"]
 }

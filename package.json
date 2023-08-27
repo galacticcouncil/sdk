@@ -1,31 +1,33 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.5.2",
   "private": false,
-  "description": "Galactic SDK",
-  "author": "Pavol Noha <palo@hydradx.io>",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/types/index.d.ts",
-  "scripts": {
-    "build": "node ./esbuild.mjs && tsc --emitDeclarationOnly --outDir dist/types/",
-    "cleanup": "rimraf out && rimraf dist",
-    "release": "standard-version --tag-prefix=''",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "pckg:build": "npm run cleanup && npm run build",
-    "pckg:beta": "npm run pckg:build && npm publish --tag beta",
-    "pckg:release": "npm run pckg:build && standard-version --tag-prefix=''",
-    "pckg:publish": "git push --follow-tags origin master && npm publish",
-    "xcmgr:sync": "node ./xcmgr.sync.mjs"
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
   },
-  "standard-version": {
-    "skip": {
-      "changelog": true
-    }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/xcm-sdk.git"
+  },
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "link": "turbo run link"
+  },
+  "dependencies": {
+    "@galacticcouncil/math-lbp": "^0.1.3",
+    "@galacticcouncil/math-omnipool": "^0.1.3",
+    "@galacticcouncil/math-xyk": "^0.1.3",
+    "@galacticcouncil/xcm-sdk": "^1.0.13",
+    "@thi.ng/cache": "^2.1.35",
+    "bignumber.js": "^9.1.0",
+    "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
-    "@galacticcouncil/api-augment": "^0.0.4",
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
     "esbuild": "^0.14.53",
@@ -37,18 +39,12 @@
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
+    "tsup": "^6.7.0",
+    "turbo": "^1.9.9",
     "typescript": "^4.7.4"
-  },
-  "dependencies": {
-    "@galacticcouncil/math-lbp": "^0.1.3",
-    "@galacticcouncil/math-omnipool": "^0.1.3",
-    "@galacticcouncil/math-xyk": "^0.1.3",
-    "@thi.ng/cache": "^2.1.35",
-    "bignumber.js": "^9.1.0",
-    "lodash.clonedeep": "^4.5.0"
   },
   "peerDependencies": {
     "@polkadot/api": "^10.9.1",
-    "ethers": "^6.0.5"
+    "ethers": "^5.7.2"
   }
 }
