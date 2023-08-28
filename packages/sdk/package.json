@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
   "repository": {
@@ -20,26 +20,14 @@
   "files": [
     "build"
   ],
-  "type": "module",
   "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./build/types/index.d.ts",
-        "default": "./build/index.mjs"
-      },
-      "require": {
-        "types": "./build/types/index.d.ts",
-        "default": "./build/index.cjs"
-      }
-    }
-  },
   "scripts": {
-    "build": "tsup",
+    "build": "node ./esbuild.config.mjs",
+    "build:watch": "npm run build -- --watch",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
-    "dev": "npm run build -- --watch",
     "link": "npm ln",
     "test": "jest"
   },
