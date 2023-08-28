@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/math-liquidity-mining",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Liquidity mining math",
   "author": "GalacticCouncil",
   "repository": {
@@ -36,6 +36,8 @@
     }
   },
   "scripts": {
-    "build": "node ../../scripts/fetch-compiled-math.mjs --name liquidity-mining"
+    "build": "node ../../scripts/build-math.mjs --name liquidity-mining",
+    "clean": "rimraf build",
+    "link": "npm ln"
   }
 }

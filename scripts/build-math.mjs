@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, appendFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 const PARAM_PREFIX = '--';
 
@@ -38,7 +38,7 @@ const main = async () => {
     const [target, input, output] = conf;
     const file = await fetchResource(mathParam, target, input);
     const outPath = [BUILD_FOLDER, output];
-    appendFileSync(outPath.join('/'), file);
+    writeFileSync(outPath.join('/'), file);
     console.log(`${input} fetched`);
   }
   console.log(`Math ${mathParam} ready ✅`);

@@ -5,6 +5,7 @@ export default defineConfig(({ watch }) => ({
   format: ['esm', 'cjs'],
   outDir: 'build',
   target: 'node18',
+  bundle: true,
   minify: true,
   sourcemap: false,
   clean: true,

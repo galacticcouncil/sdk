@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/math-lbp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "LBP pool math",
   "author": "GalacticCouncil",
   "repository": {
@@ -36,6 +36,8 @@
     }
   },
   "scripts": {
-    "build": "node ../../scripts/fetch-compiled-math.mjs --name lbp"
+    "build": "node ../../scripts/build-math.mjs --name lbp",
+    "clean": "rimraf build",
+    "link": "npm ln"
   }
 }

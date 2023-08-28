@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/math-omnipool",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Omnipool math",
   "author": "GalacticCouncil",
   "repository": {
@@ -36,6 +36,8 @@
     }
   },
   "scripts": {
-    "build": "node ../../scripts/fetch-compiled-math.mjs --name omnipool"
+    "build": "node ../../scripts/build-math.mjs --name omnipool",
+    "clean": "rimraf build",
+    "link": "npm ln"
   }
 }
