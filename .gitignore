@@ -4,6 +4,9 @@ node_modules/
 # build folders
 packages/*/build
 
+# compile folders
+examples/*/out
+
 # turbo files
 .turbo
 
