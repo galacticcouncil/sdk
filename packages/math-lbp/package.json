@@ -20,21 +20,9 @@
   "files": [
     "build"
   ],
-  "type": "module",
   "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./build/index.d.ts",
-        "default": "./build/index.mjs"
-      },
-      "require": {
-        "types": "./build/index.d.ts",
-        "default": "./build/index.cjs"
-      }
-    }
-  },
   "scripts": {
     "build": "node ../../scripts/build-math.mjs --name lbp",
     "clean": "rimraf build",
