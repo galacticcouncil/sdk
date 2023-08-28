@@ -1,0 +1,20 @@
+{
+  "name": "xcm-transfer",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.17.11"
+  },
+  "dependencies": {
+    "@galacticcouncil/xcm": "^0.0.1",
+    "@galacticcouncil/xcm-sdk": "^1.0.13",
+    "@galacticcouncil/xcm-config": "^1.0.15",
+    "@talismn/connect-wallets": "^1.2.1"
+  }
+}
