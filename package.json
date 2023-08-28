@@ -15,15 +15,15 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "build:watch": "turbo run build:watch",
     "clean": "turbo run clean",
-    "dev": "turbo run dev",
     "link": "turbo run link",
     "test": "turbo run test"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
-    "esbuild": "^0.14.53",
+    "esbuild": "^0.17.11",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
     "prettier": "^2.3.2",
@@ -31,7 +31,6 @@
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
-    "tsup": "^6.7.0",
     "turbo": "^1.9.9",
     "typescript": "^4.7.4"
   }

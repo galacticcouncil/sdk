@@ -19,36 +19,19 @@
   "files": [
     "build"
   ],
-  "type": "module",
   "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./build/types/index.d.ts",
-        "default": "./build/index.mjs"
-      },
-      "require": {
-        "types": "./build/types/index.d.ts",
-        "default": "./build/index.cjs"
-      }
-    }
-  },
   "scripts": {
-    "build": "tsup",
+    "build": "node ./esbuild.config.mjs",
+    "build:watch": "npm run build -- --watch",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
-    "dev": "npm run build -- --watch",
     "link": "npm ln"
   },
-  "dependencies": {
-    "@galacticcouncil/xcm-config": "^1.0.15"
-  },
   "peerDependencies": {
+    "@galacticcouncil/xcm-config": "^1.0.15",
     "@moonbeam-network/xcm-builder": "1.0.5",
-    "@moonbeam-network/xcm-types": "1.0.1",
-    "@polkadot/types": "^10.9.1",
-    "@polkadot/util": "^12.3.2",
-    "@polkadot/util-crypto": "^12.3.2"
+    "@moonbeam-network/xcm-types": "1.0.1"
   }
 }

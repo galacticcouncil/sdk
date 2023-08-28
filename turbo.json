@@ -5,10 +5,10 @@
       "outputs": ["build/**"],
       "dependsOn": ["^build"]
     },
-    "clean": {
+    "build:watch": {
       "cache": false
     },
-    "dev": {
+    "clean": {
       "cache": false
     },
     "link": {
