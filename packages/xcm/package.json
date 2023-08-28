@@ -1,0 +1,54 @@
+{
+  "name": "@galacticcouncil/xcm",
+  "version": "0.0.1",
+  "description": "Cross-chain polkadot & kusama configuration",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xcm",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydradx",
+    "basilisk",
+    "xcm"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "type": "module",
+  "main": "./build/index.cjs",
+  "types": "./build/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./build/types/index.d.ts",
+        "default": "./build/index.mjs"
+      },
+      "require": {
+        "types": "./build/types/index.d.ts",
+        "default": "./build/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "dev": "npm run build -- --watch",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@galacticcouncil/xcm-config": "^1.0.15"
+  },
+  "peerDependencies": {
+    "@moonbeam-network/xcm-builder": "1.0.5",
+    "@moonbeam-network/xcm-types": "1.0.1",
+    "@polkadot/types": "^10.9.1",
+    "@polkadot/util": "^12.3.2",
+    "@polkadot/util-crypto": "^12.3.2"
+  }
+}
