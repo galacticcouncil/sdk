@@ -1,25 +1,25 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-config';
 
-import { dot } from '../assets';
-import { hydraDX } from '../chains';
+import { ztg } from '../assets';
+import { hydraDX, zeitgeist } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
-    asset: dot,
+    asset: ztg,
     balance: BalanceBuilder().substrate().system().account(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.002172,
-      asset: dot,
+      amount: 0.0225,
+      asset: ztg,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV3().xcmPallet().limitedReserveTransferAssets().here(),
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
   }),
 ];
 
-export const polkadotConfig = new ChainConfig({
+export const zeitgeistConfig = new ChainConfig({
   assets: [...toHydraDX],
-  chain: polkadot,
+  chain: zeitgeist,
 });

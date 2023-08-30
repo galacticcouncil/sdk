@@ -1,7 +1,7 @@
 import { Asset } from '@moonbeam-network/xcm-types';
-import { dot, glmr, hdx, wbtc, weth } from '@galacticcouncil/xcm-config';
+import { astr, cfg, bnc, dot, glmr, hdx, ibtc, usdt, wbtc, weth } from '@galacticcouncil/xcm-config';
 
-export { dot, glmr, hdx, wbtc, weth };
+export { astr, cfg, bnc, dot, glmr, hdx, ibtc, usdt, wbtc, weth };
 
 export const daiAcala = new Asset({
   key: 'dai-acala',
@@ -13,4 +13,9 @@ export const daiMoonbeam = new Asset({
   originSymbol: 'DAI',
 });
 
-export const assets: Asset[] = [daiAcala, daiMoonbeam, dot, glmr, hdx, wbtc, weth];
+export const ztg = new Asset({
+  key: 'ztg',
+  originSymbol: 'ZTG',
+});
+
+export const assets: Asset[] = [astr, cfg, bnc, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg];

@@ -1,20 +1,73 @@
-import { AnyChain, EvmParachain, Parachain } from '@moonbeam-network/xcm-types';
+import { AnyChain, Ecosystem, EvmParachain, Parachain } from '@moonbeam-network/xcm-types';
 import {
-  polkadot,
-  hydraDX as defaultHydraDx,
-  moonbeam as defaultMoonbeam,
   acala as defaultAcala,
+  astar as defaultAstar,
+  bifrostPolkadot as defaultBifrostPolkadot,
+  centrifuge as defaultCentrifuge,
+  hydraDX as defaultHydraDx,
+  interlay as defaultInterlay,
+  moonbeam as defaultMoonbeam,
+  polkadot,
+  polkadotAssetHub as defaultPolkadotAssetHub,
 } from '@galacticcouncil/xcm-config';
 
-import { daiAcala, daiMoonbeam, glmr, hdx, wbtc, weth } from './assets';
+import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
 
-export const acala = new Parachain({
-  ...defaultAcala,
+const { type: _, ...acalaConf } = defaultAcala;
+
+export const acala = new EvmParachain({
+  ...acalaConf,
   assetsData: [
     {
       asset: daiAcala,
-      id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
       balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
+    },
+  ],
+  id: 2000,
+  rpc: 'wss://eth-rpc-acala.aca-api.network/ws',
+});
+
+export const assetHub = new Parachain({
+  ...defaultPolkadotAssetHub,
+  assetsData: [
+    {
+      asset: usdt,
+      id: 1984,
+      palletInstance: 50,
+    },
+  ],
+  key: 'assethub',
+  name: 'AssetHub',
+});
+
+export const astar = new Parachain({
+  ...defaultAstar,
+  assetsData: [
+    {
+      asset: astr,
+      metadataId: 0,
+    },
+  ],
+});
+
+export const bifrost = new Parachain({
+  ...defaultBifrostPolkadot,
+  assetsData: [
+    {
+      asset: bnc,
+      id: { Native: bnc.originSymbol },
+    },
+  ],
+  key: 'bifrost',
+});
+
+export const centrifuge = new Parachain({
+  ...defaultCentrifuge,
+  assetsData: [
+    {
+      asset: cfg,
+      id: 'Native',
     },
   ],
 });
@@ -22,8 +75,24 @@ export const acala = new Parachain({
 export const hydraDX = new Parachain({
   ...defaultHydraDx,
   key: 'hydradx',
-  ws: 'wss://hydradx-rpc.dwellir.com',
+  //ws: 'wss://hydradx-rpc.dwellir.com',
   assetsData: [
+    {
+      asset: astr,
+      id: 9,
+    },
+    {
+      asset: bnc,
+      id: 14,
+    },
+    {
+      asset: cfg,
+      id: 13,
+    },
+    {
+      asset: dot,
+      id: 5,
+    },
     {
       asset: daiAcala,
       id: 2,
@@ -37,8 +106,19 @@ export const hydraDX = new Parachain({
       id: 16,
     },
     {
+      asset: ibtc,
+      id: 11,
+    },
+    {
       asset: hdx,
       id: 0,
+    },
+    {
+      asset: usdt,
+      id: 1984,
+      balanceId: 10,
+      metadataId: 10,
+      palletInstance: 50,
     },
     {
       asset: wbtc,
@@ -47,6 +127,22 @@ export const hydraDX = new Parachain({
     {
       asset: weth,
       id: 20,
+    },
+    {
+      asset: ztg,
+      id: 12,
+    },
+  ],
+});
+
+export const interlay = new Parachain({
+  ...defaultInterlay,
+  assetsData: [
+    {
+      asset: ibtc,
+      decimals: 8,
+      id: { Token: ibtc.originSymbol },
+      metadataId: 0,
     },
   ],
 });
@@ -81,4 +177,31 @@ export const moonbeam = new EvmParachain({
   ],
 });
 
-export const chains: AnyChain[] = [polkadot, hydraDX, moonbeam, acala];
+export const zeitgeist = new Parachain({
+  assetsData: [
+    {
+      asset: ztg,
+      id: 'Ztg',
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash: '',
+  key: 'zeitgeist',
+  name: 'Zeitgeist',
+  parachainId: 2092,
+  ss58Format: 73,
+  ws: 'wss://zeitgeist.api.onfinality.io/public-ws',
+});
+
+export const chains: AnyChain[] = [
+  acala,
+  assetHub,
+  astar,
+  bifrost,
+  centrifuge,
+  hydraDX,
+  interlay,
+  moonbeam,
+  polkadot,
+  zeitgeist,
+];
