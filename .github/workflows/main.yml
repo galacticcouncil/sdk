@@ -21,7 +21,7 @@ jobs:
           node-version: '18.x'
       - name: Install dependencies
         run: npm install
-      - name: Run tests with coverage report
-        run: npm run test:coverage
       - name: Build SDK
         run: npm run build
+      - name: Test SDK
+        run: npm run test
