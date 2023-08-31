@@ -88,6 +88,11 @@ export class LbpPoolClient extends PoolClient {
 
   private async isRepayFeeApplied(assetKey: string, poolEntry: PalletLbpPool): Promise<boolean> {
     const repayTarget = bnum(poolEntry.repayTarget.toString());
+
+    if (repayTarget.isZero()) {
+      return false;
+    }
+
     try {
       const balance = await this.getAccountBalance(assetKey, poolEntry.feeCollector.toString());
       const feeCollectorBalance = balance.amount;
@@ -112,9 +117,9 @@ export class LbpPoolClient extends PoolClient {
   }
 
   private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
-    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toJSON() as number;
+    const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
+    const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
+    const minTradingLimit = this.api.consts.lbp.minTradingLimit.toJSON() as number;
     return { maxInRatio: maxInRatio, maxOutRatio: maxOutRatio, minTradingLimit: minTradingLimit } as PoolLimits;
   }
 }
