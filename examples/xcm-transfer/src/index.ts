@@ -32,6 +32,7 @@ async function transfer(srcChain: string, destChain: string, asset: string) {
   const polkaSigner = await createPolkadotSigner();
   const etherSigner = await createEtherSigner();
   const ethAddress = await etherSigner.getAddress();
+  // const acalaEvm = '0x616dfd307fd95942a74212c904942d3c9d3f219e';
 
   const data = await sdkBuilder
     .assets()

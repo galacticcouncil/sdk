@@ -17,3 +17,7 @@ export async function createEtherSigner() {
   await provider.send('eth_requestAccounts', []);
   return provider.getSigner();
 }
+
+export async function createEtherProvider(ws: string) {
+  return ethers.getDefaultProvider(ws);
+}

@@ -1,6 +1,5 @@
 import { AnyChain, Ecosystem, EvmParachain, Parachain } from '@moonbeam-network/xcm-types';
 import {
-  acala as defaultAcala,
   astar as defaultAstar,
   bifrostPolkadot as defaultBifrostPolkadot,
   centrifuge as defaultCentrifuge,
@@ -13,10 +12,7 @@ import {
 
 import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
 
-const { type: _, ...acalaConf } = defaultAcala;
-
 export const acala = new EvmParachain({
-  ...acalaConf,
   assetsData: [
     {
       asset: daiAcala,
@@ -24,7 +20,14 @@ export const acala = new EvmParachain({
       id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
   id: 2000,
+  key: 'acala',
+  name: 'Acala',
+  parachainId: 2000,
+  ss58Format: 10,
+  ws: 'wss://acala-rpc-0.aca-api.network',
   rpc: 'wss://eth-rpc-acala.aca-api.network/ws',
 });
 
