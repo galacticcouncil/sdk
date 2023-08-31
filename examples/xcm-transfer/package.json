@@ -1,7 +1,6 @@
 {
   "name": "xcm-transfer",
-  "version": "0.0.1",
-  "private": false,
+  "private": true,
   "type": "module",
   "main": "out/index.js",
   "scripts": {
