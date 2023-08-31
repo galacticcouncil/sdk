@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.6.1
+
+### Patch Changes
+
+- Lbp pool validations, fix repay fee check
+
 ## 0.6.0
 
 ### Minor Changes
