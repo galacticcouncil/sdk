@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/math-stableswap",
-  "version": "0.1.5",
+  "version": "0.1.4",
   "description": "Stableswap pool math",
   "author": "GalacticCouncil",
   "repository": {
