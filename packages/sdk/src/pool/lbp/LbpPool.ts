@@ -2,6 +2,7 @@ import {
   BuyTransfer,
   Pool,
   PoolBase,
+  PoolError,
   PoolFee,
   PoolFees,
   PoolPair,
@@ -109,20 +110,51 @@ export class LbpPool implements Pool {
    */
   validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber, fees: LbpPoolFees): BuyTransfer {
     const feeAsset = this.tokens[0].id;
+
+    const errors: PoolError[] = [];
+
+    if (amountOut.isLessThan(this.minTradingLimit)) {
+      errors.push(PoolError.InsufficientTradingAmount);
+    }
+
+    const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
+    if (amountOut.isGreaterThan(poolOutReserve)) {
+      errors.push(PoolError.MaxOutRatioExceeded);
+    }
+
     if (feeAsset === poolPair.assetOut) {
       const fee = this.calculateTradeFee(amountOut, fees);
       const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOutPlusFee = amountOut.plus(fee);
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
+
+      const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
+      if (calculatedIn.isGreaterThan(poolInReserve)) {
+        errors.push(PoolError.MaxInRatioExceeded);
+      }
+
       return {
         amountIn: calculatedIn,
         calculatedIn: calculatedIn,
         amountOut: amountOut,
         feePct: feePct,
+        errors: errors,
       } as BuyTransfer;
     } else {
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
-      return { amountIn: calculatedIn, calculatedIn: calculatedIn, amountOut: amountOut, feePct: 0 } as BuyTransfer;
+
+      const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
+      if (calculatedIn.isGreaterThan(poolInReserve)) {
+        errors.push(PoolError.MaxInRatioExceeded);
+      }
+
+      return {
+        amountIn: calculatedIn,
+        calculatedIn: calculatedIn,
+        amountOut: amountOut,
+        feePct: 0,
+        errors: errors,
+      } as BuyTransfer;
     }
   }
 
@@ -134,24 +166,50 @@ export class LbpPool implements Pool {
    */
   validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber, fees: LbpPoolFees): SellTransfer {
     const feeAsset = this.tokens[0].id;
+
+    const errors: PoolError[] = [];
+
+    if (amountIn.isLessThan(this.minTradingLimit)) {
+      errors.push(PoolError.InsufficientTradingAmount);
+    }
+
+    const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
+    if (amountIn.isGreaterThan(poolInReserve)) {
+      errors.push(PoolError.MaxInRatioExceeded);
+    }
+
     if (feeAsset === poolPair.assetIn) {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
+
+      const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
+      if (calculatedOut.isGreaterThan(poolOutReserve)) {
+        errors.push(PoolError.MaxOutRatioExceeded);
+      }
+
       return {
         amountIn: amountIn,
         calculatedOut: calculatedOut,
         amountOut: calculatedOut,
         feePct: 0,
+        errors: errors,
       } as SellTransfer;
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut, fees);
       const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
       const amountOut = calculatedOut.minus(fee);
+
+      const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
+      if (amountOut.isGreaterThan(poolOutReserve)) {
+        errors.push(PoolError.MaxOutRatioExceeded);
+      }
+
       return {
         amountIn: amountIn,
         calculatedOut: calculatedOut,
         amountOut: amountOut,
         feePct: feePct,
+        errors: errors,
       } as SellTransfer;
     }
   }
