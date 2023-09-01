@@ -166,5 +166,6 @@ export interface AssetMetadata {
 
 export interface AssetDetail {
   name: string;
+  assetType: string;
   existentialDeposit: string;
 }

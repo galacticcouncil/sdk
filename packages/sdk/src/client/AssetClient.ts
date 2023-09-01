@@ -30,6 +30,7 @@ export class AssetClient extends PolkadotApiClient {
       const defaultAssetEd = this.api.consts.balances.existentialDeposit;
       return {
         name: this.chainToken,
+        assetType: 'Token',
         existentialDeposit: defaultAssetEd.toString(),
       } as AssetDetail;
     }
@@ -38,6 +39,7 @@ export class AssetClient extends PolkadotApiClient {
     const unwrapped = asset.unwrap();
     return {
       name: unwrapped.name.toHuman(),
+      assetType: unwrapped.assetType.toHuman(),
       existentialDeposit: unwrapped.existentialDeposit.toString(),
     } as AssetDetail;
   }
