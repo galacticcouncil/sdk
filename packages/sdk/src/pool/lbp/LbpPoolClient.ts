@@ -1,8 +1,7 @@
 import type { StorageKey } from '@polkadot/types';
+import type { Option } from '@polkadot/types-codec';
 import type { AnyTuple } from '@polkadot/types/types';
 import type { PalletLbpPool } from '@polkadot/types/lookup';
-import type { Option } from '@polkadot/types-codec';
-import type { PersistedValidationData } from '@polkadot/types/interfaces/parachains';
 import { bnum, scale } from '../../utils/bignumber';
 import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
 
@@ -18,23 +17,27 @@ export class LbpPoolClient extends PoolClient {
   private _poolsLoaded = false;
 
   async getPools(): Promise<PoolBase[]> {
+    const relayBlockNumber = await this.getRelayChainBlock();
     if (this._poolsLoaded) {
-      this.pools = await this.syncPools();
+      this.pools = await this.syncPools(relayBlockNumber);
     } else {
-      this.pools = await this.loadPools();
+      this.pools = await this.loadPools(relayBlockNumber);
       this._poolsLoaded = true;
     }
-    return this.pools;
+    return this.pools.filter((pool) => {
+      const poolData = this.poolsData.get(pool.address);
+      return poolData ? this.isActivePool(poolData, relayBlockNumber) : false;
+    });
   }
 
-  private async loadPools(): Promise<PoolBase[]> {
+  private async loadPools(relayBlockNumber: number): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.lbp.poolData.entries();
     const pools = poolAssets.map(async (asset: [StorageKey<AnyTuple>, Option<PalletLbpPool>]) => {
       const poolAddress = this.getStorageKey(asset, 0);
       const poolEntry = asset[1].unwrap();
       const poolAssets = poolEntry.assets.map((a) => a.toString());
       const poolTokens = await this.getPoolTokens(poolAddress, poolAssets);
-      const linearWeight = await this.getLinearWeight(poolEntry);
+      const linearWeight = await this.getLinearWeight(poolEntry, relayBlockNumber);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
       const accumulatedAsset = poolTokens[0].id;
@@ -54,11 +57,11 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  private async syncPools(): Promise<PoolBase[]> {
+  private async syncPools(relayBlockNumber: number): Promise<PoolBase[]> {
     const syncedPools = this.pools.map(async (pool: PoolBase) => {
       const poolEntry = this.poolsData.get(pool.address);
       const poolTokens = await this.syncPoolTokens(pool.address, pool.tokens);
-      const linearWeight = await this.getLinearWeight(poolEntry!);
+      const linearWeight = await this.getLinearWeight(poolEntry!, relayBlockNumber);
       const assetAWeight = bnum(linearWeight);
       const assetBWeight = this.MAX_FINAL_WEIGHT.minus(bnum(assetAWeight));
       const accumulatedAsset = poolTokens[0].id;
@@ -74,15 +77,24 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(syncedPools);
   }
 
-  private async getLinearWeight(poolEntry: PalletLbpPool): Promise<string> {
-    const validationData = await this.api.query.parachainSystem.validationData();
-    const data = validationData.toJSON() as unknown as PersistedValidationData;
+  public async getRelayChainBlock(): Promise<number> {
+    const data = await this.api.query.parachainSystem.validationData();
+    return data.unwrap().relayParentNumber.toNumber();
+  }
+
+  private isActivePool(poolEntry: PalletLbpPool, relayBlockNumber: number): boolean {
+    const start = poolEntry.start.toString();
+    const end = poolEntry.end.toString();
+    return relayBlockNumber >= Number(start) && relayBlockNumber < Number(end);
+  }
+
+  private async getLinearWeight(poolEntry: PalletLbpPool, relayBlockNumber: number): Promise<string> {
     return LbpMath.calculateLinearWeights(
       poolEntry.start.toString(),
       poolEntry.end.toString(),
       poolEntry.initialWeight.toString(),
       poolEntry.finalWeight.toString(),
-      data.relayParentNumber.toString()
+      relayBlockNumber.toString()
     );
   }
 
