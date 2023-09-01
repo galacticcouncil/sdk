@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.6.2
+
+### Patch Changes
+
+- Lbp pool validity check, added assetType to AssetDetail
+
 ## 0.6.1
 
 ### Patch Changes
