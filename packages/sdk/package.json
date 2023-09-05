@@ -32,7 +32,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@galacticcouncil/api-augment": "^0.0.4"
+    "@galacticcouncil/api-augment": "^0.0.5"
   },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^0.2.0",
