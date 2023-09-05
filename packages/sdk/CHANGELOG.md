@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.6.4
+
+### Patch Changes
+
+- Extend PoolAsset with origin
+
 ## 0.6.3
 
 ### Patch Changes
