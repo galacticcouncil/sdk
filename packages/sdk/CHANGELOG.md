@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.6.3
+
+### Patch Changes
+
+- Support for asset metadata bonds
+
 ## 0.6.2
 
 ### Patch Changes
