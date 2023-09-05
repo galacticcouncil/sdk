@@ -90,7 +90,7 @@ export class Router {
     const assets = pools
       .map((pool: PoolBase) => {
         return pool.tokens.map(({ id, symbol }) => {
-          return { id, symbol } as PoolAsset;
+          return { id, symbol, origin } as PoolAsset;
         });
       })
       .flat();

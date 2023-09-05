@@ -1,6 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 
-export type PoolAsset = { id: string; symbol: string };
+export type PoolAsset = { id: string; symbol: string; origin: string };
 
 export enum PoolType {
   XYK = 'Xyk',
