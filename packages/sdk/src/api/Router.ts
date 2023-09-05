@@ -89,7 +89,7 @@ export class Router {
   protected async getAssets(pools: PoolBase[]): Promise<Map<string, PoolAsset>> {
     const assets = pools
       .map((pool: PoolBase) => {
-        return pool.tokens.map(({ id, symbol }) => {
+        return pool.tokens.map(({ id, symbol, origin }) => {
           return { id, symbol, origin } as PoolAsset;
         });
       })
