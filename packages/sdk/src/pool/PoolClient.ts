@@ -31,6 +31,7 @@ export abstract class PoolClient extends BalanceClient {
         balance: balance.amount.toString(),
         decimals: metadata.decimals,
         symbol: metadata.symbol,
+        origin: metadata.origin,
       } as PoolToken;
     });
     return Promise.all(poolTokens);

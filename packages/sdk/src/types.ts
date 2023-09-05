@@ -162,6 +162,7 @@ export interface AssetBalance {
 export interface AssetMetadata {
   symbol: string;
   decimals: number;
+  origin: string;
 }
 
 export interface AssetDetail {
