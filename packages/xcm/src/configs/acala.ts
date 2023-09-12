@@ -1,5 +1,5 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { daiAcala } from '../assets';
 import { hydraDX, acala } from '../chains';
@@ -21,7 +21,6 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
-    toEvmAddress: toEvmAddress,
   }),
 ];
 

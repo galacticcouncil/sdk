@@ -1,5 +1,5 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
 
 import { dot } from '../assets';
 import { hydraDX } from '../chains';

@@ -11,7 +11,6 @@ const transfer = (): ExtrinsicConfigBuilder => ({
       func: 'transfer',
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
-        console.log(version);
         const multilocation = getDestinationMultilocation(address, destination);
         return [asset, amount, toDest(version, destination, multilocation), 'Unlimited'];
       },

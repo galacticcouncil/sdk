@@ -1,5 +1,5 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { cfg } from '../assets';
 import { centrifuge, hydraDX } from '../chains';

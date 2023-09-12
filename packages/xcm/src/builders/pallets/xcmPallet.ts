@@ -1,6 +1,6 @@
 import { XcmVersion, ExtrinsicConfigBuilder, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { toAssets, toBeneficiary, toDest } from './xcmPallet.utils';
-import { getDestinationMultilocation } from 'builders/ExtrinsicBuilder.utils';
+import { getDestinationMultilocation } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'xcmPallet';
 

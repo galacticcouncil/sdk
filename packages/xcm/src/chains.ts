@@ -8,7 +8,7 @@ import {
   moonbeam as defaultMoonbeam,
   polkadot,
   polkadotAssetHub as defaultPolkadotAssetHub,
-} from '@galacticcouncil/xcm-config';
+} from '@moonbeam-network/xcm-config';
 
 import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
 
@@ -208,3 +208,7 @@ export const chains: AnyChain[] = [
   polkadot,
   zeitgeist,
 ];
+
+export const chainsMap = new Map<string, AnyChain>(
+  chains.map((chain) => [chain.key, chain]),
+);

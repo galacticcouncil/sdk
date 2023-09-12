@@ -1,4 +1,4 @@
-import { ChainConfig } from '@galacticcouncil/xcm-config';
+import { ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { acalaConfig } from './acala';
 import { assetHubConfig } from './assethub';
@@ -23,3 +23,7 @@ export const chainsConfig: ChainConfig[] = [
   polkadotConfig,
   zeitgeistConfig,
 ];
+
+export const chainsConfigMap = new Map<string, ChainConfig>(
+  chainsConfig.map((config) => [config.chain.key, config]),
+);

@@ -1,5 +1,5 @@
 import { BalanceBuilder, ExtrinsicBuilder, FeeBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
 
 import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from '../assets';
 import { acala, assetHub, astar, bifrost, centrifuge, hydraDX, interlay, moonbeam, zeitgeist } from '../chains';
@@ -162,7 +162,7 @@ const toMoonbeam: AssetConfig[] = [
 const toPolkadot: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
-    balance: BalanceBuilder().substrate().system().account(),
+    balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: polkadot,
     destinationFee: {
       amount: 0.000469417452,

@@ -1,5 +1,5 @@
 import { BalanceBuilder, ContractBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-config';
+import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { daiMoonbeam, glmr, hdx, wbtc, weth } from '../assets';
 import { hydraDX, moonbeam } from '../chains';
