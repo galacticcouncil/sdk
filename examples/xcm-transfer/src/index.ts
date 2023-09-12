@@ -1,23 +1,12 @@
+//import { Sdk } from '@moonbeam-network/xcm-sdk';
 import { Sdk } from '@galacticcouncil/xcm-sdk';
-import { MutableConfigService } from '@galacticcouncil/xcm-config';
-import { assets, chains, chainsConfig } from '@galacticcouncil/xcm';
+import { ConfigService } from '@moonbeam-network/xcm-config';
+import { assetsMap, chainsMap, chainsConfigMap } from '@galacticcouncil/xcm';
 
 import { createEtherSigner, createPolkadotSigner } from './signers';
 import { logAssets, logDestChains, logSrcChains } from './utils';
 
-function configure(configService: MutableConfigService) {
-  assets.forEach((asset) => {
-    configService.updateAssets(asset);
-  });
-
-  chains.forEach((chain) => {
-    configService.updateChains(chain);
-  });
-
-  chainsConfig.forEach((config) => {
-    configService.updateChainConfig(config);
-  });
-}
+const configService = new ConfigService({assets: assetsMap, chains: chainsMap, chainsConfig: chainsConfigMap})
 
 async function transfer(srcChain: string, destChain: string, asset: string) {
   const sourceChain = configService.getChain(srcChain);
@@ -39,17 +28,16 @@ async function transfer(srcChain: string, destChain: string, asset: string) {
     .asset(asset)
     .source(srcChain)
     .destination(destChain)
-    .accounts('7MHE9BUBEWU88cEto6P1XNNb66foSwAZPKhfL8GHW9exnuH1', ethAddress, {
+    .accounts('7MHE9BUBEWU88cEto6P1XNNb66foSwAZPKhfL8GHW9exnuH1', "14gfrgMn2BNLHukfjYxWjbcpNXfGzPVmW4oPa4kKLHCF4YMj", {
       polkadotSigner: polkaSigner.signer,
-      ethersSigner: etherSigner,
+      //evmSigner: etherSigner,
     });
+   
+  data.transfer(1);  
 
   console.log(data.source);
   console.log(data.destination);
 }
 
-const configService = new MutableConfigService();
 const sdkBuilder = Sdk({ configService: configService });
-
-configure(configService);
-await transfer('hydradx', 'moonbeam', 'dai-moonbeam');
+await transfer('hydradx', 'zeitgeist', 'ztg');
