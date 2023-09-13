@@ -80,61 +80,39 @@ export class OmniPoolClient extends PoolClient {
   }
 
   async getPoolFees(feeAsset: string, _address: string): Promise<PoolFees> {
-    try {
-      const dynamicFees = await this.api.query.dynamicFees.assetFee(feeAsset);
-      const afp = this.api.consts.dynamicFees.assetFeeParameters;
-      const pfp = this.api.consts.dynamicFees.protocolFeeParameters;
-      const min = afp.minFee.toNumber() + pfp.minFee.toNumber();
-      const max = afp.maxFee.toNumber() + pfp.maxFee.toNumber();
+    const dynamicFees = await this.api.query.dynamicFees.assetFee(feeAsset);
+    const afp = this.api.consts.dynamicFees.assetFeeParameters;
+    const pfp = this.api.consts.dynamicFees.protocolFeeParameters;
+    const min = afp.minFee.toNumber() + pfp.minFee.toNumber();
+    const max = afp.maxFee.toNumber() + pfp.maxFee.toNumber();
 
-      if (dynamicFees.isSome) {
-        const { assetFee, protocolFee } = dynamicFees.unwrap();
-        return {
-          assetFee: toPoolFee(assetFee.toNumber()),
-          protocolFee: toPoolFee(protocolFee.toNumber()),
-          min: toPoolFee(min),
-          max: toPoolFee(max),
-        } as OmniPoolFees;
-      } else {
-        return {
-          assetFee: this.getAssetFee(),
-          protocolFee: this.getProtocolFee(),
-          min: toPoolFee(min),
-          max: toPoolFee(max),
-        } as OmniPoolFees;
-      }
-    } catch {
-      // TODO: Remove fallback when dyn fees pallet on mainnet
+    if (dynamicFees.isSome) {
+      const { assetFee, protocolFee } = dynamicFees.unwrap();
+      return {
+        assetFee: toPoolFee(assetFee.toNumber()),
+        protocolFee: toPoolFee(protocolFee.toNumber()),
+        min: toPoolFee(min),
+        max: toPoolFee(max),
+      } as OmniPoolFees;
+    } else {
       return {
         assetFee: this.getAssetFee(),
         protocolFee: this.getProtocolFee(),
+        min: toPoolFee(min),
+        max: toPoolFee(max),
       } as OmniPoolFees;
     }
   }
 
   private getAssetFee(): PoolFee {
-    let assetFeeNo: number;
-    try {
-      const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
-      assetFeeNo = assetFee.minFee.toNumber();
-    } catch {
-      // TODO: Remove fallback when dyn fees pallet on mainnet
-      const assetFee = this.api.consts.omnipool.assetFee;
-      assetFeeNo = assetFee.toJSON() as number;
-    }
+    const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
+    const assetFeeNo = assetFee.minFee.toNumber();
     return toPoolFee(assetFeeNo);
   }
 
   private getProtocolFee(): PoolFee {
-    let protocolFeeNo: number;
-    try {
-      const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
-      protocolFeeNo = protocolFee.minFee.toNumber();
-    } catch {
-      // TODO: Remove fallback when dyn fees pallet on mainnet
-      const protocolFee = this.api.consts.omnipool.protocolFee;
-      protocolFeeNo = protocolFee.toJSON() as number;
-    }
+    const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
+    const protocolFeeNo: number = protocolFee.minFee.toNumber();
     return toPoolFee(protocolFeeNo);
   }
 
