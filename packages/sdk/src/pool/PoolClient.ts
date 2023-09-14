@@ -25,7 +25,6 @@ export abstract class PoolClient extends BalanceClient {
     const poolTokens = assetKeys.map(async (id) => {
       const balance = await this.getAccountBalance(poolAddress, id);
       const metadata = await this.getAssetMetadata(id);
-
       return {
         id: id,
         balance: balance.amount.toString(),

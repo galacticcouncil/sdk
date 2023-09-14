@@ -17,10 +17,16 @@ export class AssetClient extends PolkadotApiClient {
         const underlyingTokenKey = underlyingAsset.toString();
         return this.getBondMetadata(underlyingTokenKey);
       }
-      return this.getTokenMetadata(tokenKey);
-    } catch {
-      return this.getTokenMetadata(tokenKey);
-    }
+    } catch {}
+    try {
+      const share = await this.api.query.stableswap.pools(tokenKey);
+      if (share.isSome) {
+        const { assets } = share.unwrap();
+        const poolTokens = assets.map((asset) => asset.toString());
+        return this.getShareMetadata(poolTokens);
+      }
+    } catch {}
+    return this.getTokenMetadata(tokenKey);
   }
 
   private async getTokenMetadata(tokenKey: string): Promise<AssetMetadata> {
@@ -50,6 +56,17 @@ export class AssetClient extends PolkadotApiClient {
     } as AssetMetadata;
   }
 
+  private async getShareMetadata(tokens: string[]): Promise<AssetMetadata> {
+    const metadata = await Promise.all(tokens.map(async (token: string) => this.getTokenMetadata(token)));
+    const symbols = metadata.map((m) => m.symbol);
+    const symbol = symbols.join('/');
+    return {
+      symbol: symbol,
+      origin: symbol,
+      decimals: 18,
+    } as AssetMetadata;
+  }
+
   async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
     try {
       const bond = await this.api.query.bonds.bonds(tokenKey);
@@ -59,10 +76,8 @@ export class AssetClient extends PolkadotApiClient {
         const maturityTimestamp = maturity.toNumber();
         return this.getBondDetail(tokenKey, underlyingTokenKey, maturityTimestamp);
       }
-      return this.getTokenDetail(tokenKey);
-    } catch {
-      return this.getTokenDetail(tokenKey);
-    }
+    } catch {}
+    return this.getTokenDetail(tokenKey);
   }
 
   private async getTokenDetail(tokenKey: string): Promise<AssetDetail> {
@@ -77,8 +92,9 @@ export class AssetClient extends PolkadotApiClient {
 
     const asset = await this.api.query.assetRegistry.assets(tokenKey);
     const { name, assetType, existentialDeposit } = asset.unwrap();
+
     return {
-      name: name.toHuman(),
+      name: assetType.toHuman() === 'StableSwap' ? 'PoolShare' : name.toHuman(),
       assetType: assetType.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
     } as AssetDetail;
