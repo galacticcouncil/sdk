@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 const PARAM_PREFIX = '--';
 
+const GITHUB_API = 'https://api.github.com/repos/galacticcouncil/HydraDX-wasm/git/trees/main?recursive=1';
 const WASM_REPO = 'https://raw.githubusercontent.com/galacticcouncil/HydraDX-wasm';
 const WASM_BRANCH = 'main';
 const WASM_BUILD = 'build';
@@ -24,6 +25,12 @@ const fetchResource = async (math, target, file) => {
   return Buffer.from(arrayBuffer);
 };
 
+const fetchTree = async () => {
+  const resp = await fetch(GITHUB_API);
+  const json = await resp.json();
+  return json.tree;
+};
+
 const main = async () => {
   const args = process.argv.slice(2);
   const params = parseArgs(args);
@@ -34,12 +41,18 @@ const main = async () => {
     mkdirSync(BUILD_FOLDER, { recursive: true });
   }
 
+  const gitTree = await fetchTree();
+
   for (const conf of BUILD_MATRIX) {
     const [target, input, output] = conf;
+
+    const confPath = [BUILD_FOLDER, mathParam, target, input].join('/');
+    const confItem = gitTree.find((record) => record.path === confPath);
+    const confSha = confItem.sha;
     const file = await fetchResource(mathParam, target, input);
     const outPath = [BUILD_FOLDER, output];
     writeFileSync(outPath.join('/'), file);
-    console.log(`${input} fetched`);
+    console.log(`${input} [${confSha.slice(0, 8)}] fetched`);
   }
   console.log(`Math ${mathParam} ready ✅`);
 };
