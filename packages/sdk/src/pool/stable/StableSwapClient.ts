@@ -2,7 +2,7 @@ import type { StorageKey } from '@polkadot/types';
 import type { PalletStableswapPoolInfo } from '@polkadot/types/lookup';
 import type { AnyTuple } from '@polkadot/types/types';
 import type { Option } from '@polkadot/types-codec';
-import { blake2AsHex, decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
 import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees } from '../../types';
 
@@ -14,7 +14,7 @@ import { toPoolFee } from 'utils/mapper';
 
 export class StableSwapClient extends PoolClient {
   private poolsData: Map<string, PalletStableswapPoolInfo> = new Map([]);
-  private pools: PoolBase[] = [];
+  private pools: StableSwapBase[] = [];
   private _poolsLoaded = false;
 
   async getPools(): Promise<PoolBase[]> {
@@ -28,7 +28,7 @@ export class StableSwapClient extends PoolClient {
     return this.pools;
   }
 
-  private async loadPools(blockNumber: number): Promise<PoolBase[]> {
+  private async loadPools(blockNumber: number): Promise<StableSwapBase[]> {
     const poolAssets = await this.api.query.stableswap.pools.entries();
     const pools = poolAssets.map(async (pool: [StorageKey<AnyTuple>, Option<PalletStableswapPoolInfo>]) => {
       const poolId = this.getStorageKey(pool, 0);
@@ -42,14 +42,14 @@ export class StableSwapClient extends PoolClient {
       poolTokens.push({
         id: poolId,
         symbol: '',
-        origin: '',
+        icon: '',
         balance: '',
         decimals: 18,
       });
 
       const amplification = await this.getAmplification(poolEntry, blockNumber);
       const totalIssuance = await this.getTotalIssueance(poolId);
-      this.poolsData.set(poolAddress, poolEntry);
+      this.poolsData.set(poolId, poolEntry);
       return {
         id: poolId,
         address: poolAddress,
@@ -59,21 +59,22 @@ export class StableSwapClient extends PoolClient {
         totalIssuance: totalIssuance,
         tokens: poolTokens,
         ...this.getPoolLimits(),
-      } as PoolBase;
+      } as StableSwapBase;
     });
     return Promise.all(pools);
   }
 
-  private async syncPools(blockNumber: number): Promise<PoolBase[]> {
-    const syncedPools = this.pools.map(async (pool: PoolBase) => {
-      const poolEntry = this.poolsData.get(pool.address);
-      const amplification = await this.getAmplification(poolEntry!, blockNumber);
-      //const totalIssuance = await this.getTotalIssueance(poolId);
+  private async syncPools(blockNumber: number): Promise<StableSwapBase[]> {
+    const syncedPools = this.pools.map(async (pool: StableSwapBase) => {
+      const poolEntry = this.poolsData.get(pool.id)!;
+      const amplification = await this.getAmplification(poolEntry, blockNumber);
+      const totalIssuance = await this.getTotalIssueance(pool.id);
       return {
         ...pool,
         amplification: amplification,
+        totalIssuance: totalIssuance,
         tokens: await this.syncPoolTokens(pool.address, pool.tokens),
-      } as PoolBase;
+      } as StableSwapBase;
     });
     return Promise.all(syncedPools);
   }
@@ -102,10 +103,6 @@ export class StableSwapClient extends PoolClient {
     const pool = Number(poolId);
     const name = StableMath.getPoolAddress(pool);
     return encodeAddress(blake2AsHex(name), HYDRADX_SS58_PREFIX);
-  }
-
-  decodePoolAddress(poolAddress: string) {
-    return decodeAddress(poolAddress);
   }
 
   async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
