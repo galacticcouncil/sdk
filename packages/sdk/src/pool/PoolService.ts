@@ -1,6 +1,7 @@
 import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
+import { StableSwapClient } from './stable/StableSwapClient';
 
 import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees, Pool } from '../types';
 import { BigNumber } from '../utils/bignumber';
@@ -14,12 +15,14 @@ export class PoolService implements IPoolService {
   protected readonly xykClient: XykPoolClient;
   protected readonly omniClient: OmniPoolClient;
   protected readonly lbpClient: LbpPoolClient;
+  protected readonly stableClient: StableSwapClient;
 
   constructor(api: ApiPromise) {
     this.api = api;
     this.xykClient = new XykPoolClient(this.api);
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
+    this.stableClient = new StableSwapClient(this.api);
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
@@ -28,6 +31,7 @@ export class PoolService implements IPoolService {
         this.xykClient.getPools(),
         this.omniClient.getPools(),
         this.lbpClient.getPools(),
+        this.stableClient.getPools(),
       ]);
       return pools.flat();
     }
@@ -44,6 +48,9 @@ export class PoolService implements IPoolService {
         case PoolType.LBP:
           poolList.push(this.lbpClient.getPools());
           break;
+        case PoolType.Stable:
+          poolList.push(this.stableClient.getPools());
+          break;
       }
     });
 
@@ -59,6 +66,8 @@ export class PoolService implements IPoolService {
         return this.omniClient.getPoolFees(feeAsset, pool.address);
       case PoolType.LBP:
         return this.lbpClient.getPoolFees(feeAsset, pool.address);
+      case PoolType.Stable:
+        return this.stableClient.getPoolFees(feeAsset, pool.address);
       default:
         throw new PoolNotFound(pool.type);
     }

@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- Fix sdk AssetClient, update stableswap and lbp math
+- Update stableswap math
 
 ## 0.2.0
 

@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- Fix sdk AssetClient, update lbp math
+- Fix AssetClient, update lbp math
 
 - Updated dependencies []:
   - @galacticcouncil/math-lbp@0.2.1
