@@ -13,12 +13,14 @@ export const xykPool = {
       balance: '4000000000000',
       decimals: 12,
       symbol: 'KSM',
+      icon: 'KSM',
     },
     {
       id: '2',
       balance: '175000000000000',
       decimals: 12,
       symbol: 'AUSD',
+      icon: 'AUSD',
     },
   ],
 };

@@ -46,9 +46,9 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAllAssets();
     expect(result).toStrictEqual([
-      { id: '0', symbol: 'BSX' },
-      { id: '2', symbol: 'AUSD' },
-      { id: '1', symbol: 'KSM' },
+      { icon: 'BSX', id: '0', symbol: 'BSX' },
+      { icon: 'AUSD', id: '2', symbol: 'AUSD' },
+      { icon: 'KSM', id: '1', symbol: 'KSM' },
     ]);
   });
 
@@ -57,8 +57,8 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAssetPairs('1');
     expect(result).toStrictEqual([
-      { id: '2', symbol: 'AUSD' },
-      { id: '0', symbol: 'BSX' },
+      { icon: 'AUSD', id: '2', symbol: 'AUSD' },
+      { icon: 'BSX', id: '0', symbol: 'BSX' },
     ]);
   });
 
