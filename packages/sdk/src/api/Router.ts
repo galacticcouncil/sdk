@@ -197,6 +197,7 @@ export class Router {
       return {
         id: token,
         symbol: asset?.symbol,
+        icon: asset?.icon,
       } as PoolAsset;
     });
   }
