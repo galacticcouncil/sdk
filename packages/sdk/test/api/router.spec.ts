@@ -18,7 +18,8 @@ describe('Router with mocked XYK pool service', () => {
     expect(result).toStrictEqual([
       [
         {
-          poolId: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
+          poolAddress: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
+          poolId: undefined,
           pool: PoolType.XYK,
           assetIn: '1',
           assetOut: '2',
@@ -26,13 +27,15 @@ describe('Router with mocked XYK pool service', () => {
       ],
       [
         {
-          poolId: 'bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ',
+          poolAddress: 'bXn6KCrv8k2JV7B2c5jzLttBDqL4BurPCTcLa3NQk5SWDVXCJ',
+          poolId: undefined,
           pool: PoolType.XYK,
           assetIn: '1',
           assetOut: '0',
         },
         {
-          poolId: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
+          poolAddress: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
+          poolId: undefined,
           pool: PoolType.XYK,
           assetIn: '0',
           assetOut: '2',
