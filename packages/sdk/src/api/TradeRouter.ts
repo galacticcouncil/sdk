@@ -109,8 +109,8 @@ export class TradeRouter extends Router {
         assetOut,
         firstSwap.amountIn,
         minAmountOut,
-        bestRoute.map(({ assetIn, assetOut, pool, poolId }: SellSwap) => {
-          return { assetIn, assetOut, pool, poolId } as Hop;
+        bestRoute.map((swap: SellSwap) => {
+          return swap as Hop;
         })
       );
     };
@@ -154,7 +154,7 @@ export class TradeRouter extends Router {
     const amounts: BigNumber[] = [];
     for (let i = 0; i < bestRoute.length; i++) {
       const swap = bestRoute[i];
-      const pool = poolsMap.get(swap.poolId);
+      const pool = poolsMap.get(swap.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
       const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
       let aIn: BigNumber;
@@ -186,7 +186,7 @@ export class TradeRouter extends Router {
     const swaps: SellSwap[] = [];
     for (let i = 0; i < path.length; i++) {
       const hop = path[i];
-      const pool = poolsMap.get(hop.poolId);
+      const pool = poolsMap.get(hop.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
 
       const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);
@@ -333,8 +333,8 @@ export class TradeRouter extends Router {
         assetOut,
         firstSwap.amountOut,
         maxAmountIn,
-        bestRoute.map(({ assetIn, assetOut, pool, poolId }: BuySwap) => {
-          return { assetIn, assetOut, pool, poolId } as Hop;
+        bestRoute.map((swap: BuySwap) => {
+          return swap as Hop;
         })
       );
     };
@@ -378,7 +378,7 @@ export class TradeRouter extends Router {
     const amounts: BigNumber[] = [];
     for (let i = bestRoute.length - 1; i >= 0; i--) {
       const swap = bestRoute[i];
-      const pool = poolsMap.get(swap.poolId);
+      const pool = poolsMap.get(swap.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
       const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
       let aOut: BigNumber;
@@ -411,7 +411,7 @@ export class TradeRouter extends Router {
     const swaps: BuySwap[] = [];
     for (let i = path.length - 1; i >= 0; i--) {
       const hop = path[i];
-      const pool = poolsMap.get(hop.poolId);
+      const pool = poolsMap.get(hop.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
 
       const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);

@@ -90,7 +90,13 @@ export class PoolService implements IPoolService {
     if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.buy(assetOut, assetIn, amountOut.toFixed(), maxAmountIn.toFixed());
     } else {
-      tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), route);
+      tx = this.api.tx.router.buy(
+        assetIn,
+        assetOut,
+        amountOut.toFixed(),
+        maxAmountIn.toFixed(),
+        this.buildRoute(route)
+      );
     }
 
     const getTx = (): SubmittableExtrinsic => {
@@ -112,12 +118,37 @@ export class PoolService implements IPoolService {
     if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
     } else {
-      tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), route);
+      tx = this.api.tx.router.sell(
+        assetIn,
+        assetOut,
+        amountIn.toFixed(),
+        minAmountOut.toFixed(),
+        this.buildRoute(route)
+      );
     }
 
     const getTx = (): SubmittableExtrinsic => {
       return tx;
     };
     return { hex: tx.toHex(), name: 'RouterSell', get: getTx } as Transaction;
+  }
+
+  private buildRoute(route: Hop[]) {
+    return route.map(({ assetIn, assetOut, pool, poolId }: Hop) => {
+      if (pool === PoolType.Stable) {
+        return {
+          pool: {
+            Stableswap: poolId,
+          },
+          assetIn,
+          assetOut,
+        };
+      }
+      return {
+        pool,
+        assetIn,
+        assetOut,
+      };
+    });
   }
 }

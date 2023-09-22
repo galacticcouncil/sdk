@@ -27,6 +27,7 @@ export interface PoolPair {
 
 export type PoolBase = {
   address: string;
+  id?: string;
   type: PoolType;
   tokens: PoolToken[];
   maxInRatio: number;
@@ -105,7 +106,8 @@ export interface Transaction {
 
 export type Hop = {
   pool: PoolType;
-  poolId: string;
+  poolAddress: string;
+  poolId?: string;
   assetIn: string;
   assetOut: string;
 };

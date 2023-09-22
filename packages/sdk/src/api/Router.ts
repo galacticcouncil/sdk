@@ -175,15 +175,16 @@ export class Router {
    * @param poolsMap - pools map
    * @returns true if edge (token pair) is valid, otherwise false
    */
-  private validEdge([id, from, to]: Edge, poolsMap: Map<string, Pool>): boolean {
-    return poolsMap.get(id)?.validatePair(from, to) || false;
+  private validEdge([address, from, to]: Edge, poolsMap: Map<string, Pool>): boolean {
+    return poolsMap.get(address)?.validatePair(from, to) || false;
   }
 
   private toHops(path: Edge[], poolsMap: Map<string, Pool>): Hop[] {
-    return path.map(([id, from, to]: Edge) => {
-      const pool = poolsMap.get(id);
+    return path.map(([address, from, to]: Edge) => {
+      const pool = poolsMap.get(address);
       return {
-        poolId: id,
+        poolAddress: address,
+        poolId: pool?.id,
         pool: pool?.type,
         assetIn: from,
         assetOut: to,
