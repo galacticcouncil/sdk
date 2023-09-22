@@ -5,12 +5,12 @@ import type { Option } from '@polkadot/types-codec';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
 import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees } from '../../types';
+import { toPoolFee } from '../../utils/mapper';
 
 import { PoolClient } from '../PoolClient';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
-import { toPoolFee } from 'utils/mapper';
 
 export class StableSwapClient extends PoolClient {
   private poolsData: Map<string, PalletStableswapPoolInfo> = new Map([]);
