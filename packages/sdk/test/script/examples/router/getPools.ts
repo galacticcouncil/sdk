@@ -8,8 +8,6 @@ class GetAllAssetsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni, PoolType.LBP, PoolType.Stable] });
-    await router.getPools();
-
     return router.getPools();
   }
 }

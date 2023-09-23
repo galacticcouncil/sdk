@@ -31,6 +31,7 @@ export abstract class PoolClient extends BalanceClient {
         decimals: metadata.decimals,
         symbol: metadata.symbol,
         icon: metadata.icon,
+        meta: metadata.meta,
       } as PoolToken;
     });
     return Promise.all(poolTokens);

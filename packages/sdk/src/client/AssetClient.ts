@@ -65,13 +65,15 @@ export class AssetClient extends PolkadotApiClient {
   }
 
   private async getShareMetadata(_tokenKey: string, tokens: string[]): Promise<AssetMetadata> {
-    const metadata = await Promise.all(tokens.map(async (token: string) => this.getTokenMetadata(token)));
-    const symbols = metadata.map((m) => m.symbol);
-    const icon = symbols.join('/');
+    const meta: [string, AssetMetadata][] = await Promise.all(
+      tokens.map(async (token: string) => [token, await this.getTokenMetadata(token)])
+    );
+    const icons = meta.reduce((acc, item) => ({ ...acc, [item[1].symbol]: item[0] }), {});
     return {
       symbol: 'SPS',
       decimals: 18,
-      icon: icon,
+      icon: Object.keys(icons).join('/'),
+      meta: icons,
     } as AssetMetadata;
   }
 

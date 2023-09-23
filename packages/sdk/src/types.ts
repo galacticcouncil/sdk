@@ -1,6 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 
-export type PoolAsset = { id: string; symbol: string; icon: string };
+export type PoolAsset = { id: string; symbol: string; icon: string; meta?: Record<string, string> };
 
 export enum PoolType {
   XYK = 'Xyk',
@@ -165,6 +165,7 @@ export interface AssetMetadata {
   symbol: string;
   decimals: number;
   icon: string;
+  meta?: Record<string, string>;
 }
 
 export interface AssetDetail {
