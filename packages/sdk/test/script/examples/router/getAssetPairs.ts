@@ -7,9 +7,9 @@ import { PoolType } from '../../../../src/types';
 class GetAssetPairsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
+    const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni] });
     return router.getAssetPairs('1');
   }
 }
 
-new GetAssetPairsExample(ApiUrl.Basilisk, 'Get asset pairs').run();
+new GetAssetPairsExample(ApiUrl.HydraDx_Rococo, 'Get asset pairs').run();

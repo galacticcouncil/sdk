@@ -8,7 +8,7 @@ import { PoolType } from '../../../../src/types';
 class GetBestSellPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
+    const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni] });
     const bestSell = await router.getBestSell('1', '14', 1);
     const transaction = bestSell.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
@@ -16,4 +16,4 @@ class GetBestSellPriceExample extends PolkadotExecutor {
   }
 }
 
-new GetBestSellPriceExample(ApiUrl.Basilisk, 'Get best sell price', true).run();
+new GetBestSellPriceExample(ApiUrl.HydraDx_Rococo, 'Get best sell price', true).run();
