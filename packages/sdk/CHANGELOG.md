@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- Stableswap support
+
 ## 0.6.5
 
 ### Patch Changes
