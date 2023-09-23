@@ -2,16 +2,16 @@ import type { StorageKey } from '@polkadot/types';
 import type { PalletStableswapPoolInfo } from '@polkadot/types/lookup';
 import type { AnyTuple } from '@polkadot/types/types';
 import type { Option } from '@polkadot/types-codec';
+import { stringToU8a } from '@polkadot/util';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
 import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../../types';
 import { toPoolFee } from '../../utils/mapper';
 
-import { PoolClient } from '../PoolClient';
-
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
-import { stringToU8a } from '@polkadot/util';
+
+import { PoolClient } from '../PoolClient';
 
 export class StableSwapClient extends PoolClient {
   private poolsData: Map<string, PalletStableswapPoolInfo> = new Map([]);

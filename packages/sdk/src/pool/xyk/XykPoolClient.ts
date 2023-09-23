@@ -2,8 +2,9 @@ import type { StorageKey } from '@polkadot/types';
 import type { AnyTuple, Codec } from '@polkadot/types/types';
 import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees } from '../../types';
 
-import { PoolClient } from '../PoolClient';
 import { XykPoolFees } from './XykPool';
+
+import { PoolClient } from '../PoolClient';
 
 export class XykPoolClient extends PoolClient {
   private pools: PoolBase[] = [];
