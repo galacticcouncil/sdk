@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.2
+
+### Patch Changes
+
+- Support meta for PoolAsset
+
 ## 0.7.1
 
 ### Patch Changes
