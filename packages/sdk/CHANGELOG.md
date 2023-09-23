@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- Sync share token
+
 ## 0.7.0
 
 ### Minor Changes
