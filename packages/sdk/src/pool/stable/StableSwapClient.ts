@@ -4,13 +4,14 @@ import type { AnyTuple } from '@polkadot/types/types';
 import type { Option } from '@polkadot/types-codec';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
-import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees } from '../../types';
+import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../../types';
 import { toPoolFee } from '../../utils/mapper';
 
 import { PoolClient } from '../PoolClient';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
+import { stringToU8a } from '@polkadot/util';
 
 export class StableSwapClient extends PoolClient {
   private poolsData: Map<string, PalletStableswapPoolInfo> = new Map([]);
@@ -39,13 +40,12 @@ export class StableSwapClient extends PoolClient {
         poolEntry.assets.map((a) => a.toString())
       );
 
-      poolTokens.push({
-        id: poolId,
-        symbol: '',
-        icon: '',
-        balance: '',
-        decimals: 18,
-      });
+      const sharedPoolAsset = await this.api.query.omnipool.assets(poolId);
+      if (sharedPoolAsset.isSome) {
+        const omnipoolAddress = this.getOmniPoolAddress();
+        const spsInfo = await this.getPoolTokens(omnipoolAddress, [poolId]);
+        poolTokens.push(spsInfo[0]);
+      }
 
       const amplification = await this.getAmplification(poolEntry, blockNumber);
       const totalIssuance = await this.getTotalIssueance(poolId);
@@ -73,10 +73,26 @@ export class StableSwapClient extends PoolClient {
         ...pool,
         amplification: amplification,
         totalIssuance: totalIssuance,
-        tokens: await this.syncPoolTokens(pool.address, pool.tokens),
+        tokens: await this.syncTokens(pool),
       } as StableSwapBase;
     });
     return Promise.all(syncedPools);
+  }
+
+  private async syncTokens(pool: StableSwapBase): Promise<PoolToken[]> {
+    const sharedPoolToken = pool.tokens.find((token: PoolToken) => token.id === pool.id);
+
+    const poolTokens = await this.syncPoolTokens(
+      pool.address,
+      pool.tokens.filter((t) => t !== sharedPoolToken)
+    );
+
+    if (sharedPoolToken) {
+      const omnipoolAddress = this.getOmniPoolAddress();
+      const sharedToken = await this.syncPoolTokens(omnipoolAddress, [sharedPoolToken]);
+      poolTokens.push(sharedToken[0]);
+    }
+    return poolTokens;
   }
 
   public async getParaChainBlock(): Promise<number> {
@@ -99,10 +115,14 @@ export class StableSwapClient extends PoolClient {
     );
   }
 
-  getPoolAddress(poolId: string) {
+  private getPoolAddress(poolId: string) {
     const pool = Number(poolId);
     const name = StableMath.getPoolAddress(pool);
     return encodeAddress(blake2AsHex(name), HYDRADX_SS58_PREFIX);
+  }
+
+  private getOmniPoolAddress(): string {
+    return encodeAddress(stringToU8a('modlomnipool'.padEnd(32, '\0')), HYDRADX_SS58_PREFIX);
   }
 
   async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
