@@ -1,5 +1,4 @@
 import { getWalletBySource } from '@talismn/connect-wallets';
-
 import { ethers } from 'ethers';
 
 export async function createPolkadotSigner() {
