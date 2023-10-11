@@ -1,11 +1,18 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
+import { getPolkadotApi } from '@moonbeam-network/xcm-utils';
 
 import { daiAcala } from '../assets';
 import { hydraDX, acala } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
-const toEvmAddress = async (api: any, address: string) => {
+// const toEvmAddress = async (api: any, address: string) => {
+//   const h160Addr = await api.query.evmAccounts.evmAddresses(address);
+//   return h160Addr.toString();
+// };
+
+const toEvmAddress = async (address: string) => {
+  const api = await getPolkadotApi(acala.ws);
   const h160Addr = await api.query.evmAccounts.evmAddresses(address);
   return h160Addr.toString();
 };

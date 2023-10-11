@@ -10,10 +10,15 @@ import {
   polkadotAssetHub as defaultPolkadotAssetHub,
 } from '@moonbeam-network/xcm-config';
 
-import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
+import { aca, astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
 
 export const acala = new EvmParachain({
   assetsData: [
+    {
+      asset: aca,
+      id: { Token: aca.originSymbol },
+      metadataId: { NativeAssetId: { Token: aca.originSymbol } },
+    },
     {
       asset: daiAcala,
       balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
@@ -209,6 +214,4 @@ export const chains: AnyChain[] = [
   zeitgeist,
 ];
 
-export const chainsMap = new Map<string, AnyChain>(
-  chains.map((chain) => [chain.key, chain]),
-);
+export const chainsMap = new Map<string, AnyChain>(chains.map((chain) => [chain.key, chain]));
