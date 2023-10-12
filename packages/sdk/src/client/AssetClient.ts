@@ -68,10 +68,11 @@ export class AssetClient extends PolkadotApiClient {
     const meta: [string, AssetMetadata][] = await Promise.all(
       tokens.map(async (token: string) => [token, await this.getTokenMetadata(token)])
     );
-    const icons = meta.reduce((acc, item) => ({ ...acc, [item[1].symbol]: item[0] }), {});
+    const icons = meta.reduce((acc, item) => ({ ...acc, [item[0]]: item[1].symbol }), {});
     const { name } = await this.getTokenDetail(tokenKey);
+    const symbol = name.length > 0 ? name : tokenKey;
     return {
-      symbol: name,
+      symbol: symbol,
       decimals: 18,
       icon: Object.keys(icons).join('/'),
       meta: icons,
@@ -124,7 +125,7 @@ export class AssetClient extends PolkadotApiClient {
     const { assetType, existentialDeposit } = await this.getTokenDetail(tokenKey);
     const metadata = await Promise.all(tokens.map(async (token: string) => this.getTokenMetadata(token)));
     const symbols = metadata.map((m) => m.symbol);
-    const shareName = symbols.join(',');
+    const shareName = symbols.join(', ');
 
     return {
       name: shareName,
