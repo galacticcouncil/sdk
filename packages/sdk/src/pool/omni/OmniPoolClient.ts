@@ -39,7 +39,7 @@ export class OmniPoolClient extends PoolClient {
       .concat(hubAssetId);
     const poolAddress = this.getPoolId();
     const poolTokens = await this.getPoolTokens(poolAddress, poolEntries);
-    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
+    const poolTokensState = await this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {
       address: poolAddress,
       type: PoolType.Omni,
@@ -53,30 +53,37 @@ export class OmniPoolClient extends PoolClient {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAssets = await this.api.query.omnipool.assets.entries();
     const poolTokens = await this.syncPoolTokens(this.pools[0].address, this.pools[0].tokens);
-    const poolTokensState = this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
+    const poolTokensState = await this.getPoolTokenState(poolAssets, poolTokens, hubAssetId);
     return {
       ...this.pools[0],
       tokens: poolTokensState,
     } as PoolBase;
   }
 
-  private getPoolTokenState(
+  private async getPoolTokenState(
     poolAssets: [StorageKey<AnyTuple>, Option<PalletOmnipoolAssetState>][],
     poolTokens: PoolToken[],
     hubAssetId: string
-  ): PoolToken[] {
-    return poolTokens.map((token: PoolToken, index: number) => {
+  ): Promise<PoolToken[]> {
+    const tokens = poolTokens.map(async (token: PoolToken, index: number) => {
       if (hubAssetId === token.id) {
-        return token;
+        const hubAssetTradeability = await this.api.query.omnipool.hubAssetTradability();
+        return {
+          ...token,
+          tradeable: hubAssetTradeability.bits.toNumber(),
+        } as OmniPoolToken;
       }
+
       const assetData: Option<PalletOmnipoolAssetState> = poolAssets[index][1];
       const state = assetData.unwrap();
       return {
         ...token,
         hubReserves: bnum(state.hubReserve.toString()),
         shares: bnum(state.shares.toString()),
+        tradeable: state.tradable.bits.toNumber(),
       } as OmniPoolToken;
     });
+    return Promise.all(tokens);
   }
 
   async getPoolFees(feeAsset: string, _address: string): Promise<PoolFees> {

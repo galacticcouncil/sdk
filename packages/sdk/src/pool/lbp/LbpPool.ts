@@ -93,12 +93,12 @@ export class LbpPool implements Pool {
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
+      balanceIn: balanceIn,
+      balanceOut: balanceOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
       weightIn: tokenInMeta.weight,
       weightOut: tokenOutMeta.weight,
-      balanceIn: balanceIn,
-      balanceOut: balanceOut,
     } as WeightedPoolPair;
   }
 

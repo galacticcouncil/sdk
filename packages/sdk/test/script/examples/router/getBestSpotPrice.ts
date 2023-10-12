@@ -7,8 +7,8 @@ import { PoolType } from '../../../../src/types';
 class GetBestSpotPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni] });
-    return router.getBestSpotPrice('1', '14');
+    const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni, PoolType.Stable] });
+    return router.getBestSpotPrice('5', '2');
   }
 }
 

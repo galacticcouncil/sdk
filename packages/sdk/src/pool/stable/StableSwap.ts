@@ -14,6 +14,16 @@ import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toDecimals, toPct } from '../../utils/mapper';
 
 import { StableMath } from './StableMath';
+import { OmniMath } from '../omni/OmniMath';
+
+export type StableSwapPair = PoolPair & {
+  tradeableIn: number;
+  tradeableOut: number;
+};
+
+export type StableSwapToken = PoolToken & {
+  tradeable: number;
+};
 
 export type StableSwapFees = PoolFees & {
   fee: PoolFee;
@@ -29,7 +39,7 @@ export type StableSwapBase = PoolBase & {
 export class StableSwap implements Pool {
   type: PoolType;
   address: string;
-  tokens: PoolToken[];
+  tokens: StableSwapToken[];
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
@@ -41,7 +51,7 @@ export class StableSwap implements Pool {
   static fromPool(pool: StableSwapBase): StableSwap {
     return new StableSwap(
       pool.address,
-      pool.tokens,
+      pool.tokens as StableSwapToken[],
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
@@ -54,7 +64,7 @@ export class StableSwap implements Pool {
 
   constructor(
     address: string,
-    tokens: PoolToken[],
+    tokens: StableSwapToken[],
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
@@ -79,7 +89,7 @@ export class StableSwap implements Pool {
     return true;
   }
 
-  parsePair(tokenIn: string, tokenOut: string): PoolPair {
+  parsePair(tokenIn: string, tokenOut: string): StableSwapPair {
     const tokensMap = new Map(this.tokens.map((token) => [token.id, token]));
     const tokenInMeta = tokensMap.get(tokenIn);
     const tokenOutMeta = tokensMap.get(tokenOut);
@@ -93,19 +103,26 @@ export class StableSwap implements Pool {
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
-      decimalsIn: tokenInMeta.decimals,
-      decimalsOut: tokenOutMeta.decimals,
       balanceIn: balanceIn,
       balanceOut: balanceOut,
-    } as PoolPair;
+      decimalsIn: tokenInMeta.decimals,
+      decimalsOut: tokenOutMeta.decimals,
+      tradeableIn: tokenInMeta.tradeable,
+      tradeableOut: tokenOutMeta.tradeable,
+    } as StableSwapPair;
   }
 
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, fees: StableSwapFees): BuyTransfer {
+  validateAndBuy(poolPair: StableSwapPair, amountOut: BigNumber, fees: StableSwapFees): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
     const feePct = toPct(fees.fee);
 
     const errors: PoolError[] = [];
+    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
+
+    if (!isSellAllowed) {
+      errors.push(PoolError.TradeNotAllowed);
+    }
 
     if (amountOut.isLessThan(this.minTradingLimit)) {
       errors.push(PoolError.InsufficientTradingAmount);
@@ -120,12 +137,17 @@ export class StableSwap implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: PoolPair, amountIn: BigNumber, fees: StableSwapFees): SellTransfer {
+  validateAndSell(poolPair: StableSwapPair, amountIn: BigNumber, fees: StableSwapFees): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
     const feePct = toPct(fees.fee);
 
     const errors: PoolError[] = [];
+    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
+
+    if (!isBuyAllowed) {
+      errors.push(PoolError.TradeNotAllowed);
+    }
 
     if (amountIn.isLessThan(this.minTradingLimit)) {
       errors.push(PoolError.InsufficientTradingAmount);

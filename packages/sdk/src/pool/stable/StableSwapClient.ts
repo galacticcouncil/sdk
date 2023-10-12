@@ -9,7 +9,7 @@ import { PoolBase, PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '..
 import { toPoolFee } from '../../utils/mapper';
 
 import { StableMath } from './StableMath';
-import { StableSwapBase, StableSwapFees } from './StableSwap';
+import { StableSwapBase, StableSwapFees, StableSwapToken } from './StableSwap';
 
 import { PoolClient } from '../PoolClient';
 
@@ -39,12 +39,12 @@ export class StableSwapClient extends PoolClient {
         poolAddress,
         poolEntry.assets.map((a) => a.toString())
       );
-
+      const poolTokensState = await this.getPoolTokenState(poolTokens, poolId);
       const sharedPoolAsset = await this.api.query.omnipool.assets(poolId);
       if (sharedPoolAsset.isSome) {
         const omnipoolAddress = this.getOmniPoolAddress();
-        const spsInfo = await this.getPoolTokens(omnipoolAddress, [poolId]);
-        poolTokens.push(spsInfo[0]);
+        const sharedToken = await this.getPoolTokens(omnipoolAddress, [poolId]);
+        poolTokensState.push(...sharedToken);
       }
 
       const amplification = await this.getAmplification(poolEntry, blockNumber);
@@ -57,7 +57,7 @@ export class StableSwapClient extends PoolClient {
         amplification: amplification,
         fee: toPoolFee(poolEntry.fee.toNumber()),
         totalIssuance: totalIssuance,
-        tokens: poolTokens,
+        tokens: poolTokensState,
         ...this.getPoolLimits(),
       } as StableSwapBase;
     });
@@ -81,18 +81,32 @@ export class StableSwapClient extends PoolClient {
 
   private async syncTokens(pool: StableSwapBase): Promise<PoolToken[]> {
     const sharedPoolToken = pool.tokens.find((token: PoolToken) => token.id === pool.id);
-
     const poolTokens = await this.syncPoolTokens(
       pool.address,
       pool.tokens.filter((t) => t !== sharedPoolToken)
     );
+    const poolTokensState = await this.getPoolTokenState(poolTokens, pool.id);
 
     if (sharedPoolToken) {
       const omnipoolAddress = this.getOmniPoolAddress();
       const sharedToken = await this.syncPoolTokens(omnipoolAddress, [sharedPoolToken]);
-      poolTokens.push(sharedToken[0]);
+      poolTokensState.push(...sharedToken);
     }
-    return poolTokens;
+    return poolTokensState;
+  }
+
+  private async getPoolTokenState(poolTokens: PoolToken[], poolId: string): Promise<PoolToken[]> {
+    const tokens = poolTokens.map(async (token: PoolToken, index: number) => {
+      const tradeability = await this.api.query.stableswap.assetTradability(poolId, token.id);
+      if (tradeability.bits) {
+        return {
+          ...token,
+          tradeable: tradeability.bits.toNumber(),
+        } as StableSwapToken;
+      }
+      return token;
+    });
+    return Promise.all(tokens);
   }
 
   public async getParaChainBlock(): Promise<number> {

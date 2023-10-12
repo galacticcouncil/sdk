@@ -14,6 +14,7 @@ export enum PoolError {
   InsufficientTradingAmount = 'InsufficientTradingAmount',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
+  TradeNotAllowed = 'TradeNotAllowed',
 }
 
 export interface PoolPair {

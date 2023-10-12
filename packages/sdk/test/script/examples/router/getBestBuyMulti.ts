@@ -5,15 +5,15 @@ import { TradeRouter } from '../../../../src/api';
 import { ZERO } from '../../../../src/utils/bignumber';
 import { PoolType } from '../../../../src/types';
 
-class GetBestSellPriceExample extends PolkadotExecutor {
+class GetBestBuyPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService, { includeOnly: [PoolType.Omni, PoolType.Stable] });
-    const bestSell = await router.getBestSell('15', '0', '1');
-    const transaction = bestSell.toTx(ZERO);
+    const bestBuy = await router.getBestBuy('5', '2', '1');
+    const transaction = bestBuy.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
-    return bestSell;
+    return bestBuy;
   }
 }
 
-new GetBestSellPriceExample(ApiUrl.HydraDx_Rococo, 'Get best sell price (Omni)', true).run();
+new GetBestBuyPriceExample(ApiUrl.HydraDx_Rococo, 'Get best buy price (Multi)', true).run();

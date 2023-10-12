@@ -1,3 +1,4 @@
+import { all } from '@polkadot/api-derive/bagsList';
 import { RUNTIME_DECIMALS } from '../../consts';
 import {
   BuyTransfer,
@@ -21,11 +22,14 @@ export type OmniPoolPair = PoolPair & {
   hubReservesOut: BigNumber;
   sharesIn: BigNumber;
   sharesOut: BigNumber;
+  tradeableIn: number;
+  tradeableOut: number;
 };
 
 export type OmniPoolToken = PoolToken & {
   hubReserves: BigNumber;
   shares: BigNumber;
+  tradeable: number;
 };
 
 export type OmniPoolFees = PoolFees & {
@@ -104,6 +108,8 @@ export class OmniPool implements Pool {
       decimalsOut: tokenOutMeta.decimals,
       balanceIn: balanceIn,
       balanceOut: balanceOut,
+      tradeableIn: tokenInMeta.tradeable,
+      tradeableOut: tokenOutMeta.tradeable,
     } as OmniPoolPair;
   }
 
@@ -115,6 +121,11 @@ export class OmniPool implements Pool {
     const feePct = calculatedIn === ZERO ? ZERO : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(2);
 
     const errors: PoolError[] = [];
+    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
+
+    if (!isBuyAllowed) {
+      errors.push(PoolError.TradeNotAllowed);
+    }
 
     if (amountOut.isLessThan(this.minTradingLimit)) {
       errors.push(PoolError.InsufficientTradingAmount);
@@ -147,6 +158,11 @@ export class OmniPool implements Pool {
     const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(2);
 
     const errors: PoolError[] = [];
+    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
+
+    if (!isSellAllowed) {
+      errors.push(PoolError.TradeNotAllowed);
+    }
 
     if (amountIn.isLessThan(this.minTradingLimit)) {
       errors.push(PoolError.InsufficientTradingAmount);
