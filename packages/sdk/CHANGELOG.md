@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.6
+
+### Patch Changes
+
+- Fix stableswap shared asset tradeability flags
+
 ## 0.7.5
 
 ### Patch Changes
