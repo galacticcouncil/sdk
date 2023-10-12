@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.3
+
+### Patch Changes
+
+- Tradeable flags support for StableSwap & Omnipool
+
 ## 0.7.2
 
 ### Patch Changes
