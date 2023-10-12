@@ -120,8 +120,24 @@ export class AssetClient extends PolkadotApiClient {
     } as AssetDetail;
   }
 
+  private async getShareDetail(tokenKey: string, tokens: string[]): Promise<AssetDetail> {
+    const { assetType, existentialDeposit } = await this.getTokenDetail(tokenKey);
+    const metadata = await Promise.all(tokens.map(async (token: string) => this.getTokenMetadata(token)));
+    const symbols = metadata.map((m) => m.symbol);
+    const shareName = symbols.join(',');
+
+    return {
+      name: shareName,
+      assetType: assetType,
+      existentialDeposit: existentialDeposit,
+    } as AssetDetail;
+  }
+
   async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
-    const maybe = await Promise.all([this.tryBonds(tokenKey, this.getBondDetail.bind(this))]);
+    const maybe = await Promise.all([
+      this.tryBonds(tokenKey, this.getBondDetail.bind(this)),
+      this.tryShares(tokenKey, this.getShareDetail.bind(this)),
+    ]);
     return maybe.find((e) => e!!) || this.getTokenDetail(tokenKey);
   }
 }
