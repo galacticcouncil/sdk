@@ -74,7 +74,7 @@ export class AssetClient extends PolkadotApiClient {
     return {
       symbol: symbol,
       decimals: 18,
-      icon: Object.keys(icons).join('/'),
+      icon: Object.values(icons).join('/'),
       meta: icons,
     } as AssetMetadata;
   }

@@ -86,7 +86,6 @@ export class StableSwapClient extends PoolClient {
       pool.tokens.filter((t) => t !== sharedPoolToken)
     );
     const poolTokensState = await this.getPoolTokenState(poolTokens, pool.id);
-
     if (sharedPoolToken) {
       const omnipoolAddress = this.getOmniPoolAddress();
       const sharedToken = await this.syncPoolTokens(omnipoolAddress, [sharedPoolToken]);
@@ -98,13 +97,10 @@ export class StableSwapClient extends PoolClient {
   private async getPoolTokenState(poolTokens: PoolToken[], poolId: string): Promise<PoolToken[]> {
     const tokens = poolTokens.map(async (token: PoolToken, index: number) => {
       const tradeability = await this.api.query.stableswap.assetTradability(poolId, token.id);
-      if (tradeability.bits) {
-        return {
-          ...token,
-          tradeable: tradeability.bits.toNumber(),
-        } as StableSwapToken;
-      }
-      return token;
+      return {
+        ...token,
+        tradeable: tradeability.bits.toNumber(),
+      } as StableSwapToken;
     });
     return Promise.all(tokens);
   }

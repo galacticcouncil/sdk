@@ -1,4 +1,5 @@
 export const RUNTIME_DECIMALS = 18;
+export const TRADEABLE_DEFAULT = 15; // Allows all (buy/sell)
 
 export const SYSTEM_ASSET_ID = '0';
 export const SYSTEM_ASSET_DECIMALS = 12;

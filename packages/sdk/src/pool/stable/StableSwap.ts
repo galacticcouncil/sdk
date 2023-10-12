@@ -1,3 +1,4 @@
+import { TRADEABLE_DEFAULT } from '../../consts';
 import {
   BuyTransfer,
   Pool,
@@ -107,8 +108,8 @@ export class StableSwap implements Pool {
       balanceOut: balanceOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
-      tradeableIn: tokenInMeta.tradeable,
-      tradeableOut: tokenOutMeta.tradeable,
+      tradeableIn: this.id === tokenIn ? TRADEABLE_DEFAULT : tokenInMeta.tradeable,
+      tradeableOut: this.id === tokenOut ? TRADEABLE_DEFAULT : tokenOutMeta.tradeable,
     } as StableSwapPair;
   }
 
@@ -118,9 +119,9 @@ export class StableSwap implements Pool {
     const feePct = toPct(fees.fee);
 
     const errors: PoolError[] = [];
-    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
+    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
 
-    if (!isSellAllowed) {
+    if (!isBuyAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
@@ -143,9 +144,9 @@ export class StableSwap implements Pool {
     const feePct = toPct(fees.fee);
 
     const errors: PoolError[] = [];
-    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
+    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
 
-    if (!isBuyAllowed) {
+    if (!isSellAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
