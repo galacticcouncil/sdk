@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.4
+
+### Patch Changes
+
+- Fix AssetClient detail name
+
 ## 0.7.3
 
 ### Patch Changes
