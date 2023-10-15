@@ -2,6 +2,7 @@ import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
 import { StableSwapClient } from './stable/StableSwapClient';
+import { buildRoute } from './PoolUtils';
 
 import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees, Pool } from '../types';
 import { BigNumber } from '../utils/bignumber';
@@ -90,13 +91,7 @@ export class PoolService implements IPoolService {
     if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.buy(assetOut, assetIn, amountOut.toFixed(), maxAmountIn.toFixed());
     } else {
-      tx = this.api.tx.router.buy(
-        assetIn,
-        assetOut,
-        amountOut.toFixed(),
-        maxAmountIn.toFixed(),
-        this.buildRoute(route)
-      );
+      tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), buildRoute(route));
     }
 
     const getTx = (): SubmittableExtrinsic => {
@@ -118,37 +113,12 @@ export class PoolService implements IPoolService {
     if (this.isDirectOmnipoolTrade(route)) {
       tx = this.api.tx.omnipool.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
     } else {
-      tx = this.api.tx.router.sell(
-        assetIn,
-        assetOut,
-        amountIn.toFixed(),
-        minAmountOut.toFixed(),
-        this.buildRoute(route)
-      );
+      tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), buildRoute(route));
     }
 
     const getTx = (): SubmittableExtrinsic => {
       return tx;
     };
     return { hex: tx.toHex(), name: 'RouterSell', get: getTx } as Transaction;
-  }
-
-  private buildRoute(route: Hop[]) {
-    return route.map(({ assetIn, assetOut, pool, poolId }: Hop) => {
-      if (pool === PoolType.Stable) {
-        return {
-          pool: {
-            Stableswap: poolId,
-          },
-          assetIn,
-          assetOut,
-        };
-      }
-      return {
-        pool,
-        assetIn,
-        assetOut,
-      };
-    });
   }
 }
