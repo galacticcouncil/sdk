@@ -119,9 +119,10 @@ export class StableSwap implements Pool {
     const feePct = toPct(fees.fee);
 
     const errors: PoolError[] = [];
+    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
     const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
 
-    if (!isBuyAllowed) {
+    if (!isSellAllowed || !isBuyAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
@@ -145,8 +146,9 @@ export class StableSwap implements Pool {
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
+    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
 
-    if (!isSellAllowed) {
+    if (!isSellAllowed || !isBuyAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 

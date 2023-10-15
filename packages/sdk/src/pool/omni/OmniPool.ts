@@ -121,9 +121,10 @@ export class OmniPool implements Pool {
     const feePct = calculatedIn === ZERO ? ZERO : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(2);
 
     const errors: PoolError[] = [];
+    const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
     const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
 
-    if (!isBuyAllowed) {
+    if (!isSellAllowed || !isBuyAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
@@ -159,8 +160,9 @@ export class OmniPool implements Pool {
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
+    const isBuyAllowed = OmniMath.isBuyAllowed(poolPair.tradeableOut);
 
-    if (!isSellAllowed) {
+    if (!isSellAllowed || !isBuyAllowed) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
