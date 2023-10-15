@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 0.7.7
+
+### Patch Changes
+
+- Check both sell/buy tradeability flags for pair, move route builder to pool utils
+
 ## 0.7.6
 
 ### Patch Changes
