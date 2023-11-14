@@ -4,6 +4,7 @@ import { XykPoolClient } from './xyk/XykPoolClient';
 import { StableSwapClient } from './stable/StableSwapClient';
 import { buildRoute } from './PoolUtils';
 
+import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
 import {
   Hop,
@@ -19,7 +20,6 @@ import { BigNumber } from '../utils/bignumber';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { AssetClient } from 'client';
 
 export class PoolService implements IPoolService {
   protected readonly api: ApiPromise;
