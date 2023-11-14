@@ -84,6 +84,13 @@ export class PoolService implements IPoolService {
     return this.withMetadata(flatten);
   }
 
+  unsubscribe() {
+    this.xykClient.unsubscribe();
+    this.omniClient.unsubscribe();
+    this.lbpClient.unsubscribe();
+    this.stableClient.unsubscribe();
+  }
+
   private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
     const metaMap: Map<string, AssetMetadata> = new Map(
       this.metadata.map((m) => [m.id, m])
