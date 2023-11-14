@@ -4,22 +4,38 @@ import { XykPoolClient } from './xyk/XykPoolClient';
 import { StableSwapClient } from './stable/StableSwapClient';
 import { buildRoute } from './PoolUtils';
 
-import { Hop, PoolBase, IPoolService, PoolType, Transaction, PoolFees, Pool } from '../types';
-import { BigNumber } from '../utils/bignumber';
 import { PoolNotFound } from '../errors';
+import {
+  Hop,
+  PoolBase,
+  IPoolService,
+  PoolType,
+  Transaction,
+  PoolFees,
+  Pool,
+  AssetMetadata,
+} from '../types';
+import { BigNumber } from '../utils/bignumber';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { AssetClient } from 'client';
 
 export class PoolService implements IPoolService {
   protected readonly api: ApiPromise;
+  protected readonly assetClient: AssetClient;
+
   protected readonly xykClient: XykPoolClient;
   protected readonly omniClient: OmniPoolClient;
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
 
+  protected metadata: AssetMetadata[] = [];
+  protected metadataLoaded = false;
+
   constructor(api: ApiPromise) {
     this.api = api;
+    this.assetClient = new AssetClient(this.api);
     this.xykClient = new XykPoolClient(this.api);
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
@@ -27,6 +43,13 @@ export class PoolService implements IPoolService {
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
+    if (!this.metadataLoaded) {
+      console.time('Load metadata');
+      this.metadata = await this.assetClient.getOnChainMetadata();
+      this.metadataLoaded = true;
+      console.timeEnd('Load metadata');
+    }
+
     if (includeOnly.length == 0) {
       const pools = await Promise.all([
         this.xykClient.getPools(),
@@ -34,7 +57,8 @@ export class PoolService implements IPoolService {
         this.lbpClient.getPools(),
         this.stableClient.getPools(),
       ]);
-      return pools.flat();
+      const flatten = pools.flat();
+      return this.withMetadata(flatten);
     }
 
     const poolList: Promise<PoolBase[]>[] = [];
@@ -56,7 +80,28 @@ export class PoolService implements IPoolService {
     });
 
     const pools = await Promise.all(poolList);
-    return pools.flat();
+    const flatten = pools.flat();
+    return this.withMetadata(flatten);
+  }
+
+  private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
+    const metaMap: Map<string, AssetMetadata> = new Map(
+      this.metadata.map((m) => [m.id, m])
+    );
+
+    return pools.map((pool: PoolBase) => {
+      const tokens = pool.tokens.map((t) => {
+        const meta = metaMap.get(t.id);
+        return {
+          ...t,
+          ...meta,
+        };
+      });
+      return {
+        ...pool,
+        tokens,
+      };
+    });
   }
 
   async getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {
@@ -89,9 +134,20 @@ export class PoolService implements IPoolService {
 
     // In case of direct trade in omnipool we skip router (cheaper tx)
     if (this.isDirectOmnipoolTrade(route)) {
-      tx = this.api.tx.omnipool.buy(assetOut, assetIn, amountOut.toFixed(), maxAmountIn.toFixed());
+      tx = this.api.tx.omnipool.buy(
+        assetOut,
+        assetIn,
+        amountOut.toFixed(),
+        maxAmountIn.toFixed()
+      );
     } else {
-      tx = this.api.tx.router.buy(assetIn, assetOut, amountOut.toFixed(), maxAmountIn.toFixed(), buildRoute(route));
+      tx = this.api.tx.router.buy(
+        assetIn,
+        assetOut,
+        amountOut.toFixed(),
+        maxAmountIn.toFixed(),
+        buildRoute(route)
+      );
     }
 
     const getTx = (): SubmittableExtrinsic => {
@@ -111,9 +167,20 @@ export class PoolService implements IPoolService {
 
     // In case of direct trade in omnipool we skip router (cheaper tx)
     if (this.isDirectOmnipoolTrade(route)) {
-      tx = this.api.tx.omnipool.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed());
+      tx = this.api.tx.omnipool.sell(
+        assetIn,
+        assetOut,
+        amountIn.toFixed(),
+        minAmountOut.toFixed()
+      );
     } else {
-      tx = this.api.tx.router.sell(assetIn, assetOut, amountIn.toFixed(), minAmountOut.toFixed(), buildRoute(route));
+      tx = this.api.tx.router.sell(
+        assetIn,
+        assetOut,
+        amountIn.toFixed(),
+        minAmountOut.toFixed(),
+        buildRoute(route)
+      );
     }
 
     const getTx = (): SubmittableExtrinsic => {

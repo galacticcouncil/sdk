@@ -1,7 +1,5 @@
 import { BigNumber } from './utils/bignumber';
 
-export type PoolAsset = { id: string; symbol: string; icon: string; meta?: Record<string, string> };
-
 export enum PoolType {
   XYK = 'Xyk',
   LBP = 'Lbp',
@@ -36,7 +34,16 @@ export type PoolBase = {
   minTradingLimit: number;
 };
 
-export type PoolLimits = Pick<PoolBase, 'maxInRatio' | 'maxOutRatio' | 'minTradingLimit'>;
+export interface PoolToken extends AssetMetadata {
+  id: string;
+  balance: string;
+  tradeable?: number;
+}
+
+export type PoolLimits = Pick<
+  PoolBase,
+  'maxInRatio' | 'maxOutRatio' | 'minTradingLimit'
+>;
 
 export type PoolFee = [numerator: number, denominator: number];
 
@@ -44,11 +51,6 @@ export type PoolFee = [numerator: number, denominator: number];
 export type PoolFees = {
   min?: PoolFee;
   max?: PoolFee;
-};
-
-export type PoolToken = PoolAsset & {
-  balance: string;
-  decimals: number;
 };
 
 export type PoolSell = {
@@ -72,8 +74,16 @@ export type BuyTransfer = Transfer & PoolBuy;
 export interface Pool extends PoolBase {
   validatePair(tokenIn: string, tokenOut: string): boolean;
   parsePair(tokenIn: string, tokenOut: string): PoolPair;
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, dynamicFees: PoolFees | null): BuyTransfer;
-  validateAndSell(poolPair: PoolPair, amountOut: BigNumber, dynamicFees: PoolFees | null): SellTransfer;
+  validateAndBuy(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    dynamicFees: PoolFees | null
+  ): BuyTransfer;
+  validateAndSell(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    dynamicFees: PoolFees | null
+  ): SellTransfer;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber;
@@ -163,14 +173,12 @@ export interface AssetBalance {
 }
 
 export interface AssetMetadata {
-  symbol: string;
+  id: string;
   decimals: number;
-  icon: string;
-  meta?: Record<string, string>;
-}
-
-export interface AssetDetail {
   name: string;
+  symbol: string;
+  icon: string;
   assetType: string;
   existentialDeposit: string;
+  meta?: Record<string, string>;
 }

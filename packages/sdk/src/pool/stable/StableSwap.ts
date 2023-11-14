@@ -22,10 +22,6 @@ export type StableSwapPair = PoolPair & {
   tradeableOut: number;
 };
 
-export type StableSwapToken = PoolToken & {
-  tradeable: number;
-};
-
 export type StableSwapFees = PoolFees & {
   fee: PoolFee;
 };
@@ -40,7 +36,7 @@ export type StableSwapBase = PoolBase & {
 export class StableSwap implements Pool {
   type: PoolType;
   address: string;
-  tokens: StableSwapToken[];
+  tokens: PoolToken[];
   maxInRatio: number;
   maxOutRatio: number;
   minTradingLimit: number;
@@ -52,7 +48,7 @@ export class StableSwap implements Pool {
   static fromPool(pool: StableSwapBase): StableSwap {
     return new StableSwap(
       pool.address,
-      pool.tokens as StableSwapToken[],
+      pool.tokens as PoolToken[],
       pool.maxInRatio,
       pool.maxOutRatio,
       pool.minTradingLimit,
@@ -65,7 +61,7 @@ export class StableSwap implements Pool {
 
   constructor(
     address: string,
-    tokens: StableSwapToken[],
+    tokens: PoolToken[],
     maxInRation: number,
     maxOutRatio: number,
     minTradeLimit: number,
@@ -108,12 +104,18 @@ export class StableSwap implements Pool {
       balanceOut: balanceOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
-      tradeableIn: this.id === tokenIn ? TRADEABLE_DEFAULT : tokenInMeta.tradeable,
-      tradeableOut: this.id === tokenOut ? TRADEABLE_DEFAULT : tokenOutMeta.tradeable,
+      tradeableIn:
+        this.id === tokenIn ? TRADEABLE_DEFAULT : tokenInMeta.tradeable,
+      tradeableOut:
+        this.id === tokenOut ? TRADEABLE_DEFAULT : tokenOutMeta.tradeable,
     } as StableSwapPair;
   }
 
-  validateAndBuy(poolPair: StableSwapPair, amountOut: BigNumber, fees: StableSwapFees): BuyTransfer {
+  validateAndBuy(
+    poolPair: StableSwapPair,
+    amountOut: BigNumber,
+    fees: StableSwapFees
+  ): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
     const feePct = toPct(fees.fee);
@@ -139,7 +141,11 @@ export class StableSwap implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: StableSwapPair, amountIn: BigNumber, fees: StableSwapFees): SellTransfer {
+  validateAndSell(
+    poolPair: StableSwapPair,
+    amountIn: BigNumber,
+    fees: StableSwapFees
+  ): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
     const feePct = toPct(fees.fee);
@@ -165,7 +171,11 @@ export class StableSwap implements Pool {
     } as SellTransfer;
   }
 
-  private calculateIn(poolPair: PoolPair, amountOut: BigNumber, fees?: StableSwapFees) {
+  private calculateIn(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateInGivenOut(
       this.getReserves(),
       Number(poolPair.assetIn),
@@ -178,7 +188,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  private calculateAddOneAsset(poolPair: PoolPair, amountOut: BigNumber, fees?: StableSwapFees) {
+  private calculateAddOneAsset(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateAddOneAsset(
       this.getReserves(),
       amountOut.toFixed(0),
@@ -191,7 +205,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  private calculateSharesForAmount(poolPair: PoolPair, amountOut: BigNumber, fees?: StableSwapFees) {
+  private calculateSharesForAmount(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateSharesForAmount(
       this.getReserves(),
       Number(poolPair.assetOut),
@@ -204,7 +222,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber, fees?: StableSwapFees): BigNumber {
+  calculateInGivenOut(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    fees?: StableSwapFees
+  ): BigNumber {
     if (poolPair.assetOut == this.id) {
       return this.calculateAddOneAsset(poolPair, amountOut, fees);
     }
@@ -230,7 +252,11 @@ export class StableSwap implements Pool {
     return this.calculateIn(poolPair, one);
   }
 
-  private calculateOut(poolPair: PoolPair, amountIn: BigNumber, fees?: StableSwapFees) {
+  private calculateOut(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateOutGivenIn(
       this.getReserves(),
       Number(poolPair.assetIn),
@@ -243,7 +269,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  private calculateWithdrawOneAsset(poolPair: PoolPair, amountIn: BigNumber, fees?: StableSwapFees) {
+  private calculateWithdrawOneAsset(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateLiquidityOutOneAsset(
       this.getReserves(),
       amountIn.toFixed(0),
@@ -256,7 +286,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  private calculateShares(poolPair: PoolPair, amountIn: BigNumber, fees?: StableSwapFees) {
+  private calculateShares(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    fees?: StableSwapFees
+  ) {
     const price = StableMath.calculateShares(
       this.getReserves(),
       this.getAssets(poolPair.assetIn, amountIn),
@@ -268,7 +302,11 @@ export class StableSwap implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber, fees?: StableSwapFees): BigNumber {
+  calculateOutGivenIn(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    fees?: StableSwapFees
+  ): BigNumber {
     if (poolPair.assetIn == this.id) {
       return this.calculateWithdrawOneAsset(poolPair, amountIn, fees);
     }
@@ -295,7 +333,11 @@ export class StableSwap implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber, fees: StableSwapFees): BigNumber {
-    const fee = StableMath.calculatePoolTradeFee(amount.toString(), fees.fee[0], fees.fee[1]);
+    const fee = StableMath.calculatePoolTradeFee(
+      amount.toString(),
+      fees.fee[0],
+      fees.fee[1]
+    );
     return bnum(fee);
   }
 

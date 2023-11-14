@@ -28,10 +28,22 @@ export class XykPool implements Pool {
   minTradingLimit: number;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(pool.address, pool.tokens, pool.maxInRatio, pool.maxOutRatio, pool.minTradingLimit);
+    return new XykPool(
+      pool.address,
+      pool.tokens as PoolToken[],
+      pool.maxInRatio,
+      pool.maxOutRatio,
+      pool.minTradingLimit
+    );
   }
 
-  constructor(address: string, tokens: PoolToken[], maxInRation: number, maxOutRatio: number, minTradeLimit: number) {
+  constructor(
+    address: string,
+    tokens: PoolToken[],
+    maxInRation: number,
+    maxOutRatio: number,
+    minTradeLimit: number
+  ) {
     this.type = PoolType.XYK;
     this.address = address;
     this.tokens = tokens;
@@ -65,7 +77,11 @@ export class XykPool implements Pool {
     } as PoolPair;
   }
 
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber, fees: XykPoolFees): BuyTransfer {
+  validateAndBuy(
+    poolPair: PoolPair,
+    amountOut: BigNumber,
+    fees: XykPoolFees
+  ): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
@@ -97,7 +113,11 @@ export class XykPool implements Pool {
     } as BuyTransfer;
   }
 
-  validateAndSell(poolPair: PoolPair, amountIn: BigNumber, fees: XykPoolFees): SellTransfer {
+  validateAndSell(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    fees: XykPoolFees
+  ): SellTransfer {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
@@ -168,7 +188,11 @@ export class XykPool implements Pool {
   }
 
   calculateTradeFee(amount: BigNumber, fees: XykPoolFees): BigNumber {
-    const fee = XykMath.calculatePoolTradeFee(amount.toString(), fees.exchangeFee[0], fees.exchangeFee[1]);
+    const fee = XykMath.calculatePoolTradeFee(
+      amount.toString(),
+      fees.exchangeFee[0],
+      fees.exchangeFee[1]
+    );
     return bnum(fee);
   }
 }
