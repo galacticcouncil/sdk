@@ -21,14 +21,16 @@ import { PoolClient } from '../PoolClient';
 export class OmniPoolClient extends PoolClient {
   async loadPools(): Promise<PoolBase[]> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
-    const [assets, hubAssetTradeability] = await Promise.all([
+    const poolAddress = this.getPoolId();
+
+    const [assets, hubAssetTradeability, hubAssetBalance] = await Promise.all([
       this.api.query.omnipool.assets.entries(),
       this.api.query.omnipool.hubAssetTradability(),
+      this.getBalance(poolAddress, hubAssetId),
     ]);
 
-    const poolAddress = this.getPoolId();
     const poolTokens = assets.map(
-      ([
+      async ([
         {
           args: [id],
         },
@@ -36,19 +38,24 @@ export class OmniPoolClient extends PoolClient {
       ]) => {
         const { hubReserve, shares, tradable }: PalletOmnipoolAssetState =
           state.unwrap();
+        const balance = await this.getBalance(poolAddress, id.toString());
         return {
           id: id.toString(),
           hubReserves: bnum(hubReserve.toString()),
           shares: bnum(shares.toString()),
           tradeable: tradable.bits.toNumber(),
+          balance: balance.toString(),
         } as OmniPoolToken;
       }
     );
 
+    const tokens = await Promise.all(poolTokens);
+
     // Adding LRNA info
-    poolTokens.push({
+    tokens.push({
       id: hubAssetId,
       tradeable: hubAssetTradeability.bits.toNumber(),
+      balance: hubAssetBalance.toString(),
     } as OmniPoolToken);
 
     return [
@@ -56,7 +63,7 @@ export class OmniPoolClient extends PoolClient {
         address: poolAddress,
         type: PoolType.Omni,
         hubAssetId: hubAssetId,
-        tokens: poolTokens,
+        tokens: tokens,
         ...this.getPoolLimits(),
       } as PoolBase,
     ];
@@ -91,7 +98,7 @@ export class OmniPoolClient extends PoolClient {
     return PoolType.Omni;
   }
 
-  async subscribe(pool: PoolBase): UnsubscribePromise {
+  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
     const assetsArgs = pool.tokens.map((t) => t.id);
     return this.api.query.omnipool.assets.multi(assetsArgs, (states) => {
       pool.tokens = states.map((state, i) => {

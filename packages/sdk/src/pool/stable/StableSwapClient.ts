@@ -1,7 +1,7 @@
 import type { PalletStableswapPoolInfo } from '@polkadot/types/lookup';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
-import { HYDRADX_SS58_PREFIX } from '../../consts';
+import { HYDRADX_OMNIPOOL_ADDRESS, HYDRADX_SS58_PREFIX } from '../../consts';
 import {
   PoolBase,
   PoolType,
@@ -37,11 +37,10 @@ export class StableSwapClient extends PoolClient {
         const poolId = id.toString();
         const poolAddress = this.getPoolAddress(poolId);
 
-        const poolDelta = await this.getPoolDelta(
-          poolId,
-          pool,
-          blockNumber.toString()
-        );
+        const [poolDelta, poolTokens] = await Promise.all([
+          this.getPoolDelta(poolId, pool, blockNumber.toString()),
+          this.getPoolTokens(poolAddress, poolId, pool),
+        ]);
 
         this.stablePools.set(poolAddress, pool);
         return {
@@ -49,6 +48,7 @@ export class StableSwapClient extends PoolClient {
           id: poolId,
           type: PoolType.Stable,
           fee: pool.fee.toJSON() as PoolFee,
+          tokens: poolTokens,
           ...poolDelta,
           ...this.getPoolLimits(),
         } as PoolBase;
@@ -70,7 +70,7 @@ export class StableSwapClient extends PoolClient {
     return PoolType.Stable;
   }
 
-  async subscribe(pool: PoolBase): UnsubscribePromise {
+  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
     return this.api.query.system.number(async (parachainBlock) => {
       const blockNumber = parachainBlock.toNumber();
       const stablePool = this.stablePools.get(pool.address);
@@ -79,10 +79,11 @@ export class StableSwapClient extends PoolClient {
         stablePool!,
         blockNumber.toString()
       );
+
       pool = {
         ...pool,
         ...poolDelta,
-      };
+      } as StableSwapBase;
     });
   }
 
@@ -90,13 +91,12 @@ export class StableSwapClient extends PoolClient {
     poolId: string,
     poolInfo: PalletStableswapPoolInfo,
     blockNumber: string
-  ): Promise<Partial<PoolBase>> {
+  ): Promise<Partial<StableSwapBase>> {
     const {
       initialAmplification,
       finalAmplification,
       initialBlock,
       finalBlock,
-      assets,
     } = poolInfo;
 
     const amplification = StableMath.calculateAmplification(
@@ -107,36 +107,46 @@ export class StableSwapClient extends PoolClient {
       blockNumber
     );
 
-    const [sharedAsset, totalIssuance] = await Promise.all([
-      this.api.query.omnipool.assets(poolId),
-      this.api.query.tokens.totalIssuance(poolId),
-    ]);
+    const totalIssuance = await this.api.query.tokens.totalIssuance(poolId);
+    return {
+      amplification: amplification,
+      totalIssuance: totalIssuance.toString(),
+    } as Partial<StableSwapBase>;
+  }
+
+  private async getPoolTokens(
+    poolAddress: string,
+    poolId: string,
+    poolInfo: PalletStableswapPoolInfo
+  ): Promise<PoolToken[]> {
+    const { assets } = poolInfo;
 
     const poolTokens = assets.map(async (a) => {
-      const tradeability = await this.api.query.stableswap.assetTradability(
-        poolId,
-        a.toString()
-      );
+      const [tradeability, balance] = await Promise.all([
+        this.api.query.stableswap.assetTradability(poolId, a.toString()),
+        this.getBalance(poolAddress, a.toString()),
+      ]);
+
       return {
         id: a.toString(),
         tradeable: tradeability.bits.toNumber(),
+        balance: balance.toString(),
       } as PoolToken;
     });
 
     const tokens = await Promise.all(poolTokens);
+
+    const sharedAsset = await this.api.query.omnipool.assets(poolId);
     if (sharedAsset.isSome) {
       const { tradable } = sharedAsset.unwrap();
+      const balance = await this.getBalance(HYDRADX_OMNIPOOL_ADDRESS, poolId);
       tokens.push({
         id: poolId,
         tradeable: tradable.bits.toNumber(),
+        balance: balance.toString(),
       } as PoolToken);
     }
-
-    return {
-      amplification: amplification,
-      totalIssuance: totalIssuance.toString(),
-      tokens: tokens,
-    } as Partial<PoolBase>;
+    return tokens;
   }
 
   private getPoolAddress(poolId: string) {
