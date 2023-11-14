@@ -1,50 +1,89 @@
 import { ApiPromise } from '@polkadot/api';
-import type { StorageKey } from '@polkadot/types';
-import type { AnyTuple, Codec } from '@polkadot/types/types';
-import type { PoolBase, PoolFees, PoolToken } from '../types';
+import { UnsubscribePromise } from '@polkadot/api-base/types';
+import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
+import { PoolBase, PoolFees, PoolType } from '../types';
 
 import { BalanceClient } from '../client';
+import BigNumber from 'bignumber.js';
 
 export abstract class PoolClient extends BalanceClient {
+  protected pools: PoolBase[] = [];
+  protected subs: UnsubscribePromise[] = [];
+  private poolsLoaded = false;
+
   constructor(api: ApiPromise) {
     super(api);
   }
 
-  abstract getPools(): Promise<PoolBase[]>;
+  protected abstract loadPools(): Promise<PoolBase[]>;
+  abstract getPoolType(): PoolType;
   abstract getPoolFees(feeAsset: string, address: string): Promise<PoolFees>;
+  protected abstract subscribe(pool: PoolBase): UnsubscribePromise;
 
-  protected getStorageKey(asset: [StorageKey<AnyTuple>, Codec], index: number): string {
-    return (asset[0].toHuman() as string[])[index];
+  async getPools(): Promise<PoolBase[]> {
+    if (this.poolsLoaded) {
+      return this.pools;
+    }
+    console.time(`Load ${this.getPoolType()}`);
+    this.pools = await this.loadPools();
+    console.timeEnd(`Load ${this.getPoolType()}`);
+    this.subs = this.pools.map((pool) => this.getSubs(pool)).flat();
+    this.poolsLoaded = true;
+    return this.pools;
   }
 
-  protected getStorageEntryArray(asset: [StorageKey<AnyTuple>, Codec]): string[] {
-    return asset[1].toHuman() as string[];
+  private getSubs(pool: PoolBase) {
+    const subs = [
+      this.subscribe(pool),
+      this.subscribeTokenBalance(
+        pool.address,
+        pool.tokens.map((t) => t.id),
+        this.updateBalanceListener(pool, 'token')
+      ),
+      this.subscribeSystemBalance(
+        pool.address,
+        this.updateBalanceListener(pool, 'system')
+      ),
+    ];
+
+    if (pool.type === PoolType.Stable && pool.id) {
+      subs.push(
+        this.subscribeTokenBalance(
+          HYDRADX_OMNIPOOL_ADDRESS,
+          [pool.id],
+          this.updateShareBalanceListener(pool, 'share')
+        )
+      );
+    }
+
+    return subs;
   }
 
-  protected async getPoolTokens(poolAddress: string, assetKeys: string[]): Promise<PoolToken[]> {
-    const poolTokens = assetKeys.map(async (id) => {
-      const balance = await this.getAccountBalance(poolAddress, id);
-      const metadata = await this.getAssetMetadata(id);
-      return {
-        id: id,
-        balance: balance.amount.toString(),
-        decimals: metadata.decimals,
-        symbol: metadata.symbol,
-        icon: metadata.icon,
-        meta: metadata.meta,
-      } as PoolToken;
-    });
-    return Promise.all(poolTokens);
+  private updateBalanceListener(pool: PoolBase, type: string) {
+    this.log(pool, type);
+    return function (token: string, balance: BigNumber) {
+      const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+      // If asset found and not shared asset
+      if (tokenIndex >= 0 && pool.id !== token) {
+        pool.tokens[tokenIndex].balance = balance.toString();
+      }
+    };
   }
 
-  protected async syncPoolTokens(poolAddress: string, poolTokens: PoolToken[]): Promise<PoolToken[]> {
-    const syncedPoolTokens = poolTokens.map(async (poolToken: PoolToken) => {
-      const balance = await this.getAccountBalance(poolAddress, poolToken.id);
-      return {
-        ...poolToken,
-        balance: balance.amount.toString(),
-      } as PoolToken;
-    });
-    return Promise.all(syncedPoolTokens);
+  private updateShareBalanceListener(pool: PoolBase, type: string) {
+    this.log(pool, type);
+    return function (token: string, balance: BigNumber) {
+      const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+      if (tokenIndex >= 0) {
+        pool.tokens[tokenIndex].balance = balance.toString();
+      }
+    };
+  }
+
+  private log(pool: PoolBase, type: string) {
+    const poolAddr = pool.address.substring(0, 10).concat('...');
+    console.log(
+      `${pool.type} [${poolAddr}] ${type} balance listener subscribed`
+    );
   }
 }

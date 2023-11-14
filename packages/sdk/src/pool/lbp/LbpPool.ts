@@ -108,7 +108,11 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is bought (out) from the pool for distributed asset (in) - User(Buyer) bears the fee
    * b) Distributed asset is bought (out) from the pool for accumualted asset (in) - Pool bears the fee
    */
-  validateAndBuy(poolPair: WeightedPoolPair, amountOut: BigNumber, fees: LbpPoolFees): BuyTransfer {
+  validateAndBuy(
+    poolPair: WeightedPoolPair,
+    amountOut: BigNumber,
+    fees: LbpPoolFees
+  ): BuyTransfer {
     const feeAsset = this.tokens[0].id;
 
     const errors: PoolError[] = [];
@@ -124,7 +128,9 @@ export class LbpPool implements Pool {
 
     if (feeAsset === poolPair.assetOut) {
       const fee = this.calculateTradeFee(amountOut, fees);
-      const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
+      const feePct = toPct(
+        this.repayFeeApply ? fees.repayFee : fees.exchangeFee
+      );
       const amountOutPlusFee = amountOut.plus(fee);
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOutPlusFee);
 
@@ -164,7 +170,11 @@ export class LbpPool implements Pool {
    * a) Accumulated asset is sold (in) to the pool for distributed asset (out) - Pool bears the fee
    * b) Distributed asset is sold (in) to the pool for accumualted asset (out) - User(Seller) bears the fee
    */
-  validateAndSell(poolPair: WeightedPoolPair, amountIn: BigNumber, fees: LbpPoolFees): SellTransfer {
+  validateAndSell(
+    poolPair: WeightedPoolPair,
+    amountIn: BigNumber,
+    fees: LbpPoolFees
+  ): SellTransfer {
     const feeAsset = this.tokens[0].id;
 
     const errors: PoolError[] = [];
@@ -196,7 +206,9 @@ export class LbpPool implements Pool {
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut, fees);
-      const feePct = toPct(this.repayFeeApply ? fees.repayFee : fees.exchangeFee);
+      const feePct = toPct(
+        this.repayFeeApply ? fees.repayFee : fees.exchangeFee
+      );
       const amountOut = calculatedOut.minus(fee);
 
       const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
@@ -214,7 +226,10 @@ export class LbpPool implements Pool {
     }
   }
 
-  calculateInGivenOut(poolPair: WeightedPoolPair, amountOut: BigNumber): BigNumber {
+  calculateInGivenOut(
+    poolPair: WeightedPoolPair,
+    amountOut: BigNumber
+  ): BigNumber {
     const price = LbpMath.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
@@ -226,7 +241,10 @@ export class LbpPool implements Pool {
     return priceBN.isNegative() ? ZERO : priceBN;
   }
 
-  calculateOutGivenIn(poolPair: WeightedPoolPair, amountIn: BigNumber): BigNumber {
+  calculateOutGivenIn(
+    poolPair: WeightedPoolPair,
+    amountIn: BigNumber
+  ): BigNumber {
     const price = LbpMath.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),

@@ -1,144 +1,220 @@
+import type {
+  PalletAssetRegistryAssetDetails,
+  PalletAssetRegistryAssetMetadata,
+  PalletStableswapPoolInfo,
+} from '@polkadot/types/lookup';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { AssetDetail, AssetMetadata } from '../types';
+import { AssetMetadata } from '../types';
 
 import { PolkadotApiClient } from './PolkadotApi';
+import { ITuple } from '@polkadot/types-codec/types';
+import { u32, u64 } from '@polkadot/types-codec';
 
 export class AssetClient extends PolkadotApiClient {
+  private SUPPORTED_TYPES = ['StableSwap', 'Bond', 'Token'];
+
   constructor(api: ApiPromise) {
     super(api);
   }
 
-  private async tryBonds<T>(
-    tokenKey: string,
-    cb: (tokenKey: string, underlyingAsset: string, maturity: number) => Promise<T>
-  ) {
+  async safeSharesQuery(): Promise<Map<string, PalletStableswapPoolInfo>> {
     try {
-      const bond = await this.api.query.bonds.bonds(tokenKey);
-      if (bond.isSome) {
-        const [underlyingAsset, maturity] = bond.unwrap();
-        const underlyingTokenKey = underlyingAsset.toString();
-        const maturityTimestamp = maturity.toNumber();
-        return cb(tokenKey, underlyingTokenKey, maturityTimestamp);
-      }
-    } catch {}
-    return undefined;
-  }
-
-  private async tryShares<T>(tokenKey: string, cb: (tokenKey: string, tokens: string[]) => Promise<T>) {
-    try {
-      const share = await this.api.query.stableswap.pools(tokenKey);
-      if (share.isSome) {
-        const { assets } = share.unwrap();
-        const poolTokens = assets.map((asset) => asset.toString());
-        return cb(tokenKey, poolTokens);
-      }
-    } catch {}
-    return undefined;
-  }
-
-  private async getTokenMetadata(tokenKey: string): Promise<AssetMetadata> {
-    if (tokenKey == SYSTEM_ASSET_ID) {
-      return {
-        symbol: this.chainToken,
-        decimals: this.chainDecimals,
-        icon: this.chainToken,
-      } as AssetMetadata;
+      const entries = await this.api.query.stableswap.pools.entries();
+      return new Map(
+        entries.map(
+          ([
+            {
+              args: [id],
+            },
+            value,
+          ]) => [id.toString(), value.unwrap()]
+        )
+      );
+    } catch (error) {
+      return new Map([]);
     }
-
-    const metadata = await this.api.query.assetRegistry.assetMetadataMap(tokenKey);
-    const { symbol, decimals } = metadata.unwrap();
-    return {
-      symbol: symbol.toHuman(),
-      decimals: decimals.toNumber(),
-      icon: symbol.toHuman(),
-    } as AssetMetadata;
   }
 
-  private async getBondMetadata(_tokenKey: string, underlyingTokenKey: string): Promise<AssetMetadata> {
-    const { symbol, decimals } = await this.getTokenMetadata(underlyingTokenKey);
-    return {
-      symbol: symbol + 'b',
-      decimals: decimals,
-      icon: symbol,
-    } as AssetMetadata;
+  async safeBondsQuery(): Promise<Map<string, ITuple<[u32, u64]>>> {
+    try {
+      const entries = await this.api.query.bonds.bonds.entries();
+      return new Map(
+        entries.map(
+          ([
+            {
+              args: [id],
+            },
+            value,
+          ]) => {
+            return [id.toString(), value.unwrap()];
+          }
+        )
+      );
+    } catch (error) {
+      return new Map([]);
+    }
   }
 
-  private async getShareMetadata(tokenKey: string, tokens: string[]): Promise<AssetMetadata> {
-    const meta: [string, AssetMetadata][] = await Promise.all(
-      tokens.map(async (token: string) => [token, await this.getTokenMetadata(token)])
-    );
-    const icons = meta.reduce((acc, item) => ({ ...acc, [item[0]]: item[1].symbol }), {});
-    const { name } = await this.getTokenDetail(tokenKey);
-    const symbol = name.length > 0 ? name : tokenKey;
-    return {
-      symbol: symbol,
-      decimals: 18,
-      icon: Object.values(icons).join('/'),
-      meta: icons,
-    } as AssetMetadata;
+  async metadataQuery(): Promise<
+    Map<string, PalletAssetRegistryAssetMetadata>
+  > {
+    try {
+      const entries =
+        await this.api.query.assetRegistry.assetMetadataMap.entries();
+      return new Map(
+        entries.map(
+          ([
+            {
+              args: [id],
+            },
+            value,
+          ]) => {
+            return [id.toString(), value.unwrap()];
+          }
+        )
+      );
+    } catch (error) {
+      return new Map([]);
+    }
   }
 
-  async getAssetMetadata(tokenKey: string): Promise<AssetMetadata> {
-    const maybe = await Promise.all([
-      this.tryBonds(tokenKey, this.getBondMetadata.bind(this)),
-      this.tryShares(tokenKey, this.getShareMetadata.bind(this)),
-    ]);
-    return maybe.find((e) => e!!) || this.getTokenMetadata(tokenKey);
-  }
-
-  private async getTokenDetail(tokenKey: string): Promise<AssetDetail> {
+  private getTokenMetadata(
+    tokenKey: string,
+    details: PalletAssetRegistryAssetDetails,
+    metadata: Map<string, PalletAssetRegistryAssetMetadata>
+  ): AssetMetadata {
     if (tokenKey == SYSTEM_ASSET_ID) {
       const defaultAssetEd = this.api.consts.balances.existentialDeposit;
       return {
+        id: SYSTEM_ASSET_ID,
         name: this.chainToken,
+        symbol: this.chainToken,
+        decimals: this.chainDecimals,
+        icon: this.chainToken,
         assetType: 'Token',
         existentialDeposit: defaultAssetEd.toString(),
-      } as AssetDetail;
+      } as AssetMetadata;
     }
 
-    const asset = await this.api.query.assetRegistry.assets(tokenKey);
-    const { name, assetType, existentialDeposit } = asset.unwrap();
+    const { name, assetType, existentialDeposit } = details;
+    const { symbol, decimals } = metadata.get(tokenKey)!;
 
     return {
+      id: tokenKey,
       name: name.toHuman(),
+      symbol: symbol.toHuman(),
+      decimals: decimals.toNumber(),
+      icon: symbol.toHuman(),
       assetType: assetType.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
-    } as AssetDetail;
+    } as AssetMetadata;
   }
 
-  private async getBondDetail(tokenKey: string, underlyingTokenKey: string, maturity: number): Promise<AssetDetail> {
-    const { assetType, existentialDeposit } = await this.getTokenDetail(tokenKey);
-    const { icon } = await this.getBondMetadata(tokenKey, underlyingTokenKey);
-
-    const bondMaturity = new Intl.DateTimeFormat('en-GB');
-    const bondName = [icon, 'Bond', bondMaturity.format(maturity)].join(' ');
-
+  private getBondMetadata(
+    tokenKey: string,
+    details: PalletAssetRegistryAssetDetails,
+    metadata: Map<string, PalletAssetRegistryAssetMetadata>,
+    bond: ITuple<[u32, u64]>
+  ): AssetMetadata {
+    const [underlyingAsset, maturity] = bond;
+    const { assetType, existentialDeposit } = details;
+    const { symbol, decimals } = this.getTokenMetadata(
+      underlyingAsset.toString(),
+      details,
+      metadata
+    );
+    const bondMaturity = maturity.toNumber();
+    const bondFormatter = new Intl.DateTimeFormat('en-GB');
+    const bondName = [symbol, 'Bond', bondFormatter.format(bondMaturity)].join(
+      ' '
+    );
     return {
+      id: tokenKey,
       name: bondName,
-      assetType: assetType,
-      existentialDeposit: existentialDeposit,
-    } as AssetDetail;
+      symbol: symbol + 'b',
+      decimals: decimals,
+      icon: symbol,
+      assetType: assetType.toString(),
+      existentialDeposit: existentialDeposit.toString(),
+    } as AssetMetadata;
   }
 
-  private async getShareDetail(tokenKey: string, tokens: string[]): Promise<AssetDetail> {
-    const { assetType, existentialDeposit } = await this.getTokenDetail(tokenKey);
-    const metadata = await Promise.all(tokens.map(async (token: string) => this.getTokenMetadata(token)));
-    const symbols = metadata.map((m) => m.symbol);
-    const shareName = symbols.join(', ');
-
+  private getShareMetadata(
+    tokenKey: string,
+    details: PalletAssetRegistryAssetDetails,
+    metadata: Map<string, PalletAssetRegistryAssetMetadata>,
+    share: PalletStableswapPoolInfo
+  ): AssetMetadata {
+    const { assets } = share;
+    const { name, assetType, existentialDeposit } = details;
+    const poolTokens = assets.map((asset) => asset.toString());
+    const poolEntries = poolTokens.map((token: string) => {
+      const { symbol } = this.getTokenMetadata(token, details, metadata);
+      return [token, symbol];
+    });
+    const meta = Object.fromEntries(poolEntries);
+    const symbols = Object.values(meta);
     return {
-      name: shareName,
-      assetType: assetType,
-      existentialDeposit: existentialDeposit,
-    } as AssetDetail;
+      id: tokenKey,
+      name: symbols.join(', '),
+      symbol: name.length > 0 ? name.toHuman() : tokenKey,
+      decimals: 18,
+      icon: symbols.join('/'),
+      assetType: assetType.toString(),
+      existentialDeposit: existentialDeposit.toString(),
+      meta: meta,
+    } as AssetMetadata;
   }
 
-  async getAssetDetail(tokenKey: string): Promise<AssetDetail> {
-    const maybe = await Promise.all([
-      this.tryBonds(tokenKey, this.getBondDetail.bind(this)),
-      this.tryShares(tokenKey, this.getShareDetail.bind(this)),
+  async getOnChainMetadata(): Promise<AssetMetadata[]> {
+    const [asset, assetMetadata, shares, bonds] = await Promise.all([
+      this.api.query.assetRegistry.assets.entries(),
+      this.metadataQuery(),
+      this.safeSharesQuery(),
+      this.safeBondsQuery(),
     ]);
-    return maybe.find((e) => e!!) || this.getTokenDetail(tokenKey);
+
+    return asset
+      .filter(([_args, state]) => this.isSupportedType(state.unwrap()))
+      .map(
+        ([
+          {
+            args: [id],
+          },
+          value,
+        ]) => {
+          const details: PalletAssetRegistryAssetDetails = value.unwrap();
+          const { assetType } = details;
+          switch (assetType.toString()) {
+            case 'Bond':
+              const bond = bonds.get(id.toString());
+              return this.getBondMetadata(
+                id.toString(),
+                details,
+                assetMetadata,
+                bond!
+              );
+            case 'StableSwap':
+              const share = shares.get(id.toString());
+              return this.getShareMetadata(
+                id.toString(),
+                details,
+                assetMetadata,
+                share!
+              );
+            default:
+              return this.getTokenMetadata(
+                id.toString(),
+                details,
+                assetMetadata
+              );
+          }
+        }
+      );
+  }
+
+  private isSupportedType(details: PalletAssetRegistryAssetDetails) {
+    return this.SUPPORTED_TYPES.includes(details.assetType.toString());
   }
 }
