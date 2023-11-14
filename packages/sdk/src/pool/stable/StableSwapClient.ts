@@ -10,6 +10,7 @@ import {
   PoolFees,
   PoolToken,
 } from '../../types';
+import { toPoolFee } from '../../utils/mapper';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
@@ -47,7 +48,7 @@ export class StableSwapClient extends PoolClient {
           address: poolAddress,
           id: poolId,
           type: PoolType.Stable,
-          fee: pool.fee.toJSON() as PoolFee,
+          fee: toPoolFee(pool.fee.toNumber()),
           tokens: poolTokens,
           ...poolDelta,
           ...this.getPoolLimits(),
