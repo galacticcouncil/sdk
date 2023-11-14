@@ -26,14 +26,29 @@ export abstract class PoolClient extends BalanceClient {
     }
     console.time(`Load ${this.getPoolType()}`);
     this.pools = await this.loadPools();
-    const subscriptions = this.pools.map(
-      async (pool) => await this.getPoolSubscriptions(pool)
-    );
-    const subs = await Promise.all(subscriptions);
-    this.subs = subs.flat();
+    this.subs = await this.subscribe();
     this.poolsLoaded = true;
     console.timeEnd(`Load ${this.getPoolType()}`);
     return this.pools;
+  }
+
+  async subscribe() {
+    const subs = this.pools.map(async (pool: PoolBase) => {
+      const poolSubs = [
+        await this.subscribePoolChange(pool),
+        await this.tokenSubs(pool),
+        await this.systemSubs(pool),
+      ];
+
+      if (this.hasShareAsset(pool)) {
+        const sub = await this.shareSubs(pool);
+        poolSubs.push(sub);
+      }
+      return poolSubs;
+    });
+
+    const subsriptions = await Promise.all(subs);
+    return subsriptions.flat();
   }
 
   unsubscribe() {
@@ -42,32 +57,31 @@ export abstract class PoolClient extends BalanceClient {
     });
   }
 
-  private async getPoolSubscriptions(pool: PoolBase) {
-    const subs = [
-      await this.subscribePoolChange(pool),
-      await this.subscribeTokenBalance(
-        pool.address,
-        pool.tokens.map((t) => t.id),
-        this.updateBalanceCallback(pool, 'token', (p, t) => p.id !== t)
-      ),
-      await this.subscribeSystemBalance(
-        pool.address,
-        this.updateBalanceCallback(pool, 'system', () => true)
-      ),
-    ];
+  private hasShareAsset(pool: PoolBase) {
+    return pool.type === PoolType.Stable && pool.id;
+  }
 
-    // Shared asset balance
-    if (pool.type === PoolType.Stable && pool.id) {
-      subs.push(
-        await this.subscribeTokenBalance(
-          HYDRADX_OMNIPOOL_ADDRESS,
-          [pool.id],
-          this.updateBalanceCallback(pool, 'share', () => true)
-        )
-      );
-    }
+  private tokenSubs(pool: PoolBase): UnsubscribePromise {
+    return this.subscribeTokenBalance(
+      pool.address,
+      pool.tokens.map((t) => t.id),
+      this.updateBalanceCallback(pool, 'token', (p, t) => p.id !== t)
+    );
+  }
 
-    return subs;
+  private shareSubs(pool: PoolBase): UnsubscribePromise {
+    return this.subscribeTokenBalance(
+      HYDRADX_OMNIPOOL_ADDRESS,
+      [pool.id!],
+      this.updateBalanceCallback(pool, 'share', () => true)
+    );
+  }
+
+  private systemSubs(pool: PoolBase): UnsubscribePromise {
+    return this.subscribeSystemBalance(
+      pool.address,
+      this.updateBalanceCallback(pool, 'system', () => true)
+    );
   }
 
   private updateBalanceCallback(
