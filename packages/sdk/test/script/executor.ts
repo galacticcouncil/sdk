@@ -38,6 +38,7 @@ export abstract class PolkadotExecutor {
           console.log('API ready');
           console.log('Running script...');
           console.log(this.desc);
+          console.time('Execution time:');
           this.script(api)
             .then((output: any) => {
               if (this.pretty) {
@@ -48,7 +49,10 @@ export abstract class PolkadotExecutor {
               return null;
             })
             .catch((e) => console.log(e))
-            .finally(() => api.disconnect());
+            .finally(() => {
+              console.timeEnd('Execution time:');
+              api.disconnect();
+            });
         });
     } catch (error) {
       console.log(error);
