@@ -32,14 +32,16 @@ export class LbpPoolClient extends PoolClient {
           state,
         ]) => {
           const poolData: PalletLbpPool = state.unwrap();
+          const poolAddress = id.toString();
           const poolDelta = await this.getPoolDelta(
+            poolAddress,
             poolData,
             relayParentNumber.toString()
           );
 
           this.poolsData.set(id.toString(), poolData);
           return {
-            address: id.toString(),
+            address: poolAddress,
             type: PoolType.LBP,
             fee: poolData.fee.toJSON() as PoolFee,
             ...poolDelta,
@@ -64,7 +66,7 @@ export class LbpPoolClient extends PoolClient {
     return PoolType.LBP;
   }
 
-  async subscribe(pool: PoolBase): UnsubscribePromise {
+  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
     return this.api.query.parachainSystem.validationData(
       async (validationData) => {
         const { relayParentNumber } = validationData.unwrap();
@@ -73,13 +75,15 @@ export class LbpPoolClient extends PoolClient {
 
         if (isActive) {
           const poolDelta = await this.getPoolDelta(
+            pool.address,
             poolData!,
             relayParentNumber.toString()
           );
+
           pool = {
             ...pool,
             ...poolDelta,
-          };
+          } as LbpPoolBase;
         } else {
           const inactivePoolIndex = this.pools.findIndex(
             (p) => p.address == pool.address
@@ -91,9 +95,10 @@ export class LbpPoolClient extends PoolClient {
   }
 
   private async getPoolDelta(
+    poolAddress: string,
     poolEntry: PalletLbpPool,
     relayBlockNumber: string
-  ): Promise<Partial<PoolBase>> {
+  ): Promise<Partial<LbpPoolBase>> {
     const {
       start,
       end,
@@ -120,25 +125,32 @@ export class LbpPoolClient extends PoolClient {
       bnum(accumulatedWeight)
     );
 
-    const isRepayFeeApplied = await this.isRepayFeeApplied(
-      accumulatedAsset,
-      repayTarget.toString(),
-      feeCollector.toString()
-    );
+    const [repayFeeApplied, accumulatedBalance, distributedBalance] =
+      await Promise.all([
+        this.isRepayFeeApplied(
+          accumulatedAsset,
+          repayTarget.toString(),
+          feeCollector.toString()
+        ),
+        this.getBalance(poolAddress, accumulatedAsset),
+        this.getBalance(poolAddress, distributedAsset),
+      ]);
 
     return {
-      repayFeeApply: isRepayFeeApplied,
+      repayFeeApply: repayFeeApplied,
       tokens: [
         {
           id: accumulatedAsset,
           weight: accumulatedWeight,
+          balance: accumulatedBalance.toString(),
         } as WeightedPoolToken,
         {
           id: distributedAsset,
           weight: distributedWeight,
+          balance: distributedBalance.toString(),
         } as WeightedPoolToken,
       ],
-    } as Partial<PoolBase>;
+    } as Partial<LbpPoolBase>;
   }
 
   private isActivePool(

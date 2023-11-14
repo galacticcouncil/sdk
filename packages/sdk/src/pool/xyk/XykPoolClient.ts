@@ -24,17 +24,24 @@ export class XykPoolClient extends PoolClient {
         },
         state,
       ]) => {
+        const poolAddress = id.toString();
         const [assetA, assetB]: ITuple<[u32, u32]> = state.unwrap();
+        const [assetABalance, assetBBalance] = await Promise.all([
+          this.getBalance(poolAddress, assetA.toString()),
+          this.getBalance(poolAddress, assetB.toString()),
+        ]);
 
         return {
-          address: id.toString(),
+          address: poolAddress,
           type: PoolType.XYK,
           tokens: [
             {
               id: assetA.toString(),
+              balance: assetABalance.toString(),
             } as PoolToken,
             {
               id: assetB.toString(),
+              balance: assetBBalance.toString(),
             } as PoolToken,
           ],
           ...this.getPoolLimits(),
@@ -54,9 +61,8 @@ export class XykPoolClient extends PoolClient {
     return PoolType.XYK;
   }
 
-  protected subscribe(pool: PoolBase): UnsubscribePromise {
-    const assetsArgs = pool.tokens.map((t) => t.id);
-    return this.api.query.xyk.poolAssets.multi(assetsArgs, (_states) => {
+  protected subscribePoolChange(pool: PoolBase): UnsubscribePromise {
+    return this.api.query.xyk.poolAssets(pool.address, (_states) => {
       //do nothing
     });
   }
