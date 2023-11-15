@@ -1,7 +1,23 @@
 import { BalanceBuilder, ExtrinsicBuilder, FeeBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
 
-import { astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from '../assets';
+import {
+  astr,
+  bnc,
+  cfg,
+  daiAcala,
+  daiMoonbeam,
+  dot,
+  glmr,
+  hdx,
+  ibtc,
+  usdt,
+  wbtcAcala,
+  wbtcMoonbeam,
+  wethAcala,
+  wethMoonbeam,
+  ztg,
+} from '../assets';
 import { acala, assetHub, astar, bifrost, centrifuge, hydraDX, interlay, moonbeam, zeitgeist } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
@@ -13,6 +29,28 @@ const toAcala: AssetConfig[] = [
     destinationFee: {
       amount: 0.00092696,
       asset: daiAcala,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+  }),
+  new AssetConfig({
+    asset: wbtcAcala,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acala,
+    destinationFee: {
+      amount: 0.00000004,
+      asset: wbtcAcala,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+  }),
+  new AssetConfig({
+    asset: wethAcala,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acala,
+    destinationFee: {
+      amount: 0.000000687004,
+      asset: wethAcala,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
@@ -128,7 +166,7 @@ const toMoonbeam: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: wbtc,
+    asset: wbtcMoonbeam,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
@@ -143,7 +181,7 @@ const toMoonbeam: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: weth,
+    asset: wethMoonbeam,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {

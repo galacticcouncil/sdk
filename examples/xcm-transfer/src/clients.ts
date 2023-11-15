@@ -1,5 +1,4 @@
-import { createWalletClient, createPublicClient, custom, http, webSocket, defineChain } from 'viem';
-import { moonbeam } from 'viem/chains';
+import { createWalletClient, createPublicClient, webSocket, defineChain } from 'viem';
 
 const transport = webSocket('wss://eth-rpc-acala.aca-api.network/ws');
 
@@ -31,7 +30,6 @@ export const publicClient = createPublicClient({
 });
 
 export const walletClient = createWalletClient({
-  //account: '0x616dfd307fd95942a74212c904942d3c9d3f219e',
   chain: acala,
   transport,
 });

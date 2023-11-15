@@ -1,21 +1,36 @@
 import { Asset } from '@moonbeam-network/xcm-types';
-import { aca, astr, cfg, bnc, dot, glmr, hdx, ibtc, usdt, wbtc, weth } from '@moonbeam-network/xcm-config';
+import { aca, astr, bnc, cfg, dai, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from '@moonbeam-network/xcm-config';
 
-export { aca, astr, cfg, bnc, dot, glmr, hdx, ibtc, usdt, wbtc, weth };
+export { aca, astr, bnc, cfg, dot, glmr, hdx, ibtc, usdt, ztg };
 
 export const daiAcala = new Asset({
+  ...dai,
   key: 'dai-acala',
-  originSymbol: 'DAI',
 });
 
 export const daiMoonbeam = new Asset({
+  ...dai,
   key: 'dai-moonbeam',
-  originSymbol: 'DAI',
 });
 
-export const ztg = new Asset({
-  key: 'ztg',
-  originSymbol: 'ZTG',
+export const wethAcala = new Asset({
+  ...weth,
+  key: 'weth-acala',
+});
+
+export const wethMoonbeam = new Asset({
+  ...weth,
+  key: 'weth-moonbeam',
+});
+
+export const wbtcAcala = new Asset({
+  ...wbtc,
+  key: 'wbtc-acala',
+});
+
+export const wbtcMoonbeam = new Asset({
+  ...wbtc,
+  key: 'wbtc-moonbeam',
 });
 
 export const assets: Asset[] = [
@@ -30,8 +45,10 @@ export const assets: Asset[] = [
   hdx,
   ibtc,
   usdt,
-  wbtc,
-  weth,
+  wbtcAcala,
+  wbtcMoonbeam,
+  wethAcala,
+  wethMoonbeam,
   ztg,
 ];
 

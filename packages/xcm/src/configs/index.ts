@@ -24,6 +24,4 @@ export const chainsConfig: ChainConfig[] = [
   zeitgeistConfig,
 ];
 
-export const chainsConfigMap = new Map<string, ChainConfig>(
-  chainsConfig.map((config) => [config.chain.key, config]),
-);
+export const chainsConfigMap = new Map<string, ChainConfig>(chainsConfig.map((config) => [config.chain.key, config]));

@@ -1,7 +1,7 @@
 import { BalanceBuilder, ContractBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { daiMoonbeam, glmr, hdx, wbtc, weth } from '../assets';
+import { daiMoonbeam, glmr, hdx, wbtcMoonbeam, wethMoonbeam } from '../assets';
 import { hydraDX, moonbeam } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
@@ -36,13 +36,13 @@ const toHydraDX: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: wbtc,
+    asset: wbtcMoonbeam,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.0000001,
-      asset: wbtc,
+      asset: wbtcMoonbeam,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -51,13 +51,13 @@ const toHydraDX: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: weth,
+    asset: wethMoonbeam,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.000002,
-      asset: weth,
+      asset: wethMoonbeam,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {

@@ -1,5 +1,6 @@
 import { AnyChain, Ecosystem, EvmParachain, Parachain } from '@moonbeam-network/xcm-types';
 import {
+  acala as defaultAcala,
   astar as defaultAstar,
   bifrostPolkadot as defaultBifrostPolkadot,
   centrifuge as defaultCentrifuge,
@@ -8,11 +9,30 @@ import {
   moonbeam as defaultMoonbeam,
   polkadot,
   polkadotAssetHub as defaultPolkadotAssetHub,
+  zeitgeist as defaultZeitgeist,
 } from '@moonbeam-network/xcm-config';
 
-import { aca, astr, bnc, cfg, daiAcala, daiMoonbeam, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from './assets';
+import {
+  aca,
+  astr,
+  bnc,
+  cfg,
+  daiAcala,
+  daiMoonbeam,
+  dot,
+  glmr,
+  hdx,
+  ibtc,
+  usdt,
+  wbtcAcala,
+  wbtcMoonbeam,
+  wethAcala,
+  wethMoonbeam,
+  ztg,
+} from './assets';
 
-export const acala = new EvmParachain({
+export const acala = new Parachain({
+  ...defaultAcala,
   assetsData: [
     {
       asset: aca,
@@ -24,16 +44,17 @@ export const acala = new EvmParachain({
       balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
       id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
     },
+    {
+      asset: wbtcAcala,
+      balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
+      id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
+    },
+    {
+      asset: wethAcala,
+      balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
+      id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
+    },
   ],
-  ecosystem: Ecosystem.Polkadot,
-  genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
-  id: 2000,
-  key: 'acala',
-  name: 'Acala',
-  parachainId: 2000,
-  ss58Format: 10,
-  ws: 'wss://acala-rpc-0.aca-api.network',
-  rpc: 'wss://eth-rpc-acala.aca-api.network/ws',
 });
 
 export const assetHub = new Parachain({
@@ -129,11 +150,19 @@ export const hydraDX = new Parachain({
       palletInstance: 50,
     },
     {
-      asset: wbtc,
+      asset: wbtcAcala,
+      id: 3,
+    },
+    {
+      asset: wbtcMoonbeam,
       id: 19,
     },
     {
-      asset: weth,
+      asset: wethAcala,
+      id: 4,
+    },
+    {
+      asset: wethMoonbeam,
       id: 20,
     },
     {
@@ -173,12 +202,12 @@ export const moonbeam = new EvmParachain({
       id: '69606720909260275826784788104880799692',
     },
     {
-      asset: wbtc,
+      asset: wbtcMoonbeam,
       id: '0xE57eBd2d67B462E9926e04a8e33f01cD0D64346D',
       metadataId: 0,
     },
     {
-      asset: weth,
+      asset: wethMoonbeam,
       id: '0xab3f0245B83feB11d15AAffeFD7AD465a59817eD',
       metadataId: 0,
     },
@@ -186,19 +215,13 @@ export const moonbeam = new EvmParachain({
 });
 
 export const zeitgeist = new Parachain({
+  ...defaultZeitgeist,
   assetsData: [
     {
       asset: ztg,
       id: 'Ztg',
     },
   ],
-  ecosystem: Ecosystem.Polkadot,
-  genesisHash: '',
-  key: 'zeitgeist',
-  name: 'Zeitgeist',
-  parachainId: 2092,
-  ss58Format: 73,
-  ws: 'wss://zeitgeist.api.onfinality.io/public-ws',
 });
 
 export const chains: AnyChain[] = [
