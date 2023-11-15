@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cross-chain polkadot & kusama configuration",
   "author": "GalacticCouncil",
   "repository": {
