@@ -11,7 +11,7 @@
     "esbuild": "^0.17.11"
   },
   "dependencies": {
-    "@galacticcouncil/xcm": "^0.0.2",
+    "@galacticcouncil/xcm": "^0.0.3",
     "@moonbeam-network/xcm-sdk": "^1.4.9",
     "@talismn/connect-wallets": "^1.2.1",
     "viem": "^1.19.1"
