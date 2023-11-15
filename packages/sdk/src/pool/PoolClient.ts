@@ -65,7 +65,7 @@ export abstract class PoolClient extends BalanceClient {
     return this.subscribeTokenBalance(
       pool.address,
       pool.tokens.map((t) => t.id),
-      this.updateBalanceCallback(pool, 'token', (p, t) => p.id !== t)
+      this.updateBalanceCallback(pool, 'tokens', (p, t) => p.id !== t)
     );
   }
 
