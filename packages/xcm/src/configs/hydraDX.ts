@@ -5,17 +5,17 @@ import {
   astr,
   bnc,
   cfg,
-  daiAcala,
-  daiMoonbeam,
+  dai_awh,
+  dai_mwh,
   dot,
   glmr,
   hdx,
   ibtc,
   usdt,
-  wbtcAcala,
-  wbtcMoonbeam,
-  wethAcala,
-  wethMoonbeam,
+  wbtc_awh,
+  wbtc_mwh,
+  weth_awh,
+  weth_mwh,
   ztg,
 } from '../assets';
 import { acala, assetHub, astar, bifrost, centrifuge, hydraDX, interlay, moonbeam, zeitgeist } from '../chains';
@@ -23,34 +23,34 @@ import { ExtrinsicBuilderV3 } from '../builders';
 
 const toAcala: AssetConfig[] = [
   new AssetConfig({
-    asset: daiAcala,
+    asset: dai_awh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: acala,
     destinationFee: {
       amount: 0.00092696,
-      asset: daiAcala,
+      asset: dai_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
   }),
   new AssetConfig({
-    asset: wbtcAcala,
+    asset: wbtc_awh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: acala,
     destinationFee: {
       amount: 0.00000004,
-      asset: wbtcAcala,
+      asset: wbtc_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
   }),
   new AssetConfig({
-    asset: wethAcala,
+    asset: weth_awh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: acala,
     destinationFee: {
       amount: 0.000000687004,
-      asset: wethAcala,
+      asset: weth_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
@@ -151,7 +151,7 @@ const toMoonbeam: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetConfig({
-    asset: daiMoonbeam,
+    asset: dai_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
@@ -166,7 +166,7 @@ const toMoonbeam: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: wbtcMoonbeam,
+    asset: wbtc_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
@@ -181,7 +181,7 @@ const toMoonbeam: AssetConfig[] = [
     },
   }),
   new AssetConfig({
-    asset: wethMoonbeam,
+    asset: weth_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {

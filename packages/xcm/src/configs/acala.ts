@@ -1,7 +1,7 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { daiAcala, wbtcAcala, wethAcala } from '../assets';
+import { dai_awh, wbtc_awh, weth_awh } from '../assets';
 import { hydraDX, acala } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
@@ -12,36 +12,36 @@ const toEvmAddress = async (api: any, address: string) => {
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
-    asset: daiAcala,
+    asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.002926334210356268,
-      asset: daiAcala,
+      asset: dai_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
     //toEvmAddress,
   }),
   new AssetConfig({
-    asset: wbtcAcala,
+    asset: wbtc_awh,
     balance: BalanceBuilder().evm().erc20(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.00000006,
-      asset: wbtcAcala,
+      asset: wbtc_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
     //toEvmAddress,
   }),
   new AssetConfig({
-    asset: wethAcala,
+    asset: weth_awh,
     balance: BalanceBuilder().evm().erc20(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.000000956965470918,
-      asset: wethAcala,
+      asset: weth_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),

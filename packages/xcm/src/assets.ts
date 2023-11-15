@@ -3,34 +3,34 @@ import { aca, astr, bnc, cfg, dai, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg }
 
 export { aca, astr, bnc, cfg, dot, glmr, hdx, ibtc, usdt, ztg };
 
-export const daiAcala = new Asset({
+export const dai_awh = new Asset({
   ...dai,
-  key: 'dai-acala',
+  key: 'dai_awh',
 });
 
-export const daiMoonbeam = new Asset({
+export const dai_mwh = new Asset({
   ...dai,
-  key: 'dai-moonbeam',
+  key: 'dai_mwh',
 });
 
-export const wethAcala = new Asset({
+export const weth_awh = new Asset({
   ...weth,
-  key: 'weth-acala',
+  key: 'weth_awh',
 });
 
-export const wethMoonbeam = new Asset({
+export const weth_mwh = new Asset({
   ...weth,
-  key: 'weth-moonbeam',
+  key: 'weth_mwh',
 });
 
-export const wbtcAcala = new Asset({
+export const wbtc_awh = new Asset({
   ...wbtc,
-  key: 'wbtc-acala',
+  key: 'wbtc_awh',
 });
 
-export const wbtcMoonbeam = new Asset({
+export const wbtc_mwh = new Asset({
   ...wbtc,
-  key: 'wbtc-moonbeam',
+  key: 'wbtc_mwh',
 });
 
 export const assets: Asset[] = [
@@ -38,17 +38,17 @@ export const assets: Asset[] = [
   astr,
   cfg,
   bnc,
-  daiAcala,
-  daiMoonbeam,
+  dai_awh,
+  dai_mwh,
   dot,
   glmr,
   hdx,
   ibtc,
   usdt,
-  wbtcAcala,
-  wbtcMoonbeam,
-  wethAcala,
-  wethMoonbeam,
+  wbtc_awh,
+  wbtc_mwh,
+  weth_awh,
+  weth_mwh,
   ztg,
 ];
 
