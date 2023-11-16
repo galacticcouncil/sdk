@@ -96,13 +96,7 @@ export class Router {
   protected async getAssets(
     pools: PoolBase[]
   ): Promise<Map<string, PoolToken>> {
-    const assets = pools
-      .map((pool: PoolBase) => {
-        return pool.tokens.map(({ id, symbol, icon, meta }) => {
-          return { id, symbol, icon, meta } as PoolToken;
-        });
-      })
-      .flat();
+    const assets = pools.map((pool: PoolBase) => pool.tokens).flat();
     return new Map(assets.map((asset) => [asset.id, asset]));
   }
 
@@ -226,14 +220,6 @@ export class Router {
     tokens: string[],
     assets: Map<string, PoolToken>
   ): PoolToken[] {
-    return tokens.map((token) => {
-      const asset = assets.get(token);
-      return {
-        id: token,
-        symbol: asset?.symbol,
-        icon: asset?.icon,
-        meta: asset?.meta,
-      } as PoolToken;
-    });
+    return tokens.map((token) => assets.get(token)!);
   }
 }
