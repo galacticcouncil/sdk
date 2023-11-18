@@ -72,10 +72,10 @@ export class BalanceClient extends PolkadotApiClient {
       .filter((t) => t !== SYSTEM_ASSET_ID)
       .map((t) => [address, t]);
     return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
-      balances.forEach(({ free, reserved, frozen }, i) => {
+      balances.forEach(({ free, frozen }, i) => {
         const freeBalance = this.calculateFreeBalance(
           free.toString(),
-          reserved.toString(),
+          ZERO.toFixed(),
           frozen.toString()
         );
         const token = tokenAccArgs[i][1];
