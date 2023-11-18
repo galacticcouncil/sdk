@@ -44,10 +44,8 @@ export class PoolService implements IPoolService {
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
     if (!this.metadataLoaded) {
-      console.time('Load metadata');
       this.metadata = await this.assetClient.getOnChainMetadata();
       this.metadataLoaded = true;
-      console.timeEnd('Load metadata');
     }
 
     if (includeOnly.length == 0) {
