@@ -49,9 +49,36 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAllAssets();
     expect(result).toStrictEqual([
-      { icon: 'BSX', id: '0', symbol: 'BSX', meta: undefined },
-      { icon: 'AUSD', id: '2', symbol: 'AUSD', meta: undefined },
-      { icon: 'KSM', id: '1', symbol: 'KSM', meta: undefined },
+      {
+        id: '0',
+        decimals: 12,
+        symbol: 'BSX',
+        icon: 'BSX',
+        name: 'BSX',
+        type: 'Token',
+        existentialDeposit: '1000',
+        meta: undefined,
+      },
+      {
+        id: '2',
+        decimals: 12,
+        symbol: 'AUSD',
+        icon: 'AUSD',
+        name: 'Acala Dollar',
+        type: 'Token',
+        existentialDeposit: '1000',
+        meta: undefined,
+      },
+      {
+        id: '1',
+        decimals: 12,
+        symbol: 'KSM',
+        icon: 'KSM',
+        name: 'Kusama',
+        type: 'Token',
+        existentialDeposit: '1000',
+        meta: undefined,
+      },
     ]);
   });
 
@@ -60,8 +87,26 @@ describe('Router with mocked XYK pool service', () => {
     expect(router).toBeDefined();
     const result = await router.getAssetPairs('1');
     expect(result).toStrictEqual([
-      { icon: 'AUSD', id: '2', symbol: 'AUSD', meta: undefined },
-      { icon: 'BSX', id: '0', symbol: 'BSX', meta: undefined },
+      {
+        id: '2',
+        decimals: 12,
+        symbol: 'AUSD',
+        icon: 'AUSD',
+        name: 'Acala Dollar',
+        type: 'Token',
+        existentialDeposit: '1000',
+        meta: undefined,
+      },
+      {
+        id: '0',
+        decimals: 12,
+        symbol: 'BSX',
+        icon: 'BSX',
+        name: 'BSX',
+        type: 'Token',
+        existentialDeposit: '1000',
+        meta: undefined,
+      },
     ]);
   });
 

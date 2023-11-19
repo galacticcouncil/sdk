@@ -5,7 +5,7 @@ import type {
 } from '@polkadot/types/lookup';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { AssetMetadata } from '../types';
+import { Asset } from '../types';
 
 import { PolkadotApiClient } from './PolkadotApi';
 import { ITuple } from '@polkadot/types-codec/types';
@@ -83,7 +83,7 @@ export class AssetClient extends PolkadotApiClient {
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>
-  ): AssetMetadata {
+  ): Asset {
     if (tokenKey == SYSTEM_ASSET_ID) {
       const defaultAssetEd = this.api.consts.balances.existentialDeposit;
       return {
@@ -92,9 +92,9 @@ export class AssetClient extends PolkadotApiClient {
         symbol: this.chainToken,
         decimals: this.chainDecimals,
         icon: this.chainToken,
-        assetType: 'Token',
+        type: 'Token',
         existentialDeposit: defaultAssetEd.toString(),
-      } as AssetMetadata;
+      } as Asset;
     }
 
     const { name, assetType, existentialDeposit } = details;
@@ -106,9 +106,9 @@ export class AssetClient extends PolkadotApiClient {
       symbol: symbol.toHuman(),
       decimals: decimals.toNumber(),
       icon: symbol.toHuman(),
-      assetType: assetType.toHuman(),
+      type: assetType.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
-    } as AssetMetadata;
+    } as Asset;
   }
 
   private getBondMetadata(
@@ -116,7 +116,7 @@ export class AssetClient extends PolkadotApiClient {
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>,
     bond: ITuple<[u32, u64]>
-  ): AssetMetadata {
+  ): Asset {
     const [underlyingAsset, maturity] = bond;
     const { assetType, existentialDeposit } = details;
     const { symbol, decimals } = this.getTokenMetadata(
@@ -135,9 +135,9 @@ export class AssetClient extends PolkadotApiClient {
       symbol: symbol + 'b',
       decimals: decimals,
       icon: symbol,
-      assetType: assetType.toString(),
+      type: assetType.toString(),
       existentialDeposit: existentialDeposit.toString(),
-    } as AssetMetadata;
+    } as Asset;
   }
 
   private getShareMetadata(
@@ -145,7 +145,7 @@ export class AssetClient extends PolkadotApiClient {
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>,
     share: PalletStableswapPoolInfo
-  ): AssetMetadata {
+  ): Asset {
     const { assets } = share;
     const { name, assetType, existentialDeposit } = details;
     const poolTokens = assets.map((asset) => asset.toString());
@@ -161,13 +161,13 @@ export class AssetClient extends PolkadotApiClient {
       symbol: name.length > 0 ? name.toHuman() : tokenKey,
       decimals: 18,
       icon: symbols.join('/'),
-      assetType: assetType.toString(),
+      type: assetType.toString(),
       existentialDeposit: existentialDeposit.toString(),
       meta: meta,
-    } as AssetMetadata;
+    } as Asset;
   }
 
-  async getOnChainMetadata(): Promise<AssetMetadata[]> {
+  async getOnChainMetadata(): Promise<Asset[]> {
     const [asset, assetMetadata, shares, bonds] = await Promise.all([
       this.api.query.assetRegistry.assets.entries(),
       this.metadataQuery(),

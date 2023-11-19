@@ -14,7 +14,7 @@ import {
   Transaction,
   PoolFees,
   Pool,
-  AssetMetadata,
+  Asset,
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
@@ -30,7 +30,7 @@ export class PoolService implements IPoolService {
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
 
-  protected metadata: AssetMetadata[] = [];
+  protected metadata: Asset[] = [];
   protected metadataLoaded = false;
 
   constructor(api: ApiPromise) {
@@ -90,7 +90,7 @@ export class PoolService implements IPoolService {
   }
 
   private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
-    const metaMap: Map<string, AssetMetadata> = new Map(
+    const metaMap: Map<string, Asset> = new Map(
       this.metadata.map((m) => [m.id, m])
     );
 

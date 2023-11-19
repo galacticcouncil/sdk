@@ -1,11 +1,4 @@
-import {
-  IPoolService,
-  PoolBase,
-  Hop,
-  Pool,
-  PoolToken,
-  PoolType,
-} from '../types';
+import { Asset, IPoolService, PoolBase, Hop, Pool, PoolType } from '../types';
 import { RouteSuggester } from '../route';
 import { Edge } from '../route';
 import { PoolFactory } from '../pool';
@@ -49,9 +42,9 @@ export class Router {
   /**
    * Return list of all available assets from substrate based pools
    *
-   * @returns {PoolToken[]} List of all available assets
+   * @returns {Asset[]} List of all available assets
    */
-  async getAllAssets(): Promise<PoolToken[]> {
+  async getAllAssets(): Promise<Asset[]> {
     const pools = await this.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const asset = await this.getAssets(pools);
@@ -62,15 +55,15 @@ export class Router {
    * Calculate and return list of all assets, given token can be trade with
    *
    * @param {string} asset - Storage key of asset
-   * @returns {PoolAsset[]} List of all available assets, given token can be trade with
+   * @returns {Asset[]} List of all available assets, given token can be trade with
    */
-  async getAssetPairs(asset: string): Promise<PoolToken[]> {
+  async getAssetPairs(asset: string): Promise<Asset[]> {
     const pools = await this.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { assets, poolsMap } = await this.validateToken(asset, pools);
     const hops = this.getPaths(asset, null, poolsMap, pools);
     const dest = hops.map((hop) => hop[hop.length - 1].assetOut);
-    return this.toPoolAssets([...new Set(dest)], assets);
+    return this.toAssets([...new Set(dest)], assets);
   }
 
   /**
@@ -93,13 +86,25 @@ export class Router {
    * @param pools - pools
    * @returns Map of all available assets
    */
-  protected async getAssets(
-    pools: PoolBase[]
-  ): Promise<Map<string, PoolToken>> {
-    const assets = pools.map((pool: PoolBase) => pool.tokens).flat();
+  protected async getAssets(pools: PoolBase[]): Promise<Map<string, Asset>> {
+    const assets = pools
+      .map((pool: PoolBase) =>
+        pool.tokens.map((t) => {
+          return {
+            id: t.id,
+            name: t.name,
+            symbol: t.symbol,
+            decimals: t.decimals,
+            icon: t.icon,
+            type: t.type,
+            existentialDeposit: t.existentialDeposit,
+            meta: t.meta,
+          } as Asset;
+        })
+      )
+      .flat();
     return new Map(assets.map((asset) => [asset.id, asset]));
   }
-
   /**
    * Calculate and return all possible paths for best swap assetIn>assetOut
    *
@@ -216,10 +221,7 @@ export class Router {
     });
   }
 
-  private toPoolAssets(
-    tokens: string[],
-    assets: Map<string, PoolToken>
-  ): PoolToken[] {
+  private toAssets(tokens: string[], assets: Map<string, Asset>): Asset[] {
     return tokens.map((token) => assets.get(token)!);
   }
 }

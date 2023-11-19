@@ -32,8 +32,8 @@ Off-chain routing, build to find the most suitable routes across the pools. Buil
 
 ```typescript
 getPools(): PoolBase[]
-getAllAssets(): PoolAsset[]
-getAssetPairs(token: string): PoolAsset[]
+getAllAssets(): Asset[]
+getAssetPairs(token: string): Asset[]
 getAllPaths(tokenIn: string, tokenOut: string): Hop[][]
 ```
 
@@ -64,7 +64,9 @@ const api = await ApiPromise.create({ provider: wsProvider });
 
 // Initialize Trade Router
 const poolService = new PoolService(api);
-const tradeRouter = new TradeRouter(poolService, { includeOnly: [PoolType.XYK] });
+const tradeRouter = new TradeRouter(poolService, {
+  includeOnly: [PoolType.XYK],
+});
 
 // Do something
 const result = await tradeRouter.getAllAssets();
@@ -98,9 +100,9 @@ Component list and current status ⬇️
 | Omni        | Math |  🧪 |
 | Omni        | Pool |  🧪 |
 | LBP         | Math |  🧪 |
-| LBP         | Pool |   🛠 |
-| Stable      | Math |  ⏳ |
-| Stable      | Pool |  ⏳ |
+| LBP         | Pool |  🧪 |
+| Stable      | Math |  🧪 |
+| Stable      | Pool |  🧪 |
 
 ## Development and Build
 

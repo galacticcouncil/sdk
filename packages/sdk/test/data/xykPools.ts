@@ -1,5 +1,4 @@
-import { XykPoolFees } from '../../src/pool/xyk/XykPool';
-import { PoolFee, PoolType } from '../../src/types';
+import { PoolType } from '../../src/types';
 
 export const xykPools = [
   {
@@ -15,6 +14,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'BSX',
         icon: 'BSX',
+        name: 'BSX',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
       {
         id: '2',
@@ -22,6 +24,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'AUSD',
         icon: 'AUSD',
+        name: 'Acala Dollar',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
     ],
   },
@@ -38,6 +43,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'KSM',
         icon: 'KSM',
+        name: 'Kusama',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
       {
         id: '2',
@@ -45,6 +53,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'AUSD',
         icon: 'AUSD',
+        name: 'Acala Dollar',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
     ],
   },
@@ -61,6 +72,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'BSX',
         icon: 'BSX',
+        name: 'BSX',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
       {
         id: '1',
@@ -68,6 +82,9 @@ export const xykPools = [
         decimals: 12,
         symbol: 'KSM',
         icon: 'KSM',
+        name: 'Kusama',
+        type: 'Token',
+        existentialDeposit: '1000',
       },
     ],
   },

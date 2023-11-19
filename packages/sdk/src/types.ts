@@ -34,7 +34,7 @@ export type PoolBase = {
   minTradingLimit: number;
 };
 
-export interface PoolToken extends AssetMetadata {
+export interface PoolToken extends Asset {
   id: string;
   balance: string;
   tradeable?: number;
@@ -165,20 +165,13 @@ export type Amount = {
   decimals: number;
 };
 
-export interface AssetBalance {
-  free: BigNumber;
-  locked: BigNumber;
-  reserved: BigNumber;
-  available: BigNumber;
-}
-
-export interface AssetMetadata {
+export interface Asset {
   id: string;
   decimals: number;
   name: string;
   symbol: string;
   icon: string;
-  assetType: string;
+  type: string;
   existentialDeposit: string;
   meta?: Record<string, string>;
 }
