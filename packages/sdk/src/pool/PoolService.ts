@@ -30,8 +30,8 @@ export class PoolService implements IPoolService {
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
 
-  protected metadata: Asset[] = [];
-  protected metadataLoaded = false;
+  protected onChainAssets: Asset[] = [];
+  protected onChainAssetsLoaded = false;
 
   constructor(api: ApiPromise) {
     this.api = api;
@@ -43,9 +43,9 @@ export class PoolService implements IPoolService {
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
-    if (!this.metadataLoaded) {
-      this.metadata = await this.assetClient.getOnChainMetadata();
-      this.metadataLoaded = true;
+    if (!this.onChainAssetsLoaded) {
+      this.onChainAssets = await this.assetClient.getOnChainAssets();
+      this.onChainAssetsLoaded = true;
     }
 
     if (includeOnly.length == 0) {
@@ -90,16 +90,16 @@ export class PoolService implements IPoolService {
   }
 
   private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
-    const metaMap: Map<string, Asset> = new Map(
-      this.metadata.map((m) => [m.id, m])
+    const assets: Map<string, Asset> = new Map(
+      this.onChainAssets.map((asset: Asset) => [asset.id, asset])
     );
 
     return pools.map((pool: PoolBase) => {
       const tokens = pool.tokens.map((t) => {
-        const meta = metaMap.get(t.id);
+        const asset = assets.get(t.id);
         return {
           ...t,
-          ...meta,
+          ...asset,
         };
       });
       return {

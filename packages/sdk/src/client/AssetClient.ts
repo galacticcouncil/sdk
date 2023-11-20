@@ -79,7 +79,7 @@ export class AssetClient extends PolkadotApiClient {
     }
   }
 
-  private getTokenMetadata(
+  private getTokens(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>
@@ -111,7 +111,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  private getBondMetadata(
+  private getBonds(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>,
@@ -119,7 +119,7 @@ export class AssetClient extends PolkadotApiClient {
   ): Asset {
     const [underlyingAsset, maturity] = bond;
     const { assetType, existentialDeposit } = details;
-    const { symbol, decimals } = this.getTokenMetadata(
+    const { symbol, decimals } = this.getTokens(
       underlyingAsset.toString(),
       details,
       metadata
@@ -140,7 +140,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  private getShareMetadata(
+  private getShares(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, PalletAssetRegistryAssetMetadata>,
@@ -150,7 +150,7 @@ export class AssetClient extends PolkadotApiClient {
     const { name, assetType, existentialDeposit } = details;
     const poolTokens = assets.map((asset) => asset.toString());
     const poolEntries = poolTokens.map((token: string) => {
-      const { symbol } = this.getTokenMetadata(token, details, metadata);
+      const { symbol } = this.getTokens(token, details, metadata);
       return [token, symbol];
     });
     const meta = Object.fromEntries(poolEntries);
@@ -167,7 +167,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  async getOnChainMetadata(): Promise<Asset[]> {
+  async getOnChainAssets(): Promise<Asset[]> {
     const [asset, assetMetadata, shares, bonds] = await Promise.all([
       this.api.query.assetRegistry.assets.entries(),
       this.metadataQuery(),
@@ -189,7 +189,7 @@ export class AssetClient extends PolkadotApiClient {
           switch (assetType.toString()) {
             case 'Bond':
               const bond = bonds.get(id.toString());
-              return this.getBondMetadata(
+              return this.getBonds(
                 id.toString(),
                 details,
                 assetMetadata,
@@ -197,18 +197,14 @@ export class AssetClient extends PolkadotApiClient {
               );
             case 'StableSwap':
               const share = shares.get(id.toString());
-              return this.getShareMetadata(
+              return this.getShares(
                 id.toString(),
                 details,
                 assetMetadata,
                 share!
               );
             default:
-              return this.getTokenMetadata(
-                id.toString(),
-                details,
-                assetMetadata
-              );
+              return this.getTokens(id.toString(), details, assetMetadata);
           }
         }
       );
