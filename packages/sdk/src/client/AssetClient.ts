@@ -3,13 +3,13 @@ import type {
   PalletAssetRegistryAssetMetadata,
   PalletStableswapPoolInfo,
 } from '@polkadot/types/lookup';
+import { ITuple } from '@polkadot/types-codec/types';
+import { u32, u64 } from '@polkadot/types-codec';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { Asset } from '../types';
 
 import { PolkadotApiClient } from './PolkadotApi';
-import { ITuple } from '@polkadot/types-codec/types';
-import { u32, u64 } from '@polkadot/types-codec';
 
 export class AssetClient extends PolkadotApiClient {
   private SUPPORTED_TYPES = ['StableSwap', 'Bond', 'Token'];
