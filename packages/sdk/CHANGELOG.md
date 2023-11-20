@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.0.0
+
+### Major Changes
+
+- Pools perf. upgrade, types cleanup
+
 ## 0.7.7
 
 ### Patch Changes
