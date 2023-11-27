@@ -8,3 +8,5 @@ export { OmniPool } from './omni/OmniPool';
 export { OmniMath } from './omni/OmniMath';
 export { LbpPool } from './lbp/LbpPool';
 export { LbpMath } from './lbp/LbpMath';
+export { StableMath } from './stable/StableMath';
+export { StableSwap } from './stable/StableSwap';
