@@ -28,13 +28,13 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdc,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: moonbeam,
+    destination: hydraDX,
     destinationFee: {
       amount: 0.02,
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV3()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
