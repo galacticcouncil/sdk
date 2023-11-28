@@ -1,7 +1,22 @@
 import { Asset } from '@moonbeam-network/xcm-types';
-import { aca, astr, bnc, cfg, dai, dot, glmr, hdx, ibtc, usdt, wbtc, weth, ztg } from '@moonbeam-network/xcm-config';
+import {
+  aca,
+  astr,
+  bnc,
+  cfg,
+  dai,
+  dot,
+  glmr,
+  hdx,
+  ibtc,
+  usdc,
+  usdt,
+  wbtc,
+  weth,
+  ztg,
+} from '@moonbeam-network/xcm-config';
 
-export { aca, astr, bnc, cfg, dot, glmr, hdx, ibtc, usdt, ztg };
+export { aca, astr, bnc, cfg, dot, glmr, hdx, ibtc, usdc, usdt, ztg };
 
 export const dai_awh = new Asset({
   ...dai,
@@ -44,6 +59,7 @@ export const assets: Asset[] = [
   glmr,
   hdx,
   ibtc,
+  usdc,
   usdt,
   wbtc_awh,
   wbtc_mwh,
@@ -52,4 +68,6 @@ export const assets: Asset[] = [
   ztg,
 ];
 
-export const assetsMap = new Map<string, Asset>(assets.map((asset) => [asset.key, asset]));
+export const assetsMap = new Map<string, Asset>(
+  assets.map((asset) => [asset.key, asset])
+);

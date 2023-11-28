@@ -1,7 +1,7 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { dai_awh, wbtc_awh, weth_awh } from '../assets';
+import { aca, dai_awh, wbtc_awh, weth_awh } from '../assets';
 import { hydraDX, acala } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
@@ -21,7 +21,10 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
-    //toEvmAddress,
+    fee: {
+      asset: aca,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
   }),
   new AssetConfig({
     asset: wbtc_awh,
@@ -33,7 +36,10 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
-    //toEvmAddress,
+    fee: {
+      asset: aca,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
   }),
   new AssetConfig({
     asset: weth_awh,
@@ -45,7 +51,10 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().evm().erc20(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
-    //toEvmAddress,
+    fee: {
+      asset: aca,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
   }),
 ];
 

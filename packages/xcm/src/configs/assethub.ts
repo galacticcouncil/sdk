@@ -1,7 +1,7 @@
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
+import { AssetMinBuilder, BalanceBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { usdt } from '../assets';
+import { dot, usdc, usdt } from '../assets';
 import { assetHub, hydraDX } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
 
@@ -15,7 +15,34 @@ const toHydraDX: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilderV3().polkadotXcm().limitedReserveTransferAssets().X2(),
+    extrinsic: ExtrinsicBuilderV3()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 0.02,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    min: AssetMinBuilder().assets().asset(),
   }),
 ];
 

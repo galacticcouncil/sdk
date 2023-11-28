@@ -23,6 +23,7 @@ import {
   glmr,
   hdx,
   ibtc,
+  usdc,
   usdt,
   wbtc_awh,
   wbtc_mwh,
@@ -59,15 +60,20 @@ export const acala = new Parachain({
 
 export const assetHub = new Parachain({
   ...defaultPolkadotAssetHub,
+  key: 'assethub',
+  name: 'AssetHub',
   assetsData: [
     {
       asset: usdt,
       id: 1984,
       palletInstance: 50,
     },
+    {
+      asset: usdc,
+      id: 1337,
+      palletInstance: 50,
+    },
   ],
-  key: 'assethub',
-  name: 'AssetHub',
 });
 
 export const astar = new Parachain({
@@ -82,13 +88,13 @@ export const astar = new Parachain({
 
 export const bifrost = new Parachain({
   ...defaultBifrostPolkadot,
+  key: 'bifrost',
   assetsData: [
     {
       asset: bnc,
       id: { Native: bnc.originSymbol },
     },
   ],
-  key: 'bifrost',
 });
 
 export const centrifuge = new Parachain({
@@ -140,6 +146,13 @@ export const hydraDX = new Parachain({
     {
       asset: hdx,
       id: 0,
+    },
+    {
+      asset: usdc,
+      id: 1337,
+      balanceId: 22,
+      metadataId: 22,
+      palletInstance: 50,
     },
     {
       asset: usdt,
@@ -236,4 +249,6 @@ export const chains: AnyChain[] = [
   zeitgeist,
 ];
 
-export const chainsMap = new Map<string, AnyChain>(chains.map((chain) => [chain.key, chain]));
+export const chainsMap = new Map<string, AnyChain>(
+  chains.map((chain) => [chain.key, chain])
+);
