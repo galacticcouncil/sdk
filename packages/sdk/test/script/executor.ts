@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 export enum ApiUrl {
   Local = 'ws://localhost:8000',
+  Nice = 'wss://rpc.nice.hydration.cloud',
   Basilisk = 'wss://rpc.basilisk.cloud',
   Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
   Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
