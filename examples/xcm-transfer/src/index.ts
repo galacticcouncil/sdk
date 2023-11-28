@@ -2,11 +2,15 @@ import { Sdk } from '@moonbeam-network/xcm-sdk';
 import { ConfigService } from '@moonbeam-network/xcm-config';
 import { assetsMap, chainsMap, chainsConfigMap } from '@galacticcouncil/xcm';
 
-import { walletClient } from './clients';
+import { moonbeamWalletClient } from './client';
 import { createPolkadotSigner } from './signers';
 import { logAssets, logDestChains, logSrcChains } from './utils';
 
-const configService = new ConfigService({ assets: assetsMap, chains: chainsMap, chainsConfig: chainsConfigMap });
+const configService = new ConfigService({
+  assets: assetsMap,
+  chains: chainsMap,
+  chainsConfig: chainsConfigMap,
+});
 
 async function transfer(srcChain: string, destChain: string, asset: string) {
   const sourceChain = configService.getChain(srcChain);
@@ -15,19 +19,25 @@ async function transfer(srcChain: string, destChain: string, asset: string) {
   const { sourceChains } = sdkBuilder.assets().asset(asset);
   logSrcChains(asset, sourceChains);
 
-  const { destinationChains } = sdkBuilder.assets().asset(asset).source(srcChain);
+  const { destinationChains } = sdkBuilder
+    .assets()
+    .asset(asset)
+    .source(srcChain);
   logDestChains(asset, destinationChains);
 
   const polkaSigner = await createPolkadotSigner();
+
+  const SRC_ADDR = 'INSERT_ADDRESS';
+  const DST_ADDR = 'INSERT_ADDRESS';
 
   const data = await sdkBuilder
     .assets()
     .asset(asset)
     .source(srcChain)
     .destination(destChain)
-    .accounts('7MHE9BUBEWU88cEto6P1XNNb66foSwAZPKhfL8GHW9exnuH1', '24ZGSbmos67brVoJnskkWcH4qP6DYDnyPULhiuBKxq97skrF', {
+    .accounts(SRC_ADDR, DST_ADDR, {
       polkadotSigner: polkaSigner.signer,
-      evmSigner: walletClient,
+      evmSigner: moonbeamWalletClient,
     });
   //data.transfer(0.1);
   console.log(data.source);
@@ -35,4 +45,4 @@ async function transfer(srcChain: string, destChain: string, asset: string) {
 }
 
 const sdkBuilder = Sdk({ configService: configService });
-await transfer('hydradx', 'acala', 'wbtc-acala');
+await transfer('hydradx', 'moonbeam', 'wbtc_mwh');
