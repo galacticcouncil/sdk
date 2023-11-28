@@ -34,7 +34,7 @@ export const hydraDxPublicClient = createPublicClient({
 });
 
 export const hydraDxWalletClient = createWalletClient({
-  account: 'INSERT_ACCOUNT' as `0x${string}`,
+  account: 'INSERT_ADDRESS' as `0x${string}`,
   chain: hydraChain,
   transport: custom(window['ethereum']),
 });

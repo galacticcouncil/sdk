@@ -48,6 +48,11 @@ export const wbtc_mwh = new Asset({
   key: 'wbtc_mwh',
 });
 
+export const sub = new Asset({
+  key: 'sub',
+  originSymbol: 'SUB',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -59,6 +64,7 @@ export const assets: Asset[] = [
   glmr,
   hdx,
   ibtc,
+  sub,
   usdc,
   usdt,
   wbtc_awh,

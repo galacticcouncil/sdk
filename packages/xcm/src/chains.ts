@@ -1,4 +1,9 @@
-import { AnyChain, EvmParachain, Parachain } from '@moonbeam-network/xcm-types';
+import {
+  AnyChain,
+  Ecosystem,
+  EvmParachain,
+  Parachain,
+} from '@moonbeam-network/xcm-types';
 import {
   acala as defaultAcala,
   astar as defaultAstar,
@@ -23,6 +28,7 @@ import {
   glmr,
   hdx,
   ibtc,
+  sub,
   usdc,
   usdt,
   wbtc_awh,
@@ -233,7 +239,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: hdx,
       id: '69606720909260275826784788104880799692',
-      decimals: 10,
+      decimals: 12,
     },
     {
       asset: wbtc_mwh,
@@ -248,6 +254,22 @@ export const moonbeam = new EvmParachain({
       decimals: 18,
     },
   ],
+});
+
+export const subsocial = new Parachain({
+  assetsData: [
+    {
+      asset: sub,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash: '0x',
+  key: 'subsocial',
+  name: 'Subsocial',
+  parachainId: 2101,
+  ss58Format: 28,
+  ws: 'wss://para.subsocial.network',
 });
 
 export const zeitgeist = new Parachain({
@@ -270,6 +292,7 @@ export const chains: AnyChain[] = [
   interlay,
   moonbeam,
   polkadot,
+  subsocial,
   zeitgeist,
 ];
 
