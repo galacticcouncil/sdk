@@ -9,14 +9,30 @@ import {
   glmr,
   hdx,
   ibtc,
+  intr,
   usdc,
   usdt,
+  vdot,
   wbtc,
   weth,
   ztg,
 } from '@moonbeam-network/xcm-config';
 
-export { aca, astr, bnc, cfg, dot, glmr, hdx, ibtc, usdc, usdt, ztg };
+export {
+  aca,
+  astr,
+  bnc,
+  cfg,
+  dot,
+  glmr,
+  hdx,
+  intr,
+  ibtc,
+  usdc,
+  usdt,
+  vdot,
+  ztg,
+};
 
 export const dai_awh = new Asset({
   ...dai,
@@ -64,9 +80,11 @@ export const assets: Asset[] = [
   glmr,
   hdx,
   ibtc,
+  intr,
   sub,
   usdc,
   usdt,
+  vdot,
   wbtc_awh,
   wbtc_mwh,
   weth_awh,

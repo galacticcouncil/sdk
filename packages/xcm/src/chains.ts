@@ -28,9 +28,11 @@ import {
   glmr,
   hdx,
   ibtc,
+  intr,
   sub,
   usdc,
   usdt,
+  vdot,
   wbtc_awh,
   wbtc_mwh,
   weth_awh,
@@ -105,6 +107,11 @@ export const bifrost = new Parachain({
       asset: bnc,
       id: { Native: bnc.originSymbol },
     },
+    {
+      asset: vdot,
+      id: { VToken2: 0 },
+      metadataId: { VToken2: 0 },
+    },
   ],
 });
 
@@ -167,6 +174,11 @@ export const hydraDX = new Parachain({
       decimals: 8,
     },
     {
+      asset: intr,
+      id: 17,
+      decimals: 10,
+    },
+    {
       asset: usdc,
       id: 1337,
       balanceId: 22,
@@ -181,6 +193,11 @@ export const hydraDX = new Parachain({
       metadataId: 10,
       palletInstance: 50,
       decimals: 6,
+    },
+    {
+      asset: vdot,
+      id: 15,
+      decimals: 10,
     },
     {
       asset: wbtc_awh,
@@ -217,6 +234,12 @@ export const interlay = new Parachain({
       asset: ibtc,
       decimals: 8,
       id: { Token: ibtc.originSymbol },
+      metadataId: 0,
+    },
+    {
+      asset: intr,
+      decimals: 10,
+      id: { Token: intr.originSymbol },
       metadataId: 0,
     },
   ],

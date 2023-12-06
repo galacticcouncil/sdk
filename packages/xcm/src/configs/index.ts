@@ -9,6 +9,7 @@ import { hydraDxConfig } from './hydraDX';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { polkadotConfig } from './polkadot';
+import { subsocialConfig } from './subsocial';
 import { zeitgeistConfig } from './zeitgeist';
 
 export const chainsConfig: ChainConfig[] = [
@@ -21,7 +22,10 @@ export const chainsConfig: ChainConfig[] = [
   interlayConfig,
   moonbeamConfig,
   polkadotConfig,
+  subsocialConfig,
   zeitgeistConfig,
 ];
 
-export const chainsConfigMap = new Map<string, ChainConfig>(chainsConfig.map((config) => [config.chain.key, config]));
+export const chainsConfigMap = new Map<string, ChainConfig>(
+  chainsConfig.map((config) => [config.chain.key, config])
+);

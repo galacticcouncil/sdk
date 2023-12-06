@@ -20,8 +20,11 @@ import {
   glmr,
   hdx,
   ibtc,
+  intr,
+  sub,
   usdc,
   usdt,
+  vdot,
   wbtc_awh,
   wbtc_mwh,
   weth_awh,
@@ -37,6 +40,7 @@ import {
   hydraDX,
   interlay,
   moonbeam,
+  subsocial,
   zeitgeist,
 } from '../chains';
 import { ExtrinsicBuilderV3 } from '../builders';
@@ -156,6 +160,21 @@ const toBifrost: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
+  new AssetConfig({
+    asset: vdot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.0000000703,
+      asset: vdot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
 ];
 
 const toCentrifuge: AssetConfig[] = [
@@ -184,6 +203,21 @@ const toInterlay: AssetConfig[] = [
     destinationFee: {
       amount: 0.00000062,
       asset: ibtc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: intr,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: interlay,
+    destinationFee: {
+      amount: 0.0019213457,
+      asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
@@ -287,6 +321,24 @@ const toPolkadot: AssetConfig[] = [
   }),
 ];
 
+const toSubsocial: AssetConfig[] = [
+  new AssetConfig({
+    asset: sub,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: subsocial,
+    destinationFee: {
+      amount: 0.064,
+      asset: sub,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toZeitgeist: AssetConfig[] = [
   new AssetConfig({
     asset: ztg,
@@ -315,6 +367,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toInterlay,
     ...toMoonbeam,
     ...toPolkadot,
+    ...toSubsocial,
     ...toZeitgeist,
   ],
   chain: hydraDX,
