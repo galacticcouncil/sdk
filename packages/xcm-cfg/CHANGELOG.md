@@ -1,4 +1,4 @@
-# @galacticcouncil/xcm
+# @galacticcouncil/xcm-cfg
 
 ## 0.0.5
 

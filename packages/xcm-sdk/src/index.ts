@@ -1,2 +1,3 @@
 export { Wallet } from './Wallet';
-export { EvmClient } from './evm';
+export * from './evm';
+export * from './types';

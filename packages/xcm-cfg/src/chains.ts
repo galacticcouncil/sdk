@@ -179,6 +179,11 @@ export const hydraDX = new Parachain({
       decimals: 10,
     },
     {
+      asset: sub,
+      id: 24,
+      decimals: 10,
+    },
+    {
       asset: usdc,
       id: 1337,
       balanceId: 22,
