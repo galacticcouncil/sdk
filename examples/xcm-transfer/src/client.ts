@@ -1,12 +1,6 @@
-import {
-  createPublicClient,
-  createWalletClient,
-  custom,
-  defineChain,
-  http,
-} from 'viem';
+import { defineChain } from 'viem';
 
-export const hydraChain = defineChain({
+export const hydradx = defineChain({
   id: 222222,
   name: 'HydraDX',
   network: 'hydradx',
@@ -26,17 +20,6 @@ export const hydraChain = defineChain({
     },
   },
   testnet: false,
-});
-
-export const hydraDxPublicClient = createPublicClient({
-  chain: hydraChain,
-  transport: http(),
-});
-
-export const hydraDxWalletClient = createWalletClient({
-  account: 'INSERT_ADDRESS' as `0x${string}`,
-  chain: hydraChain,
-  transport: custom(window['ethereum']),
 });
 
 const moonbeam = defineChain({
@@ -59,15 +42,4 @@ const moonbeam = defineChain({
     },
   },
   testnet: false,
-});
-
-export const moonbeamPublicClient = createPublicClient({
-  chain: moonbeam,
-  transport: http(),
-});
-
-export const moonbeamWalletClient = createWalletClient({
-  account: 'INSERT_ACCOUNT' as `0x${string}`,
-  chain: moonbeam,
-  transport: custom(window['ethereum']),
 });

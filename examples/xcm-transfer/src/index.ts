@@ -1,48 +1,82 @@
-import { Sdk } from '@moonbeam-network/xcm-sdk';
-import { ConfigService } from '@moonbeam-network/xcm-config';
-import { assetsMap, chainsMap, chainsConfigMap } from '@galacticcouncil/xcm';
+import { ConfigService, ConfigBuilder } from '@moonbeam-network/xcm-config';
+import { AssetAmount } from '@moonbeam-network/xcm-types';
+import { getPolkadotApi } from '@moonbeam-network/xcm-utils';
 
-import { moonbeamWalletClient } from './client';
-import { createPolkadotSigner } from './signers';
-import { logAssets, logDestChains, logSrcChains } from './utils';
+import {
+  chainsConfigMap,
+  chainsMap,
+  assetsMap,
+  evmChains,
+} from '../../../packages/xcm-cfg/build/types';
+import { Wallet, XCall } from '@galacticcouncil/xcm-sdk';
 
+import { logAssets, logSrcChains, logDestChains } from './utils';
+
+// Inialialize config
 const configService = new ConfigService({
   assets: assetsMap,
   chains: chainsMap,
   chainsConfig: chainsConfigMap,
 });
 
-async function transfer(srcChain: string, destChain: string, asset: string) {
-  const sourceChain = configService.getChain(srcChain);
-  logAssets(sourceChain);
+// Inialialize wallet
+const wallet: Wallet = new Wallet({
+  configService: configService,
+  evmChains: evmChains,
+});
 
-  const { sourceChains } = sdkBuilder.assets().asset(asset);
-  logSrcChains(asset, sourceChains);
+// Define transfer
+const asset = configService.getAsset('hdx');
+const srcChain = configService.getChain('hydradx');
+const destChain = configService.getChain('moonbeam');
 
-  const { destinationChains } = sdkBuilder
-    .assets()
-    .asset(asset)
-    .source(srcChain);
-  logDestChains(asset, destinationChains);
+const configBuilder = ConfigBuilder(configService);
+const { sourceChains } = configBuilder.assets().asset(asset);
+const { destinationChains } = configBuilder
+  .assets()
+  .asset(asset)
+  .source(srcChain);
 
-  const polkaSigner = await createPolkadotSigner();
+// Dump transfer info
+logAssets(srcChain);
+logDestChains(asset.key, destinationChains);
+logSrcChains(asset.key, sourceChains);
 
-  const SRC_ADDR = 'INSERT_ADDRESS';
-  const DST_ADDR = 'INSERT_ADDRESS';
+// Initialize bi-directional connection (optional)
+console.time('connection');
+const [_srcApi, _dstApi] = await Promise.all([
+  getPolkadotApi(srcChain.ws),
+  getPolkadotApi(destChain.ws),
+]);
+console.timeEnd('connection');
 
-  const data = await sdkBuilder
-    .assets()
-    .asset(asset)
-    .source(srcChain)
-    .destination(destChain)
-    .accounts(SRC_ADDR, DST_ADDR, {
-      polkadotSigner: polkaSigner.signer,
-      evmSigner: moonbeamWalletClient,
-    });
-  //data.transfer(0.1);
-  console.log(data.source);
-  console.log(data.destination);
-}
+// Define source & dest accounts
+const srcAddr = 'INSERT_ACCOUNT';
+const destAddr = 'INSERT_ACCOUNT';
 
-const sdkBuilder = Sdk({ configService: configService });
-await transfer('hydradx', 'moonbeam', 'wbtc_mwh');
+// Subscribe source chain token balance
+const balanceObserver = (balance: AssetAmount) => console.log(balance);
+const balanceSubscription = await wallet.subscribeBalance(
+  srcAddr,
+  srcChain,
+  balanceObserver
+);
+
+// Get transfer input data (dialog)
+const xdata = await wallet.transfer(
+  asset,
+  srcAddr,
+  srcChain,
+  destAddr,
+  destChain
+);
+
+// Construct calldata with transfer amount
+const call: XCall = xdata.transfer('1');
+
+// Dump transfer info
+console.log(xdata);
+console.log(call);
+
+// Unsubscribe source chain balance
+balanceSubscription.unsubscribe();
