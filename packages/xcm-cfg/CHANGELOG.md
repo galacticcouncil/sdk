@@ -1,5 +1,9 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.0
+
+- Initial xcm cfg release
+
 ## 0.0.5
 
 ### Patch Changes
