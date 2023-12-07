@@ -2,8 +2,10 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 const PARAM_PREFIX = '--';
 
-const GITHUB_API = 'https://api.github.com/repos/galacticcouncil/HydraDX-wasm/git/trees/main?recursive=1';
-const WASM_REPO = 'https://raw.githubusercontent.com/galacticcouncil/HydraDX-wasm';
+const GITHUB_API =
+  'https://api.github.com/repos/galacticcouncil/HydraDX-wasm/git/trees/main?recursive=1';
+const WASM_REPO =
+  'https://raw.githubusercontent.com/galacticcouncil/HydraDX-wasm';
 const WASM_BRANCH = 'main';
 const WASM_BUILD = 'build';
 
