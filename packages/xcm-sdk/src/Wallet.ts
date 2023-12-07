@@ -134,7 +134,6 @@ export class Wallet {
       });
       return balanceAdapter.subscribe(asset, balanceConfig);
     });
-
     const observable = merge(...observables);
     return observable.subscribe(observer);
   }

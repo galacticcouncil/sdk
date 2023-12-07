@@ -32,10 +32,10 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@moonbeam-network/xcm-config": "1.3.13",
     "@moonbeam-network/xcm-builder": "1.0.9",
+    "@moonbeam-network/xcm-config": "1.3.13",
     "@moonbeam-network/xcm-types": "1.0.1",
-    "viem": "^1.19.1"
+    "@moonbeam-network/xcm-utils": "1.0.3"
   },
   "peerDependencies": {
     "@polkadot/api": "^10.9.1",
@@ -53,6 +53,7 @@
     "@polkadot/types-known": "^10.9.1",
     "@polkadot/keyring": "^12.3.2",
     "@polkadot/util": "^12.3.2",
-    "@polkadot/util-crypto": "^12.3.2"
+    "@polkadot/util-crypto": "^12.3.2",
+    "viem": "^1.19.1"
   }
 }
