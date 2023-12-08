@@ -7,7 +7,7 @@ import {
   chainsMap,
   assetsMap,
   evmChains,
-} from '../../../packages/xcm-cfg/build/types';
+} from '@galacticcouncil/xcm-cfg';
 import { Wallet, XCall } from '@galacticcouncil/xcm-sdk';
 
 import { logAssets, logSrcChains, logDestChains } from './utils';
@@ -53,6 +53,10 @@ console.timeEnd('connection');
 // Define source & dest accounts
 const srcAddr = 'INSERT_ACCOUNT';
 const destAddr = 'INSERT_ACCOUNT';
+
+if (srcAddr === 'INSERT_ACCOUNT' || destAddr === 'INSERT_ACCOUNT') {
+  throw new Error('Setup your accounts mate!');
+}
 
 // Subscribe source chain token balance
 const balanceObserver = (balance: AssetAmount) => console.log(balance);
