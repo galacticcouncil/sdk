@@ -23,7 +23,6 @@ const toHydraDX: AssetConfig[] = [
       asset: sub,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    min: AssetMinBuilder().assets().asset(),
   }),
 ];
 
