@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.1
+
+### Patch Changes
+
+- Fix polkadot & subsocial configs, hydra evm mainnet config
+
 ## 1.0.0
 
 - Initial xcm cfg release
