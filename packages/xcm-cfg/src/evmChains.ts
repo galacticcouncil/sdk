@@ -55,15 +55,15 @@ export const hydradx: Chain = defineChain({
   },
   rpcUrls: {
     public: {
-      http: ['https://rpc.nice.hydration.cloud'],
-      webSocket: ['wss://rpc.nice.hydration.cloud'],
+      http: ['https://rpc.hydradx.cloud'],
+      webSocket: ['wss://rpc.hydradx.cloud'],
     },
     default: {
-      http: ['https://rpc.nice.hydration.cloud'],
-      webSocket: ['wss://rpc.nice.hydration.cloud'],
+      http: ['https://rpc.hydradx.cloud'],
+      webSocket: ['wss://rpc.hydradx.cloud'],
     },
   },
-  testnet: true,
+  testnet: false,
 });
 
 export const evmChains: Record<string, Chain> = {
