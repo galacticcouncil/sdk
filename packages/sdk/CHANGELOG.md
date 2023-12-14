@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.0.2
+
+### Patch Changes
+
+- fixed token balances
+
 ## 1.0.1
 
 ### Patch Changes
