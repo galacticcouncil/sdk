@@ -1,6 +1,13 @@
-import { XcmVersion, ExtrinsicConfigBuilder, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
+import {
+  XcmVersion,
+  ExtrinsicConfigBuilder,
+  ExtrinsicConfig,
+} from '@moonbeam-network/xcm-builder';
 import { toAsset, toDest } from './xTokens.utils';
-import { getDestinationMultilocation, getExtrinsicArgumentVersion } from '../ExtrinsicBuilder.utils';
+import {
+  getDestinationMultilocation,
+  getExtrinsicArgumentVersion,
+} from '../ExtrinsicBuilder.utils';
 
 const pallet = 'xTokens';
 
@@ -12,7 +19,12 @@ const transfer = (): ExtrinsicConfigBuilder => ({
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const multilocation = getDestinationMultilocation(address, destination);
-        return [asset, amount, toDest(version, destination, multilocation), 'Unlimited'];
+        return [
+          asset,
+          amount,
+          toDest(version, destination, multilocation),
+          'Unlimited',
+        ];
       },
     }),
 });
@@ -27,7 +39,10 @@ const transferMultiasset = () => {
           func: 'transferMultiasset',
           getArgs: () => {
             const version = XcmVersion.v3;
-            const multilocation = getDestinationMultilocation(address, destination);
+            const multilocation = getDestinationMultilocation(
+              address,
+              destination
+            );
             return [
               toAsset(
                 version,

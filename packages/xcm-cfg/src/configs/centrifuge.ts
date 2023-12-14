@@ -1,9 +1,11 @@
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+} from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { cfg } from '../assets';
 import { centrifuge, hydraDX } from '../chains';
-import { ExtrinsicBuilderV3 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +17,7 @@ const toHydraDX: AssetConfig[] = [
       asset: cfg,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

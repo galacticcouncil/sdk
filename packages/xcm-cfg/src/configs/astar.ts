@@ -3,7 +3,7 @@ import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { astr } from '../assets';
 import { astar, hydraDX } from '../chains';
-import { ExtrinsicBuilderV3 } from '../builders';
+import { ExtrinsicBuilderV2 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +15,10 @@ const toHydraDX: AssetConfig[] = [
       asset: astr,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV3().polkadotXcm().reserveTransferAssets().here(),
+    extrinsic: ExtrinsicBuilderV2()
+      .polkadotXcm()
+      .reserveTransferAssets()
+      .here(),
   }),
 ];
 

@@ -1,9 +1,12 @@
-import { AssetMinBuilder, BalanceBuilder } from '@moonbeam-network/xcm-builder';
+import {
+  AssetMinBuilder,
+  BalanceBuilder,
+  ExtrinsicBuilder,
+} from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { dot, usdc, usdt } from '../assets';
 import { assetHub, hydraDX } from '../chains';
-import { ExtrinsicBuilderV3 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +18,7 @@ const toHydraDX: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilderV3()
+    extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -34,7 +37,7 @@ const toHydraDX: AssetConfig[] = [
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilderV3()
+    extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),

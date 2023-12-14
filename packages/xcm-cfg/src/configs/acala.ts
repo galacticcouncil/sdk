@@ -1,14 +1,11 @@
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+} from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { aca, dai_awh, wbtc_awh, weth_awh } from '../assets';
 import { hydraDX, acala } from '../chains';
-import { ExtrinsicBuilderV3 } from '../builders';
-
-const toEvmAddress = async (api: any, address: string) => {
-  const h160Addr = await api.query.evmAccounts.evmAddresses(address);
-  return h160Addr.toString();
-};
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -20,7 +17,7 @@ const toHydraDX: AssetConfig[] = [
       asset: dai_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
@@ -35,7 +32,7 @@ const toHydraDX: AssetConfig[] = [
       asset: wbtc_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
@@ -50,7 +47,7 @@ const toHydraDX: AssetConfig[] = [
       asset: weth_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV3().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
