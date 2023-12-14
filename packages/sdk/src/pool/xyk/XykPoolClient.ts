@@ -15,6 +15,10 @@ import { XykPoolFees } from './XykPool';
 import { PoolClient } from '../PoolClient';
 
 export class XykPoolClient extends PoolClient {
+  isSupported(): boolean {
+    return this.api.query.xyk !== undefined;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.xyk.poolAssets.entries();
     const pools = poolAssets.map(

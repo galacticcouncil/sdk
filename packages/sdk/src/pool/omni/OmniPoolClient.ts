@@ -19,6 +19,10 @@ import { OmniPoolFees, OmniPoolToken } from './OmniPool';
 import { PoolClient } from '../PoolClient';
 
 export class OmniPoolClient extends PoolClient {
+  isSupported(): boolean {
+    return this.api.query.omnipool !== undefined;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAddress = this.getPoolId();

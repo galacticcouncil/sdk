@@ -20,6 +20,10 @@ import { PoolClient } from '../PoolClient';
 export class StableSwapClient extends PoolClient {
   private stablePools: Map<string, PalletStableswapPoolInfo> = new Map([]);
 
+  isSupported(): boolean {
+    return this.api.query.stableswap !== undefined;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const [pools, parachainBlock] = await Promise.all([
       this.api.query.stableswap.pools.entries(),

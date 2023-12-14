@@ -13,6 +13,10 @@ export class LbpPoolClient extends PoolClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
   private poolsData: Map<string, PalletLbpPool> = new Map([]);
 
+  isSupported(): boolean {
+    return this.api.query.xyk !== undefined;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const [poolData, validationData] = await Promise.all([
       this.api.query.lbp.poolData.entries(),

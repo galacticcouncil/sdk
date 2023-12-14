@@ -49,12 +49,11 @@ export class PoolService implements IPoolService {
     }
 
     if (includeOnly.length == 0) {
-      const pools = await Promise.all([
-        this.xykClient.getPools(),
-        this.omniClient.getPools(),
-        this.lbpClient.getPools(),
-        this.stableClient.getPools(),
-      ]);
+      const pools = await Promise.all(
+        [this.xykClient, this.omniClient, this.lbpClient, this.stableClient]
+            .filter(client => client.isSupported())
+            .map(client => client.getPools())
+      );
       const flatten = pools.flat();
       return this.withMetadata(flatten);
     }
