@@ -18,12 +18,12 @@ export class BalanceClient extends PolkadotApiClient {
 
   async getSystemBalance(accountId: string): Promise<BigNumber> {
     const {
-      data: { free, miscFrozen, feeFrozen },
+      data: { free, miscFrozen, feeFrozen, frozen },
     } = await this.api.query.system.account(accountId);
     return this.calculateFreeBalance(
       free.toString(),
-      miscFrozen.toString(),
-      feeFrozen.toString()
+        (miscFrozen || frozen).toString(),
+        (feeFrozen || 0).toString()
     );
   }
 
@@ -90,25 +90,17 @@ export class BalanceClient extends PolkadotApiClient {
   ): UnsubscribePromise {
     return this.api.query.system.account(
       address,
-      ({ data: { free, miscFrozen, feeFrozen } }) => {
-        const freeBalance = this.calculateFreeBalance(
-          free.toString(),
-          miscFrozen.toString(),
-          feeFrozen.toString()
-        );
-        onChange(SYSTEM_ASSET_ID, freeBalance);
-      }
+      ({ data }) => onChange(SYSTEM_ASSET_ID, this.calculateFreeBalance(data))
     );
   }
 
   private calculateFreeBalance(
-    free: string,
-    miscFrozen: string,
-    feeFrozen: string
+    data: any,
   ): BigNumber {
+    const { free, miscFrozen, feeFrozen, frozen } = data;
     const freeBN = new BigNumber(free);
-    const miscFrozenBN = new BigNumber(miscFrozen);
-    const feeFrozenBN = new BigNumber(feeFrozen);
+    const miscFrozenBN = new BigNumber(miscFrozen || frozen);
+    const feeFrozenBN = new BigNumber(feeFrozen || 0);
     const maxFrozenBN = miscFrozenBN.gt(feeFrozenBN)
       ? miscFrozenBN
       : feeFrozenBN;

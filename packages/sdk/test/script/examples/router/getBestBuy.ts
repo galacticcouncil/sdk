@@ -16,7 +16,11 @@ class GetBestBuyPriceExample extends PolkadotExecutor {
 }
 
 new GetBestBuyPriceExample(
-  ApiUrl.HydraDx_Rococo,
-  'Get best buy price',
+  ApiUrl.HydraDx,
+  'Get best buy price Hydra',
   true
-).run();
+).run().then(() => new GetBestBuyPriceExample(
+  ApiUrl.Chopsticks,
+  'Get best buy price 🐍',
+  true
+).run());
