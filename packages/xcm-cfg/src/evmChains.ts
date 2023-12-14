@@ -1,11 +1,11 @@
 import { defineChain, Chain } from 'viem';
 
 export const acala: Chain = defineChain({
-  id: 1934,
+  id: 787,
   name: 'Acala',
   network: 'acala',
   nativeCurrency: {
-    decimals: 12,
+    decimals: 18,
     name: 'ACA',
     symbol: 'ACA',
   },
@@ -17,6 +17,12 @@ export const acala: Chain = defineChain({
     default: {
       http: ['https://eth-rpc-acala.aca-api.network'],
       webSocket: ['wss://eth-rpc-acala.aca-api.network'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Acala Blockscout',
+      url: 'https://blockscout.acala.network',
     },
   },
   testnet: false,
@@ -41,6 +47,16 @@ export const moonbeam: Chain = defineChain({
       webSocket: ['wss://rpc.api.moonbeam.network'],
     },
   },
+  blockExplorers: {
+    default: {
+      name: 'Moonscan',
+      url: 'https://moonscan.io',
+    },
+    etherscan: {
+      name: 'Moonscan',
+      url: 'https://moonscan.io',
+    },
+  },
   testnet: false,
 });
 
@@ -61,6 +77,12 @@ export const hydradx: Chain = defineChain({
     default: {
       http: ['https://rpc.hydradx.cloud'],
       webSocket: ['wss://rpc.hydradx.cloud'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'HydraDX Explorer',
+      url: 'https://explorer.evm.hydration.cloud',
     },
   },
   testnet: false,

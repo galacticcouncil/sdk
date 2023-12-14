@@ -4,18 +4,7 @@ import {
   EvmParachain,
   Parachain,
 } from '@moonbeam-network/xcm-types';
-import {
-  acala as defaultAcala,
-  astar as defaultAstar,
-  bifrostPolkadot as defaultBifrostPolkadot,
-  centrifuge as defaultCentrifuge,
-  hydraDX as defaultHydraDx,
-  interlay as defaultInterlay,
-  moonbeam as defaultMoonbeam,
-  polkadot,
-  polkadotAssetHub as defaultPolkadotAssetHub,
-  zeitgeist as defaultZeitgeist,
-} from '@moonbeam-network/xcm-config';
+import { polkadot } from '@moonbeam-network/xcm-config';
 
 import {
   aca,
@@ -41,7 +30,6 @@ import {
 } from './assets';
 
 export const acala = new Parachain({
-  ...defaultAcala,
   assetsData: [
     {
       asset: aca,
@@ -67,12 +55,17 @@ export const acala = new Parachain({
       id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+  key: 'acala',
+  name: 'Acala',
+  parachainId: 2000,
+  ss58Format: 10,
+  ws: 'wss://acala-rpc.aca-api.network',
 });
 
 export const assetHub = new Parachain({
-  ...defaultPolkadotAssetHub,
-  key: 'assethub',
-  name: 'AssetHub',
   assetsData: [
     {
       asset: usdt,
@@ -87,21 +80,34 @@ export const assetHub = new Parachain({
       palletInstance: 50,
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
+  key: 'assethub',
+  name: 'AssetHub',
+  parachainId: 1000,
+  ss58Format: 42,
+  ws: 'wss://polkadot-asset-hub-rpc.polkadot.io',
 });
 
 export const astar = new Parachain({
-  ...defaultAstar,
   assetsData: [
     {
       asset: astr,
       metadataId: 0,
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+  key: 'astar',
+  name: 'Astar',
+  parachainId: 2006,
+  ss58Format: 5,
+  ws: 'wss://rpc.astar.network',
 });
 
 export const bifrost = new Parachain({
-  ...defaultBifrostPolkadot,
-  key: 'bifrost',
   assetsData: [
     {
       asset: bnc,
@@ -113,21 +119,34 @@ export const bifrost = new Parachain({
       metadataId: { VToken2: 0 },
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
+  key: 'bifrost',
+  name: 'Bifrost',
+  parachainId: 2030,
+  ss58Format: 6,
+  ws: 'wss://eu.bifrost-polkadot-rpc.liebi.com/ws',
 });
 
 export const centrifuge = new Parachain({
-  ...defaultCentrifuge,
   assetsData: [
     {
       asset: cfg,
       id: 'Native',
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',
+  key: 'centrifuge',
+  name: 'Centrifuge',
+  parachainId: 2031,
+  ss58Format: 36,
+  ws: 'wss://fullnode.centrifuge.io',
 });
 
 export const hydraDX = new Parachain({
-  ...defaultHydraDx,
-  key: 'hydradx',
   assetsData: [
     {
       asset: hdx,
@@ -230,10 +249,17 @@ export const hydraDX = new Parachain({
       decimals: 10,
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
+  key: 'hydradx',
+  name: 'HydraDX',
+  parachainId: 2034,
+  ss58Format: 63,
+  ws: 'wss://rpc.hydradx.cloud',
 });
 
 export const interlay = new Parachain({
-  ...defaultInterlay,
   assetsData: [
     {
       asset: ibtc,
@@ -248,10 +274,17 @@ export const interlay = new Parachain({
       metadataId: 0,
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xbf88efe70e9e0e916416e8bed61f2b45717f517d7f3523e33c7b001e5ffcbc72',
+  key: 'interlay',
+  name: 'Interlay',
+  parachainId: 2032,
+  ss58Format: 2032,
+  ws: 'wss://api.interlay.io/parachain',
 });
 
 export const moonbeam = new EvmParachain({
-  ...defaultMoonbeam,
   assetsData: [
     {
       asset: glmr,
@@ -282,6 +315,16 @@ export const moonbeam = new EvmParachain({
       decimals: 18,
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
+  id: 1284,
+  key: 'moonbeam',
+  name: 'Moonbeam',
+  parachainId: 2004,
+  rpc: 'https://rpc.api.moonbeam.network',
+  ss58Format: 1284,
+  ws: 'wss://wss.api.moonbeam.network',
 });
 
 export const subsocial = new Parachain({
@@ -292,7 +335,8 @@ export const subsocial = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
-  genesisHash: '0x',
+  genesisHash:
+    '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f',
   key: 'subsocial',
   name: 'Subsocial',
   parachainId: 2101,
@@ -301,13 +345,20 @@ export const subsocial = new Parachain({
 });
 
 export const zeitgeist = new Parachain({
-  ...defaultZeitgeist,
   assetsData: [
     {
       asset: ztg,
       id: 'Ztg',
     },
   ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060',
+  key: 'zeitgeist',
+  name: 'Zeitgeist',
+  parachainId: 2092,
+  ss58Format: 73,
+  ws: 'wss://zeitgeist-rpc.dwellir.com',
 });
 
 export const chains: AnyChain[] = [
