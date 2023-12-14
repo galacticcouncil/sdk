@@ -17,14 +17,8 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getSystemBalance(accountId: string): Promise<BigNumber> {
-    const {
-      data: { free, miscFrozen, feeFrozen, frozen },
-    } = await this.api.query.system.account(accountId);
-    return this.calculateFreeBalance(
-      free.toString(),
-        (miscFrozen || frozen).toString(),
-        (feeFrozen || 0).toString()
-    );
+    const { data } = await this.api.query.system.account(accountId);
+    return this.calculateFreeBalance(data);
   }
 
   async getTokenBalance(
@@ -35,11 +29,7 @@ export class BalanceClient extends PolkadotApiClient {
       accountId,
       tokenKey
     );
-    return this.calculateFreeBalance(
-      free.toString(),
-      ZERO.toFixed(),
-      frozen.toString()
-    );
+    return this.calculateFreeBalance({free, feeFrozen: reserved, frozen});
   }
 
   async subscribeBalance(
@@ -52,11 +42,7 @@ export class BalanceClient extends PolkadotApiClient {
       .map((t) => [address, t]);
     return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
       balances.forEach(({ free, reserved, frozen }, i) => {
-        const freeBalance = this.calculateFreeBalance(
-          free.toString(),
-          reserved.toString(),
-          frozen.toString()
-        );
+        const freeBalance = this.calculateFreeBalance({free, feeFrozen: reserved, frozen});
         const token = tokenAccArgs[i][1];
         onChange(token, freeBalance);
       });
@@ -72,12 +58,8 @@ export class BalanceClient extends PolkadotApiClient {
       .filter((t) => t !== SYSTEM_ASSET_ID)
       .map((t) => [address, t]);
     return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
-      balances.forEach(({ free, frozen }, i) => {
-        const freeBalance = this.calculateFreeBalance(
-          free.toString(),
-          ZERO.toFixed(),
-          frozen.toString()
-        );
+      balances.forEach((data, i) => {
+        const freeBalance = this.calculateFreeBalance(data);
         const token = tokenAccArgs[i][1];
         onChange(token, freeBalance);
       });
