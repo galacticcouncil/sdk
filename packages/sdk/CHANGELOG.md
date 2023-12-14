@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 1.0.1
+
+### Patch Changes
+
+- support for polkadot 1.1
+  automatically detecting pools
+
 ## 1.0.0
 
 ### Major Changes
