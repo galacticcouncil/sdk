@@ -1,6 +1,5 @@
 import { ConfigService, ConfigBuilder } from '@moonbeam-network/xcm-config';
 import { AssetAmount } from '@moonbeam-network/xcm-types';
-import { getPolkadotApi } from '@moonbeam-network/xcm-utils';
 
 import {
   chainsConfigMap,
@@ -8,7 +7,7 @@ import {
   assetsMap,
   evmChains,
 } from '@galacticcouncil/xcm-cfg';
-import { Wallet, XCall } from '@galacticcouncil/xcm-sdk';
+import { SubstrateApis, Wallet, XCall } from '@galacticcouncil/xcm-sdk';
 
 import { logAssets, logSrcChains, logDestChains } from './utils';
 
@@ -43,20 +42,17 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Initialize bi-directional connection (optional)
+const apiPool = SubstrateApis.getInstance();
 console.time('connection');
 const [_srcApi, _dstApi] = await Promise.all([
-  getPolkadotApi(srcChain.ws),
-  getPolkadotApi(destChain.ws),
+  apiPool.api(srcChain.ws),
+  apiPool.api(destChain.ws),
 ]);
 console.timeEnd('connection');
 
 // Define source & dest accounts
 const srcAddr = 'INSERT_ACCOUNT';
 const destAddr = 'INSERT_ACCOUNT';
-
-if (srcAddr === 'INSERT_ACCOUNT' || destAddr === 'INSERT_ACCOUNT') {
-  throw new Error('Setup your accounts mate!');
-}
 
 // Subscribe source chain token balance
 const balanceObserver = (balance: AssetAmount) => console.log(balance);

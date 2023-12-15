@@ -3,9 +3,9 @@ import '@polkadot/api-augment';
 import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { IConfigService } from '@moonbeam-network/xcm-config';
 import { AnyParachain, Asset, AssetAmount } from '@moonbeam-network/xcm-types';
-import { getPolkadotApi } from '@moonbeam-network/xcm-utils';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { SubstrateApis } from './SubstrateApis';
 
 export class SubstrateService {
   readonly api: ApiPromise;
@@ -28,11 +28,9 @@ export class SubstrateService {
     chain: AnyParachain,
     configService: IConfigService
   ): Promise<SubstrateService> {
-    return new SubstrateService(
-      await getPolkadotApi(chain.ws),
-      chain,
-      configService
-    );
+    const apiPool = SubstrateApis.getInstance();
+    const api = await apiPool.api(chain.ws);
+    return new SubstrateService(api, chain, configService);
   }
 
   get decimals(): number {
