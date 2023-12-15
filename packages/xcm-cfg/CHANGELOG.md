@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.2
+
+### Patch Changes
+
+- Revisited chains configs
+
 ## 1.0.1
 
 ### Patch Changes
