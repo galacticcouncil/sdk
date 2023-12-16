@@ -98,6 +98,7 @@ export class Router {
             icon: t.icon,
             type: t.type,
             existentialDeposit: t.existentialDeposit,
+            origin: t.origin,
             meta: t.meta,
           } as Asset;
         })

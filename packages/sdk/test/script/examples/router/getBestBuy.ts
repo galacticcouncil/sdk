@@ -8,7 +8,7 @@ class GetBestBuyPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
-    const bestBuy = await router.getBestBuy('1', '2', 10);
+    const bestBuy = await router.getBestBuy('1', '10', 10);
     const transaction = bestBuy.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
     return bestBuy;
@@ -17,10 +17,6 @@ class GetBestBuyPriceExample extends PolkadotExecutor {
 
 new GetBestBuyPriceExample(
   ApiUrl.HydraDx,
-  'Get best buy price Hydra',
+  'Get best buy price HydraDX',
   true
-).run().then(() => new GetBestBuyPriceExample(
-  ApiUrl.Chopsticks,
-  'Get best buy price 🐍',
-  true
-).run());
+).run();

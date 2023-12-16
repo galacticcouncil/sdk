@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { BigNumber, ZERO } from '../utils/bignumber';
+import { BigNumber } from '../utils/bignumber';
 
 import { PolkadotApiClient } from './PolkadotApi';
 
@@ -29,7 +29,7 @@ export class BalanceClient extends PolkadotApiClient {
       accountId,
       tokenKey
     );
-    return this.calculateFreeBalance({free, feeFrozen: reserved, frozen});
+    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
   }
 
   async subscribeBalance(
@@ -42,7 +42,11 @@ export class BalanceClient extends PolkadotApiClient {
       .map((t) => [address, t]);
     return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
       balances.forEach(({ free, reserved, frozen }, i) => {
-        const freeBalance = this.calculateFreeBalance({free, feeFrozen: reserved, frozen});
+        const freeBalance = this.calculateFreeBalance({
+          free,
+          feeFrozen: reserved,
+          frozen,
+        });
         const token = tokenAccArgs[i][1];
         onChange(token, freeBalance);
       });
@@ -70,15 +74,12 @@ export class BalanceClient extends PolkadotApiClient {
     address: string,
     onChange: (token: string, balance: BigNumber) => void
   ): UnsubscribePromise {
-    return this.api.query.system.account(
-      address,
-      ({ data }) => onChange(SYSTEM_ASSET_ID, this.calculateFreeBalance(data))
+    return this.api.query.system.account(address, ({ data }) =>
+      onChange(SYSTEM_ASSET_ID, this.calculateFreeBalance(data))
     );
   }
 
-  private calculateFreeBalance(
-    data: any,
-  ): BigNumber {
+  private calculateFreeBalance(data: any): BigNumber {
     const { free, miscFrozen, feeFrozen, frozen } = data;
     const freeBN = new BigNumber(free);
     const miscFrozenBN = new BigNumber(miscFrozen || frozen);

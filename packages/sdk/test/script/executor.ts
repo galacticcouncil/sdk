@@ -13,7 +13,6 @@ export enum ApiUrl {
   Basilisk_Rococo_CLOUD = 'wss://basilisk-rococo-rpc.play.hydration.cloud',
   HydraDx = 'wss://rpc.hydradx.cloud',
   HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
-  Acala = 'wss://acala-polkadot.api.onfinality.io/public-ws',
 }
 
 export abstract class PolkadotExecutor {
@@ -61,7 +60,7 @@ export abstract class PolkadotExecutor {
               .finally(() => {
                 console.timeEnd('Execution time:');
                 api.disconnect();
-                resolve();
+                resolve('');
               });
           });
       } catch (error) {

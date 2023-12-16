@@ -173,5 +173,6 @@ export interface Asset {
   icon: string;
   type: string;
   existentialDeposit: string;
+  origin?: number;
   meta?: Record<string, string>;
 }
