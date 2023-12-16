@@ -57,6 +57,7 @@ describe('Router with mocked XYK pool service', () => {
         name: 'BSX',
         type: 'Token',
         existentialDeposit: '1000',
+        origin: undefined,
         meta: undefined,
       },
       {
@@ -67,6 +68,7 @@ describe('Router with mocked XYK pool service', () => {
         name: 'Acala Dollar',
         type: 'Token',
         existentialDeposit: '1000',
+        origin: undefined,
         meta: undefined,
       },
       {
@@ -77,6 +79,7 @@ describe('Router with mocked XYK pool service', () => {
         name: 'Kusama',
         type: 'Token',
         existentialDeposit: '1000',
+        origin: undefined,
         meta: undefined,
       },
     ]);
@@ -95,6 +98,7 @@ describe('Router with mocked XYK pool service', () => {
         name: 'Acala Dollar',
         type: 'Token',
         existentialDeposit: '1000',
+        origin: undefined,
         meta: undefined,
       },
       {
@@ -105,6 +109,7 @@ describe('Router with mocked XYK pool service', () => {
         name: 'BSX',
         type: 'Token',
         existentialDeposit: '1000',
+        origin: undefined,
         meta: undefined,
       },
     ]);
