@@ -39,7 +39,7 @@ export class Bfs {
    * @param dst - destination node or null if requesting all posible paths from src
    * @returns paths
    */
-  findPaths(g: Path[], src: number, dst: number | null): Path[] {
+  findPaths(g: Map<number,Path>, src: number, dst: number | null): Path[] {
     // Store the result paths
     const paths: Path[] = [];
     // Store the traversing paths
@@ -74,8 +74,8 @@ export class Bfs {
       }
 
       // Traverse to all nodes connected to current one and push path to queue
-      const lastNode = g[last[0]];
-      lastNode.forEach((segment) => {
+      const lastNode = g.get(last[0]);
+      lastNode?.forEach((segment) => {
         if (this.isNotVisited(segment, path)) {
           const newpath = [...path];
           newpath.push(segment);
@@ -93,17 +93,15 @@ export class Bfs {
    * @param edges - list of all edges [id, from, to] between assets
    * @returns - traversal graph
    */
-  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Path[] {
-    const lastNodeId = nodes[nodes.length - 1];
-    const graph: Path[] = [];
-    for (let j = 0; j <= parseInt(lastNodeId); j++) {
-      graph.push([]);
+  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Map<number, Path> {
+    const graph = new Map<number, Path>();
+    for (let node of nodes) {
+      graph.set(parseInt(node), []);
     }
-
     for (const [address, from, to] of edges) {
       const fromNumber = parseInt(from);
       const toNumber = parseInt(to);
-      graph[fromNumber].push([toNumber, address]);
+      graph.get(fromNumber)?.push([toNumber, address]);
     }
     return graph;
   }
