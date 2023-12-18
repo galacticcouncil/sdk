@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.1
+
+### Patch Changes
+
+- using map instead of array for graph
+
 ## 1.1.0
 
 ### Minor Changes
