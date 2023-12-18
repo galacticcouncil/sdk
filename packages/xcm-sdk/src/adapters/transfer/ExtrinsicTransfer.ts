@@ -16,7 +16,7 @@ export class ExtrinsicTransfer implements TransferProvider<ExtrinsicConfig> {
   calldata(config: ExtrinsicConfig): XCall {
     const extrinic = this.#substrate.buildExtrinsic(config);
     return {
-      data: extrinic.toHex(),
+      data: extrinic.inner.toHex(),
     } as XCall;
   }
 
