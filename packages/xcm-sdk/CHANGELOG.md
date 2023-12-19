@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.3
+
+### Patch Changes
+
+- Revert back inner hex
+
 ## 1.0.2
 
 ### Patch Changes
