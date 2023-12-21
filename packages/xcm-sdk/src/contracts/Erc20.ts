@@ -8,15 +8,23 @@ const ABI = parseAbi([
   'function decimals() view returns (uint8)',
 ]);
 
+type RecipientResolver = (address: string) => Promise<string>;
+
 export class Erc20 {
   readonly #client: EvmClient;
   readonly #config: ContractConfig;
+  readonly #resolver?: RecipientResolver;
 
-  constructor(client: EvmClient, config: ContractConfig) {
+  constructor(
+    client: EvmClient,
+    config: ContractConfig,
+    resolver?: RecipientResolver
+  ) {
     this.validateClient(client);
     this.validateConfig(config);
     this.#client = client;
     this.#config = config;
+    this.#resolver = resolver;
   }
 
   private validateClient(client: EvmClient) {
@@ -25,10 +33,14 @@ export class Erc20 {
     }
   }
 
-  private validateConfig(config: ContractConfig) {
+  private async validateConfig(config: ContractConfig) {
     if (!config.address) {
       throw new Error('Erc20 address is required');
     }
+  }
+
+  private async resolve(address: string): Promise<string> {
+    return this.#resolver ? await this.#resolver(address) : address;
   }
 
   async getBalance(): Promise<bigint> {
@@ -36,11 +48,12 @@ export class Erc20 {
     const { address, args } = this.#config;
     const [recipient] = args;
 
+    const resolved = await this.resolve(recipient);
     return await provider.readContract({
       address: address as `0x${string}`,
       abi: ABI,
       functionName: 'balanceOf',
-      args: [recipient as `0x${string}`],
+      args: [resolved as `0x${string}`],
     });
   }
 

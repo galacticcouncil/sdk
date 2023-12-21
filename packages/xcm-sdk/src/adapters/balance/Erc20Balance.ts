@@ -53,7 +53,7 @@ export class Erc20Balance implements BalanceProvider<Erc20> {
 
     return observable.pipe(
       finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount),
+      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
     ) as Observable<AssetAmount>;
   }
 }

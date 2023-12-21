@@ -4,7 +4,7 @@ import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
-import { EvmClient } from '../evm';
+import { EvmClient, EvmResolver } from '../evm';
 import { SubstrateService } from '../substrate';
 
 import { buildTransfer } from './TransferUtils';
@@ -15,15 +15,19 @@ export class TransferService {
 
   protected substrate: SubstrateService;
 
-  constructor(evmClient: EvmClient, substrate: SubstrateService) {
-    this.balance = new BalanceAdapter({ evmClient, substrate });
+  constructor(
+    evmClient: EvmClient,
+    substrate: SubstrateService,
+    evmResolver?: EvmResolver
+  ) {
+    this.balance = new BalanceAdapter({ evmClient, evmResolver, substrate });
     this.transfer = new TransferAdapter({ evmClient, substrate });
     this.substrate = substrate;
   }
 
   async getBalance(
     address: string,
-    transferConfig: ChainTransferConfig,
+    transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
     const asset = config.asset;
@@ -36,7 +40,7 @@ export class TransferService {
   }
 
   async getDestinationFee(
-    transferConfig: ChainTransferConfig,
+    transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { config } = transferConfig;
     const { asset, amount } = config.destinationFee;
@@ -68,21 +72,21 @@ export class TransferService {
     destAddress: string,
     destChain: AnyChain,
     destFee: AssetAmount,
-    transferConfig: ChainTransferConfig,
+    transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const config = buildTransfer(
       amount,
       destAddress,
       destChain,
       destFee,
-      transferConfig,
+      transferConfig
     );
     return this.transfer.getFee(address, amount, feeBalance, config);
   }
 
   async getFeeBalance(
     address: string,
-    transferConfig: ChainTransferConfig,
+    transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
     if (config.fee) {

@@ -30,7 +30,6 @@ const transfer = (): ExtrinsicConfigBuilder => ({
 });
 
 const transferMultiasset = () => {
-  const func = 'transferMultiasset';
   return {
     X3: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, palletInstance }) =>

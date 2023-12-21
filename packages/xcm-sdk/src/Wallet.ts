@@ -6,7 +6,7 @@ import { merge, Subscription } from 'rxjs';
 import { Chain } from 'viem';
 
 import { BalanceAdapter } from './adapters';
-import { EvmClient } from './evm';
+import { EvmClient, EvmResolver } from './evm';
 import { SubstrateService } from './substrate';
 
 import {
@@ -21,17 +21,24 @@ export interface EvmChains {
   [key: string]: Chain;
 }
 
+export interface EvmResolvers {
+  [key: string]: EvmResolver;
+}
+
 export interface WalletOptions {
   configService: ConfigService;
   evmChains: EvmChains;
+  evmResolvers?: EvmResolvers;
 }
 
 export class Wallet {
   private readonly configService: ConfigService;
   private readonly evmClients: Record<string, EvmClient> = {};
+  private readonly evmResolvers: Record<string, EvmResolver> = {};
 
-  constructor({ configService, evmChains }: WalletOptions) {
+  constructor({ configService, evmChains, evmResolvers }: WalletOptions) {
     this.configService = configService;
+    this.evmResolvers = evmResolvers ?? {};
     Object.entries(evmChains).forEach(([name, chain]) => {
       this.evmClients[name] = new EvmClient(chain);
     });
@@ -40,6 +47,11 @@ export class Wallet {
   public getEvmClient(chain: string | AnyChain): EvmClient {
     const aChain = this.configService.getChain(chain);
     return this.evmClients[aChain.key];
+  }
+
+  private getEvmResolver(chain: string | AnyChain): EvmResolver {
+    const aChain = this.configService.getChain(chain);
+    return this.evmResolvers[aChain.key];
   }
 
   public async getSubstrateService(
@@ -65,8 +77,9 @@ export class Wallet {
 
     const srcEvm = this.getEvmClient(srcChain);
     const srcSubstrate = await this.getSubstrateService(srcChain);
+    const srcEvmAResolver = this.getEvmResolver(srcChain);
     const srcEd = srcSubstrate.existentialDeposit;
-    const srcData = new TransferService(srcEvm, srcSubstrate);
+    const srcData = new TransferService(srcEvm, srcSubstrate, srcEvmAResolver);
 
     const destEvm = this.getEvmClient(destChain);
     const destSubstrate = await this.getSubstrateService(destChain);
@@ -123,7 +136,13 @@ export class Wallet {
 
     const evmClient = this.getEvmClient(chain);
     const substrate = await this.getSubstrateService(chain);
-    const balanceAdapter = new BalanceAdapter({ evmClient, substrate });
+    const evmResolver = this.getEvmResolver(chain);
+
+    const balanceAdapter = new BalanceAdapter({
+      evmClient,
+      evmResolver,
+      substrate,
+    });
 
     const observables = chainConfig.getAssetsConfigs().map((assetConfig) => {
       const { asset, balance } = assetConfig;
