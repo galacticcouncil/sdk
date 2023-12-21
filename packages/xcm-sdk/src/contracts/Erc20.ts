@@ -49,12 +49,16 @@ export class Erc20 {
     const [recipient] = args;
 
     const resolved = await this.resolve(recipient);
-    return await provider.readContract({
-      address: address as `0x${string}`,
-      abi: ABI,
-      functionName: 'balanceOf',
-      args: [resolved as `0x${string}`],
-    });
+    if (resolved) {
+      return await provider.readContract({
+        address: address as `0x${string}`,
+        abi: ABI,
+        functionName: 'balanceOf',
+        args: [resolved as `0x${string}`],
+      });
+    } else {
+      return 0n;
+    }
   }
 
   async getDecimals(): Promise<number> {

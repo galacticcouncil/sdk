@@ -64,8 +64,8 @@ const [_srcApi, _dstApi] = await Promise.all([
 console.timeEnd('connection');
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ACCOUNT';
-const destAddr = 'INSERT_ACCOUNT';
+const srcAddr = 'INSERT_ADDR';
+const destAddr = 'INSERT_ADDR';
 
 // Subscribe source chain token balance
 const balanceObserver = (balance: AssetAmount) => console.log(balance);

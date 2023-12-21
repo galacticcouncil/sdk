@@ -83,8 +83,13 @@ export class Wallet {
 
     const destEvm = this.getEvmClient(destChain);
     const destSubstrate = await this.getSubstrateService(destChain);
+    const destEvmAResolver = this.getEvmResolver(destChain);
     const destEd = destSubstrate.existentialDeposit;
-    const destData = new TransferService(destEvm, destSubstrate);
+    const destData = new TransferService(
+      destEvm,
+      destSubstrate,
+      destEvmAResolver
+    );
 
     const [srcBalance, srcFeeBalance, srcMin, destBalance, destFee, destMin] =
       await Promise.all([
