@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.4
+
+### Patch Changes
+
+- Evm resolver support, fix transferMultiasset fee est
+
 ## 1.0.3
 
 ### Patch Changes
