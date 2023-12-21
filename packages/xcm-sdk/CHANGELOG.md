@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.5
+
+### Patch Changes
+
+- evm resolver fallback to 0n if invalid address
+
 ## 1.0.4
 
 ### Patch Changes
