@@ -7,7 +7,12 @@ import {
   assetsMap,
   evmChains,
 } from '@galacticcouncil/xcm-cfg';
-import { SubstrateApis, Wallet, XCall } from '@galacticcouncil/xcm-sdk';
+import {
+  EvmResolver,
+  SubstrateApis,
+  Wallet,
+  XCall,
+} from '@galacticcouncil/xcm-sdk';
 
 import { logAssets, logSrcChains, logDestChains } from './utils';
 
@@ -18,10 +23,18 @@ const configService = new ConfigService({
   chainsConfig: chainsConfigMap,
 });
 
+const acalaEvmResolver: EvmResolver = async (api: any, address: string) => {
+  const h160Addr = await api.query.evmAccounts.evmAddresses(address);
+  return h160Addr.toString();
+};
+
 // Inialialize wallet
 const wallet: Wallet = new Wallet({
   configService: configService,
   evmChains: evmChains,
+  evmResolvers: {
+    acala: acalaEvmResolver,
+  },
 });
 
 // Define transfer

@@ -26,7 +26,13 @@ export class ExtrinsicTransfer implements TransferProvider<ExtrinsicConfig> {
     feeBalance: AssetAmount,
     config: ExtrinsicConfig
   ): Promise<AssetAmount> {
-    const fee = await this.#substrate.getFee(account, config);
+    let fee: bigint;
+    try {
+      fee = await this.#substrate.getFee(account, config);
+    } catch {
+      // Can't estimate fee if transferMultiasset with no balance
+      fee = 0n;
+    }
     return feeBalance.copyWith({
       amount: fee,
     });
