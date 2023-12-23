@@ -7,15 +7,17 @@ import { AssetAmount } from '@moonbeam-network/xcm-types';
  * @member {AssetAmount} balance Asset balance
  * @member {AssetAmount} max Maximum allowed amount of asset to send
  * @member {AssetAmount} min Minimum required amount of asset to send
- * @member {AssetAmount} srcFee Source chain transfer fee
- * @member {AssetAmount} destFee Destination chain transfer fee
+ * @member {AssetAmount} srcFee Source chain fee
+ * @member {AssetAmount} srcFee Source chain fee asset balance
+ * @member {AssetAmount} destFee Destination chain fee
  */
 export interface XData {
   balance: AssetAmount;
+  destFee: AssetAmount;
   max: AssetAmount;
   min: AssetAmount;
   srcFee: AssetAmount;
-  destFee: AssetAmount;
+  srcFeeBalance: AssetAmount;
   transfer(amount: bigint | number | string): XCall;
 }
 

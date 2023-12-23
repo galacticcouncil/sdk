@@ -109,10 +109,11 @@ export class Wallet {
     const max = calculateMax(srcBalance, srcEd, srcFee, srcMin);
     return {
       balance: srcBalance,
-      min,
-      max,
-      srcFee,
       destFee,
+      max,
+      min,
+      srcFee,
+      srcFeeBalance,
       transfer(amount): XCall {
         const config = buildTransfer(
           toBigInt(amount, srcBalance.decimals),
