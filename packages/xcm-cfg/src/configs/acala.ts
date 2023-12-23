@@ -1,7 +1,6 @@
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
-  FeeBuilder,
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
@@ -9,17 +8,6 @@ import { aca, dai_awh, wbtc_awh, weth_awh } from '../assets';
 import { hydraDX, acala } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
-  new AssetConfig({
-    asset: aca,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: FeeBuilder().assetManager().assetTypeUnitsPerSecond(),
-      asset: aca,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
   new AssetConfig({
     asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
