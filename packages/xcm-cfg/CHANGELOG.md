@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.5
+
+### Patch Changes
+
+- drop acala aca config
+
 ## 1.0.4
 
 ### Patch Changes

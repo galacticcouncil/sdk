@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.7
+
+### Patch Changes
+
+- wallet src fee balance support
+
 ## 1.0.6
 
 ### Patch Changes
