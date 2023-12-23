@@ -9,17 +9,6 @@ import { hydraDX, interlay } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
-    asset: ibtc,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.00000007,
-      asset: ibtc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetConfig({
     asset: intr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: hydraDX,
@@ -29,6 +18,21 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetConfig({
+    asset: ibtc,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.00000007,
+      asset: ibtc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: intr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
   }),
 ];
 
