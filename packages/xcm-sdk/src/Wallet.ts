@@ -49,16 +49,16 @@ export class Wallet {
     return this.evmClients[aChain.key];
   }
 
-  private getEvmResolver(chain: string | AnyChain): EvmResolver {
-    const aChain = this.configService.getChain(chain);
-    return this.evmResolvers[aChain.key];
-  }
-
   public async getSubstrateService(
     chain: string | AnyChain
   ): Promise<SubstrateService> {
     const aChain = this.configService.getChain(chain);
-    return await SubstrateService.create(aChain, this.configService);
+    const evmResolver = this.evmResolvers[aChain.key];
+    return await SubstrateService.create(
+      aChain,
+      this.configService,
+      evmResolver
+    );
   }
 
   public async transfer(
@@ -77,19 +77,13 @@ export class Wallet {
 
     const srcEvm = this.getEvmClient(srcChain);
     const srcSubstrate = await this.getSubstrateService(srcChain);
-    const srcEvmAResolver = this.getEvmResolver(srcChain);
     const srcEd = srcSubstrate.existentialDeposit;
-    const srcData = new TransferService(srcEvm, srcSubstrate, srcEvmAResolver);
+    const srcData = new TransferService(srcEvm, srcSubstrate);
 
     const destEvm = this.getEvmClient(destChain);
     const destSubstrate = await this.getSubstrateService(destChain);
-    const destEvmAResolver = this.getEvmResolver(destChain);
     const destEd = destSubstrate.existentialDeposit;
-    const destData = new TransferService(
-      destEvm,
-      destSubstrate,
-      destEvmAResolver
-    );
+    const destData = new TransferService(destEvm, destSubstrate);
 
     const [srcBalance, srcFeeBalance, srcMin, destBalance, destFee, destMin] =
       await Promise.all([
@@ -141,24 +135,29 @@ export class Wallet {
 
     const evmClient = this.getEvmClient(chain);
     const substrate = await this.getSubstrateService(chain);
-    const evmResolver = this.getEvmResolver(chain);
 
     const balanceAdapter = new BalanceAdapter({
       evmClient,
-      evmResolver,
       substrate,
     });
 
-    const observables = chainConfig.getAssetsConfigs().map((assetConfig) => {
-      const { asset, balance } = assetConfig;
-      const assetId = chainConfig.chain.getBalanceAssetId(asset);
-      const balanceConfig = balance.build({
-        address: address,
-        asset: assetId,
+    const observables = chainConfig
+      .getAssetsConfigs()
+      .map(async (assetConfig) => {
+        const { asset, balance } = assetConfig;
+        const assetId = chainConfig.chain.getBalanceAssetId(asset);
+        const resolvedAddr = await substrate.resolveAddress(
+          address,
+          assetId.toString()
+        );
+        const balanceConfig = balance.build({
+          address: resolvedAddr,
+          asset: assetId,
+        });
+        return balanceAdapter.subscribe(asset, balanceConfig);
       });
-      return balanceAdapter.subscribe(asset, balanceConfig);
-    });
-    const observable = merge(...observables);
+    const ob = await Promise.all(observables);
+    const observable = merge(...ob);
     return observable.subscribe(observer);
   }
 }

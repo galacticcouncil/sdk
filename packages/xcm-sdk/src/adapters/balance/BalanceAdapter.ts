@@ -12,45 +12,34 @@ import { Erc20Balance } from './Erc20Balance';
 import { SubstrateBalance } from './SubstrateBalance';
 
 import { Erc20 } from '../../contracts';
-import { EvmClient, EvmResolver } from '../../evm';
+import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 
 export type BalanceOptions = {
   evmClient?: EvmClient;
-  evmResolver?: EvmResolver;
   substrate: SubstrateService;
 };
 
 export class BalanceAdapter {
   protected evmClient!: EvmClient;
-  protected evmResolver?: EvmResolver;
   protected substrate: SubstrateService;
 
   private erc20Balance!: Erc20Balance;
   private substrateBalance: SubstrateBalance;
 
-  constructor({ evmClient, evmResolver, substrate }: BalanceOptions) {
+  constructor({ evmClient, substrate }: BalanceOptions) {
     this.substrate = substrate;
     this.substrateBalance = new SubstrateBalance(substrate);
 
     if (evmClient) {
       this.evmClient = evmClient;
-      this.evmResolver = evmResolver;
       this.erc20Balance = new Erc20Balance(evmClient);
     }
   }
 
-  private async resolver(address: string) {
-    return this.evmResolver
-      ? this.evmResolver(this.substrate.api, address)
-      : address;
-  }
-
   async read(asset: Asset, config: BaseConfig): Promise<AssetAmount> {
     if (config.type === CallType.Evm) {
-      const cfg = config as ContractConfig;
-      const resolverFn = this.resolver.bind(this);
-      const erc20 = new Erc20(this.evmClient, cfg, resolverFn);
+      const erc20 = new Erc20(this.evmClient, config as ContractConfig);
       return this.erc20Balance.read(asset, erc20);
     }
 
@@ -59,9 +48,7 @@ export class BalanceAdapter {
 
   subscribe(asset: Asset, config: BaseConfig): Observable<AssetAmount> {
     if (config.type === CallType.Evm) {
-      const cfg = config as ContractConfig;
-      const resolverFn = this.resolver.bind(this);
-      const erc20 = new Erc20(this.evmClient, cfg, resolverFn);
+      const erc20 = new Erc20(this.evmClient, config as ContractConfig);
       return this.erc20Balance.subscribe(asset, erc20);
     }
 

@@ -5,7 +5,10 @@ import { IConfigService } from '@moonbeam-network/xcm-config';
 import { AnyParachain, Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+
 import { SubstrateApis } from './SubstrateApis';
+import { EvmResolver } from '../evm';
+import { isEthAddress } from '../utils/address';
 
 export class SubstrateService {
   readonly api: ApiPromise;
@@ -14,23 +17,28 @@ export class SubstrateService {
 
   readonly configService: IConfigService;
 
+  readonly evmResolver?: EvmResolver;
+
   constructor(
     api: ApiPromise,
     chain: AnyParachain,
-    configService: IConfigService
+    configService: IConfigService,
+    evmResolver?: EvmResolver
   ) {
     this.api = api;
     this.chain = chain;
     this.configService = configService;
+    this.evmResolver = evmResolver;
   }
 
   static async create(
     chain: AnyParachain,
-    configService: IConfigService
+    configService: IConfigService,
+    evmResolver?: EvmResolver
   ): Promise<SubstrateService> {
     const apiPool = SubstrateApis.getInstance();
     const api = await apiPool.api(chain.ws);
-    return new SubstrateService(api, chain, configService);
+    return new SubstrateService(api, chain, configService, evmResolver);
   }
 
   get decimals(): number {
@@ -76,5 +84,19 @@ export class SubstrateService {
     const fn = this.api.tx[config.module][config.func];
     const args = config.getArgs(fn);
     return fn(...args);
+  }
+
+  /**
+   * Try to resolve evm address if token config using erc20 balance
+   * builder yet substrate address was provided.
+   *
+   * @param address - substrate address
+   * @param assetId - balance asset id
+   * @returns h160 address if any
+   */
+  async resolveAddress(address: string, assetId: string) {
+    return this.evmResolver && isEthAddress(assetId)
+      ? this.evmResolver(this.api, address)
+      : address;
   }
 }
