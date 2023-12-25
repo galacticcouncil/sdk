@@ -2,7 +2,14 @@ import { SubstrateQueryConfig } from '@moonbeam-network/xcm-builder';
 import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 import { QueryableStorage } from '@polkadot/api/types';
 
-import { concatMap, map, switchMap, Observable, ReplaySubject } from 'rxjs';
+import {
+  concatMap,
+  distinctUntilChanged,
+  map,
+  switchMap,
+  Observable,
+  ReplaySubject,
+} from 'rxjs';
 
 import { SubstrateService } from '../../substrate';
 
@@ -28,7 +35,7 @@ export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
 
   subscribe(
     asset: Asset,
-    config: SubstrateQueryConfig,
+    config: SubstrateQueryConfig
   ): Observable<AssetAmount> {
     const subject = new ReplaySubject<QueryableStorage<'rxjs'>>(1);
     subject.next(this.#substrate.api.rx.query);
@@ -37,13 +44,14 @@ export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
     return subject.pipe(
       switchMap((q) => q[module][func](...args)),
       concatMap((b) => transform(b)),
+      distinctUntilChanged((prev, curr) => prev === curr),
       map((balance) => {
         const decimals = this.#substrate.getDecimals(asset);
         return AssetAmount.fromAsset(asset, {
           amount: balance,
           decimals: decimals,
         });
-      }),
+      })
     );
   }
 }
