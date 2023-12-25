@@ -41,10 +41,6 @@ export class SubstrateService {
     return new SubstrateService(api, chain, configService, evmResolver);
   }
 
-  get decimals(): number {
-    return this.api.registry.chainDecimals.at(0) || 12;
-  }
-
   get asset(): Asset {
     const symbol = this.api.registry.chainTokens.at(0);
     const key = symbol?.toString().toLowerCase();
@@ -59,6 +55,10 @@ export class SubstrateService {
     }
 
     return asset;
+  }
+
+  get decimals(): number {
+    return this.api.registry.chainDecimals.at(0) || 12;
   }
 
   get existentialDeposit(): AssetAmount {

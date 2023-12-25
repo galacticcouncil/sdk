@@ -2,7 +2,7 @@ import { ConfigBuilder, ConfigService } from '@moonbeam-network/xcm-config';
 import { Asset, AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
-import { merge, Subscription } from 'rxjs';
+import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { Chain } from 'viem';
 
 import { BalanceAdapter } from './adapters';
@@ -130,7 +130,7 @@ export class Wallet {
   public async subscribeBalance(
     address: string,
     chain: string | AnyChain,
-    observer: (balance: AssetAmount) => void
+    observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainConfig = this.configService.getChainConfig(chain);
 
@@ -158,7 +158,7 @@ export class Wallet {
         return balanceAdapter.subscribe(asset, balanceConfig);
       });
     const ob = await Promise.all(observables);
-    const observable = merge(...ob);
-    return observable.subscribe(observer);
+    const observable = combineLatest(ob);
+    return observable.pipe(debounceTime(500)).subscribe(observer);
   }
 }
