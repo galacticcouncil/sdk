@@ -5,15 +5,8 @@ import {
   chainsConfigMap,
   chainsMap,
   assetsMap,
-  evmChains,
 } from '@galacticcouncil/xcm-cfg';
-import {
-  EvmResolver,
-  SubstrateApis,
-  Wallet,
-  XCall,
-} from '@galacticcouncil/xcm-sdk';
-
+import { SubstrateApis, Wallet, XCall } from '@galacticcouncil/xcm-sdk';
 import { logAssets, logSrcChains, logDestChains } from './utils';
 
 // Inialialize config
@@ -23,24 +16,15 @@ const configService = new ConfigService({
   chainsConfig: chainsConfigMap,
 });
 
-const acalaEvmResolver: EvmResolver = async (api: any, address: string) => {
-  const h160Addr = await api.query.evmAccounts.evmAddresses(address);
-  return h160Addr.toString();
-};
-
 // Inialialize wallet
 const wallet: Wallet = new Wallet({
   configService: configService,
-  evmChains: evmChains,
-  evmResolvers: {
-    acala: acalaEvmResolver,
-  },
 });
 
 // Define transfer
 const asset = configService.getAsset('hdx');
-const srcChain = configService.getChain('hydradx');
-const destChain = configService.getChain('moonbeam');
+const srcChain = configService.getChain('moonbeam');
+const destChain = configService.getChain('hydradx');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -64,11 +48,11 @@ const [_srcApi, _dstApi] = await Promise.all([
 console.timeEnd('connection');
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDR';
-const destAddr = 'INSERT_ADDR';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
-const balanceObserver = (balance: AssetAmount) => console.log(balance);
+const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
 const balanceSubscription = await wallet.subscribeBalance(
   srcAddr,
   srcChain,
@@ -85,7 +69,7 @@ const xdata = await wallet.transfer(
 );
 
 // Construct calldata with transfer amount
-const call: XCall = xdata.transfer('1');
+const call: XCall = xdata.buildCall('1');
 
 // Dump transfer info
 console.log(xdata);

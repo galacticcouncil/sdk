@@ -6,7 +6,13 @@ import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { Chain } from 'viem';
 
 import { BalanceAdapter } from './adapters';
-import { EvmClient, EvmResolver } from './evm';
+import {
+  EvmClient,
+  EvmReconciler,
+  EvmResolver,
+  evmChains as defaultEvmChains,
+  evmResolvers as defaultEvmResolvers,
+} from './evm';
 import { SubstrateService } from './substrate';
 
 import {
@@ -16,6 +22,7 @@ import {
   buildTransfer,
 } from './transfer';
 import { XCall, XData } from './types';
+import { isH160Address } from './utils';
 
 export interface EvmChains {
   [key: string]: Chain;
@@ -27,7 +34,7 @@ export interface EvmResolvers {
 
 export interface WalletOptions {
   configService: ConfigService;
-  evmChains: EvmChains;
+  evmChains?: EvmChains;
   evmResolvers?: EvmResolvers;
 }
 
@@ -38,8 +45,9 @@ export class Wallet {
 
   constructor({ configService, evmChains, evmResolvers }: WalletOptions) {
     this.configService = configService;
-    this.evmResolvers = evmResolvers ?? {};
-    Object.entries(evmChains).forEach(([name, chain]) => {
+    this.evmResolvers = evmResolvers ?? defaultEvmResolvers;
+    const chains = evmChains ?? defaultEvmChains;
+    Object.entries(chains).forEach(([name, chain]) => {
       this.evmClients[name] = new EvmClient(chain);
     });
   }
@@ -49,16 +57,17 @@ export class Wallet {
     return this.evmClients[aChain.key];
   }
 
-  public async getSubstrateService(
+  public getEvmReconciler(chain: string | AnyChain): EvmReconciler {
+    const aChain = this.configService.getChain(chain);
+    const evmProvider = this.evmResolvers[aChain.key];
+    return new EvmReconciler(aChain, evmProvider);
+  }
+
+  private async getSubstrateService(
     chain: string | AnyChain
   ): Promise<SubstrateService> {
     const aChain = this.configService.getChain(chain);
-    const evmResolver = this.evmResolvers[aChain.key];
-    return await SubstrateService.create(
-      aChain,
-      this.configService,
-      evmResolver
-    );
+    return await SubstrateService.create(aChain, this.configService);
   }
 
   public async transfer(
@@ -76,14 +85,20 @@ export class Wallet {
       .build();
 
     const srcEvm = this.getEvmClient(srcChain);
+    const srcEvmReconciler = this.getEvmReconciler(srcChain);
     const srcSubstrate = await this.getSubstrateService(srcChain);
     const srcEd = srcSubstrate.existentialDeposit;
-    const srcData = new TransferService(srcEvm, srcSubstrate);
+    const srcData = new TransferService(srcEvm, srcEvmReconciler, srcSubstrate);
 
     const destEvm = this.getEvmClient(destChain);
+    const destEvmReconciler = this.getEvmReconciler(destChain);
     const destSubstrate = await this.getSubstrateService(destChain);
     const destEd = destSubstrate.existentialDeposit;
-    const destData = new TransferService(destEvm, destSubstrate);
+    const destData = new TransferService(
+      destEvm,
+      destEvmReconciler,
+      destSubstrate
+    );
 
     const [srcBalance, srcFeeBalance, srcMin, destBalance, destFee, destMin] =
       await Promise.all([
@@ -114,7 +129,7 @@ export class Wallet {
       min,
       srcFee,
       srcFeeBalance,
-      transfer(amount): XCall {
+      buildCall(amount): XCall {
         const config = buildTransfer(
           toBigInt(amount, srcBalance.decimals),
           destAddr,
@@ -135,6 +150,7 @@ export class Wallet {
     const chainConfig = this.configService.getChainConfig(chain);
 
     const evmClient = this.getEvmClient(chain);
+    const evmReconciler = this.getEvmReconciler(chain);
     const substrate = await this.getSubstrateService(chain);
 
     const balanceAdapter = new BalanceAdapter({
@@ -146,13 +162,14 @@ export class Wallet {
       .getAssetsConfigs()
       .map(async (assetConfig) => {
         const { asset, balance } = assetConfig;
-        const assetId = chainConfig.chain.getBalanceAssetId(asset);
-        const resolvedAddr = await substrate.resolveAddress(
-          address,
-          assetId.toString()
-        );
+        const { chain } = chainConfig;
+        const assetId = chain.getBalanceAssetId(asset);
+        const isErc20 = isH160Address(assetId.toString());
+        const evmAddr = isErc20
+          ? await evmReconciler.toEvmAddress(address, substrate.api)
+          : address;
         const balanceConfig = balance.build({
-          address: resolvedAddr,
+          address: evmAddr,
           asset: assetId,
         });
         return balanceAdapter.subscribe(asset, balanceConfig);
