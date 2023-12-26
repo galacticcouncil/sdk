@@ -1,6 +1,7 @@
 import { ContractConfig, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { ChainTransferConfig } from '@moonbeam-network/xcm-config';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
+
 /**
  * Calculate maximum allowed amount of asset to send from source to
  * destination chain.

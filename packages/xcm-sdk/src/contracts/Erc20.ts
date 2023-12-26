@@ -14,6 +14,7 @@ export class Erc20 {
 
   constructor(client: EvmClient, config: ContractConfig) {
     this.validateClient(client);
+    this.validateConfig(config);
     this.#client = client;
     this.#config = config;
   }
@@ -24,21 +25,23 @@ export class Erc20 {
     }
   }
 
+  private async validateConfig(config: ContractConfig) {
+    if (!config.address) {
+      throw new Error('Erc20 address is required');
+    }
+  }
+
   async getBalance(): Promise<bigint> {
     const provider = this.#client.getProvider();
     const { address, args } = this.#config;
     const [recipient] = args;
 
-    try {
-      return await provider.readContract({
-        address: address as `0x${string}`,
-        abi: ABI,
-        functionName: 'balanceOf',
-        args: [recipient as `0x${string}`],
-      });
-    } catch {
-      return 0n;
-    }
+    return await provider.readContract({
+      address: address as `0x${string}`,
+      abi: ABI,
+      functionName: 'balanceOf',
+      args: [recipient as `0x${string}`],
+    });
   }
 
   async getDecimals(): Promise<number> {

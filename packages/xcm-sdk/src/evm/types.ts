@@ -1,3 +1,5 @@
 import type { ApiPromise } from '@polkadot/api';
 
-export type EvmResolver = (api: ApiPromise, address: string) => Promise<string>;
+export interface EvmResolver {
+  toH160(ss58Addr: string, api?: ApiPromise): Promise<string>;
+}

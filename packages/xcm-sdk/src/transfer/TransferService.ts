@@ -4,8 +4,9 @@ import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
-import { EvmClient } from '../evm';
+import { EvmClient, EvmReconciler } from '../evm';
 import { SubstrateService } from '../substrate';
+import { isH160Address } from '../utils';
 
 import { buildTransfer } from './TransferUtils';
 
@@ -13,11 +14,19 @@ export class TransferService {
   readonly balance: BalanceAdapter;
   readonly transfer: TransferAdapter;
 
+  protected evmClient: EvmClient;
+  protected evmReconciler: EvmReconciler;
   protected substrate: SubstrateService;
 
-  constructor(evmClient: EvmClient, substrate: SubstrateService) {
+  constructor(
+    evmClient: EvmClient,
+    evmReconciler: EvmReconciler,
+    substrate: SubstrateService
+  ) {
     this.balance = new BalanceAdapter({ evmClient, substrate });
     this.transfer = new TransferAdapter({ evmClient, substrate });
+    this.evmClient = evmClient;
+    this.evmReconciler = evmReconciler;
     this.substrate = substrate;
   }
 
@@ -28,12 +37,12 @@ export class TransferService {
     const { chain, config } = transferConfig;
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
-    const resolvedAddr = await this.substrate.resolveAddress(
-      address,
-      assetId.toString()
-    );
+    const isErc20 = isH160Address(assetId.toString());
+    const evmAddr = isErc20
+      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+      : address;
     const balanceConfig = config.balance.build({
-      address: resolvedAddr,
+      address: evmAddr,
       asset: assetId,
     });
     return this.balance.read(asset, balanceConfig);
@@ -92,12 +101,12 @@ export class TransferService {
     if (config.fee) {
       const feeAsset = config.fee.asset;
       const feeAssetId = chain.getBalanceAssetId(feeAsset);
-      const resolvedAddr = await this.substrate.resolveAddress(
-        address,
-        feeAssetId.toString()
-      );
+      const isErc20 = isH160Address(feeAssetId.toString());
+      const evmAddr = isErc20
+        ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+        : address;
       const feeBalanceConfig = config.fee.balance.build({
-        address: resolvedAddr,
+        address: evmAddr,
         asset: feeAssetId,
       });
       return this.balance.read(feeAsset, feeBalanceConfig);

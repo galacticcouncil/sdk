@@ -14,7 +14,7 @@ import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 import { XCall } from '../../types';
 
-export type TransferOptions = {
+export type TransferParams = {
   evmClient?: EvmClient;
   substrate: SubstrateService;
 };
@@ -26,7 +26,7 @@ export class TransferAdapter {
   private extrinsicTransfer: ExtrinsicTransfer;
   private xTokensTransfer!: XTokensTransfer;
 
-  constructor({ evmClient, substrate }: TransferOptions) {
+  constructor({ evmClient, substrate }: TransferParams) {
     this.substrate = substrate;
     this.extrinsicTransfer = new ExtrinsicTransfer(substrate);
 

@@ -15,7 +15,7 @@ import { Erc20 } from '../../contracts';
 import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 
-export type BalanceOptions = {
+export type BalanceParams = {
   evmClient?: EvmClient;
   substrate: SubstrateService;
 };
@@ -27,7 +27,7 @@ export class BalanceAdapter {
   private erc20Balance!: Erc20Balance;
   private substrateBalance: SubstrateBalance;
 
-  constructor({ evmClient, substrate }: BalanceOptions) {
+  constructor({ evmClient, substrate }: BalanceParams) {
     this.substrate = substrate;
     this.substrateBalance = new SubstrateBalance(substrate);
 
