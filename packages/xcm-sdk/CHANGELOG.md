@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.8
+
+### Patch Changes
+
+- evm reconciler, default resolvers
+
 ## 1.0.7
 
 ### Patch Changes

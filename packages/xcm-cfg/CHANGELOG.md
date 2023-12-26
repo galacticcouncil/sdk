@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.6
+
+### Patch Changes
+
+- move evm config to sdk
+
 ## 1.0.5
 
 ### Patch Changes
