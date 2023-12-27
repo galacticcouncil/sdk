@@ -20,7 +20,9 @@ import {
   intr,
   sub,
   usdc,
+  usdc_mwh,
   usdt,
+  usdt_mwh,
   vdot,
   wbtc_awh,
   wbtc_mwh,
@@ -211,11 +213,21 @@ export const hydraDX = new Parachain({
       decimals: 6,
     },
     {
+      asset: usdc_mwh,
+      id: 21,
+      decimals: 6,
+    },
+    {
       asset: usdt,
       id: 1984,
       balanceId: 10,
       metadataId: 10,
       palletInstance: 50,
+      decimals: 6,
+    },
+    {
+      asset: usdt_mwh,
+      id: 23,
       decimals: 6,
     },
     {
@@ -301,6 +313,18 @@ export const moonbeam = new EvmParachain({
       asset: hdx,
       id: '69606720909260275826784788104880799692',
       decimals: 12,
+    },
+    {
+      asset: usdc_mwh,
+      id: '0x931715FEE2d06333043d11F658C8CE934aC61D0c',
+      metadataId: 0,
+      decimals: 6,
+    },
+    {
+      asset: usdt_mwh,
+      id: '0xc30E9cA94CF52f3Bf5692aaCF81353a27052c46f',
+      metadataId: 0,
+      decimals: 6,
     },
     {
       asset: wbtc_mwh,

@@ -22,7 +22,9 @@ import {
   intr,
   sub,
   usdc,
+  usdc_mwh,
   usdt,
+  usdt_mwh,
   vdot,
   wbtc_awh,
   wbtc_mwh,
@@ -257,6 +259,36 @@ const toMoonbeam: AssetConfig[] = [
   }),
   new AssetConfig({
     asset: dai_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 0.04,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdc_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 0.04,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdt_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {

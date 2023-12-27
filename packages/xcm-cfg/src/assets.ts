@@ -64,6 +64,16 @@ export const wbtc_mwh = new Asset({
   key: 'wbtc_mwh',
 });
 
+export const usdt_mwh = new Asset({
+  ...usdt,
+  key: 'usdt_mwh',
+});
+
+export const usdc_mwh = new Asset({
+  ...usdc,
+  key: 'usdc_mwh',
+});
+
 export const sub = new Asset({
   key: 'sub',
   originSymbol: 'SUB',
@@ -83,7 +93,9 @@ export const assets: Asset[] = [
   intr,
   sub,
   usdc,
+  usdc_mwh,
   usdt,
+  usdt_mwh,
   vdot,
   wbtc_awh,
   wbtc_mwh,
