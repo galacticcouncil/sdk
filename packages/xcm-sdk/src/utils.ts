@@ -1,3 +1,4 @@
+import { isHex, hexToU8a } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { Buffer } from 'buffer';
 
@@ -18,7 +19,12 @@ export function validateH160(h160Addr: string) {
 }
 
 export function validateSs58(ss58Addr: string) {
-  if (ss58Addr.length !== 48 || ss58Addr.at(0) !== '5') {
+  try {
+    const bytes = isHex(ss58Addr)
+      ? hexToU8a(ss58Addr)
+      : decodeAddress(ss58Addr);
+    encodeAddress(bytes);
+  } catch (error) {
     throw 'Invalid SS58 address provided!';
   }
 }
