@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.0.9
+
+### Patch Changes
+
+- fix ss58 validator
+
 ## 1.0.8
 
 ### Patch Changes

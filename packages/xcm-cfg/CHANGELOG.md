@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.7
+
+### Patch Changes
+
+- support moonbeam wh usdt & usdc
+
 ## 1.0.6
 
 ### Patch Changes
