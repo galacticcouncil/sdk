@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.8
+
+### Patch Changes
+
+- fix hydradx -> polkadot xtokens
+
 ## 1.0.7
 
 ### Patch Changes
