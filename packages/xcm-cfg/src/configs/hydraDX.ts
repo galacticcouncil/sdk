@@ -344,7 +344,7 @@ const toPolkadot: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(), //relay using x1 interior !!!
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),

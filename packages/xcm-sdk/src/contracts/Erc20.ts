@@ -25,7 +25,7 @@ export class Erc20 {
     }
   }
 
-  private async validateConfig(config: ContractConfig) {
+  private validateConfig(config: ContractConfig) {
     if (!config.address) {
       throw new Error('Erc20 address is required');
     }
