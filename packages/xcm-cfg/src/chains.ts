@@ -119,6 +119,7 @@ export const bifrost = new Parachain({
       asset: vdot,
       id: { VToken2: 0 },
       metadataId: { VToken2: 0 },
+      decimals: 10,
     },
   ],
   ecosystem: Ecosystem.Polkadot,
