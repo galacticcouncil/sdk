@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.1.0
+
+### Minor Changes
+
+- phala added
+
 ## 1.0.11
 
 ### Patch Changes
