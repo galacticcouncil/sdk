@@ -26,9 +26,13 @@ const toHydraDX: AssetConfig[] = [
     destinationFee: {
       amount: 0.000555,
       asset: vdot,
-      balance: BalanceBuilder().substrate().system().account(),
+      balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    }
   }),
 ];
 
