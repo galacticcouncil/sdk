@@ -29,6 +29,7 @@ import {
   weth_awh,
   weth_mwh,
   ztg,
+  pha,
 } from './assets';
 
 export const acala = new Parachain({
@@ -261,6 +262,11 @@ export const hydraDX = new Parachain({
       id: 12,
       decimals: 10,
     },
+    {
+      asset: pha,
+      id: 8,
+      decimals: 12,
+    }
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -386,6 +392,24 @@ export const zeitgeist = new Parachain({
   ws: 'wss://zeitgeist-rpc.dwellir.com',
 });
 
+export const phala = new Parachain({
+  assetsData: [
+    // NOTE: no meta for native token
+    {
+      asset: pha,
+      metadataId: 99999999,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
+  key: 'phala',
+  name: 'Phala',
+  parachainId: 2035,
+  ss58Format: 30,
+  ws: 'wss://api.phala.network/ws',
+});
+
 export const chains: AnyChain[] = [
   acala,
   assetHub,
@@ -398,6 +422,7 @@ export const chains: AnyChain[] = [
   polkadot,
   subsocial,
   zeitgeist,
+  phala,
 ];
 
 export const chainsMap = new Map<string, AnyChain>(

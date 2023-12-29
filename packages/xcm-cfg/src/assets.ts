@@ -79,6 +79,11 @@ export const sub = new Asset({
   originSymbol: 'SUB',
 });
 
+export const pha = new Asset({
+  key: 'pha',
+  originSymbol: 'PHA',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -102,6 +107,7 @@ export const assets: Asset[] = [
   weth_awh,
   weth_mwh,
   ztg,
+  pha,
 ];
 
 export const assetsMap = new Map<string, Asset>(

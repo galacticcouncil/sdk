@@ -11,6 +11,7 @@ import { moonbeamConfig } from './moonbeam';
 import { polkadotConfig } from './polkadot';
 import { subsocialConfig } from './subsocial';
 import { zeitgeistConfig } from './zeitgeist';
+import { phalaConfig } from './phala';
 
 export const chainsConfig: ChainConfig[] = [
   acalaConfig,
@@ -24,6 +25,7 @@ export const chainsConfig: ChainConfig[] = [
   polkadotConfig,
   subsocialConfig,
   zeitgeistConfig,
+  phalaConfig,
 ];
 
 export const chainsConfigMap = new Map<string, ChainConfig>(

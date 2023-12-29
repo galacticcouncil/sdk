@@ -20,6 +20,7 @@ import {
   hdx,
   ibtc,
   intr,
+  pha,
   sub,
   usdc,
   usdc_mwh,
@@ -41,6 +42,7 @@ import {
   hydraDX,
   interlay,
   moonbeam,
+  phala,
   subsocial,
   zeitgeist,
 } from '../chains';
@@ -388,6 +390,24 @@ const toZeitgeist: AssetConfig[] = [
   }),
 ];
 
+const toPhala: AssetConfig[] = [
+  new AssetConfig({
+    asset: pha,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: phala,
+    destinationFee: {
+      amount: 0.064296,
+      asset: pha,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
@@ -400,6 +420,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toPolkadot,
     ...toSubsocial,
     ...toZeitgeist,
+    ...toPhala,
   ],
   chain: hydraDX,
 });
