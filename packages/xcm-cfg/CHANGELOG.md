@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.10
+
+### Patch Changes
+
+- subsocial transfer fixed
+
 ## 1.0.9
 
 ### Patch Changes
