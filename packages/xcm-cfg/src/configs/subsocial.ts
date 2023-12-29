@@ -20,7 +20,7 @@ const toHydraDX: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
       .limitedReserveTransferAssets()
-      .X2(),
+      .here(),
     fee: {
       asset: sub,
       balance: BalanceBuilder().substrate().system().account(),
