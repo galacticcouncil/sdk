@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.9
+
+### Patch Changes
+
+- vDOT decimals corrected
+
 ## 1.0.8
 
 ### Patch Changes
