@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.0.11
+
+### Patch Changes
+
+- bnc as fee payment asset
+
 ## 1.0.10
 
 ### Patch Changes
