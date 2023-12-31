@@ -84,6 +84,16 @@ export const pha = new Asset({
   originSymbol: 'PHA',
 });
 
+export const nodl = new Asset({
+  key: 'nodl',
+  originSymbol: 'NODL',
+});
+
+export const unq = new Asset({
+  key: 'unq',
+  originSymbol: 'UNQ',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -96,7 +106,9 @@ export const assets: Asset[] = [
   hdx,
   ibtc,
   intr,
+  nodl,
   sub,
+  unq,
   usdc,
   usdc_mwh,
   usdt,

@@ -20,8 +20,10 @@ import {
   hdx,
   ibtc,
   intr,
+  nodl,
   pha,
   sub,
+  unq,
   usdc,
   usdc_mwh,
   usdt,
@@ -42,8 +44,10 @@ import {
   hydraDX,
   interlay,
   moonbeam,
+  nodle,
   phala,
   subsocial,
+  unique,
   zeitgeist,
 } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
@@ -408,6 +412,42 @@ const toPhala: AssetConfig[] = [
   }),
 ];
 
+const toNodle: AssetConfig[] = [
+  new AssetConfig({
+    asset: nodl,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: nodle,
+    destinationFee: {
+      amount: 0.0018,
+      asset: nodl,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
+const toUnique: AssetConfig[] = [
+  new AssetConfig({
+    asset: unq,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: unique,
+    destinationFee: {
+      amount: 0.000078,
+      asset: unq,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
@@ -417,8 +457,10 @@ export const hydraDxConfig = new ChainConfig({
     ...toCentrifuge,
     ...toInterlay,
     ...toMoonbeam,
+    ...toNodle,
     ...toPolkadot,
     ...toSubsocial,
+    ...toUnique,
     ...toZeitgeist,
     ...toPhala,
   ],

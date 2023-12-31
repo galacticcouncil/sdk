@@ -8,8 +8,10 @@ import { centrifugeConfig } from './centrifuge';
 import { hydraDxConfig } from './hydraDX';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
+import { nodleConfig } from './nodle';
 import { polkadotConfig } from './polkadot';
 import { subsocialConfig } from './subsocial';
+import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 
@@ -22,8 +24,10 @@ export const chainsConfig: ChainConfig[] = [
   hydraDxConfig,
   interlayConfig,
   moonbeamConfig,
+  nodleConfig,
   polkadotConfig,
   subsocialConfig,
+  uniqueConfig,
   zeitgeistConfig,
   phalaConfig,
 ];

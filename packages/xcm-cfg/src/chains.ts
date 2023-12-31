@@ -18,7 +18,9 @@ import {
   hdx,
   ibtc,
   intr,
+  nodl,
   sub,
+  unq,
   usdc,
   usdc_mwh,
   usdt,
@@ -202,9 +204,19 @@ export const hydraDX = new Parachain({
       decimals: 10,
     },
     {
+      asset: nodl,
+      id: 26,
+      decimals: 11,
+    },
+    {
       asset: sub,
       id: 24,
       decimals: 10,
+    },
+    {
+      asset: unq,
+      id: 25,
+      decimals: 18,
     },
     {
       asset: usdc,
@@ -408,6 +420,42 @@ export const phala = new Parachain({
   parachainId: 2035,
   ss58Format: 30,
   ws: 'wss://api.phala.network/ws',
+});
+
+export const nodle = new Parachain({
+  assetsData: [
+    // NOTE: no meta for native token
+    {
+      asset: nodl,
+      metadataId: 99999999,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21',
+  key: 'nodle',
+  name: 'Nodle',
+  parachainId: 2026,
+  ss58Format: 37,
+  ws: 'wss://eden-rpc.dwellir.com',
+});
+
+export const unique = new Parachain({
+  assetsData: [
+    // NOTE: no meta for native token
+    {
+      asset: unq,
+      metadataId: 99999999,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
+  key: 'unique',
+  name: 'Unique network',
+  parachainId: 2037,
+  ss58Format: 7391,
+  ws: 'wss://unique-rpc.dwellir.com',
 });
 
 export const chains: AnyChain[] = [
