@@ -14,7 +14,7 @@ export class LbpPoolClient extends PoolClient {
   private poolsData: Map<string, PalletLbpPool> = new Map([]);
 
   isSupported(): boolean {
-    return this.api.query.xyk !== undefined;
+    return this.api.query.lbp !== undefined;
   }
 
   async loadPools(): Promise<PoolBase[]> {
@@ -161,6 +161,10 @@ export class LbpPoolClient extends PoolClient {
     poolEntry: PalletLbpPool,
     relayBlockNumber: u32
   ): boolean {
+    if (poolEntry.start.isEmpty || poolEntry.end.isEmpty) {
+      return false;
+    }
+
     const start = poolEntry.start.unwrap().toNumber();
     const end = poolEntry.end.unwrap().toNumber();
     return (
