@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.2
+
+### Patch Changes
+
+- fix lbp pool active validation
+
 ## 1.1.1
 
 ### Patch Changes
