@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.3
+
+### Patch Changes
+
+- fix lbp subs sync
+
 ## 1.1.2
 
 ### Patch Changes
