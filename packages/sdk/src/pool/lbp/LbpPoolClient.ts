@@ -70,7 +70,7 @@ export class LbpPoolClient extends PoolClient {
     return PoolType.LBP;
   }
 
-  async subscribePoolChange(pool: LbpPoolBase): UnsubscribePromise {
+  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
     return this.api.query.parachainSystem.validationData(
       async (validationData) => {
         const { relayParentNumber } = validationData.unwrap();
@@ -83,9 +83,7 @@ export class LbpPoolClient extends PoolClient {
             poolData!,
             relayParentNumber.toString()
           );
-
-          pool.tokens = poolDelta.tokens ?? pool.tokens;
-          pool.repayFeeApply = poolDelta.repayFeeApply ?? pool.repayFeeApply;
+          Object.assign(pool, poolDelta);
         } else {
           const inactivePoolIndex = this.pools.findIndex(
             (p) => p.address == pool.address

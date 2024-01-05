@@ -84,11 +84,7 @@ export class StableSwapClient extends PoolClient {
         stablePool!,
         blockNumber.toString()
       );
-
-      pool = {
-        ...pool,
-        ...poolDelta,
-      } as StableSwapBase;
+      Object.assign(pool, poolDelta);
     });
   }
 
