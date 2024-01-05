@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.4
+
+### Patch Changes
+
+- fix stableswap pool change sync
+
 ## 1.1.3
 
 ### Patch Changes
