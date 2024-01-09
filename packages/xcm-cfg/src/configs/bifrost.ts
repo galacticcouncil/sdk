@@ -6,6 +6,7 @@ import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { bnc, vdot } from '../assets';
 import { bifrost, hydraDX } from '../chains';
+import { ExtrinsicBuilderV2 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -17,7 +18,7 @@ const toHydraDX: AssetConfig[] = [
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
   }),
   new AssetConfig({
     asset: vdot,
@@ -28,11 +29,11 @@ const toHydraDX: AssetConfig[] = [
       asset: vdot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
-    }
+    },
   }),
 ];
 
