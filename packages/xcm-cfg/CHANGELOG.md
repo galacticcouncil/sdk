@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.1.1
+
+### Patch Changes
+
+- Fix bifrost to hydradx xcm, extrinsic account support
+
 ## 1.1.0
 
 ### Minor Changes
