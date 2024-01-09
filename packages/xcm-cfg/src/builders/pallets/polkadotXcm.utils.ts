@@ -12,12 +12,12 @@ export const toDest = (version: XcmVersion, destination: AnyChain) => {
   };
 };
 
-export const toBeneficiary = (version: XcmVersion, multilocation: any) => {
+export const toBeneficiary = (version: XcmVersion, account: any) => {
   return {
     [version]: {
       parents: 0,
       interior: {
-        X1: multilocation,
+        X1: account,
       },
     },
   };

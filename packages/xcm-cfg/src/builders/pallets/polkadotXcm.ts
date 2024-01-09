@@ -1,6 +1,10 @@
-import { XcmVersion, ExtrinsicConfigBuilder, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
+import {
+  XcmVersion,
+  ExtrinsicConfigBuilder,
+  ExtrinsicConfig,
+} from '@moonbeam-network/xcm-builder';
 import { toAssets, toBeneficiary, toDest } from './polkadotXcm.utils';
-import { getDestinationMultilocation } from '../ExtrinsicBuilder.utils';
+import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'polkadotXcm';
 
@@ -14,10 +18,10 @@ const limitedReserveTransferAssets = () => {
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
-            const multilocation = getDestinationMultilocation(address, destination);
+            const account = getExtrinsicAccount(address);
             return [
               toDest(version, destination),
-              toBeneficiary(version, multilocation),
+              toBeneficiary(version, account),
               toAssets(
                 version,
                 {
@@ -51,10 +55,10 @@ const reserveTransferAssets = () => {
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
-            const multilocation = getDestinationMultilocation(address, destination);
+            const account = getExtrinsicAccount(address);
             return [
               toDest(version, destination),
-              toBeneficiary(version, multilocation),
+              toBeneficiary(version, account),
               toAssets(version, 'Here', amount),
               0,
             ];
