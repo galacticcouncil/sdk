@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@galacticcouncil/xcm-cfg": "^1.2.0",
-    "@galacticcouncil/xcm-sdk": "^1.1.0",
+    "@galacticcouncil/xcm-sdk": "^2.0.0",
     "@talismn/connect-wallets": "^1.2.1",
     "viem": "^1.19.1"
   }
