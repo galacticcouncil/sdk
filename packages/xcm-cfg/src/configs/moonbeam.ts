@@ -15,24 +15,24 @@ import { hydraDX, moonbeam } from '../chains';
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: glmr,
-    balance: BalanceBuilder().evm().erc20(),
+    balance: BalanceBuilder().substrate().system().account(),
     contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.05,
       asset: glmr,
-      balance: BalanceBuilder().evm().erc20(),
+      balance: BalanceBuilder().substrate().system().account(),
     },
   }),
   new AssetConfig({
     asset: hdx,
-    balance: BalanceBuilder().evm().erc20(),
+    balance: BalanceBuilder().substrate().assets().account(),
     contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.6,
       asset: hdx,
-      balance: BalanceBuilder().evm().erc20(),
+      balance: BalanceBuilder().substrate().assets().account(),
     },
     fee: {
       asset: glmr,

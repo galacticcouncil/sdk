@@ -12,11 +12,11 @@ export const moonbeam: Chain = defineChain({
   rpcUrls: {
     public: {
       http: ['https://rpc.api.moonbeam.network'],
-      webSocket: ['wss://rpc.api.moonbeam.network'],
+      webSocket: ['wss://wss.api.moonbeam.network'],
     },
     default: {
       http: ['https://rpc.api.moonbeam.network'],
-      webSocket: ['wss://rpc.api.moonbeam.network'],
+      webSocket: ['wss://wss.api.moonbeam.network'],
     },
   },
   blockExplorers: {
