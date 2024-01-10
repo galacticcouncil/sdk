@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- substrate balance adapter rxjs read (fix race cond)
+- fix moonbeam wss config
+
 ## 1.0.9
 
 ### Patch Changes

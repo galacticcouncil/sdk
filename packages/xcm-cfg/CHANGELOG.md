@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.2.0
+
+### Minor Changes
+
+- unique support
+- nodle support
+
 ## 1.1.1
 
 ### Patch Changes
