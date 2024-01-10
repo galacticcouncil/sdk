@@ -278,7 +278,7 @@ export const hydraDX = new Parachain({
       asset: pha,
       id: 8,
       decimals: 12,
-    }
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -331,6 +331,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: hdx,
       id: '69606720909260275826784788104880799692',
+      balanceId: '0xFFFfFfff345Dc44DDAE98Df024Eb494321E73FcC',
       decimals: 12,
     },
     {
