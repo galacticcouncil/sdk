@@ -427,7 +427,7 @@ export const nodle = new Parachain({
     // NOTE: no meta for native token
     {
       asset: nodl,
-      metadataId: 99999999,
+      id: 'NodleNative',
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -445,7 +445,7 @@ export const unique = new Parachain({
     // NOTE: no meta for native token
     {
       asset: unq,
-      metadataId: 99999999,
+      id: 0,
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -471,6 +471,8 @@ export const chains: AnyChain[] = [
   subsocial,
   zeitgeist,
   phala,
+  unique,
+  nodle
 ];
 
 export const chainsMap = new Map<string, AnyChain>(

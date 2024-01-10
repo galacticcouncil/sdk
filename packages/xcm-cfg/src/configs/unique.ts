@@ -13,11 +13,11 @@ export const uniqueConfig = new ChainConfig({
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
-        amount: 1.8,
+        amount: 0.22,
         asset: unq,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().xTransfer().transfer().here(),
+      extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     }),
   ],
   chain: unique,

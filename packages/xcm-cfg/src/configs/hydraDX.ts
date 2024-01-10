@@ -418,7 +418,7 @@ const toNodle: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: nodle,
     destinationFee: {
-      amount: 0.0018,
+      amount: 0.0012,
       asset: nodl,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -436,7 +436,7 @@ const toUnique: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: unique,
     destinationFee: {
-      amount: 0.000078,
+      amount: 0,
       asset: unq,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
