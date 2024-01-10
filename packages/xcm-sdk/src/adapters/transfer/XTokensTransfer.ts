@@ -19,7 +19,7 @@ export class XTokensTransfer implements TransferProvider<XTokens> {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    contract: XTokens,
+    contract: XTokens
   ): Promise<AssetAmount> {
     const fee = await contract.getFee(account, amount);
     return feeBalance.copyWith({
