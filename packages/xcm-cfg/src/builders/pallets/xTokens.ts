@@ -29,7 +29,7 @@ const transfer = (): ExtrinsicConfigBuilder => ({
     }),
 });
 
-const transferMultiasset = () => {
+const transferMultiasset = (originParachainId?: number) => {
   return {
     X3: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, palletInstance }) =>
@@ -45,7 +45,7 @@ const transferMultiasset = () => {
                 {
                   X3: [
                     {
-                      Parachain: destination.parachainId,
+                      Parachain: originParachainId ?? destination.parachainId,
                     },
                     {
                       PalletInstance: palletInstance,

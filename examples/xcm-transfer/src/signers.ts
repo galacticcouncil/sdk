@@ -11,9 +11,11 @@ export async function createPolkadotSigner() {
 }
 
 export async function createEvmSigner(account: string, chain: Chain) {
-  return createWalletClient({
+  const signer = createWalletClient({
     account: account as `0x${string}`,
     chain: chain,
     transport: custom(window['ethereum']),
   });
+  await signer.switchChain({ id: chain.id });
+  return signer;
 }
