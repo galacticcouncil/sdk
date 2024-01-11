@@ -6,6 +6,7 @@ import {
   Chain,
   PublicClient,
   WalletClient,
+  webSocket,
 } from 'viem';
 
 export class EvmClient {

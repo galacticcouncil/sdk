@@ -1,5 +1,5 @@
 import { BalanceBuilder, ContractBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, usdtwh } from '@moonbeam-network/xcm-config';
+import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import {
   dai_mwh,

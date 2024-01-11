@@ -1,9 +1,8 @@
 import { XcmVersion } from '@moonbeam-network/xcm-builder';
-import { AnyChain } from '@moonbeam-network/xcm-types';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/types';
 import { getTypeDef } from '@polkadot/types';
-import { hexToU8a, isHex, u8aToHex } from '@polkadot/util';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { u8aToHex } from '@polkadot/util';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 export function getExtrinsicArgumentVersion(
   func?: SubmittableExtrinsicFunction<'promise'>,
@@ -19,7 +18,9 @@ export function getExtrinsicArgumentVersion(
     return XcmVersion.v1;
   }
 
-  const versions = Array.isArray(raw.sub) ? raw.sub.map((x) => x.name) : [raw.sub.name];
+  const versions = Array.isArray(raw.sub)
+    ? raw.sub.map((x) => x.name)
+    : [raw.sub.name];
 
   if (versions.includes(XcmVersion.v3)) {
     return XcmVersion.v3;
@@ -36,48 +37,19 @@ export function getExtrinsicArgumentVersion(
   throw new Error("Can't find Xcm version");
 }
 
-export function getDestinationMultilocation(address: string, destination: AnyChain) {
-  if (isValidAddressPolkadotAddress(address)) {
-    const accountId32 = '0x' + u8aToHex(decodeAddress(address), -1, false);
-    return {
-      AccountId32: {
-        network: null,
-        id: accountId32,
-      },
-    };
-  }
-  return {
-    AccountKey20: {
-      network: 'Any',
-      key: address,
-    },
-  };
-}
+export function getExtrinsicAccount(address: string) {
+  const isEthAddress = address.length === 42 && address.startsWith('0x');
 
-export function getDestinationMultilocation2(address: string, destination: AnyChain) {
-  if (destination.isEvmParachain()) {
-    return {
-      AccountKey20: {
-        network: 'Any',
-        key: address,
-      },
-    };
-  }
-
-  const accountId32 = '0x' + u8aToHex(decodeAddress(address), -1, false);
-  return {
-    AccountId32: {
-      network: null,
-      id: accountId32,
-    },
-  };
-}
-
-function isValidAddressPolkadotAddress(address: string) {
-  try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address));
-    return true;
-  } catch (error) {
-    return false;
-  }
+  return isEthAddress
+    ? {
+        AccountKey20: {
+          key: address,
+        },
+      }
+    : {
+        AccountId32: {
+          id: u8aToHex(decodeAddress(address)),
+          network: null,
+        },
+      };
 }

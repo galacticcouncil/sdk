@@ -5,6 +5,7 @@ import { QueryableStorage } from '@polkadot/api/types';
 import {
   concatMap,
   distinctUntilChanged,
+  firstValueFrom,
   map,
   switchMap,
   Observable,
@@ -23,14 +24,8 @@ export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
   }
 
   async read(asset: Asset, config: SubstrateQueryConfig): Promise<AssetAmount> {
-    const { module, func, args, transform } = config;
-    const response = await this.#substrate.api.query[module][func](...args);
-    const balance = await transform(response);
-    const decimals = this.#substrate.getDecimals(asset);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
+    const ob = this.subscribe(asset, config);
+    return firstValueFrom(ob);
   }
 
   subscribe(

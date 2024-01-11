@@ -3,7 +3,7 @@ import {
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
-import { nodl } from 'assets';
+import { nodl } from '../assets';
 import { hydraDX, nodle } from '../chains';
 
 export const nodleConfig = new ChainConfig({

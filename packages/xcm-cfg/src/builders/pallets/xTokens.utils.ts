@@ -4,14 +4,14 @@ import { AnyChain } from '@moonbeam-network/xcm-types';
 export const toDest = (
   version: XcmVersion,
   destination: AnyChain,
-  multilocation: any
+  account: any
 ) => {
   if (destination.key === 'polkadot') {
     return {
       [version]: {
         parents: 1,
         interior: {
-          X1: multilocation,
+          X1: account,
         },
       },
     };
@@ -25,7 +25,7 @@ export const toDest = (
           {
             Parachain: destination.parachainId,
           },
-          multilocation,
+          account,
         ],
       },
     },

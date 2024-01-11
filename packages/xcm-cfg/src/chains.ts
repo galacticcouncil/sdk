@@ -284,7 +284,7 @@ export const hydraDX = new Parachain({
       asset: pha,
       id: 8,
       decimals: 12,
-    }
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -430,7 +430,6 @@ export const phala = new Parachain({
 
 export const nodle = new Parachain({
   assetsData: [
-    // NOTE: no meta for native token
     {
       asset: nodl,
       id: 'NodleNative',
@@ -448,7 +447,6 @@ export const nodle = new Parachain({
 
 export const unique = new Parachain({
   assetsData: [
-    // NOTE: no meta for native token
     {
       asset: unq,
       id: 0,
@@ -473,12 +471,12 @@ export const chains: AnyChain[] = [
   hydraDX,
   interlay,
   moonbeam,
+  nodle,
+  phala,
   polkadot,
   subsocial,
-  zeitgeist,
-  phala,
   unique,
-  nodle
+  zeitgeist,
 ];
 
 export const chainsMap = new Map<string, AnyChain>(

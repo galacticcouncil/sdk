@@ -3,7 +3,7 @@ import {
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
-import { unq } from 'assets';
+import { unq } from '../assets';
 import { hydraDX, unique } from '../chains';
 
 export const uniqueConfig = new ChainConfig({
