@@ -182,6 +182,21 @@ const toBifrost: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
+  new AssetConfig({
+    asset: dot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.001,
+      asset: dot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
 ];
 
 const toCentrifuge: AssetConfig[] = [
