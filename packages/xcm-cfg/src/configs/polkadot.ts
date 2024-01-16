@@ -34,7 +34,7 @@ const toBifrost: AssetConfig[] = [
     balance: BalanceBuilder().substrate().system().account(),
     destination: bifrost,
     destinationFee: {
-      amount: 0.002172,
+      amount: 0.001,
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
