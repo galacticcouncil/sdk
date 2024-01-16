@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.2.1
+
+### Patch Changes
+
+- Added DOT for Bifrost<->HydraDX
+
 ## 1.2.0
 
 ### Minor Changes

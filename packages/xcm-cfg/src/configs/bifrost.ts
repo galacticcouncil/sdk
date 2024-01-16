@@ -1,7 +1,4 @@
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
 
 import { bnc, vdot, dot } from '../assets';
@@ -48,7 +45,7 @@ const toHydraDX: AssetConfig[] = [
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
-    }
+    },
   }),
 ];
 
