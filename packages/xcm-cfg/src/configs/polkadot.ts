@@ -9,7 +9,7 @@ import {
 } from '@moonbeam-network/xcm-config';
 
 import { dot } from '../assets';
-import { hydraDX } from '../chains';
+import { bifrost, hydraDX } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -28,7 +28,27 @@ const toHydraDX: AssetConfig[] = [
   }),
 ];
 
+const toBifrost: AssetConfig[] = [
+  new AssetConfig({
+    asset: dot,
+    balance: BalanceBuilder().substrate().system().account(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.001,
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .xcmPallet()
+      .limitedReserveTransferAssets(0)
+      .here(),
+  }),
+];
+
 export const polkadotConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [
+    ...toHydraDX,
+    ...toBifrost,
+  ],
   chain: polkadot,
 });
