@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.2.2
+
+### Patch Changes
+
+- Add DOT for Polkadot<->Bifrost
+
 ## 1.2.1
 
 ### Patch Changes
