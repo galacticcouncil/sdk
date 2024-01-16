@@ -2,7 +2,7 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
+import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
 
 import { bnc, vdot, dot } from '../assets';
 import { bifrost, hydraDX } from '../chains';
@@ -52,7 +52,28 @@ const toHydraDX: AssetConfig[] = [
   }),
 ];
 
+const toPolkadot: AssetConfig[] = [
+  new AssetConfig({
+    asset: dot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: polkadot,
+    destinationFee: {
+      amount: 0.000469417452,
+      asset: dot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const bifrostConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [
+    ...toHydraDX,
+    ...toPolkadot,
+  ],
   chain: bifrost,
 });
