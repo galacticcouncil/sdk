@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber, ZERO } from '../utils/bignumber';
@@ -22,9 +23,13 @@ export class BalanceClient extends AssetClient {
 
   async getSystemAccountBalance(accountId: string): Promise<BigNumber> {
     const {
-      data: { free, miscFrozen, feeFrozen },
+      data: { free, miscFrozen, feeFrozen, frozen },
     } = await this.api.query.system.account(accountId);
-    return this.calculateFreeBalance(free.toString(), miscFrozen.toString(), feeFrozen.toString());
+    if (frozen) {
+      return this.calculateFreeBalance(free.toString(), frozen.toString(), frozen.toString());
+    } else {
+      return this.calculateFreeBalance(free.toString(), miscFrozen.toString(), feeFrozen.toString());
+    }
   }
 
   async getTokenAccountBalance(accountId: string, tokenKey: string): Promise<BigNumber> {

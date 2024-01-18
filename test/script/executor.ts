@@ -4,7 +4,7 @@ export enum ApiUrl {
   Local = 'ws://localhost:8000',
   Basilisk = 'wss://rpc.basilisk.cloud',
   Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
-  Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
+  Basilisk_Rococo = 'wss://basilisk-rococo-rpc.play.hydration.cloud',
   Basilisk_Rococo_UK = 'wss://rococo-basilisk-rpc04.hydration.dev',
   HydraDx = 'wss://rpc.hydradx.cloud',
   HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
