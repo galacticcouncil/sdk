@@ -202,14 +202,14 @@ export class AssetClient extends PolkadotApiClient {
   }
 
   async getOnChainAssets(): Promise<Asset[]> {
-    const assetMetadata = await this.metadataQuery();
-
-    const [asset, assetLocations, shares, bonds] = await Promise.all([
-      this.api.query.assetRegistry.assets.entries(),
-      this.locationsQuery(),
-      this.safeSharesQuery(),
-      this.safeBondsQuery(),
-    ]);
+    const [asset, assetLocations, shares, bonds, assetMetadata] =
+      await Promise.all([
+        this.api.query.assetRegistry.assets.entries(),
+        this.locationsQuery(),
+        this.safeSharesQuery(),
+        this.safeBondsQuery(),
+        this.metadataQuery(),
+      ]);
 
     const filteredAssets = asset.filter(
       ([_args, state]) => !state.isNone && this.isSupportedType(state.unwrap())
