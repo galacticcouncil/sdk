@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.5
+
+### Patch Changes
+
+- Exclude maths from cjs build, sdk examples
+
 ## 1.1.4
 
 ### Patch Changes
