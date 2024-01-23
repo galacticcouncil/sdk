@@ -4,7 +4,7 @@
   "type": "module",
   "main": "out/index.js",
   "scripts": {
-    "dev": "node ./esbuild.dev.mjs"
+    "start": "node ../../esbuild.server.mjs"
   },
   "keywords": [],
   "devDependencies": {
