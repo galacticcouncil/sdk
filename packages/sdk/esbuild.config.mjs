@@ -14,11 +14,16 @@ esbuild
   })
   .catch(() => process.exit(1));
 
+// Exclude maths from commonjs
+const externalMaths = Object.keys(packageJson.dependencies).filter((v) =>
+  v.startsWith('@galacticcouncil/math-')
+);
+
 // CJS bundle
 esbuild
   .build({
     ...cjsConfig,
     bundle: true,
-    external: Object.keys(packageJson.peerDependencies),
+    external: Object.keys(packageJson.peerDependencies).concat(externalMaths),
   })
   .catch(() => process.exit(1));
