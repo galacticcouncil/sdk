@@ -3,6 +3,12 @@ import { wasmLoader } from 'esbuild-plugin-wasm';
 import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
 
 const packageJson = getPackageJson(import.meta.url);
+const peerDependencies = Object.keys(packageJson.peerDependencies);
+const dependencies = Object.keys(packageJson.dependencies);
+
+const mathDependencies = dependencies.filter((v) =>
+  v.startsWith('@galacticcouncil/math-')
+);
 
 // ESM bundle
 esbuild
@@ -10,20 +16,15 @@ esbuild
     ...esmConfig,
     bundle: true,
     plugins: [wasmLoader({ mode: 'embedded' })],
-    external: Object.keys(packageJson.peerDependencies),
+    external: peerDependencies,
   })
   .catch(() => process.exit(1));
-
-// Exclude maths from commonjs
-const externalMaths = Object.keys(packageJson.dependencies).filter((v) =>
-  v.startsWith('@galacticcouncil/math-')
-);
 
 // CJS bundle
 esbuild
   .build({
     ...cjsConfig,
     bundle: true,
-    external: Object.keys(packageJson.peerDependencies).concat(externalMaths),
+    external: peerDependencies.concat(mathDependencies),
   })
   .catch(() => process.exit(1));
