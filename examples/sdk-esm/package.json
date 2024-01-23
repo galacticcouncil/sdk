@@ -1,0 +1,16 @@
+{
+  "name": "sdk-esm",
+  "private": true,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.17.11"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk": "^1.1.4"
+  }
+}
