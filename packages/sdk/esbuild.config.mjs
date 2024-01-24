@@ -10,7 +10,7 @@ const mathDependencies = dependencies.filter((v) =>
   v.startsWith('@galacticcouncil/math-')
 );
 
-// ESM bundle
+// ESM bundle (Embedded wasms)
 esbuild
   .build({
     ...esmConfig,
@@ -20,7 +20,7 @@ esbuild
   })
   .catch(() => process.exit(1));
 
-// CJS bundle
+// CJS bundle (External math modules)
 esbuild
   .build({
     ...cjsConfig,
