@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.3.0
+
+### Minor Changes
+
+- Upgrade of base moonbeams xcm packages
+
 ## 1.2.2
 
 ### Patch Changes
