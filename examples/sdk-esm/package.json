@@ -1,5 +1,5 @@
 {
-  "name": "xcm-transfer",
+  "name": "sdk-esm",
   "private": true,
   "type": "module",
   "main": "out/index.js",
@@ -11,9 +11,6 @@
     "esbuild": "^0.17.11"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-cfg": "^1.3.0",
-    "@galacticcouncil/xcm-sdk": "^2.1.0",
-    "@talismn/connect-wallets": "^1.2.1",
-    "viem": "^1.19.1"
+    "@galacticcouncil/sdk": "^1.1.5"
   }
 }

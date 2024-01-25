@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 2.1.0
+
+### Minor Changes
+
+- Upgrade of base moonbeams xcm packages
+
 ## 2.0.0
 
 ### Minor Changes

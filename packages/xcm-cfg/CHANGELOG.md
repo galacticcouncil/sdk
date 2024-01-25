@@ -1,5 +1,23 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.3.0
+
+### Minor Changes
+
+- Upgrade of base moonbeams xcm packages
+
+## 1.2.2
+
+### Patch Changes
+
+- Add DOT for Polkadot<->Bifrost
+
+## 1.2.1
+
+### Patch Changes
+
+- Added DOT for Bifrost<->HydraDX
+
 ## 1.2.0
 
 ### Minor Changes

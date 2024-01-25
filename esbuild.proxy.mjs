@@ -7,7 +7,14 @@ import http from 'node:http';
 export function createProxyServer(localServer, proxyPort = 3000) {
   const listenerFn = requestListener(localServer);
   http.createServer(listenerFn).listen(proxyPort);
-  console.log('\x1b[1m\x1b[92m', '> Proxy: \x1b[4mhttp://' + localServer.host + ':' + proxyPort + '/\x1b[0m\n');
+  console.log(
+    '\x1b[1m\x1b[92m',
+    '> Proxy: \x1b[4mhttp://' +
+      localServer.host +
+      ':' +
+      proxyPort +
+      '/\x1b[0m\n'
+  );
 }
 
 function requestListener({ host, port }) {

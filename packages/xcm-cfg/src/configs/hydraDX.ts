@@ -406,7 +406,7 @@ const toPolkadot: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: polkadot,
     destinationFee: {
-      amount: 0.000469417452,
+      amount: 0.003,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
