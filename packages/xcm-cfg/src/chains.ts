@@ -106,6 +106,12 @@ export const astar = new Parachain({
       id: '340282366920938463463374607431768211455',
       metadataId: 0,
       decimals: 10,
+    },
+    {
+      asset: usdt,
+      id: '4294969280',
+      metadataId: 0,
+      decimals: 6,
     }
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -135,6 +141,12 @@ export const bifrost = new Parachain({
       id: { Token2: 0 },
       metadataId: { Token2: 0 },
       decimals: 10,
+    },
+    {
+      asset: usdt,
+      id: { Token2: 2 },
+      metadataId: { Token2: 2 },
+      decimals: 6,
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -322,6 +334,12 @@ export const interlay = new Parachain({
       id: { Token: dot.originSymbol },
       metadataId: 0,
     },
+    {
+      asset: usdt,
+      decimals: 6,
+      id: { ForeignAsset: 2 },
+      metadataId: 0,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -380,6 +398,12 @@ export const moonbeam = new EvmParachain({
       id: '42259045809535163221576417993425387648',
       metadataId: 0,
       decimals: 10,
+    },
+    {
+      asset: usdt,
+      id: '311091173110107856861649819128533077277',
+      metadataId: 0,
+      decimals: 6,
     },
   ],
   ecosystem: Ecosystem.Polkadot,

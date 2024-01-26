@@ -4,7 +4,7 @@ import {
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { ibtc, intr, dot, hdx } from '../assets';
+import { ibtc, intr, dot, hdx, usdt } from '../assets';
 import { hydraDX, interlay } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
@@ -36,6 +36,21 @@ const toHydraDX: AssetConfig[] = [
   }),
   new AssetConfig({
     asset: dot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.6,
+      asset: hdx,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: intr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdt,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: hydraDX,
     destinationFee: {
