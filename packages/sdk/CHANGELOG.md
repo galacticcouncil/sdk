@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.6
+
+### Patch Changes
+
+- Support dynamic registry (metadata fallback)
+
 ## 1.1.5
 
 ### Patch Changes
