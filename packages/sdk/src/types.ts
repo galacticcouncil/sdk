@@ -176,3 +176,8 @@ export interface Asset {
   origin?: number;
   meta?: Record<string, string>;
 }
+
+export interface AssetMetadata {
+  decimals: number;
+  symbol: string;
+}
