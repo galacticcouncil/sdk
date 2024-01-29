@@ -84,6 +84,11 @@ export const assetHub = new Parachain({
       id: 1337,
       palletInstance: 50,
     },
+    {
+      asset: dot,
+      decimals: 10,
+      id: 0,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:

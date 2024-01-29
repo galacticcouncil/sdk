@@ -131,6 +131,21 @@ const toAssetHub: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
+  new AssetConfig({
+    asset: dot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.02,
+      asset: dot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
 ];
 
 const toAstar: AssetConfig[] = [
