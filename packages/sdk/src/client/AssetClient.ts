@@ -8,7 +8,7 @@ import { ITuple } from '@polkadot/types-codec/types';
 import { u32, u64 } from '@polkadot/types-codec';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset } from '../types';
+import { Asset, AssetMetadata } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
@@ -58,9 +58,7 @@ export class AssetClient extends PolkadotApiClient {
     }
   }
 
-  async metadataQuery(): Promise<
-    Map<string, PalletAssetRegistryAssetMetadata>
-  > {
+  async metadataQuery(): Promise<Map<string, AssetMetadata>> {
     try {
       const entries =
         await this.api.query.assetRegistry.assetMetadataMap.entries();
@@ -72,7 +70,17 @@ export class AssetClient extends PolkadotApiClient {
             },
             value,
           ]) => {
-            return [id.toString(), value.unwrap()];
+            {
+              const data = value.unwrap();
+
+              return [
+                id.toString(),
+                {
+                  decimals: data.decimals.toNumber(),
+                  symbol: data.symbol.toHuman() as string,
+                },
+              ];
+            }
           }
         )
       );
@@ -105,7 +113,7 @@ export class AssetClient extends PolkadotApiClient {
   private getTokens(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
-    metadata: Map<string, PalletAssetRegistryAssetMetadata>,
+    metadata: Map<string, AssetMetadata>,
     locations?: Map<string, HydradxRuntimeXcmAssetLocation>
   ): Asset {
     if (tokenKey == SYSTEM_ASSET_ID) {
@@ -128,9 +136,9 @@ export class AssetClient extends PolkadotApiClient {
     return {
       id: tokenKey,
       name: name.toHuman(),
-      symbol: symbol.toHuman(),
-      decimals: decimals.toNumber(),
-      icon: symbol.toHuman(),
+      symbol: symbol,
+      decimals: decimals,
+      icon: symbol,
       type: assetType.toHuman(),
       origin: location && this.parseLocation(location),
       existentialDeposit: existentialDeposit.toString(),
@@ -140,7 +148,7 @@ export class AssetClient extends PolkadotApiClient {
   private getBonds(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
-    metadata: Map<string, PalletAssetRegistryAssetMetadata>,
+    metadata: Map<string, AssetMetadata>,
     bond: ITuple<[u32, u64]>
   ): Asset {
     const [underlyingAsset, maturity] = bond;
@@ -169,7 +177,7 @@ export class AssetClient extends PolkadotApiClient {
   private getShares(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
-    metadata: Map<string, PalletAssetRegistryAssetMetadata>,
+    metadata: Map<string, AssetMetadata>,
     share: PalletStableswapPoolInfo
   ): Asset {
     const { assets } = share;
@@ -194,53 +202,69 @@ export class AssetClient extends PolkadotApiClient {
   }
 
   async getOnChainAssets(): Promise<Asset[]> {
-    const [asset, assetMetadata, assetLocations, shares, bonds] =
+    const [asset, assetLocations, shares, bonds, assetMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
-        this.metadataQuery(),
         this.locationsQuery(),
         this.safeSharesQuery(),
         this.safeBondsQuery(),
+        this.metadataQuery(),
       ]);
 
-    return asset
-      .filter(([_args, state]) => this.isSupportedType(state.unwrap()))
-      .map(
-        ([
-          {
-            args: [id],
-          },
-          value,
-        ]) => {
-          const details: PalletAssetRegistryAssetDetails = value.unwrap();
-          const { assetType } = details;
-          switch (assetType.toString()) {
-            case 'Bond':
-              const bond = bonds.get(id.toString());
-              return this.getBonds(
+    const filteredAssets = asset.filter(
+      ([_args, state]) => !state.isNone && this.isSupportedType(state.unwrap())
+    );
+
+    const assetsMeta: Map<string, AssetMetadata> = assetMetadata.size
+      ? assetMetadata
+      : new Map(
+          filteredAssets.map(
+            ([
+              {
+                args: [id],
+              },
+              value,
+            ]) => {
+              const data = value.unwrap();
+              return [
                 id.toString(),
-                details,
-                assetMetadata,
-                bond!
-              );
-            case 'StableSwap':
-              const share = shares.get(id.toString());
-              return this.getShares(
-                id.toString(),
-                details,
-                assetMetadata,
-                share!
-              );
-            default:
-              return this.getTokens(
-                id.toString(),
-                details,
-                assetMetadata,
-                assetLocations
-              );
-          }
+                {
+                  //@ts-ignore
+                  decimals: Number(data.decimals.toString()),
+                  //@ts-ignore
+                  symbol: data.symbol.toHuman(),
+                },
+              ];
+            }
+          )
+        );
+
+    return filteredAssets.map(
+      ([
+        {
+          args: [id],
+        },
+        value,
+      ]) => {
+        const details: PalletAssetRegistryAssetDetails = value.unwrap();
+        const { assetType } = details;
+        switch (assetType.toString()) {
+          case 'Bond':
+            const bond = bonds.get(id.toString());
+            return this.getBonds(id.toString(), details, assetsMeta, bond!);
+          case 'StableSwap':
+            const share = shares.get(id.toString());
+            return this.getShares(id.toString(), details, assetsMeta, share!);
+          default:
+            return this.getTokens(
+              id.toString(),
+              details,
+              assetsMeta,
+              assetLocations
+            );
         }
-      );
+      }
+    );
   }
 
   private isSupportedType(details: PalletAssetRegistryAssetDetails): boolean {

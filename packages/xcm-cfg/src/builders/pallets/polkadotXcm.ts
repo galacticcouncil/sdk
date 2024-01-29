@@ -24,6 +24,7 @@ const limitedReserveTransferAssets = () => {
               toBeneficiary(version, account),
               toAssets(
                 version,
+                0,
                 {
                   X2: [
                     {
@@ -59,8 +60,32 @@ const reserveTransferAssets = () => {
             return [
               toDest(version, destination),
               toBeneficiary(version, account),
-              toAssets(version, 'Here', amount),
+              toAssets(version, 0, 'Here', amount),
               0,
+            ];
+          },
+        }),
+    }),
+  };
+};
+
+const limitedTeleportAssets = () => {
+  const func = 'limitedTeleportAssets';
+  return {
+    here: (): ExtrinsicConfigBuilder => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v2;
+            const account = getExtrinsicAccount(address);
+            return [
+              toDest(version, destination),
+              toBeneficiary(version, account),
+              toAssets(version, 1, 'Here', amount),
+              0,
+              'Unlimited',
             ];
           },
         }),
@@ -71,6 +96,7 @@ const reserveTransferAssets = () => {
 export const polkadotXcm = () => {
   return {
     limitedReserveTransferAssets,
+    limitedTeleportAssets,
     reserveTransferAssets,
   };
 };
