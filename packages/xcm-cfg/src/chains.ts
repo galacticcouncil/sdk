@@ -399,6 +399,16 @@ export const zeitgeist = new Parachain({
       asset: ztg,
       id: 'Ztg',
     },
+    {
+      asset: usdc_mwh,
+      id: { ForeignAsset: 1 },
+      decimals: 6,
+    },
+    {
+      asset: glmr,
+      id: { ForeignAsset: 3 },
+      decimals: 18,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:

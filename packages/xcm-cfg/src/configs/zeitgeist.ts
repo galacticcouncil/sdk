@@ -4,7 +4,7 @@ import {
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
-import { ztg } from '../assets';
+import { usdc_mwh, ztg, glmr } from '../assets';
 import { hydraDX, zeitgeist } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
@@ -18,6 +18,21 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetConfig({
+    asset: usdc_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    fee: {
+      asset: ztg,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
   }),
 ];
 
