@@ -2,6 +2,7 @@ import {
   XcmVersion,
   ExtrinsicConfigBuilder,
   ExtrinsicConfig,
+  Parents,
 } from '@moonbeam-network/xcm-builder';
 import { toAssets, toBeneficiary, toDest } from './polkadotXcm.utils';
 import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
@@ -69,7 +70,7 @@ const reserveTransferAssets = () => {
   };
 };
 
-const limitedTeleportAssets = () => {
+const limitedTeleportAssets = (parent: Parents) => {
   const func = 'limitedTeleportAssets';
   return {
     here: (): ExtrinsicConfigBuilder => ({
@@ -83,7 +84,7 @@ const limitedTeleportAssets = () => {
             return [
               toDest(version, destination),
               toBeneficiary(version, account),
-              toAssets(version, 1, 'Here', amount),
+              toAssets(version, parent, 'Here', amount),
               0,
               'Unlimited',
             ];
