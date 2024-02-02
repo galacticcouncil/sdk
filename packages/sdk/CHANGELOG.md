@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.7
+
+### Patch Changes
+
+- Fix fee assset payment (buy)
+
 ## 1.1.6
 
 ### Patch Changes
