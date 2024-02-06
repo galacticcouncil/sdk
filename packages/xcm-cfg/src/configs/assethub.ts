@@ -3,7 +3,11 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
+import {
+  AssetConfig,
+  ChainConfig,
+  polkadot,
+} from '@moonbeam-network/xcm-config';
 
 import { dot, usdc, usdt } from '../assets';
 import { assetHub, hydraDX } from '../chains';
@@ -79,7 +83,10 @@ const toPolkadot: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().polkadotXcm().limitedTeleportAssets().here(),
+    extrinsic: ExtrinsicBuilderV2()
+      .polkadotXcm()
+      .limitedTeleportAssets(0)
+      .here(),
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
@@ -89,9 +96,6 @@ const toPolkadot: AssetConfig[] = [
 ];
 
 export const assetHubConfig = new ChainConfig({
-  assets: [
-    ...toHydraDX,
-    ...toPolkadot,
-  ],
+  assets: [...toHydraDX, ...toPolkadot],
   chain: assetHub,
 });

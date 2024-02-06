@@ -2,13 +2,14 @@ import {
   XcmVersion,
   ExtrinsicConfigBuilder,
   ExtrinsicConfig,
+  Parents,
 } from '@moonbeam-network/xcm-builder';
 import { toAssets, toBeneficiary, toDest } from './xcmPallet.utils';
 import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'xcmPallet';
 
-const limitedReserveTransferAssets = () => {
+const limitedReserveTransferAssets = (parent: Parents) => {
   const func = 'limitedReserveTransferAssets';
   return {
     here: (): ExtrinsicConfigBuilder => ({
@@ -22,7 +23,31 @@ const limitedReserveTransferAssets = () => {
             return [
               toDest(version, destination),
               toBeneficiary(version, account),
-              toAssets(version, amount),
+              toAssets(version, parent, 'Here', amount),
+              0,
+              'Unlimited',
+            ];
+          },
+        }),
+    }),
+  };
+};
+
+const limitedTeleportAssets = (parent: Parents) => {
+  const func = 'limitedTeleportAssets';
+  return {
+    here: (): ExtrinsicConfigBuilder => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v3;
+            const account = getExtrinsicAccount(address);
+            return [
+              toDest(version, destination),
+              toBeneficiary(version, account),
+              toAssets(version, parent, 'Here', amount),
               0,
               'Unlimited',
             ];
@@ -35,5 +60,6 @@ const limitedReserveTransferAssets = () => {
 export const xcmPallet = () => {
   return {
     limitedReserveTransferAssets,
+    limitedTeleportAssets,
   };
 };

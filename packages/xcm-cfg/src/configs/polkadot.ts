@@ -56,18 +56,11 @@ const toAssetHub: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2()
-      .polkadotXcm()
-      .limitedTeleportAssets()
-      .here(),
+    extrinsic: ExtrinsicBuilderV2().xcmPallet().limitedTeleportAssets(0).here(),
   }),
 ];
 
 export const polkadotConfig = new ChainConfig({
-  assets: [
-    ...toHydraDX,
-    ...toBifrost,
-    ...toAssetHub,
-  ],
+  assets: [...toHydraDX, ...toBifrost, ...toAssetHub],
   chain: polkadot,
 });
