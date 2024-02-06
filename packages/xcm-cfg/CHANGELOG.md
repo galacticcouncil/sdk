@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.4.0
+
+### Minor Changes
+
+- Zeitgeist USDC support (market)
+
 ## 1.3.0
 
 ### Minor Changes

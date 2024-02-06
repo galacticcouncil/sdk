@@ -10,6 +10,6 @@
     "node": "^21.6.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^1.1.5"
+    "@galacticcouncil/sdk": "^1.1.7"
   }
 }
