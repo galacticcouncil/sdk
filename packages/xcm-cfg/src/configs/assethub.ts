@@ -85,7 +85,7 @@ const toPolkadot: AssetConfig[] = [
     },
     extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
-      .limitedTeleportAssets(0)
+      .limitedTeleportAssets(1)
       .here(),
     fee: {
       asset: dot,
