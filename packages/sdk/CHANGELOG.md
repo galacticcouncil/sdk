@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.8
+
+### Patch Changes
+
+- Fix: Exclude XYK pools with invalid assets
+
 ## 1.1.7
 
 ### Patch Changes
