@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.4.1
+
+### Patch Changes
+
+- Zeitgeist chain decimals for all assets
+
 ## 1.4.0
 
 ### Minor Changes
