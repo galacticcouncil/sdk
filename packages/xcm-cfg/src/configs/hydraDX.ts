@@ -422,6 +422,21 @@ const toZeitgeist: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
+  new AssetConfig({
+    asset: glmr,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: zeitgeist,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+  }),
 ];
 
 const toPhala: AssetConfig[] = [

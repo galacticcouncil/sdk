@@ -30,8 +30,23 @@ const toHydraDX: AssetConfig[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
     fee: {
-      asset: ztg,
-      balance: BalanceBuilder().substrate().system().account(),
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+  }),
+  new AssetConfig({
+    asset: glmr,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
     },
   }),
 ];
