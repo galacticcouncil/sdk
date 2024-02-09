@@ -402,7 +402,7 @@ export const zeitgeist = new Parachain({
     {
       asset: usdc_mwh,
       id: { ForeignAsset: 1 },
-      decimals: 10,
+      decimals: 6,
     },
     {
       asset: glmr,
@@ -417,6 +417,7 @@ export const zeitgeist = new Parachain({
   name: 'Zeitgeist',
   parachainId: 2092,
   ss58Format: 73,
+  usesChainDecimals: true,
   ws: 'wss://zeitgeist-rpc.dwellir.com',
 });
 
