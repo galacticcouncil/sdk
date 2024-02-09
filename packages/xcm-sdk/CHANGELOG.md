@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- Support usesChainDecimals, upgrade base moonbeams packages
+
 ## 2.1.0
 
 ### Minor Changes

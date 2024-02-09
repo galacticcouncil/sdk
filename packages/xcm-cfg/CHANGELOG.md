@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.5.0
+
+### Minor Changes
+
+- Zeitgeist usesChainDecimals flag, fix usdc_mwh decimals
+
 ## 1.4.1
 
 ### Patch Changes
