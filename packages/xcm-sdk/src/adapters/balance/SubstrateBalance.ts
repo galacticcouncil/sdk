@@ -12,7 +12,7 @@ import {
   ReplaySubject,
 } from 'rxjs';
 
-import { SubstrateService } from '../../substrate';
+import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 
 import { BalanceProvider } from '../types';
 
@@ -41,11 +41,8 @@ export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
       concatMap((b) => transform(b)),
       distinctUntilChanged((prev, curr) => prev === curr),
       map((balance) => {
-        const decimals = this.#substrate.getDecimals(asset);
-        return AssetAmount.fromAsset(asset, {
-          amount: balance,
-          decimals: decimals,
-        });
+        const params = normalizeAssetAmount(balance, asset, this.#substrate);
+        return AssetAmount.fromAsset(asset, params);
       })
     );
   }

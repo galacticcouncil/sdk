@@ -1,7 +1,7 @@
 import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
-import { SubstrateService } from '../../substrate';
+import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 import { XCall } from '../../types';
 
 import { TransferProvider } from '../types';
@@ -33,8 +33,7 @@ export class ExtrinsicTransfer implements TransferProvider<ExtrinsicConfig> {
       // Can't estimate fee if transferMultiasset with no balance
       fee = 0n;
     }
-    return feeBalance.copyWith({
-      amount: fee,
-    });
+    const params = normalizeAssetAmount(fee, feeBalance, this.#substrate);
+    return feeBalance.copyWith(params);
   }
 }
