@@ -6,7 +6,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/galacticcouncil/xcm-sdk.git"
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
   },
   "type": "module",
   "workspaces": [
