@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.6.0
+
+### Minor Changes
+
+- Support USDT & DOT in major liquidity routes
+
 ## 1.5.0
 
 ### Minor Changes
