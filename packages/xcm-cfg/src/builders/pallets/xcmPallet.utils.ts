@@ -1,4 +1,4 @@
-import { XcmVersion } from '@moonbeam-network/xcm-builder';
+import { Parents, XcmVersion } from '@moonbeam-network/xcm-builder';
 import { AnyChain } from '@moonbeam-network/xcm-types';
 
 export const toDest = (version: XcmVersion, destination: AnyChain) => {
@@ -23,14 +23,19 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
   };
 };
 
-export const toAssets = (version: XcmVersion, amount: any) => {
+export const toAssets = (
+  version: XcmVersion,
+  parents: Parents,
+  interior: any,
+  amount: any
+) => {
   return {
     [version]: [
       {
         id: {
           Concrete: {
-            parents: 0,
-            interior: 'Here',
+            parents: parents,
+            interior: interior,
           },
         },
         fun: {
