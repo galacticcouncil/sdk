@@ -131,21 +131,6 @@ const toAssetHub: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: assetHub,
-    destinationFee: {
-      amount: 0.02,
-      asset: dot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
 ];
 
 const toAstar: AssetConfig[] = [
@@ -173,7 +158,7 @@ const toAstar: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -184,8 +169,8 @@ const toAstar: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: astar,
     destinationFee: {
-      amount: 0.004,
-      asset: astr,
+      amount: 1.4,
+      asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
@@ -313,11 +298,11 @@ const toInterlay: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: interlay,
     destinationFee: {
-      amount: 0.0019213457,
-      asset: intr,
+      amount: 0.002,
+      asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -328,8 +313,8 @@ const toInterlay: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: interlay,
     destinationFee: {
-      amount: 0.0019213457,
-      asset: intr,
+      amount: 1.4,
+      asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
@@ -433,11 +418,11 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.001,
+      amount: 0.003,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -463,8 +448,23 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.04,
-      asset: glmr,
+      amount: 1.4,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 1.4,
+      asset: usdc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
