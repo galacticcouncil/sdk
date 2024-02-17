@@ -6,16 +6,16 @@ Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chai
 
 <pre>
 <a href=".">SDK</a>: Galactic SDK monorepo.
-├──<a href="./packages/math-ema/">Math EMA</a>: Exponential moving average utils.
-├──<a href="./packages/math-lbp/">Math LBP</a>: Liquidity bootstrapping pool utils.
-├──<a href="./packages/math-liquidity-mining/">Math LM</a>: Liquidity mining utils.
-├──<a href="./packages/math-omnipool/">Math Omnipool</a>: Omnipool utils.
-├──<a href="./packages/math-stableswap/">Math Stableswap</a>: Stableswap pool utils.
-├──<a href="./packages/math-staking/">Math Staking</a>: Staking utils.
-├──<a href="./packages/math-xyk/">Math XYK</a>: XYK pool utils.
-├──<a href="./packages/sdk">SDK</a>: HydraDX trade router & pool utilities.
-├──<a href="./packages/xcm-cfg">XCM Config</a>: HydraDX cross-chain configuration.
-├──<a href="./packages/xcm-sdk">XCM SDK</a>: HydraDX cross-chain sdk.
+├──<a href="./packages/math-ema/">Math EMA</a>: Exponential moving average math
+├──<a href="./packages/math-lbp/">Math LBP</a>: Liquidity bootstrapping pool math
+├──<a href="./packages/math-liquidity-mining/">Math LM</a>: Liquidity mining math
+├──<a href="./packages/math-omnipool/">Math Omnipool</a>: Omnipool math
+├──<a href="./packages/math-stableswap/">Math Stableswap</a>: Stableswap pool math
+├──<a href="./packages/math-staking/">Math Staking</a>: Staking math
+├──<a href="./packages/math-xyk/">Math XYK</a>: XYK pool math
+├──<a href="./packages/sdk">SDK</a>: HydraDX trade router & pool utilities
+├──<a href="./packages/xcm-cfg">XCM Config</a>: HydraDX cross-chain configuration
+├──<a href="./packages/xcm-sdk">XCM SDK</a>: HydraDX cross-chain sdk
 </pre>
 
 ## Requirements
