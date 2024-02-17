@@ -24,8 +24,8 @@
   "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
   "scripts": {
-    "build": "node ./esbuild.config.mjs",
-    "build:watch": "npm run build -- --watch",
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",

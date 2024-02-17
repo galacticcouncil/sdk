@@ -1,5 +1,5 @@
 import esbuild from 'esbuild';
-import { createProxyServer } from './esbuild.proxy.mjs';
+import { createProxyServer } from '../../esbuild.proxy.mjs';
 
 const plugins = [];
 

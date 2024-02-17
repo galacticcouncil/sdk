@@ -10,6 +10,7 @@ const plugins = [];
 const options = {
   ...esmConfig,
   bundle: true,
+  sourcemap: true,
   external: Object.keys(peerDependencies),
 };
 
