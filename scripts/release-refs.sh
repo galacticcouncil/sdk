@@ -4,7 +4,7 @@ TAGS=$(git tag --points-at HEAD)
 
 for tag in $TAGS; do
   if [[ $tag == *.0 ]]; then
-    # Keep major & minor versions (publish)
+    # Keep only major & minor versions
     continue;
   else
     # Delete patch version
@@ -12,5 +12,5 @@ for tag in $TAGS; do
   fi
 done
 
-# Push tags 
+# Push all the refs with annotated local tags
 git push --follow-tags
