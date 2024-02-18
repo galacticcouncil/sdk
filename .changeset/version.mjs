@@ -18,7 +18,7 @@ const releasesLines = releases
   .map((release) => `  ${release.name}@${release.newVersion}`)
   .join('\n');
 const releaseMessage = outdent`
-  RELEASING: Releasing ${releases.length} package(s)
+  RELEASE: Releasing ${releases.length} package(s)
 
   Releases:
   ${releasesLines}
