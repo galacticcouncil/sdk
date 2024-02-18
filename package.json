@@ -22,7 +22,7 @@
     "changeset": "changeset",
     "changeset:version": "node ./.changeset/version.mjs",
     "changeset:publish": "npm run build && changeset publish",
-    "changeset:release": "node ./scripts/release-tags.sh"
+    "changeset:release": "./scripts/release-tags.sh"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
