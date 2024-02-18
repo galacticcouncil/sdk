@@ -52,7 +52,7 @@ const toAssetHub: AssetConfig[] = [
     balance: BalanceBuilder().substrate().system().account(),
     destination: assetHub,
     destinationFee: {
-      amount: 0.001,
+      amount: 0.00014,
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },

@@ -52,8 +52,8 @@ const toHydraDX: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.0013,
-      asset: hdx,
+      amount: 1.4,
+      asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),

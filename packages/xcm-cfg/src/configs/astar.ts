@@ -25,9 +25,9 @@ const toHydraDX: AssetConfig[] = [
     balance: BalanceBuilder().substrate().assets().account(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.6,
-      asset: hdx,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
+      amount: 0.044306118,
+      asset: astr,
+      balance: BalanceBuilder().substrate().system().account(),
     },
     fee: {
       asset: astr,
@@ -40,9 +40,9 @@ const toHydraDX: AssetConfig[] = [
     balance: BalanceBuilder().substrate().assets().account(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.6,
-      asset: hdx,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
+      amount: 1.4,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
     },
     fee: {
       asset: astr,

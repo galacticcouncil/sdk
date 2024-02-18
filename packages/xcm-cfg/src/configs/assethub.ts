@@ -52,25 +52,6 @@ const toHydraDX: AssetConfig[] = [
     },
     min: AssetMinBuilder().assets().asset(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.02,
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X1(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-    min: AssetMinBuilder().assets().asset(),
-  }),
 ];
 
 const toPolkadot: AssetConfig[] = [
@@ -79,7 +60,7 @@ const toPolkadot: AssetConfig[] = [
     balance: BalanceBuilder().substrate().system().account(),
     destination: polkadot,
     destinationFee: {
-      amount: 0.02,
+      amount: 0.003,
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
