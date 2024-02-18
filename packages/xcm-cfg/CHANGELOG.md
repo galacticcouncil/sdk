@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.6.1
+
+### Patch Changes
+
+- Fee USDT/DOT transfer fixes
+
 ## 1.6.0
 
 ### Minor Changes
