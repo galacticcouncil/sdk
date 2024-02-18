@@ -20,9 +20,9 @@
     "link": "turbo run link",
     "test": "turbo run test",
     "changeset": "changeset",
-    "changeset:version": "changeset version && npm i --package-lock-only",
+    "changeset:version": "node ./.changeset/version.mjs",
     "changeset:publish": "npm run build && changeset publish",
-    "release": "git push --follow-tags"
+    "changeset:release": "node ./scripts/release-tags.sh"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
