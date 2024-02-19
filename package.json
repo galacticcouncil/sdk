@@ -20,9 +20,10 @@
     "link": "turbo run link",
     "test": "turbo run test",
     "changeset": "changeset",
-    "changeset:version": "node ./.changeset/version.mjs",
-    "changeset:publish": "npm run build && changeset publish",
-    "changeset:release": "./scripts/release-refs.sh"
+    "changeset:version": "node ./scripts/changeset-version.mjs",
+    "prerelease": "npm run build",
+    "release": "changeset publish",
+    "postrelease": "bash ./scripts/changeset-push.sh"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",

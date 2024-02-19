@@ -1,6 +1,6 @@
 # Galactic SDK
 
-Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chains integration.
+Collection of SDK(s) crafted to ease Basilisk & HydraDX chains integration.
 
 ## Project Structure
 
@@ -18,9 +18,9 @@ Galactic SDK is collection of components crafted to ease Basilisk & HydraDX chai
 ├──<a href="./packages/xcm-sdk">XCM SDK</a>: HydraDX cross-chain sdk
 </pre>
 
-## Requirements
+## Contributing
 
-- [Node.js](https://nodejs.org/) (**version 18 or higher**)
+Everything about building, setting up development environment & releasing can be found in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Issue reporting
 
