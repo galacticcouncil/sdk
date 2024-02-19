@@ -1,12 +1,11 @@
 import esbuild from 'esbuild';
-
+import { wasmLoader } from 'esbuild-plugin-wasm';
 import { esmConfig, getPackageJson } from '../../esbuild.config.mjs';
 
 const packageJson = getPackageJson(import.meta.url);
 const peerDependencies = packageJson.peerDependencies || {};
 
-const plugins = [];
-
+const plugins = [wasmLoader({ mode: 'embedded' })];
 const options = {
   ...esmConfig,
   bundle: true,
