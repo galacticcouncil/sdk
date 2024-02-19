@@ -1,5 +1,9 @@
 # How to contribute
 
+## Requirements
+
+- [Node.js](https://nodejs.org/) (**version 18 or higher**)
+
 ## Local development
 
 1. Link local modules
