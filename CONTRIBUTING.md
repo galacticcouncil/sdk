@@ -39,7 +39,7 @@ For more details visit individual package folder.
 
 ## Releasing
 
-1. Run changeset and specify package version & changelog
+1. Run changeset and specify new package version & change summary
 
 Note: If releasing multiple packages, you can run changeset
 just once if u wish to share changelog and version type, or
