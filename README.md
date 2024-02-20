@@ -4,19 +4,18 @@ Collection of SDK(s) crafted to ease Basilisk & HydraDX chains integration.
 
 ## Project Structure
 
-<pre>
-<a href=".">SDK</a>: Galactic SDK monorepo.
-├──<a href="./packages/math-ema/">Math EMA</a>: Exponential moving average math
-├──<a href="./packages/math-lbp/">Math LBP</a>: Liquidity bootstrapping pool math
-├──<a href="./packages/math-liquidity-mining/">Math LM</a>: Liquidity mining math
-├──<a href="./packages/math-omnipool/">Math Omnipool</a>: Omnipool math
-├──<a href="./packages/math-stableswap/">Math Stableswap</a>: Stableswap pool math
-├──<a href="./packages/math-staking/">Math Staking</a>: Staking math
-├──<a href="./packages/math-xyk/">Math XYK</a>: XYK pool math
-├──<a href="./packages/sdk">SDK</a>: HydraDX trade router & pool utilities
-├──<a href="./packages/xcm-cfg">XCM Config</a>: HydraDX cross-chain configuration
-├──<a href="./packages/xcm-sdk">XCM SDK</a>: HydraDX cross-chain sdk
-</pre>
+| Package               | Version             | Changelog              | Description            |
+|:----------------------|:--------------------|:-----------------------|:-----------------------|
+| [`@galacticcouncil/sdk`](./packages/sdk)                          | [![version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)                | [changelog](./packages/sdk/CHANGELOG.md)  |  Trade router & pool utilities
+| [`@galacticcouncil/xcm-cfg`](./packages/xcm-cfg)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-cfg.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-cfg)            | [changelog](./packages/xcm-cfg/CHANGELOG.md)  |  HydraDX cross-chain configuration
+| [`@galacticcouncil/xcm-cfg`](./packages/xcm-sdk)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-sdk)            | [changelog](./packages/xcm-sdk/CHANGELOG.md)  |  HydraDX cross-chain sdk
+| [`@galacticcouncil/math-ema`](./packages/math-ema)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-ema.svg)](https://www.npmjs.com/package/@galacticcouncil/math-ema)           | [changelog](./packages/math-ema/CHANGELOG.md)  |  Exponential moving average math
+| [`@galacticcouncil/math-lbp`](./packages/math-lbp)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-lbp.svg)](https://www.npmjs.com/package/@galacticcouncil/math-lbp)           | [changelog](./packages/math-lbp/CHANGELOG.md)  |  Liquidity bootstrapping pool math
+| [`@galacticcouncil/math-liquidity-mining`](./packages/math-liquidity-mining)  | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-liquidity-mining.svg)](https://www.npmjs.com/package/@galacticcouncil/math-liquidity-mining)  | [changelog](./packages/math-liquidity-mining/CHANGELOG.md)  |  Liquidity mining math
+| [`@galacticcouncil/math-omnipool`](./packages/math-omnipool)      | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-omnipool.svg)](https://www.npmjs.com/package/@galacticcouncil/math-omnipool)      | [changelog](./packages/math-omnipool/CHANGELOG.md)  |  Omnipool math
+| [`@galacticcouncil/math-stableswap`](./packages/math-stableswap)  | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-stableswap.svg)](https://www.npmjs.com/package/@galacticcouncil/math-stableswap)    | [changelog](./packages/math-stableswap/CHANGELOG.md)  |  Stableswap pool math
+| [`@galacticcouncil/math-staking`](./packages/math-staking)        | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-staking.svg)](https://www.npmjs.com/package/@galacticcouncil/math-staking)       | [changelog](./packages/math-staking/CHANGELOG.md)  |  Staking math
+| [`@galacticcouncil/math-xyk`](./packages/math-xyk)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-xyk.svg)](https://www.npmjs.com/package/@galacticcouncil/math-xyk)           | [changelog](./packages/math-xyk/CHANGELOG.md)  |  XYK pool math
 
 ## Contributing
 
