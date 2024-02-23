@@ -170,6 +170,21 @@ export const centrifuge = new Parachain({
       asset: cfg,
       id: 'Native',
     },
+    {
+      asset: dot,
+      id: { ForeignAsset: 5 },
+      decimals: 10,
+    },
+    {
+      asset: usdt,
+      id: { ForeignAsset: 1 },
+      decimals: 6,
+    },
+    {
+      asset: usdc,
+      id: { ForeignAsset: 6 },
+      decimals: 6,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
