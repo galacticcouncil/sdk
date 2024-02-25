@@ -127,14 +127,6 @@ export class TradeRouter extends Router {
       lastSwap.assetOutDecimals
     ).decimalPlaces(0, 1);
 
-    const swapAmount = firstSwap.amountIn
-      .shiftedBy(-1 * firstSwap.assetInDecimals)
-      .multipliedBy(bestRouteSpotPrice);
-    const bestRoutePriceImpact = calculateDiffToRef(
-      lastSwap.calculatedOut,
-      swapAmount
-    );
-
     const delta0Y = isDirect
       ? lastSwap.calculatedOut
       : this.calculateDelta0Y(firstSwap.amountIn, bestRoute, poolsMap);
@@ -145,6 +137,12 @@ export class TradeRouter extends Router {
       : calculateSellFee(delta0Y, deltaY).toNumber();
     const tradeFee = delta0Y.minus(deltaY);
     const tradeFeeRange = this.getRouteFeeRange(bestRoute);
+
+    const swapAmount = firstSwap.amountIn
+      .shiftedBy(-1 * firstSwap.assetInDecimals)
+      .multipliedBy(bestRouteSpotPrice);
+
+    const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
 
     const sellTx = (minAmountOut: BigNumber): Transaction => {
       return this.poolService.buildSellTx(
@@ -395,20 +393,6 @@ export class TradeRouter extends Router {
       lastSwap.assetInDecimals
     ).decimalPlaces(0, 1);
 
-    const swapAmount = firstSwap.amountOut
-      .shiftedBy(-1 * firstSwap.assetOutDecimals)
-      .multipliedBy(bestRouteSpotPrice);
-
-    let bestRoutePriceImpact: number;
-    if (lastSwap.calculatedIn.isZero()) {
-      bestRoutePriceImpact = -100;
-    } else {
-      bestRoutePriceImpact = calculateDiffToRef(
-        swapAmount,
-        lastSwap.calculatedIn
-      ).toNumber();
-    }
-
     const delta0X = isDirect
       ? lastSwap.calculatedIn
       : this.calculateDelta0X(firstSwap.amountOut, bestRoute, poolsMap);
@@ -419,6 +403,17 @@ export class TradeRouter extends Router {
       : calculateBuyFee(delta0X, deltaX);
     const tradeFee = deltaX.minus(delta0X);
     const tradeFeeRange = this.getRouteFeeRange(bestRoute);
+
+    const swapAmount = firstSwap.amountOut
+      .shiftedBy(-1 * firstSwap.assetOutDecimals)
+      .multipliedBy(bestRouteSpotPrice);
+
+    let bestRoutePriceImpact: number;
+    if (delta0X.isZero()) {
+      bestRoutePriceImpact = -100;
+    } else {
+      bestRoutePriceImpact = calculateDiffToRef(swapAmount, delta0X).toNumber();
+    }
 
     const buyTx = (maxAmountIn: BigNumber): Transaction => {
       return this.poolService.buildBuyTx(
