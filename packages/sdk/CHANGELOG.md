@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.9
+
+### Patch Changes
+
+- Price impact calculation fee exclusive
+
 ## 1.1.8
 
 ### Patch Changes
