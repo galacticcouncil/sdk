@@ -14,6 +14,7 @@ import { subsocialConfig } from './subsocial';
 import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
+import { crustConfig } from './crust';
 
 export const chainsConfig: ChainConfig[] = [
   acalaConfig,
@@ -30,6 +31,7 @@ export const chainsConfig: ChainConfig[] = [
   uniqueConfig,
   zeitgeistConfig,
   phalaConfig,
+  crustConfig,
 ];
 
 export const chainsConfigMap = new Map<string, ChainConfig>(

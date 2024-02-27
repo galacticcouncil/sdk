@@ -35,21 +35,22 @@ const toHydraDX: AssetConfig[] = [
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transfer()
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-    },
-    fee: {
-      asset: astr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer()
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().assets().account(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().assets().account(),
+  //   },
+  //   fee: {
+  //     asset: astr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer()
+  // }),
 ];
 
 export const astarConfig = new ChainConfig({

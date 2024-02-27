@@ -47,21 +47,22 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
-    fee: {
-      asset: bnc,
-      balance: BalanceBuilder().substrate().system().account(),
-    }
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+  //   fee: {
+  //     asset: bnc,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   }
+  // }),
 ];
 
 const toPolkadot: AssetConfig[] = [

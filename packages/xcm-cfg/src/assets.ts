@@ -94,10 +94,16 @@ export const unq = new Asset({
   originSymbol: 'UNQ',
 });
 
+export const cru = new Asset({
+  key: 'cru',
+  originSymbol: 'CRU',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
   cfg,
+  cru,
   bnc,
   dai_awh,
   dai_mwh,
