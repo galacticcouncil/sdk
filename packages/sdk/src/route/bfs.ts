@@ -3,7 +3,7 @@ import { Queue } from '../utils/Queue';
 export type Path = Node[];
 export type Node = [id: number, from: string];
 
-const MAX_SIZE_OF_PATH = 4;
+const MAX_SIZE_OF_PATH = 5;
 
 /**
  * Breadth First Search.
@@ -39,7 +39,7 @@ export class Bfs {
    * @param dst - destination node or null if requesting all posible paths from src
    * @returns paths
    */
-  findPaths(g: Map<number,Path>, src: number, dst: number | null): Path[] {
+  findPaths(g: Map<number, Path>, src: number, dst: number | null): Path[] {
     // Store the result paths
     const paths: Path[] = [];
     // Store the traversing paths
@@ -93,7 +93,10 @@ export class Bfs {
    * @param edges - list of all edges [id, from, to] between assets
    * @returns - traversal graph
    */
-  buildAndPopulateGraph(nodes: string[], edges: [string, string, string][]): Map<number, Path> {
+  buildAndPopulateGraph(
+    nodes: string[],
+    edges: [string, string, string][]
+  ): Map<number, Path> {
     const graph = new Map<number, Path>();
     for (let node of nodes) {
       graph.set(parseInt(node), []);
