@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.10
+
+### Patch Changes
+
+- Increase number of supported hops to 5 to allow trading between 2 isolated pools that don't have asset in omnipool
+
 ## 1.1.9
 
 ### Patch Changes
