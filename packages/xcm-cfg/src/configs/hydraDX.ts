@@ -13,6 +13,7 @@ import {
   astr,
   bnc,
   cfg,
+  cru,
   dai_awh,
   dai_mwh,
   dot,
@@ -41,6 +42,7 @@ import {
   astar,
   bifrost,
   centrifuge,
+  crust,
   hydraDX,
   interlay,
   moonbeam,
@@ -164,21 +166,22 @@ const toAstar: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: astar,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: astar,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toBifrost: AssetConfig[] = [
@@ -227,21 +230,22 @@ const toBifrost: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: bifrost,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toCentrifuge: AssetConfig[] = [
@@ -308,21 +312,22 @@ const toInterlay: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: interlay,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: interlay,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toMoonbeam: AssetConfig[] = [
@@ -443,36 +448,37 @@ const toMoonbeam: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: usdt,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: usdc,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 1.4,
-      asset: usdc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
+  // new AssetConfig({
+  //   asset: usdt,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: usdc,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 1.4,
+  //     asset: usdc,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset(1000).X3(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toPolkadot: AssetConfig[] = [
@@ -613,6 +619,24 @@ const toUnique: AssetConfig[] = [
   }),
 ];
 
+const toCrust: AssetConfig[] = [
+  new AssetConfig({
+    asset: cru,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: crust,
+    destinationFee: {
+      amount: 0.04,
+      asset: cru,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
@@ -620,6 +644,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toAstar,
     ...toBifrost,
     ...toCentrifuge,
+    ...toCrust,
     ...toInterlay,
     ...toMoonbeam,
     ...toNodle,

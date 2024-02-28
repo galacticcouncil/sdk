@@ -32,6 +32,7 @@ import {
   weth_mwh,
   ztg,
   pha,
+  cru,
 } from './assets';
 
 export const acala = new Parachain({
@@ -308,6 +309,11 @@ export const hydraDX = new Parachain({
       id: 8,
       decimals: 12,
     },
+    {
+      asset: cru,
+      id: 27,
+      decimals: 12,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -526,12 +532,30 @@ export const unique = new Parachain({
   ws: 'wss://unique-rpc.dwellir.com',
 });
 
+export const crust = new Parachain({
+  assetsData: [
+    {
+      asset: cru,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x4319cc49ee79495b57a1fec4d2bd43f59052dcc690276de566c2691d6df4f7b8',
+  key: 'crust',
+  name: 'Crust network',
+  parachainId: 2008,
+  ss58Format: 88,
+  ws: 'wss://crust-parachain.crustapps.net',
+});
+
 export const chains: AnyChain[] = [
   acala,
   assetHub,
   astar,
   bifrost,
   centrifuge,
+  crust,
   hydraDX,
   interlay,
   moonbeam,
