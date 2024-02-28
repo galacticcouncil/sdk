@@ -26,7 +26,7 @@ const toHydraDX: AssetConfig[] = [
     destination: hydraDX,
     destinationFee: {
       amount: 0.02,
-      asset: astr,
+      asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
     fee: {
