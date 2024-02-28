@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.8.0
+
+### Minor Changes
+
+- Added CRU support (temp disable AH transfers)
+
 ## 1.7.0
 
 ### Minor Changes
