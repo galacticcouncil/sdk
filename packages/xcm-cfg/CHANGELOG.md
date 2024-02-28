@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.8.1
+
+### Patch Changes
+
+- Fix DOT fees
+
 ## 1.8.0
 
 ### Minor Changes
