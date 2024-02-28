@@ -123,7 +123,7 @@ const toHydraDX: AssetConfig[] = [
     contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.002,
+      amount: 0.02,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },

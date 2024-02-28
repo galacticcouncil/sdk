@@ -156,7 +156,7 @@ const toAstar: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: astar,
     destinationFee: {
-      amount: 0.001,
+      amount: 0.02,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -302,7 +302,7 @@ const toInterlay: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: interlay,
     destinationFee: {
-      amount: 0.002,
+      amount: 0.02,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -423,7 +423,7 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.003,
+      amount: 0.02,
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
