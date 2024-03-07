@@ -1,3 +1,4 @@
+import { TxWeight } from '@galacticcouncil/xcm-core';
 import { Parents, XcmVersion } from '@moonbeam-network/xcm-builder';
 import { AnyChain } from '@moonbeam-network/xcm-types';
 
@@ -49,6 +50,72 @@ export const toAssets = (
         },
         fun: {
           Fungible: amount,
+        },
+      },
+    ],
+  };
+};
+
+export const toTransactMessage = (
+  version: XcmVersion,
+  account: any,
+  interior: any,
+  transactCall: `0x${string}`,
+  transactWeight: TxWeight,
+  amount: any
+) => {
+  return {
+    [version]: [
+      {
+        // Withdraw fee asset from the target account
+        WithdrawAsset: [
+          {
+            id: {
+              Concrete: {
+                parents: 0,
+                interior: interior,
+              },
+            },
+            fun: { Fungible: amount },
+          },
+        ],
+      },
+      {
+        // Buy execution with the fee asset
+        BuyExecution: {
+          fees: {
+            id: {
+              Concrete: {
+                parents: 0,
+                interior: interior,
+              },
+            },
+            fun: { Fungible: amount },
+          },
+          weightLimit: 'Unlimited',
+        },
+      },
+      {
+        Transact: {
+          originKind: 'SovereignAccount',
+          requireWeightAtMost: transactWeight,
+          call: {
+            encoded: transactCall,
+          },
+        },
+      },
+      {
+        RefundSurplus: {},
+      },
+      {
+        DepositAsset: {
+          assets: { Wild: { AllCounted: 1 } },
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: account,
+            },
+          },
         },
       },
     ],

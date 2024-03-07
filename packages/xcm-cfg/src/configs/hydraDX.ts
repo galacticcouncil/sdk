@@ -1,3 +1,4 @@
+import { AssetConfigV2, Precompile, Wormhole } from '@galacticcouncil/xcm-core';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
@@ -43,6 +44,7 @@ import {
   bifrost,
   centrifuge,
   crust,
+  ethereumMrl,
   hydraDX,
   interlay,
   moonbeam,
@@ -481,6 +483,33 @@ const toMoonbeam: AssetConfig[] = [
   // }),
 ];
 
+const toEthereumViaMrl: AssetConfigV2[] = [
+  new AssetConfigV2({
+    asset: weth_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ethereumMrl,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
+      Wormhole.Ethereum.id,
+      '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
+    ),
+    extrinsicV2: ExtrinsicBuilderV2()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.6), // Execution fee (GLMR)
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toPolkadot: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
@@ -647,6 +676,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toCrust,
     ...toInterlay,
     ...toMoonbeam,
+    ...toEthereumViaMrl,
     ...toNodle,
     ...toPolkadot,
     ...toSubsocial,

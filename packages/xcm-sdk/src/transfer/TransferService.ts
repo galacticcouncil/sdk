@@ -1,3 +1,4 @@
+import { AssetConfigV2, TransactInfo } from '@galacticcouncil/xcm-core';
 import { FeeConfigBuilder } from '@moonbeam-network/xcm-builder';
 import { ChainTransferConfig } from '@moonbeam-network/xcm-config';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
@@ -6,9 +7,10 @@ import { toBigInt } from '@moonbeam-network/xcm-utils';
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { EvmClient, EvmReconciler } from '../evm';
 import { SubstrateService } from '../substrate';
+import { XCall } from '../types';
 import { isH160Address } from '../utils';
 
-import { buildTransfer } from './TransferUtils';
+import { buildTransact, buildTransfer } from './TransferUtils';
 
 export class TransferService {
   readonly balance: BalanceAdapter;
@@ -81,16 +83,37 @@ export class TransferService {
     destAddress: string,
     destChain: AnyChain,
     destFee: AssetAmount,
-    transferConfig: ChainTransferConfig
+    transferConfig: ChainTransferConfig,
+    transactInfo?: TransactInfo
   ): Promise<AssetAmount> {
     const config = buildTransfer(
       amount,
       destAddress,
       destChain,
       destFee,
-      transferConfig
+      transferConfig,
+      transactInfo
     );
     return this.transfer.getFee(address, amount, feeBalance, config);
+  }
+
+  async getCall(
+    amount: bigint,
+    destAddress: string,
+    destChain: AnyChain,
+    destFee: AssetAmount,
+    transferConfig: ChainTransferConfig,
+    transactInfo?: TransactInfo
+  ): Promise<XCall> {
+    const config = buildTransfer(
+      amount,
+      destAddress,
+      destChain,
+      destFee,
+      transferConfig,
+      transactInfo
+    );
+    return this.transfer.calldata(config);
   }
 
   async getFeeBalance(
@@ -142,5 +165,38 @@ export class TransferService {
       amount: balance,
       decimals: decimals,
     });
+  }
+
+  isMrl(transferConfig: ChainTransferConfig): boolean {
+    const config = transferConfig.config as AssetConfigV2;
+    return !!config.ethereum;
+  }
+
+  async getTransactInfo(
+    address: string,
+    amount: bigint,
+    destAddress: string,
+    destChain: AnyChain,
+    destFee: AssetAmount,
+    transferConfig: ChainTransferConfig
+  ): Promise<TransactInfo> {
+    const config = buildTransact(
+      amount,
+      destAddress,
+      destChain,
+      destFee,
+      transferConfig,
+      this.substrate.chain
+    );
+
+    const extrinsic = this.substrate.getExtrinsic(config);
+    const { weight } = await extrinsic.paymentInfo(address);
+    return {
+      call: extrinsic.method.toHex(),
+      weight: {
+        refTime: weight.refTime.toNumber(),
+        proofSize: weight.proofSize.toString(),
+      },
+    } as TransactInfo;
   }
 }

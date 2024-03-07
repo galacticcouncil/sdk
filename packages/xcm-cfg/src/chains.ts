@@ -118,7 +118,7 @@ export const astar = new Parachain({
       id: '4294969280',
       metadataId: 0,
       decimals: 6,
-    }
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -222,6 +222,7 @@ export const hydraDX = new Parachain({
       asset: glmr,
       id: 16,
       decimals: 18,
+      palletInstance: 10,
     },
     {
       asset: ibtc,
@@ -273,6 +274,7 @@ export const hydraDX = new Parachain({
       asset: usdt_mwh,
       id: 23,
       decimals: 6,
+      palletInstance: 110,
     },
     {
       asset: vdot,
@@ -288,6 +290,7 @@ export const hydraDX = new Parachain({
       asset: wbtc_mwh,
       id: 19,
       decimals: 8,
+      palletInstance: 110,
     },
     {
       asset: weth_awh,
@@ -298,6 +301,7 @@ export const hydraDX = new Parachain({
       asset: weth_mwh,
       id: 20,
       decimals: 18,
+      palletInstance: 110,
     },
     {
       asset: ztg,
@@ -322,7 +326,7 @@ export const hydraDX = new Parachain({
   name: 'HydraDX',
   parachainId: 2034,
   ss58Format: 63,
-  ws: 'wss://rpc.hydradx.cloud',
+  ws: 'wss://hydradx-rpc.dwellir.com',
 });
 
 export const interlay = new Parachain({
@@ -549,6 +553,31 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
+// MRL chain config
+
+export const ethereumMrl = new EvmParachain({
+  ...moonbeam,
+  id: 1,
+  key: 'ethereum',
+  name: 'Ethereum (Mrl)',
+  assetsData: [
+    {
+      asset: wbtc_mwh,
+      id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+      metadataId: 0,
+      decimals: 8,
+    },
+    {
+      asset: weth_mwh,
+      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      metadataId: 0,
+      decimals: 18,
+    },
+  ],
+});
+
+const mrlChains: AnyChain[] = [ethereumMrl];
+
 export const chains: AnyChain[] = [
   acala,
   assetHub,
@@ -565,7 +594,7 @@ export const chains: AnyChain[] = [
   subsocial,
   unique,
   zeitgeist,
-];
+].concat(mrlChains);
 
 export const chainsMap = new Map<string, AnyChain>(
   chains.map((chain) => [chain.key, chain])

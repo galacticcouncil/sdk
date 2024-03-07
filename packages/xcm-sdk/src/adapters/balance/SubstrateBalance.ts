@@ -12,9 +12,8 @@ import {
   ReplaySubject,
 } from 'rxjs';
 
-import { SubstrateService, normalizeAssetAmount } from '../../substrate';
-
 import { BalanceProvider } from '../types';
+import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 
 export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
   readonly #substrate: SubstrateService;

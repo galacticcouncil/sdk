@@ -1,16 +1,16 @@
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
-import { XTokens } from '../../contracts';
+import { EvmTransfer } from './evm';
 import { XCall } from '../../types';
 
 import { TransferProvider } from '../types';
 
-export class XTokensTransfer implements TransferProvider<XTokens> {
-  calldata(contract: XTokens): XCall {
+export class ContractTransfer implements TransferProvider<EvmTransfer> {
+  calldata(contract: EvmTransfer): XCall {
     const { data, abi, address } = contract;
     return {
       data: data as `0x${string}`,
-      abi: abi,
+      abi: JSON.stringify(abi),
       to: address,
     } as XCall;
   }
@@ -19,7 +19,7 @@ export class XTokensTransfer implements TransferProvider<XTokens> {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    contract: XTokens
+    contract: EvmTransfer
   ): Promise<AssetAmount> {
     const fee = await contract.getFee(account, amount);
     return feeBalance.copyWith({

@@ -1,12 +1,9 @@
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
 import { encodeFunctionData } from 'viem';
 
-import { EvmClient } from '../evm';
+import { EvmClient } from '../../../evm';
 
-import abi from './XTokensABI.json';
-
-export class XTokens {
-  readonly address = '0x0000000000000000000000000000000000000804';
+export abstract class EvmTransfer {
   readonly #client: EvmClient;
   readonly #config: ContractConfig;
 
@@ -22,14 +19,25 @@ export class XTokens {
     }
   }
 
-  get abi(): string {
-    return JSON.stringify(abi);
+  abstract _abi(): any;
+  abstract _precompile(): string;
+
+  get abi(): any {
+    return this._abi();
+  }
+
+  get address(): string {
+    const { address } = this.#config;
+    if (address) {
+      return address;
+    }
+    return this._precompile();
   }
 
   get data(): string {
     const { func, args } = this.#config;
     return encodeFunctionData({
-      abi: abi,
+      abi: this.abi,
       functionName: func,
       args: args,
     });
@@ -40,7 +48,7 @@ export class XTokens {
     const provider = this.#client.getProvider();
     return await provider.estimateContractGas({
       address: this.address as `0x${string}`,
-      abi: abi,
+      abi: this.abi,
       functionName: func,
       args: args,
       account: account as `0x${string}`,

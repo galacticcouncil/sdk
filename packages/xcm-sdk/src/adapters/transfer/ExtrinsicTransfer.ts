@@ -1,10 +1,9 @@
 import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
+import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 import { XCall } from '../../types';
-
-import { TransferProvider } from '../types';
 
 export class ExtrinsicTransfer implements TransferProvider<ExtrinsicConfig> {
   readonly #substrate: SubstrateService;

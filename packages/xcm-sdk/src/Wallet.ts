@@ -110,6 +110,17 @@ export class Wallet {
         destData.getMin(destination),
       ]);
 
+    const transactInfo = srcData.isMrl(source)
+      ? await destData.getTransactInfo(
+          srcAddr,
+          srcBalance.amount,
+          destAddr,
+          destination.chain,
+          destFee,
+          source
+        )
+      : undefined;
+
     const srcFee = await srcData.getFee(
       srcAddr,
       srcBalance.amount,
@@ -117,11 +128,13 @@ export class Wallet {
       destAddr,
       destination.chain,
       destFee,
-      source
+      source,
+      transactInfo
     );
 
     const min = calculateMin(destBalance, destEd, destFee, destMin);
     const max = calculateMax(srcBalance, srcEd, srcFee, srcMin);
+
     return {
       balance: srcBalance,
       destFee,
@@ -135,7 +148,8 @@ export class Wallet {
           destAddr,
           destination.chain,
           destFee,
-          source
+          source,
+          transactInfo
         );
         return srcData.transfer.calldata(config);
       },

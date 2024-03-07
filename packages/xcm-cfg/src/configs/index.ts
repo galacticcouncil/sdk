@@ -15,6 +15,7 @@ import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
+import { ethereumConfig } from './ethereumMrl';
 
 export const chainsConfig: ChainConfig[] = [
   acalaConfig,
@@ -32,6 +33,7 @@ export const chainsConfig: ChainConfig[] = [
   zeitgeistConfig,
   phalaConfig,
   crustConfig,
+  ethereumConfig,
 ];
 
 export const chainsConfigMap = new Map<string, ChainConfig>(
