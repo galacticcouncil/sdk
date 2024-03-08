@@ -13,7 +13,7 @@ import {
   usdt,
   usdc
 } from '../assets';
-import { hydraDX, moonbeam } from '../chains';
+import { assetHub, hydraDX, moonbeam } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -132,6 +132,7 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
+  
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
   // new AssetConfig({
   //   asset: usdt,
@@ -165,7 +166,40 @@ const toHydraDX: AssetConfig[] = [
   // }),
 ];
 
+const toAssetHub: AssetConfig[] = [
+  new AssetConfig({
+    asset: usdt,
+    balance: BalanceBuilder().substrate().assets().account(),
+    contract: ContractBuilder().Xtokens().transfer(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.07,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().assets().account(),
+    contract: ContractBuilder().Xtokens().transfer(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.07,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const moonbeamConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydraDX, ...toAssetHub],
   chain: moonbeam,
 });

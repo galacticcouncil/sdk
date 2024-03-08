@@ -2,10 +2,11 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
+import { AssetConfig, ChainConfig, usdc } from '@moonbeam-network/xcm-config';
 
 import { ibtc, intr, dot, hdx, usdt } from '../assets';
-import { hydraDX, interlay } from '../chains';
+import { assetHub, hydraDX, interlay } from '../chains';
+import { ExtrinsicBuilderV2 } from 'builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -67,7 +68,40 @@ const toHydraDX: AssetConfig[] = [
   // }),
 ];
 
+const toAssetHub: AssetConfig[] = [
+  new AssetConfig({
+    asset: usdt,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.07,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.07,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const interlayConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydraDX, ...toAssetHub],
   chain: interlay,
 });

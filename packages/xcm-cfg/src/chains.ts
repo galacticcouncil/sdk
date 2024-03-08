@@ -351,6 +351,12 @@ export const interlay = new Parachain({
       id: { ForeignAsset: 2 },
       metadataId: 0,
     },
+    {
+      asset: usdc,
+      decimals: 6,
+      id: { ForeignAsset: 12 },
+      metadataId: 0,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
