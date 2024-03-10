@@ -10,7 +10,9 @@ import {
 
 import { dot } from '../assets';
 import { assetHub, bifrost, hydraDX } from '../chains';
-import { ExtrinsicBuilderV2 } from 'builders';
+import { ExtrinsicBuilderV2 } from '../builders';
+
+const xcmDeliveryFeeAmount = 0.047;
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -26,6 +28,11 @@ const toHydraDX: AssetConfig[] = [
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
   }),
 ];
 
@@ -43,6 +50,11 @@ const toBifrost: AssetConfig[] = [
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
   }),
 ];
 
@@ -57,6 +69,11 @@ const toAssetHub: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
     extrinsic: ExtrinsicBuilderV2().xcmPallet().limitedTeleportAssets(0).here(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
   }),
 ];
 

@@ -8,7 +8,7 @@ import { EvmClient, EvmReconciler } from '../evm';
 import { SubstrateService } from '../substrate';
 import { isH160Address } from '../utils';
 
-import { buildTransfer } from './TransferUtils';
+import { buildTransfer, getXcmDeliveryFee } from './TransferUtils';
 
 export class TransferService {
   readonly balance: BalanceAdapter;
@@ -83,14 +83,23 @@ export class TransferService {
     destFee: AssetAmount,
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
-    const config = buildTransfer(
+    const { config } = transferConfig;
+    const cfg = buildTransfer(
       amount,
       destAddress,
       destChain,
       destFee,
       transferConfig
     );
-    return this.transfer.getFee(address, amount, feeBalance, config);
+    const fee = await this.transfer.getFee(address, amount, feeBalance, cfg);
+    const feeConfig = config.fee;
+    if (feeConfig) {
+      const { amount, decimals } = fee;
+      const xcmDeliveryFee = getXcmDeliveryFee(decimals, feeConfig);
+      const totalFee = amount + xcmDeliveryFee;
+      return fee.copyWith({ amount: totalFee });
+    }
+    return fee;
   }
 
   async getFeeBalance(

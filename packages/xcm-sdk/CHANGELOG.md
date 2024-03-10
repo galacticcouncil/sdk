@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- Support XCM delivery fees
+
 ## 2.2.0
 
 ### Minor Changes

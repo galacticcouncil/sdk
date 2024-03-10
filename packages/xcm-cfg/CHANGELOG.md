@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.9.0
+
+### Minor Changes
+
+- Set xcm delivery fees for relay DOT transfers
+
 ## 1.8.2
 
 ### Patch Changes

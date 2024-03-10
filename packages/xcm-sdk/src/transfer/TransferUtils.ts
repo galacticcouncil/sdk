@@ -1,6 +1,10 @@
 import { ContractConfig, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
-import { ChainTransferConfig } from '@moonbeam-network/xcm-config';
+import {
+  ChainTransferConfig,
+  FeeAssetConfig,
+} from '@moonbeam-network/xcm-config';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
+import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 /**
  * Calculate maximum allowed amount of asset to send from source to
@@ -61,6 +65,15 @@ export function calculateMin(
   return balance.copyWith({
     amount: BigInt(result.toFixed()),
   });
+}
+
+export function getXcmDeliveryFee(
+  decimals: number,
+  feeConfig?: FeeAssetConfig
+): bigint {
+  return feeConfig?.xcmDeliveryFeeAmount
+    ? toBigInt(feeConfig.xcmDeliveryFeeAmount, decimals)
+    : 0n;
 }
 
 export function buildTransfer(
