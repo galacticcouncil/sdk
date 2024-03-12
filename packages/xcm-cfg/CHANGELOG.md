@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.4
+
+### Patch Changes
+
+- Fix integritee imports
+
 ## 1.10.3
 
 ### Patch Changes
