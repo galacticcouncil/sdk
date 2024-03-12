@@ -10,12 +10,15 @@ import {
   hdx,
   ibtc,
   intr,
+  kar,
+  ksm,
   usdc,
   usdt,
   vdot,
   wbtc,
   weth,
   ztg,
+  xrt,
 } from '@moonbeam-network/xcm-config';
 
 export {
@@ -28,11 +31,24 @@ export {
   hdx,
   intr,
   ibtc,
+  kar,
+  ksm,
   usdc,
   usdt,
   vdot,
   ztg,
+  xrt,
 };
+
+export const bsx = new Asset({
+  key: 'bsx',
+  originSymbol: 'BSX',
+});
+
+export const cru = new Asset({
+  key: 'cru',
+  originSymbol: 'CRU',
+});
 
 export const dai_awh = new Asset({
   ...dai,
@@ -42,6 +58,21 @@ export const dai_awh = new Asset({
 export const dai_mwh = new Asset({
   ...dai,
   key: 'dai_mwh',
+});
+
+export const nodl = new Asset({
+  key: 'nodl',
+  originSymbol: 'NODL',
+});
+
+export const pha = new Asset({
+  key: 'pha',
+  originSymbol: 'PHA',
+});
+
+export const tnkr = new Asset({
+  key: 'tnkr',
+  originSymbol: 'TNKR',
 });
 
 export const weth_awh = new Asset({
@@ -79,29 +110,15 @@ export const sub = new Asset({
   originSymbol: 'SUB',
 });
 
-export const pha = new Asset({
-  key: 'pha',
-  originSymbol: 'PHA',
-});
-
-export const nodl = new Asset({
-  key: 'nodl',
-  originSymbol: 'NODL',
-});
-
 export const unq = new Asset({
   key: 'unq',
   originSymbol: 'UNQ',
 });
 
-export const cru = new Asset({
-  key: 'cru',
-  originSymbol: 'CRU',
-});
-
 export const assets: Asset[] = [
   aca,
   astr,
+  bsx,
   cfg,
   cru,
   bnc,
@@ -112,8 +129,12 @@ export const assets: Asset[] = [
   hdx,
   ibtc,
   intr,
+  kar,
+  ksm,
   nodl,
+  pha,
   sub,
+  tnkr,
   unq,
   usdc,
   usdc_mwh,
@@ -125,7 +146,7 @@ export const assets: Asset[] = [
   weth_awh,
   weth_mwh,
   ztg,
-  pha,
+  xrt,
 ];
 
 export const assetsMap = new Map<string, Asset>(

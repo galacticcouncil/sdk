@@ -10,7 +10,9 @@ import {
   aca,
   astr,
   bnc,
+  bsx,
   cfg,
+  cru,
   dai_awh,
   dai_mwh,
   dot,
@@ -18,7 +20,11 @@ import {
   hdx,
   ibtc,
   intr,
+  kar,
+  ksm,
+  pha,
   nodl,
+  tnkr,
   sub,
   unq,
   usdc,
@@ -31,8 +37,7 @@ import {
   weth_awh,
   weth_mwh,
   ztg,
-  pha,
-  cru,
+  xrt,
 } from './assets';
 
 export const acala = new Parachain({
@@ -118,7 +123,7 @@ export const astar = new Parachain({
       id: '4294969280',
       metadataId: 0,
       decimals: 6,
-    }
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -549,7 +554,7 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
-export const chains: AnyChain[] = [
+const polkadotChains: AnyChain[] = [
   acala,
   assetHub,
   astar,
@@ -566,6 +571,161 @@ export const chains: AnyChain[] = [
   unique,
   zeitgeist,
 ];
+
+// Kusama chains configuration
+
+export const basilisk = new Parachain({
+  assetsData: [
+    {
+      asset: bsx,
+      id: 0,
+    },
+    {
+      asset: ksm,
+      id: 1,
+      decimals: 12,
+    },
+    {
+      asset: usdt,
+      id: 1984,
+      balanceId: 14,
+      metadataId: 14,
+      palletInstance: 50,
+      decimals: 6,
+    },
+    {
+      asset: tnkr,
+      id: 6,
+      decimals: 12,
+    },
+    {
+      asset: xrt,
+      id: 16,
+      decimals: 9,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755',
+  key: 'basilisk',
+  name: 'Basilisk',
+  parachainId: 2090,
+  ss58Format: 10041,
+  ws: 'wss://rpc.basilisk.cloud',
+});
+
+export const karura = new Parachain({
+  assetsData: [
+    {
+      asset: kar,
+      id: { Token: kar.originSymbol },
+    },
+    {
+      asset: ksm,
+      id: { Token: ksm.originSymbol },
+      decimals: 12,
+    },
+    {
+      asset: bsx,
+      id: { ForeignAsset: 11 },
+      decimals: 12,
+    },
+    {
+      asset: usdt,
+      id: 1984,
+      balanceId: { ForeignAsset: 7 },
+      decimals: 6,
+      palletInstance: 50,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
+  key: 'karura',
+  name: 'Karura',
+  parachainId: 2000,
+  ss58Format: 8,
+  ws: 'wss://karura-rpc-0.aca-api.network',
+});
+
+export const kusama = new Parachain({
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+  key: 'kusama',
+  name: 'Kusama',
+  parachainId: 0,
+  ss58Format: 2,
+  ws: 'wss://kusama-rpc.dwellir.com',
+});
+
+export const kusamaAssetHub = new Parachain({
+  assetsData: [
+    {
+      asset: usdt,
+      id: 1984,
+      decimals: 6,
+      palletInstance: 50,
+    },
+    {
+      asset: ksm,
+      decimals: 12,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
+  key: 'kusama-assethub',
+  name: 'AssetHub',
+  parachainId: 1000,
+  ss58Format: 2,
+  ws: 'wss://kusama-asset-hub-rpc.polkadot.io',
+});
+
+export const robonomics = new Parachain({
+  assetsData: [
+    {
+      asset: xrt,
+      metadataId: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc',
+  key: 'robonomics',
+  name: 'Robonomics',
+  parachainId: 2048,
+  ss58Format: 32,
+  ws: 'wss://kusama.rpc.robonomics.network/',
+});
+
+export const tinkernet = new Parachain({
+  assetsData: [
+    {
+      asset: tnkr,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0xd42e9606a995dfe433dc7955dc2a70f495f350f373daa200098ae84437816ad2',
+  key: 'tinkernet',
+  name: 'Tinkernet',
+  parachainId: 2125,
+  ss58Format: 117,
+  ws: 'wss://tinkernet-rpc.dwellir.com',
+});
+
+const kusamaChains: AnyChain[] = [
+  basilisk,
+  karura,
+  kusama,
+  kusamaAssetHub,
+  robonomics,
+  tinkernet,
+];
+
+export const chains: AnyChain[] = [...polkadotChains, ...kusamaChains];
 
 export const chainsMap = new Map<string, AnyChain>(
   chains.map((chain) => [chain.key, chain])

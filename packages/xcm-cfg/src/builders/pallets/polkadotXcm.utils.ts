@@ -2,7 +2,7 @@ import { Parents, XcmVersion } from '@moonbeam-network/xcm-builder';
 import { AnyChain } from '@moonbeam-network/xcm-types';
 
 export const toDest = (version: XcmVersion, destination: AnyChain) => {
-  if (destination.key === 'polkadot') {
+  if (destination.key === 'polkadot' || destination.key === 'kusama') {
     return {
       [version]: {
         parents: 1,

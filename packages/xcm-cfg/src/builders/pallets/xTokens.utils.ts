@@ -6,7 +6,7 @@ export const toDest = (
   destination: AnyChain,
   account: any
 ) => {
-  if (destination.key === 'polkadot') {
+  if (destination.key === 'polkadot' || destination.key === 'kusama') {
     return {
       [version]: {
         parents: 1,

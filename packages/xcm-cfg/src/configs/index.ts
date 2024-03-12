@@ -1,5 +1,7 @@
 import { ChainConfig } from '@moonbeam-network/xcm-config';
 
+import { kusamaChainsConfig } from './kusama';
+
 import { acalaConfig } from './acala';
 import { assetHubConfig } from './assethub';
 import { astarConfig } from './astar';
@@ -16,7 +18,7 @@ import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 
-export const chainsConfig: ChainConfig[] = [
+const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
   assetHubConfig,
   astarConfig,
@@ -32,6 +34,11 @@ export const chainsConfig: ChainConfig[] = [
   zeitgeistConfig,
   phalaConfig,
   crustConfig,
+];
+
+export const chainsConfig: ChainConfig[] = [
+  ...polkadotChainsConfig,
+  ...kusamaChainsConfig,
 ];
 
 export const chainsConfigMap = new Map<string, ChainConfig>(
