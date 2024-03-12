@@ -2,15 +2,12 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import {
-  AssetConfig,
-  ChainConfig,
-  integritee,
-} from '@moonbeam-network/xcm-config';
+import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { bsx, ksm, teer, tnkr, usdt, xrt } from '../../assets';
 import {
   basilisk,
+  integritee,
   karura,
   kusama,
   kusamaAssetHub,
