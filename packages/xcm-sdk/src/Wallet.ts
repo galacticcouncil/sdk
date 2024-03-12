@@ -148,7 +148,6 @@ export class Wallet {
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainConfig = this.configService.getChainConfig(chain);
-
     const evmClient = this.getEvmClient(chain);
     const evmReconciler = this.getEvmReconciler(chain);
     const substrate = await this.getSubstrateService(chain);
@@ -158,22 +157,25 @@ export class Wallet {
       substrate,
     });
 
-    const observables = chainConfig
-      .getAssetsConfigs()
-      .map(async (assetConfig) => {
-        const { asset, balance } = assetConfig;
-        const { chain } = chainConfig;
-        const assetId = chain.getBalanceAssetId(asset);
-        const isErc20 = isH160Address(assetId.toString());
-        const evmAddr = isErc20
-          ? await evmReconciler.toEvmAddress(address, substrate.api)
-          : address;
-        const balanceConfig = balance.build({
-          address: evmAddr,
-          asset: assetId,
-        });
-        return balanceAdapter.subscribe(asset, balanceConfig);
+    const configs = chainConfig.getAssetsConfigs();
+    const uniqueConfigs = [
+      ...new Map(configs.map((cfg) => [cfg.asset, cfg])).values(),
+    ];
+
+    const observables = uniqueConfigs.map(async (assetConfig) => {
+      const { asset, balance } = assetConfig;
+      const { chain } = chainConfig;
+      const assetId = chain.getBalanceAssetId(asset);
+      const isErc20 = isH160Address(assetId.toString());
+      const evmAddr = isErc20
+        ? await evmReconciler.toEvmAddress(address, substrate.api)
+        : address;
+      const balanceConfig = balance.build({
+        address: evmAddr,
+        asset: assetId,
       });
+      return balanceAdapter.subscribe(asset, balanceConfig);
+    });
     const ob = await Promise.all(observables);
     const observable = combineLatest(ob);
     return observable.pipe(debounceTime(500)).subscribe(observer);
