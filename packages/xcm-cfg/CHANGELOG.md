@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.3
+
+### Patch Changes
+
+- TEER (Integritee) support
+
 ## 1.10.2
 
 ### Patch Changes
