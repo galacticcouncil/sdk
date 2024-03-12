@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.2
+
+### Patch Changes
+
+- Temp disable Basilisk <-> Karura (KSM) transfer
+
 ## 1.10.1
 
 ### Patch Changes
