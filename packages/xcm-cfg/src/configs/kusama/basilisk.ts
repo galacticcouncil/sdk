@@ -49,21 +49,22 @@ const toKarura: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: ksm,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: karura,
-    destinationFee: {
-      amount: 0.000090741527,
-      asset: ksm,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
-    fee: {
-      asset: bsx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // TODO: Configure Karura <-> Basilisk (KSM)
+  // new AssetConfig({
+  //   asset: ksm,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: karura,
+  //   destinationFee: {
+  //     amount: 0.000090741527,
+  //     asset: ksm,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+  //   fee: {
+  //     asset: bsx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toKusama: AssetConfig[] = [
