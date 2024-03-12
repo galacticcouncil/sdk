@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 2.3.1
+
+### Patch Changes
+
+- Dedup wallet balance subscribers
+
 ## 2.3.0
 
 ### Minor Changes
