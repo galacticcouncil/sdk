@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.1
+
+### Patch Changes
+
+- Integritee chain config
+
 ## 1.10.0
 
 ### Minor Changes

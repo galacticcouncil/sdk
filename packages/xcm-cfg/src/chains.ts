@@ -648,6 +648,17 @@ export const karura = new Parachain({
   ws: 'wss://karura-rpc-0.aca-api.network',
 });
 
+export const integritee = new Parachain({
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0xcdedc8eadbfa209d3f207bba541e57c3c58a667b05a2e1d1e86353c9000758da',
+  key: 'integritee',
+  name: 'Integritee Network',
+  parachainId: 2015,
+  ss58Format: 13,
+  ws: 'wss://kusama.api.integritee.network/rpc',
+});
+
 export const kusama = new Parachain({
   ecosystem: Ecosystem.Kusama,
   genesisHash:
@@ -718,6 +729,7 @@ export const tinkernet = new Parachain({
 
 const kusamaChains: AnyChain[] = [
   basilisk,
+  integritee,
   karura,
   kusama,
   kusamaAssetHub,
