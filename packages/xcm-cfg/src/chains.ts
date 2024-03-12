@@ -24,6 +24,7 @@ import {
   ksm,
   pha,
   nodl,
+  teer,
   tnkr,
   sub,
   unq,
@@ -594,6 +595,11 @@ export const basilisk = new Parachain({
       decimals: 6,
     },
     {
+      asset: teer,
+      id: 17,
+      decimals: 12,
+    },
+    {
       asset: tnkr,
       id: 6,
       decimals: 12,
@@ -649,14 +655,20 @@ export const karura = new Parachain({
 });
 
 export const integritee = new Parachain({
+  assetsData: [
+    {
+      asset: teer,
+      id: 0,
+    },
+  ],
   ecosystem: Ecosystem.Kusama,
   genesisHash:
     '0xcdedc8eadbfa209d3f207bba541e57c3c58a667b05a2e1d1e86353c9000758da',
   key: 'integritee',
-  name: 'Integritee Network',
+  name: 'Integritee',
   parachainId: 2015,
   ss58Format: 13,
-  ws: 'wss://kusama.api.integritee.network/rpc',
+  ws: 'wss://kusama.api.integritee.network',
 });
 
 export const kusama = new Parachain({

@@ -2,9 +2,13 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
+import {
+  AssetConfig,
+  ChainConfig,
+  integritee,
+} from '@moonbeam-network/xcm-config';
 
-import { bsx, ksm, tnkr, usdt, xrt } from '../../assets';
+import { bsx, ksm, teer, tnkr, usdt, xrt } from '../../assets';
 import {
   basilisk,
   karura,
@@ -85,6 +89,24 @@ const toKusama: AssetConfig[] = [
   }),
 ];
 
+const toIntegritee: AssetConfig[] = [
+  new AssetConfig({
+    asset: teer,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: integritee,
+    destinationFee: {
+      amount: 0.000004,
+      asset: teer,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: bsx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toRobonomics: AssetConfig[] = [
   new AssetConfig({
     asset: xrt,
@@ -126,6 +148,7 @@ export const basiliskConfig = new ChainConfig({
     ...toAssetHub,
     ...toKarura,
     ...toKusama,
+    ...toIntegritee,
     ...toRobonomics,
     ...toTinkernet,
   ],
