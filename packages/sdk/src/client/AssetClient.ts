@@ -70,17 +70,15 @@ export class AssetClient extends PolkadotApiClient {
             },
             value,
           ]) => {
-            {
-              const data = value.unwrap();
-
-              return [
-                id.toString(),
-                {
-                  decimals: data.decimals.toNumber(),
-                  symbol: data.symbol.toHuman() as string,
-                },
-              ];
-            }
+            //@ts-ignore
+            const { decimals, symbol } = value.unwrap();
+            return [
+              id.toString(),
+              {
+                decimals: decimals.toNumber(),
+                symbol: symbol.toHuman() as string,
+              },
+            ];
           }
         )
       );
@@ -181,7 +179,7 @@ export class AssetClient extends PolkadotApiClient {
     share: PalletStableswapPoolInfo
   ): Asset {
     const { assets } = share;
-    const { name, assetType, existentialDeposit } = details;
+    const { name, symbol, assetType, existentialDeposit } = details;
     const poolTokens = assets.map((asset) => asset.toString());
     const poolEntries = poolTokens.map((token: string) => {
       const { symbol } = this.getTokens(token, details, metadata);
@@ -192,7 +190,7 @@ export class AssetClient extends PolkadotApiClient {
     return {
       id: tokenKey,
       name: symbols.join(', '),
-      symbol: name.length > 0 ? name.toHuman() : tokenKey,
+      symbol: symbol?.isSome ? symbol.toHuman() : name.toHuman(),
       decimals: 18,
       icon: symbols.join('/'),
       type: assetType.toString(),
@@ -225,14 +223,12 @@ export class AssetClient extends PolkadotApiClient {
               },
               value,
             ]) => {
-              const data = value.unwrap();
+              const { decimals, symbol } = value.unwrap();
               return [
                 id.toString(),
                 {
-                  //@ts-ignore
-                  decimals: Number(data.decimals.toString()),
-                  //@ts-ignore
-                  symbol: data.symbol.toHuman(),
+                  decimals: Number(decimals.toString()),
+                  symbol: symbol.toHuman() as string,
                 },
               ];
             }
@@ -280,5 +276,23 @@ export class AssetClient extends PolkadotApiClient {
     } else {
       return undefined;
     }
+  }
+
+  private parseMeta(
+    details: PalletAssetRegistryAssetDetails,
+    metadata?: PalletAssetRegistryAssetMetadata
+  ): AssetMetadata {
+    const symbol = details.symbol.isSome
+      ? details.symbol.toHuman()
+      : metadata?.symbol.toHuman();
+
+    const decimals = details.decimals.isSome
+      ? details.decimals.toHuman()
+      : metadata?.decimals.toHuman();
+
+    return {
+      decimals: Number(decimals),
+      symbol,
+    } as AssetMetadata;
   }
 }
