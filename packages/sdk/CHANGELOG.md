@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.1.12
+
+### Patch Changes
+
+- Fix asset client (runtime dyn reg. upgrade)
+
 ## 1.1.11
 
 ### Patch Changes
