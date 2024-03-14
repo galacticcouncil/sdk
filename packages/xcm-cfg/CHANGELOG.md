@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.5
+
+### Patch Changes
+
+- Assethub XCM delivery fees
+
 ## 1.10.4
 
 ### Patch Changes
