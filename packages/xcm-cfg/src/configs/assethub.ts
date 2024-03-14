@@ -13,6 +13,8 @@ import { dot, usdc, usdt } from '../assets';
 import { assetHub, hydraDX } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
+const xcmDeliveryFeeAmount = 0.036;
+
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdt,
@@ -30,6 +32,7 @@ const toHydraDX: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -49,6 +52,7 @@ const toHydraDX: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -71,6 +75,7 @@ const toPolkadot: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
