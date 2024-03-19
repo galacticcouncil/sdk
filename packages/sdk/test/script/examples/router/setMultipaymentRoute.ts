@@ -47,10 +47,7 @@ class MultiCurrencyPaymentRoutes extends PolkadotExecutor {
       .filter(({ section }) => section === 'router')
       .filter(({ asset_in, asset_out }) => [asset_in, asset_out].sort() )
       .map(({ args }) => args)
-      .filter(({ asset_in, asset_out }) => !onchain.find(({ assets }) => {
-        const [a, b] = assets;
-        return (a === asset_in && b === asset_out) || (a === asset_out && b === asset_in);
-      }))
+      .filter(({ asset_in, asset_out }) => !onchain.find(({ assets: [a, b] }) => (a === asset_in && b === asset_out) || (a === asset_out && b === asset_in)))
       .map(({ asset_in, asset_out, route }) =>
         api.tx.router.setRoute([asset_in, asset_out], route)
       );
