@@ -16,7 +16,7 @@ import {
   Pool,
   Asset,
   PoolServiceOptions,
-  ExternalAssetMeta,
+  AssetBase,
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
@@ -33,7 +33,7 @@ export class PoolService implements IPoolService {
   protected readonly stableClient: StableSwapClient;
 
   protected onChainAssets: Asset[] = [];
-  protected externalAssetsMeta: ExternalAssetMeta[] | undefined = [];
+  protected externalAssetsMeta: AssetBase[] | undefined = [];
   protected onChainAssetsLoaded = false;
 
   constructor(api: ApiPromise, options?: PoolServiceOptions) {
