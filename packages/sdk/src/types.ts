@@ -181,3 +181,14 @@ export interface AssetMetadata {
   decimals: number;
   symbol: string;
 }
+
+export type ExternalAssetMeta = {
+  id: string;
+  decimals: number;
+  name: string;
+  symbol: string;
+};
+
+export type PoolServiceOptions = {
+  externalAssets: ExternalAssetMeta[];
+};
