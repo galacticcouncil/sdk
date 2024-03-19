@@ -24,17 +24,14 @@ class MultiCurrencyPaymentRoutes extends PolkadotExecutor {
               route,
             ]) => [[assetIn.toString(), assetOut.toString()], route]
           )
-          .filter(([[asset_in]]) => asset_in.toString() === HDX)
-          .reduce(
-            (a, [[, asset_out], route]) => ({
-              ...a,
-              [asset_out]: route.toHuman(),
-            }),
-            {}
-          )
+          .filter(([[asset_in, asset_out]]) => asset_in === HDX || asset_out === HDX)
+          .map(
+            ([[asset_in, asset_out], route]) => ({
+              assets: [asset_in, asset_out],
+              route: route.toHuman(),
+            }))
       ),
     ]);
-    console.log(acceptedCurrencies, onchain);
     const { amountOut: hdxAmount } = await router.getBestSell('10', HDX, 2000);
     const routes = (
       await Promise.all(
@@ -48,7 +45,12 @@ class MultiCurrencyPaymentRoutes extends PolkadotExecutor {
       .filter((i) => i)
       .map((route) => route.toTx(ZERO).get().toHuman().method)
       .filter(({ section }) => section === 'router')
+      .filter(({ asset_in, asset_out }) => [asset_in, asset_out].sort() )
       .map(({ args }) => args)
+      .filter(({ asset_in, asset_out }) => !onchain.find(({ assets }) => {
+        const [a, b] = assets;
+        return (a === asset_in && b === asset_out) || (a === asset_out && b === asset_in);
+      }))
       .map(({ asset_in, asset_out, route }) =>
         api.tx.router.setRoute([asset_in, asset_out], route)
       );
