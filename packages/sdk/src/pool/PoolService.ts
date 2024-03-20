@@ -15,6 +15,8 @@ import {
   PoolFees,
   Pool,
   Asset,
+  PoolServiceOptions,
+  AssetBase,
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
@@ -31,20 +33,24 @@ export class PoolService implements IPoolService {
   protected readonly stableClient: StableSwapClient;
 
   protected onChainAssets: Asset[] = [];
+  protected externalAssetsMeta: AssetBase[] | undefined = [];
   protected onChainAssetsLoaded = false;
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, options?: PoolServiceOptions) {
     this.api = api;
     this.assetClient = new AssetClient(this.api);
     this.xykClient = new XykPoolClient(this.api);
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
     this.stableClient = new StableSwapClient(this.api);
+    this.externalAssetsMeta = options?.externalAssets;
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
     if (!this.onChainAssetsLoaded) {
-      this.onChainAssets = await this.assetClient.getOnChainAssets();
+      this.onChainAssets = await this.assetClient.getOnChainAssets(
+        this.externalAssetsMeta
+      );
       this.onChainAssetsLoaded = true;
     }
 

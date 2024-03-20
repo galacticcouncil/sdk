@@ -8,7 +8,7 @@ import { ITuple } from '@polkadot/types-codec/types';
 import { u32, u64 } from '@polkadot/types-codec';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset, AssetMetadata } from '../types';
+import { Asset, AssetMetadata, AssetBase } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
@@ -128,7 +128,7 @@ export class AssetClient extends PolkadotApiClient {
     }
 
     const { name, assetType, existentialDeposit } = details;
-    const { symbol, decimals } = metadata.get(tokenKey)!;
+    const { symbol, decimals } = metadata.get(tokenKey) ?? {};
     const location = locations ? locations.get(tokenKey) : undefined;
 
     return {
@@ -199,7 +199,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  async getOnChainAssets(): Promise<Asset[]> {
+  async getOnChainAssets(externalAssetsMeta?: AssetBase[]): Promise<Asset[]> {
     const [asset, assetLocations, shares, bonds, assetMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
@@ -209,9 +209,28 @@ export class AssetClient extends PolkadotApiClient {
         this.metadataQuery(),
       ]);
 
-    const filteredAssets = asset.filter(
-      ([_args, state]) => !state.isNone && this.isSupportedType(state.unwrap())
-    );
+    const filteredAssets = asset.filter(([_args, state]) => {
+      if (state.isNone) return false;
+      const details = state.unwrap();
+
+      if (this.isSupportedType(details)) return true;
+
+      if (
+        externalAssetsMeta?.length &&
+        details.assetType.toString() === 'External'
+      ) {
+        const id = _args.args[0];
+        const meta = externalAssetsMeta.find(
+          (assetMeta) => assetMeta.id === id.toString()
+        );
+
+        if (meta) return true;
+
+        return false;
+      }
+
+      return false;
+    });
 
     const assetsMeta: Map<string, AssetMetadata> = assetMetadata.size
       ? assetMetadata
@@ -251,6 +270,19 @@ export class AssetClient extends PolkadotApiClient {
           case 'StableSwap':
             const share = shares.get(id.toString());
             return this.getShares(id.toString(), details, assetsMeta, share!);
+          case 'External':
+            const token = this.getTokens(
+              id.toString(),
+              details,
+              new Map(),
+              assetLocations
+            );
+
+            const meta = externalAssetsMeta?.find(
+              (assetMeta) => assetMeta.id === id.toString()
+            );
+
+            if (meta) return { ...token, ...meta };
           default:
             return this.getTokens(
               id.toString(),

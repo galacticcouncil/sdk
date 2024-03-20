@@ -165,11 +165,7 @@ export type Amount = {
   decimals: number;
 };
 
-export interface Asset {
-  id: string;
-  decimals: number;
-  name: string;
-  symbol: string;
+export interface Asset extends AssetBase {
   icon: string;
   type: string;
   existentialDeposit: string;
@@ -177,7 +173,16 @@ export interface Asset {
   meta?: Record<string, string>;
 }
 
+export interface AssetBase extends AssetMetadata {
+  id: string;
+  name: string;
+}
+
 export interface AssetMetadata {
   decimals: number;
   symbol: string;
 }
+
+export type PoolServiceOptions = {
+  externalAssets: AssetBase[];
+};
