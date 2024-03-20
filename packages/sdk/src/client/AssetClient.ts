@@ -199,7 +199,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  async getOnChainAssets(externalAssetsMeta?: AssetBase[]): Promise<Asset[]> {
+  async getOnChainAssets(external?: AssetBase[]): Promise<Asset[]> {
     const [asset, assetLocations, shares, bonds, assetMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
@@ -209,28 +209,21 @@ export class AssetClient extends PolkadotApiClient {
         this.metadataQuery(),
       ]);
 
-    const filteredAssets = asset.filter(([_args, state]) => {
-      if (state.isNone) return false;
-      const details = state.unwrap();
-
-      if (this.isSupportedType(details)) return true;
-
-      if (
-        externalAssetsMeta?.length &&
-        details.assetType.toString() === 'External'
-      ) {
-        const id = _args.args[0];
-        const meta = externalAssetsMeta.find(
-          (assetMeta) => assetMeta.id === id.toString()
-        );
-
-        if (meta) return true;
-
-        return false;
+    const filteredAssets = asset.filter(
+      ([
+        {
+          args: [id],
+        },
+        state,
+      ]) => {
+        if (state.isNone) {
+          return false;
+        }
+        const details = state.unwrap();
+        const ext = external?.find((a) => a.id === id.toString());
+        return this.isSupportedAsset(details, ext);
       }
-
-      return false;
-    });
+    );
 
     const assetsMeta: Map<string, AssetMetadata> = assetMetadata.size
       ? assetMetadata
@@ -271,18 +264,14 @@ export class AssetClient extends PolkadotApiClient {
             const share = shares.get(id.toString());
             return this.getShares(id.toString(), details, assetsMeta, share!);
           case 'External':
+            const base = external?.find((a) => a.id === id.toString());
             const token = this.getTokens(
               id.toString(),
               details,
               new Map(),
               assetLocations
             );
-
-            const meta = externalAssetsMeta?.find(
-              (assetMeta) => assetMeta.id === id.toString()
-            );
-
-            if (meta) return { ...token, ...meta };
+            return { ...token, ...base };
           default:
             return this.getTokens(
               id.toString(),
@@ -295,8 +284,14 @@ export class AssetClient extends PolkadotApiClient {
     );
   }
 
-  private isSupportedType(details: PalletAssetRegistryAssetDetails): boolean {
-    return this.SUPPORTED_TYPES.includes(details.assetType.toString());
+  private isSupportedAsset(
+    details: PalletAssetRegistryAssetDetails,
+    external?: AssetBase
+  ): boolean {
+    const type = details.assetType.toString();
+    const isSupported = this.SUPPORTED_TYPES.includes(type);
+    const isExternal = !!external && type === 'External';
+    return isSupported || isExternal;
   }
 
   private parseLocation(
@@ -308,23 +303,5 @@ export class AssetClient extends PolkadotApiClient {
     } else {
       return undefined;
     }
-  }
-
-  private parseMeta(
-    details: PalletAssetRegistryAssetDetails,
-    metadata?: PalletAssetRegistryAssetMetadata
-  ): AssetMetadata {
-    const symbol = details.symbol.isSome
-      ? details.symbol.toHuman()
-      : metadata?.symbol.toHuman();
-
-    const decimals = details.decimals.isSome
-      ? details.decimals.toHuman()
-      : metadata?.decimals.toHuman();
-
-    return {
-      decimals: Number(decimals),
-      symbol,
-    } as AssetMetadata;
   }
 }

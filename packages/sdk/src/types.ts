@@ -182,7 +182,3 @@ export interface AssetMetadata {
   decimals: number;
   symbol: string;
 }
-
-export type PoolServiceOptions = {
-  externalAssets: AssetBase[];
-};
