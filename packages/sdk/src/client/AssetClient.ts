@@ -8,7 +8,7 @@ import { ITuple } from '@polkadot/types-codec/types';
 import { u32, u64 } from '@polkadot/types-codec';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset, AssetMetadata, AssetBase } from '../types';
+import { Asset, AssetMetadata, ExternalAsset } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
@@ -112,7 +112,7 @@ export class AssetClient extends PolkadotApiClient {
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, AssetMetadata>,
-    locations?: Map<string, HydradxRuntimeXcmAssetLocation>
+    location?: HydradxRuntimeXcmAssetLocation
   ): Asset {
     if (tokenKey == SYSTEM_ASSET_ID) {
       const defaultAssetEd = this.api.consts.balances.existentialDeposit;
@@ -129,7 +129,6 @@ export class AssetClient extends PolkadotApiClient {
 
     const { name, assetType, existentialDeposit } = details;
     const { symbol, decimals } = metadata.get(tokenKey) ?? {};
-    const location = locations ? locations.get(tokenKey) : undefined;
 
     return {
       id: tokenKey,
@@ -138,7 +137,7 @@ export class AssetClient extends PolkadotApiClient {
       decimals: decimals,
       icon: symbol,
       type: assetType.toHuman(),
-      origin: location && this.parseLocation(location),
+      origin: location && this.parseLocation(location, 'parachain'),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
   }
@@ -199,7 +198,7 @@ export class AssetClient extends PolkadotApiClient {
     } as Asset;
   }
 
-  async getOnChainAssets(external?: AssetBase[]): Promise<Asset[]> {
+  async getOnChainAssets(external?: ExternalAsset[]): Promise<Asset[]> {
     const [asset, assetLocations, shares, bonds, assetMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
@@ -220,8 +219,17 @@ export class AssetClient extends PolkadotApiClient {
           return false;
         }
         const details = state.unwrap();
-        const ext = external?.find((a) => a.id === id.toString());
-        return this.isSupportedAsset(details, ext);
+
+        if (external && details.assetType.toString() === 'External') {
+          const location = assetLocations.get(id.toString());
+          const index =
+            location && this.parseLocation(location, 'generalIndex');
+          const ext = external.find((ext) => ext.id === index?.toString());
+
+          return !!ext;
+        }
+
+        return this.isSupportedAsset(details);
       }
     );
 
@@ -255,6 +263,8 @@ export class AssetClient extends PolkadotApiClient {
         value,
       ]) => {
         const details: PalletAssetRegistryAssetDetails = value.unwrap();
+        const location = assetLocations.get(id.toString());
+
         const { assetType } = details;
         switch (assetType.toString()) {
           case 'Bond':
@@ -264,42 +274,49 @@ export class AssetClient extends PolkadotApiClient {
             const share = shares.get(id.toString());
             return this.getShares(id.toString(), details, assetsMeta, share!);
           case 'External':
-            const base = external?.find((a) => a.id === id.toString());
+            const ext = external?.find((a) => {
+              const index =
+                location && this.parseLocation(location, 'generalIndex');
+
+              return a.id === index?.toString();
+            });
+
             const token = this.getTokens(
               id.toString(),
               details,
               new Map(),
-              assetLocations
+              location
             );
-            return { ...token, ...base };
+
+            return ext
+              ? {
+                  ...token,
+                  decimals: ext.decimals,
+                  name: ext.name,
+                  symbol: ext.symbol,
+                }
+              : token;
           default:
-            return this.getTokens(
-              id.toString(),
-              details,
-              assetsMeta,
-              assetLocations
-            );
+            return this.getTokens(id.toString(), details, assetsMeta, location);
         }
       }
     );
   }
 
-  private isSupportedAsset(
-    details: PalletAssetRegistryAssetDetails,
-    external?: AssetBase
-  ): boolean {
+  private isSupportedAsset(details: PalletAssetRegistryAssetDetails): boolean {
     const type = details.assetType.toString();
     const isSupported = this.SUPPORTED_TYPES.includes(type);
-    const isExternal = !!external && type === 'External';
-    return isSupported || isExternal;
+
+    return isSupported;
   }
 
   private parseLocation(
-    location: HydradxRuntimeXcmAssetLocation
+    location: HydradxRuntimeXcmAssetLocation,
+    key: string
   ): number | undefined {
     if (location) {
-      const entry = findNestedKey(location.toJSON(), 'parachain');
-      return entry && entry.parachain;
+      const entry = findNestedKey(location.toJSON(), key);
+      return entry && entry[key];
     } else {
       return undefined;
     }

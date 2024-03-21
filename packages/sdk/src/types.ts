@@ -165,7 +165,9 @@ export type Amount = {
   decimals: number;
 };
 
-export interface Asset extends AssetBase {
+export interface Asset extends AssetMetadata {
+  id: string;
+  name: string;
   icon: string;
   type: string;
   existentialDeposit: string;
@@ -173,8 +175,9 @@ export interface Asset extends AssetBase {
   meta?: Record<string, string>;
 }
 
-export interface AssetBase extends AssetMetadata {
+export interface ExternalAsset extends AssetMetadata {
   id: string;
+  origin: number;
   name: string;
 }
 
