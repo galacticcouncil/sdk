@@ -54,3 +54,17 @@ export const toAssets = (
     ],
   };
 };
+
+export const toAsset = (parents: Parents, interior: any, amount: any) => {
+  return {
+    id: {
+      Concrete: {
+        parents: parents,
+        interior: interior,
+      },
+    },
+    fun: {
+      Fungible: amount,
+    },
+  };
+};

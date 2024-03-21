@@ -4,7 +4,7 @@ import {
   ExtrinsicConfig,
   Parents,
 } from '@moonbeam-network/xcm-builder';
-import { toAssets, toBeneficiary, toDest } from './polkadotXcm.utils';
+import { toAsset, toAssets, toBeneficiary, toDest } from './polkadotXcm.utils';
 import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'polkadotXcm';
@@ -31,18 +31,25 @@ const limitedReserveTransferAssets = () => {
         }),
     }),
     X2: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, asset, destination, palletInstance }) =>
+      build: ({
+        address,
+        amount,
+        asset,
+        destination,
+        palletInstance,
+        fee,
+        feeAsset,
+      }) =>
         new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            return [
-              toDest(version, destination),
-              toBeneficiary(version, account),
-              toAssets(
-                version,
+
+            const isAssetDifferent = !!feeAsset && asset !== feeAsset;
+            const assets = [
+              toAsset(
                 0,
                 {
                   X2: [
@@ -56,7 +63,34 @@ const limitedReserveTransferAssets = () => {
                 },
                 amount
               ),
-              0,
+            ];
+
+            if (isAssetDifferent) {
+              assets.push(
+                toAsset(
+                  0,
+                  {
+                    X2: [
+                      {
+                        PalletInstance: palletInstance,
+                      },
+                      {
+                        GeneralIndex: feeAsset,
+                      },
+                    ],
+                  },
+                  fee
+                )
+              );
+            }
+
+            return [
+              toDest(version, destination),
+              toBeneficiary(version, account),
+              {
+                [version]: assets,
+              },
+              isAssetDifferent ? 1 : 0,
               'Unlimited',
             ];
           },
