@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- External assets support
+
 ## 1.1.12
 
 ### Patch Changes
