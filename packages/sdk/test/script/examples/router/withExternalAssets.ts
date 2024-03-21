@@ -8,7 +8,8 @@ class GetAllAssetsExample extends PolkadotExecutor {
     const external = [
       {
         decimals: 8,
-        id: '1000008',
+        origin: 1000,
+        id: '666',
         name: 'Danger Coin',
         symbol: 'DANGER',
       },

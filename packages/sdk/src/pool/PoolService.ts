@@ -15,7 +15,7 @@ import {
   PoolFees,
   Pool,
   Asset,
-  AssetBase,
+  ExternalAsset,
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
@@ -43,7 +43,7 @@ export class PoolService implements IPoolService {
     this.stableClient = new StableSwapClient(this.api);
   }
 
-  async syncRegistry(external?: AssetBase[]) {
+  async syncRegistry(external?: ExternalAsset[]) {
     this.onChainAssets = await this.assetClient.getOnChainAssets(external);
     this.onChainAssetsLoaded = true;
   }
