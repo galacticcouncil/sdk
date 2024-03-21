@@ -22,10 +22,6 @@ import { BigNumber } from '../utils/bignumber';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-export type PoolServiceOptions = {
-  externalAssets?: AssetBase[];
-};
-
 export class PoolService implements IPoolService {
   protected readonly api: ApiPromise;
   protected readonly assetClient: AssetClient;
@@ -35,32 +31,26 @@ export class PoolService implements IPoolService {
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
 
-  protected readonly options: PoolServiceOptions;
-  protected readonly defaultOptions: PoolServiceOptions = {
-    externalAssets: [],
-  };
-
   protected onChainAssets: Asset[] = [];
   protected onChainAssetsLoaded = false;
 
-  constructor(api: ApiPromise, options?: PoolServiceOptions) {
+  constructor(api: ApiPromise) {
     this.api = api;
     this.assetClient = new AssetClient(this.api);
     this.xykClient = new XykPoolClient(this.api);
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
     this.stableClient = new StableSwapClient(this.api);
-    this.options = {
-      ...this.defaultOptions,
-      ...options,
-    };
+  }
+
+  async syncRegistry(external?: AssetBase[]) {
+    this.onChainAssets = await this.assetClient.getOnChainAssets(external);
+    this.onChainAssetsLoaded = true;
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
     if (!this.onChainAssetsLoaded) {
-      this.onChainAssets = await this.assetClient.getOnChainAssets(
-        this.options.externalAssets
-      );
+      this.onChainAssets = await this.assetClient.getOnChainAssets();
       this.onChainAssetsLoaded = true;
     }
 

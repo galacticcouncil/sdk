@@ -14,8 +14,9 @@ class GetAllAssetsExample extends PolkadotExecutor {
       },
     ];
 
-    const poolService = new PoolService(api, { externalAssets: external });
+    const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
+    await poolService.syncRegistry(external);
     return router.getAllAssets();
   }
 }
