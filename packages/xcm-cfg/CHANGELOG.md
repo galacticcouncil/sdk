@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.6
+
+### Patch Changes
+
+- Multiple transfer assets support
+
 ## 1.10.5
 
 ### Patch Changes
