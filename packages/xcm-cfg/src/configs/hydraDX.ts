@@ -23,6 +23,7 @@ import {
   intr,
   nodl,
   pha,
+  pink,
   sub,
   unq,
   usdc,
@@ -125,6 +126,21 @@ const toAssetHub: AssetConfig[] = [
     destinationFee: {
       amount: 0.7,
       asset: usdc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset().X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: pink,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.07,
+      asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset().X3(),
