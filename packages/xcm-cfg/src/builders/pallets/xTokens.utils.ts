@@ -32,18 +32,16 @@ export const toDest = (
   };
 };
 
-export const toAsset = (version: XcmVersion, interior: any, amount: any) => {
+export const toAsset = (interior: any, amount: any) => {
   return {
-    [version]: {
-      id: {
-        Concrete: {
-          parents: 1,
-          interior: interior,
-        },
+    id: {
+      Concrete: {
+        parents: 1,
+        interior: interior,
       },
-      fun: {
-        Fungible: amount,
-      },
+    },
+    fun: {
+      Fungible: amount,
     },
   };
 };
