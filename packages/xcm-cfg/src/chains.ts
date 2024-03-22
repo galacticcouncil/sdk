@@ -39,6 +39,8 @@ import {
   weth_mwh,
   ztg,
   xrt,
+  pink,
+  ded,
 } from './assets';
 
 export const acala = new Parachain({
@@ -95,6 +97,18 @@ export const assetHub = new Parachain({
       asset: dot,
       decimals: 10,
       id: 0,
+    },
+    {
+      asset: pink,
+      decimals: 10,
+      id: 23,
+      palletInstance: 50,
+    },
+    {
+      asset: ded,
+      decimals: 10,
+      id: 30,
+      palletInstance: 50,
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -320,6 +334,18 @@ export const hydraDX = new Parachain({
       id: 27,
       decimals: 12,
     },
+    {
+      asset: pink,
+      id: 23,
+      decimals: 10,
+      palletInstance: 50,
+    },
+    {
+      asset: ded,
+      id: 30,
+      decimals: 10,
+      palletInstance: 50,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -355,6 +381,12 @@ export const interlay = new Parachain({
       asset: usdt,
       decimals: 6,
       id: { ForeignAsset: 2 },
+      metadataId: 0,
+    },
+    {
+      asset: hdx,
+      decimals: 12,
+      id: { ForeignAsset: 13 },
       metadataId: 0,
     },
   ],

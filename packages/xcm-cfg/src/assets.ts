@@ -117,6 +117,16 @@ export const unq = new Asset({
   originSymbol: 'UNQ',
 });
 
+export const pink = new Asset({
+  key: 'pink',
+  originSymbol: 'PINK',
+});
+
+export const ded = new Asset({
+  key: 'ded',
+  originSymbol: 'DED',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -150,6 +160,8 @@ export const assets: Asset[] = [
   weth_mwh,
   ztg,
   xrt,
+  pink,
+  ded,
 ];
 
 export const assetsMap = new Map<string, Asset>(
