@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.7
+
+### Patch Changes
+
+- Memecoins goes xchain
+
 ## 1.10.6
 
 ### Patch Changes
