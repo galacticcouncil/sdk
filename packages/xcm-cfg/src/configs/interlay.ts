@@ -49,6 +49,21 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
   }),
+  new AssetConfig({
+    asset: hdx,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.1,
+      asset: hdx,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: intr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+  }),
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
   // new AssetConfig({
   //   asset: usdt,

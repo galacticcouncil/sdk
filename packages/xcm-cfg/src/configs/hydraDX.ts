@@ -16,6 +16,7 @@ import {
   cru,
   dai_awh,
   dai_mwh,
+  ded,
   dot,
   glmr,
   hdx,
@@ -139,11 +140,26 @@ const toAssetHub: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: assetHub,
     destinationFee: {
-      amount: 0.07,
+      amount: 0.11,
       asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset().X3(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: ded,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.11,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -320,6 +336,21 @@ const toInterlay: AssetConfig[] = [
     destinationFee: {
       amount: 0.1,
       asset: dot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: hdx,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: interlay,
+    destinationFee: {
+      amount: 0.5,
+      asset: hdx,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),

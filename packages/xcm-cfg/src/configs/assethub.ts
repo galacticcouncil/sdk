@@ -9,7 +9,7 @@ import {
   polkadot,
 } from '@moonbeam-network/xcm-config';
 
-import { dot, pink, usdc, usdt } from '../assets';
+import { ded, dot, pink, usdc, usdt } from '../assets';
 import { assetHub, hydraDX } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
@@ -65,7 +65,27 @@ const toHydraDX: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: ded,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.02,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
