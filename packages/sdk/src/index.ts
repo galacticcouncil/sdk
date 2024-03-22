@@ -6,3 +6,4 @@ export * from './errors';
 export * from './consts';
 export * from './utils/bignumber';
 export * from './utils/math';
+export * from './utils/json';
