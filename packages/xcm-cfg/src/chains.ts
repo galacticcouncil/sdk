@@ -460,6 +460,11 @@ export const moonbeam = new EvmParachain({
       metadataId: 0,
       decimals: 6,
     },
+    {
+      asset: pink,
+      id: '64174511183114006009298114091987195453',
+      decimals: 10,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
