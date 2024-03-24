@@ -182,7 +182,7 @@ export const bifrost = new Parachain({
   name: 'Bifrost',
   parachainId: 2030,
   ss58Format: 6,
-  ws: 'wss://eu.bifrost-polkadot-rpc.liebi.com/ws',
+  ws: 'wss://bifrost-polkadot-rpc.dwellir.com',
 });
 
 export const centrifuge = new Parachain({
@@ -337,12 +337,14 @@ export const hydraDX = new Parachain({
     {
       asset: pink,
       id: 23,
+      balanceId: 1000021,
       decimals: 10,
       palletInstance: 50,
     },
     {
       asset: ded,
       id: 30,
+      balanceId: 1000019,
       decimals: 10,
       palletInstance: 50,
     },
