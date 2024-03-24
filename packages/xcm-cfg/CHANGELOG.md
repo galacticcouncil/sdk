@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.8
+
+### Patch Changes
+
+- Fix pink balance ids
+
 ## 1.10.7
 
 ### Patch Changes
