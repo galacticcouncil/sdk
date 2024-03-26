@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.9
+
+### Patch Changes
+
+- Pink Moonbeam <-> AH support
+
 ## 1.10.8
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 1.2.2
+
+### Patch Changes
+
+- Asset sufficiency flag
+
 ## 1.2.1
 
 ### Patch Changes
