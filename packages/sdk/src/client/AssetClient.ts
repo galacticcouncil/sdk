@@ -125,11 +125,12 @@ export class AssetClient extends PolkadotApiClient {
         decimals: this.chainDecimals,
         icon: this.chainToken,
         type: 'Token',
+        isSufficient: true,
         existentialDeposit: defaultAssetEd.toString(),
       } as Asset;
     }
 
-    const { name, assetType, existentialDeposit } = details;
+    const { name, assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = metadata.get(tokenKey) ?? {};
 
     return {
@@ -139,6 +140,7 @@ export class AssetClient extends PolkadotApiClient {
       decimals: decimals,
       icon: symbol,
       type: assetType.toHuman(),
+      isSufficient: isSufficient ? isSufficient.toHuman() : true,
       origin: this.parseLocation('parachain', location),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
@@ -151,7 +153,7 @@ export class AssetClient extends PolkadotApiClient {
     bond: ITuple<[u32, u64]>
   ): Asset {
     const [underlyingAsset, maturity] = bond;
-    const { assetType, existentialDeposit } = details;
+    const { assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = this.getToken(
       underlyingAsset.toString(),
       details,
@@ -169,6 +171,7 @@ export class AssetClient extends PolkadotApiClient {
       decimals: decimals,
       icon: symbol,
       type: assetType.toString(),
+      isSufficient: isSufficient.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
   }
@@ -180,7 +183,8 @@ export class AssetClient extends PolkadotApiClient {
     share: PalletStableswapPoolInfo
   ): Asset {
     const { assets } = share;
-    const { name, symbol, assetType, existentialDeposit } = details;
+    const { name, symbol, assetType, isSufficient, existentialDeposit } =
+      details;
     const poolTokens = assets.map((asset) => asset.toString());
     const poolEntries = poolTokens.map((token: string) => {
       const { symbol } = this.getToken(token, details, metadata);
@@ -195,6 +199,7 @@ export class AssetClient extends PolkadotApiClient {
       decimals: 18,
       icon: symbols.join('/'),
       type: assetType.toString(),
+      isSufficient: isSufficient.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
       meta: meta,
     } as Asset;

@@ -46,7 +46,6 @@ const limitedReserveTransferAssets = () => {
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-
             const isAssetDifferent = !!feeAsset && asset !== feeAsset;
             const assets = [
               toAsset(

@@ -11,4 +11,4 @@ class GetAllAssetsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllAssetsExample(ApiUrl.Nice, 'Get all assets').run();
+new GetAllAssetsExample(ApiUrl.Basilisk, 'Get all assets').run();

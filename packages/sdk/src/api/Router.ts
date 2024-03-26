@@ -97,6 +97,7 @@ export class Router {
             decimals: t.decimals,
             icon: t.icon,
             type: t.type,
+            isSufficient: t.isSufficient,
             existentialDeposit: t.existentialDeposit,
             origin: t.origin,
             meta: t.meta,

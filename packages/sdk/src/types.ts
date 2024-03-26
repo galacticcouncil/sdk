@@ -171,6 +171,7 @@ export interface Asset extends AssetMetadata {
   icon: string;
   type: string;
   existentialDeposit: string;
+  isSufficient: boolean;
   origin?: number;
   meta?: Record<string, string>;
 }
