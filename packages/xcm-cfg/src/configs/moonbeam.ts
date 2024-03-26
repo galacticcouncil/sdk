@@ -11,9 +11,10 @@ import {
   weth_mwh,
   dot,
   usdt,
-  usdc
+  usdc,
+  pink
 } from '../assets';
-import { hydraDX, moonbeam } from '../chains';
+import { assetHub, hydraDX, moonbeam } from '../chains';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -164,8 +165,25 @@ const toHydraDX: AssetConfig[] = [
   //   },
   // }),
 ];
+const toAssetHub: AssetConfig[] = [
+  new AssetConfig({
+    asset: pink,
+    balance: BalanceBuilder().substrate().assets().account(),
+    contract: ContractBuilder().Xtokens().transferMultiCurrencies(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.11,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+]
 
 export const moonbeamConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydraDX, ...toAssetHub],
   chain: moonbeam,
 });
