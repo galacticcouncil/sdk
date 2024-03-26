@@ -15,6 +15,7 @@ export const xykPool = {
       icon: 'KSM',
       name: 'Kusama',
       type: 'Token',
+      isSufficient: true,
       existentialDeposit: '1000',
     },
     {
@@ -25,6 +26,7 @@ export const xykPool = {
       icon: 'AUSD',
       name: 'Acala Dollar',
       type: 'Token',
+      isSufficient: true,
       existentialDeposit: '1000',
     },
   ],
