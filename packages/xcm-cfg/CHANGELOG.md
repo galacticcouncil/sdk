@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.11
+
+### Patch Changes
+
+- USDC/USDT Moonbeam <-> AH
+
 ## 1.10.10
 
 ### Patch Changes
