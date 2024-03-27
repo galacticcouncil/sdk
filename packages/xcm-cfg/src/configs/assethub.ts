@@ -76,26 +76,26 @@ const toHydraDX: AssetConfig[] = [
     },
     min: AssetMinBuilder().assets().asset(),
   }),
-  new AssetConfig({
-    asset: ded,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.02,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-    },
-    extrinsic: ExtrinsicBuilderV2()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
-    },
-    min: AssetMinBuilder().assets().asset(),
-  }),
+  // new AssetConfig({
+  //   asset: ded,
+  //   balance: BalanceBuilder().substrate().assets().account(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.02,
+  //     asset: usdt,
+  //     balance: BalanceBuilder().substrate().assets().account(),
+  //   },
+  //   extrinsic: ExtrinsicBuilderV2()
+  //     .polkadotXcm()
+  //     .limitedReserveTransferAssets()
+  //     .X2(),
+  //   fee: {
+  //     asset: dot,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //     xcmDeliveryFeeAmount,
+  //   },
+  //   min: AssetMinBuilder().assets().asset(),
+  // }),
 ];
 
 const toPolkadot: AssetConfig[] = [
@@ -142,9 +142,9 @@ const toMoonbeam: AssetConfig[] = [
     },
     min: AssetMinBuilder().assets().asset(),
   }),
-]
+];
 
 export const assetHubConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toPolkadot, ...toMoonbeam,],
+  assets: [...toHydraDX, ...toPolkadot, ...toMoonbeam],
   chain: assetHub,
 });
