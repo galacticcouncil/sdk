@@ -2,6 +2,7 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
+  FeeBuilder,
 } from '@moonbeam-network/xcm-builder';
 import {
   AssetConfig,
@@ -132,6 +133,46 @@ const toMoonbeam: AssetConfig[] = [
       balance: BalanceBuilder().substrate().assets().account(),
     },
     extrinsic: ExtrinsicBuilderV2()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: usdt,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: FeeBuilder().assetManager().assetTypeUnitsPerSecond(),
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 0.03,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
