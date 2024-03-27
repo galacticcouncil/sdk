@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.10
+
+### Patch Changes
+
+- Disable DED transfer
+
 ## 1.10.9
 
 ### Patch Changes
