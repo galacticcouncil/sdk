@@ -458,8 +458,8 @@ export const moonbeam = new EvmParachain({
     },
     {
       asset: usdc,
-      id: '166377000701797186346254371275954761085',
-      metadataId: 0,
+      id: '0xFFfffffF7D2B0B761Af01Ca8e25242976ac0aD7D',
+      metadataId: '166377000701797186346254371275954761085', // registered XC20 id for ERC20 tokens
       decimals: 6,
     },
     {
