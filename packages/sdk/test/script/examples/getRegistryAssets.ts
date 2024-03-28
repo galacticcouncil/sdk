@@ -6,11 +6,18 @@ class GetAssetsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const external = [
       {
-        decimals: 8,
+        decimals: 10,
+        id: '30',
+        name: 'DED',
         origin: 1000,
-        id: '666',
-        name: 'Danger Coin',
-        symbol: 'DANGER',
+        symbol: 'DED',
+      },
+      {
+        decimals: 10,
+        id: '23',
+        name: 'PINK',
+        origin: 1000,
+        symbol: 'PINK',
       },
     ];
     const assetClient = new AssetClient(api);
@@ -18,4 +25,4 @@ class GetAssetsExample extends PolkadotExecutor {
   }
 }
 
-new GetAssetsExample(ApiUrl.Nice, 'Get all assets').run();
+new GetAssetsExample(ApiUrl.HydraDx, 'Get all assets').run();
