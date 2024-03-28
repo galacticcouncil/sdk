@@ -122,10 +122,7 @@ export class TradeRouter extends Router {
       .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
-    const bestRouteSpotPrice = scale(
-      spotPrice,
-      lastSwap.assetOutDecimals
-    ).decimalPlaces(0, 1);
+    const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetOutDecimals);
 
     const delta0Y = isDirect
       ? lastSwap.calculatedOut
@@ -324,10 +321,7 @@ export class TradeRouter extends Router {
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
     const spotPriceDecimals = bestRoute[bestRoute.length - 1].assetOutDecimals;
-    const spotPriceAmount = scale(spotPrice, spotPriceDecimals).decimalPlaces(
-      0,
-      1
-    );
+    const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
     return { amount: spotPriceAmount, decimals: spotPriceDecimals };
   }
 
@@ -388,10 +382,7 @@ export class TradeRouter extends Router {
       .map((s: BuySwap) => s.spotPrice.shiftedBy(-1 * s.assetInDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
 
-    const bestRouteSpotPrice = scale(
-      spotPrice,
-      lastSwap.assetInDecimals
-    ).decimalPlaces(0, 1);
+    const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetInDecimals);
 
     const delta0X = isDirect
       ? lastSwap.calculatedIn
