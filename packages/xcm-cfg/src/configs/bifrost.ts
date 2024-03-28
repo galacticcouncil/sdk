@@ -1,8 +1,8 @@
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot } from '@moonbeam-network/xcm-config';
+import { AssetConfig, ChainConfig, polkadot, usdc } from '@moonbeam-network/xcm-config';
 
-import { bnc, vdot, dot, usdt, hdx } from '../assets';
-import { bifrost, hydraDX } from '../chains';
+import { bnc, vdot, dot, usdt, hdx, pink } from '../assets';
+import { assetHub, bifrost, hydraDX } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
@@ -83,10 +83,59 @@ const toPolkadot: AssetConfig[] = [
   }),
 ];
 
+const toAssetHub: AssetConfig[] = [
+  new AssetConfig({
+    asset: pink,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.18,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdt,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.11,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.11,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const bifrostConfig = new ChainConfig({
   assets: [
     ...toHydraDX,
     ...toPolkadot,
+    ...toAssetHub,
   ],
   chain: bifrost,
 });
