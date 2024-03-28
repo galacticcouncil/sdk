@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.12
+
+### Patch Changes
+
+- Add PINK, USDT & USDC to AH<>Bifrost #36
+
 ## 1.10.11
 
 ### Patch Changes
