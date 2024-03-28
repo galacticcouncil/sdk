@@ -11,7 +11,7 @@ import {
 } from '@moonbeam-network/xcm-config';
 
 import { ded, dot, pink, usdc, usdt } from '../assets';
-import { assetHub, hydraDX, moonbeam } from '../chains';
+import { assetHub, bifrost, hydraDX, moonbeam } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
 const xcmDeliveryFeeAmount = 0.036;
@@ -185,7 +185,70 @@ const toMoonbeam: AssetConfig[] = [
   }),
 ];
 
+const toBifrost: AssetConfig[] = [
+  new AssetConfig({
+    asset: pink,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.0001,
+      asset: pink,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilderV2()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: usdt,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.03,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+  new AssetConfig({
+    asset: usdc,
+    balance: BalanceBuilder().substrate().assets().account(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.03,
+      asset: usdc,
+      balance: BalanceBuilder().substrate().assets().account(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X2(),
+    fee: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      xcmDeliveryFeeAmount,
+    },
+    min: AssetMinBuilder().assets().asset(),
+  }),
+];
+
 export const assetHubConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toPolkadot, ...toMoonbeam],
+  assets: [...toHydraDX, ...toPolkadot, ...toMoonbeam, ...toBifrost],
   chain: assetHub,
 });
