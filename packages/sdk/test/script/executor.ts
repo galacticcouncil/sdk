@@ -5,14 +5,14 @@ import '@galacticcouncil/api-augment/hydradx';
 export enum ApiUrl {
   Local = 'ws://localhost:8000',
   Chopsticks = 'wss://chopsticks.rpc.hydration.cloud',
-  Nice = 'wss://rpc.nice.hydration.cloud',
   Basilisk = 'wss://rpc.basilisk.cloud',
   Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
   Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
   Basilisk_Rococo_UK = 'wss://rococo-basilisk-rpc04.hydration.dev',
   Basilisk_Rococo_CLOUD = 'wss://basilisk-rococo-rpc.play.hydration.cloud',
   HydraDx = 'wss://rpc.hydradx.cloud',
-  HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
+  Nice = 'wss://rpc.nice.hydration.cloud',
+  //HydraDx_Rococo = 'wss://hydradx-rococo-rpc.play.hydration.cloud',
 }
 
 export abstract class PolkadotExecutor {
@@ -33,7 +33,6 @@ export abstract class PolkadotExecutor {
         const api = new ApiPromise({
           provider: provider,
         });
-
         api
           .on('connected', () => console.log('API connected'))
           .on('disconnected', () => console.log('API disconnected'))

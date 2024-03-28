@@ -11,4 +11,4 @@ class GetAssetPairsExample extends PolkadotExecutor {
   }
 }
 
-new GetAssetPairsExample(ApiUrl.HydraDx_Rococo, 'Get asset pairs').run();
+new GetAssetPairsExample(ApiUrl.Nice, 'Get asset pairs').run();

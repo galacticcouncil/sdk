@@ -11,4 +11,4 @@ class GetAllPathsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllPathsExample(ApiUrl.HydraDx_Rococo, 'Get all paths').run();
+new GetAllPathsExample(ApiUrl.Nice, 'Get all paths').run();
