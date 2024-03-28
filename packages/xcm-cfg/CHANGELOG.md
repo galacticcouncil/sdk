@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.13
+
+### Patch Changes
+
+- Enable DED
+
 ## 1.10.12
 
 ### Patch Changes
