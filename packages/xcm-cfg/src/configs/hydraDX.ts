@@ -150,21 +150,21 @@ const toAssetHub: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  // new AssetConfig({
-  //   asset: ded,
-  //   balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   destination: assetHub,
-  //   destinationFee: {
-  //     amount: 0.11,
-  //     asset: usdt,
-  //     balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   },
-  //   extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
-  //   fee: {
-  //     asset: hdx,
-  //     balance: BalanceBuilder().substrate().system().account(),
-  //   },
-  // }),
+  new AssetConfig({
+    asset: ded,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.11,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
 ];
 
 const toAstar: AssetConfig[] = [
