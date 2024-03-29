@@ -172,7 +172,7 @@ const toAssetHub: AssetConfig[] = [
     contract: ContractBuilder().Xtokens().transferMultiCurrencies(),
     destination: assetHub,
     destinationFee: {
-      amount: 0.07,
+      amount: 0.18,
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
@@ -187,7 +187,7 @@ const toAssetHub: AssetConfig[] = [
     contract: ContractBuilder().Xtokens().transfer(),
     destination: assetHub,
     destinationFee: {
-      amount: 0.07,
+      amount: 0.18,
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
@@ -202,7 +202,7 @@ const toAssetHub: AssetConfig[] = [
     contract: ContractBuilder().Xtokens().transfer(),
     destination: assetHub,
     destinationFee: {
-      amount: 0.07,
+      amount: 0.18,
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
