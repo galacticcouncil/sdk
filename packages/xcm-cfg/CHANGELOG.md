@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.10.14
+
+### Patch Changes
+
+- Bump PINK/DED fees to avoid trapping if no acc
+
 ## 1.10.13
 
 ### Patch Changes
