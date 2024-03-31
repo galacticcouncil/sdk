@@ -31,9 +31,6 @@
     "link": "npm ln",
     "test": "jest"
   },
-  "devDependencies": {
-    "@galacticcouncil/api-augment": "^0.0.7"
-  },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^0.2.1",
     "@galacticcouncil/math-omnipool": "^0.2.0",
