@@ -391,7 +391,7 @@ export class TradeRouter extends Router {
 
     const tradeFeePct = isDirect
       ? lastSwap.tradeFeePct
-      : calculateBuyFee(delta0X, deltaX);
+      : calculateBuyFee(delta0X, deltaX).toNumber();
     const tradeFee = deltaX.minus(delta0X);
     const tradeFeeRange = this.getRouteFeeRange(bestRoute);
 
