@@ -1,5 +1,14 @@
 # @galacticcouncil/sdk
 
+## 2.0.0
+
+### Major Changes
+
+- Use deferred wasms for ESM build (Breaking!!!)
+  - WHAT - Wasms are not longer enbedded for esm build
+  - WHY - To decrease resulting bundle size
+  - FIX - Include wasms from sdk package to your project root
+
 ## 1.2.3
 
 ### Patch Changes
