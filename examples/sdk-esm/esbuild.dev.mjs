@@ -14,8 +14,6 @@ const plugins = [
   }),
 ];
 
-const plugins = [];
-
 const options = {
   entryPoints: ['src/index.ts'],
   bundle: true,
