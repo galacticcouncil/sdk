@@ -21,7 +21,14 @@ Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/sdk`
 
-## Components
+⚠️ **Breaking change (ESM Only)**
+
+If you upgrading from **v1.x** to **v2.x** make sure hydradx wasm
+files from npm package are included in project root. Those are not
+longer embeddded in bundle itself but rather deferred to improve
+load & performance of SDK. 
+
+For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ### Router
 
