@@ -1,5 +1,18 @@
 import esbuild from 'esbuild';
+import { copy } from 'esbuild-plugin-copy';
 import { createProxyServer } from '../../esbuild.proxy.mjs';
+
+const plugins = [
+  copy({
+    resolveFrom: 'cwd',
+    assets: {
+      from: ['../../node_modules/@galacticcouncil/sdk/build/*.wasm'],
+      to: ['./out'],
+    },
+    watch: true,
+    once: true,
+  }),
+];
 
 const plugins = [];
 

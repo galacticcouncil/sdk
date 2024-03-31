@@ -1,5 +1,6 @@
 import esbuild from 'esbuild';
 import { wasmLoader } from 'esbuild-plugin-wasm';
+import { writeFileSync } from 'fs';
 import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
 
 const packageJson = getPackageJson(import.meta.url);
@@ -10,13 +11,16 @@ const mathDependencies = dependencies.filter((v) =>
   v.startsWith('@galacticcouncil/math-')
 );
 
-// ESM bundle (Embedded wasms)
+// ESM bundle (Deferred wasms)
 esbuild
   .build({
     ...esmConfig,
     bundle: true,
-    plugins: [wasmLoader({ mode: 'embedded' })],
+    plugins: [wasmLoader({ mode: 'deferred' })],
     external: peerDependencies,
+  })
+  .then(({ metafile }) => {
+    writeFileSync('build-meta.json', JSON.stringify(metafile));
   })
   .catch(() => process.exit(1));
 

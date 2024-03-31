@@ -31,6 +31,7 @@
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
     "esbuild": "^0.17.11",
+    "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
     "prettier": "^3.0.3",
