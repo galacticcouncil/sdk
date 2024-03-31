@@ -1,4 +1,5 @@
 import esbuild from 'esbuild';
+import { writeFileSync } from 'fs';
 import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
 
 const packageJson = getPackageJson(import.meta.url);
@@ -10,6 +11,9 @@ esbuild
     ...esmConfig,
     bundle: true,
     external: Object.keys(peerDependencies),
+  })
+  .then(({ metafile }) => {
+    writeFileSync('build-meta.json', JSON.stringify(metafile));
   })
   .catch(() => process.exit(1));
 

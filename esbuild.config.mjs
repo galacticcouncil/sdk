@@ -18,6 +18,7 @@ const common = {
   preserveSymlinks: true,
   treeShaking: true,
   minify: true,
+  metafile: true,
   logLevel: 'info',
 };
 

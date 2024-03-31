@@ -3,6 +3,7 @@ node_modules/
 
 # build folders
 packages/*/build
+packages/*/build-meta.json
 
 # compile folders
 examples/*/out
