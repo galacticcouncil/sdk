@@ -4,13 +4,18 @@ import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
 
 const packageJson = getPackageJson(import.meta.url);
 const peerDependencies = packageJson.peerDependencies || {};
+const dependencies = Object.keys(packageJson.dependencies);
+
+const moonbeamDependencies = dependencies.filter((v) =>
+  v.startsWith('@moonbeam-network/xcm-')
+);
 
 // ESM bundle
 esbuild
   .build({
     ...esmConfig,
     bundle: true,
-    external: Object.keys(peerDependencies),
+    external: Object.keys(peerDependencies).concat(moonbeamDependencies),
   })
   .then(({ metafile }) => {
     writeFileSync('build-meta.json', JSON.stringify(metafile));
@@ -22,6 +27,6 @@ esbuild
   .build({
     ...cjsConfig,
     bundle: true,
-    external: Object.keys(peerDependencies),
+    external: Object.keys(peerDependencies).concat(moonbeamDependencies),
   })
   .catch(() => process.exit(1));
