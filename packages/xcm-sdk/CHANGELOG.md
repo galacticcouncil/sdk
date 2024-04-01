@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- Bundle size down (moonbeam deps as external)
+
 ## 2.3.1
 
 ### Patch Changes

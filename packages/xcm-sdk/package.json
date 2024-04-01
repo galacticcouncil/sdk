@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-sdk",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Cross-chain XCM SDK",
   "author": "GalacticCouncil",
   "repository": {
