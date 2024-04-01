@@ -21,12 +21,15 @@ Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/sdk`
 
-⚠️ **Breaking change (ESM Only)**
+### Troubleshooting
 
-If you upgrading from **v1.x** to **v2.x** make sure hydradx wasm
-files from npm package are included in project root. Those are not
-longer embeddded in bundle itself but rather deferred to improve
-load & performance of SDK. 
+As of **v2.x** .wasm files are no longer embedded in bundle
+but rather deferred to improve load performance & decrease
+module size.
+
+If you upgrading from **v1.x** to **v2.x** make sure you use
+corresponding wasm plugin in your build config to directly
+import .wasm files as if they were a javascript module.
 
 For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 

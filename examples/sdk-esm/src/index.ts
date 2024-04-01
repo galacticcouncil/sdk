@@ -11,3 +11,4 @@ const tradeRouter = new TradeRouter(poolService);
 // Do something
 const result = await tradeRouter.getAllAssets();
 console.log(result);
+api.disconnect();

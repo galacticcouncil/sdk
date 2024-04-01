@@ -4,10 +4,10 @@
 
 ### Major Changes
 
-- Use deferred wasms for ESM build (Breaking!!!)
+- Use deferred wasms for ESM build
   - WHAT - Wasms are not longer enbedded for esm build
   - WHY - To decrease resulting bundle size
-  - FIX - Include wasms from sdk package to your project root
+  - FIX - Use corresponding wasm plugin in your build config
 
 ## 1.2.3
 

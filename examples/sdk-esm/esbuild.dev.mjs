@@ -1,18 +1,8 @@
 import esbuild from 'esbuild';
-import { copy } from 'esbuild-plugin-copy';
+import { wasmLoader } from 'esbuild-plugin-wasm';
 import { createProxyServer } from '../../esbuild.proxy.mjs';
 
-const plugins = [
-  copy({
-    resolveFrom: 'cwd',
-    assets: {
-      from: ['../../node_modules/@galacticcouncil/sdk/build/*.wasm'],
-      to: ['./out'],
-    },
-    watch: true,
-    once: true,
-  }),
-];
+const plugins = [wasmLoader({ mode: 'deferred' })];
 
 const options = {
   entryPoints: ['src/index.ts'],
