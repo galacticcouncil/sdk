@@ -1,5 +1,4 @@
 import esbuild from 'esbuild';
-import { wasmLoader } from 'esbuild-plugin-wasm';
 import { writeFileSync } from 'fs';
 import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
 
