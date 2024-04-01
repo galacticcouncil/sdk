@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 2.0.1
+
+### Patch Changes
+
+- Fix deferred wasm loading, export math
+
 ## 2.0.0
 
 ### Major Changes
