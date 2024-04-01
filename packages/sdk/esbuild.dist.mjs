@@ -11,20 +11,19 @@ const mathDependencies = dependencies.filter((v) =>
   v.startsWith('@galacticcouncil/math-')
 );
 
-// ESM bundle (Deferred wasms)
+// ESM bundle
 esbuild
   .build({
     ...esmConfig,
     bundle: true,
-    plugins: [wasmLoader({ mode: 'deferred' })],
-    external: peerDependencies,
+    external: peerDependencies.concat(mathDependencies),
   })
   .then(({ metafile }) => {
     writeFileSync('build-meta.json', JSON.stringify(metafile));
   })
   .catch(() => process.exit(1));
 
-// CJS bundle (External math modules)
+// CJS bundle
 esbuild
   .build({
     ...cjsConfig,
