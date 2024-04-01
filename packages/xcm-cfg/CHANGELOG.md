@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.0
+
+### Minor Changes
+
+- Bundle size down (polkadeps as external)
+
 ## 1.10.14
 
 ### Patch Changes
