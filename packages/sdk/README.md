@@ -33,6 +33,8 @@ import .wasm files as if they were a javascript module.
 
 For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
+## Components
+
 ### Router
 
 Off-chain routing, build to find the most suitable routes across the pools. Building block for TradeRouter.
