@@ -7,8 +7,8 @@ class GetAllPathsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
-    return router.getAllPaths('1', '2');
+    return router.getAllPaths('0', '5');
   }
 }
 
-new GetAllPathsExample(ApiUrl.Nice, 'Get all paths').run();
+new GetAllPathsExample(ApiUrl.HydraDx, 'Get all paths').run();
