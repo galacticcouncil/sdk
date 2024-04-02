@@ -346,7 +346,7 @@ const toInterlay: AssetConfig[] = [
   }),
   new AssetConfig({
     asset: hdx,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
+    balance: BalanceBuilder().substrate().system().account(),
     destination: interlay,
     destinationFee: {
       amount: 0.5,
