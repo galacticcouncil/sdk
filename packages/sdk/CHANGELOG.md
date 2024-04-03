@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 2.1.0
+
+### Minor Changes
+
+- Omit low liquidity pools if calculating spot price
+
 ## 2.0.1
 
 ### Patch Changes
