@@ -24,3 +24,28 @@ Everything about building, setting up development environment & releasing can be
 ## Issue reporting
 
 In case of unexpected sdk behaviour, please create well-written issue [here](https://https://github.com/galacticcouncil/sdk/issues/new). It makes it easier to find & fix the problem accordingly.
+
+## License
+<pre>
+                    :                     $$\   $$\                 $$\                    $$$$$$$\  $$\   $$\
+                  !YJJ^                   $$ |  $$ |                $$ |                   $$  __$$\ $$ |  $$ |
+                7B5. ~B5^                 $$ |  $$ |$$\   $$\  $$$$$$$ | $$$$$$\  $$$$$$\  $$ |  $$ |\$$\ $$  |
+             .?B@G    ~@@P~               $$$$$$$$ |$$ |  $$ |$$  __$$ |$$  __$$\ \____$$\ $$ |  $$ | \$$$$  /
+           :?#@@@Y    .&@@@P!.            $$  __$$ |$$ |  $$ |$$ /  $$ |$$ |  \__|$$$$$$$ |$$ |  $$ | $$  $$<
+         ^?J^7P&@@!  .5@@#Y~!J!.          $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |     $$  __$$ |$$ |  $$ |$$  /\$$\
+       ^JJ!.   :!J5^ ?5?^    ^?Y7.        $$ |  $$ |\$$$$$$$ |\$$$$$$$ |$$ |     \$$$$$$$ |$$$$$$$  |$$ /  $$ |
+     ~PP: 7#B5!.         :?P#G: 7G?.      \__|  \__| \____$$ | \_______|\__|      \_______|\_______/ \__|  \__|
+  .!P@G    7@@@#Y^    .!P@@@#.   ~@&J:              $$\   $$ |
+  !&@@J    :&@@@@P.   !&@@@@5     #@@P.             \$$$$$$  |
+   :J##:   Y@@&P!      :JB@@&~   ?@G!                \______/
+     .?P!.?GY7:   .. .    ^?PP^:JP~
+       .7Y7.  .!YGP^ ?BP?^   ^JJ^         This repository is part of https://github.com/galacticcouncil
+         .!Y7Y#@@#:   ?@@@G?JJ^           Built with <3 for decentralisation.
+            !G@@@Y    .&@@&J:
+              ^5@#.   7@#?.               Copyright (C) 2021-2024  Intergalactic, Limited (GIB).
+                :5P^.?G7.                 SPDX-License-Identifier: Apache-2.0
+                  :?Y!                    Licensed under the Apache License, Version 2.0 (the "License");
+                                          you may not use this file except in compliance with the License.
+                                          http://www.apache.org/licenses/LICENSE-2.0
+</pre>
+For more details visit [LICENSE.md](LICENSE.md)
