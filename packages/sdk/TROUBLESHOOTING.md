@@ -3,7 +3,7 @@
 ## Wasm
 
 Starting with **v2.x** version, .wasm files are not longer embedded in final bundle. To properly load
-them update your build config with corresponding wasm plugin.
+them update your build config with appropriate wasm plugin.
 
 ### esbuild
 

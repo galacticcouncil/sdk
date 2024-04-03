@@ -10,6 +10,7 @@ import {
   Amount,
   Transaction,
   Swap,
+  PoolToken,
 } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import {
@@ -312,6 +313,10 @@ export class TradeRouter extends Router {
   /**
    * Calculate and return best possible spot price for tokenIn>tokenOut
    *
+   * To avoid routing through the pools with low liquidity, 0.1% from the
+   * most liquid pool asset is used as reference value to determine ideal
+   * route to calculate spot.
+   *
    * @param {string} assetIn - Storage key of tokenIn
    * @param {string} assetOut - Storage key of tokenOut
    * @return Best possible spot price of given token pair, or undefined if given pair trade not supported
@@ -328,22 +333,29 @@ export class TradeRouter extends Router {
       pools
     );
     const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-
     if (paths.length === 0) {
       return Promise.resolve(undefined);
     }
 
-    const sellSwaps = paths.map(
-      async (path) => await this.toSellSwaps('1', path, poolsMap)
-    );
-    const swaps = await Promise.all(sellSwaps);
-    const bestRoute = this.findBestSellRoute(swaps);
+    const assetsByLiquidityDesc = pools
+      .map((pool) => pool.tokens.find((t) => t.id === assetIn))
+      .filter((a): a is PoolToken => !!a)
+      .sort((a, b) => Number(b.balance) - Number(a.balance));
 
-    const spotPrice = bestRoute
+    const { balance, decimals } = assetsByLiquidityDesc[0];
+    const liquidity = bnum(balance).shiftedBy(-1 * decimals);
+    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
+    const routesPromises = paths.map(
+      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
+    );
+    const routes = await Promise.all(routesPromises);
+    const route = this.findBestSellRoute(routes);
+    const swaps = await this.toSellSwaps('1', route, poolsMap);
+
+    const spotPrice = swaps
       .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
       .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
-
-    const spotPriceDecimals = bestRoute[bestRoute.length - 1].assetOutDecimals;
+    const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
     const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
     return { amount: spotPriceAmount, decimals: spotPriceDecimals };
   }

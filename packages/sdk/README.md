@@ -25,10 +25,10 @@ Install with [npm](https://www.npmjs.com/):
 
 As of **v2.x** .wasm files are no longer embedded in bundle
 but rather deferred to improve load performance & decrease
-module size.
+module size (esm only).
 
 If you upgrading from **v1.x** to **v2.x** make sure you use
-corresponding wasm plugin in your build config to directly
+appropriate wasm plugin in your build config to directly
 import .wasm files as if they were a javascript module.
 
 For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
@@ -75,6 +75,7 @@ const api = await ApiPromise.create({ provider: wsProvider });
 
 // Initialize Trade Router
 const poolService = new PoolService(api);
+await poolService.syncRegistry(); // Wait until pools initialized (optional), fallback to lazy init
 const tradeRouter = new TradeRouter(poolService);
 
 // Do something
