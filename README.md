@@ -25,7 +25,7 @@ Everything about building, setting up development environment & releasing can be
 
 In case of unexpected sdk behaviour, please create well-written issue [here](https://https://github.com/galacticcouncil/sdk/issues/new). It makes it easier to find & fix the problem accordingly.
 
-## License
+## Legal
 <pre>
                     :                     $$\   $$\                 $$\                    $$$$$$$\  $$\   $$\
                   !YJJ^                   $$ |  $$ |                $$ |                   $$  __$$\ $$ |  $$ |
@@ -48,4 +48,4 @@ In case of unexpected sdk behaviour, please create well-written issue [here](htt
                                           you may not use this file except in compliance with the License.
                                           http://www.apache.org/licenses/LICENSE-2.0
 </pre>
-For more details visit [LICENSE.md](LICENSE.md)
+For more details read [LICENSE.md](LICENSE.md)
