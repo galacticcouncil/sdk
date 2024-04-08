@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.2
+
+### Patch Changes
+
+- Add DOTA support
+
 ## 1.11.1
 
 ### Patch Changes
