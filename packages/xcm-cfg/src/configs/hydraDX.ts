@@ -18,6 +18,7 @@ import {
   dai_mwh,
   ded,
   dot,
+  dota,
   glmr,
   hdx,
   ibtc,
@@ -152,6 +153,21 @@ const toAssetHub: AssetConfig[] = [
   }),
   new AssetConfig({
     asset: ded,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.18,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: dota,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: assetHub,
     destinationFee: {

@@ -127,6 +127,11 @@ export const ded = new Asset({
   originSymbol: 'DED',
 });
 
+export const dota = new Asset({
+  key: 'dota',
+  originSymbol: 'DOTA',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -162,6 +167,7 @@ export const assets: Asset[] = [
   xrt,
   pink,
   ded,
+  dota,
 ];
 
 export const assetsMap = new Map<string, Asset>(

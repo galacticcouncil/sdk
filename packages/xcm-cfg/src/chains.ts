@@ -41,6 +41,7 @@ import {
   xrt,
   pink,
   ded,
+  dota,
 } from './assets';
 
 export const acala = new Parachain({
@@ -108,6 +109,12 @@ export const assetHub = new Parachain({
       asset: ded,
       decimals: 10,
       id: 30,
+      palletInstance: 50,
+    },
+    {
+      asset: dota,
+      decimals: 4,
+      id: 18,
       palletInstance: 50,
     },
   ],
@@ -363,6 +370,13 @@ export const hydraDX = new Parachain({
       asset: ded,
       id: 30,
       balanceId: 1000019,
+      decimals: 10,
+      palletInstance: 50,
+    },
+    {
+      asset: dota,
+      id: 18,
+      balanceId: 1000038,
       decimals: 10,
       palletInstance: 50,
     },
