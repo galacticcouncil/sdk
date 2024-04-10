@@ -377,7 +377,7 @@ export const hydraDX = new Parachain({
       asset: dota,
       id: 18,
       balanceId: 1000038,
-      decimals: 10,
+      decimals: 4,
       palletInstance: 50,
     },
   ],
