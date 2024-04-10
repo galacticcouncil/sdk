@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-cfg",
-  "version": "1.11.2",
+  "version": "1.11.3",
   "description": "Cross-chain polkadot & kusama HydraDX config",
   "author": "GalacticCouncil",
   "repository": {

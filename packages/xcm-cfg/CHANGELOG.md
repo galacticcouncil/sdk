@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.3
+
+### Patch Changes
+
+- Fix DOTA hydradx decimals
+
 ## 1.11.2
 
 ### Patch Changes
