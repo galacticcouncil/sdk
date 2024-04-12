@@ -43,6 +43,14 @@ export class PoolService implements IPoolService {
     this.stableClient = new StableSwapClient(this.api);
   }
 
+  get assets(): Asset[] {
+    return this.assets;
+  }
+
+  get isRegistrySynced(): boolean {
+    return this.onChainAssetsLoaded;
+  }
+
   async syncRegistry(external?: ExternalAsset[]) {
     this.onChainAssets = await this.assetClient.getOnChainAssets(external);
     this.onChainAssetsLoaded = true;
@@ -50,8 +58,7 @@ export class PoolService implements IPoolService {
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
     if (!this.onChainAssetsLoaded) {
-      this.onChainAssets = await this.assetClient.getOnChainAssets();
-      this.onChainAssetsLoaded = true;
+      this.syncRegistry();
     }
 
     if (includeOnly.length == 0) {
