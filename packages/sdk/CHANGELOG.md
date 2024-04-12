@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 2.2.1
+
+### Patch Changes
+
+- Fix assets getter
+
 ## 2.2.0
 
 ### Minor Changes
