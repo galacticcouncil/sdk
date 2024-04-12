@@ -44,7 +44,7 @@ export class PoolService implements IPoolService {
   }
 
   get assets(): Asset[] {
-    return this.assets;
+    return this.onChainAssets;
   }
 
   get isRegistrySynced(): boolean {
