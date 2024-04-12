@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- Extends PoolService API with registry getters
+
 ## 2.1.0
 
 ### Minor Changes
