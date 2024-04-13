@@ -75,6 +75,8 @@ export function buildTransact(
   const chain = transferConfig.chain;
   const config = transferConfig.config as AssetConfigV2;
 
+  console.log(mrlChain);
+
   const assetId = mrlChain.getAssetId(config.asset);
   const feeAssetId = chain.getAssetId(destFee);
   const palletInstance = chain.getAssetPalletInstance(config.asset);
@@ -107,7 +109,7 @@ export function buildTransfer(
   if (config.extrinsic || config.extrinsicV2) {
     return buildExtrinsic(
       amount,
-      destAddress,
+      '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc',
       destChain,
       destFee,
       transferConfig,

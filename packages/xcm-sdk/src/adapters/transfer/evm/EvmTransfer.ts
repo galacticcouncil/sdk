@@ -1,5 +1,6 @@
+import { Abi } from '@galacticcouncil/xcm-core';
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, BaseError } from 'viem';
 
 import { EvmClient } from '../../../evm';
 
@@ -59,20 +60,35 @@ export abstract class EvmTransfer {
     return this.#client.getProvider().getGasPrice();
   }
 
+  async getAllowance(account: string): Promise<bigint> {
+    const { args } = this.#config;
+    const [owner] = args;
+    const provider = this.#client.getProvider();
+    const output = await provider.readContract({
+      address: owner as `0x${string}`,
+      abi: Abi.IERC20,
+      functionName: 'allowance',
+      args: [this.address as `0x${string}`, account as `0x${string}`],
+    });
+    return output as bigint;
+  }
+
   async getFee(account: string, amount: bigint): Promise<bigint> {
     if (amount === 0n) {
       return 0n;
     }
+    /* 
+    const allowance = await this.getAllowance(account);
+    console.log(allowance); */
 
     try {
       const estimatedGas = await this.getEstimatedGas(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
     } catch (error) {
-      console.log(error);
-      throw new Error(
-        "Can't get a fee. Make sure that you have enough balance!"
-      );
+      const err = error as BaseError;
+      console.log(err.message);
+      throw new Error("Can't estimate fees. " + err.shortMessage);
     }
   }
 }

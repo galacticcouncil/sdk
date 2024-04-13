@@ -14,6 +14,7 @@ import {
   dai_awh,
   dai_mwh,
   dot,
+  eth,
   glmr,
   hdx,
   ibtc,
@@ -555,12 +556,35 @@ export const crust = new Parachain({
 
 // MRL chain config
 
+export const acalaMrl = new EvmParachain({
+  ...moonbeam,
+  id: 787,
+  key: 'acalaMrl',
+  name: 'Acala (Mrl)',
+  assetsData: [
+    {
+      asset: dai_mwh,
+      id: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      //id: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
+      //balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      metadataId: 0,
+      decimals: 18,
+    },
+  ],
+});
+
 export const ethereumMrl = new EvmParachain({
   ...moonbeam,
   id: 1,
-  key: 'ethereum',
+  key: 'ethereumMrl',
   name: 'Ethereum (Mrl)',
   assetsData: [
+    {
+      asset: dai_mwh,
+      id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      metadataId: 0,
+      decimals: 18,
+    },
     {
       asset: wbtc_mwh,
       id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
@@ -576,7 +600,7 @@ export const ethereumMrl = new EvmParachain({
   ],
 });
 
-const mrlChains: AnyChain[] = [ethereumMrl];
+const mrlChains: AnyChain[] = [acalaMrl, ethereumMrl];
 
 export const chains: AnyChain[] = [
   acala,

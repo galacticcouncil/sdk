@@ -15,14 +15,19 @@ import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
-import { ethereumConfig } from './ethereumMrl';
+
+// mrl
+import { acalaMrlConfig } from './acalaMrl';
+import { ethereumMrlConfig } from './ethereumMrl';
 
 export const chainsConfig: ChainConfig[] = [
   acalaConfig,
+  acalaMrlConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,
   centrifugeConfig,
+  ethereumMrlConfig,
   hydraDxConfig,
   interlayConfig,
   moonbeamConfig,
@@ -33,7 +38,6 @@ export const chainsConfig: ChainConfig[] = [
   zeitgeistConfig,
   phalaConfig,
   crustConfig,
-  ethereumConfig,
 ];
 
 export const chainsConfigMap = new Map<string, ChainConfig>(

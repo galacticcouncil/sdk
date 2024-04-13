@@ -34,6 +34,11 @@ export {
   ztg,
 };
 
+export const eth = new Asset({
+  key: 'eth',
+  originSymbol: 'ETH',
+});
+
 export const dai_awh = new Asset({
   ...dai,
   key: 'dai_awh',
@@ -108,6 +113,7 @@ export const assets: Asset[] = [
   dai_awh,
   dai_mwh,
   dot,
+  eth,
   glmr,
   hdx,
   ibtc,

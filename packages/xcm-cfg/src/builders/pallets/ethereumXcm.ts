@@ -10,7 +10,7 @@ import {
 } from '@moonbeam-network/xcm-builder';
 import { encodeFunctionData } from 'viem';
 
-import { formatDestAddress } from './ethereumXcm.utils';
+import { formatDestAddress } from '../utils';
 
 const pallet = 'ethereumXcm';
 
@@ -22,8 +22,9 @@ const transact = () => {
       relayerAddress: string
     ): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { amount, address, asset } =
-          params as ExtrinsicConfigBuilderParamsV2;
+        console.log(params);
+        const asset = '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD';
+        const { amount, address } = params as ExtrinsicConfigBuilderParamsV2;
         return new ExtrinsicConfig({
           module: pallet,
           func,
@@ -55,6 +56,44 @@ const transact = () => {
                 [approveTx, transferTx],
                 [],
               ],
+            });
+            console.log({
+              abi: Abi.IERC20,
+              functionName: 'approve',
+              args: [relayerAddress, amount],
+            });
+            console.log({
+              abi: Abi.TokenRelayer,
+              functionName: 'transferTokensWithRelay',
+              args: [
+                asset,
+                amount,
+                0,
+                destChain,
+                formatDestAddress(address),
+                0,
+              ],
+            });
+            console.log({
+              abi: Abi.Batch,
+              functionName: 'batchAll',
+              args: [
+                [asset, relayerAddress],
+                [0, 0],
+                [approveTx, transferTx],
+                [],
+              ],
+            });
+            console.log({
+              [version]: {
+                gasLimit: 350000n,
+                feePayment: 'Auto',
+                action: {
+                  Call: Precompile.Batch,
+                },
+                value: 0n,
+                input: batchTx,
+              },
             });
             return [
               {

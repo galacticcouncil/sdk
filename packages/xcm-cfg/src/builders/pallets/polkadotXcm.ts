@@ -1,4 +1,7 @@
-import { ExtrinsicConfigBuilderParamsV2 } from '@galacticcouncil/xcm-core';
+import {
+  ExtrinsicConfigBuilderParamsV2,
+  calculateMDA,
+} from '@galacticcouncil/xcm-core';
 import {
   XcmVersion,
   ExtrinsicConfigBuilder,
@@ -121,7 +124,17 @@ const send = () => {
               throw new Error('Ethereum transact must be provided');
             }
             const version = XcmVersion.v3;
-            const account = getExtrinsicAccount(address);
+            const account = getExtrinsicAccount(
+              '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc'
+            );
+            console.log(account);
+            calculateMDA(address, '2034', 1).then((a) => console.log(a));
+            calculateMDA(
+              '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym',
+              '2034',
+              1
+            ).then((a) => console.log(a));
+
             return [
               toDest(version, destination),
               toTransactMessage(

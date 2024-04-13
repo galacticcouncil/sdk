@@ -34,6 +34,6 @@
     "@moonbeam-network/xcm-config": "1.3.27",
     "@moonbeam-network/xcm-types": "1.0.4",
     "@moonbeam-network/xcm-utils": "1.0.4",
-    "viem": "^2.7.19"
+    "viem": "2.7.19"
   }
 }

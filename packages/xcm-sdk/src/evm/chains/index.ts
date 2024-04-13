@@ -7,6 +7,7 @@ import { moonbeam } from './moonbeam';
 
 export const evmChains: Record<string, Chain> = {
   acala: acala,
+  acalaMrl: acala,
   hydradx: hydradx,
   moonbeam: moonbeam,
   ethereum: mainnet,

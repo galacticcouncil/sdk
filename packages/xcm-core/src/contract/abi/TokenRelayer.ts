@@ -2,6 +2,30 @@ export const TOKEN_RELAYER = [
   {
     inputs: [
       {
+        name: 'token',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'toNativeAmount',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    name: 'calculateNativeSwapAmountOut',
+    outputs: [
+      {
+        name: 'nativeAmount',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint16',
         name: 'targetChainId',
         type: 'uint16',

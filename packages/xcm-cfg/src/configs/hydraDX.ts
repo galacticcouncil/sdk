@@ -1,4 +1,4 @@
-import { AssetConfigV2, Precompile, Wormhole } from '@galacticcouncil/xcm-core';
+import { AssetConfigV2, Wormhole } from '@galacticcouncil/xcm-core';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
@@ -39,6 +39,7 @@ import {
 } from '../assets';
 import {
   acala,
+  acalaMrl,
   assetHub,
   astar,
   bifrost,
@@ -97,6 +98,33 @@ const toAcala: AssetConfig[] = [
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
+const toAcalaViaMrl: AssetConfigV2[] = [
+  new AssetConfigV2({
+    asset: dai_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acalaMrl,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
+      Wormhole.Acala.id,
+      '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
+    ),
+    extrinsicV2: ExtrinsicBuilderV2()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
+      ]),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -485,7 +513,7 @@ const toMoonbeam: AssetConfig[] = [
 
 const toEthereumViaMrl: AssetConfigV2[] = [
   new AssetConfigV2({
-    asset: weth_mwh,
+    asset: dai_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: ethereumMrl,
     destinationFee: {
@@ -501,7 +529,7 @@ const toEthereumViaMrl: AssetConfigV2[] = [
       .utility()
       .batchAll([
         ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.6), // Execution fee (GLMR)
+        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
       ]),
     fee: {
       asset: hdx,
@@ -669,6 +697,7 @@ const toCrust: AssetConfig[] = [
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
+    ...toAcalaViaMrl,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,
