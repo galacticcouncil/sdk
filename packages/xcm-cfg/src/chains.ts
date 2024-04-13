@@ -16,6 +16,7 @@ import {
   dai_awh,
   dai_mwh,
   dot,
+  eth,
   glmr,
   hdx,
   ibtc,
@@ -267,6 +268,7 @@ export const hydraDX = new Parachain({
       asset: glmr,
       id: 16,
       decimals: 18,
+      palletInstance: 10,
     },
     {
       asset: ibtc,
@@ -318,6 +320,7 @@ export const hydraDX = new Parachain({
       asset: usdt_mwh,
       id: 23,
       decimals: 6,
+      palletInstance: 110,
     },
     {
       asset: vdot,
@@ -333,6 +336,7 @@ export const hydraDX = new Parachain({
       asset: wbtc_mwh,
       id: 19,
       decimals: 8,
+      palletInstance: 110,
     },
     {
       asset: weth_awh,
@@ -343,6 +347,7 @@ export const hydraDX = new Parachain({
       asset: weth_mwh,
       id: 20,
       decimals: 18,
+      palletInstance: 110,
     },
     {
       asset: ztg,
@@ -388,7 +393,7 @@ export const hydraDX = new Parachain({
   name: 'HydraDX',
   parachainId: 2034,
   ss58Format: 63,
-  ws: 'wss://rpc.hydradx.cloud',
+  ws: 'wss://hydradx-rpc.dwellir.com',
 });
 
 export const interlay = new Parachain({
@@ -626,7 +631,55 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
-const polkadotChains: AnyChain[] = [
+// MRL chain config
+
+export const acalaMrl = new EvmParachain({
+  ...moonbeam,
+  id: 787,
+  key: 'acalaMrl',
+  name: 'Acala (Mrl)',
+  assetsData: [
+    {
+      asset: dai_mwh,
+      id: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      //id: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
+      //balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      metadataId: 0,
+      decimals: 18,
+    },
+  ],
+});
+
+export const ethereumMrl = new EvmParachain({
+  ...moonbeam,
+  id: 1,
+  key: 'ethereumMrl',
+  name: 'Ethereum (Mrl)',
+  assetsData: [
+    {
+      asset: dai_mwh,
+      id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      metadataId: 0,
+      decimals: 18,
+    },
+    {
+      asset: wbtc_mwh,
+      id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+      metadataId: 0,
+      decimals: 8,
+    },
+    {
+      asset: weth_mwh,
+      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      metadataId: 0,
+      decimals: 18,
+    },
+  ],
+});
+
+const mrlChains: AnyChain[] = [acalaMrl, ethereumMrl];
+
+export const polkadotChains: AnyChain[] = [
   acala,
   assetHub,
   astar,
@@ -642,7 +695,7 @@ const polkadotChains: AnyChain[] = [
   subsocial,
   unique,
   zeitgeist,
-];
+].concat(mrlChains);
 
 // Kusama chains configuration
 

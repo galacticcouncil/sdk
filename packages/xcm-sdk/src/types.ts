@@ -18,7 +18,7 @@ export interface XData {
   min: AssetAmount;
   srcFee: AssetAmount;
   srcFeeBalance: AssetAmount;
-  buildCall(amount: bigint | number | string): XCall;
+  buildCall(amount: bigint | number | string): Promise<XCall>;
 }
 
 export interface XCall {

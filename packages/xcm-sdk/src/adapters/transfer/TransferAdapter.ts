@@ -7,9 +7,9 @@ import {
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
 import { ExtrinsicTransfer } from './ExtrinsicTransfer';
-import { XTokensTransfer } from './XTokensTransfer';
+import { ContractTransfer } from './ContractTransfer';
+import { EvmTransferFactory } from './evm';
 
-import { XTokens } from '../../contracts';
 import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 import { XCall } from '../../types';
@@ -24,7 +24,7 @@ export class TransferAdapter {
   protected substrate: SubstrateService;
 
   private extrinsicTransfer: ExtrinsicTransfer;
-  private xTokensTransfer!: XTokensTransfer;
+  private contractTransfer!: ContractTransfer;
 
   constructor({ evmClient, substrate }: TransferParams) {
     this.substrate = substrate;
@@ -32,14 +32,17 @@ export class TransferAdapter {
 
     if (evmClient) {
       this.evmClient = evmClient;
-      this.xTokensTransfer = new XTokensTransfer();
+      this.contractTransfer = new ContractTransfer();
     }
   }
 
   calldata(config: BaseConfig): XCall {
     if (config.type === CallType.Evm) {
-      const xTokens = new XTokens(this.evmClient, config as ContractConfig);
-      return this.xTokensTransfer.calldata(xTokens);
+      const contract = EvmTransferFactory.get(
+        this.evmClient,
+        config as ContractConfig
+      );
+      return this.contractTransfer.calldata(contract);
     }
     return this.extrinsicTransfer.calldata(config as ExtrinsicConfig);
   }
@@ -51,8 +54,16 @@ export class TransferAdapter {
     config: BaseConfig
   ): Promise<AssetAmount> {
     if (config.type === CallType.Evm) {
-      const xTokens = new XTokens(this.evmClient, config as ContractConfig);
-      return this.xTokensTransfer.getFee(account, amount, feeBalance, xTokens);
+      const contract = EvmTransferFactory.get(
+        this.evmClient,
+        config as ContractConfig
+      );
+      return this.contractTransfer.getFee(
+        account,
+        amount,
+        feeBalance,
+        contract
+      );
     }
 
     return this.extrinsicTransfer.getFee(

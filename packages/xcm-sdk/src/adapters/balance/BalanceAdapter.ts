@@ -8,10 +8,10 @@ import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 
 import { Observable } from 'rxjs';
 
-import { Erc20Balance } from './Erc20Balance';
+import { EthereumBalance } from './EthereumBalance';
 import { SubstrateBalance } from './SubstrateBalance';
+import { EvmBalanceFactory } from './evm';
 
-import { Erc20 } from '../../contracts';
 import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 
@@ -24,7 +24,7 @@ export class BalanceAdapter {
   protected evmClient!: EvmClient;
   protected substrate: SubstrateService;
 
-  private erc20Balance!: Erc20Balance;
+  private ethereumBalance!: EthereumBalance;
   private substrateBalance: SubstrateBalance;
 
   constructor({ evmClient, substrate }: BalanceParams) {
@@ -33,14 +33,17 @@ export class BalanceAdapter {
 
     if (evmClient) {
       this.evmClient = evmClient;
-      this.erc20Balance = new Erc20Balance(evmClient);
+      this.ethereumBalance = new EthereumBalance(evmClient);
     }
   }
 
   async read(asset: Asset, config: BaseConfig): Promise<AssetAmount> {
     if (config.type === CallType.Evm) {
-      const erc20 = new Erc20(this.evmClient, config as ContractConfig);
-      return this.erc20Balance.read(asset, erc20);
+      const contract = EvmBalanceFactory.get(
+        this.evmClient,
+        config as ContractConfig
+      );
+      return this.ethereumBalance.read(asset, contract);
     }
 
     return this.substrateBalance.read(asset, config as SubstrateQueryConfig);
@@ -48,8 +51,11 @@ export class BalanceAdapter {
 
   subscribe(asset: Asset, config: BaseConfig): Observable<AssetAmount> {
     if (config.type === CallType.Evm) {
-      const erc20 = new Erc20(this.evmClient, config as ContractConfig);
-      return this.erc20Balance.subscribe(asset, erc20);
+      const contract = EvmBalanceFactory.get(
+        this.evmClient,
+        config as ContractConfig
+      );
+      return this.ethereumBalance.subscribe(asset, contract);
     }
 
     return this.substrateBalance.subscribe(

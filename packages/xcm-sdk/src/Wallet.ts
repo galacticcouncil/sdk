@@ -110,6 +110,17 @@ export class Wallet {
         destData.getMin(destination),
       ]);
 
+    const transactInfo = srcData.isMrl(source)
+      ? await destData.getTransactInfo(
+          srcAddr,
+          srcBalance.amount, // should be transfer amount
+          destAddr,
+          destination.chain,
+          destFee,
+          source
+        )
+      : undefined;
+
     const srcFee = await srcData.getFee(
       srcAddr,
       srcBalance.amount,
@@ -117,11 +128,13 @@ export class Wallet {
       destAddr,
       destination.chain,
       destFee,
-      source
+      source,
+      transactInfo
     );
 
     const min = calculateMin(destBalance, destEd, destFee, destMin);
     const max = calculateMax(srcBalance, srcEd, srcFee, srcMin);
+
     return {
       balance: srcBalance,
       destFee,
@@ -129,13 +142,24 @@ export class Wallet {
       min,
       srcFee,
       srcFeeBalance,
-      buildCall(amount): XCall {
+      async buildCall(amount): Promise<XCall> {
+        const transactInfo = srcData.isMrl(source)
+          ? await destData.getTransactInfo(
+              srcAddr,
+              toBigInt(amount, srcBalance.decimals),
+              destAddr,
+              destination.chain,
+              destFee,
+              source
+            )
+          : undefined;
         const config = buildTransfer(
           toBigInt(amount, srcBalance.decimals),
           destAddr,
           destination.chain,
           destFee,
-          source
+          source,
+          transactInfo
         );
         return srcData.transfer.calldata(config);
       },

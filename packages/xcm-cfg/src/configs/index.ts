@@ -18,12 +18,18 @@ import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 
-const polkadotChainsConfig: ChainConfig[] = [
+// mrl
+import { acalaMrlConfig } from './acalaMrl';
+import { ethereumMrlConfig } from './ethereumMrl';
+
+export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
+  acalaMrlConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,
   centrifugeConfig,
+  ethereumMrlConfig,
   hydraDxConfig,
   interlayConfig,
   moonbeamConfig,

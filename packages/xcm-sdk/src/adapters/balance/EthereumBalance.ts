@@ -8,19 +8,18 @@ import {
   distinctUntilChanged,
 } from 'rxjs';
 
-import { Erc20 } from '../../contracts';
+import { EvmBalance } from './evm';
+import { BalanceProvider } from '../types';
 import { EvmClient } from '../../evm';
 
-import { BalanceProvider } from '../types';
-
-export class Erc20Balance implements BalanceProvider<Erc20> {
+export class EthereumBalance implements BalanceProvider<EvmBalance> {
   readonly #client: EvmClient;
 
   constructor(client: EvmClient) {
     this.#client = client;
   }
 
-  async read(asset: Asset, contract: Erc20): Promise<AssetAmount> {
+  async read(asset: Asset, contract: EvmBalance): Promise<AssetAmount> {
     const [balance, decimals] = await Promise.all([
       contract.getBalance(),
       contract.getDecimals(),
@@ -31,7 +30,7 @@ export class Erc20Balance implements BalanceProvider<Erc20> {
     });
   }
 
-  subscribe(asset: Asset, contract: Erc20): Observable<AssetAmount> {
+  subscribe(asset: Asset, contract: EvmBalance): Observable<AssetAmount> {
     const subject = new Subject<AssetAmount>();
     const observable = subject.pipe(shareReplay(1));
     const provider = this.#client.getProvider();

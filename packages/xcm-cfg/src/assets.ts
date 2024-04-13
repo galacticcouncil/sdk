@@ -42,6 +42,11 @@ export {
   xrt,
 };
 
+export const eth = new Asset({
+  key: 'eth',
+  originSymbol: 'ETH',
+});
+
 export const bsx = new Asset({
   key: 'bsx',
   originSymbol: 'BSX',
@@ -142,6 +147,7 @@ export const assets: Asset[] = [
   dai_awh,
   dai_mwh,
   dot,
+  eth,
   glmr,
   hdx,
   ibtc,

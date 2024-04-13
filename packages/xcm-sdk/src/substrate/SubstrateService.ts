@@ -68,6 +68,15 @@ export class SubstrateService {
   getExtrinsic(config: ExtrinsicConfig): SubmittableExtrinsic {
     const fn = this.api.tx[config.module][config.func];
     const args = config.getArgs(fn);
+
+    if (args.length > 1 && config.func === 'batchAll') {
+      const calls = args.map(({ module, func, getArgs }) => {
+        const fn = this.api.tx[module][func];
+        const args = getArgs(fn);
+        return fn(...args);
+      });
+      return fn(calls);
+    }
     return fn(...args);
   }
 
