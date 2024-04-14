@@ -1,11 +1,8 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import {
-  AssetConfig,
-  ChainConfig,
-  robonomics,
-} from '@moonbeam-network/xcm-config';
+
 import { xrt } from '../../assets';
-import { basilisk } from '../../chains';
+import { basilisk, robonomics } from '../../chains';
 import { ExtrinsicBuilderV2 } from '../../builders';
 
 export const robonomicsConfig = new ChainConfig({

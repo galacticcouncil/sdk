@@ -1,8 +1,8 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { bsx, ksm, teer, tnkr, usdt, xrt } from '../../assets';
 import {

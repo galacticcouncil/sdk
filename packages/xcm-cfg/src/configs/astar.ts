@@ -1,5 +1,5 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
 
 import { astr, dot, hdx, usdt } from '../assets';
 import { astar, hydraDX } from '../chains';
@@ -33,7 +33,7 @@ const toHydraDX: AssetConfig[] = [
       asset: astr,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer()
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
   }),
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
   // new AssetConfig({

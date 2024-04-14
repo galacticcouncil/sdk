@@ -1,4 +1,4 @@
-import { ChainConfig } from '@moonbeam-network/xcm-config';
+import { ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { assetHubConfig } from './assethub';
 import { basiliskConfig } from './basilisk';

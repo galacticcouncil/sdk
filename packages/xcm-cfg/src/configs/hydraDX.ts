@@ -1,14 +1,9 @@
-import { AssetConfigV2, Wormhole } from '@galacticcouncil/xcm-core';
+import { AssetConfig, ChainConfig, Wormhole } from '@galacticcouncil/xcm-core';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
   FeeBuilder,
 } from '@moonbeam-network/xcm-builder';
-import {
-  AssetConfig,
-  ChainConfig,
-  polkadot,
-} from '@moonbeam-network/xcm-config';
 
 import {
   astr,
@@ -51,6 +46,7 @@ import {
   ethereumMrl,
   hydraDX,
   interlay,
+  polkadot,
   moonbeam,
   nodle,
   phala,
@@ -108,8 +104,8 @@ const toAcala: AssetConfig[] = [
   }),
 ];
 
-const toAcalaViaMrl: AssetConfigV2[] = [
-  new AssetConfigV2({
+const toAcalaViaMrl: AssetConfig[] = [
+  new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: acalaMrl,
@@ -118,11 +114,11 @@ const toAcalaViaMrl: AssetConfigV2[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
+    /*     ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
       Wormhole.Acala.id,
       '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
-    ),
-    extrinsicV2: ExtrinsicBuilderV2()
+    ), */
+    extrinsic: ExtrinsicBuilderV2()
       .utility()
       .batchAll([
         ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
@@ -574,8 +570,8 @@ const toMoonbeam: AssetConfig[] = [
   // }),
 ];
 
-const toEthereumViaMrl: AssetConfigV2[] = [
-  new AssetConfigV2({
+const toEthereumViaMrl: AssetConfig[] = [
+  new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: ethereumMrl,
@@ -584,11 +580,11 @@ const toEthereumViaMrl: AssetConfigV2[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
+    /*     ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
       Wormhole.Ethereum.id,
       '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
-    ),
-    extrinsicV2: ExtrinsicBuilderV2()
+    ), */
+    extrinsic: ExtrinsicBuilderV2()
       .utility()
       .batchAll([
         ExtrinsicBuilder().xTokens().transferMultiCurrencies(),

@@ -1,8 +1,9 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
+
 import { unq } from '../assets';
 import { hydraDX, unique } from '../chains';
 

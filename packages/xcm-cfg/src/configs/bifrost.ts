@@ -1,8 +1,8 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
-import { AssetConfig, ChainConfig, polkadot, usdc } from '@moonbeam-network/xcm-config';
 
-import { bnc, vdot, dot, usdt, hdx, pink } from '../assets';
-import { assetHub, bifrost, hydraDX } from '../chains';
+import { bnc, vdot, dot, usdc, usdt, hdx, pink } from '../assets';
+import { assetHub, bifrost, hydraDX, polkadot } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
@@ -132,10 +132,6 @@ const toAssetHub: AssetConfig[] = [
 ];
 
 export const bifrostConfig = new ChainConfig({
-  assets: [
-    ...toHydraDX,
-    ...toPolkadot,
-    ...toAssetHub,
-  ],
+  assets: [...toHydraDX, ...toPolkadot, ...toAssetHub],
   chain: bifrost,
 });

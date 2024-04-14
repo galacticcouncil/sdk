@@ -1,17 +1,13 @@
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
   FeeBuilder,
 } from '@moonbeam-network/xcm-builder';
-import {
-  AssetConfig,
-  ChainConfig,
-  polkadot,
-} from '@moonbeam-network/xcm-config';
 
 import { ded, dot, dota, pink, usdc, usdt } from '../assets';
-import { assetHub, bifrost, hydraDX, moonbeam } from '../chains';
+import { assetHub, bifrost, hydraDX, moonbeam, polkadot } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
 const xcmDeliveryFeeAmount = 0.036;

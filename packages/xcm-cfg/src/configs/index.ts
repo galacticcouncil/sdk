@@ -1,4 +1,4 @@
-import { ChainConfig } from '@moonbeam-network/xcm-config';
+import { ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { kusamaChainsConfig } from './kusama';
 
@@ -19,12 +19,10 @@ import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 
 // mrl
-import { acalaMrlConfig } from './acalaMrl';
 import { ethereumMrlConfig } from './ethereumMrl';
 
 export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
-  acalaMrlConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,

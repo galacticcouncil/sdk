@@ -28,5 +28,25 @@ export function Bridge() {
         });
       },
     }),
+    viaWormhole: (
+      from: WormholeChain,
+      to: WormholeChain
+    ): ContractConfigBuilder => ({
+      build: ({ address, amount, asset }) => {
+        return new ContractConfig({
+          address: from.tokenBridge,
+          args: [
+            asset,
+            amount,
+            to.id,
+            formatDestAddress(address) as `0x${string}`,
+            '0',
+            '0',
+          ],
+          func: 'transferTokens',
+          module: 'Bridge',
+        });
+      },
+    }),
   };
 }
