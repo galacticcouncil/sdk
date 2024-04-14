@@ -1,9 +1,11 @@
-import { AssetConfigV2, TransactInfo } from '@galacticcouncil/xcm-core';
-import { ContractConfig, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import {
+  AssetConfig,
   ChainTransferConfig,
   FeeAssetConfig,
-} from '@moonbeam-network/xcm-config';
+  ExtrinsicConfigBuilderParamsV2,
+  TransactInfo,
+} from '@galacticcouncil/xcm-core';
+import { ContractConfig, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
@@ -86,19 +88,17 @@ export function buildTransact(
   mrlChain: AnyChain
 ): ExtrinsicConfig {
   const chain = transferConfig.chain;
-  const config = transferConfig.config as AssetConfigV2;
-
-  console.log(mrlChain);
+  const config = transferConfig.config as AssetConfig;
 
   const assetId = mrlChain.getAssetId(config.asset);
   const feeAssetId = chain.getAssetId(destFee);
   const palletInstance = chain.getAssetPalletInstance(config.asset);
 
-  if (!config.ethereum) {
+  if (!config.transact) {
     throw new Error('Ethereum transact must be provided');
   }
 
-  return config.ethereum.build({
+  return config.transact.build({
     address: destAddress,
     amount: amount,
     asset: assetId,
@@ -118,8 +118,8 @@ export function buildTransfer(
   transferConfig: ChainTransferConfig,
   transactInfo?: TransactInfo
 ): ExtrinsicConfig | ContractConfig {
-  const config = transferConfig.config as AssetConfigV2;
-  if (config.extrinsic || config.extrinsicV2) {
+  const config = transferConfig.config;
+  if (config.extrinsic) {
     return buildExtrinsic(
       amount,
       '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc',
@@ -151,39 +151,25 @@ function buildExtrinsic(
   transactInfo?: TransactInfo
 ): ExtrinsicConfig | undefined {
   const chain = transferConfig.chain;
-  const config = transferConfig.config as AssetConfigV2;
+  const config = transferConfig.config as AssetConfig;
 
   const assetId = chain.getAssetId(config.asset);
-  const feeAssetId = chain.getAssetId(destFee);
   const palletInstance = chain.getAssetPalletInstance(config.asset);
-
-  if (config.extrinsicV2) {
-    const feePalletInstance = chain.getAssetPalletInstance(destFee);
-    return config.extrinsicV2.build({
-      address: destAddress,
-      amount: amount,
-      asset: assetId,
-      destination: destChain,
-      fee: destFee.amount,
-      feeDecimals: destFee.decimals,
-      feePalletInstance: feePalletInstance,
-      feeAsset: feeAssetId,
-      palletInstance: palletInstance,
-      source: chain,
-      transact: transactInfo,
-    });
-  }
-
+  const feeAssetId = chain.getAssetId(destFee);
+  const feePalletInstance = chain.getAssetPalletInstance(destFee);
   return config.extrinsic?.build({
     address: destAddress,
     amount: amount,
     asset: assetId,
     destination: destChain,
     fee: destFee.amount,
+    feeDecimals: destFee.decimals,
+    feePalletInstance: feePalletInstance,
     feeAsset: feeAssetId,
     palletInstance: palletInstance,
     source: chain,
-  });
+    transact: transactInfo,
+  } as ExtrinsicConfigBuilderParamsV2);
 }
 
 function buildContract(

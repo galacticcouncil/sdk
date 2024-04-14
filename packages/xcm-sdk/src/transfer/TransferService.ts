@@ -1,6 +1,9 @@
-import { AssetConfigV2, TransactInfo } from '@galacticcouncil/xcm-core';
+import {
+  AssetConfig,
+  ChainTransferConfig,
+  TransactInfo,
+} from '@galacticcouncil/xcm-core';
 import { FeeConfigBuilder } from '@moonbeam-network/xcm-builder';
-import { ChainTransferConfig } from '@moonbeam-network/xcm-config';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
@@ -181,8 +184,8 @@ export class TransferService {
   }
 
   isMrl(transferConfig: ChainTransferConfig): boolean {
-    const config = transferConfig.config as AssetConfigV2;
-    return !!config.ethereum;
+    const config = transferConfig.config as AssetConfig;
+    return !!config.transact;
   }
 
   async getTransactInfo(

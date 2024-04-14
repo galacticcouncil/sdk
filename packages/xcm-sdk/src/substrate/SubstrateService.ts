@@ -1,7 +1,7 @@
 import '@polkadot/api-augment';
 
+import { ConfigService } from '@galacticcouncil/xcm-core';
 import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
-import { IConfigService } from '@moonbeam-network/xcm-config';
 import { AnyParachain, Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -13,12 +13,12 @@ export class SubstrateService {
 
   readonly chain: AnyParachain;
 
-  readonly configService: IConfigService;
+  readonly configService: ConfigService;
 
   constructor(
     api: ApiPromise,
     chain: AnyParachain,
-    configService: IConfigService
+    configService: ConfigService
   ) {
     this.api = api;
     this.chain = chain;
@@ -27,7 +27,7 @@ export class SubstrateService {
 
   static async create(
     chain: AnyParachain,
-    configService: IConfigService
+    configService: ConfigService
   ): Promise<SubstrateService> {
     const apiPool = SubstrateApis.getInstance();
     const api = await apiPool.api(chain.ws);

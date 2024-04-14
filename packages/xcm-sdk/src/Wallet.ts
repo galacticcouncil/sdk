@@ -1,4 +1,4 @@
-import { ConfigBuilder, ConfigService } from '@moonbeam-network/xcm-config';
+import { ConfigBuilder, ConfigService } from '@galacticcouncil/xcm-core';
 import { Asset, AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
