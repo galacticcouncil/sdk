@@ -14,7 +14,7 @@ export class EvmTransferFactory {
         return new XTokens(client, config);
       default: {
         throw new Error(
-          'Module type ' + config.module + ' is not supported yet'
+          'Contract type ' + config.module + ' is not supported yet'
         );
       }
     }

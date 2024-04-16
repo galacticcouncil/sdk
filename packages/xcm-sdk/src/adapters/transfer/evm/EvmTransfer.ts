@@ -1,17 +1,16 @@
-import { Abi } from '@galacticcouncil/xcm-core';
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
 import { encodeFunctionData, BaseError } from 'viem';
 
 import { EvmClient } from '../../../evm';
 
 export abstract class EvmTransfer {
-  readonly #client: EvmClient;
-  readonly #config: ContractConfig;
+  protected readonly client: EvmClient;
+  protected readonly config: ContractConfig;
 
   constructor(client: EvmClient, config: ContractConfig) {
     this.validateClient(client);
-    this.#client = client;
-    this.#config = config;
+    this.client = client;
+    this.config = config;
   }
 
   private validateClient(client: EvmClient) {
@@ -20,23 +19,13 @@ export abstract class EvmTransfer {
     }
   }
 
-  abstract _abi(): any;
-  abstract _precompile(): string;
-
-  get abi(): any {
-    return this._abi();
-  }
-
-  get address(): string {
-    const { address } = this.#config;
-    if (address) {
-      return address;
-    }
-    return this._precompile();
-  }
+  abstract get abi(): any;
+  abstract get address(): string;
+  abstract get asset(): string;
+  abstract get amount(): string;
 
   get data(): string {
-    const { func, args } = this.#config;
+    const { func, args } = this.config;
     return encodeFunctionData({
       abi: this.abi,
       functionName: func,
@@ -44,9 +33,9 @@ export abstract class EvmTransfer {
     });
   }
 
-  async getEstimatedGas(account: string): Promise<bigint> {
-    const { func, args } = this.#config;
-    const provider = this.#client.getProvider();
+  async getGasEstimation(account: string): Promise<bigint> {
+    const { func, args } = this.config;
+    const provider = this.client.getProvider();
     return await provider.estimateContractGas({
       address: this.address as `0x${string}`,
       abi: this.abi,
@@ -57,32 +46,16 @@ export abstract class EvmTransfer {
   }
 
   async getGasPrice(): Promise<bigint> {
-    return this.#client.getProvider().getGasPrice();
+    return this.client.getProvider().getGasPrice();
   }
 
-  async getAllowance(account: string): Promise<bigint> {
-    const { args } = this.#config;
-    const [owner] = args;
-    const provider = this.#client.getProvider();
-    const output = await provider.readContract({
-      address: owner as `0x${string}`,
-      abi: Abi.IERC20,
-      functionName: 'allowance',
-      args: [this.address as `0x${string}`, account as `0x${string}`],
-    });
-    return output as bigint;
-  }
-
-  async getFee(account: string, amount: bigint): Promise<bigint> {
-    if (amount === 0n) {
+  async getFee(account: string, balance: bigint): Promise<bigint> {
+    if (balance === 0n) {
       return 0n;
     }
-    /* 
-    const allowance = await this.getAllowance(account);
-    console.log(allowance); */
 
     try {
-      const estimatedGas = await this.getEstimatedGas(account);
+      const estimatedGas = await this.getGasEstimation(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
     } catch (error) {

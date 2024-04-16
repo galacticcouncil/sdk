@@ -22,6 +22,8 @@ export interface XData {
 }
 
 export interface XCall {
+  /** Owner of transation. */
+  from: string;
   /** Hex-encoded call data. */
   data: `0x${string}`;
   /** Solidity JSON string ABI. */

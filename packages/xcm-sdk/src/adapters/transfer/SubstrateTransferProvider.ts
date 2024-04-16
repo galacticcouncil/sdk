@@ -5,16 +5,19 @@ import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 import { XCall } from '../../types';
 
-export class ExtrinsicTransfer implements TransferProvider<ExtrinsicConfig> {
+export class SubstrateTransferProvider
+  implements TransferProvider<ExtrinsicConfig>
+{
   readonly #substrate: SubstrateService;
 
   constructor(substrate: SubstrateService) {
     this.#substrate = substrate;
   }
 
-  calldata(config: ExtrinsicConfig): XCall {
+  async calldata(account: string, config: ExtrinsicConfig): Promise<XCall> {
     const extrinsic = this.#substrate.getExtrinsic(config);
     return {
+      from: account,
       data: extrinsic.toHex(),
     } as XCall;
   }

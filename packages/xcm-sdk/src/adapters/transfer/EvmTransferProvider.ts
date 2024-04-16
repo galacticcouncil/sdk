@@ -1,15 +1,25 @@
 import { AssetAmount } from '@moonbeam-network/xcm-types';
-import { BaseError } from 'viem';
 
 import { EvmTransfer } from './evm';
 import { TransferProvider } from '../types';
 import { XCall } from '../../types';
 
-export class ContractTransfer implements TransferProvider<EvmTransfer> {
-  calldata(contract: EvmTransfer): XCall {
-    console.log(contract);
+import { EvmClient, Erc20Client } from '../../evm';
+
+export class EvmTransferProvider implements TransferProvider<EvmTransfer> {
+  readonly #client: EvmClient;
+
+  constructor(client: EvmClient) {
+    this.#client = client;
+  }
+
+  async calldata(account: string, contract: EvmTransfer): Promise<XCall> {
+    const erc20 = new Erc20Client(this.#client, contract.asset);
+    erc20.allowance(account, contract.address);
+
     const { data, abi, address } = contract;
     return {
+      from: account as `0x${string}`,
       data: data as `0x${string}`,
       abi: JSON.stringify(abi),
       to: address,
@@ -22,8 +32,6 @@ export class ContractTransfer implements TransferProvider<EvmTransfer> {
     feeBalance: AssetAmount,
     contract: EvmTransfer
   ): Promise<AssetAmount> {
-    console.log(contract);
-
     let fee: bigint;
     try {
       fee = await contract.getFee(account, amount);

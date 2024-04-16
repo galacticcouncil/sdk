@@ -1,62 +1,27 @@
-import { Abi } from '@galacticcouncil/xcm-core';
+import { ContractConfig } from '@moonbeam-network/xcm-builder';
+
 import { EvmBalance } from './EvmBalance';
+import { EvmClient, Erc20Client } from '../../../evm';
 
 export class Erc20 extends EvmBalance {
-  get abi() {
-    return Abi.IERC20;
+  readonly erc20: Erc20Client;
+
+  constructor(client: EvmClient, config: ContractConfig) {
+    super(client, config);
+    this.erc20 = new Erc20Client(client, this.address);
   }
 
-  async allowance(): Promise<bigint> {
-    const provider = this.client.getProvider();
-    const { address, args } = this.config;
-    const [recipient] = args;
-
-    const output = await provider.readContract({
-      address: address as `0x${string}`,
-      abi: this.abi,
-      functionName: 'allowance',
-      args: [address as `0x${string}`, recipient as `0x${string}`],
-    });
-    return output as bigint;
-  }
-
-  async approve(amount: bigint): Promise<bigint> {
-    const provider = this.client.getProvider();
-    const { address, args } = this.config;
-    const [recipient] = args;
-
-    const output = await provider.readContract({
-      address: address as `0x${string}`,
-      abi: this.abi,
-      functionName: 'approve',
-      args: [recipient as `0x${string}`, amount],
-    });
-    return output as bigint;
+  get address() {
+    return this.config.address!;
   }
 
   async getBalance(): Promise<bigint> {
-    const provider = this.client.getProvider();
-    const { address, args } = this.config;
-    const [recipient] = args;
-
-    const output = await provider.readContract({
-      address: address as `0x${string}`,
-      abi: this.abi,
-      functionName: 'balanceOf',
-      args: [recipient as `0x${string}`],
-    });
-    return output as bigint;
+    const { args } = this.config;
+    const [account] = args;
+    return this.erc20.balanceOf(account);
   }
 
   async getDecimals(): Promise<number> {
-    const provider = this.client.getProvider();
-    const { address } = this.config;
-
-    const output = await provider.readContract({
-      address: address as `0x${string}`,
-      abi: this.abi,
-      functionName: 'decimals',
-    });
-    return output as number;
+    return this.erc20.decimals();
   }
 }

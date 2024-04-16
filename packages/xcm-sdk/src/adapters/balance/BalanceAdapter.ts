@@ -8,8 +8,8 @@ import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 
 import { Observable } from 'rxjs';
 
-import { EthereumBalance } from './EthereumBalance';
-import { SubstrateBalance } from './SubstrateBalance';
+import { EvmBalanceProvider } from './EvmBalanceProvider';
+import { SubstrateBalanceProvider } from './SubstrateBalanceProvider';
 import { EvmBalanceFactory } from './evm';
 
 import { EvmClient } from '../../evm';
@@ -24,16 +24,16 @@ export class BalanceAdapter {
   protected evmClient!: EvmClient;
   protected substrate: SubstrateService;
 
-  private ethereumBalance!: EthereumBalance;
-  private substrateBalance: SubstrateBalance;
+  private substrateProvider: SubstrateBalanceProvider;
+  private evmProvider!: EvmBalanceProvider;
 
   constructor({ evmClient, substrate }: BalanceParams) {
     this.substrate = substrate;
-    this.substrateBalance = new SubstrateBalance(substrate);
+    this.substrateProvider = new SubstrateBalanceProvider(substrate);
 
     if (evmClient) {
       this.evmClient = evmClient;
-      this.ethereumBalance = new EthereumBalance(evmClient);
+      this.evmProvider = new EvmBalanceProvider(evmClient);
     }
   }
 
@@ -43,10 +43,10 @@ export class BalanceAdapter {
         this.evmClient,
         config as ContractConfig
       );
-      return this.ethereumBalance.read(asset, contract);
+      return this.evmProvider.read(asset, contract);
     }
 
-    return this.substrateBalance.read(asset, config as SubstrateQueryConfig);
+    return this.substrateProvider.read(asset, config as SubstrateQueryConfig);
   }
 
   subscribe(asset: Asset, config: BaseConfig): Observable<AssetAmount> {
@@ -55,10 +55,10 @@ export class BalanceAdapter {
         this.evmClient,
         config as ContractConfig
       );
-      return this.ethereumBalance.subscribe(asset, contract);
+      return this.evmProvider.subscribe(asset, contract);
     }
 
-    return this.substrateBalance.subscribe(
+    return this.substrateProvider.subscribe(
       asset,
       config as SubstrateQueryConfig
     );

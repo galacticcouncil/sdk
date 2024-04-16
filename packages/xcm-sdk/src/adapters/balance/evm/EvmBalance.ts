@@ -3,8 +3,8 @@ import { ContractConfig } from '@moonbeam-network/xcm-builder';
 import { EvmClient } from '../../../evm';
 
 export abstract class EvmBalance {
-  protected readonly client: EvmClient;
-  protected readonly config: ContractConfig;
+  readonly client: EvmClient;
+  readonly config: ContractConfig;
 
   constructor(client: EvmClient, config: ContractConfig) {
     this.validateClient(client);
@@ -21,7 +21,7 @@ export abstract class EvmBalance {
 
   private validateConfig(config: ContractConfig) {
     if (!config.address) {
-      throw new Error('Address is required');
+      throw new Error('Contract address is required');
     }
   }
 

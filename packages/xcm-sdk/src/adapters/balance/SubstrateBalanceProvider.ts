@@ -15,7 +15,9 @@ import {
 import { BalanceProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 
-export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
+export class SubstrateBalanceProvider
+  implements BalanceProvider<SubstrateQueryConfig>
+{
   readonly #substrate: SubstrateService;
 
   constructor(substrate: SubstrateService) {

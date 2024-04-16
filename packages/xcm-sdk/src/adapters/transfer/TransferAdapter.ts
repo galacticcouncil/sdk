@@ -6,8 +6,8 @@ import {
 } from '@moonbeam-network/xcm-builder';
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
-import { ExtrinsicTransfer } from './ExtrinsicTransfer';
-import { ContractTransfer } from './ContractTransfer';
+import { SubstrateTransferProvider } from './SubstrateTransferProvider';
+import { EvmTransferProvider } from './EvmTransferProvider';
 import { EvmTransferFactory } from './evm';
 
 import { EvmClient } from '../../evm';
@@ -23,28 +23,29 @@ export class TransferAdapter {
   protected evmClient!: EvmClient;
   protected substrate: SubstrateService;
 
-  private extrinsicTransfer: ExtrinsicTransfer;
-  private contractTransfer!: ContractTransfer;
+  private substrateProvider: SubstrateTransferProvider;
+  private evmProvider!: EvmTransferProvider;
 
   constructor({ evmClient, substrate }: TransferParams) {
     this.substrate = substrate;
-    this.extrinsicTransfer = new ExtrinsicTransfer(substrate);
+    this.substrateProvider = new SubstrateTransferProvider(substrate);
 
     if (evmClient) {
       this.evmClient = evmClient;
-      this.contractTransfer = new ContractTransfer();
+      this.evmProvider = new EvmTransferProvider(evmClient);
     }
   }
 
-  calldata(config: BaseConfig): XCall {
+  async calldata(account: string, config: BaseConfig): Promise<XCall> {
     if (config.type === CallType.Evm) {
       const contract = EvmTransferFactory.get(
         this.evmClient,
         config as ContractConfig
       );
-      return this.contractTransfer.calldata(contract);
+      return this.evmProvider.calldata(account, contract);
     }
-    return this.extrinsicTransfer.calldata(config as ExtrinsicConfig);
+
+    return this.substrateProvider.calldata(account, config as ExtrinsicConfig);
   }
 
   async getFee(
@@ -58,15 +59,10 @@ export class TransferAdapter {
         this.evmClient,
         config as ContractConfig
       );
-      return this.contractTransfer.getFee(
-        account,
-        amount,
-        feeBalance,
-        contract
-      );
+      return this.evmProvider.getFee(account, amount, feeBalance, contract);
     }
 
-    return this.extrinsicTransfer.getFee(
+    return this.substrateProvider.getFee(
       account,
       amount,
       feeBalance,

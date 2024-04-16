@@ -122,7 +122,7 @@ export function buildTransfer(
   if (config.extrinsic) {
     return buildExtrinsic(
       amount,
-      '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc',
+      destAddress,
       destChain,
       destFee,
       transferConfig,

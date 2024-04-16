@@ -13,7 +13,7 @@ export interface TransferProvider<T> {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: T,
+    config: T
   ): Promise<AssetAmount>;
-  calldata(config: T): XCall;
+  calldata(account: string, config: T): Promise<XCall>;
 }

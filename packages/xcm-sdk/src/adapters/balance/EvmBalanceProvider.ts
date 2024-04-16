@@ -12,7 +12,7 @@ import { EvmBalance } from './evm';
 import { BalanceProvider } from '../types';
 import { EvmClient } from '../../evm';
 
-export class EthereumBalance implements BalanceProvider<EvmBalance> {
+export class EvmBalanceProvider implements BalanceProvider<EvmBalance> {
   readonly #client: EvmClient;
 
   constructor(client: EvmClient) {
