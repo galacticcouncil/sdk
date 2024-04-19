@@ -154,10 +154,10 @@ export class OmniMath {
   }
 
   static calculateCapDifference(
-    assetHubReserve: string,
     assetReserve: string,
-    totalHubReserve: string,
-    assetCap: string
+    assetHubReserve: string,
+    assetCap: string,
+    totalHubReserve: string
   ): string {
     const qi = BigNumber(assetHubReserve);
     const ri = BigNumber(assetReserve);
