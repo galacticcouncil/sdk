@@ -1,9 +1,9 @@
-import { Abi } from '@galacticcouncil/xcm-core';
+import { Abi, Precompile } from '@galacticcouncil/xcm-core';
 import { EvmTransfer } from './EvmTransfer';
 
-export class Bridge extends EvmTransfer {
+export class Batch extends EvmTransfer {
   get abi() {
-    return Abi.Bridge;
+    return Abi.Batch;
   }
 
   get address(): string {
@@ -11,12 +11,13 @@ export class Bridge extends EvmTransfer {
     if (address) {
       return address;
     }
-    throw new Error('Bridge contract address is missing');
+    return Precompile.Batch;
   }
 
   get asset(): string {
     const { args } = this.config;
-    const [asset] = args;
+    const [to] = args;
+    const [asset] = to;
     return asset;
   }
 

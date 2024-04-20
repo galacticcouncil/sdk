@@ -190,5 +190,6 @@ function buildContract(
     destination: destChain,
     fee: destFee.amount,
     feeAsset: feeAssetId,
+    source: chain,
   });
 }

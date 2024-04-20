@@ -27,17 +27,17 @@ export async function createEvmSigner(account: string, chain: Chain) {
 
 export async function signAndSendEvm(
   api: ApiPromise,
+  address: string,
+  client: EvmClient,
   call: XCall,
-  evmAddress: string,
-  evmClient: EvmClient,
   onTransactionSend: (hash: string | null) => void,
   onTransactionReceipt: (receipt: any) => void,
   onError: (error: unknown) => void
 ) {
-  const provider = evmClient.getProvider();
-  const signer = evmClient.getSigner(evmAddress);
+  const provider = client.getProvider();
+  const signer = client.getSigner(address);
 
-  await signer.switchChain({ id: evmClient.chain.id });
+  await signer.switchChain({ id: client.chain.id });
 
   let data: `0x${string}` | null = null;
   let txHash: `0x${string}` | null = null;
@@ -49,7 +49,7 @@ export async function signAndSendEvm(
   if (data) {
     const [gas, gasPrice] = await Promise.all([
       provider.estimateGas({
-        account: evmAddress as `0x${string}`,
+        account: address as `0x${string}`,
         data: data,
         to: DISPATCH_ADDRESS as `0x${string}`,
       }),
@@ -60,8 +60,8 @@ export async function signAndSendEvm(
     const gasPricePlus = gasPrice + onePrc * 10n;
 
     txHash = await signer.sendTransaction({
-      account: evmAddress as `0x${string}`,
-      chain: evmClient.chain,
+      account: address as `0x${string}`,
+      chain: client.chain,
       data: data,
       maxPriorityFeePerGas: gasPricePlus,
       maxFeePerGas: gasPricePlus,
@@ -70,8 +70,8 @@ export async function signAndSendEvm(
     });
   } else {
     txHash = await signer.sendTransaction({
-      account: evmAddress as `0x${string}`,
-      chain: evmClient.chain,
+      account: address as `0x${string}`,
+      chain: client.chain,
       data: call.data,
       to: call.to as `0x${string}`,
     });

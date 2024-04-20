@@ -20,7 +20,7 @@ export function createMRLPayload(
   parachainId: number,
   account: string,
   isEthereumStyle = false
-) {
+): VersionedUserAction {
   // Create a multilocation object based on the target parachain's account type
   const versionedMultiLocation = {
     v1: {
@@ -44,8 +44,5 @@ export function createMRLPayload(
 
   // Wrap and format the MultiLocation object into the precompile's input type
   const userAction = new XcmRoutingUserAction({ destination });
-  const versionedUserAction = new VersionedUserAction({ V1: userAction });
-
-  // SCALE encode resultant precompile formatted objects
-  return versionedUserAction.toHex();
+  return new VersionedUserAction({ V1: userAction });
 }

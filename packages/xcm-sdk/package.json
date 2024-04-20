@@ -35,23 +35,5 @@
     "@galacticcouncil/xcm-core": "^1.0.0",
     "@thi.ng/cache": "^2.1.35",
     "buffer": "^6.0.3"
-  },
-  "peerDependencies": {
-    "@polkadot/api": "^10.9.1",
-    "@polkadot/api-augment": "^10.9.1",
-    "@polkadot/api-derive": "^10.9.1",
-    "@polkadot/api-base": "^10.9.1",
-    "@polkadot/apps-config": "^0.132.1",
-    "@polkadot/rpc-augment": "^10.9.1",
-    "@polkadot/rpc-core": "^10.9.1",
-    "@polkadot/rpc-provider": "^10.9.1",
-    "@polkadot/types": "^10.9.1",
-    "@polkadot/types-augment": "^10.9.1",
-    "@polkadot/types-codec": "^10.9.1",
-    "@polkadot/types-create": "^10.9.1",
-    "@polkadot/types-known": "^10.9.1",
-    "@polkadot/keyring": "^12.3.2",
-    "@polkadot/util": "^12.3.2",
-    "@polkadot/util-crypto": "^12.3.2"
   }
 }

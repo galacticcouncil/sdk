@@ -5,9 +5,7 @@ import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 import { XCall } from '../../types';
 
-export class SubstrateTransferProvider
-  implements TransferProvider<ExtrinsicConfig>
-{
+export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
   readonly #substrate: SubstrateService;
 
   constructor(substrate: SubstrateService) {

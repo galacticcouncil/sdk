@@ -1,3 +1,5 @@
+import { ChainAssetId } from '@moonbeam-network/xcm-types';
+
 /**
  * Format recipient address on the destination chain in 32 bytes (left padded)
  *
@@ -6,4 +8,11 @@
  */
 export function formatDestAddress(address: string) {
   return '0x000000000000000000000000' + address.substring(2);
+}
+
+export function parseAssetId(assetId: ChainAssetId) {
+  if (typeof assetId === 'object') {
+    return Object.values(assetId)[0];
+  }
+  return assetId;
 }

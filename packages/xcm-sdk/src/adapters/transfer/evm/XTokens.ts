@@ -20,7 +20,7 @@ export class XTokens extends EvmTransfer {
     return asset;
   }
 
-  get amount(): string {
+  get amount(): bigint {
     const { args } = this.config;
     const [_asset, amount] = args;
     return amount;

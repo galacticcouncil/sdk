@@ -1,51 +1,27 @@
-import {
-  BaseConfig,
-  CallType,
-  ContractConfig,
-  ExtrinsicConfig,
-} from '@moonbeam-network/xcm-builder';
+import { BaseConfig } from '@moonbeam-network/xcm-builder';
 import { AssetAmount } from '@moonbeam-network/xcm-types';
 
-import { SubstrateTransferProvider } from './SubstrateTransferProvider';
-import { EvmTransferProvider } from './EvmTransferProvider';
-import { EvmTransferFactory } from './evm';
+import { SubstrateTransfer } from './SubstrateTransfer';
+import { ContractTransfer } from './ContractTransfer';
 
 import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 import { XCall } from '../../types';
+import { TransferProvider } from 'adapters/types';
 
 export type TransferParams = {
-  evmClient?: EvmClient;
   substrate: SubstrateService;
+  evmClient?: EvmClient;
 };
 
 export class TransferAdapter {
-  protected evmClient!: EvmClient;
-  protected substrate: SubstrateService;
+  private readonly providers: Record<string, TransferProvider<BaseConfig>> = {};
 
-  private substrateProvider: SubstrateTransferProvider;
-  private evmProvider!: EvmTransferProvider;
-
-  constructor({ evmClient, substrate }: TransferParams) {
-    this.substrate = substrate;
-    this.substrateProvider = new SubstrateTransferProvider(substrate);
-
+  constructor({ substrate, evmClient }: TransferParams) {
+    this.providers.Substrate = new SubstrateTransfer(substrate);
     if (evmClient) {
-      this.evmClient = evmClient;
-      this.evmProvider = new EvmTransferProvider(evmClient);
+      this.providers.Evm = new ContractTransfer(evmClient);
     }
-  }
-
-  async calldata(account: string, config: BaseConfig): Promise<XCall> {
-    if (config.type === CallType.Evm) {
-      const contract = EvmTransferFactory.get(
-        this.evmClient,
-        config as ContractConfig
-      );
-      return this.evmProvider.calldata(account, contract);
-    }
-
-    return this.substrateProvider.calldata(account, config as ExtrinsicConfig);
   }
 
   async getFee(
@@ -54,19 +30,15 @@ export class TransferAdapter {
     feeBalance: AssetAmount,
     config: BaseConfig
   ): Promise<AssetAmount> {
-    if (config.type === CallType.Evm) {
-      const contract = EvmTransferFactory.get(
-        this.evmClient,
-        config as ContractConfig
-      );
-      return this.evmProvider.getFee(account, amount, feeBalance, contract);
-    }
-
-    return this.substrateProvider.getFee(
+    return this.providers[config.type].getFee(
       account,
       amount,
       feeBalance,
-      config as ExtrinsicConfig
+      config
     );
+  }
+
+  async calldata(account: string, config: BaseConfig): Promise<XCall> {
+    return this.providers[config.type].calldata(account, config);
   }
 }

@@ -4,7 +4,6 @@ import {
   SubstrateQueryConfig,
 } from '@moonbeam-network/xcm-builder';
 import { OrmlTokensAccountData } from '@polkadot/types/lookup';
-import { isString } from '@polkadot/util';
 
 export function BalanceBuilderV2() {
   return {
@@ -27,14 +26,10 @@ export function evm() {
 
 function native(): BalanceConfigBuilder {
   return {
-    build: ({ address, asset }) => {
-      if (!asset || !isString(asset)) {
-        throw new Error(`Invalid contract address: ${asset}`);
-      }
-
+    build: ({ address }) => {
       return new ContractConfig({
-        address: asset,
-        args: [address],
+        address: address,
+        args: [],
         func: 'eth_getBalance',
         module: 'Native',
       });

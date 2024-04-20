@@ -1,4 +1,4 @@
-export const ITOKEN_BRIDGE = [
+export const TOKEN_BRIDGE = [
   {
     anonymous: false,
     inputs: [

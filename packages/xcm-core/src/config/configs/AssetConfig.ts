@@ -7,7 +7,10 @@ import {
 } from '@moonbeam-network/xcm-builder';
 import { AnyChain, Asset } from '@moonbeam-network/xcm-types';
 
-import { ExtrinsicConfigBuilderV2 } from '../overrides';
+import {
+  ExtrinsicConfigBuilderV2,
+  ContractConfigBuilderV2,
+} from '../overrides';
 
 export interface AssetConfigParams {
   asset: Asset;
@@ -26,7 +29,7 @@ export class AssetConfig {
 
   readonly balance: BalanceConfigBuilder;
 
-  readonly contract?: ContractConfigBuilder;
+  readonly contract?: ContractConfigBuilderV2;
 
   readonly destination: AnyChain;
 

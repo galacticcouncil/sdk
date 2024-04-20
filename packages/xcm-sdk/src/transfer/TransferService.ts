@@ -1,8 +1,4 @@
-import {
-  AssetConfig,
-  ChainTransferConfig,
-  TransactInfo,
-} from '@galacticcouncil/xcm-core';
+import { ChainTransferConfig, TransactInfo } from '@galacticcouncil/xcm-core';
 import { FeeConfigBuilder } from '@moonbeam-network/xcm-builder';
 import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
@@ -20,20 +16,20 @@ import {
 } from './TransferUtils';
 
 export class TransferService {
-  readonly balance: BalanceAdapter;
-  readonly transfer: TransferAdapter;
+  private readonly balance: BalanceAdapter;
+  private readonly transfer: TransferAdapter;
 
-  protected evmClient: EvmClient;
-  protected evmReconciler: EvmReconciler;
-  protected substrate: SubstrateService;
+  readonly evmClient: EvmClient;
+  readonly evmReconciler: EvmReconciler;
+  readonly substrate: SubstrateService;
 
   constructor(
     evmClient: EvmClient,
     evmReconciler: EvmReconciler,
     substrate: SubstrateService
   ) {
-    this.balance = new BalanceAdapter({ evmClient, substrate });
-    this.transfer = new TransferAdapter({ evmClient, substrate });
+    this.balance = new BalanceAdapter({ substrate, evmClient });
+    this.transfer = new TransferAdapter({ substrate, evmClient });
     this.evmClient = evmClient;
     this.evmReconciler = evmReconciler;
     this.substrate = substrate;
@@ -46,12 +42,11 @@ export class TransferService {
     const { chain, config } = transferConfig;
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
-    const isErc20 = isH160Address(assetId.toString());
-    const evmAddr = isErc20
+    const account = isH160Address(assetId.toString())
       ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
       : address;
     const balanceConfig = config.balance.build({
-      address: evmAddr,
+      address: account,
       asset: assetId,
     });
     return this.balance.read(asset, balanceConfig);
@@ -83,6 +78,44 @@ export class TransferService {
     });
   }
 
+  async getNetworkFee(
+    address: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    destAddress: string,
+    destChain: AnyChain,
+    destFee: AssetAmount,
+    transferConfig: ChainTransferConfig
+  ): Promise<AssetAmount> {
+    const { config } = transferConfig;
+
+    const transactInfo = config.transact
+      ? await this.getTransactInfo(
+          address,
+          amount,
+          destAddress,
+          destChain,
+          destFee,
+          transferConfig
+        )
+      : undefined;
+
+    const transfer = buildTransfer(
+      amount,
+      destAddress,
+      destChain,
+      destFee,
+      transferConfig,
+      transactInfo
+    );
+
+    const sender = config.contract
+      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+      : address;
+
+    return this.transfer.getFee(sender, amount, feeBalance, transfer);
+  }
+
   async getFee(
     address: string,
     amount: bigint,
@@ -90,38 +123,46 @@ export class TransferService {
     destAddress: string,
     destChain: AnyChain,
     destFee: AssetAmount,
-    transferConfig: ChainTransferConfig,
-    transactInfo?: TransactInfo
+    transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { config } = transferConfig;
-    const cfg = buildTransfer(
-      amount,
+    const fee = await this.getNetworkFee(
+      address,
+      amount, // should be transfer fee
+      feeBalance,
       destAddress,
       destChain,
       destFee,
-      transferConfig,
-      transactInfo
+      transferConfig
     );
-    const fee = await this.transfer.getFee(address, amount, feeBalance, cfg);
-    const feeConfig = config.fee;
-    if (feeConfig) {
-      const { amount, decimals } = fee;
-      const xcmDeliveryFee = getXcmDeliveryFee(decimals, feeConfig);
-      const totalFee = amount + xcmDeliveryFee;
-      return fee.copyWith({ amount: totalFee });
-    }
-    return fee;
+
+    const xcmDeliveryFee = getXcmDeliveryFee(fee.decimals, config.fee);
+    const totalFee = fee.amount + xcmDeliveryFee;
+    return fee.copyWith({ amount: totalFee });
   }
 
   async getCall(
+    address: string,
     amount: bigint,
     destAddress: string,
     destChain: AnyChain,
     destFee: AssetAmount,
-    transferConfig: ChainTransferConfig,
-    transactInfo?: TransactInfo
+    transferConfig: ChainTransferConfig
   ): Promise<XCall> {
-    const config = buildTransfer(
+    const { config } = transferConfig;
+
+    const transactInfo = config.transact
+      ? await this.getTransactInfo(
+          address,
+          amount,
+          destAddress,
+          destChain,
+          destFee,
+          transferConfig
+        )
+      : undefined;
+
+    const transfer = buildTransfer(
       amount,
       destAddress,
       destChain,
@@ -129,7 +170,7 @@ export class TransferService {
       transferConfig,
       transactInfo
     );
-    return this.transfer.calldata(config);
+    return this.transfer.calldata(address, transfer);
   }
 
   async getFeeBalance(
@@ -137,33 +178,36 @@ export class TransferService {
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
-    if (config.fee) {
-      const feeAsset = config.fee.asset;
-      const feeAssetId = chain.getBalanceAssetId(feeAsset);
-      const isErc20 = isH160Address(feeAssetId.toString());
-      const evmAddr = isErc20
-        ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
-        : address;
-      const feeBalanceConfig = config.fee.balance.build({
-        address: evmAddr,
-        asset: feeAssetId,
-      });
-      return this.balance.read(feeAsset, feeBalanceConfig);
+
+    if (!config.fee) {
+      return this.getBalance(address, transferConfig);
     }
-    return this.getBalance(address, transferConfig);
+
+    const feeAsset = config.fee.asset;
+    const feeAssetId = chain.getBalanceAssetId(feeAsset);
+    const account = isH160Address(feeAssetId.toString())
+      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+      : address;
+    const feeBalanceConfig = config.fee.balance.build({
+      address: account,
+      asset: feeAssetId,
+    });
+    return this.balance.read(feeAsset, feeBalanceConfig);
   }
 
   async getMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
     const asset = config.asset;
-    if (config.min) {
-      const minAssetId = chain.getMinAssetId(asset);
-      const minBalanceConfig = config.min.build({
-        asset: minAssetId,
-      });
-      return this.balance.read(asset, minBalanceConfig);
+
+    if (!config.min) {
+      return this.getAssetMin(transferConfig);
     }
-    return this.getAssetMin(transferConfig);
+
+    const minAssetId = chain.getMinAssetId(asset);
+    const minBalanceConfig = config.min.build({
+      asset: minAssetId,
+    });
+    return this.balance.read(asset, minBalanceConfig);
   }
 
   async getAssetMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
@@ -183,11 +227,6 @@ export class TransferService {
     });
   }
 
-  isMrl(transferConfig: ChainTransferConfig): boolean {
-    const config = transferConfig.config as AssetConfig;
-    return !!config.transact;
-  }
-
   async getTransactInfo(
     address: string,
     amount: bigint,
@@ -195,7 +234,7 @@ export class TransferService {
     destChain: AnyChain,
     destFee: AssetAmount,
     transferConfig: ChainTransferConfig
-  ): Promise<TransactInfo> {
+  ): Promise<TransactInfo | undefined> {
     const config = buildTransact(
       amount,
       destAddress,

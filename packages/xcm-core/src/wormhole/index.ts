@@ -1,9 +1,4 @@
-export type WormholeId =
-  | 'Ethereum'
-  | 'Polygon'
-  | 'Fantom'
-  | 'Acala'
-  | 'Moonbeam';
+export type WormholeId = 'acala' | 'ethereum' | 'moonbeam';
 
 export type WormholeChain = {
   id: number;
@@ -13,16 +8,6 @@ export type WormholeChain = {
 const ETHEREUM = {
   id: 2,
   tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
-};
-
-const POLYGON = {
-  id: 5,
-  tokenBridge: '0x5a58505a96D1dbf8dF91cB21B54419FC36e93fdE' as `0x${string}`,
-};
-
-const FANTOM = {
-  id: 10,
-  tokenBridge: '0x7C9Fc5741288cDFdD83CeB07f3ea7e22618D79D2' as `0x${string}`,
 };
 
 const ACALA = {
@@ -36,9 +21,7 @@ const MOONBEAM = {
 };
 
 export const Wormhole: Record<WormholeId, WormholeChain> = {
-  Ethereum: ETHEREUM,
-  Polygon: POLYGON,
-  Fantom: FANTOM,
-  Acala: ACALA,
-  Moonbeam: MOONBEAM,
+  acala: ACALA,
+  ethereum: ETHEREUM,
+  moonbeam: MOONBEAM,
 };

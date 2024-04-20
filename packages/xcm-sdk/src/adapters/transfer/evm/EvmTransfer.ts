@@ -22,7 +22,7 @@ export abstract class EvmTransfer {
   abstract get abi(): any;
   abstract get address(): string;
   abstract get asset(): string;
-  abstract get amount(): string;
+  abstract get amount(): bigint;
 
   get data(): string {
     const { func, args } = this.config;

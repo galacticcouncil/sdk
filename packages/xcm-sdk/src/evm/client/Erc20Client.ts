@@ -1,4 +1,5 @@
 import { Abi } from '@galacticcouncil/xcm-core';
+import { encodeFunctionData } from 'viem';
 
 import { EvmClient } from '../EvmClient';
 
@@ -61,14 +62,11 @@ export class Erc20Client {
     return output as bigint;
   }
 
-  async approve(spender: string, amount: bigint): Promise<bigint> {
-    const provider = this.client.getProvider();
-    const output = await provider.readContract({
-      address: this.address as `0x${string}`,
+  approve(spender: string, amount: bigint): string {
+    return encodeFunctionData({
       abi: this.abi,
       functionName: 'approve',
       args: [spender as `0x${string}`, amount],
     });
-    return output as bigint;
   }
 }

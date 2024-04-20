@@ -1,66 +1,35 @@
-import {
-  BaseConfig,
-  CallType,
-  ContractConfig,
-  SubstrateQueryConfig,
-} from '@moonbeam-network/xcm-builder';
+import { BaseConfig } from '@moonbeam-network/xcm-builder';
 import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 
 import { Observable } from 'rxjs';
 
-import { EvmBalanceProvider } from './EvmBalanceProvider';
-import { SubstrateBalanceProvider } from './SubstrateBalanceProvider';
-import { EvmBalanceFactory } from './evm';
+import { ContractBalance } from './ContractBalance';
+import { SubstrateBalance } from './SubstrateBalance';
 
+import { BalanceProvider } from '../types';
 import { EvmClient } from '../../evm';
 import { SubstrateService } from '../../substrate';
 
 export type BalanceParams = {
-  evmClient?: EvmClient;
   substrate: SubstrateService;
+  evmClient?: EvmClient;
 };
 
 export class BalanceAdapter {
-  protected evmClient!: EvmClient;
-  protected substrate: SubstrateService;
+  private readonly providers: Record<string, BalanceProvider<BaseConfig>> = {};
 
-  private substrateProvider: SubstrateBalanceProvider;
-  private evmProvider!: EvmBalanceProvider;
-
-  constructor({ evmClient, substrate }: BalanceParams) {
-    this.substrate = substrate;
-    this.substrateProvider = new SubstrateBalanceProvider(substrate);
-
+  constructor({ substrate, evmClient }: BalanceParams) {
+    this.providers.Substrate = new SubstrateBalance(substrate);
     if (evmClient) {
-      this.evmClient = evmClient;
-      this.evmProvider = new EvmBalanceProvider(evmClient);
+      this.providers.Evm = new ContractBalance(evmClient);
     }
   }
 
   async read(asset: Asset, config: BaseConfig): Promise<AssetAmount> {
-    if (config.type === CallType.Evm) {
-      const contract = EvmBalanceFactory.get(
-        this.evmClient,
-        config as ContractConfig
-      );
-      return this.evmProvider.read(asset, contract);
-    }
-
-    return this.substrateProvider.read(asset, config as SubstrateQueryConfig);
+    return this.providers[config.type].read(asset, config);
   }
 
   subscribe(asset: Asset, config: BaseConfig): Observable<AssetAmount> {
-    if (config.type === CallType.Evm) {
-      const contract = EvmBalanceFactory.get(
-        this.evmClient,
-        config as ContractConfig
-      );
-      return this.evmProvider.subscribe(asset, contract);
-    }
-
-    return this.substrateProvider.subscribe(
-      asset,
-      config as SubstrateQueryConfig
-    );
+    return this.providers[config.type].subscribe(asset, config);
   }
 }

@@ -1,3 +1,4 @@
+import { ContractConfig } from '@moonbeam-network/xcm-builder';
 import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
 
 import {
@@ -8,18 +9,19 @@ import {
   distinctUntilChanged,
 } from 'rxjs';
 
-import { EvmBalance } from './evm';
+import { EvmBalanceFactory } from './evm';
 import { BalanceProvider } from '../types';
 import { EvmClient } from '../../evm';
 
-export class EvmBalanceProvider implements BalanceProvider<EvmBalance> {
+export class ContractBalance implements BalanceProvider<ContractConfig> {
   readonly #client: EvmClient;
 
   constructor(client: EvmClient) {
     this.#client = client;
   }
 
-  async read(asset: Asset, contract: EvmBalance): Promise<AssetAmount> {
+  async read(asset: Asset, config: ContractConfig): Promise<AssetAmount> {
+    const contract = EvmBalanceFactory.get(this.#client, config);
     const [balance, decimals] = await Promise.all([
       contract.getBalance(),
       contract.getDecimals(),
@@ -30,14 +32,14 @@ export class EvmBalanceProvider implements BalanceProvider<EvmBalance> {
     });
   }
 
-  subscribe(asset: Asset, contract: EvmBalance): Observable<AssetAmount> {
+  subscribe(asset: Asset, config: ContractConfig): Observable<AssetAmount> {
     const subject = new Subject<AssetAmount>();
     const observable = subject.pipe(shareReplay(1));
     const provider = this.#client.getProvider();
 
     const run = async () => {
       const updateBalance = async () => {
-        const balance = await this.read(asset, contract);
+        const balance = await this.read(asset, config);
         subject.next(balance);
       };
       await updateBalance();

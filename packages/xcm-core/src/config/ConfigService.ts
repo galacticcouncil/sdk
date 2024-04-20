@@ -8,11 +8,11 @@ export interface ConfigServiceOptions {
 }
 
 export class ConfigService {
-  protected assets: Map<string, Asset>;
+  readonly assets: Map<string, Asset>;
 
-  protected chains: Map<string, AnyChain>;
+  readonly chains: Map<string, AnyChain>;
 
-  protected chainsConfig: Map<string, ChainConfig>;
+  readonly chainsConfig: Map<string, ChainConfig>;
 
   constructor({ assets, chains, chainsConfig }: ConfigServiceOptions) {
     this.assets = assets;
@@ -94,7 +94,7 @@ export class ConfigService {
     if (!chainConfig) {
       throw new Error(`Config for chain ${source.key} not found`);
     }
-    return chainConfig.getAssetDestinationConfig(asset, destination);
+    return chainConfig.getAssetDestinationConfig(asset, source, destination);
   }
 
   updateAsset(asset: Asset): void {
