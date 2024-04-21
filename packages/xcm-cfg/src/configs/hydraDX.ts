@@ -1,9 +1,5 @@
-import { AssetConfig, ChainConfig, Wormhole } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  FeeBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { BalanceBuilder, FeeBuilder } from '@moonbeam-network/xcm-builder';
 
 import {
   astr,
@@ -54,7 +50,7 @@ import {
   unique,
   zeitgeist,
 } from '../chains';
-import { ExtrinsicBuilderV2 } from '../builders';
+import { ContractBuilderV2, ExtrinsicBuilderV2 } from '../builders';
 
 const toAcala: AssetConfig[] = [
   new AssetConfig({
@@ -66,7 +62,7 @@ const toAcala: AssetConfig[] = [
       asset: dai_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -81,7 +77,7 @@ const toAcala: AssetConfig[] = [
       asset: wbtc_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -96,34 +92,7 @@ const toAcala: AssetConfig[] = [
       asset: weth_awh,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-];
-
-const toAcalaViaMrl: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: acalaMrl,
-    destinationFee: {
-      amount: 0.1,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    /*     ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
-      Wormhole.Acala.id,
-      '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
-    ), */
-    extrinsic: ExtrinsicBuilderV2()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
-      ]),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -219,7 +188,7 @@ const toAstar: AssetConfig[] = [
       asset: astr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -268,7 +237,7 @@ const toBifrost: AssetConfig[] = [
       asset: bnc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -283,7 +252,7 @@ const toBifrost: AssetConfig[] = [
       asset: vdot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -298,7 +267,7 @@ const toBifrost: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -332,7 +301,7 @@ const toCentrifuge: AssetConfig[] = [
       asset: cfg,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -350,7 +319,7 @@ const toInterlay: AssetConfig[] = [
       asset: ibtc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -365,7 +334,7 @@ const toInterlay: AssetConfig[] = [
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -429,9 +398,8 @@ const toMoonbeam: AssetConfig[] = [
       asset: hdx,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
   }),
-
   new AssetConfig({
     asset: glmr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -441,7 +409,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -456,7 +424,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -471,7 +439,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -486,7 +454,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -501,7 +469,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -531,7 +499,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -570,33 +538,6 @@ const toMoonbeam: AssetConfig[] = [
   // }),
 ];
 
-const toEthereumViaMrl: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: ethereumMrl,
-    destinationFee: {
-      amount: 0.1,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    /*     ethereum: ExtrinsicBuilderV2().ethereumXcm().transact().batch(
-      Wormhole.Ethereum.id,
-      '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' // relayer
-    ), */
-    extrinsic: ExtrinsicBuilderV2()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
-      ]),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-];
-
 const toPolkadot: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
@@ -625,7 +566,7 @@ const toSubsocial: AssetConfig[] = [
       asset: sub,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -643,7 +584,7 @@ const toZeitgeist: AssetConfig[] = [
       asset: ztg,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -658,7 +599,7 @@ const toZeitgeist: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -673,7 +614,7 @@ const toZeitgeist: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
     fee: {
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -691,7 +632,7 @@ const toPhala: AssetConfig[] = [
       asset: pha,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -709,7 +650,7 @@ const toNodle: AssetConfig[] = [
       asset: nodl,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -727,7 +668,7 @@ const toUnique: AssetConfig[] = [
       asset: unq,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -745,7 +686,7 @@ const toCrust: AssetConfig[] = [
       asset: cru,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -753,10 +694,44 @@ const toCrust: AssetConfig[] = [
   }),
 ];
 
+const toAcalaViaWormhole: AssetConfig[] = [
+  new AssetConfig({
+    asset: dai_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acala,
+    destinationFee: {
+      amount: 0.1,
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilderV2()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
+        ExtrinsicBuilderV2().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    routedVia: moonbeam,
+    transact: ExtrinsicBuilderV2()
+      .ethereumXcm()
+      .transact(
+        ContractBuilderV2()
+          .Batch()
+          .batchAll([
+            ContractBuilderV2().Erc20().approve(),
+            ContractBuilderV2().TokenBridge().transferTokens(),
+          ])
+      ),
+  }),
+];
+
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
-    ...toAcalaViaMrl,
+    ...toAcalaViaWormhole,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,
@@ -764,7 +739,6 @@ export const hydraDxConfig = new ChainConfig({
     ...toCrust,
     ...toInterlay,
     ...toMoonbeam,
-    ...toEthereumViaMrl,
     ...toNodle,
     ...toPolkadot,
     ...toSubsocial,

@@ -1,6 +1,6 @@
+import { ExtrinsicConfigBuilderV2 } from '@galacticcouncil/xcm-core';
 import {
   XcmVersion,
-  ExtrinsicConfigBuilder,
   ExtrinsicConfig,
   Parents,
 } from '@moonbeam-network/xcm-builder';
@@ -12,7 +12,7 @@ const pallet = 'xcmPallet';
 const limitedReserveTransferAssets = (parent: Parents) => {
   const func = 'limitedReserveTransferAssets';
   return {
-    here: (): ExtrinsicConfigBuilder => ({
+    here: (): ExtrinsicConfigBuilderV2 => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -36,7 +36,7 @@ const limitedReserveTransferAssets = (parent: Parents) => {
 const limitedTeleportAssets = (parent: Parents) => {
   const func = 'limitedTeleportAssets';
   return {
-    here: (): ExtrinsicConfigBuilder => ({
+    here: (): ExtrinsicConfigBuilderV2 => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,

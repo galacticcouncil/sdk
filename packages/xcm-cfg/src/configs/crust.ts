@@ -1,11 +1,9 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { cru } from '../assets';
 import { hydraDX, crust } from '../chains';
+import { ExtrinsicBuilderV2 } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -17,7 +15,7 @@ const toHydraDX: AssetConfig[] = [
       asset: cru,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
   }),
 ];
 

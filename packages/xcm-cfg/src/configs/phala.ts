@@ -1,11 +1,9 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { pha } from '../assets';
 import { hydraDX, phala } from '../chains';
+import { ExtrinsicBuilderV2 } from 'builders';
 
 export const phalaConfig = new ChainConfig({
   assets: [
@@ -18,7 +16,7 @@ export const phalaConfig = new ChainConfig({
         asset: pha,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().xTransfer().transfer().here(),
+      extrinsic: ExtrinsicBuilderV2().xTransfer().transfer().here(),
     }),
   ],
   chain: phala,

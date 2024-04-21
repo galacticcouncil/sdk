@@ -2,7 +2,6 @@ import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 import {
   AssetMinBuilder,
   BalanceBuilder,
-  ExtrinsicBuilder,
   FeeBuilder,
 } from '@moonbeam-network/xcm-builder';
 
@@ -22,7 +21,7 @@ const toHydraDX: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -42,7 +41,7 @@ const toHydraDX: AssetConfig[] = [
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -168,7 +167,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -188,7 +187,7 @@ const toMoonbeam: AssetConfig[] = [
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -231,7 +230,7 @@ const toBifrost: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -251,7 +250,7 @@ const toBifrost: AssetConfig[] = [
       asset: usdc,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),

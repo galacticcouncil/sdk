@@ -1,4 +1,4 @@
-export const IERC20 = [
+export const ERC20 = [
   {
     anonymous: false,
     inputs: [

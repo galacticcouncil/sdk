@@ -27,7 +27,7 @@ export class Erc20Client {
   }
 
   get abi() {
-    return Abi.IERC20;
+    return Abi.Erc20;
   }
 
   async balanceOf(account: string): Promise<bigint> {

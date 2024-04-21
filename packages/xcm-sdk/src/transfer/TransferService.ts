@@ -240,8 +240,7 @@ export class TransferService {
       destAddress,
       destChain,
       destFee,
-      transferConfig,
-      this.substrate.chain
+      transferConfig
     );
 
     const extrinsic = this.substrate.getExtrinsic(config);

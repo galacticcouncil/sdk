@@ -1,11 +1,9 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { teer } from '../../assets';
 import { basilisk, integritee } from '../../chains';
+import { ExtrinsicBuilderV2 } from '../../builders';
 
 export const integriteeConfig = new ChainConfig({
   assets: [
@@ -18,7 +16,7 @@ export const integriteeConfig = new ChainConfig({
         asset: teer,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+      extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     }),
   ],
   chain: integritee,

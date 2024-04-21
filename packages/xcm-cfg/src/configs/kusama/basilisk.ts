@@ -44,7 +44,7 @@ const toKarura: AssetConfig[] = [
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),

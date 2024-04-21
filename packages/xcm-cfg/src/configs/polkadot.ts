@@ -1,8 +1,5 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { dot } from '../assets';
 import { assetHub, bifrost, hydraDX, polkadot } from '../chains';
@@ -20,7 +17,7 @@ const toHydraDX: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
@@ -42,7 +39,7 @@ const toBifrost: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),

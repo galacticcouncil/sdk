@@ -1,8 +1,5 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
+import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { ksm } from '../../assets';
 import { kusama, kusamaAssetHub, basilisk, karura } from '../../chains';
@@ -20,7 +17,7 @@ const toBasilisk: AssetConfig[] = [
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
@@ -42,7 +39,7 @@ const toKarura: AssetConfig[] = [
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),

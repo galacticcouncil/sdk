@@ -20,7 +20,7 @@ const toBasilisk: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
@@ -42,7 +42,7 @@ const toKarura: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV2()
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),

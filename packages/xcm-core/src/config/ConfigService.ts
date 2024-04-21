@@ -94,7 +94,7 @@ export class ConfigService {
     if (!chainConfig) {
       throw new Error(`Config for chain ${source.key} not found`);
     }
-    return chainConfig.getAssetDestinationConfig(asset, source, destination);
+    return chainConfig.getAssetDestinationConfig(asset, destination);
   }
 
   updateAsset(asset: Asset): void {

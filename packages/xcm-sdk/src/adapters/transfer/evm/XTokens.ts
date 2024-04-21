@@ -1,7 +1,7 @@
 import { Abi, Precompile } from '@galacticcouncil/xcm-core';
 import { EvmTransfer } from './EvmTransfer';
 
-export class XTokens extends EvmTransfer {
+export class Xtokens extends EvmTransfer {
   get abi() {
     return Abi.XTokens;
   }

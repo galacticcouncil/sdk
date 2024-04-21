@@ -1,10 +1,9 @@
 import {
-  ExtrinsicConfigBuilderParamsV2,
+  ExtrinsicConfigBuilderV2,
   calculateMDA,
 } from '@galacticcouncil/xcm-core';
 import {
   XcmVersion,
-  ExtrinsicConfigBuilder,
   ExtrinsicConfig,
   Parents,
 } from '@moonbeam-network/xcm-builder';
@@ -16,15 +15,36 @@ import {
   toDest,
   toTransactMessage,
 } from './polkadotXcm.utils';
-import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
+import {
+  getExtrinsicAccount,
+  getExtrinsicArgumentVersion,
+} from '../ExtrinsicBuilder.utils';
 
 const pallet = 'polkadotXcm';
 
 const limitedReserveTransferAssets = () => {
   const func = 'limitedReserveTransferAssets';
   return {
-    X1: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, asset, destination, palletInstance }) =>
+    here: (): ExtrinsicConfigBuilderV2 => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: (ext) => {
+            const version = getExtrinsicArgumentVersion(ext);
+            const account = getExtrinsicAccount(address);
+            return [
+              toDest(version, destination),
+              toBeneficiary(version, account),
+              toAssets(version, 0, 'Here', amount),
+              0,
+              'Unlimited',
+            ];
+          },
+        }),
+    }),
+    X1: (): ExtrinsicConfigBuilderV2 => ({
+      build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
           func,
@@ -41,23 +61,17 @@ const limitedReserveTransferAssets = () => {
           },
         }),
     }),
-    X2: (): ExtrinsicConfigBuilder => ({
-      build: ({
-        address,
-        amount,
-        asset,
-        destination,
-        palletInstance,
-        fee,
-        feeAsset,
-      }) =>
+    X2: (): ExtrinsicConfigBuilderV2 => ({
+      build: ({ address, amount, asset, destination, fee, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
+            const assetId = source.getAssetId(asset);
+            const palletInstance = source.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            const isAssetDifferent = !!feeAsset && asset !== feeAsset;
+            const isAssetDifferent = !!fee && asset.key !== fee.key;
             const assets = [
               toAsset(
                 0,
@@ -67,7 +81,7 @@ const limitedReserveTransferAssets = () => {
                       PalletInstance: palletInstance,
                     },
                     {
-                      GeneralIndex: asset,
+                      GeneralIndex: assetId,
                     },
                   ],
                 },
@@ -76,6 +90,7 @@ const limitedReserveTransferAssets = () => {
             ];
 
             if (isAssetDifferent) {
+              const feeAssetId = source.getAssetId(fee);
               assets.push(
                 toAsset(
                   0,
@@ -85,11 +100,11 @@ const limitedReserveTransferAssets = () => {
                         PalletInstance: palletInstance,
                       },
                       {
-                        GeneralIndex: feeAsset,
+                        GeneralIndex: feeAssetId,
                       },
                     ],
                   },
-                  fee
+                  fee.amount
                 )
               );
             }
@@ -112,7 +127,7 @@ const limitedReserveTransferAssets = () => {
 const limitedTeleportAssets = (parent: Parents) => {
   const func = 'limitedTeleportAssets';
   return {
-    here: (): ExtrinsicConfigBuilder => ({
+    here: (): ExtrinsicConfigBuilderV2 => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -136,7 +151,7 @@ const limitedTeleportAssets = (parent: Parents) => {
 const reserveTransferAssets = () => {
   const func = 'reserveTransferAssets';
   return {
-    here: (): ExtrinsicConfigBuilder => ({
+    here: (): ExtrinsicConfigBuilderV2 => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -159,15 +174,9 @@ const reserveTransferAssets = () => {
 const send = () => {
   const func = 'send';
   return {
-    transact: (executionCost: number): ExtrinsicConfigBuilder => ({
+    transact: (executionCost: number): ExtrinsicConfigBuilderV2 => ({
       build: (params) => {
-        const {
-          address,
-          destination,
-          feeDecimals,
-          feePalletInstance,
-          transact,
-        } = params as ExtrinsicConfigBuilderParamsV2;
+        const { address, destination, fee, source, transact } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
@@ -175,17 +184,19 @@ const send = () => {
             if (!transact) {
               throw new Error('Ethereum transact must be provided');
             }
+
+            const feePalletInstance = source.getAssetPalletInstance(fee);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(
               '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc'
             );
-            console.log(account);
+            /*             console.log(account);
             calculateMDA(address, '2034', 1).then((a) => console.log(a));
             calculateMDA(
               '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym',
               '2034',
               1
-            ).then((a) => console.log(a));
+            ).then((a) => console.log(a)); */
 
             return [
               toDest(version, destination),
@@ -195,7 +206,7 @@ const send = () => {
                 { X1: { PalletInstance: feePalletInstance } },
                 transact.call,
                 transact.weight,
-                toBigInt(executionCost, feeDecimals!)
+                toBigInt(executionCost, fee.decimals)
               ),
             ];
           },

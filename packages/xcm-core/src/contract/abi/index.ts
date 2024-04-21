@@ -1,17 +1,15 @@
 import { BATCH } from './Batch';
-import { BRIDGE } from './Bridge';
 import { GMP } from './Gmp';
-import { IERC20 } from './IErc20';
+import { ERC20 } from './Erc20';
 import { TOKEN_BRIDGE } from './TokenBridge';
 import { TOKEN_RELAYER } from './TokenRelayer';
-import { XTOKENS } from './XTokens';
+import { XTOKENS } from './Xtokens';
 
-export const Abi = {
+export const Abi: Record<string, unknown[]> = {
   Batch: BATCH,
-  Bridge: BRIDGE,
-  GMP: GMP,
-  IERC20: IERC20,
+  Gmp: GMP,
+  Erc20: ERC20,
   TokenBridge: TOKEN_BRIDGE,
   TokenRelayer: TOKEN_RELAYER,
-  XTokens: XTOKENS,
+  Xtokens: XTOKENS,
 };

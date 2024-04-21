@@ -1,117 +1,46 @@
 import {
-  ExtrinsicConfigBuilderParamsV2,
   Abi,
-  Precompile,
+  ContractConfigBuilderV2,
+  ExtrinsicConfigBuilderV2,
 } from '@galacticcouncil/xcm-core';
-import {
-  XcmVersion,
-  ExtrinsicConfigBuilder,
-  ExtrinsicConfig,
-} from '@moonbeam-network/xcm-builder';
+import { XcmVersion, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { encodeFunctionData } from 'viem';
-
-import { formatDestAddress } from '../utils';
 
 const pallet = 'ethereumXcm';
 
-const transact = () => {
+const transact = (
+  config: ContractConfigBuilderV2
+): ExtrinsicConfigBuilderV2 => {
   const func = 'transact';
   return {
-    batch: (
-      destChain: number,
-      relayerAddress: string
-    ): ExtrinsicConfigBuilder => ({
-      build: (params) => {
-        console.log(params);
-        const asset = '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD';
-        const { amount, address } = params as ExtrinsicConfigBuilderParamsV2;
-        return new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getArgs: () => {
-            const version = XcmVersion.v1;
-            const approveTx = encodeFunctionData({
-              abi: Abi.IERC20,
-              functionName: 'approve',
-              args: [relayerAddress, amount],
-            });
-            const transferTx = encodeFunctionData({
-              abi: Abi.TokenRelayer,
-              functionName: 'transferTokensWithRelay',
-              args: [
-                asset,
-                amount,
-                0,
-                destChain,
-                formatDestAddress(address),
-                0,
-              ],
-            });
-            const batchTx = encodeFunctionData({
-              abi: Abi.Batch,
-              functionName: 'batchAll',
-              args: [
-                [asset, relayerAddress],
-                [0, 0],
-                [approveTx, transferTx],
-                [],
-              ],
-            });
-            console.log({
-              abi: Abi.IERC20,
-              functionName: 'approve',
-              args: [relayerAddress, amount],
-            });
-            console.log({
-              abi: Abi.TokenRelayer,
-              functionName: 'transferTokensWithRelay',
-              args: [
-                asset,
-                amount,
-                0,
-                destChain,
-                formatDestAddress(address),
-                0,
-              ],
-            });
-            console.log({
-              abi: Abi.Batch,
-              functionName: 'batchAll',
-              args: [
-                [asset, relayerAddress],
-                [0, 0],
-                [approveTx, transferTx],
-                [],
-              ],
-            });
-            console.log({
+    build: (params) => {
+      const contract = config.build(params);
+      return new ExtrinsicConfig({
+        module: pallet,
+        func,
+        getArgs: () => {
+          const version = XcmVersion.v1;
+          const call = encodeFunctionData({
+            abi: Abi[contract.module],
+            functionName: contract.func,
+            args: contract.args,
+          });
+          return [
+            {
               [version]: {
                 gasLimit: 350000n,
                 feePayment: 'Auto',
                 action: {
-                  Call: Precompile.Batch,
+                  Call: contract.address,
                 },
                 value: 0n,
-                input: batchTx,
+                input: call,
               },
-            });
-            return [
-              {
-                [version]: {
-                  gasLimit: 350000n,
-                  feePayment: 'Auto',
-                  action: {
-                    Call: Precompile.Batch,
-                  },
-                  value: 0n,
-                  input: batchTx,
-                },
-              },
-            ];
-          },
-        });
-      },
-    }),
+            },
+          ];
+        },
+      });
+    },
   };
 };
 

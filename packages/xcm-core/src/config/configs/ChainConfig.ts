@@ -2,6 +2,8 @@ import { AnyChain, Asset } from '@moonbeam-network/xcm-types';
 
 import { AssetConfig } from './AssetConfig';
 
+const supportedBridges = ['_awh', '_mwh'];
+
 export interface ChainConfigParams {
   assets: AssetConfig[];
   chain: AnyChain;
@@ -43,44 +45,42 @@ export class ChainConfig {
     );
   }
 
-  getAssetDestinationConfig(
-    asset: Asset,
-    source: AnyChain,
-    destination: AnyChain
-  ): AssetConfig {
-    const assetKey = this.normalizeKey(asset, source, destination);
-    const assetConfig = this.assets.get(`${assetKey}-${destination.key}`);
+  getAssetDestinationConfig(asset: Asset, destination: AnyChain): AssetConfig {
+    let assetConfig = this.assets.get(`${asset.key}-${destination.key}`);
+
+    // If assetConfig not found & token is bridged, try lookup other variants
+    if (!assetConfig && this.isBridged(asset)) {
+      const vars = this.getBridgedVariants(asset);
+      assetConfig = vars
+        .map((v) => this.assets.get(`${v}-${destination.key}`))
+        .find((c) => !!c);
+    }
+
     if (!assetConfig) {
       throw new Error(
-        `AssetConfig for ${assetKey} and destination ${destination.key} not found`
+        `AssetConfig for ${asset.key} and destination ${destination.key} not found`
       );
     }
     return assetConfig;
   }
 
   /**
-   * Normalize key of wrapped assets (via Wormhole)
+   * Check if asset is bridged
    *
    * @param asset - transfer asset
-   * @param source - source chain
-   * @param destination - destination chain
-   * @returns corresponding source chain key of wrapped asset or default
    */
-  private normalizeKey(asset: Asset, source: AnyChain, destination: AnyChain) {
-    if (
-      source.key === 'moonbeam' &&
-      destination.key === 'acala' &&
-      asset.key.includes('_awh')
-    ) {
-      return asset.key.replace('_awh', '_mwh');
-    } else if (
-      source.key === 'acala' &&
-      destination.key === 'moonbeam' &&
-      asset.key.includes('_mwh')
-    ) {
-      return asset.key.replace('_mwh', '_awh');
-    } else {
-      return asset.key;
-    }
+  private isBridged(asset: Asset) {
+    const bridge = supportedBridges.find((b) => asset.key.includes(b));
+    return !!bridge;
+  }
+
+  /**
+   * Return all variants of asset, bridged inclusive
+   *
+   * @param asset - transfer asset
+   */
+  private getBridgedVariants(asset: Asset): string[] {
+    const origin = asset.key.split('_')[0];
+    return supportedBridges.map((b) => origin + b).concat(origin);
   }
 }

@@ -9,7 +9,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Bridge().mrlViaWormhole(Wormhole.Ethereum),
+    //contract: ContractBuilderV2().Bridge().transferViaMrl(Wormhole.Ethereum),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -27,7 +27,7 @@ const toMoonbeam: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Bridge().mrlViaWormhole(Wormhole.Ethereum),
+    //contract: ContractBuilderV2().Bridge().transferViaMrl(Wormhole.Ethereum),
     destination: moonbeam,
     destinationFee: {
       amount: 0.004,

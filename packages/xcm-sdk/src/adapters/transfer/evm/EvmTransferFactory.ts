@@ -1,7 +1,7 @@
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
 import { Batch } from './Batch';
-import { Bridge } from './Bridge';
-import { XTokens } from './XTokens';
+import { TokenBridge } from './TokenBridge';
+import { Xtokens } from './Xtokens';
 import { EvmTransfer } from './EvmTransfer';
 
 import { EvmClient } from '../../../evm';
@@ -11,10 +11,10 @@ export class EvmTransferFactory {
     switch (config.module) {
       case 'Batch':
         return new Batch(client, config);
-      case 'Bridge':
-        return new Bridge(client, config);
+      case 'TokenBridge':
+        return new TokenBridge(client, config);
       case 'Xtokens':
-        return new XTokens(client, config);
+        return new Xtokens(client, config);
       default: {
         throw new Error(
           'Contract type ' + config.module + ' is not supported yet'

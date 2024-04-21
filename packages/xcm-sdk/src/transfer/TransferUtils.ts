@@ -84,15 +84,10 @@ export function buildTransact(
   destAddress: string,
   destChain: AnyChain,
   destFee: AssetAmount,
-  transferConfig: ChainTransferConfig,
-  mrlChain: AnyChain
+  transferConfig: ChainTransferConfig
 ): ExtrinsicConfig {
   const chain = transferConfig.chain;
   const config = transferConfig.config as AssetConfig;
-
-  const assetId = mrlChain.getAssetId(config.asset);
-  const feeAssetId = chain.getAssetId(destFee);
-  const palletInstance = chain.getAssetPalletInstance(config.asset);
 
   if (!config.transact) {
     throw new Error('Ethereum transact must be provided');
@@ -101,12 +96,11 @@ export function buildTransact(
   return config.transact.build({
     address: destAddress,
     amount: amount,
-    asset: assetId,
+    asset: config.asset,
     destination: destChain,
-    fee: destFee.amount,
-    feeAsset: feeAssetId,
-    palletInstance: palletInstance,
+    fee: destFee,
     source: chain,
+    routedVia: config.routedVia,
   });
 }
 
@@ -152,21 +146,12 @@ function buildExtrinsic(
 ): ExtrinsicConfig | undefined {
   const chain = transferConfig.chain;
   const config = transferConfig.config as AssetConfig;
-
-  const assetId = chain.getAssetId(config.asset);
-  const palletInstance = chain.getAssetPalletInstance(config.asset);
-  const feeAssetId = chain.getAssetId(destFee);
-  const feePalletInstance = chain.getAssetPalletInstance(destFee);
   return config.extrinsic?.build({
     address: destAddress,
     amount: amount,
-    asset: assetId,
+    asset: config.asset,
     destination: destChain,
-    fee: destFee.amount,
-    feeDecimals: destFee.decimals,
-    feePalletInstance: feePalletInstance,
-    feeAsset: feeAssetId,
-    palletInstance: palletInstance,
+    fee: destFee,
     source: chain,
     transact: transactInfo,
   } as ExtrinsicConfigBuilderParamsV2);
@@ -180,16 +165,12 @@ function buildContract(
   transferConfig: ChainTransferConfig
 ): ContractConfig | undefined {
   const { chain, config } = transferConfig;
-  const assetId = chain.getAssetId(config.asset);
-  const feeAssetId = chain.getAssetId(destFee);
-
   return config.contract?.build({
     address: destAddress,
     amount: amount,
-    asset: assetId,
+    asset: config.asset,
     destination: destChain,
-    fee: destFee.amount,
-    feeAsset: feeAssetId,
+    fee: destFee,
     source: chain,
   });
 }
