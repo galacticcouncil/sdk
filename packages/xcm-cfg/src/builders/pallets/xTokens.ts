@@ -1,7 +1,11 @@
-import { ExtrinsicConfigBuilderV2 } from '@galacticcouncil/xcm-core';
+import {
+  ExtrinsicConfigBuilderV2,
+  calculateMDA,
+} from '@galacticcouncil/xcm-core';
 import { XcmVersion, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { toAsset, toDest } from './xTokens.utils';
 import {
+  getAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
 } from '../ExtrinsicBuilder.utils';
@@ -137,22 +141,23 @@ const transferMultiassets = (originParachainId?: number) => {
 };
 
 const transferMultiCurrencies = (): ExtrinsicConfigBuilderV2 => ({
-  build: ({ address, amount, asset, destination, fee, source }) =>
+  build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
+        const { amount, asset, destination, fee, source, transactVia } = params;
+        const version = XcmVersion.v3;
         const assetId = source.getAssetId(asset);
         const feeAssetId = source.getAssetId(fee);
-        const version = XcmVersion.v3;
-        const account = getExtrinsicAccount(address);
+        const account = getAccount(params);
         return [
           [
             [assetId, amount],
             [feeAssetId, fee.amount],
           ],
           1,
-          toDest(version, destination, account),
+          toDest(version, transactVia ?? destination, account),
           'Unlimited',
         ];
       },

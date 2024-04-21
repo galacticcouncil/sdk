@@ -14,11 +14,11 @@ const transact = (
   const func = 'transact';
   return {
     build: (params) => {
-      const contract = config.build(params);
       return new ExtrinsicConfig({
         module: pallet,
         func,
         getArgs: () => {
+          const contract = config.build(params);
           const version = XcmVersion.v1;
           const call = encodeFunctionData({
             abi: Abi[contract.module],

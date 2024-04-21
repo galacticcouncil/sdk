@@ -80,6 +80,7 @@ export function getXcmDeliveryFee(
 }
 
 export function buildTransact(
+  address: string,
   amount: bigint,
   destAddress: string,
   destChain: AnyChain,
@@ -99,12 +100,14 @@ export function buildTransact(
     asset: config.asset,
     destination: destChain,
     fee: destFee,
+    sender: address,
     source: chain,
-    routedVia: config.routedVia,
+    transactVia: config.transactVia,
   });
 }
 
 export function buildTransfer(
+  address: string,
   amount: bigint,
   destAddress: string,
   destChain: AnyChain,
@@ -115,6 +118,7 @@ export function buildTransfer(
   const config = transferConfig.config;
   if (config.extrinsic) {
     return buildExtrinsic(
+      address,
       amount,
       destAddress,
       destChain,
@@ -137,6 +141,7 @@ export function buildTransfer(
 }
 
 function buildExtrinsic(
+  address: string,
   amount: bigint,
   destAddress: string,
   destChain: AnyChain,
@@ -147,6 +152,7 @@ function buildExtrinsic(
   const chain = transferConfig.chain;
   const config = transferConfig.config as AssetConfig;
   return config.extrinsic?.build({
+    sender: address,
     address: destAddress,
     amount: amount,
     asset: config.asset,
@@ -154,6 +160,7 @@ function buildExtrinsic(
     fee: destFee,
     source: chain,
     transact: transactInfo,
+    transactVia: config.transactVia,
   } as ExtrinsicConfigBuilderParamsV2);
 }
 
@@ -172,5 +179,6 @@ function buildContract(
     destination: destChain,
     fee: destFee,
     source: chain,
+    transactVia: config.transactVia,
   });
 }

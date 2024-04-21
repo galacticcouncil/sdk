@@ -33,13 +33,11 @@ import {
 } from '../assets';
 import {
   acala,
-  acalaMrl,
   assetHub,
   astar,
   bifrost,
   centrifuge,
   crust,
-  ethereumMrl,
   hydraDX,
   interlay,
   polkadot,
@@ -714,7 +712,7 @@ const toAcalaViaWormhole: AssetConfig[] = [
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    routedVia: moonbeam,
+    transactVia: moonbeam,
     transact: ExtrinsicBuilderV2()
       .ethereumXcm()
       .transact(

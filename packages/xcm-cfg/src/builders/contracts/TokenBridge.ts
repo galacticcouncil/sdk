@@ -2,9 +2,11 @@ import {
   ContractConfigBuilderV2,
   Precompile,
   Wormhole,
+  WormholeChain,
 } from '@galacticcouncil/xcm-core';
-
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
+import { ChainAssetId } from '@moonbeam-network/xcm-types';
+
 import { createMRLPayload } from './TokenBridge.utils';
 
 import { formatDestAddress, parseAssetId } from '../utils';
@@ -40,11 +42,12 @@ const transferTokensWithPayload = () => {
 
 const transferTokens = (): ContractConfigBuilderV2 => ({
   build: (params) => {
-    const { address, amount, asset, source, destination } = params;
-
-    const from = Wormhole[source.key];
+    const { address, amount, asset, source, destination, transactVia } = params;
+    const ctx = transactVia ?? source;
+    const assetId = ctx.getAssetId(asset);
+    const from = Wormhole[ctx.key];
     const to = Wormhole[destination.key];
-    const assetId = source.getAssetId(asset);
+
     return new ContractConfig({
       address: from.tokenBridge,
       args: [

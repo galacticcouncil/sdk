@@ -19,8 +19,8 @@ export interface AssetConfigParams {
   extrinsic?: ExtrinsicConfigBuilderV2;
   fee?: FeeAssetConfig;
   min?: AssetMinConfigBuilder;
-  routedVia?: AnyChain;
   transact?: ExtrinsicConfigBuilderV2;
+  transactVia?: AnyChain;
 }
 
 export class AssetConfig {
@@ -40,9 +40,9 @@ export class AssetConfig {
 
   readonly min?: AssetMinConfigBuilder;
 
-  readonly routedVia?: AnyChain;
-
   readonly transact?: ExtrinsicConfigBuilderV2;
+
+  readonly transactVia?: AnyChain;
 
   constructor({
     asset,
@@ -53,8 +53,8 @@ export class AssetConfig {
     extrinsic,
     fee,
     min,
-    routedVia,
     transact,
+    transactVia,
   }: AssetConfigParams) {
     this.asset = asset;
     this.balance = balance;
@@ -64,8 +64,8 @@ export class AssetConfig {
     this.extrinsic = extrinsic;
     this.fee = fee;
     this.min = min;
-    this.routedVia = routedVia;
     this.transact = transact;
+    this.transactVia = transactVia;
   }
 }
 

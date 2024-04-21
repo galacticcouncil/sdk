@@ -7,10 +7,10 @@ export function Erc20() {
   return {
     approve: (): ContractConfigBuilderV2 => ({
       build: (params) => {
-        const { amount, asset, source } = params;
-
-        const assetId = source.getAssetId(asset);
-        const from = Wormhole[source.key];
+        const { amount, asset, source, transactVia } = params;
+        const ctx = transactVia ?? source;
+        const assetId = ctx.getAssetId(asset);
+        const from = Wormhole[ctx.key];
 
         return new ContractConfig({
           address: parseAssetId(assetId).toString(),

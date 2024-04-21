@@ -2,11 +2,7 @@ import { u8aToHex, hexToU8a } from '@polkadot/util';
 import { decodeAddress, blake2AsU8a } from '@polkadot/util-crypto';
 import { TypeRegistry } from '@polkadot/types';
 
-export async function calculateMDA(
-  address: string,
-  paraId: string,
-  parents: number
-) {
+export function calculateMDA(address: string, paraId: string, parents: number) {
   // Check Ethereum Address and/or Decode
   const ethAddress = address.length === 42;
   const accType = ethAddress ? 'AccountKey20' : 'AccountId32';

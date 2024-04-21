@@ -13,16 +13,12 @@ export class SubstrateService {
 
   readonly chain: AnyParachain;
 
-  readonly configService: ConfigService;
+  readonly config: ConfigService;
 
-  constructor(
-    api: ApiPromise,
-    chain: AnyParachain,
-    configService: ConfigService
-  ) {
+  constructor(api: ApiPromise, chain: AnyParachain, config: ConfigService) {
     this.api = api;
     this.chain = chain;
-    this.configService = configService;
+    this.config = config;
   }
 
   static async create(
@@ -37,7 +33,7 @@ export class SubstrateService {
   get asset(): Asset {
     const nativeToken = this.api.registry.chainTokens[0];
     const nativeTokenKey = nativeToken.toLowerCase();
-    const asset = this.configService.getAsset(nativeTokenKey);
+    const asset = this.config.getAsset(nativeTokenKey);
     if (!asset) {
       throw new Error(`No asset found for key "${nativeTokenKey}"`);
     }

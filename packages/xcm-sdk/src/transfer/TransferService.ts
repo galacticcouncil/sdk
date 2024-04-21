@@ -5,7 +5,7 @@ import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { EvmClient, EvmReconciler } from '../evm';
-import { SubstrateService } from '../substrate';
+import { SubstrateApis, SubstrateService } from '../substrate';
 import { XCall } from '../types';
 import { isH160Address } from '../utils';
 
@@ -101,6 +101,7 @@ export class TransferService {
       : undefined;
 
     const transfer = buildTransfer(
+      address,
       amount,
       destAddress,
       destChain,
@@ -163,6 +164,7 @@ export class TransferService {
       : undefined;
 
     const transfer = buildTransfer(
+      address,
       amount,
       destAddress,
       destChain,
@@ -236,6 +238,7 @@ export class TransferService {
     transferConfig: ChainTransferConfig
   ): Promise<TransactInfo | undefined> {
     const config = buildTransact(
+      address,
       amount,
       destAddress,
       destChain,
@@ -243,7 +246,19 @@ export class TransferService {
       transferConfig
     );
 
-    const extrinsic = this.substrate.getExtrinsic(config);
+    const proxyChain = transferConfig.config.transactVia;
+    let extrinsic;
+    if (proxyChain) {
+      console.log('Routed via ' + proxyChain.key);
+      const substrate = await SubstrateService.create(
+        proxyChain,
+        this.substrate.config
+      );
+      extrinsic = substrate.getExtrinsic(config);
+    } else {
+      extrinsic = this.substrate.getExtrinsic(config);
+    }
+
     const { weight } = await extrinsic.paymentInfo(address);
     return {
       call: extrinsic.method.toHex(),

@@ -1,7 +1,4 @@
-import {
-  ExtrinsicConfigBuilderV2,
-  calculateMDA,
-} from '@galacticcouncil/xcm-core';
+import { ExtrinsicConfigBuilderV2 } from '@galacticcouncil/xcm-core';
 import {
   XcmVersion,
   ExtrinsicConfig,
@@ -16,6 +13,7 @@ import {
   toTransactMessage,
 } from './polkadotXcm.utils';
 import {
+  getAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
 } from '../ExtrinsicBuilder.utils';
@@ -176,30 +174,20 @@ const send = () => {
   return {
     transact: (executionCost: number): ExtrinsicConfigBuilderV2 => ({
       build: (params) => {
-        const { address, destination, fee, source, transact } = params;
+        const { destination, fee, source, transact, transactVia } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
             if (!transact) {
-              throw new Error('Ethereum transact must be provided');
+              throw new Error('Ethereum transact not provided');
             }
 
-            const feePalletInstance = source.getAssetPalletInstance(fee);
             const version = XcmVersion.v3;
-            const account = getExtrinsicAccount(
-              '0x5dac9319aaf8a18cf60ad5b94f8dab3232ac9ffc'
-            );
-            /*             console.log(account);
-            calculateMDA(address, '2034', 1).then((a) => console.log(a));
-            calculateMDA(
-              '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym',
-              '2034',
-              1
-            ).then((a) => console.log(a)); */
-
+            const feePalletInstance = source.getAssetPalletInstance(fee);
+            const account = getAccount(params);
             return [
-              toDest(version, destination),
+              toDest(version, transactVia ?? destination),
               toTransactMessage(
                 version,
                 account,

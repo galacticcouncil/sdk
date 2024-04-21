@@ -11,23 +11,16 @@ export interface TransactInfo {
   weight: TxWeight;
 }
 
-/* export interface ExtrinsicConfigBuilderParamsV2
-  extends ExtrinsicConfigBuilderPrams {
-  feeDecimals?: number;
-  feePalletInstance?: number;
-  routedVia?: AnyChain;
-  transact?: TransactInfo;
-} */
-
 export interface ExtrinsicConfigBuilderParamsV2 {
   address: string;
   amount: bigint;
   asset: Asset;
   destination: AnyChain;
   fee: AssetAmount;
+  sender: string;
   source: AnyChain;
-  routedVia?: AnyChain;
   transact?: TransactInfo;
+  transactVia?: AnyChain;
 }
 
 export interface ExtrinsicConfigBuilderV2 {
