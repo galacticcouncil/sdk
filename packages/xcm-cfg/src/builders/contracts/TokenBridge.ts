@@ -2,10 +2,8 @@ import {
   ContractConfigBuilderV2,
   Precompile,
   Wormhole,
-  WormholeChain,
 } from '@galacticcouncil/xcm-core';
 import { ContractConfig } from '@moonbeam-network/xcm-builder';
-import { ChainAssetId } from '@moonbeam-network/xcm-types';
 
 import { createMRLPayload } from './TokenBridge.utils';
 

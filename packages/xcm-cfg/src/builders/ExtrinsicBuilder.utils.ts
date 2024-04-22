@@ -1,3 +1,7 @@
+import {
+  ExtrinsicConfigBuilderParamsV2,
+  calculateMDA,
+} from '@galacticcouncil/xcm-core';
 import { XcmVersion } from '@moonbeam-network/xcm-builder';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/types';
 import { getTypeDef } from '@polkadot/types';
@@ -52,4 +56,16 @@ export function getExtrinsicAccount(address: string) {
           network: null,
         },
       };
+}
+
+export function getAccount({
+  address,
+  sender,
+  source,
+  transactVia,
+}: ExtrinsicConfigBuilderParamsV2) {
+  if (transactVia?.key === 'moonbeam') {
+    return calculateMDA(sender, source.parachainId.toString(), 1);
+  }
+  return address;
 }

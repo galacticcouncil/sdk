@@ -5,7 +5,7 @@ import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { EvmClient, EvmReconciler } from '../evm';
-import { SubstrateApis, SubstrateService } from '../substrate';
+import { SubstrateService } from '../substrate';
 import { XCall } from '../types';
 import { isH160Address } from '../utils';
 

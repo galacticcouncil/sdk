@@ -1,5 +1,3 @@
-export type WormholeId = 'acala' | 'ethereum' | 'moonbeam';
-
 export type WormholeChain = {
   id: number;
   tokenBridge: `0x${string}`;
@@ -20,7 +18,7 @@ const MOONBEAM = {
   tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
 };
 
-export const Wormhole: Record<WormholeId, WormholeChain> = {
+export const Wormhole: Record<string, WormholeChain> = {
   acala: ACALA,
   ethereum: ETHEREUM,
   moonbeam: MOONBEAM,
