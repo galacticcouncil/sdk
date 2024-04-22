@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 2.2.3
+
+### Patch Changes
+
+- New cap difference calculation formula for Omnipool (fix)
+
 ## 2.2.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.5
+
+### Patch Changes
+
+- Update Nodle RPC (fix)
+
 ## 1.11.4
 
 ### Patch Changes
