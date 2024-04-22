@@ -17,7 +17,7 @@ import {
   is_remove_liquidity_allowed,
 } from '@galacticcouncil/math-omnipool';
 
-import { BigNumber } from 'utils/bignumber'
+import { BigNumber } from '../../utils/bignumber'
 
 export class OmniMath {
   static calculateSpotPrice(
