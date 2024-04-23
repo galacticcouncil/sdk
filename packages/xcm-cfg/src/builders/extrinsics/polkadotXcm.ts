@@ -191,7 +191,8 @@ const send = () => {
             }
 
             const version = XcmVersion.v3;
-            const account = getTransactAccount(params);
+            const tAccount = getTransactAccount(params);
+            const account = getExtrinsicAccount(tAccount);
             const ctx = source as Parachain;
             const rcv = destination as Parachain;
             const feePalletInstance = ctx.getAssetPalletInstance(fee);

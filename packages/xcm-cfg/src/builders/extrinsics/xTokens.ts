@@ -152,7 +152,8 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
         const version = XcmVersion.v3;
         const assetId = source.getAssetId(asset);
         const feeAssetId = source.getAssetId(fee);
-        const account = getTransactAccount(params);
+        const tAccount = getTransactAccount(params);
+        const account = getExtrinsicAccount(tAccount);
         return [
           [
             [assetId, amount],
