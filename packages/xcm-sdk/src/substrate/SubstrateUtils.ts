@@ -1,4 +1,4 @@
-import { Asset, AssetAmountParams } from '@moonbeam-network/xcm-types';
+import { Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
 import { convertDecimals } from '@moonbeam-network/xcm-utils';
 
 import { SubstrateService } from './SubstrateService';

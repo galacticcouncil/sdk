@@ -1,5 +1,11 @@
-import { ConfigBuilder, ConfigService } from '@galacticcouncil/xcm-core';
-import { Asset, AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
+import {
+  Asset,
+  AnyChain,
+  AssetAmount,
+  ConfigBuilder,
+  ConfigService,
+  Parachain,
+} from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
@@ -64,8 +70,8 @@ export class Wallet {
   private async substrateService(
     chain: string | AnyChain
   ): Promise<SubstrateService> {
-    const aChain = this.config.getChain(chain);
-    return await SubstrateService.create(aChain, this.config);
+    const aChain = this.config.getChain(chain); // TODO - fix
+    return await SubstrateService.create(aChain as Parachain, this.config);
   }
 
   private async transferService(

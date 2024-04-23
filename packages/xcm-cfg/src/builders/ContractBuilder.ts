@@ -3,7 +3,7 @@ import { Erc20 } from './contracts/Erc20';
 import { TokenBridge } from './contracts/TokenBridge';
 import { Xtokens } from './contracts/Xtokens';
 
-export function ContractBuilderV2() {
+export function ContractBuilder() {
   return {
     Batch,
     Erc20,

@@ -1,9 +1,8 @@
-import { ExtrinsicConfigBuilderV2 } from '@galacticcouncil/xcm-core';
 import {
-  XcmVersion,
   ExtrinsicConfig,
-  Parents,
-} from '@moonbeam-network/xcm-builder';
+  ExtrinsicConfigBuilder,
+  Parachain,
+} from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 import {
   toAsset,
@@ -13,9 +12,11 @@ import {
   toTransactMessage,
 } from './polkadotXcm.utils';
 import {
-  getAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
+  getTransactAccount,
+  Parents,
+  XcmVersion,
 } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'polkadotXcm';
@@ -23,7 +24,7 @@ const pallet = 'polkadotXcm';
 const limitedReserveTransferAssets = () => {
   const func = 'limitedReserveTransferAssets';
   return {
-    here: (): ExtrinsicConfigBuilderV2 => ({
+    here: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -31,8 +32,9 @@ const limitedReserveTransferAssets = () => {
           getArgs: (ext) => {
             const version = getExtrinsicArgumentVersion(ext);
             const account = getExtrinsicAccount(address);
+            const rcv = destination as Parachain;
             return [
-              toDest(version, destination),
+              toDest(version, rcv),
               toBeneficiary(version, account),
               toAssets(version, 0, 'Here', amount),
               0,
@@ -41,7 +43,7 @@ const limitedReserveTransferAssets = () => {
           },
         }),
     }),
-    X1: (): ExtrinsicConfigBuilderV2 => ({
+    X1: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -49,8 +51,9 @@ const limitedReserveTransferAssets = () => {
           getArgs: () => {
             const version = XcmVersion.v1;
             const account = getExtrinsicAccount(address);
+            const rcv = destination as Parachain;
             return [
-              toDest(version, destination),
+              toDest(version, rcv),
               toBeneficiary(version, account),
               toAssets(version, 0, 'Here', amount),
               0,
@@ -59,16 +62,18 @@ const limitedReserveTransferAssets = () => {
           },
         }),
     }),
-    X2: (): ExtrinsicConfigBuilderV2 => ({
+    X2: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, fee, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
-            const assetId = source.getAssetId(asset);
-            const palletInstance = source.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
+            const ctx = source as Parachain;
+            const rcv = destination as Parachain;
+            const assetId = ctx.getAssetId(asset);
+            const palletInstance = ctx.getAssetPalletInstance(asset);
             const isAssetDifferent = !!fee && asset.key !== fee.key;
             const assets = [
               toAsset(
@@ -88,7 +93,7 @@ const limitedReserveTransferAssets = () => {
             ];
 
             if (isAssetDifferent) {
-              const feeAssetId = source.getAssetId(fee);
+              const feeAssetId = ctx.getAssetId(fee);
               assets.push(
                 toAsset(
                   0,
@@ -108,7 +113,7 @@ const limitedReserveTransferAssets = () => {
             }
 
             return [
-              toDest(version, destination),
+              toDest(version, rcv),
               toBeneficiary(version, account),
               {
                 [version]: assets,
@@ -125,7 +130,7 @@ const limitedReserveTransferAssets = () => {
 const limitedTeleportAssets = (parent: Parents) => {
   const func = 'limitedTeleportAssets';
   return {
-    here: (): ExtrinsicConfigBuilderV2 => ({
+    here: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -133,8 +138,9 @@ const limitedTeleportAssets = (parent: Parents) => {
           getArgs: () => {
             const version = XcmVersion.v2;
             const account = getExtrinsicAccount(address);
+            const rcv = destination as Parachain;
             return [
-              toDest(version, destination),
+              toDest(version, rcv),
               toBeneficiary(version, account),
               toAssets(version, parent, 'Here', amount),
               0,
@@ -149,7 +155,7 @@ const limitedTeleportAssets = (parent: Parents) => {
 const reserveTransferAssets = () => {
   const func = 'reserveTransferAssets';
   return {
-    here: (): ExtrinsicConfigBuilderV2 => ({
+    here: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, destination }) =>
         new ExtrinsicConfig({
           module: pallet,
@@ -157,8 +163,9 @@ const reserveTransferAssets = () => {
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
+            const rcv = destination as Parachain;
             return [
-              toDest(version, destination),
+              toDest(version, rcv),
               toBeneficiary(version, account),
               toAssets(version, 0, 'Here', amount),
               0,
@@ -172,7 +179,7 @@ const reserveTransferAssets = () => {
 const send = () => {
   const func = 'send';
   return {
-    transact: (executionCost: number): ExtrinsicConfigBuilderV2 => ({
+    transact: (executionCost: number): ExtrinsicConfigBuilder => ({
       build: (params) => {
         const { destination, fee, source, transact, transactVia } = params;
         return new ExtrinsicConfig({
@@ -184,10 +191,12 @@ const send = () => {
             }
 
             const version = XcmVersion.v3;
-            const feePalletInstance = source.getAssetPalletInstance(fee);
-            const account = getAccount(params);
+            const account = getTransactAccount(params);
+            const ctx = source as Parachain;
+            const rcv = destination as Parachain;
+            const feePalletInstance = ctx.getAssetPalletInstance(fee);
             return [
-              toDest(version, transactVia ?? destination),
+              toDest(version, transactVia || rcv),
               toTransactMessage(
                 version,
                 account,

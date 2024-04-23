@@ -1,53 +1,52 @@
 import {
-  ExtrinsicConfigBuilderV2,
-  calculateMDA,
+  ExtrinsicConfig,
+  ExtrinsicConfigBuilder,
+  Parachain,
 } from '@galacticcouncil/xcm-core';
-import { XcmVersion, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { toAsset, toDest } from './xTokens.utils';
 import {
-  getAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
+  getTransactAccount,
+  XcmVersion,
 } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'xTokens';
 
-const transfer = (): ExtrinsicConfigBuilderV2 => ({
+const transfer = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
       getArgs: (func) => {
+        const rcv = destination as Parachain;
         const assetId = source.getAssetId(asset);
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
-        return [
-          assetId,
-          amount,
-          toDest(version, destination, account),
-          'Unlimited',
-        ];
+        return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
       },
     }),
 });
 
 const transferMultiasset = (originParachainId?: number) => {
   return {
-    X3: (): ExtrinsicConfigBuilderV2 => ({
+    X3: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func: 'transferMultiasset',
           getArgs: () => {
-            const assetId = source.getAssetId(asset);
-            const palletInstance = source.getAssetPalletInstance(asset);
+            const ctx = source as Parachain;
+            const rcv = destination as Parachain;
+            const assetId = ctx.getAssetId(asset);
+            const palletInstance = ctx.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
             const assets = toAsset(
               {
                 X3: [
                   {
-                    Parachain: originParachainId ?? destination.parachainId,
+                    Parachain: originParachainId ?? ctx.parachainId,
                   },
                   {
                     PalletInstance: palletInstance,
@@ -63,7 +62,7 @@ const transferMultiasset = (originParachainId?: number) => {
               {
                 [version]: assets,
               },
-              toDest(version, destination, account),
+              toDest(version, rcv, account),
               'Unlimited',
             ];
           },
@@ -74,14 +73,16 @@ const transferMultiasset = (originParachainId?: number) => {
 
 const transferMultiassets = (originParachainId?: number) => {
   return {
-    X3: (): ExtrinsicConfigBuilderV2 => ({
+    X3: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, fee, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func: 'transferMultiassets',
           getArgs: () => {
-            const assetId = source.getAssetId(asset);
-            const palletInstance = source.getAssetPalletInstance(asset);
+            const ctx = source as Parachain;
+            const rcv = destination as Parachain;
+            const assetId = ctx.getAssetId(asset);
+            const palletInstance = ctx.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
             const isAssetDifferent = !!fee && asset.key !== fee.key;
@@ -90,7 +91,7 @@ const transferMultiassets = (originParachainId?: number) => {
                 {
                   X3: [
                     {
-                      Parachain: originParachainId ?? destination.parachainId,
+                      Parachain: originParachainId ?? ctx.parachainId,
                     },
                     {
                       PalletInstance: palletInstance,
@@ -105,13 +106,13 @@ const transferMultiassets = (originParachainId?: number) => {
             ];
 
             if (isAssetDifferent) {
-              const feeAssetId = source.getAssetId(fee);
+              const feeAssetId = ctx.getAssetId(fee);
               assets.push(
                 toAsset(
                   {
                     X3: [
                       {
-                        Parachain: originParachainId ?? destination.parachainId,
+                        Parachain: originParachainId ?? rcv.parachainId,
                       },
                       {
                         PalletInstance: palletInstance,
@@ -131,7 +132,7 @@ const transferMultiassets = (originParachainId?: number) => {
                 [version]: assets,
               },
               isAssetDifferent ? 1 : 0,
-              toDest(version, destination, account),
+              toDest(version, rcv, account),
               'Unlimited',
             ];
           },
@@ -140,24 +141,25 @@ const transferMultiassets = (originParachainId?: number) => {
   };
 };
 
-const transferMultiCurrencies = (): ExtrinsicConfigBuilderV2 => ({
+const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
   build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
         const { amount, asset, destination, fee, source, transactVia } = params;
+        const rcv = destination as Parachain;
         const version = XcmVersion.v3;
         const assetId = source.getAssetId(asset);
         const feeAssetId = source.getAssetId(fee);
-        const account = getAccount(params);
+        const account = getTransactAccount(params);
         return [
           [
             [assetId, amount],
             [feeAssetId, fee.amount],
           ],
           1,
-          toDest(version, transactVia ?? destination, account),
+          toDest(version, transactVia || rcv, account),
           'Unlimited',
         ];
       },

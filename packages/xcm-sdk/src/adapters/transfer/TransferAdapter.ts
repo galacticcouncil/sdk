@@ -1,5 +1,4 @@
-import { BaseConfig } from '@moonbeam-network/xcm-builder';
-import { AssetAmount } from '@moonbeam-network/xcm-types';
+import { AssetAmount, BaseConfig } from '@galacticcouncil/xcm-core';
 
 import { SubstrateTransfer } from './SubstrateTransfer';
 import { ContractTransfer } from './ContractTransfer';

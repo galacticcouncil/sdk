@@ -1,5 +1,7 @@
-import { AnyChain, Asset, Ecosystem } from '@moonbeam-network/xcm-types';
-import { AssetConfig, ChainConfig } from './configs';
+import { Asset } from '../asset';
+import { AnyChain, ChainEcosystem } from '../chain';
+
+import { AssetConfig, ChainConfig } from './definition';
 
 export interface ConfigServiceOptions {
   assets: Map<string, Asset>;
@@ -20,7 +22,7 @@ export class ConfigService {
     this.chainsConfig = chainsConfig;
   }
 
-  getEcosystemAssets(ecosystem?: Ecosystem): Asset[] {
+  getEcosystemAssets(ecosystem?: ChainEcosystem): Asset[] {
     if (!ecosystem) {
       return Array.from(this.assets.values());
     }
@@ -46,8 +48,8 @@ export class ConfigService {
     return asset;
   }
 
-  getChain(keyOrAsset: string | AnyChain): AnyChain {
-    const key = typeof keyOrAsset === 'string' ? keyOrAsset : keyOrAsset.key;
+  getChain(keyOrChain: string | AnyChain): AnyChain {
+    const key = typeof keyOrChain === 'string' ? keyOrChain : keyOrChain.key;
     const chain = this.chains.get(key);
 
     if (!chain) {
@@ -56,8 +58,8 @@ export class ConfigService {
     return chain;
   }
 
-  getChainConfig(keyOrAsset: string | AnyChain): ChainConfig {
-    const key = typeof keyOrAsset === 'string' ? keyOrAsset : keyOrAsset.key;
+  getChainConfig(keyOrChain: string | AnyChain): ChainConfig {
+    const key = typeof keyOrChain === 'string' ? keyOrChain : keyOrChain.key;
     const chainConfig = this.chainsConfig.get(key);
 
     if (!chainConfig) {
@@ -66,7 +68,10 @@ export class ConfigService {
     return chainConfig;
   }
 
-  getSourceChains(asset: Asset, ecosystem: Ecosystem | undefined): AnyChain[] {
+  getSourceChains(
+    asset: Asset,
+    ecosystem: ChainEcosystem | undefined
+  ): AnyChain[] {
     return Array.from(this.chainsConfig.values())
       .filter((chainConfig) => chainConfig.getAssetConfigs(asset).length)
       .filter(

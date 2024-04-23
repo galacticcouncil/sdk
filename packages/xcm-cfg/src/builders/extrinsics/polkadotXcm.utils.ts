@@ -1,8 +1,7 @@
-import { TxWeight } from '@galacticcouncil/xcm-core';
-import { Parents, XcmVersion } from '@moonbeam-network/xcm-builder';
-import { AnyChain } from '@moonbeam-network/xcm-types';
+import { Parachain, TxWeight } from '@galacticcouncil/xcm-core';
+import { Parents, XcmVersion } from '../ExtrinsicBuilder.utils';
 
-export const toDest = (version: XcmVersion, destination: AnyChain) => {
+export const toDest = (version: XcmVersion, destination: Parachain) => {
   if (destination.key === 'polkadot' || destination.key === 'kusama') {
     return {
       [version]: {

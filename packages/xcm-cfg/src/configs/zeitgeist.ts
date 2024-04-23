@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { usdc_mwh, ztg, glmr } from '../assets';
 import { hydraDX, zeitgeist } from '../chains';
-import { ExtrinsicBuilderV2 } from '../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +14,7 @@ const toHydraDX: AssetConfig[] = [
       asset: ztg,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetConfig({
     asset: usdc_mwh,
@@ -26,7 +25,7 @@ const toHydraDX: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
     fee: {
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -41,7 +40,7 @@ const toHydraDX: AssetConfig[] = [
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
     fee: {
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),

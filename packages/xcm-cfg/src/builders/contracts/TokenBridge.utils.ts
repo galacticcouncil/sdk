@@ -1,3 +1,4 @@
+import { Parachain } from '@galacticcouncil/xcm-core';
 import { TypeRegistry, Enum, Struct } from '@polkadot/types';
 
 // Creates a type registry to properly work with the precompile's input types
@@ -17,7 +18,7 @@ class XcmRoutingUserAction extends Struct {
 }
 
 export function createMRLPayload(
-  parachainId: number,
+  destination: Parachain,
   account: string,
   isEthereumStyle = false
 ): VersionedUserAction {
@@ -27,7 +28,7 @@ export function createMRLPayload(
       parents: 1,
       interior: {
         X2: [
-          { Parachain: parachainId },
+          { Parachain: destination.parachainId },
           isEthereumStyle
             ? { AccountKey20: { key: account } }
             : { AccountId32: { id: account } },
@@ -37,12 +38,12 @@ export function createMRLPayload(
   };
 
   // Format multilocation object as a Polkadot.js type
-  const destination = registry.createType(
+  const versionedLoc = registry.createType(
     'VersionedMultiLocation',
     versionedMultiLocation
   );
 
   // Wrap and format the MultiLocation object into the precompile's input type
-  const userAction = new XcmRoutingUserAction({ destination });
+  const userAction = new XcmRoutingUserAction({ versionedLoc });
   return new VersionedUserAction({ V1: userAction });
 }

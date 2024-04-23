@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { astr, dot, hdx, usdt } from '../assets';
 import { astar, hydraDX } from '../chains';
-import { ExtrinsicBuilderV2 } from '../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,10 +14,7 @@ const toHydraDX: AssetConfig[] = [
       asset: astr,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2()
-      .polkadotXcm()
-      .reserveTransferAssets()
-      .here(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets().here(),
   }),
   new AssetConfig({
     asset: dot,
@@ -33,7 +29,7 @@ const toHydraDX: AssetConfig[] = [
       asset: astr,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
   // new AssetConfig({
@@ -49,7 +45,7 @@ const toHydraDX: AssetConfig[] = [
   //     asset: astr,
   //     balance: BalanceBuilder().substrate().system().account(),
   //   },
-  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer()
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer()
   // }),
 ];
 

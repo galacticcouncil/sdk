@@ -1,11 +1,14 @@
-import { ContractConfigBuilderV2, Wormhole } from '@galacticcouncil/xcm-core';
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
+import {
+  ContractConfig,
+  ContractConfigBuilder,
+  Wormhole,
+} from '@galacticcouncil/xcm-core';
 
 import { parseAssetId } from '../utils';
 
 export function Erc20() {
   return {
-    approve: (): ContractConfigBuilderV2 => ({
+    approve: (): ContractConfigBuilder => ({
       build: (params) => {
         const { amount, asset, source, transactVia } = params;
         const ctx = transactVia ?? source;

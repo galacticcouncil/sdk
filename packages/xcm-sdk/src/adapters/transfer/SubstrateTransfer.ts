@@ -1,5 +1,4 @@
-import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
-import { AssetAmount } from '@moonbeam-network/xcm-types';
+import { AssetAmount, ExtrinsicConfig } from '@galacticcouncil/xcm-core';
 
 import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';

@@ -1,4 +1,4 @@
-import { AnyChain } from '@moonbeam-network/xcm-types';
+import { AnyChain } from '@galacticcouncil/xcm-core';
 import { ApiPromise } from '@polkadot/api';
 import { isH160Address } from '../utils';
 

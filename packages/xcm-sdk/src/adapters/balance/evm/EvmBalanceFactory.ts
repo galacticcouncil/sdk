@@ -1,4 +1,4 @@
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
+import { ContractConfig } from '@galacticcouncil/xcm-core';
 import { Erc20 } from './Erc20';
 import { Native } from './Native';
 import { EvmBalance } from './EvmBalance';

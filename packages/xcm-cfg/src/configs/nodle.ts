@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { nodl } from '../assets';
 import { hydraDX, nodle } from '../chains';
-import { ExtrinsicBuilderV2 } from 'builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
 export const nodleConfig = new ChainConfig({
   assets: [
@@ -16,7 +15,7 @@ export const nodleConfig = new ChainConfig({
         asset: nodl,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+      extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     }),
   ],
   chain: nodle,

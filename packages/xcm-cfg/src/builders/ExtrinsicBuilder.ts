@@ -1,11 +1,11 @@
-import { ethereumXcm } from './pallets/ethereumXcm';
-import { polkadotXcm } from './pallets/polkadotXcm';
-import { utility } from './pallets/utility';
-import { xcmPallet } from './pallets/xcmPallet';
-import { xTokens } from './pallets/xTokens';
-import { xTransfer } from './pallets/xTransfer';
+import { ethereumXcm } from './extrinsics/ethereumXcm';
+import { polkadotXcm } from './extrinsics/polkadotXcm';
+import { utility } from './extrinsics/utility';
+import { xcmPallet } from './extrinsics/xcmPallet';
+import { xTokens } from './extrinsics/xTokens';
+import { xTransfer } from './extrinsics/xTransfer';
 
-export function ExtrinsicBuilderV2() {
+export function ExtrinsicBuilder() {
   return {
     ethereumXcm,
     polkadotXcm,

@@ -1,8 +1,12 @@
 import '@polkadot/api-augment';
 
-import { ConfigService } from '@galacticcouncil/xcm-core';
-import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
-import { AnyParachain, Asset, AssetAmount } from '@moonbeam-network/xcm-types';
+import {
+  AnyParachain,
+  Asset,
+  AssetAmount,
+  ConfigService,
+  ExtrinsicConfig,
+} from '@galacticcouncil/xcm-core';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 

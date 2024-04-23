@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig, Wormhole } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { dai_mwh, eth } from '../assets';
 import { ethereumMrl, hydraDX, moonbeam } from '../chains';
-import { BalanceBuilderV2, ContractBuilderV2 } from '../builders';
+import { BalanceBuilder, ContractBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -18,7 +17,7 @@ const toHydraDX: AssetConfig[] = [
     },
     fee: {
       asset: eth,
-      balance: BalanceBuilderV2().evm().native(),
+      balance: BalanceBuilder().evm().native(),
     },
   }),
 ];
@@ -36,7 +35,7 @@ const toMoonbeam: AssetConfig[] = [
     },
     fee: {
       asset: eth,
-      balance: BalanceBuilderV2().evm().native(),
+      balance: BalanceBuilder().evm().native(),
     },
   }),
 ];

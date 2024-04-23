@@ -1,4 +1,4 @@
-import { ChainAssetId } from '@moonbeam-network/xcm-types';
+import { ChainAssetId } from '@galacticcouncil/xcm-core';
 
 /**
  * Format recipient address on the destination chain in 32 bytes (left padded)

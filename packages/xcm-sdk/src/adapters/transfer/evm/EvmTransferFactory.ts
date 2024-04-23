@@ -1,4 +1,4 @@
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
+import { ContractConfig } from '@galacticcouncil/xcm-core';
 import { Batch } from './Batch';
 import { TokenBridge } from './TokenBridge';
 import { Xtokens } from './Xtokens';

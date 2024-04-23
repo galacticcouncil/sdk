@@ -1,16 +1,13 @@
 import {
   Abi,
-  ContractConfigBuilderV2,
+  ContractConfig,
+  ContractConfigBuilder,
   Precompile,
 } from '@galacticcouncil/xcm-core';
 
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
-
 import { encodeFunctionData } from 'viem';
 
-const batchAll = (
-  configs: ContractConfigBuilderV2[]
-): ContractConfigBuilderV2 => ({
+const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
   build: (params) => {
     const contracts = configs.map((c) => c.build(params));
     const to = contracts.map((c) => c.address);

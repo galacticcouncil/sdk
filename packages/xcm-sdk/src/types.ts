@@ -1,4 +1,4 @@
-import { AssetAmount } from '@moonbeam-network/xcm-types';
+import { AssetAmount } from '@galacticcouncil/xcm-core';
 
 /**
  * Transfer (X) data

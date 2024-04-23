@@ -1,5 +1,4 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import {
   dai_mwh,
@@ -15,13 +14,13 @@ import {
   pink,
 } from '../assets';
 import { acala, assetHub, hydraDX, moonbeam } from '../chains';
-import { ContractBuilderV2 } from '../builders';
+import { BalanceBuilder, ContractBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: glmr,
     balance: BalanceBuilder().substrate().system().account(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.05,
@@ -32,7 +31,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: hdx,
     balance: BalanceBuilder().substrate().assets().account(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.6,
@@ -47,7 +46,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -62,7 +61,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdc_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -77,7 +76,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdt_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -92,7 +91,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: wbtc_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.0000001,
@@ -107,7 +106,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: weth_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.000002,
@@ -122,7 +121,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().assets().account(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.1,
@@ -138,7 +137,7 @@ const toHydraDX: AssetConfig[] = [
   // new AssetConfig({
   //   asset: usdt,
   //   balance: BalanceBuilder().substrate().assets().account(),
-  //   contract: ContractBuilderV2().Xtokens().transfer(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
   //   destination: hydraDX,
   //   destinationFee: {
   //     amount: 1.4,
@@ -153,7 +152,7 @@ const toHydraDX: AssetConfig[] = [
   // new AssetConfig({
   //   asset: usdc,
   //   balance: BalanceBuilder().substrate().assets().account(),
-  //   contract: ContractBuilderV2().Xtokens().transfer(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
   //   destination: hydraDX,
   //   destinationFee: {
   //     amount: 1.4,
@@ -170,7 +169,7 @@ const toAssetHub: AssetConfig[] = [
   new AssetConfig({
     asset: pink,
     balance: BalanceBuilder().substrate().assets().account(),
-    contract: ContractBuilderV2().Xtokens().transferMultiCurrencies(),
+    contract: ContractBuilder().Xtokens().transferMultiCurrencies(),
     destination: assetHub,
     destinationFee: {
       amount: 0.18,
@@ -185,7 +184,7 @@ const toAssetHub: AssetConfig[] = [
   new AssetConfig({
     asset: usdt,
     balance: BalanceBuilder().substrate().assets().account(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: assetHub,
     destinationFee: {
       amount: 0.18,
@@ -200,7 +199,7 @@ const toAssetHub: AssetConfig[] = [
   new AssetConfig({
     asset: usdc,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().Xtokens().transfer(),
+    contract: ContractBuilder().Xtokens().transfer(),
     destination: assetHub,
     destinationFee: {
       amount: 0.18,
@@ -218,7 +217,7 @@ const toAcalaViaWormhole: AssetConfig[] = [
   /*  new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().TokenBridge().transferTokens(),
+    contract: ContractBuilder().TokenBridge().transferTokens(),
     destination: acala,
     destinationFee: {
       amount: 0.004,
@@ -233,11 +232,11 @@ const toAcalaViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2()
+    contract: ContractBuilder()
       .Batch()
       .batchAll([
-        ContractBuilderV2().Erc20().approve(),
-        ContractBuilderV2().TokenBridge().transferTokens(),
+        ContractBuilder().Erc20().approve(),
+        ContractBuilder().TokenBridge().transferTokens(),
       ]),
     destination: acala,
     destinationFee: {

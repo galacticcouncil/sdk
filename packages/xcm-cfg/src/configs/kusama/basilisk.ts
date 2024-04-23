@@ -1,9 +1,4 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '@moonbeam-network/xcm-builder';
-
 import { bsx, ksm, teer, tnkr, usdt, xrt } from '../../assets';
 import {
   basilisk,
@@ -14,7 +9,7 @@ import {
   robonomics,
   tinkernet,
 } from '../../chains';
-import { ExtrinsicBuilderV2 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toAssetHub: AssetConfig[] = [
   new AssetConfig({
@@ -26,7 +21,7 @@ const toAssetHub: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset().X3(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -44,7 +39,7 @@ const toKarura: AssetConfig[] = [
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -60,7 +55,7 @@ const toKarura: AssetConfig[] = [
   //     asset: ksm,
   //     balance: BalanceBuilder().substrate().tokens().accounts(),
   //   },
-  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   //   fee: {
   //     asset: bsx,
   //     balance: BalanceBuilder().substrate().system().account(),
@@ -78,7 +73,7 @@ const toKusama: AssetConfig[] = [
       asset: ksm,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(), //relay using x1 interior !!!
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(), //relay using x1 interior !!!
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -96,7 +91,7 @@ const toIntegritee: AssetConfig[] = [
       asset: teer,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -114,7 +109,7 @@ const toRobonomics: AssetConfig[] = [
       asset: xrt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),
@@ -132,7 +127,7 @@ const toTinkernet: AssetConfig[] = [
       asset: tnkr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bsx,
       balance: BalanceBuilder().substrate().system().account(),

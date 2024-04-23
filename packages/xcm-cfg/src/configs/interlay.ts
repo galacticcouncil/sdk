@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { ibtc, intr, dot, hdx, usdt } from '../assets';
 import { hydraDX, interlay } from '../chains';
-import { ExtrinsicBuilderV2 } from '../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +14,7 @@ const toHydraDX: AssetConfig[] = [
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetConfig({
     asset: ibtc,
@@ -26,7 +25,7 @@ const toHydraDX: AssetConfig[] = [
       asset: ibtc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -41,7 +40,7 @@ const toHydraDX: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -56,7 +55,7 @@ const toHydraDX: AssetConfig[] = [
       asset: hdx,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -72,7 +71,7 @@ const toHydraDX: AssetConfig[] = [
   //     asset: usdt,
   //     balance: BalanceBuilder().substrate().tokens().accounts(),
   //   },
-  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   //   fee: {
   //     asset: intr,
   //     balance: BalanceBuilder().substrate().tokens().accounts(),

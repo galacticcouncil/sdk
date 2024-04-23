@@ -1,6 +1,11 @@
-import { ChainTransferConfig, TransactInfo } from '@galacticcouncil/xcm-core';
-import { FeeConfigBuilder } from '@moonbeam-network/xcm-builder';
-import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
+import {
+  AnyChain,
+  AssetAmount,
+  ChainTransferConfig,
+  FeeConfigBuilder,
+  Parachain,
+  TransactInfo,
+} from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
@@ -201,15 +206,14 @@ export class TransferService {
     const { chain, config } = transferConfig;
     const asset = config.asset;
 
-    if (!config.min) {
-      return this.getAssetMin(transferConfig);
+    if (chain instanceof Parachain && config.min) {
+      const minAssetId = chain.getMinAssetId(asset);
+      const minBalanceConfig = config.min.build({
+        asset: minAssetId,
+      });
+      return this.balance.read(asset, minBalanceConfig);
     }
-
-    const minAssetId = chain.getMinAssetId(asset);
-    const minBalanceConfig = config.min.build({
-      asset: minAssetId,
-    });
-    return this.balance.read(asset, minBalanceConfig);
+    return this.getAssetMin(transferConfig);
   }
 
   async getAssetMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
@@ -247,18 +251,15 @@ export class TransferService {
     );
 
     const proxyChain = transferConfig.config.transactVia;
-    let extrinsic;
-    if (proxyChain) {
-      console.log('Routed via ' + proxyChain.key);
-      const substrate = await SubstrateService.create(
-        proxyChain,
-        this.substrate.config
-      );
-      extrinsic = substrate.getExtrinsic(config);
-    } else {
-      extrinsic = this.substrate.getExtrinsic(config);
+    if (!proxyChain) {
+      throw new Error('Transact via configuration is mandatory for transact');
     }
 
+    const substrate = await SubstrateService.create(
+      proxyChain,
+      this.substrate.config
+    );
+    const extrinsic = substrate.getExtrinsic(config);
     const { weight } = await extrinsic.paymentInfo(address);
     return {
       call: extrinsic.method.toHex(),

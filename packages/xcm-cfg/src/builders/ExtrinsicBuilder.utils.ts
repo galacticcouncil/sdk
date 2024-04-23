@@ -1,8 +1,8 @@
 import {
-  ExtrinsicConfigBuilderParamsV2,
+  ExtrinsicConfigBuilderParams,
+  Parachain,
   calculateMDA,
 } from '@galacticcouncil/xcm-core';
-import { XcmVersion } from '@moonbeam-network/xcm-builder';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/types';
 import { getTypeDef } from '@polkadot/types';
 import { u8aToHex } from '@polkadot/util';
@@ -58,14 +58,22 @@ export function getExtrinsicAccount(address: string) {
       };
 }
 
-export function getAccount({
+export function getTransactAccount({
   address,
   sender,
   source,
   transactVia,
-}: ExtrinsicConfigBuilderParamsV2) {
-  if (transactVia?.key === 'moonbeam') {
+}: ExtrinsicConfigBuilderParams) {
+  if (transactVia?.key === 'moonbeam' && source instanceof Parachain) {
     return calculateMDA(sender, source.parachainId.toString(), 1);
   }
   return address;
 }
+
+export enum XcmVersion {
+  v1 = 'V1',
+  v2 = 'V2',
+  v3 = 'V3',
+}
+
+export type Parents = 0 | 1;

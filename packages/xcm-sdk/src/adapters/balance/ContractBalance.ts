@@ -1,5 +1,4 @@
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
-import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
+import { Asset, AssetAmount, ContractConfig } from '@galacticcouncil/xcm-core';
 
 import {
   Observable,

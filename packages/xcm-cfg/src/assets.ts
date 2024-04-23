@@ -1,4 +1,4 @@
-import { Asset } from '@moonbeam-network/xcm-types';
+import { Asset } from '@galacticcouncil/xcm-core';
 
 export const aca = new Asset({
   key: 'aca',

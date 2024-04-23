@@ -1,5 +1,9 @@
-import { SubstrateQueryConfig } from '@moonbeam-network/xcm-builder';
-import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
+import {
+  Asset,
+  AssetAmount,
+  SubstrateQueryConfig,
+} from '@galacticcouncil/xcm-core';
+
 import { QueryableStorage } from '@polkadot/api/types';
 
 import {

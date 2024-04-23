@@ -1,26 +1,23 @@
-import {
-  AssetMinConfigBuilder,
-  BalanceConfigBuilder,
-  FeeConfigBuilder,
-} from '@moonbeam-network/xcm-builder';
-import { AnyChain, Asset } from '@moonbeam-network/xcm-types';
+import { Asset } from '../../asset';
+import { AnyChain, Parachain } from '../../chain';
 
-import {
-  ExtrinsicConfigBuilderV2,
-  ContractConfigBuilderV2,
-} from '../overrides';
+import { BalanceConfigBuilder } from './balance';
+import { ContractConfigBuilder } from './contract';
+import { ExtrinsicConfigBuilder } from './extrinsic';
+import { FeeAssetConfig, DestinationFeeConfig } from './fee';
+import { MinConfigBuilder } from './min';
 
 export interface AssetConfigParams {
   asset: Asset;
   balance: BalanceConfigBuilder;
-  contract?: ContractConfigBuilderV2;
+  contract?: ContractConfigBuilder;
   destination: AnyChain;
   destinationFee: DestinationFeeConfig;
-  extrinsic?: ExtrinsicConfigBuilderV2;
+  extrinsic?: ExtrinsicConfigBuilder;
   fee?: FeeAssetConfig;
-  min?: AssetMinConfigBuilder;
-  transact?: ExtrinsicConfigBuilderV2;
-  transactVia?: AnyChain;
+  min?: MinConfigBuilder;
+  transact?: ExtrinsicConfigBuilder;
+  transactVia?: Parachain;
 }
 
 export class AssetConfig {
@@ -28,21 +25,21 @@ export class AssetConfig {
 
   readonly balance: BalanceConfigBuilder;
 
-  readonly contract?: ContractConfigBuilderV2;
+  readonly contract?: ContractConfigBuilder;
 
   readonly destination: AnyChain;
 
   readonly destinationFee: DestinationFeeConfig;
 
-  readonly extrinsic?: ExtrinsicConfigBuilderV2;
+  readonly extrinsic?: ExtrinsicConfigBuilder;
 
   readonly fee?: FeeAssetConfig;
 
-  readonly min?: AssetMinConfigBuilder;
+  readonly min?: MinConfigBuilder;
 
-  readonly transact?: ExtrinsicConfigBuilderV2;
+  readonly transact?: ExtrinsicConfigBuilder;
 
-  readonly transactVia?: AnyChain;
+  readonly transactVia?: Parachain;
 
   constructor({
     asset,
@@ -67,14 +64,4 @@ export class AssetConfig {
     this.transact = transact;
     this.transactVia = transactVia;
   }
-}
-
-export interface DestinationFeeConfig extends FeeAssetConfig {
-  amount: number | FeeConfigBuilder;
-}
-
-export interface FeeAssetConfig {
-  asset: Asset;
-  balance: BalanceConfigBuilder;
-  xcmDeliveryFeeAmount?: number;
 }

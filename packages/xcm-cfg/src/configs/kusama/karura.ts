@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { bsx, kar, ksm, usdt } from '../../assets';
 import { basilisk, karura, kusama, kusamaAssetHub } from '../../chains';
-import { ExtrinsicBuilderV2 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toAssetHub: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +14,7 @@ const toAssetHub: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiasset().X3(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
     fee: {
       asset: kar,
       balance: BalanceBuilder().substrate().system().account(),
@@ -33,7 +32,7 @@ const toBasilisk: AssetConfig[] = [
       asset: bsx,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: kar,
       balance: BalanceBuilder().substrate().system().account(),
@@ -51,7 +50,7 @@ const toKusama: AssetConfig[] = [
       asset: ksm,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: kar,
       balance: BalanceBuilder().substrate().system().account(),

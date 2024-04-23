@@ -1,15 +1,15 @@
 import {
-  ExtrinsicConfigBuilderV2,
-  ExtrinsicConfigBuilderParamsV2,
+  ExtrinsicConfig,
+  ExtrinsicConfigBuilder,
+  ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
-import { ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 
 const pallet = 'utility';
 
-const batchAll = (configs: ExtrinsicConfigBuilderV2[]) => {
+const batchAll = (configs: ExtrinsicConfigBuilder[]) => {
   const func = 'batchAll';
   return {
-    build: (params: ExtrinsicConfigBuilderParamsV2) =>
+    build: (params: ExtrinsicConfigBuilderParams) =>
       new ExtrinsicConfig({
         module: pallet,
         func,

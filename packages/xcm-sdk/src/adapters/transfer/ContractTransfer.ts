@@ -1,5 +1,4 @@
-import { ContractConfig } from '@moonbeam-network/xcm-builder';
-import { AssetAmount } from '@moonbeam-network/xcm-types';
+import { AssetAmount, ContractConfig } from '@galacticcouncil/xcm-core';
 
 import { EvmTransferFactory } from './evm';
 import { TransferProvider } from '../types';

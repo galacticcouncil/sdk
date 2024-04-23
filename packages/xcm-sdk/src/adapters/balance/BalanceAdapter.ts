@@ -1,5 +1,4 @@
-import { BaseConfig } from '@moonbeam-network/xcm-builder';
-import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
+import { Asset, AssetAmount, BaseConfig } from '@galacticcouncil/xcm-core';
 
 import { Observable } from 'rxjs';
 

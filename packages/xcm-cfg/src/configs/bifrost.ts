@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { bnc, vdot, dot, usdc, usdt, hdx, pink } from '../assets';
 import { assetHub, bifrost, hydraDX, polkadot } from '../chains';
-import { ExtrinsicBuilderV2 } from '../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -15,7 +14,7 @@ const toHydraDX: AssetConfig[] = [
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetConfig({
     asset: vdot,
@@ -26,7 +25,7 @@ const toHydraDX: AssetConfig[] = [
       asset: vdot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
@@ -41,7 +40,7 @@ const toHydraDX: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
@@ -57,7 +56,7 @@ const toHydraDX: AssetConfig[] = [
   //     asset: usdt,
   //     balance: BalanceBuilder().substrate().tokens().accounts(),
   //   },
-  //   extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   //   fee: {
   //     asset: bnc,
   //     balance: BalanceBuilder().substrate().system().account(),
@@ -75,7 +74,7 @@ const toPolkadot: AssetConfig[] = [
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
@@ -93,7 +92,7 @@ const toAssetHub: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets().X3(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
@@ -108,7 +107,7 @@ const toAssetHub: AssetConfig[] = [
       asset: usdt,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets().X3(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),
@@ -123,7 +122,7 @@ const toAssetHub: AssetConfig[] = [
       asset: usdc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transferMultiassets().X3(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets().X3(),
     fee: {
       asset: bnc,
       balance: BalanceBuilder().substrate().system().account(),

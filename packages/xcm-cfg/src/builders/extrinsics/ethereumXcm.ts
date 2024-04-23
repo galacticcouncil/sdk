@@ -1,16 +1,15 @@
 import {
   Abi,
-  ContractConfigBuilderV2,
-  ExtrinsicConfigBuilderV2,
+  ContractConfigBuilder,
+  ExtrinsicConfig,
+  ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xcm-core';
-import { XcmVersion, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
 import { encodeFunctionData } from 'viem';
+import { XcmVersion } from '../ExtrinsicBuilder.utils';
 
 const pallet = 'ethereumXcm';
 
-const transact = (
-  config: ContractConfigBuilderV2
-): ExtrinsicConfigBuilderV2 => {
+const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
   const func = 'transact';
   return {
     build: (params) => {

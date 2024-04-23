@@ -1,9 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { xrt } from '../../assets';
 import { basilisk, robonomics } from '../../chains';
-import { ExtrinsicBuilderV2 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const robonomicsConfig = new ChainConfig({
   assets: [
@@ -16,7 +15,7 @@ export const robonomicsConfig = new ChainConfig({
         asset: xrt,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilderV2()
+      extrinsic: ExtrinsicBuilder()
         .polkadotXcm()
         .limitedReserveTransferAssets()
         .X1(),

@@ -1,4 +1,5 @@
-import { AnyChain, Asset } from '@moonbeam-network/xcm-types';
+import { Asset } from '../../asset';
+import { AnyChain } from '../../chain';
 
 import { AssetConfig } from './AssetConfig';
 

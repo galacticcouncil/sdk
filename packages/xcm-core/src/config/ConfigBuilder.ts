@@ -1,12 +1,13 @@
-import { AnyChain, Asset, Ecosystem } from '@moonbeam-network/xcm-types';
-import { ConfigService } from './ConfigService';
+import { Asset } from '../asset';
+import { AnyChain, ChainEcosystem } from '../chain';
 
+import { ConfigService } from './ConfigService';
 import { TransferConfig } from './types';
 
 export function ConfigBuilder(service: ConfigService) {
   const config = service;
   return {
-    assets: (ecosystem?: Ecosystem) => {
+    assets: (ecosystem?: ChainEcosystem) => {
       const assets = config.getEcosystemAssets(ecosystem);
 
       return {

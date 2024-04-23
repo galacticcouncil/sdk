@@ -29,13 +29,14 @@
     "clean": "rimraf build",
     "link": "npm ln"
   },
+  "devDependencies": {
+    "@types/big.js": "^6.2.2"
+  },
   "dependencies": {
-    "@moonbeam-network/xcm-builder": "1.0.13",
-    "@moonbeam-network/xcm-types": "1.0.4",
     "@moonbeam-network/xcm-utils": "1.0.4",
     "@wormhole-foundation/sdk-base": "^0.5.2",
-    "@wormhole-foundation/sdk-definitions": "^0.5.2",
     "@wormhole-foundation/sdk-connect": "^0.5.2",
+    "@wormhole-foundation/sdk-definitions": "^0.5.2",
     "@wormhole-foundation/sdk-evm": "^0.5.2",
     "@wormhole-foundation/sdk-evm-tokenbridge": "^0.5.2"
   },

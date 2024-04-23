@@ -1,4 +1,4 @@
-import { Asset } from '@moonbeam-network/xcm-types';
+import { Asset } from '../asset';
 import {
   Chain,
   ChainAssetData,
@@ -8,11 +8,9 @@ import {
 } from './Chain';
 
 export interface ParachainAssetsData extends ChainAssetData {
-  balanceId?: ChainAssetId;
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;
   palletInstance?: number;
-  min?: number;
 }
 
 export interface ParachainParams extends ChainParams<ParachainAssetsData> {
@@ -57,10 +55,6 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   getType(): ChainType {
     return ChainType.EvmParachain;
-  }
-
-  getAssetMin(asset: Asset): number {
-    return this.assetsData.get(asset.key)?.min ?? 0;
   }
 
   getAssetPalletInstance(asset: Asset): number | undefined {

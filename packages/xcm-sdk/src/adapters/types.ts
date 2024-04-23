@@ -1,4 +1,4 @@
-import { Asset, AssetAmount } from '@moonbeam-network/xcm-types';
+import { Asset, AssetAmount } from '@galacticcouncil/xcm-core';
 
 import { Observable } from 'rxjs';
 import { XCall } from '../types';

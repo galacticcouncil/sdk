@@ -1,9 +1,9 @@
 import {
   AnyChain,
-  Ecosystem,
+  ChainEcosystem as Ecosystem,
   EvmParachain,
   Parachain,
-} from '@moonbeam-network/xcm-types';
+} from '@galacticcouncil/xcm-core';
 
 import {
   aca,
@@ -45,6 +45,7 @@ import {
 } from './assets';
 
 export const polkadot = new Parachain({
+  assetsData: [],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
@@ -61,6 +62,11 @@ export const acala = new Parachain({
       asset: aca,
       id: { Token: aca.originSymbol },
       metadataId: { NativeAssetId: { Token: aca.originSymbol } },
+    },
+    {
+      asset: glmr,
+      id: { ForeignAsset: 0 },
+      decimals: 18,
     },
     {
       asset: dai_awh,
@@ -89,6 +95,8 @@ export const acala = new Parachain({
   parachainId: 2000,
   ss58Format: 10,
   ws: 'wss://acala-rpc.aca-api.network',
+  //ws: 'wss://acala-rpc-1.aca-api.network',
+  //ws: 'wss://acala-rpc-2.aca-api.network',
 });
 
 export const assetHub = new Parachain({
@@ -404,6 +412,8 @@ export const hydraDX = new Parachain({
   parachainId: 2034,
   ss58Format: 63,
   ws: 'wss://hydradx-rpc.dwellir.com',
+  //ws: 'wss://rpc.hydradx.cloud',
+  //ws: 'wss://hydradx.paras.dotters.network',
 });
 
 export const interlay = new Parachain({
@@ -525,6 +535,7 @@ export const moonbeam = new EvmParachain({
   rpc: 'https://rpc.api.moonbeam.network',
   ss58Format: 1284,
   ws: 'wss://wss.api.moonbeam.network',
+  //ws: 'wss://moonbeam-rpc.dwellir.com',
 });
 
 export const subsocial = new Parachain({
@@ -641,53 +652,31 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
-// MRL chain config
-
-export const acalaMrl = new EvmParachain({
-  ...moonbeam,
-  id: 787,
-  key: 'acalaMrl',
-  name: 'Acala (Mrl)',
-  assetsData: [
-    {
-      asset: dai_mwh,
-      id: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
-      //id: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
-      //balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
-      metadataId: 0,
-      decimals: 18,
-    },
-  ],
-});
+// EVM chain config
 
 export const ethereumMrl = new EvmParachain({
   ...moonbeam,
   id: 1,
-  key: 'ethereumMrl',
-  name: 'Ethereum (Mrl)',
+  key: 'ethereum',
+  name: 'Ethereum',
   assetsData: [
     {
       asset: dai_mwh,
       id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-      metadataId: 0,
       decimals: 18,
     },
     {
       asset: wbtc_mwh,
       id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-      metadataId: 0,
       decimals: 8,
     },
     {
       asset: weth_mwh,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      metadataId: 0,
       decimals: 18,
     },
   ],
 });
-
-const mrlChains: AnyChain[] = [acalaMrl, ethereumMrl];
 
 export const polkadotChains: AnyChain[] = [
   acala,
@@ -705,7 +694,7 @@ export const polkadotChains: AnyChain[] = [
   subsocial,
   unique,
   zeitgeist,
-].concat(mrlChains);
+];
 
 // Kusama chains configuration
 
@@ -806,6 +795,7 @@ export const integritee = new Parachain({
 });
 
 export const kusama = new Parachain({
+  assetsData: [],
   ecosystem: Ecosystem.Kusama,
   genesisHash:
     '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',

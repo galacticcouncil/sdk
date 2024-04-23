@@ -1,13 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { BalanceBuilder } from '@moonbeam-network/xcm-builder';
 
 import { aca, dai_awh, wbtc_awh, weth_awh } from '../assets';
 import { hydraDX, acala, moonbeam } from '../chains';
-import {
-  BalanceBuilderV2,
-  ContractBuilderV2,
-  ExtrinsicBuilderV2,
-} from '../builders';
+import { BalanceBuilder, ContractBuilder, ExtrinsicBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -19,7 +14,7 @@ const toHydraDX: AssetConfig[] = [
       asset: dai_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
@@ -34,7 +29,7 @@ const toHydraDX: AssetConfig[] = [
       asset: wbtc_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
@@ -49,7 +44,7 @@ const toHydraDX: AssetConfig[] = [
       asset: weth_awh,
       balance: BalanceBuilder().evm().erc20(),
     },
-    extrinsic: ExtrinsicBuilderV2().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
@@ -61,7 +56,7 @@ const toMoonbeamViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2().TokenBridge().transferTokens(),
+    contract: ContractBuilder().TokenBridge().transferTokens(),
     destination: moonbeam,
     destinationFee: {
       amount: 0.004,
@@ -70,7 +65,7 @@ const toMoonbeamViaWormhole: AssetConfig[] = [
     },
     fee: {
       asset: aca,
-      balance: BalanceBuilderV2().evm().native(),
+      balance: BalanceBuilder().evm().native(),
     },
   }),
 ];
@@ -79,10 +74,7 @@ const toHydraDXViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilderV2()
-      .TokenBridge()
-      .transferTokensWithPayload()
-      .mrl(),
+    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -91,7 +83,7 @@ const toHydraDXViaWormhole: AssetConfig[] = [
     },
     fee: {
       asset: aca,
-      balance: BalanceBuilderV2().evm().native(),
+      balance: BalanceBuilder().evm().native(),
     },
   }),
 ];

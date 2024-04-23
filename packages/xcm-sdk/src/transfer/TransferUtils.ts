@@ -1,13 +1,16 @@
 import {
+  AnyChain,
+  AssetAmount,
   AssetConfig,
   ChainTransferConfig,
+  ContractConfig,
+  ExtrinsicConfig,
   FeeAssetConfig,
-  ExtrinsicConfigBuilderParamsV2,
   TransactInfo,
 } from '@galacticcouncil/xcm-core';
-import { ContractConfig, ExtrinsicConfig } from '@moonbeam-network/xcm-builder';
-import { AnyChain, AssetAmount } from '@moonbeam-network/xcm-types';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
+
+import Big from 'big.js';
 
 /**
  * Calculate maximum allowed amount of asset to send from source to
@@ -29,8 +32,8 @@ export function calculateMax(
   const result = balance
     .toBig()
     .minus(min.toBig())
-    .minus(balance.isSame(ed) ? ed.toBig() : 0n)
-    .minus(balance.isSame(fee) ? fee.toBig() : 0n);
+    .minus(balance.isSame(ed) ? ed.toBig() : new Big(0))
+    .minus(balance.isSame(fee) ? fee.toBig() : new Big(0));
   return balance.copyWith({
     amount: result.lt(0) ? 0n : BigInt(result.toFixed()),
   });
@@ -59,11 +62,13 @@ export function calculateMin(
 
   const result = zero
     .toBig()
-    .plus(balance.isSame(fee) ? fee.toBig() : 0n)
+    .plus(balance.isSame(fee) ? fee.toBig() : new Big(0))
     .plus(
-      balance.isSame(ed) && balance.toBig().lt(ed.toBig()) ? ed.toBig() : 0n
+      balance.isSame(ed) && balance.toBig().lt(ed.toBig())
+        ? ed.toBig()
+        : new Big(0)
     )
-    .plus(balance.toBig().lt(min.toBig()) ? min.toBig() : 0n);
+    .plus(balance.toBig().lt(min.toBig()) ? min.toBig() : new Big(0));
 
   return balance.copyWith({
     amount: BigInt(result.toFixed()),
@@ -161,7 +166,7 @@ function buildExtrinsic(
     source: chain,
     transact: transactInfo,
     transactVia: config.transactVia,
-  } as ExtrinsicConfigBuilderParamsV2);
+  });
 }
 
 function buildContract(

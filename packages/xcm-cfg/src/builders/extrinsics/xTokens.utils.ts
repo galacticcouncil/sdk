@@ -1,9 +1,9 @@
-import { XcmVersion } from '@moonbeam-network/xcm-builder';
-import { AnyChain } from '@moonbeam-network/xcm-types';
+import { Parachain } from '@galacticcouncil/xcm-core';
+import { XcmVersion } from '../ExtrinsicBuilder.utils';
 
 export const toDest = (
   version: XcmVersion,
-  destination: AnyChain,
+  destination: Parachain,
   account: any
 ) => {
   if (destination.key === 'polkadot' || destination.key === 'kusama') {
