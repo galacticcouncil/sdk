@@ -3,22 +3,22 @@ import {
   ExtrinsicBuilder,
 } from '@moonbeam-network/xcm-builder';
 import { AssetConfig, ChainConfig } from '@moonbeam-network/xcm-config';
-import { kilt } from '../assets';
-import { hydraDX, kilt_chain } from '../chains';
+import { pen } from '../assets';
+import { hydraDX, pendulum } from '../chains';
 
-export const kiltConfig = new ChainConfig({
+export const pendulumConfig = new ChainConfig({
   assets: [
     new AssetConfig({
-      asset: kilt,
+      asset: pen,
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
-        amount: 0.03,
-        asset: kilt,
+        amount: 0.2,
+        asset: pen,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().here(),
+      extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     }),
   ],
-  chain: kilt_chain,
+  chain: pendulum,
 });

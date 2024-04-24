@@ -384,7 +384,7 @@ export const hydraDX = new Parachain({
     },
     {
       asset: kilt,
-      id: 27,
+      id: 28,
       decimals: 15,
     },
     {
@@ -655,6 +655,23 @@ export const kilt_chain = new Parachain({
   ws: 'wss://kilt-rpc.dwellir.com',
 });
 
+export const pendulum = new Parachain({
+  assetsData: [
+    {
+      asset: pen,
+      id: 'Native',
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86',
+  key: 'pendulum',
+  name: 'Pendulum',
+  parachainId: 2094,
+  ss58Format: 56,
+  ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
+});
+
 const polkadotChains: AnyChain[] = [
   acala,
   assetHub,
@@ -668,6 +685,7 @@ const polkadotChains: AnyChain[] = [
   moonbeam,
   nodle,
   phala,
+  pendulum,
   polkadot,
   subsocial,
   unique,

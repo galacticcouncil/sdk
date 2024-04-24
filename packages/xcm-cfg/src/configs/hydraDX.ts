@@ -6,6 +6,7 @@ import {
 import {
   AssetConfig,
   ChainConfig,
+  pendulum,
   polkadot,
 } from '@moonbeam-network/xcm-config';
 
@@ -25,6 +26,7 @@ import {
   intr,
   kilt,
   nodl,
+  pen,
   pha,
   pink,
   sub,
@@ -708,8 +710,26 @@ const toKilt: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: kilt_chain,
     destinationFee: {
-      amount: 1,
+      amount: 0.02,
       asset: kilt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
+const toPendulum: AssetConfig[] = [
+  new AssetConfig({
+    asset: pen,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: pendulum,
+    destinationFee: {
+      amount: 1.1,
+      asset: pen,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
@@ -737,6 +757,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toZeitgeist,
     ...toPhala,
     ...toKilt,
+    ...toPendulum,
   ],
   chain: hydraDX,
 });
