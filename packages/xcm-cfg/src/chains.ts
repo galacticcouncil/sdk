@@ -42,6 +42,8 @@ import {
   pink,
   ded,
   dota,
+  kilt,
+  pen,
 } from './assets';
 
 export const acala = new Parachain({
@@ -380,6 +382,16 @@ export const hydraDX = new Parachain({
       decimals: 4,
       palletInstance: 50,
     },
+    {
+      asset: kilt,
+      id: 27,
+      decimals: 15,
+    },
+    {
+      asset: pen,
+      id: 1000081,
+      decimals: 12,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -626,6 +638,23 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
+export const kilt_chain = new Parachain({
+  assetsData: [
+    {
+      asset: kilt,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',
+  key: 'kilt_chain',
+  name: 'Kilt',
+  parachainId: 2086,
+  ss58Format: 38,
+  ws: 'wss://kilt-rpc.dwellir.com',
+});
+
 const polkadotChains: AnyChain[] = [
   acala,
   assetHub,
@@ -634,6 +663,7 @@ const polkadotChains: AnyChain[] = [
   centrifuge,
   crust,
   hydraDX,
+  kilt_chain,
   interlay,
   moonbeam,
   nodle,
