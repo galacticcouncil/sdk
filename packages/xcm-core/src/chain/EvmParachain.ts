@@ -1,7 +1,7 @@
 import { Chain as EvmDef } from 'viem';
 import { ChainType } from './Chain';
 import { Parachain, ParachainParams } from './Parachain';
-import { EvmClient, EvmResolver, WormholeDef } from '../evm';
+import { EvmClient, EvmResolver, WormholeChain, WormholeDef } from '../evm';
 import { isH160Address } from '../utils';
 
 export interface EvmParachainParams extends ParachainParams {
@@ -10,7 +10,7 @@ export interface EvmParachainParams extends ParachainParams {
   evmResolver?: EvmResolver;
 }
 
-export class EvmParachain extends Parachain {
+export class EvmParachain extends Parachain implements WormholeChain {
   readonly defEvm: EvmDef;
   readonly defWormhole?: WormholeDef;
   readonly evmResolver?: EvmResolver;

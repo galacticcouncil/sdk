@@ -119,7 +119,7 @@ export function buildTransact(
     fee: destFee,
     sender: address,
     source: chain,
-    transactVia: config.transactVia,
+    via: config.via,
   });
 }
 
@@ -177,7 +177,7 @@ function buildExtrinsic(
     fee: destFee,
     source: chain,
     transact: transactInfo,
-    transactVia: config.transactVia,
+    via: config.via,
   });
 }
 
@@ -196,6 +196,6 @@ function buildContract(
     destination: destChain,
     fee: destFee,
     source: chain,
-    transactVia: config.transactVia,
+    via: config.via,
   });
 }

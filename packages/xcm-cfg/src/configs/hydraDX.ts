@@ -712,7 +712,6 @@ const toAcalaViaWormhole: AssetConfig[] = [
       asset: hdx,
       balance: BalanceBuilder().substrate().system().account(),
     },
-    transactVia: moonbeam,
     transact: ExtrinsicBuilder()
       .ethereumXcm()
       .transact(
@@ -723,6 +722,7 @@ const toAcalaViaWormhole: AssetConfig[] = [
             ContractBuilder().TokenBridge().transferTokens(),
           ])
       ),
+    via: moonbeam,
   }),
 ];
 

@@ -1,13 +1,13 @@
 import { Chain as EvmDef } from 'viem';
 import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
-import { EvmClient, WormholeDef } from '../evm';
+import { EvmClient, WormholeChain, WormholeDef } from '../evm';
 
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
   defEvm: EvmDef;
   defWormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> {
+export class EvmChain extends Chain<ChainAssetData> implements WormholeChain {
   readonly defEvm: EvmDef;
   readonly defWormhole?: WormholeDef;
 

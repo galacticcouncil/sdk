@@ -244,12 +244,12 @@ export class TransferService {
       transferConfig
     );
 
-    const proxyChain = transferConfig.config.transactVia;
-    if (!proxyChain) {
-      throw new Error('Transact via configuration is mandatory for transact');
+    const viaChain = transferConfig.config.via;
+    if (!viaChain) {
+      throw new Error('Proxy chain config missing. Specify [via] parameter');
     }
 
-    const substrate = await SubstrateService.create(proxyChain);
+    const substrate = await SubstrateService.create(viaChain);
     const extrinsic = substrate.getExtrinsic(config);
     const { weight } = await extrinsic.paymentInfo(address);
     return {

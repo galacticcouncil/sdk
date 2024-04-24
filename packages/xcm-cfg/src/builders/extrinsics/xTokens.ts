@@ -147,7 +147,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
-        const { amount, asset, destination, fee, source, transactVia } = params;
+        const { amount, asset, destination, fee, source, via } = params;
         const rcv = destination as Parachain;
         const version = XcmVersion.v3;
         const assetId = source.getAssetId(asset);
@@ -160,7 +160,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
             [feeAssetId, fee.amount],
           ],
           1,
-          toDest(version, transactVia || rcv, account),
+          toDest(version, via || rcv, account),
           'Unlimited',
         ];
       },

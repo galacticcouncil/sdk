@@ -1,5 +1,5 @@
 import { Asset, AssetAmount } from '../../../asset';
-import { AnyChain, Parachain } from '../../../chain';
+import { AnyChain, EvmParachain } from '../../../chain';
 
 import { ContractConfig } from './ContractConfig';
 
@@ -10,7 +10,7 @@ export interface ContractConfigBuilderParams {
   destination: AnyChain;
   fee: AssetAmount;
   source: AnyChain;
-  transactVia?: Parachain;
+  via?: EvmParachain;
 }
 
 export interface ContractConfigBuilder {

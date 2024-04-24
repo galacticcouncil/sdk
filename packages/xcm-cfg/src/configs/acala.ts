@@ -85,6 +85,7 @@ const toHydraDXViaWormhole: AssetConfig[] = [
       asset: aca,
       balance: BalanceBuilder().evm().native(),
     },
+    via: moonbeam,
   }),
 ];
 

@@ -181,7 +181,7 @@ const send = () => {
   return {
     transact: (executionCost: number): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { destination, fee, source, transact, transactVia } = params;
+        const { destination, fee, source, transact, via } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
@@ -197,7 +197,7 @@ const send = () => {
             const rcv = destination as Parachain;
             const feePalletInstance = ctx.getAssetPalletInstance(fee);
             return [
-              toDest(version, transactVia || rcv),
+              toDest(version, via || rcv),
               toTransactMessage(
                 version,
                 account,

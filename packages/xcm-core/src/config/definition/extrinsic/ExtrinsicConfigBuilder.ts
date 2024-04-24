@@ -1,5 +1,5 @@
 import { Asset, AssetAmount } from '../../../asset';
-import { AnyChain, Parachain } from '../../../chain';
+import { AnyChain, EvmParachain } from '../../../chain';
 
 import { ExtrinsicConfig } from './ExtrinsicConfig';
 
@@ -22,7 +22,7 @@ export interface ExtrinsicConfigBuilderParams {
   sender: string;
   source: AnyChain;
   transact?: TransactInfo;
-  transactVia?: Parachain;
+  via?: EvmParachain;
 }
 
 export interface ExtrinsicConfigBuilder {

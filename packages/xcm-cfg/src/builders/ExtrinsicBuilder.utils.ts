@@ -62,9 +62,9 @@ export function getTransactAccount({
   address,
   sender,
   source,
-  transactVia,
+  via,
 }: ExtrinsicConfigBuilderParams) {
-  if (transactVia?.key === 'moonbeam' && source instanceof Parachain) {
+  if (via?.key === 'moonbeam' && source instanceof Parachain) {
     return calculateMDA(sender, source.parachainId.toString(), 1);
   }
   return address;
