@@ -1,8 +1,8 @@
-import { AssetConfig, ChainConfig, Wormhole } from '@galacticcouncil/xcm-core';
+import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { dai_mwh, eth } from '../assets';
-import { ethereumMrl, hydraDX, moonbeam } from '../chains';
-import { BalanceBuilder, ContractBuilder } from '../builders';
+import { dai_mwh, eth } from '../../assets';
+import { ethereum, hydraDX, moonbeam } from '../../chains';
+import { BalanceBuilder, ContractBuilder } from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -26,7 +26,7 @@ const toMoonbeam: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    //contract: ContractBuilderV2().Bridge().transferViaMrl(Wormhole.Ethereum),
+    contract: ContractBuilder().TokenBridge().transferTokens(),
     destination: moonbeam,
     destinationFee: {
       amount: 0.004,
@@ -40,7 +40,7 @@ const toMoonbeam: AssetConfig[] = [
   }),
 ];
 
-export const ethereumMrlConfig = new ChainConfig({
+export const ethereumConfig = new ChainConfig({
   assets: [...toHydraDX, ...toMoonbeam],
-  chain: ethereumMrl,
+  chain: ethereum,
 });

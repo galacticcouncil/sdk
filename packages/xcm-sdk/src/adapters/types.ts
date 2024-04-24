@@ -5,7 +5,7 @@ import { XCall } from '../types';
 
 export interface BalanceProvider<T> {
   read(asset: Asset, config: T): Promise<AssetAmount>;
-  subscribe(asset: Asset, config: T): Observable<AssetAmount>;
+  subscribe(asset: Asset, config: T): Promise<Observable<AssetAmount>>;
 }
 
 export interface TransferProvider<T> {

@@ -4,6 +4,7 @@ import {
   AssetConfig,
   ChainTransferConfig,
   ContractConfig,
+  EvmParachain,
   ExtrinsicConfig,
   FeeAssetConfig,
   TransactInfo,
@@ -73,6 +74,17 @@ export function calculateMin(
   return balance.copyWith({
     amount: BigInt(result.toFixed()),
   });
+}
+
+export async function getAddress(
+  address: string,
+  chain: AnyChain
+): Promise<string> {
+  if (chain.isEvmParachain()) {
+    const evmPara = chain as EvmParachain;
+    return evmPara.getDerivatedAddress(address);
+  }
+  return address;
 }
 
 export function getXcmDeliveryFee(

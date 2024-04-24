@@ -1,4 +1,5 @@
 import {
+  AnyParachain,
   Asset,
   AssetAmount,
   SubstrateQueryConfig,
@@ -20,23 +21,24 @@ import { BalanceProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
 
 export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
-  readonly #substrate: SubstrateService;
+  readonly #substrate: Promise<SubstrateService>;
 
-  constructor(substrate: SubstrateService) {
-    this.#substrate = substrate;
+  constructor(chain: AnyParachain) {
+    this.#substrate = SubstrateService.create(chain);
   }
 
   async read(asset: Asset, config: SubstrateQueryConfig): Promise<AssetAmount> {
-    const ob = this.subscribe(asset, config);
+    const ob = await this.subscribe(asset, config);
     return firstValueFrom(ob);
   }
 
-  subscribe(
+  async subscribe(
     asset: Asset,
     config: SubstrateQueryConfig
-  ): Observable<AssetAmount> {
+  ): Promise<Observable<AssetAmount>> {
     const subject = new ReplaySubject<QueryableStorage<'rxjs'>>(1);
-    subject.next(this.#substrate.api.rx.query);
+    const substrate = await this.#substrate;
+    subject.next(substrate.api.rx.query);
 
     const { module, func, args, transform } = config;
     return subject.pipe(
@@ -44,7 +46,7 @@ export class SubstrateBalance implements BalanceProvider<SubstrateQueryConfig> {
       concatMap((b) => transform(b)),
       distinctUntilChanged((prev, curr) => prev === curr),
       map((balance) => {
-        const params = normalizeAssetAmount(balance, asset, this.#substrate);
+        const params = normalizeAssetAmount(balance, asset, substrate);
         return AssetAmount.fromAsset(asset, params);
       })
     );

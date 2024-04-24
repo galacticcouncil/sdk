@@ -6,7 +6,6 @@ import {
   Chain,
   PublicClient,
   WalletClient,
-  webSocket,
 } from 'viem';
 
 export class EvmClient {
@@ -14,6 +13,26 @@ export class EvmClient {
 
   constructor(chain: Chain) {
     this.chain = chain;
+  }
+
+  get chainId(): number {
+    return this.chain.id;
+  }
+
+  get chainCurrency(): string {
+    return this.chain.nativeCurrency.symbol;
+  }
+
+  get chainDecimals(): number {
+    return this.chain.nativeCurrency.decimals;
+  }
+
+  get chainRpcs(): readonly string[] {
+    return this.chain.rpcUrls.default.http;
+  }
+
+  get chainExplorer(): string | undefined {
+    return this.chain.blockExplorers?.default.url;
   }
 
   getProvider(): PublicClient {

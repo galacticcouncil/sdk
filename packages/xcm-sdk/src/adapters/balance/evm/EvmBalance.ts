@@ -1,6 +1,4 @@
-import { ContractConfig } from '@galacticcouncil/xcm-core';
-
-import { EvmClient } from '../../../evm';
+import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
 
 export abstract class EvmBalance {
   readonly client: EvmClient;

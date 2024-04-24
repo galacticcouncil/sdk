@@ -4,3 +4,4 @@ import { EvmChain } from './EvmChain';
 
 export type AnyChain = Parachain | EvmParachain | EvmChain;
 export type AnyParachain = Parachain | EvmParachain;
+export type AnyEvmChain = EvmChain | EvmParachain;

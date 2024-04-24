@@ -1,7 +1,5 @@
-import { ContractConfig } from '@galacticcouncil/xcm-core';
+import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData, BaseError } from 'viem';
-
-import { EvmClient } from '../../../evm';
 
 export abstract class EvmTransfer {
   protected readonly client: EvmClient;

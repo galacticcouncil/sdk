@@ -1,7 +1,5 @@
-import { Abi } from '@galacticcouncil/xcm-core';
+import { Abi, EvmClient } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData } from 'viem';
-
-import { EvmClient } from '../EvmClient';
 
 export class Erc20Client {
   protected readonly client: EvmClient;

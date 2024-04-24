@@ -32,8 +32,6 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-core": "^1.0.0",
-    "@thi.ng/cache": "^2.1.35",
-    "buffer": "^6.0.3"
+    "@galacticcouncil/xcm-core": "^1.0.0"
   }
 }

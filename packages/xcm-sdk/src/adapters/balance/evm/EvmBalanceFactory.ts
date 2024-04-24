@@ -1,9 +1,7 @@
-import { ContractConfig } from '@galacticcouncil/xcm-core';
+import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
 import { Erc20 } from './Erc20';
 import { Native } from './Native';
 import { EvmBalance } from './EvmBalance';
-
-import { EvmClient } from '../../../evm';
 
 export class EvmBalanceFactory {
   static get(client: EvmClient, config: ContractConfig): EvmBalance {

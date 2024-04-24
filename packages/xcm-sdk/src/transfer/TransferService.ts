@@ -5,39 +5,32 @@ import {
   FeeConfigBuilder,
   Parachain,
   TransactInfo,
+  isH160Address,
 } from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
-import { EvmClient, EvmReconciler } from '../evm';
 import { SubstrateService } from '../substrate';
 import { XCall } from '../types';
-import { isH160Address } from '../utils';
 
 import {
   buildTransact,
   buildTransfer,
+  getAddress,
   getXcmDeliveryFee,
 } from './TransferUtils';
+import { MetadataUtils } from './MetadataUtils';
 
 export class TransferService {
-  private readonly balance: BalanceAdapter;
-  private readonly transfer: TransferAdapter;
+  readonly balance: BalanceAdapter;
+  readonly transfer: TransferAdapter;
 
-  readonly evmClient: EvmClient;
-  readonly evmReconciler: EvmReconciler;
-  readonly substrate: SubstrateService;
+  readonly metadata: MetadataUtils;
 
-  constructor(
-    evmClient: EvmClient,
-    evmReconciler: EvmReconciler,
-    substrate: SubstrateService
-  ) {
-    this.balance = new BalanceAdapter({ substrate, evmClient });
-    this.transfer = new TransferAdapter({ substrate, evmClient });
-    this.evmClient = evmClient;
-    this.evmReconciler = evmReconciler;
-    this.substrate = substrate;
+  constructor(chain: AnyChain) {
+    this.balance = new BalanceAdapter(chain);
+    this.transfer = new TransferAdapter(chain);
+    this.metadata = new MetadataUtils(chain);
   }
 
   async getBalance(
@@ -48,7 +41,7 @@ export class TransferService {
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
     const account = isH160Address(assetId.toString())
-      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+      ? await getAddress(address, chain)
       : address;
     const balanceConfig = config.balance.build({
       address: account,
@@ -60,9 +53,9 @@ export class TransferService {
   async getDestinationFee(
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
-    const { config } = transferConfig;
+    const { chain, config } = transferConfig;
     const { asset, amount } = config.destinationFee;
-    const decimals = this.substrate.getDecimals(asset);
+    const decimals = await this.metadata.getDecimals(asset);
 
     if (Number.isFinite(amount)) {
       return AssetAmount.fromAsset(asset, {
@@ -71,16 +64,20 @@ export class TransferService {
       });
     }
 
-    const feeConfigBuilder = amount as FeeConfigBuilder;
-    const feeConfig = feeConfigBuilder.build({
-      api: this.substrate.api,
-      asset: this.substrate.chain.getAssetId(asset),
-    });
-    const feeBalance = await feeConfig.call();
-    return AssetAmount.fromAsset(asset, {
-      amount: feeBalance,
-      decimals,
-    });
+    if (chain instanceof Parachain) {
+      const substrate = await SubstrateService.create(chain);
+      const feeConfigBuilder = amount as FeeConfigBuilder;
+      const feeConfig = feeConfigBuilder.build({
+        api: substrate.api,
+        asset: substrate.chain.getAssetId(asset),
+      });
+      const feeBalance = await feeConfig.call();
+      return AssetAmount.fromAsset(asset, {
+        amount: feeBalance,
+        decimals,
+      });
+    }
+    throw new Error('Destination fee configuration missing or invalid');
   }
 
   async getNetworkFee(
@@ -92,7 +89,7 @@ export class TransferService {
     destFee: AssetAmount,
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
-    const { config } = transferConfig;
+    const { chain, config } = transferConfig;
 
     const transactInfo = config.transact
       ? await this.getTransactInfo(
@@ -115,10 +112,7 @@ export class TransferService {
       transactInfo
     );
 
-    const sender = config.contract
-      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
-      : address;
-
+    const sender = config.contract ? await getAddress(address, chain) : address;
     return this.transfer.getFee(sender, amount, feeBalance, transfer);
   }
 
@@ -193,7 +187,7 @@ export class TransferService {
     const feeAsset = config.fee.asset;
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
     const account = isH160Address(feeAssetId.toString())
-      ? await this.evmReconciler.toEvmAddress(address, this.substrate.api)
+      ? await getAddress(address, chain)
       : address;
     const feeBalanceConfig = config.fee.balance.build({
       address: account,
@@ -220,7 +214,7 @@ export class TransferService {
     const { chain, config } = transferConfig;
     const asset = config.asset;
     const assetMin = chain.getAssetMin(asset);
-    const decimals = this.substrate.getDecimals(asset);
+    const decimals = await this.metadata.getDecimals(asset);
 
     let balance: bigint = 0n;
     if (assetMin) {
@@ -255,10 +249,7 @@ export class TransferService {
       throw new Error('Transact via configuration is mandatory for transact');
     }
 
-    const substrate = await SubstrateService.create(
-      proxyChain,
-      this.substrate.config
-    );
+    const substrate = await SubstrateService.create(proxyChain);
     const extrinsic = substrate.getExtrinsic(config);
     const { weight } = await extrinsic.paymentInfo(address);
     return {

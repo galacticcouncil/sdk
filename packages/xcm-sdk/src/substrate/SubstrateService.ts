@@ -4,40 +4,29 @@ import {
   AnyParachain,
   Asset,
   AssetAmount,
-  ConfigService,
   ExtrinsicConfig,
 } from '@galacticcouncil/xcm-core';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-
-import { SubstrateApis } from './SubstrateApis';
 
 export class SubstrateService {
   readonly api: ApiPromise;
 
   readonly chain: AnyParachain;
 
-  readonly config: ConfigService;
-
-  constructor(api: ApiPromise, chain: AnyParachain, config: ConfigService) {
-    this.api = api;
+  constructor(chain: AnyParachain, api: ApiPromise) {
     this.chain = chain;
-    this.config = config;
+    this.api = api;
   }
 
-  static async create(
-    chain: AnyParachain,
-    configService: ConfigService
-  ): Promise<SubstrateService> {
-    const apiPool = SubstrateApis.getInstance();
-    const api = await apiPool.api(chain.ws);
-    return new SubstrateService(api, chain, configService);
+  static async create(chain: AnyParachain): Promise<SubstrateService> {
+    return new SubstrateService(chain, await chain.api);
   }
 
   get asset(): Asset {
     const nativeToken = this.api.registry.chainTokens[0];
     const nativeTokenKey = nativeToken.toLowerCase();
-    const asset = this.config.getAsset(nativeTokenKey);
+    const asset = this.chain.getAsset(nativeTokenKey);
     if (!asset) {
       throw new Error(`No asset found for key "${nativeTokenKey}"`);
     }

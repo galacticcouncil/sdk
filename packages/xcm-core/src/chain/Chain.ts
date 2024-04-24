@@ -72,6 +72,10 @@ export abstract class Chain<T extends ChainAssetData> {
     return this.getType() === ChainType.EvmChain;
   }
 
+  getAsset(key: string): Asset | undefined {
+    return this.assetsData.get(key)?.asset;
+  }
+
   getAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.id ?? asset.originSymbol;
   }

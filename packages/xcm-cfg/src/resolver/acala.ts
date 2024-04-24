@@ -1,7 +1,8 @@
+import { EvmResolver } from '@galacticcouncil/xcm-core';
+
 import { ApiPromise } from '@polkadot/api';
 import { blake2AsU8a, decodeAddress } from '@polkadot/util-crypto';
 import { u8aConcat, u8aEq, u8aToHex } from '@polkadot/util';
-import { EvmResolver } from '../types';
 
 const ETH_PREFIX = 'evm:';
 

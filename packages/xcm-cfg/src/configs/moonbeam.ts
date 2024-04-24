@@ -13,7 +13,7 @@ import {
   usdc,
   pink,
 } from '../assets';
-import { acala, assetHub, hydraDX, moonbeam } from '../chains';
+import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
@@ -214,21 +214,6 @@ const toAssetHub: AssetConfig[] = [
 ];
 
 const toAcalaViaWormhole: AssetConfig[] = [
-  /*  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().TokenBridge().transferTokens(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.004,
-      asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }), */
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
@@ -251,7 +236,35 @@ const toAcalaViaWormhole: AssetConfig[] = [
   }),
 ];
 
+const toEthereumViaWormhole: AssetConfig[] = [
+  new AssetConfig({
+    asset: dai_mwh,
+    balance: BalanceBuilder().evm().erc20(),
+    contract: ContractBuilder()
+      .Batch()
+      .batchAll([
+        ContractBuilder().Erc20().approve(),
+        ContractBuilder().TokenBridge().transferTokens(),
+      ]),
+    destination: ethereum,
+    destinationFee: {
+      amount: 0.004,
+      asset: dai_mwh,
+      balance: BalanceBuilder().evm().erc20(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 export const moonbeamConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toAssetHub, ...toAcalaViaWormhole],
+  assets: [
+    ...toHydraDX,
+    ...toAssetHub,
+    ...toAcalaViaWormhole,
+    ...toEthereumViaWormhole,
+  ],
   chain: moonbeam,
 });

@@ -1,10 +1,8 @@
-import { ContractConfig } from '@galacticcouncil/xcm-core';
+import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
 import { Batch } from './Batch';
 import { TokenBridge } from './TokenBridge';
 import { Xtokens } from './Xtokens';
 import { EvmTransfer } from './EvmTransfer';
-
-import { EvmClient } from '../../../evm';
 
 export class EvmTransferFactory {
   static get(client: EvmClient, config: ContractConfig): EvmTransfer {

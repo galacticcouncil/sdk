@@ -1,34 +1,23 @@
-import { AssetAmount, ContractConfig } from '@galacticcouncil/xcm-core';
+import {
+  AnyEvmChain,
+  AssetAmount,
+  ContractConfig,
+  EvmClient,
+} from '@galacticcouncil/xcm-core';
 
 import { EvmTransferFactory } from './evm';
 import { TransferProvider } from '../types';
 import { XCall } from '../../types';
-import { EvmClient, Erc20Client } from '../../evm';
 
 export class ContractTransfer implements TransferProvider<ContractConfig> {
   readonly #client: EvmClient;
 
-  constructor(client: EvmClient) {
-    this.#client = client;
+  constructor(chain: AnyEvmChain) {
+    this.#client = chain.client;
   }
 
   async calldata(account: string, config: ContractConfig): Promise<XCall> {
     const { data, abi, address } = EvmTransferFactory.get(this.#client, config);
-
-    /*     const erc20 = new Erc20Client(this.#client, contract.asset);
-    const allowance = await erc20.allowance(account, contract.address);
-
-    if (allowance < contract.amount) {
-      console.log('Approve call => Not sufficient allowance!');
-      const data = erc20.approve(contract.address, contract.amount);
-      return {
-        from: account as `0x${string}`,
-        data: data as `0x${string}`,
-        abi: JSON.stringify(erc20.abi),
-        to: contract.asset,
-      } as XCall;
-    } */
-
     return {
       from: account as `0x${string}`,
       data: data as `0x${string}`,

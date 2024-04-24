@@ -1,5 +1,5 @@
+import { EvmResolver } from '@galacticcouncil/xcm-core';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { EvmResolver } from '../types';
 
 const ETH_PREFIX = 'ETH\0';
 

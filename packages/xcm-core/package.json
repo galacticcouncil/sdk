@@ -34,11 +34,13 @@
   },
   "dependencies": {
     "@moonbeam-network/xcm-utils": "1.0.4",
+    "@thi.ng/cache": "^2.1.35",
     "@wormhole-foundation/sdk-base": "^0.5.2",
     "@wormhole-foundation/sdk-connect": "^0.5.2",
     "@wormhole-foundation/sdk-definitions": "^0.5.2",
     "@wormhole-foundation/sdk-evm": "^0.5.2",
-    "@wormhole-foundation/sdk-evm-tokenbridge": "^0.5.2"
+    "@wormhole-foundation/sdk-evm-tokenbridge": "^0.5.2",
+    "buffer": "^6.0.3"
   },
   "peerDependencies": {
     "@polkadot/api": "^10.9.1",

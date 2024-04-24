@@ -1,9 +1,12 @@
 import {
   AnyChain,
   ChainEcosystem as Ecosystem,
+  EvmChain,
   EvmParachain,
   Parachain,
 } from '@galacticcouncil/xcm-core';
+
+import { mainnet } from 'viem/chains';
 
 import {
   aca,
@@ -44,6 +47,9 @@ import {
   dota,
 } from './assets';
 
+import { acalaEvm, hydradxEvm, moonbeamEvm } from './evm';
+import { evmResolvers } from './resolver';
+
 export const polkadot = new Parachain({
   assetsData: [],
   ecosystem: Ecosystem.Polkadot,
@@ -56,7 +62,7 @@ export const polkadot = new Parachain({
   ws: 'wss://polkadot-rpc.dwellir.com',
 });
 
-export const acala = new Parachain({
+export const acala = new EvmParachain({
   assetsData: [
     {
       asset: aca,
@@ -87,7 +93,13 @@ export const acala = new Parachain({
       id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
     },
   ],
+  defEvm: acalaEvm,
+  defWormhole: {
+    id: 12,
+    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
+  },
   ecosystem: Ecosystem.Polkadot,
+  evmResolver: evmResolvers['acala'],
   genesisHash:
     '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
   key: 'acala',
@@ -95,8 +107,6 @@ export const acala = new Parachain({
   parachainId: 2000,
   ss58Format: 10,
   ws: 'wss://acala-rpc.aca-api.network',
-  //ws: 'wss://acala-rpc-1.aca-api.network',
-  //ws: 'wss://acala-rpc-2.aca-api.network',
 });
 
 export const assetHub = new Parachain({
@@ -246,7 +256,7 @@ export const centrifuge = new Parachain({
   ws: 'wss://fullnode.centrifuge.io',
 });
 
-export const hydraDX = new Parachain({
+export const hydraDX = new EvmParachain({
   assetsData: [
     {
       asset: hdx,
@@ -404,7 +414,9 @@ export const hydraDX = new Parachain({
       palletInstance: 50,
     },
   ],
+  defEvm: hydradxEvm,
   ecosystem: Ecosystem.Polkadot,
+  evmResolver: evmResolvers['hydradx'],
   genesisHash:
     '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
   key: 'hydradx',
@@ -525,14 +537,17 @@ export const moonbeam = new EvmParachain({
       decimals: 10,
     },
   ],
+  defEvm: moonbeamEvm,
+  defWormhole: {
+    id: 16,
+    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
+  },
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
-  id: 1284,
   key: 'moonbeam',
   name: 'Moonbeam',
   parachainId: 2004,
-  rpc: 'https://rpc.api.moonbeam.network',
   ss58Format: 1284,
   ws: 'wss://wss.api.moonbeam.network',
   //ws: 'wss://moonbeam-rpc.dwellir.com',
@@ -650,32 +665,6 @@ export const crust = new Parachain({
   parachainId: 2008,
   ss58Format: 88,
   ws: 'wss://crust-parachain.crustapps.net',
-});
-
-// EVM chain config
-
-export const ethereumMrl = new EvmParachain({
-  ...moonbeam,
-  id: 1,
-  key: 'ethereum',
-  name: 'Ethereum',
-  assetsData: [
-    {
-      asset: dai_mwh,
-      id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-      decimals: 18,
-    },
-    {
-      asset: wbtc_mwh,
-      id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-      decimals: 8,
-    },
-    {
-      asset: weth_mwh,
-      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      decimals: 18,
-    },
-  ],
 });
 
 export const polkadotChains: AnyChain[] = [
@@ -873,7 +862,42 @@ const kusamaChains: AnyChain[] = [
   tinkernet,
 ];
 
-export const chains: AnyChain[] = [...polkadotChains, ...kusamaChains];
+// EVM chains config (Wormhole)
+
+export const ethereum = new EvmChain({
+  key: 'ethereum',
+  name: 'Ethereum',
+  assetsData: [
+    {
+      asset: dai_mwh,
+      id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      decimals: 18,
+    },
+    {
+      asset: wbtc_mwh,
+      id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+      decimals: 8,
+    },
+    {
+      asset: weth_mwh,
+      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      decimals: 18,
+    },
+  ],
+  defEvm: mainnet,
+  defWormhole: {
+    id: 2,
+    tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
+  },
+});
+
+export const evmChains: EvmChain[] = [ethereum];
+
+export const chains: AnyChain[] = [
+  ...polkadotChains,
+  ...evmChains,
+  ...kusamaChains,
+];
 
 export const chainsMap = new Map<string, AnyChain>(
   chains.map((chain) => [chain.key, chain])

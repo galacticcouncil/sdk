@@ -1,4 +1,10 @@
-import { Asset, AssetAmount, ContractConfig } from '@galacticcouncil/xcm-core';
+import {
+  AnyEvmChain,
+  Asset,
+  AssetAmount,
+  ContractConfig,
+  EvmClient,
+} from '@galacticcouncil/xcm-core';
 
 import {
   Observable,
@@ -10,13 +16,12 @@ import {
 
 import { EvmBalanceFactory } from './evm';
 import { BalanceProvider } from '../types';
-import { EvmClient } from '../../evm';
 
 export class ContractBalance implements BalanceProvider<ContractConfig> {
   readonly #client: EvmClient;
 
-  constructor(client: EvmClient) {
-    this.#client = client;
+  constructor(chain: AnyEvmChain) {
+    this.#client = chain.client;
   }
 
   async read(asset: Asset, config: ContractConfig): Promise<AssetAmount> {
@@ -31,7 +36,10 @@ export class ContractBalance implements BalanceProvider<ContractConfig> {
     });
   }
 
-  subscribe(asset: Asset, config: ContractConfig): Observable<AssetAmount> {
+  async subscribe(
+    asset: Asset,
+    config: ContractConfig
+  ): Promise<Observable<AssetAmount>> {
     const subject = new Subject<AssetAmount>();
     const observable = subject.pipe(shareReplay(1));
     const provider = this.#client.getProvider();

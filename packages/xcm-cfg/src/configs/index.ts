@@ -1,6 +1,7 @@
 import { ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { kusamaChainsConfig } from './kusama';
+import { evmChainsConfig } from './evm';
 
 import { acalaConfig } from './acala';
 import { assetHubConfig } from './assethub';
@@ -18,16 +19,12 @@ import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 
-// mrl
-import { ethereumMrlConfig } from './ethereumMrl';
-
 export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,
   centrifugeConfig,
-  ethereumMrlConfig,
   hydraDxConfig,
   interlayConfig,
   moonbeamConfig,
@@ -42,6 +39,7 @@ export const polkadotChainsConfig: ChainConfig[] = [
 
 export const chainsConfig: ChainConfig[] = [
   ...polkadotChainsConfig,
+  ...evmChainsConfig,
   ...kusamaChainsConfig,
 ];
 

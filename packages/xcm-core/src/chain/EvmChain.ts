@@ -1,22 +1,41 @@
+import { Chain as EvmDef } from 'viem';
 import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
+import { EvmClient, WormholeDef } from '../evm';
 
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
-  id: number;
-  rpc: string;
+  defEvm: EvmDef;
+  defWormhole?: WormholeDef;
 }
 
 export class EvmChain extends Chain<ChainAssetData> {
-  readonly id: number;
+  readonly defEvm: EvmDef;
+  readonly defWormhole?: WormholeDef;
 
-  readonly rpc: string;
-
-  constructor({ id, rpc, ...others }: EvmChainParams) {
+  constructor({ defEvm, defWormhole, ...others }: EvmChainParams) {
     super({ ...others });
-    this.id = id;
-    this.rpc = rpc;
+    this.defEvm = defEvm;
+    this.defWormhole = defWormhole;
+  }
+
+  get client(): EvmClient {
+    return new EvmClient(this.defEvm);
   }
 
   getType(): ChainType {
     return ChainType.EvmChain;
+  }
+
+  getWormholeId(): number {
+    if (this.defWormhole) {
+      return this.defWormhole.id;
+    }
+    throw new Error('Wormhole configuration missing');
+  }
+
+  getWormholeBridge(): string {
+    if (this.defWormhole) {
+      return this.defWormhole.tokenBridge;
+    }
+    throw new Error('Wormhole configuration missing');
   }
 }

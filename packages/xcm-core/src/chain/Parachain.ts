@@ -1,4 +1,7 @@
+import { ApiPromise } from '@polkadot/api';
+
 import { Asset } from '../asset';
+import { SubstrateApis } from '../substrate';
 import {
   Chain,
   ChainAssetData,
@@ -31,7 +34,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   readonly usesChainDecimals: boolean;
 
-  readonly weight: number | undefined;
+  readonly weight?: number;
 
   readonly ws: string;
 
@@ -51,6 +54,11 @@ export class Parachain extends Chain<ParachainAssetsData> {
     this.usesChainDecimals = !!usesChainDecimals;
     this.weight = weight;
     this.ws = ws;
+  }
+
+  get api(): Promise<ApiPromise> {
+    const pool = SubstrateApis.getInstance();
+    return pool.api(this.ws);
   }
 
   getType(): ChainType {
