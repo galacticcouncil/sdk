@@ -16,7 +16,7 @@ import { XCall } from '../types';
 import {
   buildTransact,
   buildTransfer,
-  getAddress,
+  getH16Address,
   getXcmDeliveryFee,
 } from './TransferUtils';
 import { MetadataUtils } from './MetadataUtils';
@@ -41,12 +41,13 @@ export class TransferService {
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
     const account = isH160Address(assetId.toString())
-      ? await getAddress(address, chain)
+      ? await getH16Address(address, chain)
       : address;
     const balanceConfig = config.balance.build({
       address: account,
       asset: assetId,
     });
+
     return this.balance.read(asset, balanceConfig);
   }
 
@@ -90,29 +91,18 @@ export class TransferService {
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
-
-    const transactInfo = config.transact
-      ? await this.getTransactInfo(
-          address,
-          amount,
-          destAddress,
-          destChain,
-          destFee,
-          transferConfig
-        )
-      : undefined;
-
-    const transfer = buildTransfer(
+    const transfer = await this.getTransfer(
       address,
       amount,
       destAddress,
       destChain,
       destFee,
-      transferConfig,
-      transactInfo
+      transferConfig
     );
 
-    const sender = config.contract ? await getAddress(address, chain) : address;
+    const sender = config.contract
+      ? await getH16Address(address, chain)
+      : address;
     return this.transfer.getFee(sender, amount, feeBalance, transfer);
   }
 
@@ -128,7 +118,7 @@ export class TransferService {
     const { config } = transferConfig;
     const fee = await this.getNetworkFee(
       address,
-      amount, // should be transfer fee
+      amount,
       feeBalance,
       destAddress,
       destChain,
@@ -149,27 +139,13 @@ export class TransferService {
     destFee: AssetAmount,
     transferConfig: ChainTransferConfig
   ): Promise<XCall> {
-    const { config } = transferConfig;
-
-    const transactInfo = config.transact
-      ? await this.getTransactInfo(
-          address,
-          amount,
-          destAddress,
-          destChain,
-          destFee,
-          transferConfig
-        )
-      : undefined;
-
-    const transfer = buildTransfer(
+    const transfer = await this.getTransfer(
       address,
       amount,
       destAddress,
       destChain,
       destFee,
-      transferConfig,
-      transactInfo
+      transferConfig
     );
     return this.transfer.calldata(address, transfer);
   }
@@ -187,12 +163,13 @@ export class TransferService {
     const feeAsset = config.fee.asset;
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
     const account = isH160Address(feeAssetId.toString())
-      ? await getAddress(address, chain)
+      ? await getH16Address(address, chain)
       : address;
     const feeBalanceConfig = config.fee.balance.build({
       address: account,
       asset: feeAssetId,
     });
+
     return this.balance.read(feeAsset, feeBalanceConfig);
   }
 
@@ -207,10 +184,13 @@ export class TransferService {
       });
       return this.balance.read(asset, minBalanceConfig);
     }
+
     return this.getAssetMin(transferConfig);
   }
 
-  async getAssetMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
+  private async getAssetMin(
+    transferConfig: ChainTransferConfig
+  ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
     const asset = config.asset;
     const assetMin = chain.getAssetMin(asset);
@@ -227,7 +207,38 @@ export class TransferService {
     });
   }
 
-  async getTransactInfo(
+  private async getTransfer(
+    address: string,
+    amount: bigint,
+    destAddress: string,
+    destChain: AnyChain,
+    destFee: AssetAmount,
+    transferConfig: ChainTransferConfig
+  ) {
+    const { config } = transferConfig;
+    const transactInfo = config.transact
+      ? await this.getTransactInfo(
+          address,
+          amount,
+          destAddress,
+          destChain,
+          destFee,
+          transferConfig
+        )
+      : undefined;
+
+    return buildTransfer(
+      address,
+      amount,
+      destAddress,
+      destChain,
+      destFee,
+      transferConfig,
+      transactInfo
+    );
+  }
+
+  private async getTransactInfo(
     address: string,
     amount: bigint,
     destAddress: string,

@@ -30,7 +30,7 @@ export class TransferAdapter {
         this.providers.Substrate = new SubstrateTransfer(chain as Parachain);
         break;
       default:
-        throw new Error('Invalid adapter configuration');
+        throw new Error('Unsupported platform');
     }
   }
 

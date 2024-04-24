@@ -18,23 +18,27 @@ import Big from 'big.js';
  * destination chain.
  *
  * @param balance - source chain asset balance
- * @param ed - source chain existential deposit
  * @param fee - source chain transfer fee
  * @param min - source chain minimum
+ * @param ed - source chain existential deposit (opt)
  * @returns - maximum allowed amount of tokens to send or zero in
  * case of not enough funds
  */
 export function calculateMax(
   balance: AssetAmount,
-  ed: AssetAmount,
   fee: AssetAmount,
-  min: AssetAmount
+  min: AssetAmount,
+  ed?: AssetAmount
 ): AssetAmount {
   const result = balance
     .toBig()
     .minus(min.toBig())
-    .minus(balance.isSame(ed) ? ed.toBig() : new Big(0))
     .minus(balance.isSame(fee) ? fee.toBig() : new Big(0));
+
+  if (ed) {
+    result.minus(balance.isSame(ed) ? ed.toBig() : new Big(0));
+  }
+
   return balance.copyWith({
     amount: result.lt(0) ? 0n : BigInt(result.toFixed()),
   });
@@ -45,17 +49,17 @@ export function calculateMax(
  * destination chain.
  *
  * @param balance - destination chain asset balance
- * @param ed - destination chain existential deposit
  * @param fee - destination chain transfer fee
  * @param min - destination chain minimum
+ * @param ed - destination chain existential deposit (opt)
  * @returns - minimum required amount of tokens to send or zero in
  * case of no available funds
  */
 export function calculateMin(
   balance: AssetAmount,
-  ed: AssetAmount,
   fee: AssetAmount,
-  min: AssetAmount
+  min: AssetAmount,
+  ed?: AssetAmount
 ): AssetAmount {
   const zero = balance.copyWith({
     amount: 0n,
@@ -64,19 +68,29 @@ export function calculateMin(
   const result = zero
     .toBig()
     .plus(balance.isSame(fee) ? fee.toBig() : new Big(0))
-    .plus(
+    .plus(balance.toBig().lt(min.toBig()) ? min.toBig() : new Big(0));
+
+  if (ed) {
+    result.plus(
       balance.isSame(ed) && balance.toBig().lt(ed.toBig())
         ? ed.toBig()
         : new Big(0)
-    )
-    .plus(balance.toBig().lt(min.toBig()) ? min.toBig() : new Big(0));
+    );
+  }
 
   return balance.copyWith({
     amount: BigInt(result.toFixed()),
   });
 }
 
-export async function getAddress(
+/**
+ * Return h160 derivated address in case of Evm parachain
+ *
+ * @param address - h160 or ss58 address format
+ * @param chain - transfer chain ctx
+ * @returns - derivated address if evm resolver defined, fallback to default
+ */
+export async function getH16Address(
   address: string,
   chain: AnyChain
 ): Promise<string> {

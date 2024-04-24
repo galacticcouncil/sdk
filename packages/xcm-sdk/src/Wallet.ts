@@ -13,7 +13,7 @@ import {
   TransferService,
   calculateMax,
   calculateMin,
-  getAddress,
+  getH16Address,
 } from './transfer';
 import { XCall, XData } from './types';
 
@@ -69,10 +69,10 @@ export class Wallet {
     );
 
     const dstEd = await dst.metadata.getEd();
-    const min = calculateMin(dstBalance, dstEd, dstFee, dstMin);
+    const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.metadata.getEd();
-    const max = calculateMax(srcBalance, srcEd, srcFee, srcMin);
+    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
 
     return {
       balance: srcBalance,
@@ -108,7 +108,7 @@ export class Wallet {
         const { chain } = chainConfig;
         const assetId = chain.getBalanceAssetId(asset);
         const account = isH160Address(assetId.toString())
-          ? await getAddress(address, chain)
+          ? await getH16Address(address, chain)
           : address;
         const balanceConfig = balance.build({
           address: account,

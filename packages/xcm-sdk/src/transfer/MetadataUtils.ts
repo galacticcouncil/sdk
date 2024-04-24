@@ -32,19 +32,11 @@ export class MetadataUtils {
     throw new Error('Unknown asset decimals: ' + asset.key);
   }
 
-  async getEd(): Promise<AssetAmount> {
+  async getEd(): Promise<AssetAmount | undefined> {
     if (this.chain instanceof Parachain) {
       const substrate = await SubstrateService.create(this.chain);
       return substrate.existentialDeposit;
     }
-    const { client } = this.chain as EvmChain;
-    const { chainDecimals, chainCurrency } = client;
-    return new AssetAmount({
-      amount: 0n,
-      decimals: chainDecimals,
-      symbol: chainCurrency,
-      key: chainCurrency.toLowerCase(),
-      originSymbol: chainCurrency.toUpperCase(),
-    });
+    return undefined;
   }
 }
