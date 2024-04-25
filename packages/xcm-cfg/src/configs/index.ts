@@ -17,6 +17,8 @@ import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
 import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
+import { kiltConfig } from './kilt';
+import { pendulumConfig } from './pendulum';
 
 const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
@@ -34,6 +36,8 @@ const polkadotChainsConfig: ChainConfig[] = [
   zeitgeistConfig,
   phalaConfig,
   crustConfig,
+  kiltConfig,
+  pendulumConfig,
 ];
 
 export const chainsConfig: ChainConfig[] = [

@@ -132,6 +132,16 @@ export const dota = new Asset({
   originSymbol: 'DOTA',
 });
 
+export const kilt = new Asset({
+  key: 'kilt',
+  originSymbol: 'KILT',
+});
+
+export const pen = new Asset({
+  key: 'pen',
+  originSymbol: 'PEN',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -168,6 +178,8 @@ export const assets: Asset[] = [
   pink,
   ded,
   dota,
+  kilt,
+  pen,
 ];
 
 export const assetsMap = new Map<string, Asset>(
