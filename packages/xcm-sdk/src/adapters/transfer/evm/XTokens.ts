@@ -3,7 +3,7 @@ import { EvmTransfer } from './EvmTransfer';
 
 export class Xtokens extends EvmTransfer {
   get abi() {
-    return Abi.XTokens;
+    return Abi.Xtokens;
   }
 
   get address(): string {
@@ -11,7 +11,7 @@ export class Xtokens extends EvmTransfer {
     if (address) {
       return address;
     }
-    return Precompile.XTokens;
+    return Precompile.Xtokens;
   }
 
   get asset(): string {

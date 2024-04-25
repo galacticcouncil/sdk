@@ -69,7 +69,7 @@ export class SubstrateService {
     return fn(...args);
   }
 
-  async getFee(account: string, config: ExtrinsicConfig): Promise<bigint> {
+  async estimateFee(account: string, config: ExtrinsicConfig): Promise<bigint> {
     const extrinsic = this.getExtrinsic(config);
     const info = await extrinsic.paymentInfo(account, { nonce: -1 });
     return info.partialFee.toBigInt();

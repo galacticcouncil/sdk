@@ -34,13 +34,13 @@ export class TransferAdapter {
     }
   }
 
-  async getFee(
+  async estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
     config: BaseConfig
   ): Promise<AssetAmount> {
-    return this.providers[config.type].getFee(
+    return this.providers[config.type].estimateFee(
       account,
       amount,
       feeBalance,

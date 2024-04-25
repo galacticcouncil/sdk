@@ -26,10 +26,13 @@ export interface XCall {
   from: string;
   /** Hex-encoded call data. */
   data: `0x${string}`;
+}
+
+export interface XCallEvm extends XCall {
   /** Solidity JSON string ABI. */
   abi?: string;
   /** The address the transaction is directed to. */
-  to?: `0x${string}`;
+  to: `0x${string}`;
   /** Value sent with this transaction. */
   value?: number;
 }

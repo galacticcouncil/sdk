@@ -2,6 +2,7 @@ import {
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
+  Precompile,
 } from '@galacticcouncil/xcm-core';
 import { formatAssetIdToERC20 } from '@moonbeam-network/xcm-utils';
 import { isString } from '@polkadot/util';
@@ -16,6 +17,7 @@ export function Xtokens() {
       build: ({ address, amount, asset, destination, source }) => {
         const assetId = source.getAssetId(asset);
         return new ContractConfig({
+          address: Precompile.Xtokens,
           args: [
             isString(assetId) ? formatAssetIdToERC20(assetId) : asset,
             amount,
@@ -32,6 +34,7 @@ export function Xtokens() {
         const assetId = source.getAssetId(asset);
         const feeAssetId = source.getAssetId(fee);
         return new ContractConfig({
+          address: Precompile.Xtokens,
           args: [
             [
               [

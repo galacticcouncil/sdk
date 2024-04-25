@@ -24,7 +24,7 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     } as XCall;
   }
 
-  async getFee(
+  async estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
@@ -33,7 +33,7 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     const substrate = await this.#substrate;
     let fee: bigint;
     try {
-      fee = await substrate.getFee(account, config);
+      fee = await substrate.estimateFee(account, config);
     } catch {
       // Can't estimate fee if transferMultiasset with no balance
       fee = 0n;

@@ -8,7 +8,7 @@ export interface EvmParachainParams extends ParachainParams {
   defEvm: EvmDef;
   defWormhole?: WormholeDef;
   evmResolver?: EvmResolver;
-  h160AccOnly: boolean;
+  h160AccOnly?: boolean;
 }
 
 export class EvmParachain extends Parachain implements WormholeChain {

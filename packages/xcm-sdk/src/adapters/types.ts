@@ -9,7 +9,7 @@ export interface BalanceProvider<T> {
 }
 
 export interface TransferProvider<T> {
-  getFee(
+  estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,

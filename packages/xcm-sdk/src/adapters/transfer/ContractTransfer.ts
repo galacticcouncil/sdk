@@ -19,14 +19,14 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
   async calldata(account: string, config: ContractConfig): Promise<XCall> {
     const { data, abi, address } = EvmTransferFactory.get(this.#client, config);
     return {
-      from: account as `0x${string}`,
-      data: data as `0x${string}`,
       abi: JSON.stringify(abi),
-      to: address,
+      data: data as `0x${string}`,
+      from: account as `0x${string}`,
+      to: address as `0x${string}`,
     } as XCall;
   }
 
-  async getFee(
+  async estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
@@ -37,7 +37,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
 
     let fee: bigint;
     try {
-      fee = await contract.getFee(account, amount);
+      fee = await contract.estimateFee(account, amount);
     } catch (error) {
       // Can't estimate fee if no allowance
       fee = 0n;

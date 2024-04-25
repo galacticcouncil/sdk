@@ -103,7 +103,7 @@ export class TransferService {
     const sender = config.contract
       ? await getH16Address(address, chain)
       : address;
-    return this.transfer.getFee(sender, amount, feeBalance, transfer);
+    return this.transfer.estimateFee(sender, amount, feeBalance, transfer);
   }
 
   async getFee(

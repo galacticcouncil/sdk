@@ -31,7 +31,7 @@ export abstract class EvmTransfer {
     });
   }
 
-  async getGasEstimation(account: string): Promise<bigint> {
+  async estimateGas(account: string): Promise<bigint> {
     const { func, args } = this.config;
     const provider = this.client.getProvider();
     return await provider.estimateContractGas({
@@ -47,13 +47,13 @@ export abstract class EvmTransfer {
     return this.client.getProvider().getGasPrice();
   }
 
-  async getFee(account: string, balance: bigint): Promise<bigint> {
+  async estimateFee(account: string, balance: bigint): Promise<bigint> {
     if (balance === 0n) {
       return 0n;
     }
 
     try {
-      const estimatedGas = await this.getGasEstimation(account);
+      const estimatedGas = await this.estimateGas(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
     } catch (error) {
