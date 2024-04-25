@@ -6,7 +6,6 @@ import {
 import {
   AssetConfig,
   ChainConfig,
-  pendulum,
   polkadot,
 } from '@moonbeam-network/xcm-config';
 
@@ -58,6 +57,7 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  pendulum,
 } from '../chains';
 import { ExtrinsicBuilderV2 } from '../builders';
 
@@ -757,7 +757,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toZeitgeist,
     ...toPhala,
     ...toKilt,
-    ...toPendulum,
+    //...toPendulum,
   ],
   chain: hydraDX,
 });
