@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.6
+
+### Patch Changes
+
+- KILT & PEN config
+
 ## 1.11.5
 
 ### Patch Changes
