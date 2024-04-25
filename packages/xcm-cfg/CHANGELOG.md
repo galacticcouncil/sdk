@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.7
+
+### Patch Changes
+
+- Suspend pendulum
+
 ## 1.11.6
 
 ### Patch Changes
