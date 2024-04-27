@@ -18,4 +18,8 @@ export class BaseConfig {
     this.func = func;
     this.type = type;
   }
+
+  toString() {
+    return this.module + ':' + this.func;
+  }
 }

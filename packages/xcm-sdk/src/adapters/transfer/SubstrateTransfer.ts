@@ -15,7 +15,11 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     this.#substrate = SubstrateService.create(chain);
   }
 
-  async calldata(account: string, config: ExtrinsicConfig): Promise<XCall> {
+  async calldata(
+    account: string,
+    amount: bigint,
+    config: ExtrinsicConfig
+  ): Promise<XCall> {
     const substrate = await this.#substrate;
     const extrinsic = substrate.getExtrinsic(config);
     return {

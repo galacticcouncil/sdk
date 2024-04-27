@@ -18,12 +18,10 @@ export abstract class EvmTransfer {
   }
 
   abstract get abi(): any;
-  abstract get address(): string;
   abstract get asset(): string;
-  abstract get amount(): bigint;
 
   get data(): string {
-    const { func, args } = this.config;
+    const { args, func } = this.config;
     return encodeFunctionData({
       abi: this.abi,
       functionName: func,
@@ -32,10 +30,10 @@ export abstract class EvmTransfer {
   }
 
   async estimateGas(account: string): Promise<bigint> {
-    const { func, args } = this.config;
+    const { address, args, func } = this.config;
     const provider = this.client.getProvider();
     return await provider.estimateContractGas({
-      address: this.address as `0x${string}`,
+      address: address as `0x${string}`,
       abi: this.abi,
       functionName: func,
       args: args,

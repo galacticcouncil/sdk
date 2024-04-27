@@ -2,8 +2,8 @@ import { Abi, EvmClient } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData } from 'viem';
 
 export class Erc20Client {
-  protected readonly client: EvmClient;
-  protected readonly address: string;
+  readonly client: EvmClient;
+  readonly address: string;
 
   constructor(client: EvmClient, address: string) {
     this.validateClient(client);
@@ -31,10 +31,10 @@ export class Erc20Client {
   async balanceOf(account: string): Promise<bigint> {
     const provider = this.client.getProvider();
     const output = await provider.readContract({
-      address: this.address as `0x${string}`,
       abi: this.abi,
-      functionName: 'balanceOf',
+      address: this.address as `0x${string}`,
       args: [account as `0x${string}`],
+      functionName: 'balanceOf',
     });
     return output as bigint;
   }
@@ -42,8 +42,8 @@ export class Erc20Client {
   async decimals(): Promise<number> {
     const provider = this.client.getProvider();
     const output = await provider.readContract({
-      address: this.address as `0x${string}`,
       abi: this.abi,
+      address: this.address as `0x${string}`,
       functionName: 'decimals',
     });
     return output as number;
@@ -52,10 +52,10 @@ export class Erc20Client {
   async allowance(owner: string, spender: string): Promise<bigint> {
     const provider = this.client.getProvider();
     const output = await provider.readContract({
-      address: this.address as `0x${string}`,
       abi: this.abi,
-      functionName: 'allowance',
+      address: this.address as `0x${string}`,
       args: [owner as `0x${string}`, spender as `0x${string}`],
+      functionName: 'allowance',
     });
     return output as bigint;
   }
@@ -63,8 +63,8 @@ export class Erc20Client {
   approve(spender: string, amount: bigint): string {
     return encodeFunctionData({
       abi: this.abi,
-      functionName: 'approve',
       args: [spender as `0x${string}`, amount],
+      functionName: 'approve',
     });
   }
 }

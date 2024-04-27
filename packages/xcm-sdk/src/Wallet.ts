@@ -15,7 +15,7 @@ import {
   calculateMin,
   getH16Address,
 } from './transfer';
-import { XCall, XData } from './types';
+import { XCall, XTransfer } from './types';
 
 export interface WalletOptions {
   config: ConfigService;
@@ -34,7 +34,7 @@ export class Wallet {
     srcChain: string | AnyChain,
     dstAddr: string,
     dstChain: string | AnyChain
-  ): Promise<XData> {
+  ): Promise<XTransfer> {
     const transfer = ConfigBuilder(this.config)
       .assets()
       .asset(asset)
@@ -91,7 +91,7 @@ export class Wallet {
           srcConf
         );
       },
-    } as XData;
+    } as XTransfer;
   }
 
   public async subscribeBalance(

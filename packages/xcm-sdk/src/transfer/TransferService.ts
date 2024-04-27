@@ -147,7 +147,7 @@ export class TransferService {
       destFee,
       transferConfig
     );
-    return this.transfer.calldata(address, transfer);
+    return this.transfer.calldata(address, amount, transfer);
   }
 
   async getFeeBalance(

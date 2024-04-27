@@ -3,7 +3,7 @@ import { AssetAmount } from '@galacticcouncil/xcm-core';
 /**
  * Transfer (X) data
  *
- * @interface XData
+ * @interface XTransfer
  * @member {AssetAmount} balance Asset balance
  * @member {AssetAmount} max Maximum allowed amount of asset to send
  * @member {AssetAmount} min Minimum required amount of asset to send
@@ -11,7 +11,7 @@ import { AssetAmount } from '@galacticcouncil/xcm-core';
  * @member {AssetAmount} srcFee Source chain fee asset balance
  * @member {AssetAmount} dstFee Destination chain fee
  */
-export interface XData {
+export interface XTransfer {
   balance: AssetAmount;
   dstFee: AssetAmount;
   max: AssetAmount;

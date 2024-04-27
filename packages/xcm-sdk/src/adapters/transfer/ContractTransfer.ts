@@ -3,10 +3,12 @@ import {
   AssetAmount,
   ContractConfig,
   EvmClient,
+  Precompile,
 } from '@galacticcouncil/xcm-core';
 
 import { EvmTransferFactory } from './evm';
 import { TransferProvider } from '../types';
+import { Erc20Client } from '../../evm';
 import { XCall } from '../../types';
 
 export class ContractTransfer implements TransferProvider<ContractConfig> {
@@ -16,13 +18,41 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
     this.#client = chain.client;
   }
 
-  async calldata(account: string, config: ContractConfig): Promise<XCall> {
-    const { data, abi, address } = EvmTransferFactory.get(this.#client, config);
-    return {
+  private isPrecompile(address: string): boolean {
+    const precompiles = Object.entries(Precompile).map(([_, v]) => v);
+    return precompiles.includes(address);
+  }
+
+  async calldata(
+    account: string,
+    amount: bigint,
+    config: ContractConfig
+  ): Promise<XCall> {
+    const { abi, asset, data } = EvmTransferFactory.get(this.#client, config);
+    const erc20 = new Erc20Client(this.#client, asset);
+
+    const transferCall = {
       abi: JSON.stringify(abi),
       data: data as `0x${string}`,
       from: account as `0x${string}`,
-      to: address as `0x${string}`,
+      to: config.address as `0x${string}`,
+    } as XCall;
+
+    if (this.isPrecompile(config.address)) {
+      return transferCall;
+    }
+
+    const allowance = await erc20.allowance(account, config.address);
+    if (allowance >= amount) {
+      return transferCall;
+    }
+
+    const approve = erc20.approve(config.address, amount);
+    return {
+      abi: JSON.stringify(erc20.abi),
+      data: approve as `0x${string}`,
+      from: account as `0x${string}`,
+      to: asset as `0x${string}`,
     } as XCall;
   }
 

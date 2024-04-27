@@ -48,7 +48,11 @@ export class TransferAdapter {
     );
   }
 
-  async calldata(account: string, config: BaseConfig): Promise<XCall> {
-    return this.providers[config.type].calldata(account, config);
+  async calldata(
+    account: string,
+    amount: bigint,
+    config: BaseConfig
+  ): Promise<XCall> {
+    return this.providers[config.type].calldata(account, amount, config);
   }
 }

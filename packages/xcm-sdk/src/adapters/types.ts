@@ -15,5 +15,5 @@ export interface TransferProvider<T> {
     feeBalance: AssetAmount,
     config: T
   ): Promise<AssetAmount>;
-  calldata(account: string, config: T): Promise<XCall>;
+  calldata(account: string, amount: bigint, config: T): Promise<XCall>;
 }
