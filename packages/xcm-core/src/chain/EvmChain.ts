@@ -32,9 +32,16 @@ export class EvmChain extends Chain<ChainAssetData> implements WormholeChain {
     throw new Error('Wormhole configuration missing');
   }
 
-  getWormholeBridge(): string {
+  getTokenBridge(): string {
     if (this.defWormhole) {
       return this.defWormhole.tokenBridge;
+    }
+    throw new Error('Wormhole configuration missing');
+  }
+
+  getTokenRelayer(): string | undefined {
+    if (this.defWormhole) {
+      return this.defWormhole.tokenRelayer;
     }
     throw new Error('Wormhole configuration missing');
   }

@@ -14,6 +14,13 @@ export class Asset {
   }
 
   isEqual(asset: Asset): boolean {
-    return this.key === asset.key && this.originSymbol === asset.originSymbol;
+    return (
+      this.normalizeKey(this.key) === this.normalizeKey(asset.key) &&
+      this.originSymbol === asset.originSymbol
+    );
+  }
+
+  private normalizeKey(key: string) {
+    return key.split('_')[0];
   }
 }

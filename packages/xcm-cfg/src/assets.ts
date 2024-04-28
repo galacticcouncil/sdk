@@ -202,6 +202,7 @@ export const assets: Asset[] = [
   cfg,
   cru,
   bnc,
+  dai,
   dai_awh,
   dai_mwh,
   ded,

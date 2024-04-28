@@ -15,6 +15,7 @@ import {
 } from '../assets';
 import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
+import { FeeBuilder } from 'builders/FeeBuilder';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -240,15 +241,22 @@ const toEthereumViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
+    // contract: ContractBuilder()
+    //   .Batch()
+    //   .batchAll([
+    //     ContractBuilder().Erc20().approve(),
+    //     ContractBuilder().TokenBridge().transferTokens(),
+    //   ]),
     contract: ContractBuilder()
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenBridge().transferTokens(),
+        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
       ]),
     destination: ethereum,
     destinationFee: {
-      amount: 0.004,
+      //amount: 0.004,
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
       asset: dai_mwh,
       balance: BalanceBuilder().evm().erc20(),
     },

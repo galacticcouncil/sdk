@@ -15,6 +15,7 @@ import {
   bsx,
   cfg,
   cru,
+  dai,
   dai_awh,
   dai_mwh,
   dot,
@@ -36,8 +37,10 @@ import {
   usdt,
   usdt_mwh,
   vdot,
+  wbtc,
   wbtc_awh,
   wbtc_mwh,
+  weth,
   weth_awh,
   weth_mwh,
   ztg,
@@ -541,6 +544,7 @@ export const moonbeam = new EvmParachain({
   defWormhole: {
     id: 16,
     tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
   },
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
@@ -869,17 +873,17 @@ export const ethereum = new EvmChain({
   name: 'Ethereum',
   assetsData: [
     {
-      asset: dai_mwh,
+      asset: dai,
       id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
       decimals: 18,
     },
     {
-      asset: wbtc_mwh,
+      asset: wbtc,
       id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
       decimals: 8,
     },
     {
-      asset: weth_mwh,
+      asset: weth,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       decimals: 18,
     },
@@ -888,6 +892,7 @@ export const ethereum = new EvmChain({
   defWormhole: {
     id: 2,
     tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
   },
 });
 

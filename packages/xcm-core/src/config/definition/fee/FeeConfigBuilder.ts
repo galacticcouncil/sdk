@@ -1,13 +1,12 @@
-import { ApiPromise } from '@polkadot/api';
-
-import { SubstrateCallConfig } from '../base';
-import { ChainAssetId } from '../../../chain';
+import { Asset } from 'asset';
+import { AnyChain } from '../../../chain';
 
 export interface FeeConfigBuilderParams {
-  asset: ChainAssetId;
-  api: ApiPromise;
+  asset: Asset;
+  destination: AnyChain;
+  source: AnyChain;
 }
 
 export interface FeeConfigBuilder {
-  build: (params: FeeConfigBuilderParams) => SubstrateCallConfig;
+  build: (params: FeeConfigBuilderParams) => Promise<bigint>;
 }

@@ -14,9 +14,10 @@ export function Erc20() {
         const ctx = via || source;
         const ctxWh = ctx as WormholeChain;
         const assetId = ctx.getAssetId(asset);
+        const spender = ctxWh.getTokenRelayer() || ctxWh.getTokenBridge();
         return new ContractConfig({
           address: parseAssetId(assetId).toString(),
-          args: [ctxWh.getWormholeBridge(), amount],
+          args: [spender, amount],
           func: 'approve',
           module: 'Erc20',
         });

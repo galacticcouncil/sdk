@@ -60,16 +60,22 @@ export abstract class Chain<T extends ChainAssetData> {
 
   abstract getType(): ChainType;
 
-  isParachain(): boolean {
-    return this.getType() === ChainType.Parachain;
+  isSubstrateChain(): boolean {
+    return (
+      this.getType() === ChainType.Parachain ||
+      this.getType() === ChainType.EvmParachain
+    );
+  }
+
+  isEvmChain(): boolean {
+    return (
+      this.getType() === ChainType.EvmChain ||
+      this.getType() === ChainType.EvmParachain
+    );
   }
 
   isEvmParachain(): boolean {
     return this.getType() === ChainType.EvmParachain;
-  }
-
-  isEvmChain(): boolean {
-    return this.getType() === ChainType.EvmChain;
   }
 
   getAsset(key: string): Asset | undefined {

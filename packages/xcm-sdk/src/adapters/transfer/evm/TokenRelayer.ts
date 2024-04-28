@@ -1,9 +1,9 @@
 import { Abi } from '@galacticcouncil/xcm-core';
 import { EvmTransfer } from './EvmTransfer';
 
-export class TokenBridge extends EvmTransfer {
+export class TokenRelayer extends EvmTransfer {
   get abi() {
-    return Abi.TokenBridge;
+    return Abi.TokenRelayer;
   }
 
   get asset(): string {

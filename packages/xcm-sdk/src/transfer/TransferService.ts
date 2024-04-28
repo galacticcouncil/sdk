@@ -1,10 +1,12 @@
 import {
   AnyChain,
+  AnyEvmChain,
   AssetAmount,
   ChainTransferConfig,
   FeeConfigBuilder,
   Parachain,
   TransactInfo,
+  WormholeChain,
   isH160Address,
 } from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
@@ -65,20 +67,16 @@ export class TransferService {
       });
     }
 
-    if (chain instanceof Parachain) {
-      const substrate = await SubstrateService.create(chain);
-      const feeConfigBuilder = amount as FeeConfigBuilder;
-      const feeConfig = feeConfigBuilder.build({
-        api: substrate.api,
-        asset: substrate.chain.getAssetId(asset),
-      });
-      const feeBalance = await feeConfig.call();
-      return AssetAmount.fromAsset(asset, {
-        amount: feeBalance,
-        decimals,
-      });
-    }
-    throw new Error('Destination fee configuration missing or invalid');
+    const feeConfigBuilder = amount as FeeConfigBuilder;
+    const fee = await feeConfigBuilder.build({
+      asset: asset,
+      destination: this.metadata.chain,
+      source: chain,
+    });
+    return AssetAmount.fromAsset(asset, {
+      amount: fee,
+      decimals,
+    });
   }
 
   async getNetworkFee(

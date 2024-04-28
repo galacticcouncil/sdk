@@ -29,7 +29,7 @@ const transferTokensWithPayload = () => {
         const assetId = source.getAssetId(asset);
         const payload = createMRLPayload(destination as Parachain, address);
         return new ContractConfig({
-          address: ctxWh.getWormholeBridge(),
+          address: ctxWh.getTokenBridge(),
           args: [
             parseAssetId(assetId),
             amount,
@@ -55,7 +55,7 @@ const transferTokens = (): ContractConfigBuilder => ({
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
-      address: ctxWh.getWormholeBridge(),
+      address: ctxWh.getTokenBridge(),
       args: [
         parseAssetId(assetId),
         amount,
