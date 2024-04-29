@@ -757,7 +757,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toZeitgeist,
     ...toPhala,
     ...toKilt,
-    //...toPendulum,
+    ...toPendulum,
   ],
   chain: hydraDX,
 });
