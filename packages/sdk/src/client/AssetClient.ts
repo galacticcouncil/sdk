@@ -212,10 +212,8 @@ export class AssetClient extends PolkadotApiClient {
     location?: HydradxRuntimeXcmAssetLocation
   ): Asset {
     const token = this.getToken(tokenKey, details, new Map(), location);
-    const extId = this.parseLocation('generalIndex', location);
-    const ext = external?.find((a) => {
-      return a.id === extId?.toString();
-    });
+    const ext = external?.find((a) => a.internalId === token.id);
+
     return ext
       ? {
           ...token,

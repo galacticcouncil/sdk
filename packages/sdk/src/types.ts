@@ -180,6 +180,7 @@ export interface ExternalAsset extends AssetMetadata {
   id: string;
   origin: number;
   name: string;
+  internalId: string;
 }
 
 export interface AssetMetadata {
