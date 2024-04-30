@@ -1,12 +1,10 @@
 import {
   AnyChain,
-  AnyEvmChain,
   AssetAmount,
   ChainTransferConfig,
   FeeConfigBuilder,
   Parachain,
   TransactInfo,
-  WormholeChain,
   isH160Address,
 } from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
@@ -72,6 +70,7 @@ export class TransferService {
       asset: asset,
       destination: this.metadata.chain,
       source: chain,
+      via: config.via,
     });
     return AssetAmount.fromAsset(asset, {
       amount: fee,

@@ -1,6 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import {
+  aca,
   astr,
   bnc,
   cfg,
@@ -46,8 +47,14 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  ethereum,
 } from '../chains';
-import { BalanceBuilder, ContractBuilder, ExtrinsicBuilder } from '../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  ExtrinsicBuilder,
+  FeeBuilder,
+} from '../builders';
 
 const toAcala: AssetConfig[] = [
   new AssetConfig({
@@ -698,15 +705,20 @@ const toAcalaViaWormhole: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: acala,
     destinationFee: {
-      amount: 0.1,
-      asset: glmr,
+      amount: 0.06,
+      asset: aca,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder()
       .utility()
       .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilder().polkadotXcm().send().transact(0.06), // Execution fee (GLMR)
+        ExtrinsicBuilder()
+          .xTokens()
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+        ExtrinsicBuilder()
+          .polkadotXcm()
+          .send()
+          .transact({ fee: glmr, feeAmount: 0.06 }),
       ]),
     fee: {
       asset: hdx,
@@ -726,6 +738,45 @@ const toAcalaViaWormhole: AssetConfig[] = [
   }),
 ];
 
+const toEthereumViaWormhole: AssetConfig[] = [
+  new AssetConfig({
+    asset: dai_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ethereum,
+    destinationFee: {
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: dai_mwh,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder()
+          .xTokens()
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+        ExtrinsicBuilder()
+          .polkadotXcm()
+          .send()
+          .transact({ fee: glmr, feeAmount: 0.06 }),
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    transact: ExtrinsicBuilder()
+      .ethereumXcm()
+      .transact(
+        ContractBuilder()
+          .Batch()
+          .batchAll([
+            ContractBuilder().Erc20().approve(),
+            ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+          ])
+      ),
+    via: moonbeam,
+  }),
+];
+
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
@@ -735,6 +786,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toBifrost,
     ...toCentrifuge,
     ...toCrust,
+    ...toEthereumViaWormhole,
     ...toInterlay,
     ...toMoonbeam,
     ...toNodle,

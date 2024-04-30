@@ -21,13 +21,15 @@ const transferTokensWithPayload = () => {
   return {
     mrl: (): ContractConfigBuilder => ({
       build: (params) => {
-        const { address, amount, asset, source, destination, via } = params;
+        const { address, amount, asset, source, destination, fee, via } =
+          params;
         mrlGuard(via);
         const ctxWh = source as WormholeChain;
         const rcvWh = via as WormholeChain;
         const recipient = Precompile.Bridge;
         const assetId = source.getAssetId(asset);
         const payload = createMRLPayload(destination as Parachain, address);
+        console.log(payload.toHuman());
         return new ContractConfig({
           address: ctxWh.getTokenBridge(),
           args: [

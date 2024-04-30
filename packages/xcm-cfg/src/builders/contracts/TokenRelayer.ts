@@ -4,8 +4,6 @@ import {
   WormholeChain,
 } from '@galacticcouncil/xcm-core';
 
-import { createMRLPayload } from './TokenBridge.utils';
-
 import { formatDestAddress, parseAssetId } from '../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({

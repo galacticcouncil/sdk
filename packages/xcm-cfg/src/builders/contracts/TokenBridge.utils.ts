@@ -18,17 +18,16 @@ class XcmRoutingUserAction extends Struct {
 }
 
 export function createMRLPayload(
-  destination: Parachain,
+  parachain: Parachain,
   account: string,
   isEthereumStyle = false
 ): VersionedUserAction {
-  // Create a multilocation object based on the target parachain's account type
   const versionedMultiLocation = {
     v1: {
       parents: 1,
       interior: {
         X2: [
-          { Parachain: destination.parachainId },
+          { Parachain: parachain.parachainId },
           isEthereumStyle
             ? { AccountKey20: { key: account } }
             : { AccountId32: { id: account } },
@@ -37,13 +36,11 @@ export function createMRLPayload(
     },
   };
 
-  // Format multilocation object as a Polkadot.js type
-  const versionedLoc = registry.createType(
+  const destination = registry.createType(
     'VersionedMultiLocation',
     versionedMultiLocation
   );
 
-  // Wrap and format the MultiLocation object into the precompile's input type
-  const userAction = new XcmRoutingUserAction({ versionedLoc });
+  const userAction = new XcmRoutingUserAction({ destination });
   return new VersionedUserAction({ V1: userAction });
 }

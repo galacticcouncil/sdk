@@ -1,4 +1,5 @@
 import {
+  Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
@@ -176,12 +177,17 @@ const reserveTransferAssets = () => {
   };
 };
 
+type TransactOpts = {
+  fee: Asset;
+  feeAmount: number;
+};
+
 const send = () => {
   const func = 'send';
   return {
-    transact: (executionCost: number): ExtrinsicConfigBuilder => ({
+    transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { destination, fee, source, transact, via } = params;
+        const { destination, source, transact, via } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
@@ -195,7 +201,11 @@ const send = () => {
             const account = getExtrinsicAccount(tAccount);
             const ctx = source as Parachain;
             const rcv = destination as Parachain;
-            const feePalletInstance = ctx.getAssetPalletInstance(fee);
+
+            const feePalletInstance = ctx.getAssetPalletInstance(opts.fee);
+            const feeAssetDecimals = ctx.getAssetDecimals(opts.fee);
+            const fee = toBigInt(opts.feeAmount, feeAssetDecimals!);
+
             return [
               toDest(version, via || rcv),
               toTransactMessage(
@@ -204,7 +214,7 @@ const send = () => {
                 { X1: { PalletInstance: feePalletInstance } },
                 transact.call,
                 transact.weight,
-                toBigInt(executionCost, fee.decimals)
+                fee
               ),
             ];
           },

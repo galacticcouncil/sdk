@@ -8,7 +8,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dai,
     balance: BalanceBuilder().evm().erc20(),
-    //contract: ContractBuilderV2().Bridge().transferViaMrl(Wormhole.Ethereum),
+    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydraDX,
     destinationFee: {
       amount: 0.004,
@@ -19,6 +19,7 @@ const toHydraDX: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
+    via: moonbeam,
   }),
 ];
 

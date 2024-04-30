@@ -13,9 +13,15 @@ import {
   usdc,
   pink,
 } from '../assets';
-import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../chains';
-import { BalanceBuilder, ContractBuilder } from '../builders';
-import { FeeBuilder } from 'builders/FeeBuilder';
+import {
+  acala,
+  assetHub,
+  ethereum,
+  fantom,
+  hydraDX,
+  moonbeam,
+} from '../chains';
+import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -241,12 +247,6 @@ const toEthereumViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
-    // contract: ContractBuilder()
-    //   .Batch()
-    //   .batchAll([
-    //     ContractBuilder().Erc20().approve(),
-    //     ContractBuilder().TokenBridge().transferTokens(),
-    //   ]),
     contract: ContractBuilder()
       .Batch()
       .batchAll([
@@ -255,7 +255,29 @@ const toEthereumViaWormhole: AssetConfig[] = [
       ]),
     destination: ethereum,
     destinationFee: {
-      //amount: 0.004,
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: dai_mwh,
+      balance: BalanceBuilder().evm().erc20(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
+const toFantomViaWormhole: AssetConfig[] = [
+  new AssetConfig({
+    asset: dai_mwh,
+    balance: BalanceBuilder().evm().erc20(),
+    contract: ContractBuilder()
+      .Batch()
+      .batchAll([
+        ContractBuilder().Erc20().approve(),
+        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+      ]),
+    destination: fantom,
+    destinationFee: {
       amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
       asset: dai_mwh,
       balance: BalanceBuilder().evm().erc20(),
@@ -271,8 +293,9 @@ export const moonbeamConfig = new ChainConfig({
   assets: [
     ...toHydraDX,
     ...toAssetHub,
-    ...toAcalaViaWormhole,
+    //...toAcalaViaWormhole,
     ...toEthereumViaWormhole,
+    ...toFantomViaWormhole,
   ],
   chain: moonbeam,
 });

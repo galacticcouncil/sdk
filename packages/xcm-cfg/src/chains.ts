@@ -6,7 +6,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { mainnet } from 'viem/chains';
+import { mainnet as ethereumEvm, fantom as fantomEvm } from 'viem/chains';
 
 import {
   aca,
@@ -426,8 +426,8 @@ export const hydraDX = new EvmParachain({
   name: 'HydraDX',
   parachainId: 2034,
   ss58Format: 63,
-  ws: 'wss://hydradx-rpc.dwellir.com',
-  //ws: 'wss://rpc.hydradx.cloud',
+  //ws: 'wss://hydradx-rpc.dwellir.com',
+  ws: 'wss://rpc.hydradx.cloud',
   //ws: 'wss://hydradx.paras.dotters.network',
 });
 
@@ -888,7 +888,7 @@ export const ethereum = new EvmChain({
       decimals: 18,
     },
   ],
-  defEvm: mainnet,
+  defEvm: ethereumEvm,
   defWormhole: {
     id: 2,
     tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
@@ -896,7 +896,25 @@ export const ethereum = new EvmChain({
   },
 });
 
-export const evmChains: EvmChain[] = [ethereum];
+export const fantom = new EvmChain({
+  key: 'fantom',
+  name: 'Fantom',
+  assetsData: [
+    {
+      asset: dai,
+      id: '0xEE786D3D73Ea645365c7248E4e40eDba08B1169F',
+      decimals: 18,
+    },
+  ],
+  defEvm: fantomEvm,
+  defWormhole: {
+    id: 10,
+    tokenBridge: '0x7C9Fc5741288cDFdD83CeB07f3ea7e22618D79D2' as `0x${string}`,
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
+  },
+});
+
+export const evmChains: EvmChain[] = [ethereum, fantom];
 
 export const chains: AnyChain[] = [
   ...polkadotChains,

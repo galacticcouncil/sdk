@@ -49,8 +49,8 @@ export class ChainConfig {
   getAssetDestinationConfig(asset: Asset, destination: AnyChain): AssetConfig {
     let assetConfig = this.assets.get(`${asset.key}-${destination.key}`);
 
-    // If assetConfig not found & token is bridged, try lookup other variants
-    if (!assetConfig && this.isBridged(asset)) {
+    // If assetConfig not found try lookup other variants (bridged)
+    if (!assetConfig) {
       const vars = this.getBridgedVariants(asset);
       assetConfig = vars
         .map((v) => this.assets.get(`${v}-${destination.key}`))

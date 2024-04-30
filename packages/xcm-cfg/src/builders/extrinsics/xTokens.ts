@@ -1,8 +1,10 @@
 import {
+  Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xcm-core';
+import { toBigInt } from '@moonbeam-network/xcm-utils';
 import { toAsset, toDest } from './xTokens.utils';
 import {
   getExtrinsicAccount,
@@ -141,23 +143,38 @@ const transferMultiassets = (originParachainId?: number) => {
   };
 };
 
-const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
+type XTokensOpts = {
+  fee: Asset;
+  feeAmount: number;
+};
+
+const transferMultiCurrencies = (
+  opts?: XTokensOpts
+): ExtrinsicConfigBuilder => ({
   build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
         const { amount, asset, destination, fee, source, via } = params;
+
+        let feeAssetId = source.getAssetId(fee);
+        let feeAmount = fee.amount;
+        if (opts) {
+          const feeAssetDecimals = source.getAssetDecimals(opts.fee);
+          feeAssetId = source.getAssetId(opts.fee);
+          feeAmount = toBigInt(opts.feeAmount, feeAssetDecimals!);
+        }
+
         const rcv = destination as Parachain;
         const version = XcmVersion.v3;
         const assetId = source.getAssetId(asset);
-        const feeAssetId = source.getAssetId(fee);
         const tAccount = getTransactAccount(params);
         const account = getExtrinsicAccount(tAccount);
         return [
           [
             [assetId, amount],
-            [feeAssetId, fee.amount],
+            [feeAssetId, feeAmount],
           ],
           1,
           toDest(version, via || rcv, account),
