@@ -66,22 +66,21 @@ export class ChainConfig {
   }
 
   /**
-   * Check if asset is bridged
-   *
-   * @param asset - transfer asset
-   */
-  private isBridged(asset: Asset) {
-    const bridge = supportedBridges.find((b) => asset.key.includes(b));
-    return !!bridge;
-  }
-
-  /**
    * Return all variants of asset, bridged inclusive
    *
    * @param asset - transfer asset
    */
   private getBridgedVariants(asset: Asset): string[] {
-    const origin = asset.key.split('_')[0];
+    let origin = asset.key.split('_')[0];
+
+    if (['eth', 'weth'].includes(origin)) {
+      origin = 'weth';
+      return supportedBridges
+        .map((b) => origin + b)
+        .concat(origin)
+        .concat('eth');
+    }
+
     return supportedBridges.map((b) => origin + b).concat(origin);
   }
 }

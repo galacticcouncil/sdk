@@ -19,6 +19,7 @@ export interface XTransfer {
   srcFee: AssetAmount;
   srcFeeBalance: AssetAmount;
   buildCall(amount: bigint | number | string): Promise<XCall>;
+  syncFee(amount: bigint | number | string): Promise<AssetAmount>;
 }
 
 export interface XCall {
@@ -34,5 +35,5 @@ export interface XCallEvm extends XCall {
   /** The address the transaction is directed to. */
   to: `0x${string}`;
   /** Value sent with this transaction. */
-  value?: number;
+  value?: bigint;
 }

@@ -13,7 +13,6 @@ const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
     const to = contracts.map((c) => c.address);
     const value = [0, 0];
     const calldata = contracts.map((c) => {
-      console.log(c);
       return encodeFunctionData({
         abi: Abi[c.module],
         functionName: c.func,

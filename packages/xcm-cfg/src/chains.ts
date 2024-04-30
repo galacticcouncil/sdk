@@ -6,7 +6,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { mainnet as ethereumEvm, fantom as fantomEvm } from 'viem/chains';
+import { mainnet as ethereumEvm } from 'viem/chains';
 
 import {
   aca,
@@ -19,7 +19,6 @@ import {
   dai_awh,
   dai_mwh,
   dot,
-  eth,
   glmr,
   hdx,
   ibtc,
@@ -54,7 +53,11 @@ import { acalaEvm, hydradxEvm, moonbeamEvm } from './evm';
 import { evmResolvers } from './resolver';
 
 export const polkadot = new Parachain({
-  assetsData: [],
+  assetsData: [
+    {
+      asset: dot,
+    },
+  ],
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
@@ -426,9 +429,7 @@ export const hydraDX = new EvmParachain({
   name: 'HydraDX',
   parachainId: 2034,
   ss58Format: 63,
-  //ws: 'wss://hydradx-rpc.dwellir.com',
   ws: 'wss://rpc.hydradx.cloud',
-  //ws: 'wss://hydradx.paras.dotters.network',
 });
 
 export const interlay = new Parachain({
@@ -476,6 +477,10 @@ export const interlay = new Parachain({
 
 export const moonbeam = new EvmParachain({
   assetsData: [
+    {
+      asset: aca,
+      id: '224821240862170613278369189818311486111',
+    },
     {
       asset: glmr,
       id: '0x0000000000000000000000000000000000000802',
@@ -531,7 +536,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: usdc,
       id: '0xFFfffffF7D2B0B761Af01Ca8e25242976ac0aD7D',
-      metadataId: '166377000701797186346254371275954761085', // registered XC20 id for ERC20 tokens
+      metadataId: '166377000701797186346254371275954761085',
       decimals: 6,
     },
     {
@@ -554,7 +559,6 @@ export const moonbeam = new EvmParachain({
   parachainId: 2004,
   ss58Format: 1284,
   ws: 'wss://wss.api.moonbeam.network',
-  //ws: 'wss://moonbeam-rpc.dwellir.com',
 });
 
 export const subsocial = new Parachain({
@@ -604,7 +608,6 @@ export const zeitgeist = new Parachain({
 
 export const phala = new Parachain({
   assetsData: [
-    // NOTE: no meta for native token
     {
       asset: pha,
       metadataId: 99999999,
@@ -788,7 +791,11 @@ export const integritee = new Parachain({
 });
 
 export const kusama = new Parachain({
-  assetsData: [],
+  assetsData: [
+    {
+      asset: ksm,
+    },
+  ],
   ecosystem: Ecosystem.Kusama,
   genesisHash:
     '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
@@ -896,25 +903,7 @@ export const ethereum = new EvmChain({
   },
 });
 
-export const fantom = new EvmChain({
-  key: 'fantom',
-  name: 'Fantom',
-  assetsData: [
-    {
-      asset: dai,
-      id: '0xEE786D3D73Ea645365c7248E4e40eDba08B1169F',
-      decimals: 18,
-    },
-  ],
-  defEvm: fantomEvm,
-  defWormhole: {
-    id: 10,
-    tokenBridge: '0x7C9Fc5741288cDFdD83CeB07f3ea7e22618D79D2' as `0x${string}`,
-    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
-  },
-});
-
-export const evmChains: EvmChain[] = [ethereum, fantom];
+export const evmChains: EvmChain[] = [ethereum];
 
 export const chains: AnyChain[] = [
   ...polkadotChains,

@@ -1,6 +1,6 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { dai, eth } from '../../assets';
+import { dai, glmr, eth } from '../../assets';
 import { ethereum, hydraDX, moonbeam } from '../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../builders';
 
@@ -11,8 +11,27 @@ const toHydraDX: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydraDX,
     destinationFee: {
-      amount: 0.004,
-      asset: dai,
+      amount: 0.08,
+      asset: glmr,
+      balance: BalanceBuilder().evm().erc20(),
+    },
+    fee: {
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
+    },
+    via: moonbeam,
+  }),
+  new AssetConfig({
+    asset: eth,
+    balance: BalanceBuilder().evm().native(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .wrapAndTransferETHWithPayload()
+      .mrl(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.08,
+      asset: glmr,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -30,8 +49,8 @@ const toMoonbeam: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokens(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.004,
-      asset: dai,
+      amount: 0.08,
+      asset: glmr,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -42,6 +61,6 @@ const toMoonbeam: AssetConfig[] = [
 ];
 
 export const ethereumConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toMoonbeam],
+  assets: [...toHydraDX],
   chain: ethereum,
 });

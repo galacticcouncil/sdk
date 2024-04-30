@@ -21,15 +21,13 @@ const transferTokensWithPayload = () => {
   return {
     mrl: (): ContractConfigBuilder => ({
       build: (params) => {
-        const { address, amount, asset, source, destination, fee, via } =
-          params;
+        const { address, amount, asset, source, destination, via } = params;
         mrlGuard(via);
         const ctxWh = source as WormholeChain;
         const rcvWh = via as WormholeChain;
         const recipient = Precompile.Bridge;
         const assetId = source.getAssetId(asset);
         const payload = createMRLPayload(destination as Parachain, address);
-        console.log(payload.toHuman());
         return new ContractConfig({
           address: ctxWh.getTokenBridge(),
           args: [
@@ -72,9 +70,36 @@ const transferTokens = (): ContractConfigBuilder => ({
   },
 });
 
+const wrapAndTransferETHWithPayload = () => {
+  return {
+    mrl: (): ContractConfigBuilder => ({
+      build: (params) => {
+        const { address, source, destination, via } = params;
+        mrlGuard(via);
+        const ctxWh = source as WormholeChain;
+        const rcvWh = via as WormholeChain;
+        const recipient = Precompile.Bridge;
+        const payload = createMRLPayload(destination as Parachain, address);
+        return new ContractConfig({
+          address: ctxWh.getTokenBridge(),
+          args: [
+            rcvWh.getWormholeId(),
+            formatDestAddress(recipient) as `0x${string}`,
+            '0',
+            payload.toHex(),
+          ],
+          func: 'wrapAndTransferETHWithPayload',
+          module: 'TokenBridge',
+        });
+      },
+    }),
+  };
+};
+
 export const TokenBridge = () => {
   return {
     transferTokens,
     transferTokensWithPayload,
+    wrapAndTransferETHWithPayload,
   };
 };

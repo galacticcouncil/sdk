@@ -13,14 +13,7 @@ import {
   usdc,
   pink,
 } from '../assets';
-import {
-  acala,
-  assetHub,
-  ethereum,
-  fantom,
-  hydraDX,
-  moonbeam,
-} from '../chains';
+import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../builders';
 
 const toHydraDX: AssetConfig[] = [
@@ -266,36 +259,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
   }),
 ];
 
-const toFantomViaWormhole: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
-      ]),
-    destination: fantom,
-    destinationFee: {
-      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
-      asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-];
-
 export const moonbeamConfig = new ChainConfig({
-  assets: [
-    ...toHydraDX,
-    ...toAssetHub,
-    //...toAcalaViaWormhole,
-    ...toEthereumViaWormhole,
-    ...toFantomViaWormhole,
-  ],
+  assets: [...toHydraDX, ...toAssetHub],
   chain: moonbeam,
 });
