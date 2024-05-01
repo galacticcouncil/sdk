@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.8
+
+### Patch Changes
+
+- Enable pendulum, fixed imports
+
 ## 1.11.7
 
 ### Patch Changes
