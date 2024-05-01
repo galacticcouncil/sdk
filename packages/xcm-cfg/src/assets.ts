@@ -195,6 +195,16 @@ export const xrt = new Asset({
   originSymbol: 'XRT',
 });
 
+export const kilt = new Asset({
+  key: 'kilt',
+  originSymbol: 'KILT',
+});
+
+export const pen = new Asset({
+  key: 'pen',
+  originSymbol: 'PEN',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -214,9 +224,11 @@ export const assets: Asset[] = [
   ibtc,
   intr,
   kar,
+  kilt,
   ksm,
   nodl,
   pha,
+  pen,
   pink,
   sub,
   teer,

@@ -9,7 +9,6 @@ import {
   calculate_shares,
   calculate_liquidity_out,
   calculate_liquidity_lrna_out,
-  calculate_cap_difference,
   verify_asset_cap,
   calculate_liquidity_hub_in,
   is_sell_allowed,
@@ -17,6 +16,8 @@ import {
   is_add_liquidity_allowed,
   is_remove_liquidity_allowed,
 } from '@galacticcouncil/math-omnipool';
+
+import { BigNumber } from '../../utils/bignumber'
 
 export class OmniMath {
   static calculateSpotPrice(
@@ -158,7 +159,21 @@ export class OmniMath {
     assetCap: string,
     totalHubReserve: string
   ): string {
-    return calculate_cap_difference(assetReserve, assetHubReserve, assetCap, totalHubReserve);
+    const qi = BigNumber(assetHubReserve);
+    const ri = BigNumber(assetReserve);
+    const q = BigNumber(totalHubReserve);
+    const omegaI = BigNumber(assetCap);
+
+    const percentage = omegaI.shiftedBy(-18);
+    const isUnderWeightCap = qi.div(q).lt(percentage)
+
+    if (isUnderWeightCap) {
+      const numerator = percentage.times(q).minus(qi).times(ri);
+      const denominator = qi.times(BigNumber(1).minus(percentage));
+      return numerator.div(denominator).toFixed(0);
+    } else {
+      return '0';
+    }
   }
 
   static verifyAssetCap(assetReserve: string, assetCap: string, hubAdded: string, totalHubReserve: string): boolean {

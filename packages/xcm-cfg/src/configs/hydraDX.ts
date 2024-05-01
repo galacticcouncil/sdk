@@ -15,7 +15,9 @@ import {
   hdx,
   ibtc,
   intr,
+  kilt,
   nodl,
+  pen,
   pha,
   pink,
   sub,
@@ -41,6 +43,7 @@ import {
   hydraDX,
   interlay,
   polkadot,
+  kilt_chain,
   moonbeam,
   nodle,
   phala,
@@ -48,6 +51,7 @@ import {
   unique,
   zeitgeist,
   ethereum,
+  pendulum,
 } from '../chains';
 import {
   BalanceBuilder,
@@ -699,6 +703,42 @@ const toCrust: AssetConfig[] = [
   }),
 ];
 
+const toKilt: AssetConfig[] = [
+  new AssetConfig({
+    asset: kilt,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: kilt_chain,
+    destinationFee: {
+      amount: 0.02,
+      asset: kilt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
+const toPendulum: AssetConfig[] = [
+  new AssetConfig({
+    asset: pen,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: pendulum,
+    destinationFee: {
+      amount: 1.1,
+      asset: pen,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toAcalaViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
@@ -824,13 +864,15 @@ export const hydraDxConfig = new ChainConfig({
     ...toCrust,
     ...toEthereumViaWormhole,
     ...toInterlay,
+    ...toKilt,
     ...toMoonbeam,
     ...toNodle,
+    ...toPhala,
     ...toPolkadot,
+    ...toPendulum,
     ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,
-    ...toPhala,
   ],
   chain: hydraDX,
 });

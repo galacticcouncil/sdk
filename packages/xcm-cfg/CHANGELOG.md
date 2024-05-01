@@ -1,5 +1,35 @@
 # @galacticcouncil/xcm-cfg
 
+## 1.11.8
+
+### Patch Changes
+
+- Enable pendulum, fixed imports
+
+## 1.11.7
+
+### Patch Changes
+
+- Suspend pendulum
+
+## 1.11.6
+
+### Patch Changes
+
+- KILT & PEN config
+
+## 1.11.5
+
+### Patch Changes
+
+- Update Nodle RPC (fix)
+
+## 1.11.4
+
+### Patch Changes
+
+- Update Nodle RPC
+
 ## 1.11.3
 
 ### Patch Changes

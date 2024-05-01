@@ -47,6 +47,8 @@ import {
   pink,
   ded,
   dota,
+  kilt,
+  pen,
 } from './assets';
 
 import { acalaEvm, hydradxEvm, moonbeamEvm } from './evm';
@@ -419,6 +421,16 @@ export const hydraDX = new EvmParachain({
       decimals: 4,
       palletInstance: 50,
     },
+    {
+      asset: kilt,
+      id: 28,
+      decimals: 15,
+    },
+    {
+      asset: pen,
+      id: 1000081,
+      decimals: 12,
+    },
   ],
   defEvm: hydradxEvm,
   ecosystem: Ecosystem.Polkadot,
@@ -637,7 +649,7 @@ export const nodle = new Parachain({
   name: 'Nodle',
   parachainId: 2026,
   ss58Format: 37,
-  ws: 'wss://eden-rpc.dwellir.com',
+  ws: 'wss://nodle-rpc.dwellir.com',
 });
 
 export const unique = new Parachain({
@@ -674,7 +686,41 @@ export const crust = new Parachain({
   ws: 'wss://crust-parachain.crustapps.net',
 });
 
-export const polkadotChains: AnyChain[] = [
+export const kilt_chain = new Parachain({
+  assetsData: [
+    {
+      asset: kilt,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',
+  key: 'kilt_chain',
+  name: 'Kilt',
+  parachainId: 2086,
+  ss58Format: 38,
+  ws: 'wss://kilt-rpc.dwellir.com',
+});
+
+export const pendulum = new Parachain({
+  assetsData: [
+    {
+      asset: pen,
+      id: 'Native',
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0x5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86',
+  key: 'pendulum',
+  name: 'Pendulum',
+  parachainId: 2094,
+  ss58Format: 56,
+  ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
+});
+
+const polkadotChains: AnyChain[] = [
   acala,
   assetHub,
   astar,
@@ -682,10 +728,12 @@ export const polkadotChains: AnyChain[] = [
   centrifuge,
   crust,
   hydraDX,
+  kilt_chain,
   interlay,
   moonbeam,
   nodle,
   phala,
+  pendulum,
   polkadot,
   subsocial,
   unique,
