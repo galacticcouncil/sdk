@@ -32,7 +32,7 @@ import {
   weth_awh,
   weth_mwh,
   ztg,
-} from '../assets';
+} from '../../assets';
 import {
   acala,
   assetHub,
@@ -52,13 +52,13 @@ import {
   zeitgeist,
   ethereum,
   pendulum,
-} from '../chains';
+} from '../../chains';
 import {
   BalanceBuilder,
   ContractBuilder,
   ExtrinsicBuilder,
   FeeBuilder,
-} from '../builders';
+} from '../../builders';
 
 const toAcala: AssetConfig[] = [
   new AssetConfig({

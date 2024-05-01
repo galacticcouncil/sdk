@@ -1,8 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { pha } from '../assets';
-import { hydraDX, phala } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
+import { pha } from '../../assets';
+import { hydraDX, phala } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const phalaConfig = new ChainConfig({
   assets: [

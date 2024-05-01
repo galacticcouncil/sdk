@@ -12,9 +12,10 @@ import {
   usdt,
   usdc,
   pink,
-} from '../assets';
-import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../chains';
-import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../builders';
+  aca,
+} from '../../assets';
+import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../../chains';
+import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -225,8 +226,8 @@ const toAcalaViaWormhole: AssetConfig[] = [
       ]),
     destination: acala,
     destinationFee: {
-      amount: 0.004,
-      asset: dai_mwh,
+      amount: 0.05,
+      asset: aca,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {

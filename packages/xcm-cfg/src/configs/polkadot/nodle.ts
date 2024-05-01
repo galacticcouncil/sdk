@@ -1,21 +1,22 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { pen } from '../assets';
-import { hydraDX, pendulum } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
 
-export const pendulumConfig = new ChainConfig({
+import { nodl } from '../../assets';
+import { hydraDX, nodle } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+
+export const nodleConfig = new ChainConfig({
   assets: [
     new AssetConfig({
-      asset: pen,
+      asset: nodl,
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
         amount: 0.2,
-        asset: pen,
+        asset: nodl,
         balance: BalanceBuilder().substrate().system().account(),
       },
       extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     }),
   ],
-  chain: pendulum,
+  chain: nodle,
 });

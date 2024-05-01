@@ -1,8 +1,12 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { aca, dai_awh, glmr, wbtc_awh, weth_awh } from '../assets';
-import { hydraDX, acala, moonbeam } from '../chains';
-import { BalanceBuilder, ContractBuilder, ExtrinsicBuilder } from '../builders';
+import { aca, dai_awh, glmr, wbtc_awh, weth_awh } from '../../assets';
+import { hydraDX, acala, moonbeam } from '../../chains';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  ExtrinsicBuilder,
+} from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({

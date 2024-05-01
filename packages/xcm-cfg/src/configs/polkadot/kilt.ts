@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
-import { kilt } from '../assets';
-import { hydraDX, kilt_chain } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
+import { kilt } from '../../assets';
+import { hydraDX, kilt_chain } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const kiltConfig = new ChainConfig({
   assets: [

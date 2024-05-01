@@ -563,6 +563,7 @@ export const moonbeam = new EvmParachain({
     tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
     tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
   },
+  h160AccOnly: true,
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',

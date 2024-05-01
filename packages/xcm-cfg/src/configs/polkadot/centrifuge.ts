@@ -1,8 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { cfg } from '../assets';
-import { centrifuge, hydraDX } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
+import { cfg } from '../../assets';
+import { centrifuge, hydraDX } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({

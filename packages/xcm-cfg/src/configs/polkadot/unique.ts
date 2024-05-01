@@ -1,22 +1,22 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { nodl } from '../assets';
-import { hydraDX, nodle } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
+import { unq } from '../../assets';
+import { hydraDX, unique } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-export const nodleConfig = new ChainConfig({
+export const uniqueConfig = new ChainConfig({
   assets: [
     new AssetConfig({
-      asset: nodl,
+      asset: unq,
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
-        amount: 0.2,
-        asset: nodl,
+        amount: 0.22,
+        asset: unq,
         balance: BalanceBuilder().substrate().system().account(),
       },
       extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     }),
   ],
-  chain: nodle,
+  chain: unique,
 });

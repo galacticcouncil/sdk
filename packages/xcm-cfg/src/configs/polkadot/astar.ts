@@ -1,8 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { astr, dot, hdx, usdt } from '../assets';
-import { astar, hydraDX } from '../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../builders';
+import { astr, dot, hdx, usdt } from '../../assets';
+import { astar, hydraDX } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
