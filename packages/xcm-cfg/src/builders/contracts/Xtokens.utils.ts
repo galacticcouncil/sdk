@@ -1,4 +1,4 @@
-import { Parachain } from '@galacticcouncil/xcm-core';
+import { Parachain, isH160Address } from '@galacticcouncil/xcm-core';
 
 import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
@@ -36,16 +36,23 @@ type DestinationMultilocation = [
   ),
 ];
 
+/**
+ * Build destination multilocation
+ *
+ * 01: AccountId32
+ * 03: AccountKey20
+ *
+ * @see https://docs.moonbeam.network/builders/interoperability/xcm/xc20/xtokens/#building-the-precompile-multilocation
+ *
+ * @param address - destination address
+ * @param destination - destination chain
+ * @returns multilocation
+ */
 export function getDestinationMultilocation(
   address: string,
   destination: Parachain
 ): DestinationMultilocation {
-  /* 
-   01: AccountId32
-   03: AccountKey20
-   https://docs.moonbeam.network/builders/interoperability/xcm/xc20/xtokens/#building-the-precompile-multilocation
-   */
-  const accountType = destination.isEvmParachain() ? '03' : '01';
+  const accountType = isH160Address(address) ? '03' : '01';
   const acc = `0x${accountType}${u8aToHex(
     decodeAddress(address),
     -1,
