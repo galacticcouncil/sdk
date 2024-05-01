@@ -816,6 +816,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
 export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
+    ...toAcalaViaWormhole,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,

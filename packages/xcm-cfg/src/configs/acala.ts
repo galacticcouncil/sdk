@@ -52,24 +52,6 @@ const toHydraDX: AssetConfig[] = [
   }),
 ];
 
-const toMoonbeamViaWormhole: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_awh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().TokenBridge().transferTokens(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: aca,
-      balance: BalanceBuilder().evm().native(),
-    },
-  }),
-];
-
 const toHydraDXViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_awh,
@@ -90,6 +72,6 @@ const toHydraDXViaWormhole: AssetConfig[] = [
 ];
 
 export const acalaConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydraDX, ...toHydraDXViaWormhole],
   chain: acala,
 });

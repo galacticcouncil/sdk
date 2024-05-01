@@ -19,7 +19,7 @@ export interface XTransfer {
   srcFee: AssetAmount;
   srcFeeBalance: AssetAmount;
   buildCall(amount: bigint | number | string): Promise<XCall>;
-  syncFee(amount: bigint | number | string): Promise<AssetAmount>;
+  estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
 }
 
 export interface XCall {

@@ -3,11 +3,10 @@ import {
   AssetAmount,
   ContractConfig,
   EvmClient,
-  Precompile,
 } from '@galacticcouncil/xcm-core';
 
 import { EvmTransferFactory } from './evm';
-import { isNativeEthBridge } from './evm/utils';
+import { isNativeEthBridge, isPrecompile } from './evm/utils';
 import { TransferProvider } from '../types';
 import { Erc20Client } from '../../evm';
 import { XCall } from '../../types';
@@ -17,11 +16,6 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
 
   constructor(chain: AnyEvmChain) {
     this.#client = chain.client;
-  }
-
-  private isPrecompile(config: ContractConfig): boolean {
-    const precompiles = Object.entries(Precompile).map(([_, v]) => v);
-    return precompiles.includes(config.address);
   }
 
   async calldata(
@@ -40,7 +34,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
       value: isNativeEthBridge(config) ? amount : undefined,
     } as XCall;
 
-    if (this.isPrecompile(config)) {
+    if (isPrecompile(config) || isNativeEthBridge(config)) {
       return transferCall;
     }
 

@@ -91,6 +91,17 @@ export class Wallet {
           srcConf
         );
       },
+      async estimateFee(amount): Promise<AssetAmount> {
+        return src.getFee(
+          srcAddr,
+          toBigInt(amount, srcBalance.decimals),
+          srcFeeBalance,
+          dstAddr,
+          dstConf.chain,
+          dstFee,
+          srcConf
+        );
+      },
     } as XTransfer;
   }
 

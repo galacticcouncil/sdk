@@ -1,4 +1,4 @@
-import { AnyChain } from '@moonbeam-network/xcm-types';
+import { AnyChain } from '@galacticcouncil/xcm-core';
 
 export function logSrcChains(asset: string, chains: AnyChain[]) {
   const srcChains = chains.map((chain) => chain.name);

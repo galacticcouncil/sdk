@@ -1,13 +1,24 @@
-import { ConfigService, ConfigBuilder } from '@moonbeam-network/xcm-config';
-import { AssetAmount } from '@moonbeam-network/xcm-types';
-
+import {
+  AssetAmount,
+  ConfigService,
+  ConfigBuilder,
+  Abi,
+  Precompile,
+  EvmChain,
+} from '@galacticcouncil/xcm-core';
 import {
   chainsConfigMap,
   chainsMap,
   assetsMap,
 } from '@galacticcouncil/xcm-cfg';
-import { SubstrateApis, Wallet, XCall } from '@galacticcouncil/xcm-sdk';
+
+import { Wallet, XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
+
+import { decodeFunctionData, encodeFunctionData } from 'viem';
+
 import { logAssets, logSrcChains, logDestChains } from './utils';
+import { signAndSendEvm } from './signers';
+import { WormholeClient } from 'wormhole';
 
 // Inialialize config
 const configService = new ConfigService({
@@ -18,7 +29,7 @@ const configService = new ConfigService({
 
 // Inialialize wallet
 const wallet: Wallet = new Wallet({
-  configService: configService,
+  config: configService,
 });
 
 // Define transfer
@@ -38,15 +49,6 @@ logAssets(srcChain);
 logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
-// Initialize bi-directional connection (optional)
-const apiPool = SubstrateApis.getInstance();
-console.time('connection');
-const [_srcApi, _dstApi] = await Promise.all([
-  apiPool.api(srcChain.ws),
-  apiPool.api(destChain.ws),
-]);
-console.timeEnd('connection');
-
 // Define source & dest accounts
 const srcAddr = 'INSERT_ADDRESS';
 const destAddr = 'INSERT_ADDRESS';
@@ -60,7 +62,7 @@ const balanceSubscription = await wallet.subscribeBalance(
 );
 
 // Get transfer input data (dialog)
-const xdata = await wallet.transfer(
+const xTransfer = await wallet.transfer(
   asset,
   srcAddr,
   srcChain,
@@ -69,11 +71,112 @@ const xdata = await wallet.transfer(
 );
 
 // Construct calldata with transfer amount
-const call: XCall = xdata.buildCall('1');
+const call: XCall = await xTransfer.buildCall('1');
 
 // Dump transfer info
-console.log(xdata);
+console.log(xTransfer);
 console.log(call);
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
+
+///////////////////////////////////////
+// Signers & Wormhole specific code //
+/////////////////////////////////////
+
+// signAndSendEvm(
+//   srcChain,
+//   srcAddr,
+//   call,
+//   (hash) => {
+//     console.log('TxHash: ' + hash);
+//   },
+//   (receipt) => {
+//     console.log(receipt);
+//   },
+//   (error) => {
+//     console.error(error);
+//   }
+// );
+
+////////////////////////
+// [Wormhole client] //
+//////////////////////
+
+const wh = new WormholeClient();
+
+///////////////////
+// [VAA Status] //
+/////////////////
+
+// const vaa = await wh.getVaa('0x...');
+// const isTransferComplete = await wh.isTransferCompleted(vaa);
+// console.log('Transfer completed: ' + isTransferComplete);
+
+////////////////////////
+// [Redeem transfer] //
+//////////////////////
+
+// wh.redeem(vaa, destAddr, (tx) => {
+//   const { chainId, ...call } = tx.transaction;
+//   console.log(call);
+//
+//   signAndSendEvm(
+//     destChain,
+//     destAddr,
+//     call,
+//     (hash) => {
+//       console.log('TxHash: ' + hash);
+//     },
+//     (receipt) => {
+//       console.log(receipt);
+//     },
+//     (error) => {
+//       console.error(error);
+//     }
+//   );
+//   console.log(tx);
+// });
+
+//////////////////////////////
+// [Redeem transfer - GMP] //
+////////////////////////////
+
+// wh.redeem(vaa, srcAddr, (tx) => {
+//   const { chainId, ...call } = tx.transaction;
+//   console.log(call);
+
+//   const { data } = tx.transaction;
+//   const { args } = decodeFunctionData({
+//     abi: Abi.TokenBridge,
+//     data: data,
+//   });
+
+//   const xData = encodeFunctionData({
+//     abi: Abi.Gmp,
+//     functionName: 'wormholeTransferERC20',
+//     args: args,
+//   });
+
+//   const xCall = {
+//     from: '0x...' as `0x${string}`,
+//     data: xData as `0x${string}`,
+//     abi: JSON.stringify(Abi.Gmp),
+//     to: Precompile.Bridge,
+//   } as XCall;
+
+//   signAndSendEvm(
+//     configService.getChain('moonbeam'),
+//     srcAddr,
+//     xCall,
+//     (hash) => {
+//       console.log('TxHash: ' + hash);
+//     },
+//     (receipt) => {
+//       console.log(receipt);
+//     },
+//     (error) => {
+//       console.error(error);
+//     }
+//   );
+// });

@@ -1,6 +1,5 @@
-import type { ApiPromise } from '@polkadot/api';
-
-import { EvmClient, XCall } from '@galacticcouncil/xcm-sdk';
+import { AnyChain, AnyEvmChain, EvmParachain } from '@galacticcouncil/xcm-core';
+import { XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
 import { getWalletBySource } from '@talismn/connect-wallets';
 import { createWalletClient, custom, Chain } from 'viem';
 
@@ -26,14 +25,15 @@ export async function createEvmSigner(account: string, chain: Chain) {
 }
 
 export async function signAndSendEvm(
-  api: ApiPromise,
+  chain: AnyChain,
   address: string,
-  client: EvmClient,
   call: XCall,
   onTransactionSend: (hash: string | null) => void,
   onTransactionReceipt: (receipt: any) => void,
   onError: (error: unknown) => void
 ) {
+  const { client } = chain as AnyEvmChain;
+
   const provider = client.getProvider();
   const signer = client.getSigner(address);
 
@@ -41,10 +41,14 @@ export async function signAndSendEvm(
 
   let data: `0x${string}` | null = null;
   let txHash: `0x${string}` | null = null;
-  try {
-    const extrinsic = api.tx(call.data);
-    data = extrinsic.inner.toHex();
-  } catch (error) {}
+  if (chain instanceof EvmParachain) {
+    try {
+      const api = await chain.api;
+      const extrinsic = api.tx(call.data);
+      data = extrinsic.inner.toHex();
+      console.log(extrinsic.inner.toHuman());
+    } catch (error) {}
+  }
 
   if (data) {
     const [gas, gasPrice] = await Promise.all([
@@ -69,11 +73,21 @@ export async function signAndSendEvm(
       to: DISPATCH_ADDRESS as `0x${string}`,
     });
   } else {
+    const { data, to, value } = call as XCallEvm;
+    const estGas = await provider.estimateGas({
+      data: data,
+      account: address as `0x${string}`,
+      to: to as `0x${string}`,
+      value: value,
+    });
+    console.log('Est gas: ' + estGas);
+
     txHash = await signer.sendTransaction({
       account: address as `0x${string}`,
       chain: client.chain,
-      data: call.data,
-      to: call.to as `0x${string}`,
+      data: data,
+      to: to as `0x${string}`,
+      value: value,
     });
   }
 
