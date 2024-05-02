@@ -48,7 +48,7 @@ const transferMultiasset = (originParachainId?: number) => {
               {
                 X3: [
                   {
-                    Parachain: originParachainId ?? ctx.parachainId,
+                    Parachain: originParachainId ?? rcv.parachainId,
                   },
                   {
                     PalletInstance: palletInstance,
@@ -93,7 +93,7 @@ const transferMultiassets = (originParachainId?: number) => {
                 {
                   X3: [
                     {
-                      Parachain: originParachainId ?? ctx.parachainId,
+                      Parachain: originParachainId ?? rcv.parachainId,
                     },
                     {
                       PalletInstance: palletInstance,
