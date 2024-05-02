@@ -30,13 +30,13 @@ export function calculateMax(
   min: AssetAmount,
   ed?: AssetAmount
 ): AssetAmount {
-  const result = balance
+  let result = balance
     .toBig()
     .minus(min.toBig())
     .minus(balance.isSame(fee) ? fee.toBig() : new Big(0));
 
   if (ed) {
-    result.minus(balance.isSame(ed) ? ed.toBig() : new Big(0));
+    result = result.minus(balance.isSame(ed) ? ed.toBig() : new Big(0));
   }
 
   return balance.copyWith({
@@ -65,13 +65,13 @@ export function calculateMin(
     amount: 0n,
   });
 
-  const result = zero
+  let result = zero
     .toBig()
     .plus(balance.isSame(fee) ? fee.toBig() : new Big(0))
     .plus(balance.toBig().lt(min.toBig()) ? min.toBig() : new Big(0));
 
   if (ed) {
-    result.plus(
+    result = result.plus(
       balance.isSame(ed) && balance.toBig().lt(ed.toBig())
         ? ed.toBig()
         : new Big(0)
