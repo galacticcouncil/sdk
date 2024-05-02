@@ -141,8 +141,8 @@ export const weth_mwh = new Asset({
 });
 
 export const wbtc = new Asset({
-  key: 'weth',
-  originSymbol: 'WETH',
+  key: 'wbtc',
+  originSymbol: 'WBTC',
 });
 
 export const wbtc_awh = new Asset({

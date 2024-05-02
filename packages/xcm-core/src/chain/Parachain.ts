@@ -62,7 +62,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
   }
 
   getType(): ChainType {
-    return ChainType.EvmParachain;
+    return ChainType.Parachain;
   }
 
   getAssetPalletInstance(asset: Asset): number | undefined {

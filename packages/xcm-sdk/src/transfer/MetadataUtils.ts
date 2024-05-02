@@ -5,7 +5,7 @@ import {
   EvmChain,
   Parachain,
 } from '@galacticcouncil/xcm-core';
-import { SubstrateService } from 'substrate';
+import { SubstrateService } from '../substrate';
 
 export class MetadataUtils {
   readonly chain: AnyChain;

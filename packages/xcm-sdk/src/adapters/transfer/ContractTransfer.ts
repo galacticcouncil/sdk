@@ -58,7 +58,6 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
     feeBalance: AssetAmount,
     config: ContractConfig
   ): Promise<AssetAmount> {
-    console.log(config);
     const contract = EvmTransferFactory.get(this.#client, config);
 
     let fee: bigint;
