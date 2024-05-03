@@ -9,7 +9,7 @@ import { EvmTransferFactory } from './evm';
 import { isNativeEthBridge, isPrecompile } from './evm/utils';
 import { TransferProvider } from '../types';
 import { Erc20Client } from '../../evm';
-import { XCall } from '../../types';
+import { XCall, XCallEvm } from '../../types';
 
 export class ContractTransfer implements TransferProvider<ContractConfig> {
   readonly #client: EvmClient;
@@ -32,24 +32,25 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
       from: account as `0x${string}`,
       to: config.address as `0x${string}`,
       value: isNativeEthBridge(config) ? amount : undefined,
-    } as XCall;
+    } as XCallEvm;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
       return transferCall;
     }
 
     const allowance = await erc20.allowance(account, config.address);
-    if (allowance >= amount) {
+    if (allowance >= amount && amount > 0n) {
       return transferCall;
     }
 
     const approve = erc20.approve(config.address, amount);
     return {
       abi: JSON.stringify(erc20.abi),
+      allowance: allowance,
       data: approve as `0x${string}`,
       from: account as `0x${string}`,
       to: asset as `0x${string}`,
-    } as XCall;
+    } as XCallEvm;
   }
 
   async estimateFee(
