@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.0.2
+
+### Patch Changes
+
+- H160 pnly for acala evm
+
 ## 2.0.1
 
 ### Patch Changes
