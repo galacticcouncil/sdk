@@ -1,11 +1,13 @@
 # @galacticcouncil/xcm-sdk
 
-## 3.0.1
+## 3.0.0
 
-### Patch Changes
+### Major Changes
+
+- Introducing MRL & Wormhole support
 
 - Updated dependencies
-  - @galacticcouncil/xcm-core@2.0.0
+  - @galacticcouncil/xcm-core@1.0.0
 
 ## 2.4.0
 

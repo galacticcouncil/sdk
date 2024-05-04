@@ -1,7 +1,7 @@
 # @galacticcouncil/xcm-core
 
-## 2.0.0
+## 1.0.0
 
 ### Major Changes
 
-- ds
+- Introducing MRL & Wormhole support (initial version)

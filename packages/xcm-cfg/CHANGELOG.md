@@ -1,11 +1,13 @@
 # @galacticcouncil/xcm-cfg
 
-## 2.0.1
+## 2.0.0
 
-### Patch Changes
+### Major Changes
+
+- Introducing MRL & Wormhole support (refactoring)
 
 - Updated dependencies
-  - @galacticcouncil/xcm-core@2.0.0
+  - @galacticcouncil/xcm-core@1.0.0
 
 ## 1.11.8
 
