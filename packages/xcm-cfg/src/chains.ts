@@ -148,6 +148,7 @@ export const acala_evm = new EvmParachain({
     id: 12,
     tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
   },
+  h160AccOnly: true,
   ecosystem: Ecosystem.Polkadot,
   evmResolver: evmResolvers['acala'],
   genesisHash:
