@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.0.1
+
+### Patch Changes
+
+- Temp acala evm chain
+
 ## 2.0.0
 
 ### Major Changes
