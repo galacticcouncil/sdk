@@ -1,6 +1,7 @@
 import { ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { acalaConfig } from './acala';
+import { acalaEvmConfig } from './acala-evm';
 import { assetHubConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
@@ -20,6 +21,7 @@ import { pendulumConfig } from './pendulum';
 
 export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
+  acalaEvmConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,

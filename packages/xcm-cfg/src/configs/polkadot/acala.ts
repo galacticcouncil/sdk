@@ -1,12 +1,8 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { aca, dai_awh, glmr, wbtc_awh, weth_awh } from '../../assets';
-import { hydraDX, acala, moonbeam } from '../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  ExtrinsicBuilder,
-} from '../../builders';
+import { aca, dai_awh, wbtc_awh, weth_awh } from '../../assets';
+import { hydraDX, acala } from '../../chains';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydraDX: AssetConfig[] = [
   new AssetConfig({
@@ -56,26 +52,7 @@ const toHydraDX: AssetConfig[] = [
   }),
 ];
 
-const toHydraDXViaWormhole: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_awh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: aca,
-      balance: BalanceBuilder().evm().native(),
-    },
-    via: moonbeam,
-  }),
-];
-
 export const acalaConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toHydraDXViaWormhole],
+  assets: [...toHydraDX],
   chain: acala,
 });

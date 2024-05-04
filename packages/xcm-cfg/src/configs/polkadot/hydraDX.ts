@@ -52,6 +52,7 @@ import {
   zeitgeist,
   ethereum,
   pendulum,
+  acala_evm,
 } from '../../chains';
 import {
   BalanceBuilder,
@@ -743,7 +744,7 @@ const toAcalaViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: acala,
+    destination: acala_evm,
     destinationFee: {
       amount: 0.06,
       asset: aca,

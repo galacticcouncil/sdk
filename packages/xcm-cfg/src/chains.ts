@@ -117,6 +117,48 @@ export const acala = new EvmParachain({
   ws: 'wss://acala-rpc.aca-api.network',
 });
 
+export const acala_evm = new EvmParachain({
+  assetsData: [
+    {
+      asset: aca,
+      id: { Token: aca.originSymbol },
+      metadataId: { NativeAssetId: { Token: aca.originSymbol } },
+    },
+    {
+      asset: dai_awh,
+      decimals: 18,
+      balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
+      id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
+    },
+    {
+      asset: wbtc_awh,
+      decimals: 8,
+      balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
+      id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
+    },
+    {
+      asset: weth_awh,
+      decimals: 18,
+      balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
+      id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
+    },
+  ],
+  defEvm: acalaEvm,
+  defWormhole: {
+    id: 12,
+    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
+  },
+  ecosystem: Ecosystem.Polkadot,
+  evmResolver: evmResolvers['acala'],
+  genesisHash:
+    '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+  key: 'acala-evm',
+  name: 'Acala EVM',
+  parachainId: 2000,
+  ss58Format: 10,
+  ws: 'wss://acala-rpc.aca-api.network',
+});
+
 export const assetHub = new Parachain({
   assetsData: [
     {
@@ -697,7 +739,7 @@ export const kilt_chain = new Parachain({
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',
-  key: 'kilt_chain',
+  key: 'kilt',
   name: 'Kilt',
   parachainId: 2086,
   ss58Format: 38,
@@ -723,6 +765,7 @@ export const pendulum = new Parachain({
 
 const polkadotChains: AnyChain[] = [
   acala,
+  acala_evm,
   assetHub,
   astar,
   bifrost,
