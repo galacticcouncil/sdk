@@ -1,7 +1,7 @@
 {
   "name": "@galacticcouncil/xcm-cfg",
-  "version": "1.11.8",
-  "description": "Cross-chain polkadot & kusama HydraDX config",
+  "version": "2.0.1",
+  "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "repository": {
     "directory": "packages/xcm-cfg",
@@ -30,6 +30,6 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-core": "^1.0.0"
+    "@galacticcouncil/xcm-core": "^2.0.0"
   }
 }

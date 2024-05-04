@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@2.0.0
+
 ## 1.11.8
 
 ### Patch Changes

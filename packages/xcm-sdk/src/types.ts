@@ -32,8 +32,6 @@ export interface XCall {
 export interface XCallEvm extends XCall {
   /** Solidity JSON string ABI. */
   abi?: string;
-  /** Current spending cap. */
-  allowance?: bigint;
   /** The address the transaction is directed to. */
   to: `0x${string}`;
   /** Value sent with this transaction. */

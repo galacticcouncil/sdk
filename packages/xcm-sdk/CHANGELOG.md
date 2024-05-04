@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@2.0.0
+
 ## 2.4.0
 
 ### Minor Changes

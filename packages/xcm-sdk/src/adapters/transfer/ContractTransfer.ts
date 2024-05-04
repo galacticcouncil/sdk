@@ -39,14 +39,13 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
     }
 
     const allowance = await erc20.allowance(account, config.address);
-    if (allowance >= amount && amount > 0n) {
+    if (allowance >= amount) {
       return transferCall;
     }
 
     const approve = erc20.approve(config.address, amount);
     return {
       abi: JSON.stringify(erc20.abi),
-      allowance: allowance,
       data: approve as `0x${string}`,
       from: account as `0x${string}`,
       to: asset as `0x${string}`,
