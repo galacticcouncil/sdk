@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.0.1
+
+### Patch Changes
+
+- Export Erc20Client
+
 ## 3.0.0
 
 ### Major Changes
