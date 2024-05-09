@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.0.2
+
+### Patch Changes
+
+- Include allowance info for erc20 approve xcall
+
 ## 3.0.1
 
 ### Patch Changes
