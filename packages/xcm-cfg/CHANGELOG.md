@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.0.3
+
+### Patch Changes
+
+- Adjust AssetHub USDT destination fee to 0.07
+
 ## 2.0.2
 
 ### Patch Changes
