@@ -69,7 +69,7 @@ export class Wallet {
     );
 
     const dstEd = await dst.metadata.getEd();
-    const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
+    const min = calculateMin(srcBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.metadata.getEd();
     const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);

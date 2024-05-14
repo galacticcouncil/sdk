@@ -60,15 +60,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
     config: ContractConfig
   ): Promise<AssetAmount> {
     const contract = EvmTransferFactory.get(this.#client, config);
-
-    let fee: bigint;
-    try {
-      fee = await contract.estimateFee(account, amount);
-    } catch (error) {
-      // Can't estimate fee if no allowance
-      fee = 0n;
-    }
-
+    const fee = await contract.estimateFee(account, amount);
     return feeBalance.copyWith({
       amount: fee,
     });
