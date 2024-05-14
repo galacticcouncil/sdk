@@ -30,15 +30,37 @@ export class SubstrateApis {
     return SubstrateApis._instance;
   }
 
-  public async api(ws: string): Promise<ApiPromise> {
-    const promise =
-      this._cache.get(ws) ||
-      ApiPromise.create({
-        noInitWarn: true,
-        provider: new WsProvider(ws),
-      });
+  public async getPromise(endpoints: string[]): Promise<ApiPromise> {
+    const cacheKey = endpoints.find((key) => this._cache.has(key));
 
-    this._cache.set(ws, promise);
+    if (cacheKey) {
+      return Promise.resolve(this._cache.get(cacheKey));
+    }
+
+    return new Promise((resolve) => {
+      const provider = new WsProvider(endpoints);
+      provider.on('connected', async () => {
+        const promise = ApiPromise.create({
+          provider,
+          noInitWarn: true,
+        });
+
+        console.log(`Connected to ${provider.endpoint}.`);
+        this._cache.set(provider.endpoint, promise);
+        resolve(promise);
+      });
+      provider.on('error', async () => {
+        console.log(`Could not connect to ${provider.endpoint}, skipping.`);
+        this._cache.delete(provider.endpoint);
+      });
+    });
+  }
+
+  public async api(ws: string | string[]): Promise<ApiPromise> {
+    const endpoints = typeof ws === 'string' ? [ws] : ws;
+
+    const promise = this.getPromise(endpoints);
+
     const api = await promise;
     await api.isReady;
     return api;
