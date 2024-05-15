@@ -57,7 +57,7 @@ export class SubstrateApis {
   }
 
   public async api(ws: string | string[]): Promise<ApiPromise> {
-    const endpoints = typeof ws === 'string' ? [ws] : ws;
+    const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
 
     const promise = this.getPromise(endpoints);
 
