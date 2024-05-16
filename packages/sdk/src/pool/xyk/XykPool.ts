@@ -170,21 +170,23 @@ export class XykPool implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
-    const price = XykMath.getSpotPrice(
+    const price = XykMath.calculateSpotPrice(
       poolPair.balanceOut.toString(),
-      poolPair.balanceIn.toString(),
-      scale(ONE, poolPair.decimalsOut).toString()
+      poolPair.balanceIn.toString()
     );
-    return bnum(price);
+
+    const base = scale(ONE, 18 - poolPair.decimalsOut);
+    return bnum(price).div(base);
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber {
-    const price = XykMath.getSpotPrice(
+    const price = XykMath.calculateSpotPrice(
       poolPair.balanceIn.toString(),
-      poolPair.balanceOut.toString(),
-      scale(ONE, poolPair.decimalsIn).toString()
+      poolPair.balanceOut.toString()
     );
-    return bnum(price);
+
+    const base = scale(ONE, 18 - poolPair.decimalsIn);
+    return bnum(price).div(base);
   }
 
   calculateTradeFee(amount: BigNumber, fees: XykPoolFees): BigNumber {

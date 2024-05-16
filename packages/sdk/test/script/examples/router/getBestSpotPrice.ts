@@ -20,12 +20,19 @@ class GetBestSpotPriceExample extends PolkadotExecutor {
         origin: 1000,
         symbol: 'PINK',
       },
+      {
+        decimals: 2,
+        id: '420',
+        name: 'BEEFY',
+        origin: 1000,
+        symbol: 'BEEFY',
+      },
     ];
 
     const poolService = new PoolService(api);
     await poolService.syncRegistry(external);
     const router = new TradeRouter(poolService);
-    return router.getBestSpotPrice('0', '10');
+    return router.getBestSpotPrice('1000036', '5');
   }
 }
 
