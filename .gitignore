@@ -5,6 +5,9 @@ node_modules/
 packages/*/build
 packages/*/build-meta.json
 
+# except math build folders
+!packages/math-*/build
+
 # compile folders
 examples/*/out
 
