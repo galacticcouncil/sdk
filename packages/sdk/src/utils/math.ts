@@ -36,7 +36,10 @@ export function calculateDiffToAvg(v1: BigNumber, v2: BigNumber): BigNumber {
  * @param vRef - reference value
  * @returns Difference between a final value and a reference value in relation to the reference value
  */
-export function calculateDiffToRef(vFin: BigNumber, vRef: BigNumber): BigNumber {
+export function calculateDiffToRef(
+  vFin: BigNumber,
+  vRef: BigNumber
+): BigNumber {
   const impact = vFin.minus(vRef).div(vRef).multipliedBy(100);
   return impact.decimalPlaces(2);
 }
