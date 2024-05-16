@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
   "repository": {
@@ -32,10 +32,10 @@
     "test": "jest"
   },
   "dependencies": {
-    "@galacticcouncil/math-lbp": "^0.2.1",
-    "@galacticcouncil/math-omnipool": "^0.2.0",
-    "@galacticcouncil/math-stableswap": "^0.2.2",
-    "@galacticcouncil/math-xyk": "^0.2.0",
+    "@galacticcouncil/math-lbp": "^1.0.0",
+    "@galacticcouncil/math-omnipool": "^1.0.0",
+    "@galacticcouncil/math-stableswap": "^1.0.0",
+    "@galacticcouncil/math-xyk": "^1.0.0",
     "@thi.ng/cache": "^2.1.35",
     "bignumber.js": "^9.1.0",
     "lodash.clonedeep": "^4.5.0"

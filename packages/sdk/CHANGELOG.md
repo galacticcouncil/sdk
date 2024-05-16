@@ -1,5 +1,19 @@
 # @galacticcouncil/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- Use calculateSpotPrice instead of getSpotPrice for XYK (precision fix)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-lbp@1.0.0
+  - @galacticcouncil/math-omnipool@1.0.0
+  - @galacticcouncil/math-stableswap@1.0.0
+  - @galacticcouncil/math-xyk@1.0.0
+
 ## 2.2.3
 
 ### Patch Changes
