@@ -32,14 +32,14 @@ function passStringToWasm0(arg, malloc, realloc) {
 
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
-        const ptr = malloc(buf.length);
+        const ptr = malloc(buf.length, 1) >>> 0;
         getUint8Memory0().subarray(ptr, ptr + buf.length).set(buf);
         WASM_VECTOR_LEN = buf.length;
         return ptr;
     }
 
     let len = arg.length;
-    let ptr = malloc(len);
+    let ptr = malloc(len, 1) >>> 0;
 
     const mem = getUint8Memory0();
 
@@ -55,11 +55,12 @@ function passStringToWasm0(arg, malloc, realloc) {
         if (offset !== 0) {
             arg = arg.slice(offset);
         }
-        ptr = realloc(ptr, len, len = offset + arg.length * 3);
+        ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
         const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
         const ret = encodeString(arg, view);
 
         offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
     }
 
     WASM_VECTOR_LEN = offset;
@@ -80,6 +81,7 @@ let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true 
 cachedTextDecoder.decode();
 
 function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 /**
@@ -88,6 +90,8 @@ function getStringFromWasm0(ptr, len) {
 * @returns {string}
 */
 module.exports.fixed_from_rational = function(a, b) {
+    let deferred3_0;
+    let deferred3_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -97,10 +101,12 @@ module.exports.fixed_from_rational = function(a, b) {
         wasm.fixed_from_rational(retptr, ptr0, len0, ptr1, len1);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred3_0 = r0;
+        deferred3_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 };
 
@@ -111,6 +117,8 @@ module.exports.fixed_from_rational = function(a, b) {
 * @returns {string}
 */
 module.exports.calculate_loyalty_multiplier = function(period, initial_reward_percentage, scale_coef) {
+    let deferred4_0;
+    let deferred4_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(period, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -122,10 +130,12 @@ module.exports.calculate_loyalty_multiplier = function(period, initial_reward_pe
         wasm.calculate_loyalty_multiplier(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred4_0 = r0;
+        deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 };
 
@@ -136,6 +146,8 @@ module.exports.calculate_loyalty_multiplier = function(period, initial_reward_pe
 * @returns {string}
 */
 module.exports.calculate_accumulated_rps = function(accumulated_rps_now, total_shares, reward) {
+    let deferred4_0;
+    let deferred4_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(accumulated_rps_now, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -147,10 +159,12 @@ module.exports.calculate_accumulated_rps = function(accumulated_rps_now, total_s
         wasm.calculate_accumulated_rps(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred4_0 = r0;
+        deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 };
 
@@ -163,6 +177,8 @@ module.exports.calculate_accumulated_rps = function(accumulated_rps_now, total_s
 * @returns {string}
 */
 module.exports.calculate_user_reward = function(accumulated_rpvs, valued_shares, accumulated_claimed_rewards, accumulated_rpvs_now, loyalty_multiplier) {
+    let deferred6_0;
+    let deferred6_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(accumulated_rpvs, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -178,10 +194,12 @@ module.exports.calculate_user_reward = function(accumulated_rpvs, valued_shares,
         wasm.calculate_user_reward(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred6_0 = r0;
+        deferred6_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 
@@ -194,6 +212,8 @@ module.exports.calculate_user_reward = function(accumulated_rpvs, valued_shares,
 * @returns {string}
 */
 module.exports.calculate_user_unclaimed_reward = function(accumulated_rpvs, valued_shares, accumulated_claimed_rewards, accumulated_rpvs_now, loyalty_multiplier) {
+    let deferred6_0;
+    let deferred6_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(accumulated_rpvs, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -209,10 +229,12 @@ module.exports.calculate_user_unclaimed_reward = function(accumulated_rpvs, valu
         wasm.calculate_user_unclaimed_reward(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred6_0 = r0;
+        deferred6_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 
@@ -222,6 +244,8 @@ module.exports.calculate_user_unclaimed_reward = function(accumulated_rpvs, valu
 * @returns {string}
 */
 module.exports.calculate_valued_shares = function(shares, incentivized_asset_balance) {
+    let deferred3_0;
+    let deferred3_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(shares, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -231,10 +255,12 @@ module.exports.calculate_valued_shares = function(shares, incentivized_asset_bal
         wasm.calculate_valued_shares(retptr, ptr0, len0, ptr1, len1);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred3_0 = r0;
+        deferred3_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 };
 
@@ -245,6 +271,8 @@ module.exports.calculate_valued_shares = function(shares, incentivized_asset_bal
 * @returns {string}
 */
 module.exports.calculate_reward = function(accumulated_rps_start, accumulated_rps_now, shares) {
+    let deferred4_0;
+    let deferred4_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(accumulated_rps_start, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -256,10 +284,12 @@ module.exports.calculate_reward = function(accumulated_rps_start, accumulated_rp
         wasm.calculate_reward(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred4_0 = r0;
+        deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 };
 
@@ -269,6 +299,8 @@ module.exports.calculate_reward = function(accumulated_rps_start, accumulated_rp
 * @returns {string}
 */
 module.exports.calculate_global_farm_shares = function(valued_shares, multiplier) {
+    let deferred3_0;
+    let deferred3_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(valued_shares, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -278,10 +310,12 @@ module.exports.calculate_global_farm_shares = function(valued_shares, multiplier
         wasm.calculate_global_farm_shares(retptr, ptr0, len0, ptr1, len1);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred3_0 = r0;
+        deferred3_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 };
 
@@ -293,6 +327,8 @@ module.exports.calculate_global_farm_shares = function(valued_shares, multiplier
 * @returns {string}
 */
 module.exports.calculate_yield_farm_rewards = function(yield_farm_rpz, global_farm_rpz, multiplier, total_valued_shares) {
+    let deferred5_0;
+    let deferred5_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(yield_farm_rpz, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -306,10 +342,12 @@ module.exports.calculate_yield_farm_rewards = function(yield_farm_rpz, global_fa
         wasm.calculate_yield_farm_rewards(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred5_0 = r0;
+        deferred5_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 };
 
@@ -321,6 +359,8 @@ module.exports.calculate_yield_farm_rewards = function(yield_farm_rpz, global_fa
 * @returns {string}
 */
 module.exports.calculate_yield_farm_delta_rpvs = function(yield_farm_rpz, global_farm_rpz, multiplier, total_valued_shares) {
+    let deferred5_0;
+    let deferred5_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(yield_farm_rpz, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -334,10 +374,12 @@ module.exports.calculate_yield_farm_delta_rpvs = function(yield_farm_rpz, global
         wasm.calculate_yield_farm_delta_rpvs(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred5_0 = r0;
+        deferred5_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 };
 
@@ -350,6 +392,8 @@ module.exports.calculate_yield_farm_delta_rpvs = function(yield_farm_rpz, global
 * @returns {string}
 */
 module.exports.calculate_global_farm_rewards = function(total_shares_z, price_adjustment, yield_per_period, max_reward_per_period, periods_since_last_update) {
+    let deferred6_0;
+    let deferred6_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(total_shares_z, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -365,10 +409,12 @@ module.exports.calculate_global_farm_rewards = function(total_shares_z, price_ad
         wasm.calculate_global_farm_rewards(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred6_0 = r0;
+        deferred6_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 
@@ -379,6 +425,8 @@ module.exports.calculate_global_farm_rewards = function(total_shares_z, price_ad
 * @returns {string}
 */
 module.exports.calculate_pool_trade_fee = function(a, fee_numerator, fee_denominator) {
+    let deferred2_0;
+    let deferred2_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -386,10 +434,12 @@ module.exports.calculate_pool_trade_fee = function(a, fee_numerator, fee_denomin
         wasm.calculate_pool_trade_fee(retptr, ptr0, len0, fee_numerator, fee_denominator);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred2_0 = r0;
+        deferred2_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(r0, r1);
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
     }
 };
 

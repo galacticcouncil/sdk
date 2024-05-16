@@ -32,14 +32,14 @@ function passStringToWasm0(arg, malloc, realloc) {
 
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
-        const ptr = malloc(buf.length) >>> 0;
+        const ptr = malloc(buf.length, 1) >>> 0;
         getUint8Memory0().subarray(ptr, ptr + buf.length).set(buf);
         WASM_VECTOR_LEN = buf.length;
         return ptr;
     }
 
     let len = arg.length;
-    let ptr = malloc(len) >>> 0;
+    let ptr = malloc(len, 1) >>> 0;
 
     const mem = getUint8Memory0();
 
@@ -55,11 +55,12 @@ function passStringToWasm0(arg, malloc, realloc) {
         if (offset !== 0) {
             arg = arg.slice(offset);
         }
-        ptr = realloc(ptr, len, len = offset + arg.length * 3) >>> 0;
+        ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
         const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
         const ret = encodeString(arg, view);
 
         offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
     }
 
     WASM_VECTOR_LEN = offset;
@@ -111,7 +112,7 @@ module.exports.calculate_shares = function(asset_reserve, asset_hub_reserve, ass
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred5_0, deferred5_1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 };
 
@@ -140,7 +141,7 @@ module.exports.calculate_withdrawal_fee = function(spot_price, oracle_price, min
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred4_0, deferred4_1);
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 };
 
@@ -184,7 +185,7 @@ module.exports.calculate_liquidity_out = function(asset_reserve, asset_hub_reser
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred9_0, deferred9_1);
+        wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
 };
 
@@ -228,7 +229,7 @@ module.exports.calculate_liquidity_lrna_out = function(asset_reserve, asset_hub_
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred9_0, deferred9_1);
+        wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
 };
 
@@ -275,7 +276,7 @@ module.exports.recalculate_asset_fee = function(asset_amount_in, asset_amount_ou
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1);
+        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
 };
 
@@ -322,7 +323,7 @@ module.exports.recalculate_protocol_fee = function(asset_amount_in, asset_amount
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1);
+        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
 };
 
@@ -369,7 +370,7 @@ module.exports.calculate_out_given_in = function(asset_in_reserve, asset_in_hub_
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1);
+        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
 };
 
@@ -404,7 +405,7 @@ module.exports.calculate_out_given_lrna_in = function(asset_reserve, asset_hub_r
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred6_0, deferred6_1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 
@@ -451,7 +452,7 @@ module.exports.calculate_in_given_out = function(asset_in_reserve, asset_in_hub_
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1);
+        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
 };
 
@@ -486,7 +487,7 @@ module.exports.calculate_lrna_in_given_out = function(asset_reserve, asset_hub_r
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred6_0, deferred6_1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 
@@ -518,7 +519,45 @@ module.exports.calculate_spot_price = function(asset_a_reserve, asset_a_hub_rese
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred5_0, deferred5_1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
+    }
+};
+
+/**
+* @param {string} asset_a_reserve
+* @param {string} asset_a_hub_reserve
+* @param {string} asset_b_reserve
+* @param {string} asset_b_hub_reserve
+* @param {string} protocol_fee
+* @param {string} asset_fee
+* @returns {string}
+*/
+module.exports.calculate_spot_price_with_fee = function(asset_a_reserve, asset_a_hub_reserve, asset_b_reserve, asset_b_hub_reserve, protocol_fee, asset_fee) {
+    let deferred7_0;
+    let deferred7_1;
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passStringToWasm0(asset_a_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(asset_a_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(asset_b_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ptr3 = passStringToWasm0(asset_b_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ptr4 = passStringToWasm0(protocol_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ptr5 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len5 = WASM_VECTOR_LEN;
+        wasm.calculate_spot_price_with_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred7_0 = r0;
+        deferred7_1 = r1;
+        return getStringFromWasm0(r0, r1);
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+        wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 };
 
@@ -544,7 +583,36 @@ module.exports.calculate_lrna_spot_price = function(asset_reserve, asset_hub_res
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred3_0, deferred3_1);
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+};
+
+/**
+* @param {string} asset_reserve
+* @param {string} asset_hub_reserve
+* @param {string} asset_fee
+* @returns {string}
+*/
+module.exports.calculate_lrna_spot_price_with_fee = function(asset_reserve, asset_hub_reserve, asset_fee) {
+    let deferred4_0;
+    let deferred4_1;
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        wasm.calculate_lrna_spot_price_with_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        deferred4_0 = r0;
+        deferred4_1 = r1;
+        return getStringFromWasm0(r0, r1);
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 };
 
@@ -576,7 +644,7 @@ module.exports.calculate_cap_difference = function(asset_reserve, asset_hub_rese
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred5_0, deferred5_1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 };
 
@@ -634,7 +702,7 @@ module.exports.calculate_tvl_cap_difference = function(asset_reserve, asset_hub_
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred7_0, deferred7_1);
+        wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 };
 
@@ -666,7 +734,7 @@ module.exports.calculate_liquidity_hub_in = function(asset_reserve, asset_hub_re
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred5_0, deferred5_1);
+        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 };
 
@@ -727,7 +795,7 @@ module.exports.calculate_pool_trade_fee = function(a, fee_numerator, fee_denomin
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred2_0, deferred2_1);
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
     }
 };
 

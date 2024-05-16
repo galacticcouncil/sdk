@@ -60,6 +60,7 @@ function passStringToWasm0(arg, malloc, realloc) {
         const ret = encodeString(arg, view);
 
         offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
     }
 
     WASM_VECTOR_LEN = offset;
@@ -142,11 +143,12 @@ module.exports.calculate_accumulated_rps = function(current_reward_per_stake, pe
 * @param {string} current_stake
 * @param {string} stake_increase
 * @param {string} stake_weight
+* @param {string} min_slash_point
 * @returns {string}
 */
-module.exports.calculate_slashed_points = function(points, current_stake, stake_increase, stake_weight) {
-    let deferred5_0;
-    let deferred5_1;
+module.exports.calculate_slashed_points = function(points, current_stake, stake_increase, stake_weight, min_slash_point) {
+    let deferred6_0;
+    let deferred6_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(points, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -157,15 +159,17 @@ module.exports.calculate_slashed_points = function(points, current_stake, stake_
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(stake_weight, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        wasm.calculate_slashed_points(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
+        const ptr4 = passStringToWasm0(min_slash_point, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len4 = WASM_VECTOR_LEN;
+        wasm.calculate_slashed_points(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        deferred5_0 = r0;
-        deferred5_1 = r1;
+        deferred6_0 = r0;
+        deferred6_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
+        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
     }
 };
 

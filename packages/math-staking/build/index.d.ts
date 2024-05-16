@@ -19,9 +19,10 @@ export function calculate_accumulated_rps(current_reward_per_stake: string, pend
 * @param {string} current_stake
 * @param {string} stake_increase
 * @param {string} stake_weight
+* @param {string} min_slash_point
 * @returns {string}
 */
-export function calculate_slashed_points(points: string, current_stake: string, stake_increase: string, stake_weight: string): string;
+export function calculate_slashed_points(points: string, current_stake: string, stake_increase: string, stake_weight: string, min_slash_point: string): string;
 /**
 * @param {string} period_length
 * @param {string} block_number

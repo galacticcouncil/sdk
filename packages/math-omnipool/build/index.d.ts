@@ -118,11 +118,28 @@ export function calculate_lrna_in_given_out(asset_reserve: string, asset_hub_res
 */
 export function calculate_spot_price(asset_a_reserve: string, asset_a_hub_reserve: string, asset_b_reserve: string, asset_b_hub_reserve: string): string;
 /**
+* @param {string} asset_a_reserve
+* @param {string} asset_a_hub_reserve
+* @param {string} asset_b_reserve
+* @param {string} asset_b_hub_reserve
+* @param {string} protocol_fee
+* @param {string} asset_fee
+* @returns {string}
+*/
+export function calculate_spot_price_with_fee(asset_a_reserve: string, asset_a_hub_reserve: string, asset_b_reserve: string, asset_b_hub_reserve: string, protocol_fee: string, asset_fee: string): string;
+/**
 * @param {string} asset_reserve
 * @param {string} asset_hub_reserve
 * @returns {string}
 */
 export function calculate_lrna_spot_price(asset_reserve: string, asset_hub_reserve: string): string;
+/**
+* @param {string} asset_reserve
+* @param {string} asset_hub_reserve
+* @param {string} asset_fee
+* @returns {string}
+*/
+export function calculate_lrna_spot_price_with_fee(asset_reserve: string, asset_hub_reserve: string, asset_fee: string): string;
 /**
 * @param {string} asset_reserve
 * @param {string} asset_hub_reserve
