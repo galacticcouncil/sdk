@@ -1,5 +1,11 @@
 # @galacticcouncil/math-liquidity-mining
 
+## 1.0.0
+
+### Major Changes
+
+- Calculate spot price & fee wasm support
+
 ## 0.2.0
 
 ### Minor Changes

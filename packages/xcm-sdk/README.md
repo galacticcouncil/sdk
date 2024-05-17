@@ -9,8 +9,3 @@ Wallet interface for cross-chain interactions in the Polkadot/Kusama ecosystem.
 Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/xcm-sdk`
-
-## Disclaimer
-
-The existing setup is constructed based on the Moonbeam xcm-sdk.
-For more details visit: https://github.com/PureStake/xcm-sdk/
