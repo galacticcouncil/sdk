@@ -30,13 +30,22 @@ export class SubstrateApis {
     return SubstrateApis._instance;
   }
 
-  public async getPromise(endpoints: string[]): Promise<ApiPromise> {
+  public createCacheKey(endpoints: string[]) {
+    return endpoints.join(',');
+  }
+
+  public findCacheKey(endpoints: string[]) {
     const cacheKey = endpoints.find((key) => this._cache.has(key));
 
     if (cacheKey) {
-      return Promise.resolve(this._cache.get(cacheKey));
+      return cacheKey;
     }
 
+    const compositeCacheKey = this.createCacheKey(endpoints);
+    return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
+  }
+
+  public async getPromise(endpoints: string[]): Promise<ApiPromise> {
     return new Promise((resolve) => {
       const provider = new WsProvider(endpoints);
       provider.on('connected', async () => {
@@ -59,7 +68,16 @@ export class SubstrateApis {
   public async api(ws: string | string[]): Promise<ApiPromise> {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
 
-    const promise = this.getPromise(endpoints);
+    const cacheKey = this.findCacheKey(endpoints);
+
+    let promise: Promise<ApiPromise>;
+
+    if (cacheKey) {
+      promise = this._cache.get(cacheKey);
+    } else {
+      promise = this.getPromise(endpoints);
+      this._cache.set(this.createCacheKey(endpoints), promise);
+    }
 
     const api = await promise;
     await api.isReady;
