@@ -13,6 +13,7 @@ class GetBestSellPriceExample extends PolkadotExecutor {
         name: 'BEEFY',
         origin: 1000,
         symbol: 'BEEFY',
+        internalId: '1000036',
       },
     ];
 
