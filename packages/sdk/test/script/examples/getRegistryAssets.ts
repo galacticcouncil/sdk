@@ -11,6 +11,7 @@ class GetAssetsExample extends PolkadotExecutor {
         name: 'DED',
         origin: 1000,
         symbol: 'DED',
+        internalId: '1000019',
       },
       {
         decimals: 10,
@@ -18,6 +19,7 @@ class GetAssetsExample extends PolkadotExecutor {
         name: 'PINK',
         origin: 1000,
         symbol: 'PINK',
+        internalId: '1000021',
       },
     ];
     const assetClient = new AssetClient(api);

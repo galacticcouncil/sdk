@@ -12,6 +12,7 @@ class GetAllAssetsExample extends PolkadotExecutor {
         id: '666',
         name: 'Danger Coin',
         symbol: 'DANGER',
+        internalId: '1000008',
       },
     ];
 
