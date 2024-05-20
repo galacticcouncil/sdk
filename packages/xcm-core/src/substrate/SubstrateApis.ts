@@ -30,15 +30,55 @@ export class SubstrateApis {
     return SubstrateApis._instance;
   }
 
-  public async api(ws: string): Promise<ApiPromise> {
-    const promise =
-      this._cache.get(ws) ||
-      ApiPromise.create({
-        noInitWarn: true,
-        provider: new WsProvider(ws),
-      });
+  public createCacheKey(endpoints: string[]) {
+    return endpoints.join(',');
+  }
 
-    this._cache.set(ws, promise);
+  public findCacheKey(endpoints: string[]) {
+    const cacheKey = endpoints.find((key) => this._cache.has(key));
+
+    if (cacheKey) {
+      return cacheKey;
+    }
+
+    const compositeCacheKey = this.createCacheKey(endpoints);
+    return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
+  }
+
+  public async getPromise(endpoints: string[]): Promise<ApiPromise> {
+    return new Promise((resolve) => {
+      const provider = new WsProvider(endpoints);
+      provider.on('connected', async () => {
+        const promise = ApiPromise.create({
+          provider,
+          noInitWarn: true,
+        });
+
+        console.log(`Connected to ${provider.endpoint}.`);
+        this._cache.set(provider.endpoint, promise);
+        resolve(promise);
+      });
+      provider.on('error', async () => {
+        console.log(`Could not connect to ${provider.endpoint}, skipping.`);
+        this._cache.delete(provider.endpoint);
+      });
+    });
+  }
+
+  public async api(ws: string | string[]): Promise<ApiPromise> {
+    const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
+
+    const cacheKey = this.findCacheKey(endpoints);
+
+    let promise: Promise<ApiPromise>;
+
+    if (cacheKey) {
+      promise = this._cache.get(cacheKey);
+    } else {
+      promise = this.getPromise(endpoints);
+      this._cache.set(this.createCacheKey(endpoints), promise);
+    }
+
     const api = await promise;
     await api.isReady;
     return api;
