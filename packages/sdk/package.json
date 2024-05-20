@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^1.0.0",
+    "@galacticcouncil/math-liquidity-mining": "^1.0.0",
     "@galacticcouncil/math-omnipool": "^1.0.0",
     "@galacticcouncil/math-stableswap": "^1.0.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
