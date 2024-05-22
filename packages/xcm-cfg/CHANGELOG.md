@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.1.0
+
+### Minor Changes
+
+- Add WBTC/USDC/USDT Ethereum <-> HydraDX transfers
+
 ## 2.0.3
 
 ### Patch Changes
