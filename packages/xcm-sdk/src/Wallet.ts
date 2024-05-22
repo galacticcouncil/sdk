@@ -48,12 +48,11 @@ export class Wallet {
     const src = new TransferService(srcConf.chain);
     const dst = new TransferService(dstConf.chain);
 
-    const [srcBalance, srcFeeBalance, srcMin, dstBalance, dstFee, dstMin] =
+    const [srcBalance, srcFeeBalance, srcMin, dstFee, dstMin] =
       await Promise.all([
         src.getBalance(srcAddr, srcConf),
         src.getFeeBalance(srcAddr, srcConf),
         src.getMin(srcConf),
-        dst.getBalance(dstAddr, dstConf),
         dst.getDestinationFee(srcConf),
         dst.getMin(dstConf),
       ]);

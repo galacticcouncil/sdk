@@ -15,7 +15,8 @@ export class MetadataUtils {
   }
 
   async getDecimals(asset: Asset): Promise<number> {
-    const decimals = this.chain.getAssetDecimals(asset);
+    const normalizedAsset = this.normalizeAsset(asset);
+    const decimals = this.chain.getAssetDecimals(normalizedAsset);
     if (decimals) {
       return decimals;
     }
@@ -38,5 +39,17 @@ export class MetadataUtils {
       return substrate.existentialDeposit;
     }
     return undefined;
+  }
+
+  private normalizeAsset(asset: Asset) {
+    const isEvm = this.chain.isEvmChain();
+    if (isEvm) {
+      const { key } = asset;
+      return {
+        ...asset,
+        key: key.split('_')[0],
+      } as Asset;
+    }
+    return asset;
   }
 }
