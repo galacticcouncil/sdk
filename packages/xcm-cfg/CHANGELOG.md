@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.1.1
+
+### Patch Changes
+
+- Fix dst fee decimals (norm asset)
+
 ## 2.1.0
 
 ### Minor Changes
