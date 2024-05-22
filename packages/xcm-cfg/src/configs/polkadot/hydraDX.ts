@@ -852,6 +852,114 @@ const toEthereumViaWormhole: AssetConfig[] = [
       ),
     via: moonbeam,
   }),
+  new AssetConfig({
+    asset: wbtc_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ethereum,
+    destinationFee: {
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: wbtc_mwh,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder()
+          .xTokens()
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+        ExtrinsicBuilder()
+          .polkadotXcm()
+          .send()
+          .transact({ fee: glmr, feeAmount: 0.06 }),
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    transact: ExtrinsicBuilder()
+      .ethereumXcm()
+      .transact(
+        ContractBuilder()
+          .Batch()
+          .batchAll([
+            ContractBuilder().Erc20().approve(),
+            ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+          ])
+      ),
+    via: moonbeam,
+  }),
+  new AssetConfig({
+    asset: usdt_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ethereum,
+    destinationFee: {
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: usdt_mwh,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder()
+          .xTokens()
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+        ExtrinsicBuilder()
+          .polkadotXcm()
+          .send()
+          .transact({ fee: glmr, feeAmount: 0.06 }),
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    transact: ExtrinsicBuilder()
+      .ethereumXcm()
+      .transact(
+        ContractBuilder()
+          .Batch()
+          .batchAll([
+            ContractBuilder().Erc20().approve(),
+            ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+          ])
+      ),
+    via: moonbeam,
+  }),
+  new AssetConfig({
+    asset: usdc_mwh,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ethereum,
+    destinationFee: {
+      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: usdc_mwh,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder()
+          .xTokens()
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+        ExtrinsicBuilder()
+          .polkadotXcm()
+          .send()
+          .transact({ fee: glmr, feeAmount: 0.06 }),
+      ]),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    transact: ExtrinsicBuilder()
+      .ethereumXcm()
+      .transact(
+        ContractBuilder()
+          .Batch()
+          .batchAll([
+            ContractBuilder().Erc20().approve(),
+            ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+          ])
+      ),
+    via: moonbeam,
+  }),
 ];
 
 export const hydraDxConfig = new ChainConfig({

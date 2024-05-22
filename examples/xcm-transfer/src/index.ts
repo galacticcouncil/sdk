@@ -33,8 +33,8 @@ const wallet: Wallet = new Wallet({
 });
 
 // Define transfer
-const asset = configService.getAsset('dai_awh');
-const srcChain = configService.getChain('acala-evm');
+const asset = configService.getAsset('dai');
+const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydradx');
 
 const configBuilder = ConfigBuilder(configService);
@@ -50,8 +50,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
-const destAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);

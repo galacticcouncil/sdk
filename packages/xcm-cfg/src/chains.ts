@@ -987,6 +987,16 @@ export const ethereum = new EvmChain({
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       decimals: 18,
     },
+    {
+      asset: usdc,
+      id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      decimals: 6,
+    },
+    {
+      asset: usdt,
+      id: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      decimals: 6,
+    },
   ],
   defEvm: ethereumEvm,
   defWormhole: {
