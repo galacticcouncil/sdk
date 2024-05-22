@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.0.4
+
+### Patch Changes
+
+- Fix dst fee decimals (norm asset)
+
 ## 3.0.3
 
 ### Patch Changes
