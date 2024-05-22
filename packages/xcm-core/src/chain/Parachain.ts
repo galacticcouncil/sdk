@@ -22,7 +22,7 @@ export interface ParachainParams extends ChainParams<ParachainAssetsData> {
   ss58Format: number;
   usesChainDecimals?: boolean;
   weight?: number;
-  ws: string;
+  ws: string | string[];
 }
 
 export class Parachain extends Chain<ParachainAssetsData> {
@@ -36,7 +36,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   readonly weight?: number;
 
-  readonly ws: string;
+  readonly ws: string | string[];
 
   constructor({
     genesisHash,
