@@ -27,7 +27,8 @@ export class MetadataUtils {
     }
 
     if (this.chain instanceof EvmChain) {
-      return this.chain.client.chainDecimals;
+      const evmClient = this.chain.client;
+      return evmClient.chainDecimals;
     }
 
     throw new Error('Unknown asset decimals: ' + asset.key);
