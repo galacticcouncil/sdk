@@ -11,8 +11,8 @@
     "esbuild": "^0.17.11"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-cfg": "^2.2.0",
-    "@galacticcouncil/xcm-sdk": "^3.1.0",
+    "@galacticcouncil/xcm-cfg": "^2.3.0",
+    "@galacticcouncil/xcm-sdk": "^3.2.0",
     "@talismn/connect-wallets": "^1.2.1"
   }
 }
