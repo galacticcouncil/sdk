@@ -36,7 +36,7 @@ export function validatePubKey(pubkey: string) {
   }
 }
 
-export function isSs58Address(address: string) {
+export function isSs58(address: string) {
   try {
     validateSs58(address);
     return true;
@@ -45,11 +45,31 @@ export function isSs58Address(address: string) {
   }
 }
 
-export function isH160Address(address: string) {
+export function isH160(address: string) {
   try {
     validateH160(address);
     return true;
   } catch {
     return false;
   }
+}
+
+/**
+ * Format address in 32 bytes (left padded)
+ *
+ * @param address 20 bytes 0x address
+ * @returns 32 bytes 0x address
+ */
+export function toHex(address: string) {
+  return '0x000000000000000000000000' + address.substring(2);
+}
+
+/**
+ * Format address in 20 bytes
+ *
+ * @param address 32 bytes lef padded 0x address
+ * @returns 20 bytes 0x address
+ */
+export function toNative(address: string) {
+  return '0x' + address.substring(26);
 }
