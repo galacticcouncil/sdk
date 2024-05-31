@@ -2,7 +2,7 @@ import { defineChain } from 'viem';
 
 export const hydradx = defineChain({
   id: 222222,
-  name: 'HydraDX',
+  name: 'Hydration',
   network: 'hydradx',
   nativeCurrency: {
     decimals: 18,
