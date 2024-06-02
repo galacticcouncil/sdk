@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.4.0
+
+### Minor Changes
+
+- Upgrade core deps
+
 ## 2.3.0
 
 ### Minor Changes

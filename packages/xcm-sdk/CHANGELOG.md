@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.3.0
+
+### Minor Changes
+
+- Upgrade core deps
+
 ## 3.2.0
 
 ### Minor Changes
