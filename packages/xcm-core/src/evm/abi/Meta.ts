@@ -481,4 +481,4 @@ export const META = [
     type: 'function',
     payable: true,
   },
-];
+] as const;

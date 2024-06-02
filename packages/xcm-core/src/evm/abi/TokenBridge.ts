@@ -566,4 +566,4 @@ export const TOKEN_BRIDGE = [
     type: 'function',
   },
   { stateMutability: 'payable', type: 'receive' },
-];
+] as const;

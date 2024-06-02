@@ -109,4 +109,4 @@ export const BATCH = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as const;

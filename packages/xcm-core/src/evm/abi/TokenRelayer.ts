@@ -106,4 +106,4 @@ export const TOKEN_RELAYER = [
     stateMutability: 'payable',
     type: 'function',
   },
-];
+] as const;

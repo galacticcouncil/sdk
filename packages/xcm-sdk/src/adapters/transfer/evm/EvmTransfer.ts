@@ -1,5 +1,5 @@
 import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
-import { encodeFunctionData, BaseError } from 'viem';
+import { Abi, encodeFunctionData, BaseError } from 'viem';
 import { isNativeEthBridge } from './utils';
 
 export abstract class EvmTransfer {
@@ -18,7 +18,7 @@ export abstract class EvmTransfer {
     }
   }
 
-  abstract get abi(): any;
+  abstract get abi(): Abi;
   abstract get asset(): string;
 
   get data(): string {
