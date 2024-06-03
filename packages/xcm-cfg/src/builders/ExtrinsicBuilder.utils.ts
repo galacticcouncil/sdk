@@ -1,7 +1,7 @@
 import {
   ExtrinsicConfigBuilderParams,
   Parachain,
-  calculateMDA,
+  mda,
 } from '@galacticcouncil/xcm-core';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/types';
 import { getTypeDef } from '@polkadot/types';
@@ -65,7 +65,7 @@ export function getTransactAccount({
   via,
 }: ExtrinsicConfigBuilderParams) {
   if (via?.key === 'moonbeam' && source instanceof Parachain) {
-    return calculateMDA(sender, source.parachainId.toString(), 1);
+    return mda.calculateMDA(sender, source.parachainId.toString(), 1);
   }
   return address;
 }

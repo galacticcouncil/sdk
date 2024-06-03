@@ -1,10 +1,10 @@
 import {
+  addr,
   Asset,
   AnyChain,
   AssetAmount,
   ConfigBuilder,
   ConfigService,
-  isH160Address,
 } from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
@@ -117,7 +117,7 @@ export class Wallet {
       .map(async ({ asset, balance }) => {
         const { chain } = chainConfig;
         const assetId = chain.getBalanceAssetId(asset);
-        const account = isH160Address(assetId.toString())
+        const account = addr.isH160(assetId.toString())
           ? await getH16Address(address, chain)
           : address;
         const balanceConfig = balance.build({

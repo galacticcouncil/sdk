@@ -1,11 +1,11 @@
 import {
+  addr,
   AnyChain,
   AssetAmount,
   ChainTransferConfig,
   FeeConfigBuilder,
   Parachain,
   TransactInfo,
-  isH160Address,
 } from '@galacticcouncil/xcm-core';
 import { toBigInt } from '@moonbeam-network/xcm-utils';
 
@@ -40,7 +40,7 @@ export class TransferService {
     const { chain, config } = transferConfig;
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
-    const account = isH160Address(assetId.toString())
+    const account = addr.isH160(assetId.toString())
       ? await getH16Address(address, chain)
       : address;
     const balanceConfig = config.balance.build({
@@ -159,7 +159,7 @@ export class TransferService {
 
     const feeAsset = config.fee.asset;
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = isH160Address(feeAssetId.toString())
+    const account = addr.isH160(feeAssetId.toString())
       ? await getH16Address(address, chain)
       : address;
     const feeBalanceConfig = config.fee.balance.build({

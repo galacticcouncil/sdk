@@ -1,4 +1,4 @@
-import { Parachain, isH160Address } from '@galacticcouncil/xcm-core';
+import { Parachain, addr } from '@galacticcouncil/xcm-core';
 
 import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
@@ -52,7 +52,7 @@ export function getDestinationMultilocation(
   address: string,
   destination: Parachain
 ): DestinationMultilocation {
-  const accountType = isH160Address(address) ? '03' : '01';
+  const accountType = addr.isH160(address) ? '03' : '01';
   const acc = `0x${accountType}${u8aToHex(
     decodeAddress(address),
     -1,

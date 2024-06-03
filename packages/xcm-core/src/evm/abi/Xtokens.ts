@@ -91,4 +91,4 @@ export const XTOKENS = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as const;

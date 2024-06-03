@@ -2,23 +2,26 @@ import {
   AssetAmount,
   ConfigService,
   ConfigBuilder,
-  Abi,
-  Precompile,
-  EvmChain,
 } from '@galacticcouncil/xcm-core';
 import {
   chainsConfigMap,
   chainsMap,
   assetsMap,
 } from '@galacticcouncil/xcm-cfg';
+import {
+  Wallet,
+  XCall,
+  WormholeScan,
+  WormholeClient,
+} from '@galacticcouncil/xcm-sdk';
 
-import { Wallet, XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
-
-import { decodeFunctionData, encodeFunctionData } from 'viem';
-
-import { logAssets, logSrcChains, logDestChains } from './utils';
+import {
+  getWormholeChainById,
+  logAssets,
+  logSrcChains,
+  logDestChains,
+} from './utils';
 import { signAndSendEvm } from './signers';
-import { WormholeClient } from 'wormhole';
 
 // Inialialize config
 const configService = new ConfigService({
@@ -27,7 +30,9 @@ const configService = new ConfigService({
   chainsConfig: chainsConfigMap,
 });
 
-// Inialialize wallet
+// Inialialize wallet & clients
+const whScan = new WormholeScan();
+const whClient = new WormholeClient();
 const wallet: Wallet = new Wallet({
   config: configService,
 });
@@ -71,7 +76,7 @@ const xTransfer = await wallet.transfer(
 );
 
 // Construct calldata with transfer amount
-const call: XCall = await xTransfer.buildCall('1');
+const call: XCall = await xTransfer.buildCall('0.1');
 
 // Dump transfer info
 console.log(xTransfer);
@@ -80,103 +85,64 @@ console.log(call);
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
 
-///////////////////////////////////////
-// Signers & Wormhole specific code //
-/////////////////////////////////////
+/***************************/
+/**** Helper functions *****/
+/***************************/
 
-/* signAndSendEvm(
-  srcChain,
-  srcAddr,
-  call,
-  (hash) => {
-    console.log('TxHash: ' + hash);
-  },
-  (receipt) => {
-    console.log(receipt);
-  },
-  (error) => {
-    console.error(error);
+/**
+ * Sign EVM transaction
+ *
+ * @param address - signer address
+ */
+async function signEvm(address: string) {
+  signAndSendEvm(
+    srcChain,
+    address,
+    call,
+    (hash) => {
+      console.log('TxHash: ' + hash);
+    },
+    (receipt) => {
+      console.log(receipt);
+    },
+    (error) => {
+      console.error(error);
+    }
+  );
+}
+
+/**
+ * Check transfer status & redeem the funds if VAA emitted
+ *
+ * @param txHash - wormhole transaction hash
+ * @param address - signer address
+ */
+async function checkAndRedeem(txHash: string, address: string) {
+  const { id, vaa } = await whScan.getVaaByTxHash(txHash);
+  const { content } = await whScan.getOperation(id);
+  const { payload } = content;
+  const chain = getWormholeChainById(payload.toChain)!;
+  const isCompleted = await whClient.isTransferCompleted(chain, vaa);
+  console.log('Transfer completed: ' + isCompleted);
+
+  // Call redeem if transfer not completed
+  if (!isCompleted) {
+    const call = whScan.isMrlTransfer(payload)
+      ? whClient.redeemMrl(address, vaa)
+      : whClient.redeem(chain, address, vaa);
+    signAndSendEvm(
+      chain,
+      address,
+      call,
+      (hash) => {
+        console.log('TxHash: ' + hash);
+      },
+      (receipt) => {
+        console.log(receipt);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
   }
-); */
-
-////////////////////////
-// [Wormhole client] //
-//////////////////////
-
-const wh = new WormholeClient();
-
-///////////////////
-// [VAA Status] //
-/////////////////
-
-// const vaa = await wh.getVaa('0x...');
-// const isTransferComplete = await wh.isTransferCompleted(vaa);
-// console.log('Transfer completed: ' + isTransferComplete);
-
-////////////////////////
-// [Redeem transfer] //
-//////////////////////
-
-// wh.redeem(vaa, destAddr, (tx) => {
-//   const { chainId, ...call } = tx.transaction;
-//   console.log(call);
-//
-//   signAndSendEvm(
-//     destChain,
-//     destAddr,
-//     call,
-//     (hash) => {
-//       console.log('TxHash: ' + hash);
-//     },
-//     (receipt) => {
-//       console.log(receipt);
-//     },
-//     (error) => {
-//       console.error(error);
-//     }
-//   );
-//   console.log(tx);
-// });
-
-//////////////////////////////
-// [Redeem transfer - GMP] //
-////////////////////////////
-
-// wh.redeem(vaa, srcAddr, (tx) => {
-//   const { chainId, ...call } = tx.transaction;
-//   console.log(call);
-
-//   const { data } = tx.transaction;
-//   const { args } = decodeFunctionData({
-//     abi: Abi.TokenBridge,
-//     data: data,
-//   });
-
-//   const xData = encodeFunctionData({
-//     abi: Abi.Gmp,
-//     functionName: 'wormholeTransferERC20',
-//     args: args,
-//   });
-
-//   const xCall = {
-//     from: '0x...' as `0x${string}`,
-//     data: xData as `0x${string}`,
-//     abi: JSON.stringify(Abi.Gmp),
-//     to: Precompile.Bridge,
-//   } as XCall;
-
-//   signAndSendEvm(
-//     configService.getChain('moonbeam'),
-//     srcAddr,
-//     xCall,
-//     (hash) => {
-//       console.log('TxHash: ' + hash);
-//     },
-//     (receipt) => {
-//       console.log(receipt);
-//     },
-//     (error) => {
-//       console.error(error);
-//     }
-//   );
-// });
+}

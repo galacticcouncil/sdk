@@ -6,4 +6,4 @@ export const GMP = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as const;

@@ -2,7 +2,7 @@ import { Chain as EvmDef } from 'viem';
 import { ChainType } from './Chain';
 import { Parachain, ParachainParams } from './Parachain';
 import { EvmClient, EvmResolver, WormholeChain, WormholeDef } from '../evm';
-import { isH160Address } from '../utils';
+import { addr } from '../utils';
 
 export interface EvmParachainParams extends ParachainParams {
   defEvm: EvmDef;
@@ -61,7 +61,7 @@ export class EvmParachain extends Parachain implements WormholeChain {
   }
 
   async getDerivatedAddress(address: string): Promise<string> {
-    if (isH160Address(address)) {
+    if (addr.isH160(address)) {
       return address;
     }
 

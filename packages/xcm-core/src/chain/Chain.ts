@@ -1,4 +1,5 @@
 import { Asset } from '../asset';
+import { WormholeChain } from '../evm';
 
 export enum ChainType {
   'Parachain' = 'parachain',
@@ -84,6 +85,10 @@ export abstract class Chain<T extends ChainAssetData> {
 
   isParachain(): boolean {
     return this.getType() === ChainType.Parachain;
+  }
+
+  isWormholeChain(): this is WormholeChain {
+    return 'defWormhole' in this && !!this['defWormhole'];
   }
 
   getAsset(key: string): Asset | undefined {
