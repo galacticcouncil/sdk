@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- Change HydraDX to Hydratation
+- Change HydraDX to Hydration
 
 ## 2.4.0
 
