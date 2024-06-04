@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.5.0
+
+### Minor Changes
+
+- Change HydraDX to Hydratation
+
 ## 2.4.0
 
 ### Minor Changes
