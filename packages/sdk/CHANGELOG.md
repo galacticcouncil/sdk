@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 3.0.1
+
+### Patch Changes
+
+- Fix system asset name
+
 ## 3.0.0
 
 ### Major Changes
