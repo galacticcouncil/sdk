@@ -110,6 +110,17 @@ export class AssetClient extends PolkadotApiClient {
     }
   }
 
+  private getSystemTokenName(chainToken: string) {
+    switch (chainToken) {
+      case 'HDX':
+        return 'Hydration';
+      case 'BSX':
+        return 'Basilisk';
+      default:
+        return chainToken;
+    }
+  }
+
   private getToken(
     tokenKey: string,
     details: PalletAssetRegistryAssetDetails,
@@ -120,7 +131,7 @@ export class AssetClient extends PolkadotApiClient {
       const defaultAssetEd = this.api.consts.balances.existentialDeposit;
       return {
         id: SYSTEM_ASSET_ID,
-        name: this.chainToken,
+        name: this.getSystemTokenName(this.chainToken),
         symbol: this.chainToken,
         decimals: this.chainDecimals,
         icon: this.chainToken,
