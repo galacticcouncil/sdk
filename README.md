@@ -1,6 +1,6 @@
 # Galactic SDK
 
-Collection of SDK(s) crafted to ease Basilisk & HydraDX chains integration.
+Collection of SDK(s) crafted to ease Basilisk & Hydration chains integration.
 
 ## Project Structure
 
