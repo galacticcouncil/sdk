@@ -45,7 +45,12 @@ export class SubstrateApis {
     return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
   }
 
-  public async getPromise(endpoints: string[]): Promise<ApiPromise> {
+  public async getPromise(
+    endpoints: string[],
+    maxRetries?: number
+  ): Promise<ApiPromise> {
+    let currentRetry = 0;
+
     return new Promise((resolve) => {
       const provider = new WsProvider(endpoints);
       provider.on('connected', async () => {
@@ -59,13 +64,20 @@ export class SubstrateApis {
         resolve(promise);
       });
       provider.on('error', async () => {
+        currentRetry++;
         console.log(`Could not connect to ${provider.endpoint}, skipping.`);
-        this._cache.delete(provider.endpoint);
+        if (maxRetries && currentRetry >= maxRetries) {
+          this._cache.delete(provider.endpoint);
+          provider.disconnect();
+        }
       });
     });
   }
 
-  public async api(ws: string | string[]): Promise<ApiPromise> {
+  public async api(
+    ws: string | string[],
+    maxRetries?: number
+  ): Promise<ApiPromise> {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
 
     const cacheKey = this.findCacheKey(endpoints);
@@ -75,7 +87,7 @@ export class SubstrateApis {
     if (cacheKey) {
       promise = this._cache.get(cacheKey);
     } else {
-      promise = this.getPromise(endpoints);
+      promise = this.getPromise(endpoints, maxRetries);
       this._cache.set(this.createCacheKey(endpoints), promise);
     }
 
