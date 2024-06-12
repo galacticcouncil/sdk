@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 1.5.0
+
+### Minor Changes
+
+- SubstrateApis retry opts support
+
 ## 1.4.0
 
 ### Minor Changes
