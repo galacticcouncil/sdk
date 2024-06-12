@@ -65,7 +65,7 @@ export class SubstrateApis {
       });
       provider.on('error', async () => {
         currentRetry++;
-        console.log(`Could not connect to ${provider.endpoint}, skipping.`);
+        console.log(`Could not connect to ${provider.endpoint}, skipping...`);
         if (maxRetries && currentRetry >= maxRetries) {
           this._cache.delete(provider.endpoint);
           provider.disconnect();
