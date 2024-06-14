@@ -18,6 +18,7 @@ import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 import { kiltConfig } from './kilt';
 import { pendulumConfig } from './pendulum';
+import { darwiniaConfig } from './darwinia';
 
 export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
@@ -38,4 +39,5 @@ export const polkadotChainsConfig: ChainConfig[] = [
   crustConfig,
   kiltConfig,
   pendulumConfig,
+  darwiniaConfig,
 ];
