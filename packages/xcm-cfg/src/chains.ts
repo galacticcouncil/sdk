@@ -790,7 +790,7 @@ export const darwinia = new Parachain({
   assetsData: [
     {
       asset: ring,
-      id: 'Native',
+      id: 'SelfReserve',
     },
   ],
   ecosystem: Ecosystem.Polkadot,

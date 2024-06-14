@@ -125,21 +125,22 @@ const toAcala: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: ldot,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.1,
-      asset: ldot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // todo: uncomment when ldot issues resolved
+  // new AssetConfig({
+  //   asset: ldot,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: acala,
+  //   destinationFee: {
+  //     amount: 0.1,
+  //     asset: ldot,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
 ];
 
 const toAssetHub: AssetConfig[] = [
@@ -779,7 +780,7 @@ const toDarwinia: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: darwinia,
     destinationFee: {
-      amount: 1.1,
+      amount: 4,
       asset: ring,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },

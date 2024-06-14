@@ -10,7 +10,7 @@ export const darwiniaConfig = new ChainConfig({
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
-        amount: 10,
+        amount: 2,
         asset: ring,
         balance: BalanceBuilder().substrate().system().account(),
       },
