@@ -486,6 +486,16 @@ export const hydraDX = new EvmParachain({
       id: 31,
       decimals: 18,
     },
+    {
+      asset: aca,
+      id: 1000099,
+      decimals: 12,
+    },
+    {
+      asset: ldot,
+      id: 1000100,
+      decimals: 10,
+    },
   ],
   defEvm: hydradxEvm,
   ecosystem: Ecosystem.Polkadot,
