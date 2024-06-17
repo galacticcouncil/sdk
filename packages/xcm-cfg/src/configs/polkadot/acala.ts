@@ -61,22 +61,21 @@ const toHydraDX: AssetConfig[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  // todo: uncomment when ldot issues resolved
-  // new AssetConfig({
-  //   asset: ldot,
-  //   balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   destination: hydraDX,
-  //   destinationFee: {
-  //     amount: 0.1,
-  //     asset: ldot,
-  //     balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  //   fee: {
-  //     asset: ldot,
-  //     balance: BalanceBuilder().substrate().system().account(),
-  //   },
-  // }),
+  new AssetConfig({
+    asset: ldot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.011,
+      asset: ldot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: ldot,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
 ];
 
 export const acalaConfig = new ChainConfig({
