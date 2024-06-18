@@ -1,6 +1,6 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { aca, dai_awh, wbtc_awh, weth_awh } from '../../assets';
+import { aca, dai_awh, wbtc_awh, weth_awh, ldot } from '../../assets';
 import { hydraDX, acala } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -47,6 +47,32 @@ const toHydraDX: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
       asset: aca,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: aca,
+    balance: BalanceBuilder().substrate().system().account(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 1,
+      asset: aca,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetConfig({
+    asset: ldot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.011,
+      asset: ldot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: ldot,
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),

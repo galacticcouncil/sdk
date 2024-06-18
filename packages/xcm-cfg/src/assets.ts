@@ -205,6 +205,16 @@ export const pen = new Asset({
   originSymbol: 'PEN',
 });
 
+export const ldot = new Asset({
+  key: 'ldot',
+  originSymbol: 'LDOT',
+});
+
+export const ring = new Asset({
+  key: 'ring',
+  originSymbol: 'RING',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -226,10 +236,12 @@ export const assets: Asset[] = [
   kar,
   kilt,
   ksm,
+  ldot,
   nodl,
   pha,
   pen,
   pink,
+  ring,
   sub,
   teer,
   tnkr,

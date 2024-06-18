@@ -49,6 +49,8 @@ import {
   dota,
   kilt,
   pen,
+  ring,
+  ldot,
 } from './assets';
 
 import { acalaEvm, hydradxEvm, moonbeamEvm } from './evm';
@@ -76,6 +78,11 @@ export const acala = new EvmParachain({
       asset: aca,
       id: { Token: aca.originSymbol },
       metadataId: { NativeAssetId: { Token: aca.originSymbol } },
+    },
+    {
+      asset: ldot,
+      id: { Token: ldot.originSymbol },
+      metadataId: { NativeAssetId: { Token: ldot.originSymbol } },
     },
     {
       asset: glmr,
@@ -474,6 +481,21 @@ export const hydraDX = new EvmParachain({
       id: 1000081,
       decimals: 12,
     },
+    {
+      asset: ring,
+      id: 31,
+      decimals: 18,
+    },
+    {
+      asset: aca,
+      id: 1000099,
+      decimals: 12,
+    },
+    {
+      asset: ldot,
+      id: 1000100,
+      decimals: 10,
+    },
   ],
   defEvm: hydradxEvm,
   ecosystem: Ecosystem.Polkadot,
@@ -764,6 +786,23 @@ export const pendulum = new Parachain({
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
 });
 
+export const darwinia = new Parachain({
+  assetsData: [
+    {
+      asset: ring,
+      id: 'SelfReserve',
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xf0b8924b12e8108550d28870bc03f7b45a947e1b2b9abf81bfb0b89ecb60570e',
+  key: 'darwinia',
+  name: 'Darwinia',
+  parachainId: 2046,
+  ss58Format: 18,
+  ws: 'wss://darwinia-rpc.dwellir.com',
+});
+
 const polkadotChains: AnyChain[] = [
   acala,
   acala_evm,
@@ -772,6 +811,7 @@ const polkadotChains: AnyChain[] = [
   bifrost,
   centrifuge,
   crust,
+  darwinia,
   hydraDX,
   kilt_chain,
   interlay,

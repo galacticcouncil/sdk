@@ -38,9 +38,9 @@ const wallet: Wallet = new Wallet({
 });
 
 // Define transfer
-const asset = configService.getAsset('dai');
-const srcChain = configService.getChain('ethereum');
-const destChain = configService.getChain('hydradx');
+const asset = configService.getAsset('ring');
+const srcChain = configService.getChain('hydradx');
+const destChain = configService.getChain('darwinia');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -55,8 +55,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+const destAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);

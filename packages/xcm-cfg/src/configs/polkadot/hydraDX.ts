@@ -32,6 +32,8 @@ import {
   weth_awh,
   weth_mwh,
   ztg,
+  ring,
+  ldot,
 } from '../../assets';
 import {
   acala,
@@ -53,6 +55,7 @@ import {
   ethereum,
   pendulum,
   acala_evm,
+  darwinia,
 } from '../../chains';
 import {
   BalanceBuilder,
@@ -99,6 +102,36 @@ const toAcala: AssetConfig[] = [
     destinationFee: {
       amount: 0.000000687004,
       asset: weth_awh,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: aca,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acala,
+    destinationFee: {
+      amount: 1,
+      asset: aca,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: ldot,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: acala,
+    destinationFee: {
+      amount: 0.06,
+      asset: ldot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
@@ -740,6 +773,24 @@ const toPendulum: AssetConfig[] = [
   }),
 ];
 
+const toDarwinia: AssetConfig[] = [
+  new AssetConfig({
+    asset: ring,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: darwinia,
+    destinationFee: {
+      amount: 4,
+      asset: ring,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toAcalaViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
@@ -971,6 +1022,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toBifrost,
     ...toCentrifuge,
     ...toCrust,
+    ...toDarwinia,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,
