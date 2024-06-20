@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.6.0
+
+### Minor Changes
+
+- External config, templates, viem upgrade
+
 ## 2.5.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.4.0
+
+### Minor Changes
+
+- Upgrade core deps (viem upgrade)
+
 ## 3.3.0
 
 ### Minor Changes
