@@ -110,4 +110,8 @@ export abstract class Chain<T extends ChainAssetData> {
   getBalanceAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.balanceId ?? this.getAssetId(asset);
   }
+
+  updateAsset(asset: T): void {
+    this.assetsData.set(asset.asset.key, asset);
+  }
 }

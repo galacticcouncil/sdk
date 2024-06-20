@@ -17,9 +17,9 @@ export class ConfigService {
   readonly chainsConfig: Map<string, ChainConfig>;
 
   constructor({ assets, chains, chainsConfig }: ConfigServiceOptions) {
-    this.assets = assets;
-    this.chains = chains;
-    this.chainsConfig = chainsConfig;
+    this.assets = new Map(assets);
+    this.chains = new Map(chains);
+    this.chainsConfig = new Map(chainsConfig);
   }
 
   getEcosystemAssets(ecosystem?: ChainEcosystem): Asset[] {
@@ -112,5 +112,25 @@ export class ConfigService {
 
   updateChainConfig(chainConfig: ChainConfig): void {
     this.chainsConfig.set(chainConfig.chain.key, chainConfig);
+  }
+
+  updateChainAssetConfig(chain: AnyChain, assetConfig: AssetConfig): void {
+    const chainConfig = this.getChainConfig(chain);
+    const assetsConfig = chainConfig.getAssetsConfigs();
+    const isExisting: (chain: AssetConfig) => boolean = ({
+      asset,
+      destination,
+    }) =>
+      asset === assetConfig.asset && destination === assetConfig.destination;
+
+    const updatedAssetsConfig: AssetConfig[] = assetsConfig
+      .filter((config) => !isExisting(config))
+      .concat(assetConfig);
+
+    const updatedConfig = new ChainConfig({
+      ...chainConfig,
+      assets: updatedAssetsConfig,
+    });
+    this.chainsConfig.set(chainConfig.chain.key, updatedConfig);
   }
 }
