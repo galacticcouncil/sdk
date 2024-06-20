@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 1.6.0
+
+### Minor Changes
+
+- Config service immutable configs, chain asset setter, viem upgrade
+
 ## 1.5.0
 
 ### Minor Changes
