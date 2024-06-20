@@ -15,6 +15,7 @@ import {
   WormholeClient,
 } from '@galacticcouncil/xcm-sdk';
 
+import { configureExternal, externals } from './externals';
 import {
   getWormholeChainById,
   logAssets,
@@ -24,7 +25,7 @@ import {
 import { signAndSendEvm } from './signers';
 
 // Inialialize config
-const configService = new ConfigService({
+let configService = new ConfigService({
   assets: assetsMap,
   chains: chainsMap,
   chainsConfig: chainsConfigMap,
@@ -37,10 +38,13 @@ const wallet: Wallet = new Wallet({
   config: configService,
 });
 
+// Dynamically add external asset to xcm
+configureExternal(externals, configService);
+
 // Define transfer
-const asset = configService.getAsset('ring');
 const srcChain = configService.getChain('hydradx');
-const destChain = configService.getChain('darwinia');
+const destChain = configService.getChain('ethereum');
+const asset = configService.getAsset('weth_mwh');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -55,8 +59,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
-const destAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
