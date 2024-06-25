@@ -4,7 +4,7 @@ import http from 'node:http';
  * Create proxy server that will forward requests to esbuild local server.
  * @see https://esbuild.github.io/api/#serve-proxy
  */
-export function createProxyServer(localServer, proxyPort = 3000) {
+export function createProxyServer(localServer, proxyPort = 3001) {
   const listenerFn = requestListener(localServer);
   http.createServer(listenerFn).listen(proxyPort);
   console.log(
