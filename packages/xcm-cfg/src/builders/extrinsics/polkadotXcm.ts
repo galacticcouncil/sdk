@@ -75,7 +75,6 @@ const limitedReserveTransferAssets = () => {
             const rcv = destination as Parachain;
             const assetId = ctx.getAssetId(asset);
             const palletInstance = ctx.getAssetPalletInstance(asset);
-            const isAssetDifferent = !!fee && asset.key !== fee.key;
             const assets = [
               toAsset(
                 0,
@@ -93,24 +92,47 @@ const limitedReserveTransferAssets = () => {
               ),
             ];
 
-            if (isAssetDifferent) {
-              const feeAssetId = ctx.getAssetId(fee);
-              assets.push(
-                toAsset(
-                  0,
-                  {
-                    X2: [
-                      {
-                        PalletInstance: palletInstance,
-                      },
-                      {
-                        GeneralIndex: feeAssetId,
-                      },
-                    ],
-                  },
-                  fee.amount
-                )
-              );
+            if (asset.key === fee.key) {
+              return [
+                toDest(version, rcv),
+                toBeneficiary(version, account),
+                {
+                  [version]: assets,
+                },
+                0,
+                'Unlimited',
+              ];
+            }
+
+            const feeAssetId = ctx.getAssetId(fee);
+            assets.push(
+              toAsset(
+                0,
+                {
+                  X2: [
+                    {
+                      PalletInstance: palletInstance,
+                    },
+                    {
+                      GeneralIndex: feeAssetId,
+                    },
+                  ],
+                },
+                fee.amount
+              )
+            );
+
+            // Flip asset order if general index greater than fee asset
+            if (Number(assetId) > Number(feeAssetId)) {
+              return [
+                toDest(version, rcv),
+                toBeneficiary(version, account),
+                {
+                  [version]: assets.reverse(),
+                },
+                0,
+                'Unlimited',
+              ];
             }
 
             return [
@@ -119,7 +141,7 @@ const limitedReserveTransferAssets = () => {
               {
                 [version]: assets,
               },
-              isAssetDifferent ? 1 : 0,
+              1,
               'Unlimited',
             ];
           },

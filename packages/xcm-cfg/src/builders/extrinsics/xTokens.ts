@@ -87,7 +87,6 @@ const transferMultiassets = (originParachainId?: number) => {
             const palletInstance = ctx.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            const isAssetDifferent = !!fee && asset.key !== fee.key;
             const assets = [
               toAsset(
                 {
@@ -107,33 +106,55 @@ const transferMultiassets = (originParachainId?: number) => {
               ),
             ];
 
-            if (isAssetDifferent) {
-              const feeAssetId = ctx.getAssetId(fee);
-              assets.push(
-                toAsset(
-                  {
-                    X3: [
-                      {
-                        Parachain: originParachainId ?? rcv.parachainId,
-                      },
-                      {
-                        PalletInstance: palletInstance,
-                      },
-                      {
-                        GeneralIndex: feeAssetId,
-                      },
-                    ],
-                  },
-                  fee.amount
-                )
-              );
+            if (asset.key === fee.key) {
+              console.log('fdf');
+              return [
+                {
+                  [version]: assets,
+                },
+                0,
+                toDest(version, rcv, account),
+                'Unlimited',
+              ];
+            }
+
+            const feeAssetId = ctx.getAssetId(fee);
+            assets.push(
+              toAsset(
+                {
+                  X3: [
+                    {
+                      Parachain: originParachainId ?? rcv.parachainId,
+                    },
+                    {
+                      PalletInstance: palletInstance,
+                    },
+                    {
+                      GeneralIndex: feeAssetId,
+                    },
+                  ],
+                },
+                fee.amount
+              )
+            );
+
+            // Flip asset order if general index greater than fee asset
+            if (Number(assetId) > Number(feeAssetId)) {
+              return [
+                {
+                  [version]: assets.reverse(),
+                },
+                0,
+                toDest(version, rcv, account),
+                'Unlimited',
+              ];
             }
 
             return [
               {
                 [version]: assets,
               },
-              isAssetDifferent ? 1 : 0,
+              1,
               toDest(version, rcv, account),
               'Unlimited',
             ];
