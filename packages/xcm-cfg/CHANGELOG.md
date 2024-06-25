@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.6.1
+
+### Patch Changes
+
+- Fix general index ordering for x.transferAssets extrinsic
+
 ## 2.6.0
 
 ### Minor Changes
