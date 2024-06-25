@@ -22,7 +22,7 @@ import {
   logSrcChains,
   logDestChains,
 } from './utils';
-import { signAndSendEvm } from './signers';
+import { signAndSendEvm, signAndSend } from './signers';
 
 // Inialialize config
 let configService = new ConfigService({
@@ -43,8 +43,8 @@ configureExternal(externals, configService);
 
 // Define transfer
 const srcChain = configService.getChain('hydradx');
-const destChain = configService.getChain('ethereum');
-const asset = configService.getAsset('weth_mwh');
+const destChain = configService.getChain('assethub');
+const asset = configService.getAsset('usdt');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -92,6 +92,25 @@ balanceSubscription.unsubscribe();
 /***************************/
 /**** Helper functions *****/
 /***************************/
+
+/**
+ * Sign transaction
+ *
+ * @param address - signer address
+ */
+async function sign(address: string) {
+  signAndSend(
+    srcChain,
+    address,
+    call,
+    ({ status }) => {
+      console.log(status.toHuman());
+    },
+    (error) => {
+      console.error(error);
+    }
+  );
+}
 
 /**
  * Sign EVM transaction

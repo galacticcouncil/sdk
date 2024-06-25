@@ -1,27 +1,42 @@
-import { AnyChain, AnyEvmChain, EvmParachain } from '@galacticcouncil/xcm-core';
+import {
+  AnyChain,
+  AnyEvmChain,
+  AnyParachain,
+  EvmParachain,
+} from '@galacticcouncil/xcm-core';
 import { XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
+import type { ISubmittableResult } from '@polkadot/types/types';
 import { getWalletBySource } from '@talismn/connect-wallets';
-import { createWalletClient, custom, Chain } from 'viem';
 
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
-export async function createPolkadotSigner() {
+export async function signAndSend(
+  chain: AnyChain,
+  address: string,
+  call: XCall,
+  onStatusChange: (status: ISubmittableResult) => void,
+  onError: (error: unknown) => void
+) {
+  const ctx = chain as AnyParachain;
+  const api = await ctx.api;
+  const extrinsic = api.tx(call.data);
+
   const wallet = getWalletBySource('polkadot-js');
   if (!wallet) {
     throw new Error('No polkadot-js wallet found!');
   }
   await wallet.enable('xcm-example');
-  return { signer: wallet.signer };
-}
+  const nextNonce = await api.rpc.system.accountNextIndex(address);
 
-export async function createEvmSigner(account: string, chain: Chain) {
-  const signer = createWalletClient({
-    account: account as `0x${string}`,
-    chain: chain,
-    transport: custom(window['ethereum']),
-  });
-  await signer.switchChain({ id: chain.id });
-  return signer;
+  extrinsic
+    .signAndSend(
+      address,
+      { signer: wallet.signer, nonce: nextNonce },
+      onStatusChange
+    )
+    .catch((error: any) => {
+      onError(error);
+    });
 }
 
 export async function signAndSendEvm(
