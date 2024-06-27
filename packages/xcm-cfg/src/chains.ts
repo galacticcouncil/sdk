@@ -83,6 +83,7 @@ export const acala = new EvmParachain({
       asset: ldot,
       id: { Token: ldot.originSymbol },
       metadataId: { NativeAssetId: { Token: ldot.originSymbol } },
+      decimals: 10,
     },
     {
       asset: glmr,
