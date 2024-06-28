@@ -6,7 +6,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { mainnet as ethereumEvm } from 'viem/chains';
+import { mainnet as ethereumEvm, darwinia as darwiniaEvm } from 'viem/chains';
 
 import {
   aca,
@@ -787,13 +787,15 @@ export const pendulum = new Parachain({
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
 });
 
-export const darwinia = new Parachain({
+export const darwinia = new EvmParachain({
   assetsData: [
     {
       asset: ring,
       id: 'SelfReserve',
     },
   ],
+  defEvm: darwiniaEvm,
+  h160AccOnly: true,
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0xf0b8924b12e8108550d28870bc03f7b45a947e1b2b9abf81bfb0b89ecb60570e',
