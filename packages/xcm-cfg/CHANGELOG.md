@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.7.0
+
+### Minor Changes
+
+- Darwinia is EVM, vDOT decimals fix
+
 ## 2.6.1
 
 ### Patch Changes
