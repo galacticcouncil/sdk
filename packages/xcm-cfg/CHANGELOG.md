@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.8.0
+
+### Minor Changes
+
+- Upgrade xcm-core deps
+
 ## 2.7.0
 
 ### Minor Changes
