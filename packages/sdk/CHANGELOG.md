@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 3.1.0
+
+### Minor Changes
+
+- Upgrade pjs to 11.2.1
+
 ## 3.0.1
 
 ### Patch Changes

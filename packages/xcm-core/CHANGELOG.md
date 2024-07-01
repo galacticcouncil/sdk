@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 1.7.0
+
+### Minor Changes
+
+- Upgrade pjs to 11.2.1
+
 ## 1.6.0
 
 ### Minor Changes

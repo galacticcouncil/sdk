@@ -2,6 +2,7 @@ import {
   AssetAmount,
   ConfigService,
   ConfigBuilder,
+  AnyParachain,
 } from '@galacticcouncil/xcm-core';
 import {
   chainsConfigMap,
@@ -42,8 +43,8 @@ const wallet: Wallet = new Wallet({
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('hydradx');
-const destChain = configService.getChain('assethub');
+const srcChain = configService.getChain('kusama-assethub');
+const destChain = configService.getChain('basilisk');
 const asset = configService.getAsset('usdt');
 
 const configBuilder = ConfigBuilder(configService);
@@ -59,8 +60,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = 'bXieCAR98oWxVhRog5fCyTNkTquvFAonLPC2pLE1Qd1jgsK9f';
+const destAddr = 'bXieCAR98oWxVhRog5fCyTNkTquvFAonLPC2pLE1Qd1jgsK9f';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -88,6 +89,17 @@ console.log(call);
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
+
+// const ctx = srcChain as AnyParachain;
+// const api = await ctx.api;
+// const extrinsic = api.tx(
+//   '0x9d028400f2b9740bff0f93715ec5e83f6a27346904558ba33c5e93da03cf9ef75052a952016c7606fbecf269c1a2f94cc487a2fcd8bc1171a06994ecbe122e395611278d3de43d3c422a6f6a4ba790e014d6d2571b09895a674c26faf35670f82266bba2871500ac0000630801000100a9200100010100f2b9740bff0f93715ec5e83f6a27346904558ba33c5e93da03cf9ef75052a9520104000000000b03ca00d75d060000000000'
+// );
+// console.log(extrinsic.toHuman());
+// const info = await extrinsic.paymentInfo(srcAddr, { nonce: -1 });
+// console.log(info.toHuman());
+
+// sign('bXieCAR98oWxVhRog5fCyTNkTquvFAonLPC2pLE1Qd1jgsK9f');
 
 /***************************/
 /**** Helper functions *****/
