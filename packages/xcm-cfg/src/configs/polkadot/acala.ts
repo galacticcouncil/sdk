@@ -72,7 +72,7 @@ const toHydraDX: AssetConfig[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: {
-      asset: ldot,
+      asset: aca,
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
