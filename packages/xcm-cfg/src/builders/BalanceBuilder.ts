@@ -93,6 +93,7 @@ function system() {
             response: FrameSystemAccountInfo
           ): Promise<bigint> => {
             const balance = response.data as PalletBalancesAccountData;
+            // @ts-ignore
             const frozen = balance.miscFrozen ?? balance.frozen;
             return BigInt(balance.free.sub(frozen).toString());
           },
