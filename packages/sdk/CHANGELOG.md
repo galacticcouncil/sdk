@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 3.1.1
+
+### Patch Changes
+
+- Support bonds metadata
+
 ## 3.1.0
 
 ### Minor Changes
