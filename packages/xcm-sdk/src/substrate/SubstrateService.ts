@@ -51,7 +51,7 @@ export class SubstrateService {
   }
 
   getDecimals(asset: Asset): number {
-    return this.chain.getAssetDecimals(asset) || this.decimals;
+    return this.chain.getAssetDecimals(asset) ?? this.decimals;
   }
 
   getExtrinsic(config: ExtrinsicConfig): SubmittableExtrinsic {
