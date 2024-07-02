@@ -187,3 +187,8 @@ export interface AssetMetadata {
   decimals: number;
   symbol: string;
 }
+
+export interface Bond extends Asset {
+  underlyingAssetId: string;
+  maturity: number;
+}

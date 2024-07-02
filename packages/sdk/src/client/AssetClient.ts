@@ -9,7 +9,7 @@ import { u32, u64 } from '@polkadot/types-codec';
 import { Option, StorageKey } from '@polkadot/types';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset, AssetMetadata, ExternalAsset } from '../types';
+import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
@@ -162,7 +162,7 @@ export class AssetClient extends PolkadotApiClient {
     details: PalletAssetRegistryAssetDetails,
     metadata: Map<string, AssetMetadata>,
     bond: ITuple<[u32, u64]>
-  ): Asset {
+  ): Bond {
     const [underlyingAsset, maturity] = bond;
     const { assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = this.getToken(
@@ -184,7 +184,9 @@ export class AssetClient extends PolkadotApiClient {
       type: assetType.toString(),
       isSufficient: isSufficient.toHuman(),
       existentialDeposit: existentialDeposit.toString(),
-    } as Asset;
+      underlyingAssetId: underlyingAsset.toString(),
+      maturity: bondMaturity,
+    } as Bond;
   }
 
   private getShares(
@@ -275,7 +277,9 @@ export class AssetClient extends PolkadotApiClient {
     });
   }
 
-  async getOnChainAssets(external?: ExternalAsset[]): Promise<Asset[]> {
+  async getOnChainAssets(
+    external?: ExternalAsset[]
+  ): Promise<Array<Asset | Bond>> {
     const [assets, assetLocations, shares, bonds, legacyMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
