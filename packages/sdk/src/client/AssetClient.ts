@@ -277,9 +277,7 @@ export class AssetClient extends PolkadotApiClient {
     });
   }
 
-  async getOnChainAssets(
-    external?: ExternalAsset[]
-  ): Promise<Array<Asset | Bond>> {
+  async getOnChainAssets(external?: ExternalAsset[]): Promise<Asset[]> {
     const [assets, assetLocations, shares, bonds, legacyMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
