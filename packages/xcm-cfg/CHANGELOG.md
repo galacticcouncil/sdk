@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.8.1
+
+### Patch Changes
+
+- Use ACA fee for lDOT
+
 ## 2.8.0
 
 ### Minor Changes

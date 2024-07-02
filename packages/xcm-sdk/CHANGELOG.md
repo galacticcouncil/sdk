@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 3.5.1
+
+### Patch Changes
+
+- Fix substrate decimals fallback for 0
+
 ## 3.5.0
 
 ### Minor Changes
