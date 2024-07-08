@@ -153,6 +153,7 @@ export class AssetClient extends PolkadotApiClient {
       type: assetType.toHuman(),
       isSufficient: isSufficient ? isSufficient.toHuman() : true,
       origin: this.parseLocation('parachain', location),
+      externalId: this.parseLocation('generalIndex', location),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
   }

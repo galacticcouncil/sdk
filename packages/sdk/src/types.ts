@@ -173,6 +173,7 @@ export interface Asset extends AssetMetadata {
   existentialDeposit: string;
   isSufficient: boolean;
   origin?: number;
+  externalId?: number;
   meta?: Record<string, string>;
 }
 

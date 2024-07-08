@@ -101,6 +101,7 @@ export class Router {
             existentialDeposit: t.existentialDeposit,
             origin: t.origin,
             meta: t.meta,
+            externalId: t.externalId,
           } as Asset;
         })
       )
