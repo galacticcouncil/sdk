@@ -1,6 +1,6 @@
-import { toDecimal } from '@moonbeam-network/xcm-utils';
 import Big, { RoundingMode } from 'big.js';
 import { Asset, AssetParams } from './Asset';
+import { big } from '../utils';
 
 Big.NE = -18;
 
@@ -65,6 +65,6 @@ export class AssetAmount extends Asset {
   }
 
   toDecimal(maxDecimal?: number, roundType?: RoundingMode): string {
-    return toDecimal(this.amount, this.decimals, maxDecimal, roundType);
+    return big.toDecimal(this.amount, this.decimals, maxDecimal, roundType);
   }
 }

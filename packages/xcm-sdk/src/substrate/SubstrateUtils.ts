@@ -1,5 +1,4 @@
-import { Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
-import { convertDecimals } from '@moonbeam-network/xcm-utils';
+import { big, Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
 
 import { SubstrateService } from './SubstrateService';
 
@@ -22,7 +21,7 @@ export function normalizeAssetAmount(
   const normDecimals = substrate.chain.usesChainDecimals
     ? chainDecimals
     : assetDecimals;
-  const normBalance = convertDecimals(amount, normDecimals, assetDecimals);
+  const normBalance = big.convertDecimals(amount, normDecimals, assetDecimals);
   return {
     amount: normBalance,
     decimals: assetDecimals,

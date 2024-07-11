@@ -1,12 +1,12 @@
 import {
   addr,
+  big,
   Asset,
   AnyChain,
   AssetAmount,
   ConfigBuilder,
   ConfigService,
 } from '@galacticcouncil/xcm-core';
-import { toBigInt } from '@moonbeam-network/xcm-utils';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { BalanceAdapter } from './adapters';
 import {
@@ -83,7 +83,7 @@ export class Wallet {
       async buildCall(amount): Promise<XCall> {
         return src.getCall(
           srcAddr,
-          toBigInt(amount, srcBalance.decimals),
+          big.toBigInt(amount, srcBalance.decimals),
           dstAddr,
           dstConf.chain,
           dstFee,
@@ -93,7 +93,7 @@ export class Wallet {
       async estimateFee(amount): Promise<AssetAmount> {
         return src.getFee(
           srcAddr,
-          toBigInt(amount, srcBalance.decimals),
+          big.toBigInt(amount, srcBalance.decimals),
           srcFeeBalance,
           dstAddr,
           dstConf.chain,

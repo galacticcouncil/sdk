@@ -1,4 +1,5 @@
 import {
+  big,
   AnyChain,
   AssetAmount,
   AssetConfig,
@@ -9,7 +10,6 @@ import {
   FeeAssetConfig,
   TransactInfo,
 } from '@galacticcouncil/xcm-core';
-import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import Big from 'big.js';
 
@@ -106,7 +106,7 @@ export function getXcmDeliveryFee(
   feeConfig?: FeeAssetConfig
 ): bigint {
   return feeConfig?.xcmDeliveryFeeAmount
-    ? toBigInt(feeConfig.xcmDeliveryFeeAmount, decimals)
+    ? big.toBigInt(feeConfig.xcmDeliveryFeeAmount, decimals)
     : 0n;
 }
 

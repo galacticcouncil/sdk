@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 4.0.0
+
+### Major Changes
+
+- Upgrage pjs to 12.x
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@2.0.0
+
 ## 3.5.1
 
 ### Patch Changes
