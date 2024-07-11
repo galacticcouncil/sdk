@@ -33,6 +33,7 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
+    "big.js": "^6.2.1",
     "@thi.ng/cache": "^2.1.35",
     "@wormhole-foundation/sdk-base": "^0.5.2",
     "@wormhole-foundation/sdk-connect": "^0.5.2",
