@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.0.0
+
+### Major Changes
+
+- Upgrage pjs to 12.x
+
 ## 3.1.1
 
 ### Patch Changes

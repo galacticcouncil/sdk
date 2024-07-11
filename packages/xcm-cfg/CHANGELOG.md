@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.0.0
+
+### Major Changes
+
+- Upgrage pjs to 12.x
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@2.0.0
+
 ## 2.8.1
 
 ### Patch Changes
