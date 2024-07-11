@@ -175,6 +175,7 @@ export interface Asset extends AssetMetadata {
   origin?: number;
   externalId?: number;
   meta?: Record<string, string>;
+  isWhiteListed?: boolean;
 }
 
 export interface ExternalAsset extends AssetMetadata {

@@ -235,6 +235,7 @@ export class AssetClient extends PolkadotApiClient {
           name: ext.name,
           symbol: ext.symbol,
           icon: ext.symbol,
+          isWhiteListed: ext.isWhiteListed,
         }
       : token;
   }
