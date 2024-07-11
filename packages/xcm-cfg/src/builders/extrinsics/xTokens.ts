@@ -1,10 +1,10 @@
 import {
+  big,
   Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xcm-core';
-import { toBigInt } from '@moonbeam-network/xcm-utils';
 import { toAsset, toDest } from './xTokens.utils';
 import {
   getExtrinsicAccount,
@@ -184,7 +184,7 @@ const transferMultiCurrencies = (
         if (opts) {
           const feeAssetDecimals = source.getAssetDecimals(opts.fee);
           feeAssetId = source.getAssetId(opts.fee);
-          feeAmount = toBigInt(opts.feeAmount, feeAssetDecimals!);
+          feeAmount = big.toBigInt(opts.feeAmount, feeAssetDecimals!);
         }
 
         const rcv = destination as Parachain;

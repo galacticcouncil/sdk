@@ -1,4 +1,10 @@
-import { isHex, hexToU8a } from '@polkadot/util';
+import {
+  bnToU8a,
+  hexToU8a,
+  isHex,
+  stringToU8a,
+  u8aToHex,
+} from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { Buffer } from 'buffer';
 
@@ -72,4 +78,27 @@ export function toHex(address: string) {
  */
 export function toNative(address: string) {
   return '0x' + address.substring(26);
+}
+
+/**
+ * Get sovereign account addresses
+ *
+ * @param paraId parachain id
+ * @returns sovereign addresses
+ */
+export function getSovereignAccountAddresses(paraId: number) {
+  const paraIdU8a = bnToU8a(paraId, { bitLength: 32 });
+  const relay = u8aToHex(
+    new Uint8Array([...stringToU8a('para'), ...paraIdU8a])
+  ).padEnd(66, '0');
+  const generic = u8aToHex(
+    new Uint8Array([...stringToU8a('sibl'), ...paraIdU8a])
+  ).padEnd(66, '0');
+  const moonbeam = generic.slice(0, 42);
+
+  return {
+    generic,
+    moonbeam,
+    relay,
+  };
 }

@@ -1,13 +1,16 @@
 import {
+  big,
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
   Precompile,
 } from '@galacticcouncil/xcm-core';
-import { formatAssetIdToERC20, toBigInt } from '@moonbeam-network/xcm-utils';
 import { isString } from '@polkadot/util';
 
-import { getDestinationMultilocation } from './Xtokens.utils';
+import {
+  getDestinationMultilocation,
+  formatAssetIdToERC20,
+} from './Xtokens.utils';
 
 const U_64_MAX = 18446744073709551615n;
 
@@ -33,7 +36,7 @@ export function Xtokens() {
       build: ({ address, amount, asset, destination, fee, source }) => {
         const assetId = source.getAssetId(asset);
         const feeAssetId = source.getAssetId(fee);
-        const feeAmount = toBigInt(fee.amount, fee.decimals!);
+        const feeAmount = big.toBigInt(fee.amount, fee.decimals!);
         return new ContractConfig({
           address: Precompile.Xtokens,
           args: [

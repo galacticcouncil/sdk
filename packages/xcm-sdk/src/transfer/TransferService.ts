@@ -1,5 +1,6 @@
 import {
   addr,
+  big,
   AnyChain,
   AssetAmount,
   ChainTransferConfig,
@@ -7,7 +8,6 @@ import {
   Parachain,
   TransactInfo,
 } from '@galacticcouncil/xcm-core';
-import { toBigInt } from '@moonbeam-network/xcm-utils';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { SubstrateService } from '../substrate';
@@ -60,7 +60,7 @@ export class TransferService {
 
     if (Number.isFinite(amount)) {
       return AssetAmount.fromAsset(asset, {
-        amount: toBigInt(amount as number, decimals),
+        amount: big.toBigInt(amount as number, decimals),
         decimals,
       });
     }
@@ -195,7 +195,7 @@ export class TransferService {
 
     let balance: bigint = 0n;
     if (assetMin) {
-      balance = toBigInt(assetMin, decimals);
+      balance = big.toBigInt(assetMin, decimals);
     }
 
     return AssetAmount.fromAsset(asset, {

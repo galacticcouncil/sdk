@@ -1,10 +1,10 @@
 import {
+  big,
   Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xcm-core';
-import { toBigInt } from '@moonbeam-network/xcm-utils';
 import {
   toAsset,
   toAssets,
@@ -226,7 +226,7 @@ const send = () => {
 
             const feePalletInstance = ctx.getAssetPalletInstance(opts.fee);
             const feeAssetDecimals = ctx.getAssetDecimals(opts.fee);
-            const fee = toBigInt(opts.feeAmount, feeAssetDecimals!);
+            const fee = big.toBigInt(opts.feeAmount, feeAssetDecimals!);
 
             return [
               toDest(version, via || rcv),

@@ -33,7 +33,6 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
-    "@moonbeam-network/xcm-utils": "2.1.1",
     "@thi.ng/cache": "^2.1.35",
     "@wormhole-foundation/sdk-base": "^0.5.2",
     "@wormhole-foundation/sdk-connect": "^0.5.2",
@@ -41,9 +40,9 @@
     "buffer": "^6.0.3"
   },
   "peerDependencies": {
-    "@polkadot/api": "^11.2.1",
-    "@polkadot/api-augment": "^11.2.1",
-    "@polkadot/types": "^11.2.1",
+    "@polkadot/api": "^12.1.1",
+    "@polkadot/api-augment": "^12.1.1",
+    "@polkadot/types": "^12.1.1",
     "@polkadot/util-crypto": "^12.6.2",
     "viem": "^2.15.1"
   }
