@@ -40,7 +40,8 @@
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
-    "turbo": "^1.9.9",
+    "turbo": "^2.0.3",
     "typescript": "^5.0.4"
-  }
+  },
+  "packageManager": "npm@8.15.0"
 }
