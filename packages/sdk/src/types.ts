@@ -182,6 +182,7 @@ export interface ExternalAsset extends AssetMetadata {
   origin: number;
   name: string;
   internalId: string;
+  isWhiteListed?: boolean;
 }
 
 export interface AssetMetadata {
