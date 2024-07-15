@@ -60,6 +60,7 @@ describe('Router with mocked XYK pool service', () => {
         existentialDeposit: '1000',
         origin: undefined,
         meta: undefined,
+        externalId: undefined,
       },
       {
         id: '2',
@@ -72,6 +73,7 @@ describe('Router with mocked XYK pool service', () => {
         existentialDeposit: '1000',
         origin: undefined,
         meta: undefined,
+        externalId: undefined,
       },
       {
         id: '1',
@@ -84,6 +86,7 @@ describe('Router with mocked XYK pool service', () => {
         existentialDeposit: '1000',
         origin: undefined,
         meta: undefined,
+        externalId: undefined,
       },
     ]);
   });
@@ -104,6 +107,7 @@ describe('Router with mocked XYK pool service', () => {
         existentialDeposit: '1000',
         origin: undefined,
         meta: undefined,
+        externalId: undefined,
       },
       {
         id: '0',
@@ -116,6 +120,7 @@ describe('Router with mocked XYK pool service', () => {
         existentialDeposit: '1000',
         origin: undefined,
         meta: undefined,
+        externalId: undefined,
       },
     ]);
   });

@@ -173,7 +173,9 @@ export interface Asset extends AssetMetadata {
   existentialDeposit: string;
   isSufficient: boolean;
   origin?: number;
+  externalId?: number;
   meta?: Record<string, string>;
+  isWhiteListed?: boolean;
 }
 
 export interface ExternalAsset extends AssetMetadata {
@@ -181,6 +183,7 @@ export interface ExternalAsset extends AssetMetadata {
   origin: number;
   name: string;
   internalId: string;
+  isWhiteListed?: boolean;
 }
 
 export interface AssetMetadata {
