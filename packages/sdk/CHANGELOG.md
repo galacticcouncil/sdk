@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.0.1
+
+### Patch Changes
+
+- Asset whitelist flags
+
 ## 4.0.0
 
 ### Major Changes
