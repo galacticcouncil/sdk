@@ -61,6 +61,7 @@ describe('Router with mocked XYK pool service', () => {
         origin: undefined,
         meta: undefined,
         externalId: undefined,
+        isWhiteListed: undefined,
       },
       {
         id: '2',
@@ -74,6 +75,7 @@ describe('Router with mocked XYK pool service', () => {
         origin: undefined,
         meta: undefined,
         externalId: undefined,
+        isWhiteListed: undefined,
       },
       {
         id: '1',
@@ -87,6 +89,7 @@ describe('Router with mocked XYK pool service', () => {
         origin: undefined,
         meta: undefined,
         externalId: undefined,
+        isWhiteListed: undefined,
       },
     ]);
   });
@@ -108,6 +111,7 @@ describe('Router with mocked XYK pool service', () => {
         origin: undefined,
         meta: undefined,
         externalId: undefined,
+        isWhiteListed: undefined,
       },
       {
         id: '0',
@@ -121,6 +125,7 @@ describe('Router with mocked XYK pool service', () => {
         origin: undefined,
         meta: undefined,
         externalId: undefined,
+        isWhiteListed: undefined,
       },
     ]);
   });
