@@ -507,7 +507,12 @@ export const hydraDX = new EvmParachain({
   name: 'Hydration',
   parachainId: 2034,
   ss58Format: 63,
-  ws: 'wss://rpc.hydradx.cloud',
+  ws: [
+    'wss://rpc.hydradx.cloud',
+    'wss://hydradx-rpc.dwellir.com',
+    'wss://rpc.helikon.io/hydradx',
+    'wss://hydradx.paras.dotters.network',
+  ],
 });
 
 export const interlay = new Parachain({
@@ -682,7 +687,11 @@ export const zeitgeist = new Parachain({
   parachainId: 2092,
   ss58Format: 73,
   usesChainDecimals: true,
-  ws: 'wss://zeitgeist-rpc.dwellir.com',
+  ws: [
+    'wss://main.rpc.zeitgeist.pm/ws',
+    'wss://zeitgeist-rpc.dwellir.com',
+    'wss://zeitgeist.api.onfinality.io/public-ws',
+  ],
 });
 
 export const phala = new Parachain({
