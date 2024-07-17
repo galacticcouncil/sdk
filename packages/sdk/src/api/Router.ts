@@ -102,6 +102,7 @@ export class Router {
             origin: t.origin,
             meta: t.meta,
             externalId: t.externalId,
+            isWhiteListed: t.isWhiteListed,
           } as Asset;
         })
       )
