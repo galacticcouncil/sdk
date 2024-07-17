@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.0.2
+
+### Patch Changes
+
+- Return whitelist from router
+
 ## 4.0.1
 
 ### Patch Changes

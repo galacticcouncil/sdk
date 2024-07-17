@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.0.1
+
+### Patch Changes
+
+- Add multiple hydration & zeitgeist endpoints
+
 ## 3.0.0
 
 ### Major Changes
