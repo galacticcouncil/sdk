@@ -90,14 +90,34 @@ export const kar = new Asset({
   originSymbol: 'KAR',
 });
 
+export const kilt = new Asset({
+  key: 'kilt',
+  originSymbol: 'KILT',
+});
+
 export const ksm = new Asset({
   key: 'ksm',
   originSymbol: 'KSM',
 });
 
+export const ldot = new Asset({
+  key: 'ldot',
+  originSymbol: 'LDOT',
+});
+
+export const myth = new Asset({
+  key: 'myth',
+  originSymbol: 'MYTH',
+});
+
 export const nodl = new Asset({
   key: 'nodl',
   originSymbol: 'NODL',
+});
+
+export const pen = new Asset({
+  key: 'pen',
+  originSymbol: 'PEN',
 });
 
 export const pha = new Asset({
@@ -108,6 +128,11 @@ export const pha = new Asset({
 export const pink = new Asset({
   key: 'pink',
   originSymbol: 'PINK',
+});
+
+export const ring = new Asset({
+  key: 'ring',
+  originSymbol: 'RING',
 });
 
 export const sub = new Asset({
@@ -123,36 +148,6 @@ export const teer = new Asset({
 export const tnkr = new Asset({
   key: 'tnkr',
   originSymbol: 'TNKR',
-});
-
-export const weth = new Asset({
-  key: 'weth',
-  originSymbol: 'WETH',
-});
-
-export const weth_awh = new Asset({
-  ...weth,
-  key: 'weth_awh',
-});
-
-export const weth_mwh = new Asset({
-  ...weth,
-  key: 'weth_mwh',
-});
-
-export const wbtc = new Asset({
-  key: 'wbtc',
-  originSymbol: 'WBTC',
-});
-
-export const wbtc_awh = new Asset({
-  ...wbtc,
-  key: 'wbtc_awh',
-});
-
-export const wbtc_mwh = new Asset({
-  ...wbtc,
-  key: 'wbtc_mwh',
 });
 
 export const unq = new Asset({
@@ -185,9 +180,34 @@ export const vdot = new Asset({
   originSymbol: 'vDOT',
 });
 
-export const ztg = new Asset({
-  key: 'ztg',
-  originSymbol: 'ZTG',
+export const weth = new Asset({
+  key: 'weth',
+  originSymbol: 'WETH',
+});
+
+export const weth_awh = new Asset({
+  ...weth,
+  key: 'weth_awh',
+});
+
+export const weth_mwh = new Asset({
+  ...weth,
+  key: 'weth_mwh',
+});
+
+export const wbtc = new Asset({
+  key: 'wbtc',
+  originSymbol: 'WBTC',
+});
+
+export const wbtc_awh = new Asset({
+  ...wbtc,
+  key: 'wbtc_awh',
+});
+
+export const wbtc_mwh = new Asset({
+  ...wbtc,
+  key: 'wbtc_mwh',
 });
 
 export const xrt = new Asset({
@@ -195,24 +215,9 @@ export const xrt = new Asset({
   originSymbol: 'XRT',
 });
 
-export const kilt = new Asset({
-  key: 'kilt',
-  originSymbol: 'KILT',
-});
-
-export const pen = new Asset({
-  key: 'pen',
-  originSymbol: 'PEN',
-});
-
-export const ldot = new Asset({
-  key: 'ldot',
-  originSymbol: 'LDOT',
-});
-
-export const ring = new Asset({
-  key: 'ring',
-  originSymbol: 'RING',
+export const ztg = new Asset({
+  key: 'ztg',
+  originSymbol: 'ZTG',
 });
 
 export const assets: Asset[] = [
@@ -237,6 +242,7 @@ export const assets: Asset[] = [
   kilt,
   ksm,
   ldot,
+  myth,
   nodl,
   pha,
   pen,
@@ -257,8 +263,8 @@ export const assets: Asset[] = [
   weth,
   weth_awh,
   weth_mwh,
-  ztg,
   xrt,
+  ztg,
 ];
 
 export const assetsMap = new Map<string, Asset>(

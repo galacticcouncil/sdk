@@ -175,6 +175,30 @@ const limitedTeleportAssets = (parent: Parents) => {
   };
 };
 
+const teleportAssets = (parent: Parents) => {
+  const func = 'teleportAssets';
+  return {
+    here: (): ExtrinsicConfigBuilder => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v3;
+            const account = getExtrinsicAccount(address);
+            const rcv = destination as Parachain;
+            return [
+              toDest(version, rcv),
+              toBeneficiary(version, account),
+              toAssets(version, parent, 'Here', amount),
+              0,
+            ];
+          },
+        }),
+    }),
+  };
+};
+
 const reserveTransferAssets = () => {
   const func = 'reserveTransferAssets';
   return {
@@ -251,6 +275,7 @@ export const polkadotXcm = () => {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
     reserveTransferAssets,
+    teleportAssets,
     send,
   };
 };

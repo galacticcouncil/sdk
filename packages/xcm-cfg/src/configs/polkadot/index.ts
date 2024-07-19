@@ -9,6 +9,7 @@ import { centrifugeConfig } from './centrifuge';
 import { hydraDxConfig } from './hydraDX';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
+import { mythosConfig } from './mythos';
 import { nodleConfig } from './nodle';
 import { polkadotConfig } from './polkadot';
 import { subsocialConfig } from './subsocial';
@@ -30,6 +31,7 @@ export const polkadotChainsConfig: ChainConfig[] = [
   hydraDxConfig,
   interlayConfig,
   moonbeamConfig,
+  mythosConfig,
   nodleConfig,
   polkadotConfig,
   subsocialConfig,

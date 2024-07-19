@@ -18,14 +18,22 @@ import {
   dai,
   dai_awh,
   dai_mwh,
+  ded,
   dot,
+  dota,
   glmr,
   hdx,
   ibtc,
   intr,
   kar,
+  kilt,
   ksm,
+  ldot,
+  myth,
+  pen,
   pha,
+  pink,
+  ring,
   nodl,
   teer,
   tnkr,
@@ -42,15 +50,8 @@ import {
   weth,
   weth_awh,
   weth_mwh,
-  ztg,
   xrt,
-  pink,
-  ded,
-  dota,
-  kilt,
-  pen,
-  ring,
-  ldot,
+  ztg,
 } from './assets';
 
 import { acalaEvm, hydradxEvm, moonbeamEvm } from './evm';
@@ -322,6 +323,11 @@ export const hydraDX = new EvmParachain({
       id: 0,
     },
     {
+      asset: aca,
+      id: 1000099,
+      decimals: 12,
+    },
+    {
       asset: astr,
       id: 9,
       decimals: 18,
@@ -337,9 +343,28 @@ export const hydraDX = new EvmParachain({
       decimals: 18,
     },
     {
+      asset: cru,
+      id: 27,
+      decimals: 12,
+    },
+    {
+      asset: ded,
+      id: 30,
+      balanceId: 1000019,
+      decimals: 10,
+      palletInstance: 50,
+    },
+    {
       asset: dot,
       id: 5,
       decimals: 10,
+    },
+    {
+      asset: dota,
+      id: 18,
+      balanceId: 1000038,
+      decimals: 4,
+      palletInstance: 50,
     },
     {
       asset: dai_awh,
@@ -368,9 +393,46 @@ export const hydraDX = new EvmParachain({
       decimals: 10,
     },
     {
+      asset: kilt,
+      id: 28,
+      decimals: 15,
+    },
+    {
+      asset: ldot,
+      id: 1000100,
+      decimals: 10,
+    },
+    {
+      asset: myth,
+      id: 30,
+      decimals: 18,
+    },
+    {
       asset: nodl,
       id: 26,
       decimals: 11,
+    },
+    {
+      asset: pen,
+      id: 1000081,
+      decimals: 12,
+    },
+    {
+      asset: pink,
+      id: 23,
+      balanceId: 1000021,
+      decimals: 10,
+      palletInstance: 50,
+    },
+    {
+      asset: pha,
+      id: 8,
+      decimals: 12,
+    },
+    {
+      asset: ring,
+      id: 31,
+      decimals: 18,
     },
     {
       asset: sub,
@@ -439,62 +501,6 @@ export const hydraDX = new EvmParachain({
     {
       asset: ztg,
       id: 12,
-      decimals: 10,
-    },
-    {
-      asset: pha,
-      id: 8,
-      decimals: 12,
-    },
-    {
-      asset: cru,
-      id: 27,
-      decimals: 12,
-    },
-    {
-      asset: pink,
-      id: 23,
-      balanceId: 1000021,
-      decimals: 10,
-      palletInstance: 50,
-    },
-    {
-      asset: ded,
-      id: 30,
-      balanceId: 1000019,
-      decimals: 10,
-      palletInstance: 50,
-    },
-    {
-      asset: dota,
-      id: 18,
-      balanceId: 1000038,
-      decimals: 4,
-      palletInstance: 50,
-    },
-    {
-      asset: kilt,
-      id: 28,
-      decimals: 15,
-    },
-    {
-      asset: pen,
-      id: 1000081,
-      decimals: 12,
-    },
-    {
-      asset: ring,
-      id: 31,
-      decimals: 18,
-    },
-    {
-      asset: aca,
-      id: 1000099,
-      decimals: 12,
-    },
-    {
-      asset: ldot,
-      id: 1000100,
       decimals: 10,
     },
   ],
@@ -643,6 +649,23 @@ export const moonbeam = new EvmParachain({
   parachainId: 2004,
   ss58Format: 1284,
   ws: 'wss://wss.api.moonbeam.network',
+});
+
+export const mythos = new Parachain({
+  assetsData: [
+    {
+      asset: myth,
+      id: 0,
+    },
+  ],
+  ecosystem: Ecosystem.Polkadot,
+  genesisHash:
+    '0xf6ee56e9c5277df5b4ce6ae9983ee88f3cbed27d31beeb98f9f84f997a1ab0b9',
+  key: 'mythos',
+  name: 'Mythos',
+  parachainId: 3369,
+  ss58Format: 29972,
+  ws: 'wss://polkadot-mythos-rpc.polkadot.io',
 });
 
 export const subsocial = new Parachain({
@@ -828,6 +851,7 @@ const polkadotChains: AnyChain[] = [
   kilt_chain,
   interlay,
   moonbeam,
+  mythos,
   nodle,
   phala,
   pendulum,

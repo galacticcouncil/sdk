@@ -34,6 +34,7 @@ import {
   ztg,
   ring,
   ldot,
+  myth,
 } from '../../assets';
 import {
   acala,
@@ -56,6 +57,7 @@ import {
   pendulum,
   acala_evm,
   darwinia,
+  mythos,
 } from '../../chains';
 import {
   BalanceBuilder,
@@ -683,6 +685,24 @@ const toPhala: AssetConfig[] = [
   }),
 ];
 
+const toMythos: AssetConfig[] = [
+  new AssetConfig({
+    asset: myth,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: mythos,
+    destinationFee: {
+      amount: 0.064296,
+      asset: myth,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toNodle: AssetConfig[] = [
   new AssetConfig({
     asset: nodl,
@@ -1027,6 +1047,7 @@ export const hydraDxConfig = new ChainConfig({
     ...toInterlay,
     ...toKilt,
     ...toMoonbeam,
+    ...toMythos,
     ...toNodle,
     ...toPhala,
     ...toPolkadot,
