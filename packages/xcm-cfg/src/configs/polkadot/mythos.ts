@@ -11,11 +11,14 @@ export const mythosConfig = new ChainConfig({
       balance: BalanceBuilder().substrate().system().account(),
       destination: hydraDX,
       destinationFee: {
-        amount: 0.22,
+        amount: 0.003023,
         asset: myth,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().polkadotXcm().teleportAssets(0).here(),
+      extrinsic: ExtrinsicBuilder()
+        .polkadotXcm()
+        .limitedReserveTransferAssets()
+        .here(),
     }),
   ],
   chain: mythos,
