@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.1.1
+
+### Patch Changes
+
+- Fix myth fees
+
 ## 3.1.0
 
 ### Minor Changes
