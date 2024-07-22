@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 2.1.0
+
+### Minor Changes
+
+- Support EVM address space flag for Parachain
+
 ## 2.0.0
 
 ### Major Changes

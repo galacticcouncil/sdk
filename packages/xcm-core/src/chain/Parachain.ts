@@ -23,6 +23,7 @@ export interface ParachainParams extends ChainParams<ParachainAssetsData> {
   usesChainDecimals?: boolean;
   weight?: number;
   ws: string | string[];
+  h160AccOnly?: boolean;
 }
 
 export class Parachain extends Chain<ParachainAssetsData> {
@@ -38,6 +39,8 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   readonly ws: string | string[];
 
+  readonly h160AccOnly: boolean;
+
   constructor({
     genesisHash,
     parachainId,
@@ -45,6 +48,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
     ss58Format,
     weight,
     ws,
+    h160AccOnly = false,
     ...others
   }: ParachainParams) {
     super({ ...others });
@@ -54,6 +58,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
     this.usesChainDecimals = !!usesChainDecimals;
     this.weight = weight;
     this.ws = ws;
+    this.h160AccOnly = h160AccOnly;
   }
 
   get api(): Promise<ApiPromise> {

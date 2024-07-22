@@ -8,14 +8,12 @@ export interface EvmParachainParams extends ParachainParams {
   defEvm: EvmDef;
   defWormhole?: WormholeDef;
   evmResolver?: EvmResolver;
-  h160AccOnly?: boolean;
 }
 
 export class EvmParachain extends Parachain implements WormholeChain {
   readonly defEvm: EvmDef;
   readonly defWormhole?: WormholeDef;
   readonly evmResolver?: EvmResolver;
-  readonly h160AccOnly: boolean;
 
   constructor({
     defEvm,
@@ -28,7 +26,6 @@ export class EvmParachain extends Parachain implements WormholeChain {
     this.defEvm = defEvm;
     this.defWormhole = defWormhole;
     this.evmResolver = evmResolver;
-    this.h160AccOnly = h160AccOnly;
   }
 
   get client(): EvmClient {
