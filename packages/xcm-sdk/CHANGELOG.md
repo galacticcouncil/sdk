@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 4.1.0
+
+### Minor Changes
+
+- Upgrade to latest core
+
 ## 4.0.0
 
 ### Major Changes

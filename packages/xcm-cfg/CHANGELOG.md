@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.1.0
+
+### Minor Changes
+
+- Mythos & vASTR support
+- Upgrade to latest core
+
 ## 3.0.1
 
 ### Patch Changes
