@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 2.1.1
+
+### Patch Changes
+
+- Fix EvmParachain constructor
+
 ## 2.1.0
 
 ### Minor Changes
