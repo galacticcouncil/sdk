@@ -707,7 +707,7 @@ const toMythos: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: mythos,
     destinationFee: {
-      amount: 0.00737856,
+      amount: 0.3,
       asset: myth,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
