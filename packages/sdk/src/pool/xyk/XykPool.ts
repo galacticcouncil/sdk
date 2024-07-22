@@ -67,6 +67,9 @@ export class XykPool implements Pool {
     const balanceIn = bnum(tokenInMeta.balance);
     const balanceOut = bnum(tokenOutMeta.balance);
 
+    const assetInED = bnum(tokenInMeta.existentialDeposit);
+    const assetOutED = bnum(tokenOutMeta.existentialDeposit);
+
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
@@ -74,6 +77,8 @@ export class XykPool implements Pool {
       decimalsOut: tokenOutMeta.decimals,
       balanceIn: balanceIn,
       balanceOut: balanceOut,
+      assetInED,
+      assetOutED,
     } as PoolPair;
   }
 
@@ -90,7 +95,10 @@ export class XykPool implements Pool {
 
     const errors: PoolError[] = [];
 
-    if (amountOut.isLessThan(this.minTradingLimit)) {
+    if (
+      amountOut.isLessThan(this.minTradingLimit) ||
+      calculatedIn.isLessThan(poolPair.assetInED)
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 
@@ -126,7 +134,10 @@ export class XykPool implements Pool {
 
     const errors: PoolError[] = [];
 
-    if (amountIn.isLessThan(this.minTradingLimit)) {
+    if (
+      amountIn.isLessThan(this.minTradingLimit) ||
+      calculatedOut.isLessThan(poolPair.assetOutED)
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 

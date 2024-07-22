@@ -95,6 +95,9 @@ export class OmniPool implements Pool {
     const balanceIn = bnum(tokenInMeta.balance);
     const balanceOut = bnum(tokenOutMeta.balance);
 
+    const assetInED = bnum(tokenInMeta.existentialDeposit);
+    const assetOutED = bnum(tokenOutMeta.existentialDeposit);
+
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
@@ -108,6 +111,8 @@ export class OmniPool implements Pool {
       balanceOut: balanceOut,
       tradeableIn: tokenInMeta.tradeable,
       tradeableOut: tokenOutMeta.tradeable,
+      assetInED,
+      assetOutED,
     } as OmniPoolPair;
   }
 
@@ -133,7 +138,10 @@ export class OmniPool implements Pool {
       errors.push(PoolError.TradeNotAllowed);
     }
 
-    if (amountOut.isLessThan(this.minTradingLimit)) {
+    if (
+      amountOut.isLessThan(this.minTradingLimit) ||
+      calculatedIn.isLessThan(poolPair.assetInED)
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 
@@ -175,7 +183,10 @@ export class OmniPool implements Pool {
       errors.push(PoolError.TradeNotAllowed);
     }
 
-    if (amountIn.isLessThan(this.minTradingLimit)) {
+    if (
+      amountIn.isLessThan(this.minTradingLimit) ||
+      calculatedOut.isLessThan(poolPair.assetOutED)
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 
