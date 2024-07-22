@@ -19,7 +19,6 @@ export class EvmParachain extends Parachain implements WormholeChain {
     defEvm,
     defWormhole,
     evmResolver,
-    h160AccOnly = false,
     ...others
   }: EvmParachainParams) {
     super({ ...others });
