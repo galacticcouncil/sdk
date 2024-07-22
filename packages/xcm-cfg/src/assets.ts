@@ -175,6 +175,11 @@ export const usdc_mwh = new Asset({
   key: 'usdc_mwh',
 });
 
+export const vastr = new Asset({
+  key: 'vastr',
+  originSymbol: 'vASTR',
+});
+
 export const vdot = new Asset({
   key: 'vdot',
   originSymbol: 'vDOT',
@@ -256,6 +261,7 @@ export const assets: Asset[] = [
   usdc_mwh,
   usdt,
   usdt_mwh,
+  vastr,
   vdot,
   wbtc,
   wbtc_awh,

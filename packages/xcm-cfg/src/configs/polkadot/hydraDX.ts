@@ -35,6 +35,7 @@ import {
   ring,
   ldot,
   myth,
+  vastr,
 } from '../../assets';
 import {
   acala,
@@ -294,6 +295,21 @@ const toBifrost: AssetConfig[] = [
     destinationFee: {
       amount: 0.0000000703,
       asset: vdot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: vastr,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: bifrost,
+    destinationFee: {
+      amount: 0.000000643,
+      asset: vastr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),

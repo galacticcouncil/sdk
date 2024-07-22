@@ -43,6 +43,7 @@ import {
   usdc_mwh,
   usdt,
   usdt_mwh,
+  vastr,
   vdot,
   wbtc,
   wbtc_awh,
@@ -259,6 +260,12 @@ export const bifrost = new Parachain({
       decimals: 10,
     },
     {
+      asset: vastr,
+      id: { VToken2: 3 },
+      metadataId: { VToken2: 3 },
+      decimals: 18,
+    },
+    {
       asset: dot,
       id: { Token2: 0 },
       metadataId: { Token2: 0 },
@@ -470,6 +477,11 @@ export const hydraDX = new EvmParachain({
       id: 23,
       decimals: 6,
       palletInstance: 110,
+    },
+    {
+      asset: vastr,
+      id: 33,
+      decimals: 18,
     },
     {
       asset: vdot,

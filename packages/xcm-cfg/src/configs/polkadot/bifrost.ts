@@ -1,6 +1,6 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { bnc, vdot, dot, usdc, usdt, hdx, pink } from '../../assets';
+import { bnc, vdot, dot, usdc, usdt, hdx, pink, vastr } from '../../assets';
 import { assetHub, bifrost, hydraDX, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -23,6 +23,21 @@ const toHydraDX: AssetConfig[] = [
     destinationFee: {
       amount: 0.000555,
       asset: vdot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: vastr,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: hydraDX,
+    destinationFee: {
+      amount: 0.0115,
+      asset: vastr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
