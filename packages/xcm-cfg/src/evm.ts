@@ -30,7 +30,7 @@ export const acalaEvm: Chain = defineChain({
 
 export const hydradxEvm: Chain = defineChain({
   id: 222222,
-  name: 'HydraDX',
+  name: 'Hydration',
   network: 'hydradx',
   nativeCurrency: {
     decimals: 18,

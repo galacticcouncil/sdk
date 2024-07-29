@@ -24,6 +24,7 @@ export interface ParachainParams extends ChainParams<ParachainAssetsData> {
   weight?: number;
   ws: string | string[];
   h160AccOnly?: boolean;
+  explorer?: string;
 }
 
 export class Parachain extends Chain<ParachainAssetsData> {
@@ -41,6 +42,8 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   readonly h160AccOnly: boolean;
 
+  readonly explorer?: string;
+
   constructor({
     genesisHash,
     parachainId,
@@ -49,6 +52,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
     weight,
     ws,
     h160AccOnly = false,
+    explorer,
     ...others
   }: ParachainParams) {
     super({ ...others });
@@ -59,6 +63,7 @@ export class Parachain extends Chain<ParachainAssetsData> {
     this.weight = weight;
     this.ws = ws;
     this.h160AccOnly = h160AccOnly;
+    this.explorer = explorer;
   }
 
   get api(): Promise<ApiPromise> {

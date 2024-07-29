@@ -72,6 +72,7 @@ export const polkadot = new Parachain({
   parachainId: 0,
   ss58Format: 0,
   ws: 'wss://polkadot-rpc.dwellir.com',
+  explorer: 'https://polkadot.subscan.io',
 });
 
 export const acala = new EvmParachain({
@@ -125,6 +126,7 @@ export const acala = new EvmParachain({
   parachainId: 2000,
   ss58Format: 10,
   ws: 'wss://acala-rpc.aca-api.network',
+  explorer: 'https://acala.subscan.io',
 });
 
 export const acala_evm = new EvmParachain({
@@ -216,6 +218,7 @@ export const assetHub = new Parachain({
   parachainId: 1000,
   ss58Format: 42,
   ws: 'wss://polkadot-asset-hub-rpc.polkadot.io',
+  explorer: 'https://assethub-polkadot.subscan.io',
 });
 
 export const astar = new Parachain({
@@ -245,6 +248,7 @@ export const astar = new Parachain({
   parachainId: 2006,
   ss58Format: 5,
   ws: 'wss://rpc.astar.network',
+  explorer: 'https://astar.subscan.io',
 });
 
 export const bifrost = new Parachain({
@@ -304,6 +308,7 @@ export const bifrost = new Parachain({
   parachainId: 2030,
   ss58Format: 6,
   ws: 'wss://bifrost-polkadot-rpc.dwellir.com',
+  explorer: 'https://bifrost.subscan.io',
 });
 
 export const centrifuge = new Parachain({
@@ -321,6 +326,7 @@ export const centrifuge = new Parachain({
   parachainId: 2031,
   ss58Format: 36,
   ws: 'wss://fullnode.centrifuge.io',
+  explorer: 'https://centrifuge.subscan.io',
 });
 
 export const hydraDX = new EvmParachain({
@@ -531,6 +537,7 @@ export const hydraDX = new EvmParachain({
     'wss://rpc.helikon.io/hydradx',
     'wss://hydradx.paras.dotters.network',
   ],
+  explorer: 'https://hydration.subscan.io',
 });
 
 export const interlay = new Parachain({
@@ -574,6 +581,7 @@ export const interlay = new Parachain({
   parachainId: 2032,
   ss58Format: 2032,
   ws: 'wss://api.interlay.io/parachain',
+  explorer: 'https://interlay.subscan.io',
 });
 
 export const moonbeam = new EvmParachain({
@@ -661,6 +669,7 @@ export const moonbeam = new EvmParachain({
   parachainId: 2004,
   ss58Format: 1284,
   ws: 'wss://wss.api.moonbeam.network',
+  explorer: 'https://moonbeam.subscan.io',
 });
 
 export const mythos = new Parachain({
@@ -679,6 +688,7 @@ export const mythos = new Parachain({
   parachainId: 3369,
   ss58Format: 29972,
   ws: 'wss://polkadot-mythos-rpc.polkadot.io',
+  explorer: 'https://mythos.subscan.io',
 });
 
 export const subsocial = new Parachain({
@@ -728,6 +738,7 @@ export const zeitgeist = new Parachain({
     'wss://zeitgeist-rpc.dwellir.com',
     'wss://zeitgeist.api.onfinality.io/public-ws',
   ],
+  explorer: 'https://zeitgeist.subscan.io',
 });
 
 export const phala = new Parachain({
@@ -745,6 +756,7 @@ export const phala = new Parachain({
   parachainId: 2035,
   ss58Format: 30,
   ws: 'wss://api.phala.network/ws',
+  explorer: 'https://phala.subscan.io',
 });
 
 export const nodle = new Parachain({
@@ -762,6 +774,7 @@ export const nodle = new Parachain({
   parachainId: 2026,
   ss58Format: 37,
   ws: 'wss://nodle-rpc.dwellir.com',
+  explorer: 'https://nodle.subscan.io',
 });
 
 export const unique = new Parachain({
@@ -779,6 +792,7 @@ export const unique = new Parachain({
   parachainId: 2037,
   ss58Format: 7391,
   ws: 'wss://unique-rpc.dwellir.com',
+  explorer: 'https://unique.subscan.io',
 });
 
 export const crust = new Parachain({
@@ -796,6 +810,7 @@ export const crust = new Parachain({
   parachainId: 2008,
   ss58Format: 88,
   ws: 'wss://crust-parachain.crustapps.net',
+  explorer: 'https://crust.subscan.io',
 });
 
 export const kilt_chain = new Parachain({
@@ -813,6 +828,7 @@ export const kilt_chain = new Parachain({
   parachainId: 2086,
   ss58Format: 38,
   ws: 'wss://kilt-rpc.dwellir.com',
+  explorer: 'https://spiritnet.subscan.io',
 });
 
 export const pendulum = new Parachain({
@@ -830,6 +846,7 @@ export const pendulum = new Parachain({
   parachainId: 2094,
   ss58Format: 56,
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
+  explorer: 'https://pendulum.subscan.io',
 });
 
 export const darwinia = new EvmParachain({
@@ -849,6 +866,7 @@ export const darwinia = new EvmParachain({
   parachainId: 2046,
   ss58Format: 18,
   ws: 'wss://darwinia-rpc.dwellir.com',
+  explorer: 'https://darwinia.subscan.io',
 });
 
 const polkadotChains: AnyChain[] = [
@@ -919,6 +937,7 @@ export const basilisk = new Parachain({
   parachainId: 2090,
   ss58Format: 10041,
   ws: 'wss://rpc.basilisk.cloud',
+  explorer: 'https://basilisk.subscan.io',
 });
 
 export const karura = new Parachain({
@@ -953,6 +972,7 @@ export const karura = new Parachain({
   parachainId: 2000,
   ss58Format: 8,
   ws: 'wss://karura-rpc-0.aca-api.network',
+  explorer: 'https://karura.subscan.io',
 });
 
 export const integritee = new Parachain({
@@ -970,6 +990,7 @@ export const integritee = new Parachain({
   parachainId: 2015,
   ss58Format: 13,
   ws: 'wss://kusama.api.integritee.network',
+  explorer: 'https://integritee.subscan.io',
 });
 
 export const kusama = new Parachain({
@@ -986,6 +1007,7 @@ export const kusama = new Parachain({
   parachainId: 0,
   ss58Format: 2,
   ws: 'wss://kusama-rpc.dwellir.com',
+  explorer: 'https://kusama.subscan.io',
 });
 
 export const kusamaAssetHub = new Parachain({
@@ -1009,6 +1031,7 @@ export const kusamaAssetHub = new Parachain({
   parachainId: 1000,
   ss58Format: 2,
   ws: 'wss://kusama-asset-hub-rpc.polkadot.io',
+  explorer: 'https://assethub-kusama.subscan.io',
 });
 
 export const robonomics = new Parachain({
@@ -1025,7 +1048,8 @@ export const robonomics = new Parachain({
   name: 'Robonomics',
   parachainId: 2048,
   ss58Format: 32,
-  ws: 'wss://kusama.rpc.robonomics.network/',
+  ws: 'wss://kusama.rpc.robonomics.network',
+  explorer: 'https://robonomics.subscan.io',
 });
 
 export const tinkernet = new Parachain({
