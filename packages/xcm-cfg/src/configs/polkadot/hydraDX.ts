@@ -36,6 +36,7 @@ import {
   ldot,
   myth,
   vastr,
+  nctr,
 } from '../../assets';
 import {
   acala,
@@ -208,6 +209,21 @@ const toAssetHub: AssetConfig[] = [
   }),
   new AssetConfig({
     asset: dota,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: assetHub,
+    destinationFee: {
+      amount: 0.18,
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets().X3(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
+    asset: nctr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: assetHub,
     destinationFee: {
