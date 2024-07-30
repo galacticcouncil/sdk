@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 2.2.0
+
+### Minor Changes
+
+- Support Parachain explorer
+
 ## 2.1.1
 
 ### Patch Changes

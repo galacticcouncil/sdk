@@ -1,5 +1,17 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.2.0
+
+### Minor Changes
+
+- Configure Parachain explorers
+- Suport NCTR asset
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@2.2.0
+
 ## 3.1.1
 
 ### Patch Changes

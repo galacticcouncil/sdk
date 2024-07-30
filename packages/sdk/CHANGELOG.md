@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.1.0
+
+### Minor Changes
+
+- Min trade size ED validation
+
 ## 4.0.2
 
 ### Patch Changes
