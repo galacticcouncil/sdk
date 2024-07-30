@@ -22,6 +22,8 @@ export interface PoolPair {
   decimalsOut: number;
   balanceIn: BigNumber;
   balanceOut: BigNumber;
+  assetInED: BigNumber;
+  assetOutED: BigNumber;
 }
 
 export type PoolBase = {
