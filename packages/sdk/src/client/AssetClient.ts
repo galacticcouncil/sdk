@@ -13,7 +13,7 @@ import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
-import { chainsMap } from '../../../xcm-cfg/src/chains';
+import { chainsMap } from '@galacticcouncil/xcm-cfg';
 import { Parachain } from '@galacticcouncil/xcm-core';
 
 export class AssetClient extends PolkadotApiClient {
