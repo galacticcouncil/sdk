@@ -13,8 +13,6 @@ import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
 import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
-import { chainsMap } from '@galacticcouncil/xcm-cfg';
-import { Parachain } from '@galacticcouncil/xcm-core';
 
 export class AssetClient extends PolkadotApiClient {
   private SUPPORTED_TYPES = ['StableSwap', 'Bond', 'Token', 'External'];
@@ -146,7 +144,7 @@ export class AssetClient extends PolkadotApiClient {
     const { name, assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = metadata.get(tokenKey) ?? {};
     const origin = this.parseLocation('parachain', location);
-    const pendulumId = (chainsMap.get('pendulum') as Parachain).parachainId;
+    const pendulumId = 2094;
     return {
       id: tokenKey,
       name: name.toHuman(),
