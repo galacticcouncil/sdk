@@ -23,7 +23,7 @@ class GetAssetsExample extends PolkadotExecutor {
       },
     ];
     const assetClient = new AssetClient(api);
-    return assetClient.getOnChainAssets(external);
+    return assetClient.getOnChainAssets(true, external);
   }
 }
 

@@ -1,12 +1,12 @@
 export function findNestedKey(obj: any, keyToFind: any) {
-  let foundObj: any;
+  const foundObj: any[] = [];
   JSON.stringify(obj, (_, nestedValue) => {
     if (nestedValue && nestedValue[keyToFind]) {
-      foundObj = nestedValue;
+      foundObj.push(nestedValue);
     }
     return nestedValue;
   });
-  return foundObj;
+  return foundObj[0];
 }
 
 export function findNestedObj(obj: any, keyToFind: any, valToFind: any) {
