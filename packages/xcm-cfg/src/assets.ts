@@ -230,6 +230,11 @@ export const ztg = new Asset({
   originSymbol: 'ZTG',
 });
 
+export const ajun = new Asset({
+  key: 'ajun',
+  originSymbol: 'AJUN',
+});
+
 export const assets: Asset[] = [
   aca,
   astr,
@@ -277,6 +282,7 @@ export const assets: Asset[] = [
   weth_mwh,
   xrt,
   ztg,
+  ajun,
 ];
 
 export const assetsMap = new Map<string, Asset>(

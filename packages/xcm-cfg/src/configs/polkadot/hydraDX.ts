@@ -37,6 +37,7 @@ import {
   myth,
   vastr,
   nctr,
+  ajun,
 } from '../../assets';
 import {
   acala,
@@ -60,6 +61,7 @@ import {
   acala_evm,
   darwinia,
   mythos,
+  ajuna,
 } from '../../chains';
 import {
   BalanceBuilder,
@@ -843,6 +845,24 @@ const toDarwinia: AssetConfig[] = [
   }),
 ];
 
+const toAjuna: AssetConfig[] = [
+  new AssetConfig({
+    asset: ajun,
+    balance: BalanceBuilder().substrate().tokens().accounts(),
+    destination: ajuna,
+    destinationFee: {
+      amount: 0.001,
+      asset: ajun,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    fee: {
+      asset: hdx,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+];
+
 const toAcalaViaWormhole: AssetConfig[] = [
   new AssetConfig({
     asset: dai_mwh,
@@ -1069,6 +1089,7 @@ export const hydraDxConfig = new ChainConfig({
   assets: [
     ...toAcala,
     ...toAcalaViaWormhole,
+    ...toAjuna,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,

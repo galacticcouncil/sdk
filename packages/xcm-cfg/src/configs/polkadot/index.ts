@@ -20,10 +20,12 @@ import { crustConfig } from './crust';
 import { kiltConfig } from './kilt';
 import { pendulumConfig } from './pendulum';
 import { darwiniaConfig } from './darwinia';
+import { ajunaConfig } from './ajuna';
 
 export const polkadotChainsConfig: ChainConfig[] = [
   acalaConfig,
   acalaEvmConfig,
+  ajunaConfig,
   assetHubConfig,
   astarConfig,
   bifrostConfig,
