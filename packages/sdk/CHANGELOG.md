@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.2.0
+
+### Minor Changes
+
+- Support all registered assets (invalid)
+
 ## 4.1.0
 
 ### Minor Changes
