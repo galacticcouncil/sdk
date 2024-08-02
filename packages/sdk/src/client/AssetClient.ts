@@ -143,7 +143,8 @@ export class AssetClient extends PolkadotApiClient {
 
     const { name, assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = metadata.get(tokenKey) ?? {};
-
+    const origin = this.parseLocation('parachain', location);
+    const pendulumId = 2094;
     return {
       id: tokenKey,
       name: name.toHuman(),
@@ -152,8 +153,11 @@ export class AssetClient extends PolkadotApiClient {
       icon: symbol,
       type: assetType.toHuman(),
       isSufficient: isSufficient ? isSufficient.toHuman() : true,
-      origin: this.parseLocation('parachain', location),
-      externalId: this.parseLocation('generalIndex', location),
+      origin,
+      externalId: this.parseLocation(
+        pendulumId === origin ? 'generalKey' : 'generalIndex',
+        location
+      ),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
   }
@@ -279,7 +283,10 @@ export class AssetClient extends PolkadotApiClient {
     });
   }
 
-  async getOnChainAssets(external?: ExternalAsset[]): Promise<Asset[]> {
+  async getOnChainAssets(
+    includeInvalid?: boolean,
+    external?: ExternalAsset[]
+  ): Promise<Asset[]> {
     const [assets, assetLocations, shares, bonds, legacyMetadata] =
       await Promise.all([
         this.api.query.assetRegistry.assets.entries(),
@@ -292,38 +299,35 @@ export class AssetClient extends PolkadotApiClient {
     const supportedAssets = this.getSupportedAssets(assets);
     const metadata = this.normalizeMetadata(supportedAssets, legacyMetadata);
 
-    return supportedAssets
-      .map(
-        ([
-          {
-            args: [id],
-          },
-          value,
-        ]) => {
-          const details = value.unwrap();
-          const location = assetLocations.get(id.toString());
+    const assetsWithMeta = supportedAssets.map(
+      ([
+        {
+          args: [id],
+        },
+        value,
+      ]) => {
+        const details = value.unwrap();
+        const location = assetLocations.get(id.toString());
 
-          const { assetType } = details;
-          switch (assetType.toString()) {
-            case 'Bond':
-              const bond = bonds.get(id.toString());
-              return this.getBond(id.toString(), details, metadata, bond!);
-            case 'StableSwap':
-              const share = shares.get(id.toString());
-              return this.getShares(id.toString(), details, metadata, share!);
-            case 'External':
-              return this.getExternal(
-                id.toString(),
-                details,
-                external,
-                location
-              );
-            default:
-              return this.getToken(id.toString(), details, metadata, location);
-          }
+        const { assetType } = details;
+        switch (assetType.toString()) {
+          case 'Bond':
+            const bond = bonds.get(id.toString());
+            return this.getBond(id.toString(), details, metadata, bond!);
+          case 'StableSwap':
+            const share = shares.get(id.toString());
+            return this.getShares(id.toString(), details, metadata, share!);
+          case 'External':
+            return this.getExternal(id.toString(), details, external, location);
+          default:
+            return this.getToken(id.toString(), details, metadata, location);
         }
-      )
-      .filter((a) => this.isValidAsset(a));
+      }
+    );
+
+    return includeInvalid
+      ? assetsWithMeta
+      : assetsWithMeta.filter((a) => this.isValidAsset(a));
   }
 
   private isValidAsset(asset: Asset): boolean {
@@ -338,7 +342,7 @@ export class AssetClient extends PolkadotApiClient {
   private parseLocation(
     key: string,
     location?: HydradxRuntimeXcmAssetLocation
-  ): number | undefined {
+  ): any | undefined {
     if (location) {
       const entry = findNestedKey(location.toJSON(), key);
       return entry && entry[key];
