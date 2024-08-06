@@ -33,7 +33,7 @@
     "@changesets/cli": "^2.26.2",
     "@types/jest": "^28.1.8",
     "es-jest": "^2.0.0",
-    "esbuild": "^0.17.11",
+    "esbuild": "^0.20.2",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
@@ -44,6 +44,9 @@
     "tsx": "^3.8.2",
     "turbo": "^2.0.3",
     "typescript": "^5.0.4"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.20.2"
   },
   "packageManager": "npm@10.7.0"
 }
