@@ -35,9 +35,7 @@ jobs:
         run: npm run changeset -- version --snapshot pr${{ github.event.pull_request.number }}
 
       - name: 🛠️ Build SDK
-        if: false
         run: npm run build
 
       - name: 🚀 Publish snapshot
-        if: false
-        run: npm run changeset publish --no-git-tag --snapshot --tag beta
+        run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
