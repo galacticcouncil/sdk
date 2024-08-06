@@ -13,15 +13,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: 🤘 Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+
       - name: Install dependencies
-        run: npm install
-      - name: Build SDK
+        run: npm ci --ignore-scripts
+
+      - name: 🛠️ Build SDK
         run: npm run build
-      - name: Test SDK
+
+      - name: 🧪 Test SDK
         run: npm run test
