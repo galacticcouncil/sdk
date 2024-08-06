@@ -32,10 +32,12 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🖊️ Bump version
-        run: npm run snapshot:version
+        run: npm run changeset version --snapshot${{ github.event.pull_request.number }}
 
       - name: 🛠️ Build SDK
+        if: false
         run: npm run build
 
       - name: 🚀 Publish snapshot
-        run: npm run snapshot:publish
+        if: false
+        run: npm run changeset publish --no-git-tag --snapshot --tag beta
