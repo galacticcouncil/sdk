@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
+      - name: 🧩 Install dependencies
         run: npm ci --ignore-scripts
 
       - name: 🛠️ Build SDK
