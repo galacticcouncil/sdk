@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
-const PARAM_PREFIX = '--';
+import { parseArgs } from './common.mjs';
 
 const GITHUB_API =
   'https://api.github.com/repos/galacticcouncil/HydraDX-wasm/git/trees/main?recursive=1';
@@ -57,18 +57,6 @@ const main = async () => {
     console.log(`${input} [${confSha.slice(0, 8)}] fetched`);
   }
   console.log(`Math ${mathParam} ready ✅`);
-};
-
-const parseArgs = (args) => {
-  const parsedArgs = {};
-
-  args.forEach((arg, i) => {
-    if (arg.startsWith(PARAM_PREFIX)) {
-      const key = arg.replace(PARAM_PREFIX, '');
-      parsedArgs[key] = args[++i];
-    }
-  });
-  return parsedArgs;
 };
 
 await main();
