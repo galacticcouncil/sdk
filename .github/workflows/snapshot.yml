@@ -1,4 +1,4 @@
-name: Publish snapshot
+name: Create SDK Snapshot
 
 on:
   pull_request:
@@ -10,6 +10,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: 🤘 Checkout
         uses: actions/checkout@v4
@@ -22,15 +25,27 @@ jobs:
           node-version: 20.x
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 🔐 Authenticate with NPM
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: 🧩 Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: 🚀 Publish snapshot
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: npm run snapshot:version
-          publish: npm run snapshot:publish
+      - name: Read commit hash
+        id: commit
+        run: echo "git_hash=$(git rev-parse --short HEAD)" >> $GITHUB_HASH
+
+      - name: Dump commit hash
+        run: echo "${{ env.hash }}"
+
+      - name: 🖊️ Bump version
+        run: npm run changeset -- version --snapshot pr${{ github.event.pull_request.number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.sha }}
+
+      - name: 🛠️ Build SDK
+        run: npm run build
+
+      - name: 🚀 Publish snapshot
+        run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
