@@ -24,9 +24,7 @@
     "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",
     "prerelease": "npm run build",
     "release": "changeset publish",
-    "postrelease": "bash ./scripts/changeset-push.sh",
-    "snapshot:version": "changeset version --snapshot beta",
-    "snapshot:publish": "changeset publish --no-git-tag --snapshot --tag beta"
+    "postrelease": "bash ./scripts/changeset-push.sh"
   },
   "devDependencies": {
     "@galacticcouncil/api-augment": "^0.2.0",
