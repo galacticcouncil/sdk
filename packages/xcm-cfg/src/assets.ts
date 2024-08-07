@@ -110,11 +110,6 @@ export const myth = new Asset({
   originSymbol: 'MYTH',
 });
 
-export const nctr = new Asset({
-  key: 'nctr',
-  originSymbol: 'NCTR',
-});
-
 export const nodl = new Asset({
   key: 'nodl',
   originSymbol: 'NODL',
@@ -258,7 +253,6 @@ export const assets: Asset[] = [
   ksm,
   ldot,
   myth,
-  nctr,
   nodl,
   pha,
   pen,
