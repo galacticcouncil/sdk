@@ -1,4 +1,4 @@
-name: Publish snapshot
+name: Create SDK Snapshot
 
 on:
   pull_request:
@@ -32,7 +32,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🖊️ Bump version
-        run: npm run changeset -- version --snapshot pr${{ github.event.pull_request.number }}
+        run: npm run changeset:snapshot -- --pr${{ github.event.pull_request.number }}
 
       - name: 🛠️ Build SDK
         run: npm run build

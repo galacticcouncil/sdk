@@ -21,6 +21,7 @@
     "test": "turbo run test",
     "changeset": "changeset",
     "changeset:version": "node ./scripts/changeset-version.mjs",
+    "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",
     "prerelease": "npm run build",
     "release": "changeset publish",
     "postrelease": "bash ./scripts/changeset-push.sh",
