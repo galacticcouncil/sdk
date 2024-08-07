@@ -15,7 +15,6 @@ const main = async () => {
   const cwd = process.cwd();
   const args = process.argv.slice(2);
   const params = parseArgs(args);
-  const pullRequestParam = params['pullRequest'];
 
   const packages = await getPackages(cwd);
   const config = await read(cwd, packages);
@@ -26,8 +25,16 @@ const main = async () => {
 
   const releasePlan = await getReleasePlan(cwd, undefined);
   const commitSha = await getCommitSha();
+  const pullRequest = params['pr'];
+
+  if (pullRequest === undefined) {
+    throw new Error(
+      'Missing --pr configuration. Specify pull request number arg.'
+    );
+  }
+
   releasePlan.releases.map((r) => {
-    r.newVersion = ['pr', pullRequestParam, commitSha].join('-');
+    r.newVersion = [r.newVersion, 'pr' + pullRequest, commitSha].join('-');
   });
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
