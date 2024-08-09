@@ -22,12 +22,6 @@ const main = async () => {
   const pullRequest = params['pr'];
   const commitSha = params['sha'];
 
-  if (pullRequest === undefined) {
-    throw new Error(
-      'Missing --pr configuration. Specify pull request number arg.'
-    );
-  }
-
   releasePlan.releases.map((r) => {
     r.newVersion = [
       r.newVersion,
