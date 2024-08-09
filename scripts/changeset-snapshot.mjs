@@ -29,7 +29,11 @@ const main = async () => {
   }
 
   releasePlan.releases.map((r) => {
-    r.newVersion = [r.newVersion, 'pr' + pullRequest, commitSha].join('-');
+    r.newVersion = [
+      r.newVersion,
+      'pr' + pullRequest,
+      commitSha.substring(0, 7),
+    ].join('-');
   });
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
