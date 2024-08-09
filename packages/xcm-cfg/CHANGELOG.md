@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.3.0
+
+### Minor Changes
+
+- Fill missing minimal deposits for polkadot eco
+
 ## 3.2.1
 
 ### Patch Changes

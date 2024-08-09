@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 4.2.0
+
+### Minor Changes
+
+- Fix min transfer config calculation
+
 ## 4.1.0
 
 ### Minor Changes
