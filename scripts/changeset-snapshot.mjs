@@ -4,12 +4,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
-import { parseArgs, sh } from './common.mjs';
-
-const getCommitSha = async () => {
-  const { stdout } = await sh('git rev-parse --short HEAD');
-  return stdout.trim();
-};
+import { parseArgs } from './common.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -24,8 +19,8 @@ const main = async () => {
   };
 
   const releasePlan = await getReleasePlan(cwd, undefined);
-  const commitSha = await getCommitSha();
   const pullRequest = params['pr'];
+  const commitSha = params['sha'];
 
   if (pullRequest === undefined) {
     throw new Error(
