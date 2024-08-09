@@ -88,29 +88,34 @@ export const acala = new EvmParachain({
       id: { Token: ldot.originSymbol },
       metadataId: { NativeAssetId: { Token: ldot.originSymbol } },
       decimals: 10,
+      min: 0.05,
     },
     {
       asset: glmr,
       id: { ForeignAsset: 0 },
       decimals: 18,
+      min: 0.1,
     },
     {
       asset: dai_awh,
       decimals: 18,
       balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
       id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
+      min: 0.01,
     },
     {
       asset: wbtc_awh,
       decimals: 8,
       balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
       id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
+      min: 0.00000035,
     },
     {
       asset: weth_awh,
       decimals: 18,
       balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
       id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
+      min: 0.000005555555555555,
     },
   ],
   defEvm: acalaEvm,
@@ -142,18 +147,21 @@ export const acala_evm = new EvmParachain({
       decimals: 18,
       balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
       id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
+      min: 0.01,
     },
     {
       asset: wbtc_awh,
       decimals: 8,
       balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
       id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
+      min: 0.00000035,
     },
     {
       asset: weth_awh,
       decimals: 18,
       balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
       id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
+      min: 0.000005555555555555,
     },
   ],
   defEvm: acalaEvm,
@@ -176,21 +184,23 @@ export const acala_evm = new EvmParachain({
 export const assetHub = new Parachain({
   assetsData: [
     {
+      asset: dot,
+      decimals: 10,
+      id: 0,
+    },
+    {
       asset: usdt,
       decimals: 6,
       id: 1984,
       palletInstance: 50,
+      min: 0.7,
     },
     {
       asset: usdc,
       decimals: 6,
       id: 1337,
       palletInstance: 50,
-    },
-    {
-      asset: dot,
-      decimals: 10,
-      id: 0,
+      min: 0.7,
     },
     {
       asset: pink,
@@ -233,6 +243,7 @@ export const astar = new Parachain({
       id: '340282366920938463463374607431768211455',
       metadataId: 0,
       decimals: 10,
+      min: 0.0001,
     },
     {
       asset: usdt,
@@ -263,18 +274,21 @@ export const bifrost = new Parachain({
       id: { VToken2: 0 },
       metadataId: { VToken2: 0 },
       decimals: 10,
+      min: 0.0001,
     },
     {
       asset: vastr,
       id: { VToken2: 3 },
       metadataId: { VToken2: 3 },
       decimals: 18,
+      min: 0.01,
     },
     {
       asset: dot,
       id: { Token2: 0 },
       metadataId: { Token2: 0 },
       decimals: 10,
+      min: 0.0001,
     },
     {
       asset: usdt,
@@ -283,6 +297,7 @@ export const bifrost = new Parachain({
       metadataId: { Token2: 2 },
       decimals: 6,
       palletInstance: 50,
+      min: 0.001,
     },
     {
       asset: usdc,
@@ -291,6 +306,7 @@ export const bifrost = new Parachain({
       metadataId: { Token2: 5 },
       decimals: 6,
       palletInstance: 50,
+      min: 0.001,
     },
     {
       asset: pink,
@@ -340,26 +356,31 @@ export const hydraDX = new EvmParachain({
       asset: aca,
       id: 1000099,
       decimals: 12,
+      min: 0.090744101633,
     },
     {
       asset: astr,
       id: 9,
       decimals: 18,
+      min: 0.147058823529412,
     },
     {
       asset: bnc,
       id: 14,
       decimals: 12,
+      min: 0.06879518984,
     },
     {
       asset: cfg,
       id: 13,
       decimals: 18,
+      min: 0.0324675324675325,
     },
     {
       asset: cru,
       id: 27,
       decimals: 12,
+      min: 0.007874015748,
     },
     {
       asset: ded,
@@ -372,6 +393,7 @@ export const hydraDX = new EvmParachain({
       asset: dot,
       id: 5,
       decimals: 10,
+      min: 0.001754,
     },
     {
       asset: dota,
@@ -384,52 +406,62 @@ export const hydraDX = new EvmParachain({
       asset: dai_awh,
       id: 2,
       decimals: 18,
+      min: 0.01,
     },
     {
       asset: dai_mwh,
       id: 18,
       decimals: 18,
+      min: 0.01,
     },
     {
       asset: glmr,
       id: 16,
       decimals: 18,
       palletInstance: 10,
+      min: 0.034854864344868,
     },
     {
       asset: ibtc,
       id: 11,
       decimals: 8,
+      min: 0.00000036,
     },
     {
       asset: intr,
       id: 17,
       decimals: 10,
+      min: 0.6164274209,
     },
     {
       asset: kilt,
       id: 28,
       decimals: 15,
+      min: 0.021358393848783,
     },
     {
       asset: ldot,
       id: 1000100,
       decimals: 10,
+      min: 0.0100200401,
     },
     {
       asset: myth,
       id: 30,
       decimals: 18,
+      min: 0.0213675213675214,
     },
     {
       asset: nodl,
       id: 26,
       decimals: 11,
+      min: 1.0989010989,
     },
     {
       asset: pen,
       id: 1000081,
       decimals: 12,
+      min: 0.153256704981,
     },
     {
       asset: pink,
@@ -442,21 +474,25 @@ export const hydraDX = new EvmParachain({
       asset: pha,
       id: 8,
       decimals: 12,
+      min: 0.054945054945,
     },
     {
       asset: ring,
       id: 31,
       decimals: 18,
+      min: 1,
     },
     {
       asset: sub,
       id: 24,
       decimals: 10,
+      min: 0.02,
     },
     {
       asset: unq,
       id: 25,
       decimals: 18,
+      min: 1.22438434893974,
     },
     {
       asset: usdc,
@@ -465,11 +501,13 @@ export const hydraDX = new EvmParachain({
       metadataId: 22,
       palletInstance: 50,
       decimals: 6,
+      min: 0.01,
     },
     {
       asset: usdc_mwh,
       id: 21,
       decimals: 6,
+      min: 0.01,
     },
     {
       asset: usdt,
@@ -478,54 +516,64 @@ export const hydraDX = new EvmParachain({
       metadataId: 10,
       palletInstance: 50,
       decimals: 6,
+      min: 0.01,
     },
     {
       asset: usdt_mwh,
       id: 23,
       decimals: 6,
       palletInstance: 110,
+      min: 0.01,
     },
     {
       asset: vastr,
       id: 33,
       decimals: 18,
+      min: 0.133689839572193,
     },
     {
       asset: vdot,
       id: 15,
       decimals: 10,
+      min: 0.0018761726,
     },
     {
       asset: wbtc_awh,
       id: 3,
       decimals: 8,
+      min: 0.00000044,
     },
     {
       asset: wbtc_mwh,
       id: 19,
       decimals: 8,
       palletInstance: 110,
+      min: 0.00000034,
     },
     {
       asset: weth_awh,
       id: 4,
       decimals: 18,
+      min: 0.000005,
     },
     {
       asset: weth_mwh,
       id: 20,
       decimals: 18,
       palletInstance: 110,
+      min: 0.000005390835579515,
     },
     {
       asset: ztg,
       id: 12,
       decimals: 10,
+      min: 0.090744101633,
     },
     {
       asset: ajun,
       id: 32,
       decimals: 12,
+      min: 0.100786131828,
     },
   ],
   defEvm: hydradxEvm,
@@ -549,15 +597,15 @@ export const hydraDX = new EvmParachain({
 export const interlay = new Parachain({
   assetsData: [
     {
-      asset: ibtc,
-      decimals: 8,
-      id: { Token: ibtc.originSymbol },
-      metadataId: 0,
-    },
-    {
       asset: intr,
       decimals: 10,
       id: { Token: intr.originSymbol },
+      metadataId: 0,
+    },
+    {
+      asset: ibtc,
+      decimals: 8,
+      id: { Token: ibtc.originSymbol },
       metadataId: 0,
     },
     {
@@ -593,10 +641,6 @@ export const interlay = new Parachain({
 export const moonbeam = new EvmParachain({
   assetsData: [
     {
-      asset: aca,
-      id: '224821240862170613278369189818311486111',
-    },
-    {
       asset: glmr,
       id: '0x0000000000000000000000000000000000000802',
       min: 0.1,
@@ -606,11 +650,6 @@ export const moonbeam = new EvmParachain({
       id: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
       metadataId: 0,
       decimals: 18,
-    },
-    {
-      asset: hdx,
-      id: '69606720909260275826784788104880799692',
-      decimals: 12,
     },
     {
       asset: usdc_mwh,
@@ -637,9 +676,31 @@ export const moonbeam = new EvmParachain({
       decimals: 18,
     },
     {
+      asset: usdc,
+      id: '0xFFfffffF7D2B0B761Af01Ca8e25242976ac0aD7D',
+      metadataId: '166377000701797186346254371275954761085',
+      decimals: 6,
+    },
+    // xc-20 assets
+    {
+      asset: aca,
+      id: '224821240862170613278369189818311486111',
+      decimals: 10,
+    },
+    {
       asset: dot,
       id: '42259045809535163221576417993425387648',
       metadataId: 0,
+      decimals: 10,
+    },
+    {
+      asset: hdx,
+      id: '69606720909260275826784788104880799692',
+      decimals: 12,
+    },
+    {
+      asset: pink,
+      id: '64174511183114006009298114091987195453',
       decimals: 10,
     },
     {
@@ -647,17 +708,6 @@ export const moonbeam = new EvmParachain({
       id: '311091173110107856861649819128533077277',
       metadataId: 0,
       decimals: 6,
-    },
-    {
-      asset: usdc,
-      id: '0xFFfffffF7D2B0B761Af01Ca8e25242976ac0aD7D',
-      metadataId: '166377000701797186346254371275954761085',
-      decimals: 6,
-    },
-    {
-      asset: pink,
-      id: '64174511183114006009298114091987195453',
-      decimals: 10,
     },
   ],
   defEvm: moonbeamEvm,
@@ -724,11 +774,13 @@ export const zeitgeist = new Parachain({
       asset: usdc_mwh,
       id: { ForeignAsset: 1 },
       decimals: 6,
+      //min: 1,
     },
     {
       asset: glmr,
       id: { ForeignAsset: 3 },
       decimals: 18,
+      //min: 0.02334812,
     },
   ],
   ecosystem: Ecosystem.Polkadot,
