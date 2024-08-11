@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.4.0
+
+### Minor Changes
+
+- Bump core deps (cjs support)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@3.0.0
+
 ## 3.3.0
 
 ### Minor Changes

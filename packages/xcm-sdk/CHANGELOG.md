@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 4.3.0
+
+### Minor Changes
+
+- Bump core deps (cjs support)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@3.0.0
+
 ## 4.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 3.0.0
+
+### Major Changes
+
+- Switch to lru-cache instead of @thi.ng/cache. Dropped cjs support as of 2.0.0
+
 ## 2.2.0
 
 ### Minor Changes
