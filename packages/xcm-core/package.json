@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "big.js": "^6.2.1",
-    "@thi.ng/cache": "^2.1.35",
+    "buffer": "^6.0.3",
+    "lru-cache": "^11.0.0",
     "@wormhole-foundation/sdk-base": "^0.5.2",
     "@wormhole-foundation/sdk-connect": "^0.5.2",
-    "@wormhole-foundation/sdk-definitions": "^0.5.2",
-    "buffer": "^6.0.3"
+    "@wormhole-foundation/sdk-definitions": "^0.5.2"
   },
   "peerDependencies": {
     "@polkadot/api": "^12.1.1",

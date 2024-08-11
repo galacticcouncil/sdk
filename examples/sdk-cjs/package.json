@@ -3,13 +3,16 @@
   "private": true,
   "main": "index.cjs",
   "scripts": {
-    "start": "node index.cjs"
+    "start": "node index.cjs",
+    "start:xcm": "node xcm.cjs"
   },
   "keywords": [],
   "devDependencies": {
     "node": "^21.6.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^4.0.0"
+    "@galacticcouncil/sdk": "^4.0.0",
+    "@galacticcouncil/xcm-sdk": "^4.2.0",
+    "@galacticcouncil/xcm-cfg": "^3.3.0"
   }
 }

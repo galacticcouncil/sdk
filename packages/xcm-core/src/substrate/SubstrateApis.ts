@@ -1,22 +1,23 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { LRUCache } from '@thi.ng/cache';
+import { LRUCache } from 'lru-cache';
 
 export class SubstrateApis {
   private static _instance: SubstrateApis = new SubstrateApis();
 
+  private dispose = async (promise: Promise<ApiPromise>, key: string) => {
+    const api = await promise;
+    console.log('Releasing ' + key + ' connection');
+    if (api.isConnected) {
+      api.disconnect();
+    }
+  };
+
   private _cache: LRUCache<string, Promise<ApiPromise>> = new LRUCache<
     string,
     Promise<ApiPromise>
-  >(null, {
-    maxlen: 20,
-    release: (chain: string, promise: Promise<ApiPromise>) => {
-      console.log('Releasing ' + chain + ' connection');
-      promise.then((api: ApiPromise) => {
-        if (api.isConnected) {
-          api.disconnect();
-        }
-      });
-    },
+  >({
+    max: 20,
+    dispose: this.dispose,
   });
 
   constructor() {
@@ -60,7 +61,7 @@ export class SubstrateApis {
         });
 
         console.log(`Connected to ${provider.endpoint}.`);
-        this._cache.set(provider.endpoint, promise);
+        this._cache.set(provider.endpoint, promise, { noDisposeOnSet: true });
         resolve(promise);
       });
       provider.on('error', async () => {
@@ -79,16 +80,17 @@ export class SubstrateApis {
     maxRetries?: number
   ): Promise<ApiPromise> {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
-
     const cacheKey = this.findCacheKey(endpoints);
 
     let promise: Promise<ApiPromise>;
 
     if (cacheKey) {
-      promise = this._cache.get(cacheKey);
+      promise = this._cache.get(cacheKey)!;
     } else {
       promise = this.getPromise(endpoints, maxRetries);
-      this._cache.set(this.createCacheKey(endpoints), promise);
+      this._cache.set(this.createCacheKey(endpoints), promise, {
+        noDisposeOnSet: true,
+      });
     }
 
     const api = await promise;

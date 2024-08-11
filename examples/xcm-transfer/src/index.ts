@@ -26,7 +26,7 @@ import {
 import { signAndSendEvm, signAndSend } from './signers';
 
 // Inialialize config
-let configService = new ConfigService({
+const configService = new ConfigService({
   assets: assetsMap,
   chains: chainsMap,
   chainsConfig: chainsConfigMap,

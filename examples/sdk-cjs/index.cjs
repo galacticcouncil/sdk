@@ -15,4 +15,7 @@ const main = async () => {
   console.log(result);
 };
 
-main();
+main()
+  .then(() => console.log('Router call complete ✅'))
+  .catch(console.error)
+  .finally(() => process.exit(0));
