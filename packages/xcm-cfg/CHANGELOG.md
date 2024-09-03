@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.4.1
+
+### Patch Changes
+
+- Fix moonbeam dest fee
+
 ## 3.4.0
 
 ### Minor Changes

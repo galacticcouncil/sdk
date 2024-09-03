@@ -43,9 +43,9 @@ const wallet: Wallet = new Wallet({
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('assethub');
-const destChain = configService.getChain('hydradx');
-const asset = configService.getAsset('usdt');
+const srcChain = configService.getChain('hydradx');
+const destChain = configService.getChain('ethereum');
+const asset = configService.getAsset('dai');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -60,8 +60,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
+const destAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -81,7 +81,7 @@ const xTransfer = await wallet.transfer(
 );
 
 // Construct calldata with transfer amount
-const call: XCall = await xTransfer.buildCall('0.1');
+const call: XCall = await xTransfer.buildCall('2');
 
 // Dump transfer info
 console.log(xTransfer);
@@ -89,6 +89,8 @@ console.log(call);
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
+
+signEvm('0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04');
 
 /***************************/
 /**** Helper functions *****/
