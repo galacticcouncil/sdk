@@ -483,7 +483,7 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.04,
+      amount: 0.08,
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -498,7 +498,7 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.04,
+      amount: 0.08,
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -513,7 +513,7 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.04,
+      amount: 0.08,
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -528,7 +528,7 @@ const toMoonbeam: AssetConfig[] = [
     balance: BalanceBuilder().substrate().tokens().accounts(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.04,
+      amount: 0.08,
       asset: glmr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
     },
@@ -901,7 +901,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
@@ -937,7 +937,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
@@ -973,7 +973,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
@@ -1009,7 +1009,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
@@ -1045,7 +1045,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
