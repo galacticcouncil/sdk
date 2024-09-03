@@ -44,81 +44,81 @@ const toHydraDX: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.004,
-      asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: usdc_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.004,
-      asset: usdc_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: usdt_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.004,
-      asset: usdt_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: wbtc_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.0000001,
-      asset: wbtc_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: weth_mwh,
-    balance: BalanceBuilder().evm().erc20(),
-    contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
-    destinationFee: {
-      amount: 0.000002,
-      asset: weth_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-    },
-    fee: {
-      asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // new AssetConfig({
+  //   asset: dai_mwh,
+  //   balance: BalanceBuilder().evm().erc20(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.004,
+  //     asset: dai_mwh,
+  //     balance: BalanceBuilder().evm().erc20(),
+  //   },
+  //   fee: {
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: usdc_mwh,
+  //   balance: BalanceBuilder().evm().erc20(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.004,
+  //     asset: usdc_mwh,
+  //     balance: BalanceBuilder().evm().erc20(),
+  //   },
+  //   fee: {
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: usdt_mwh,
+  //   balance: BalanceBuilder().evm().erc20(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.004,
+  //     asset: usdt_mwh,
+  //     balance: BalanceBuilder().evm().erc20(),
+  //   },
+  //   fee: {
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: wbtc_mwh,
+  //   balance: BalanceBuilder().evm().erc20(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.0000001,
+  //     asset: wbtc_mwh,
+  //     balance: BalanceBuilder().evm().erc20(),
+  //   },
+  //   fee: {
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: weth_mwh,
+  //   balance: BalanceBuilder().evm().erc20(),
+  //   contract: ContractBuilder().Xtokens().transfer(),
+  //   destination: hydraDX,
+  //   destinationFee: {
+  //     amount: 0.000002,
+  //     asset: weth_mwh,
+  //     balance: BalanceBuilder().evm().erc20(),
+  //   },
+  //   fee: {
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().assets().account(),

@@ -478,66 +478,66 @@ const toMoonbeam: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.04,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: usdc_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.04,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: usdt_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.04,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
-  new AssetConfig({
-    asset: wbtc_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.04,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // new AssetConfig({
+  //   asset: dai_mwh,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 0.04,
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: usdc_mwh,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 0.04,
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: usdt_mwh,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 0.04,
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
+  // new AssetConfig({
+  //   asset: wbtc_mwh,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 0.04,
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -553,21 +553,21 @@ const toMoonbeam: AssetConfig[] = [
       balance: BalanceBuilder().substrate().system().account(),
     },
   }),
-  new AssetConfig({
-    asset: weth_mwh,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.04,
-      asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().system().account(),
-    },
-  }),
+  // new AssetConfig({
+  //   asset: weth_mwh,
+  //   balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   destination: moonbeam,
+  //   destinationFee: {
+  //     amount: 0.04,
+  //     asset: glmr,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+  //   fee: {
+  //     asset: hdx,
+  //     balance: BalanceBuilder().substrate().system().account(),
+  //   },
+  // }),
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
   // new AssetConfig({
   //   asset: usdt,
