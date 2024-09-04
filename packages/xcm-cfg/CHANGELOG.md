@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.4.2
+
+### Patch Changes
+
+- Bump moonbeam dest fees & ethereum transact gasLimit
+
 ## 3.4.1
 
 ### Patch Changes
