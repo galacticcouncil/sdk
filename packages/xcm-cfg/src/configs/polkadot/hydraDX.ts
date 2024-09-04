@@ -69,6 +69,9 @@ import {
   FeeBuilder,
 } from '../../builders';
 
+const MRL_EXECUTION_FEE = 0.15;
+const MRL_XCM_FEE = 0.25;
+
 const toAcala: AssetConfig[] = [
   new AssetConfig({
     asset: dai_awh,
@@ -862,11 +865,11 @@ const toAcalaViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.1 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
@@ -901,11 +904,11 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
@@ -937,11 +940,11 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
@@ -973,11 +976,11 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
@@ -1009,11 +1012,11 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
@@ -1045,11 +1048,11 @@ const toEthereumViaWormhole: AssetConfig[] = [
       .batchAll([
         ExtrinsicBuilder()
           .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: 0.2 }),
+          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: 0.06 }),
+          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
       ]),
     fee: {
       asset: hdx,
