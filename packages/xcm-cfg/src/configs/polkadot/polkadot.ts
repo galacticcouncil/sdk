@@ -1,16 +1,16 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { dot } from '../../assets';
-import { assetHub, bifrost, hydraDX, polkadot } from '../../chains';
+import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const xcmDeliveryFeeAmount = 0.047;
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.002172,
       asset: dot,
@@ -70,6 +70,6 @@ const toAssetHub: AssetConfig[] = [
 ];
 
 export const polkadotConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toBifrost, ...toAssetHub],
+  assets: [...toHydration, ...toBifrost, ...toAssetHub],
   chain: polkadot,
 });

@@ -1,14 +1,14 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { aca, dai_awh, wbtc_awh, weth_awh, ldot } from '../../assets';
-import { hydraDX, acala } from '../../chains';
+import { hydration, acala } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.002926334210356268,
       asset: dai_awh,
@@ -23,7 +23,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: wbtc_awh,
     balance: BalanceBuilder().evm().erc20(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.00000006,
       asset: wbtc_awh,
@@ -38,7 +38,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: weth_awh,
     balance: BalanceBuilder().evm().erc20(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.000000956965470918,
       asset: weth_awh,
@@ -53,7 +53,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: aca,
     balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 1,
       asset: aca,
@@ -64,7 +64,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: ldot,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.011,
       asset: ldot,
@@ -79,6 +79,6 @@ const toHydraDX: AssetConfig[] = [
 ];
 
 export const acalaConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydration],
   chain: acala,
 });

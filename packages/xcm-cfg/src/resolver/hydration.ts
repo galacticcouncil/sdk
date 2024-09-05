@@ -3,7 +3,7 @@ import { decodeAddress } from '@polkadot/util-crypto';
 
 const ETH_PREFIX = 'ETH\0';
 
-export class HydraDxEvmResolver implements EvmResolver {
+export class HydrationEvmResolver implements EvmResolver {
   async toH160(ss58Addr: string): Promise<string> {
     const decodedBytes = decodeAddress(ss58Addr);
     const prefixBytes = Buffer.from(ETH_PREFIX);

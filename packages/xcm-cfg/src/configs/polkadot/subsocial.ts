@@ -1,14 +1,14 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { sub } from '../../assets';
-import { hydraDX, subsocial } from '../../chains';
+import { hydration, subsocial } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: sub,
     balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.0003525641,
       asset: sub,
@@ -26,6 +26,6 @@ const toHydraDX: AssetConfig[] = [
 ];
 
 export const subsocialConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydration],
   chain: subsocial,
 });

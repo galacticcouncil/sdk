@@ -28,10 +28,10 @@ export const acalaEvm: Chain = defineChain({
   testnet: false,
 });
 
-export const hydradxEvm: Chain = defineChain({
+export const hydrationEvm: Chain = defineChain({
   id: 222222,
   name: 'Hydration',
-  network: 'hydradx',
+  network: 'hydration',
   nativeCurrency: {
     decimals: 18,
     name: 'WETH',
@@ -49,7 +49,7 @@ export const hydradxEvm: Chain = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'HydraDX Explorer',
+      name: 'Hydration Explorer',
       url: 'https://explorer.evm.hydration.cloud',
     },
   },

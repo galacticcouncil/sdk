@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { ded, dot, dota, pink, usdc, usdt, wud } from '../../assets';
-import { assetHub, bifrost, hydraDX, moonbeam, polkadot } from '../../chains';
+import { assetHub, bifrost, hydration, moonbeam, polkadot } from '../../chains';
 import {
   AssetMinBuilder,
   BalanceBuilder,
@@ -10,11 +10,11 @@ import {
 
 const xcmDeliveryFeeAmount = 0.036;
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: usdt,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.0022,
       asset: usdt,
@@ -34,7 +34,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdc,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.02,
       asset: usdc,
@@ -54,7 +54,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: pink,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.02,
       asset: usdt,
@@ -64,6 +64,12 @@ const toHydraDX: AssetConfig[] = [
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
+    // extrinsic: ExtrinsicBuilder()
+    //   .utility()
+    //   .batchAll([
+    //     ExtrinsicBuilder().assetConversion().swapTokensForExactTokens(),
+    //     ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().X2(),
+    //   ]),
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
@@ -74,7 +80,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: ded,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.02,
       asset: usdt,
@@ -94,7 +100,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dota,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.02,
       asset: usdt,
@@ -114,7 +120,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: wud,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.02,
       asset: usdt,
@@ -281,6 +287,6 @@ const toBifrost: AssetConfig[] = [
 ];
 
 export const assetHubConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toPolkadot, ...toMoonbeam, ...toBifrost],
+  assets: [...toHydration, ...toPolkadot, ...toMoonbeam, ...toBifrost],
   chain: assetHub,
 });

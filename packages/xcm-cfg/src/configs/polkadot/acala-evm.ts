@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { aca, dai_awh, glmr } from '../../assets';
-import { hydraDX, moonbeam, acala_evm } from '../../chains';
+import { hydration, moonbeam, acala_evm } from '../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../builders';
 
 const toHydraDXViaWormhole: AssetConfig[] = [
@@ -9,7 +9,7 @@ const toHydraDXViaWormhole: AssetConfig[] = [
     asset: dai_awh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,

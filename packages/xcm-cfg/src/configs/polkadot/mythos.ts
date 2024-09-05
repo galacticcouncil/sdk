@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { myth } from '../../assets';
-import { hydraDX, mythos } from '../../chains';
+import { hydration, mythos } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const mythosConfig = new ChainConfig({
@@ -9,7 +9,7 @@ export const mythosConfig = new ChainConfig({
     new AssetConfig({
       asset: myth,
       balance: BalanceBuilder().substrate().system().account(),
-      destination: hydraDX,
+      destination: hydration,
       destinationFee: {
         amount: 0.003023,
         asset: myth,

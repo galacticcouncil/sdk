@@ -1,14 +1,14 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { bnc, vdot, dot, usdc, usdt, hdx, pink, vastr } from '../../assets';
-import { assetHub, bifrost, hydraDX, polkadot } from '../../chains';
+import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: bnc,
     balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.014645,
       asset: bnc,
@@ -19,7 +19,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: vdot,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.000555,
       asset: vdot,
@@ -34,7 +34,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: vastr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.0115,
       asset: vastr,
@@ -49,7 +49,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: dot,
@@ -65,7 +65,7 @@ const toHydraDX: AssetConfig[] = [
   // new AssetConfig({
   //   asset: usdt,
   //   balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   destination: hydraDX,
+  //   destination: hydration,
   //   destinationFee: {
   //     amount: 1.4,
   //     asset: usdt,
@@ -146,6 +146,6 @@ const toAssetHub: AssetConfig[] = [
 ];
 
 export const bifrostConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toPolkadot, ...toAssetHub],
+  assets: [...toHydration, ...toPolkadot, ...toAssetHub],
   chain: bifrost,
 });

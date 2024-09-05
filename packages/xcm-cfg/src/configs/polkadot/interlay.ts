@@ -1,14 +1,14 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { ibtc, intr, dot, hdx, usdt } from '../../assets';
-import { hydraDX, interlay } from '../../chains';
+import { hydration, interlay } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: intr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.136389,
       asset: intr,
@@ -19,7 +19,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: ibtc,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.00000007,
       asset: ibtc,
@@ -34,7 +34,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: dot,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: dot,
@@ -49,7 +49,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: hdx,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: hdx,
@@ -65,7 +65,7 @@ const toHydraDX: AssetConfig[] = [
   // new AssetConfig({
   //   asset: usdt,
   //   balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   destination: hydraDX,
+  //   destination: hydration,
   //   destinationFee: {
   //     amount: 1.4,
   //     asset: usdt,
@@ -80,6 +80,6 @@ const toHydraDX: AssetConfig[] = [
 ];
 
 export const interlayConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydration],
   chain: interlay,
 });

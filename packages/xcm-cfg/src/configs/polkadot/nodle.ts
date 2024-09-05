@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { nodl } from '../../assets';
-import { hydraDX, nodle } from '../../chains';
+import { hydration, nodle } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const nodleConfig = new ChainConfig({
@@ -9,7 +9,7 @@ export const nodleConfig = new ChainConfig({
     new AssetConfig({
       asset: nodl,
       balance: BalanceBuilder().substrate().system().account(),
-      destination: hydraDX,
+      destination: hydration,
       destinationFee: {
         amount: 0.2,
         asset: nodl,

@@ -14,15 +14,15 @@ import {
   pink,
   aca,
 } from '../../assets';
-import { acala, assetHub, ethereum, hydraDX, moonbeam } from '../../chains';
+import { acala, assetHub, ethereum, hydration, moonbeam } from '../../chains';
 import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: glmr,
     balance: BalanceBuilder().substrate().system().account(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.05,
       asset: glmr,
@@ -33,7 +33,7 @@ const toHydraDX: AssetConfig[] = [
     asset: hdx,
     balance: BalanceBuilder().substrate().assets().account(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.6,
       asset: hdx,
@@ -48,7 +48,7 @@ const toHydraDX: AssetConfig[] = [
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.004,
       asset: dai_mwh,
@@ -63,7 +63,7 @@ const toHydraDX: AssetConfig[] = [
     asset: usdc_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.004,
       asset: usdc_mwh,
@@ -78,7 +78,7 @@ const toHydraDX: AssetConfig[] = [
     asset: usdt_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.004,
       asset: usdt_mwh,
@@ -93,7 +93,7 @@ const toHydraDX: AssetConfig[] = [
     asset: wbtc_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.0000001,
       asset: wbtc_mwh,
@@ -108,7 +108,7 @@ const toHydraDX: AssetConfig[] = [
     asset: weth_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.000002,
       asset: weth_mwh,
@@ -123,7 +123,7 @@ const toHydraDX: AssetConfig[] = [
     asset: dot,
     balance: BalanceBuilder().substrate().assets().account(),
     contract: ContractBuilder().Xtokens().transfer(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: dot,
@@ -139,7 +139,7 @@ const toHydraDX: AssetConfig[] = [
   //   asset: usdt,
   //   balance: BalanceBuilder().substrate().assets().account(),
   //   contract: ContractBuilder().Xtokens().transfer(),
-  //   destination: hydraDX,
+  //   destination: hydration,
   //   destinationFee: {
   //     amount: 1.4,
   //     asset: usdt,
@@ -154,7 +154,7 @@ const toHydraDX: AssetConfig[] = [
   //   asset: usdc,
   //   balance: BalanceBuilder().substrate().assets().account(),
   //   contract: ContractBuilder().Xtokens().transfer(),
-  //   destination: hydraDX,
+  //   destination: hydration,
   //   destinationFee: {
   //     amount: 1.4,
   //     asset: usdc,
@@ -261,6 +261,6 @@ const toEthereumViaWormhole: AssetConfig[] = [
 ];
 
 export const moonbeamConfig = new ChainConfig({
-  assets: [...toHydraDX, ...toAssetHub],
+  assets: [...toHydration, ...toAssetHub],
   chain: moonbeam,
 });

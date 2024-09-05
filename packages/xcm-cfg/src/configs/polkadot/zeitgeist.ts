@@ -1,14 +1,14 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { usdc_mwh, ztg, glmr } from '../../assets';
-import { hydraDX, zeitgeist } from '../../chains';
+import { hydration, zeitgeist } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: ztg,
     balance: BalanceBuilder().substrate().system().account(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.0225,
       asset: ztg,
@@ -19,7 +19,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: usdc_mwh,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: glmr,
@@ -34,7 +34,7 @@ const toHydraDX: AssetConfig[] = [
   new AssetConfig({
     asset: glmr,
     balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.1,
       asset: glmr,
@@ -49,6 +49,6 @@ const toHydraDX: AssetConfig[] = [
 ];
 
 export const zeitgeistConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydration],
   chain: zeitgeist,
 });

@@ -1,15 +1,15 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { dai, glmr, eth, wbtc, usdc, usdt } from '../assets';
-import { ethereum, hydraDX, moonbeam } from '../chains';
+import { ethereum, hydration, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
 
-const toHydraDX: AssetConfig[] = [
+const toHydration: AssetConfig[] = [
   new AssetConfig({
     asset: dai,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,
@@ -28,7 +28,7 @@ const toHydraDX: AssetConfig[] = [
       .TokenBridge()
       .wrapAndTransferETHWithPayload()
       .mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,
@@ -44,7 +44,7 @@ const toHydraDX: AssetConfig[] = [
     asset: wbtc,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,
@@ -60,7 +60,7 @@ const toHydraDX: AssetConfig[] = [
     asset: usdc,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,
@@ -76,7 +76,7 @@ const toHydraDX: AssetConfig[] = [
     asset: usdt,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
-    destination: hydraDX,
+    destination: hydration,
     destinationFee: {
       amount: 0.08,
       asset: glmr,
@@ -109,6 +109,6 @@ const toMoonbeam: AssetConfig[] = [
 ];
 
 export const ethereumConfig = new ChainConfig({
-  assets: [...toHydraDX],
+  assets: [...toHydration],
   chain: ethereum,
 });

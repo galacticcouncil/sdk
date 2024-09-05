@@ -6,7 +6,7 @@ import { assetHubConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
 import { centrifugeConfig } from './centrifuge';
-import { hydraDxConfig } from './hydraDX';
+import { hydrationConfig } from './hydration';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { mythosConfig } from './mythos';
@@ -30,7 +30,7 @@ export const polkadotChainsConfig: ChainConfig[] = [
   astarConfig,
   bifrostConfig,
   centrifugeConfig,
-  hydraDxConfig,
+  hydrationConfig,
   interlayConfig,
   moonbeamConfig,
   mythosConfig,

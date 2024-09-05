@@ -1,7 +1,7 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
 import { pha } from '../../assets';
-import { hydraDX, phala } from '../../chains';
+import { hydration, phala } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 export const phalaConfig = new ChainConfig({
@@ -9,7 +9,7 @@ export const phalaConfig = new ChainConfig({
     new AssetConfig({
       asset: pha,
       balance: BalanceBuilder().substrate().system().account(),
-      destination: hydraDX,
+      destination: hydration,
       destinationFee: {
         amount: 0.01842508453,
         asset: pha,
