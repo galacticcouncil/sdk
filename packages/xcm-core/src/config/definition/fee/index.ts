@@ -1,2 +1,3 @@
-export * from './FeeAssetConfig';
-export * from './FeeConfigBuilder';
+export * from './FeeConfig';
+export * from './FeeAmountConfigBuilder';
+export * from './FeeAssetConfigBuilder';

@@ -18,8 +18,13 @@ export interface XTransfer {
   min: AssetAmount;
   srcFee: AssetAmount;
   srcFeeBalance: AssetAmount;
-  buildCall(amount: bigint | number | string): Promise<XCall>;
+  buildCall(amount: bigint | number | string, opts?: XCallOpts): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
+}
+
+export interface XCallOpts {
+  /** Owner of transation. */
+  swapFee: boolean;
 }
 
 export interface XCall {

@@ -1,5 +1,6 @@
 import '@polkadot/api-augment';
 
+import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   AnyParachain,
   Asset,
@@ -14,13 +15,13 @@ export class SubstrateService {
 
   readonly chain: AnyParachain;
 
-  constructor(chain: AnyParachain, api: ApiPromise) {
-    this.chain = chain;
+  constructor(api: ApiPromise, chain: AnyParachain) {
     this.api = api;
+    this.chain = chain;
   }
 
   static async create(chain: AnyParachain): Promise<SubstrateService> {
-    return new SubstrateService(chain, await chain.api);
+    return new SubstrateService(await chain.api, chain);
   }
 
   get asset(): Asset {
@@ -73,5 +74,27 @@ export class SubstrateService {
     const extrinsic = this.getExtrinsic(config);
     const info = await extrinsic.paymentInfo(account, { nonce: -1 });
     return info.partialFee.toBigInt();
+  }
+
+  async exchangeFeeWithRouter(
+    fee: bigint,
+    feeBalance: AssetAmount,
+    router: TradeRouter
+  ): Promise<bigint> {
+    if (this.chain.key === 'hydration') {
+      const amountIn = Number(fee) / 10 ** this.decimals;
+      const assetIn = this.chain.getMetadataAssetId(this.asset);
+      const assetOut = this.chain.getMetadataAssetId(feeBalance);
+
+      if (assetIn !== assetOut) {
+        const { amountOut } = await router.getBestSell(
+          assetIn.toString(),
+          assetOut.toString(),
+          amountIn
+        );
+        return BigInt(amountOut.toNumber());
+      }
+    }
+    return fee;
   }
 }

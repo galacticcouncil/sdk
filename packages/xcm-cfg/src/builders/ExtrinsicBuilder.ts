@@ -1,3 +1,4 @@
+import { assetConversion } from './extrinsics/assetConversion';
 import { ethereumXcm } from './extrinsics/ethereumXcm';
 import { polkadotXcm } from './extrinsics/polkadotXcm';
 import { utility } from './extrinsics/utility';
@@ -7,6 +8,7 @@ import { xTransfer } from './extrinsics/xTransfer';
 
 export function ExtrinsicBuilder() {
   return {
+    assetConversion,
     ethereumXcm,
     polkadotXcm,
     utility,

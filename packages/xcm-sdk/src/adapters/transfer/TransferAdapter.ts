@@ -1,3 +1,4 @@
+import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   AnyChain,
   AssetAmount,
@@ -17,20 +18,26 @@ import { TransferProvider } from '../types';
 export class TransferAdapter {
   private readonly providers: Record<string, TransferProvider<BaseConfig>> = {};
 
-  constructor(chain: AnyChain) {
+  constructor(chain: AnyChain, router: TradeRouter) {
     switch (chain.getType()) {
       case ChainType.EvmChain:
         this.providers.Evm = new ContractTransfer(chain as EvmChain);
         break;
       case ChainType.EvmParachain:
         this.providers.Evm = new ContractTransfer(chain as EvmParachain);
-        this.providers.Substrate = new SubstrateTransfer(chain as EvmParachain);
+        this.providers.Substrate = new SubstrateTransfer(
+          chain as EvmParachain,
+          router
+        );
         break;
       case ChainType.Parachain:
-        this.providers.Substrate = new SubstrateTransfer(chain as Parachain);
+        this.providers.Substrate = new SubstrateTransfer(
+          chain as Parachain,
+          router
+        );
         break;
       default:
-        throw new Error('Unsupported platform');
+        throw new Error('Unsupported platform: ' + chain.getType);
     }
   }
 

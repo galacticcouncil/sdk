@@ -4,7 +4,7 @@ import { AnyChain, EvmParachain } from '../../chain';
 import { BalanceConfigBuilder } from './balance';
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
-import { FeeAssetConfig, DestinationFeeConfig } from './fee';
+import { FeeConfig, DestinationFeeConfig } from './fee';
 import { MinConfigBuilder } from './min';
 
 export interface AssetConfigParams {
@@ -14,7 +14,7 @@ export interface AssetConfigParams {
   destination: AnyChain;
   destinationFee: DestinationFeeConfig;
   extrinsic?: ExtrinsicConfigBuilder;
-  fee?: FeeAssetConfig;
+  fee?: FeeConfig;
   min?: MinConfigBuilder;
   transact?: ExtrinsicConfigBuilder;
   via?: EvmParachain;
@@ -33,7 +33,7 @@ export class AssetConfig {
 
   readonly extrinsic?: ExtrinsicConfigBuilder;
 
-  readonly fee?: FeeAssetConfig;
+  readonly fee?: FeeConfig;
 
   readonly min?: MinConfigBuilder;
 

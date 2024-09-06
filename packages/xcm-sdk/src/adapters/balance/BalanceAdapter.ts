@@ -32,7 +32,7 @@ export class BalanceAdapter {
         this.providers.Substrate = new SubstrateBalance(chain as Parachain);
         break;
       default:
-        throw new Error('Unsupported platform');
+        throw new Error('Unsupported platform: ' + chain.getType);
     }
   }
 

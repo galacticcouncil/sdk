@@ -1,10 +1,13 @@
+import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   addr,
   big,
   AnyChain,
+  Asset,
   AssetAmount,
   ChainTransferConfig,
-  FeeConfigBuilder,
+  FeeAmountConfigBuilder,
+  FeeAssetConfigBuilder,
   Parachain,
   TransactInfo,
 } from '@galacticcouncil/xcm-core';
@@ -16,7 +19,7 @@ import { XCall } from '../types';
 import {
   buildTransact,
   buildTransfer,
-  getH16Address,
+  getH160Address,
   getXcmDeliveryFee,
 } from './TransferUtils';
 import { MetadataUtils } from './MetadataUtils';
@@ -24,13 +27,15 @@ import { MetadataUtils } from './MetadataUtils';
 export class TransferService {
   readonly balance: BalanceAdapter;
   readonly transfer: TransferAdapter;
-
   readonly metadata: MetadataUtils;
 
-  constructor(chain: AnyChain) {
+  readonly router: TradeRouter;
+
+  constructor(chain: AnyChain, router: TradeRouter) {
     this.balance = new BalanceAdapter(chain);
-    this.transfer = new TransferAdapter(chain);
+    this.transfer = new TransferAdapter(chain, router);
     this.metadata = new MetadataUtils(chain);
+    this.router = router;
   }
 
   async getBalance(
@@ -41,7 +46,7 @@ export class TransferService {
     const asset = config.asset;
     const assetId = chain.getBalanceAssetId(asset);
     const account = addr.isH160(assetId.toString())
-      ? await getH16Address(address, chain)
+      ? await getH160Address(address, chain)
       : address;
     const balanceConfig = config.balance.build({
       address: account,
@@ -65,7 +70,7 @@ export class TransferService {
       });
     }
 
-    const feeConfigBuilder = amount as FeeConfigBuilder;
+    const feeConfigBuilder = amount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
       asset: asset,
       destination: this.metadata.chain,
@@ -98,7 +103,7 @@ export class TransferService {
     );
 
     const sender = config.contract
-      ? await getH16Address(address, chain)
+      ? await getH160Address(address, chain)
       : address;
     return this.transfer.estimateFee(sender, amount, feeBalance, transfer);
   }
@@ -157,10 +162,10 @@ export class TransferService {
       return this.getBalance(address, transferConfig);
     }
 
-    const feeAsset = config.fee.asset;
+    const feeAsset = await this.getFeeAsset(address, transferConfig);
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
     const account = addr.isH160(feeAssetId.toString())
-      ? await getH16Address(address, chain)
+      ? await getH160Address(address, chain)
       : address;
     const feeBalanceConfig = config.fee.balance.build({
       address: account,
@@ -183,6 +188,28 @@ export class TransferService {
     }
 
     return this.getAssetMin(transferConfig);
+  }
+
+  private async getFeeAsset(
+    address: string,
+    transferConfig: ChainTransferConfig
+  ): Promise<Asset> {
+    const { chain, config } = transferConfig;
+
+    if (!config.fee) {
+      return config.asset;
+    }
+
+    const feeAssetConfig = config.fee.asset;
+    if (chain instanceof Parachain && 'build' in feeAssetConfig) {
+      const feeAssetBuilder = feeAssetConfig as FeeAssetConfigBuilder;
+      const feeAssetCall = feeAssetBuilder.build({
+        chain,
+        address,
+      });
+      return await feeAssetCall.call();
+    }
+    return feeAssetConfig as Asset;
   }
 
   private async getAssetMin(
@@ -243,7 +270,13 @@ export class TransferService {
     destFee: AssetAmount,
     transferConfig: ChainTransferConfig
   ): Promise<TransactInfo | undefined> {
-    const config = buildTransact(
+    const { config } = transferConfig;
+
+    if (!config.via) {
+      throw new Error('Proxy chain config missing. Specify [via] parameter');
+    }
+
+    const transactConfig = buildTransact(
       address,
       amount,
       destAddress,
@@ -252,13 +285,8 @@ export class TransferService {
       transferConfig
     );
 
-    const viaChain = transferConfig.config.via;
-    if (!viaChain) {
-      throw new Error('Proxy chain config missing. Specify [via] parameter');
-    }
-
-    const substrate = await SubstrateService.create(viaChain);
-    const extrinsic = substrate.getExtrinsic(config);
+    const substrate = await SubstrateService.create(config.via);
+    const extrinsic = substrate.getExtrinsic(transactConfig);
     const { weight } = await extrinsic.paymentInfo(address);
     return {
       call: extrinsic.method.toHex(),

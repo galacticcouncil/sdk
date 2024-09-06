@@ -1,3 +1,4 @@
+import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   AnyParachain,
   AssetAmount,
@@ -10,9 +11,11 @@ import { XCall } from '../../types';
 
 export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
   readonly #substrate: Promise<SubstrateService>;
+  readonly #router: TradeRouter;
 
-  constructor(chain: AnyParachain) {
+  constructor(chain: AnyParachain, router: TradeRouter) {
     this.#substrate = SubstrateService.create(chain);
+    this.#router = router;
   }
 
   async calldata(
@@ -38,6 +41,11 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     let fee: bigint;
     try {
       fee = await substrate.estimateFee(account, config);
+      fee = await substrate.exchangeFeeWithRouter(
+        fee,
+        feeBalance,
+        this.#router
+      );
     } catch {
       // Can't estimate fee if transferMultiasset with no balance
       fee = 0n;

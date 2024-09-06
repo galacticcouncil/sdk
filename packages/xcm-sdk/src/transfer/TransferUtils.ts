@@ -7,7 +7,7 @@ import {
   ContractConfig,
   EvmParachain,
   ExtrinsicConfig,
-  FeeAssetConfig,
+  FeeConfig,
   TransactInfo,
 } from '@galacticcouncil/xcm-core';
 
@@ -90,7 +90,7 @@ export function calculateMin(
  * @param chain - transfer chain ctx
  * @returns - derivated address if evm resolver defined, fallback to default
  */
-export async function getH16Address(
+export async function getH160Address(
   address: string,
   chain: AnyChain
 ): Promise<string> {
@@ -103,7 +103,7 @@ export async function getH16Address(
 
 export function getXcmDeliveryFee(
   decimals: number,
-  feeConfig?: FeeAssetConfig
+  feeConfig?: FeeConfig
 ): bigint {
   return feeConfig?.xcmDeliveryFeeAmount
     ? big.toBigInt(feeConfig.xcmDeliveryFeeAmount, decimals)
@@ -183,12 +183,12 @@ function buildExtrinsic(
   const chain = transferConfig.chain;
   const config = transferConfig.config as AssetConfig;
   return config.extrinsic?.build({
-    sender: address,
     address: destAddress,
     amount: amount,
     asset: config.asset,
     destination: destChain,
     fee: destFee,
+    sender: address,
     source: chain,
     transact: transactInfo,
     via: config.via,

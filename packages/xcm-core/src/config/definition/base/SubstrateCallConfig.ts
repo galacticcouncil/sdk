@@ -1,21 +1,20 @@
-import { ApiPromise } from '@polkadot/api';
-
 import { CallType } from './types';
+import { Parachain } from '../../../chain';
 
 export interface SubstrateCallConfigParams {
-  api: ApiPromise;
-  call: () => Promise<bigint>;
+  chain: Parachain;
+  call: () => Promise<any>;
 }
 
 export class SubstrateCallConfig {
-  readonly api: ApiPromise;
+  readonly chain: Parachain;
 
   readonly call: () => Promise<any>;
 
   readonly type = CallType.Substrate;
 
-  constructor({ api, call }: SubstrateCallConfigParams) {
-    this.api = api;
+  constructor({ chain, call }: SubstrateCallConfigParams) {
+    this.chain = chain;
     this.call = call;
   }
 }

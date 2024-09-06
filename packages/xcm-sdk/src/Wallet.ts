@@ -1,3 +1,4 @@
+import { PoolService, PoolType, TradeRouter } from '@galacticcouncil/sdk';
 import {
   addr,
   big,
@@ -13,19 +14,24 @@ import {
   TransferService,
   calculateMax,
   calculateMin,
-  getH16Address,
+  getH160Address,
 } from './transfer';
 import { XCall, XTransfer } from './types';
 
 export interface WalletOptions {
-  config: ConfigService;
+  configService: ConfigService;
+  poolService: PoolService;
 }
 
 export class Wallet {
   private readonly config: ConfigService;
+  private readonly router: TradeRouter;
 
-  constructor({ config }: WalletOptions) {
-    this.config = config;
+  constructor({ configService, poolService }: WalletOptions) {
+    this.config = configService;
+    this.router = new TradeRouter(poolService, {
+      includeOnly: [PoolType.Omni, PoolType.Stable],
+    });
   }
 
   public async transfer(
@@ -45,8 +51,8 @@ export class Wallet {
     const srcConf = transfer.source;
     const dstConf = transfer.destination;
 
-    const src = new TransferService(srcConf.chain);
-    const dst = new TransferService(dstConf.chain);
+    const src = new TransferService(srcConf.chain, this.router);
+    const dst = new TransferService(dstConf.chain, this.router);
 
     const [srcBalance, srcFeeBalance, srcMin, dstBalance, dstFee, dstMin] =
       await Promise.all([
@@ -119,7 +125,7 @@ export class Wallet {
         const { chain } = chainConfig;
         const assetId = chain.getBalanceAssetId(asset);
         const account = addr.isH160(assetId.toString())
-          ? await getH16Address(address, chain)
+          ? await getH160Address(address, chain)
           : address;
         const balanceConfig = balance.build({
           address: account,

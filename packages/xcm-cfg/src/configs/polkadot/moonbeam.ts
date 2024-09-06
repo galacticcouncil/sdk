@@ -15,7 +15,11 @@ import {
   aca,
 } from '../../assets';
 import { acala, assetHub, ethereum, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, ContractBuilder, FeeBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 const toHydration: AssetConfig[] = [
   new AssetConfig({
@@ -249,7 +253,7 @@ const toEthereumViaWormhole: AssetConfig[] = [
       ]),
     destination: ethereum,
     destinationFee: {
-      amount: FeeBuilder().TokenRelayer().calculateRelayerFee(),
+      amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
       asset: dai_mwh,
       balance: BalanceBuilder().evm().erc20(),
     },

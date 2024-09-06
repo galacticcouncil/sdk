@@ -86,4 +86,12 @@ export class Parachain extends Chain<ParachainAssetsData> {
   getMetadataAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.metadataId ?? this.getAssetId(asset);
   }
+
+  findAssetById(id: string) {
+    return Array.from(this.assetsData.values()).find((a) => {
+      return Object.hasOwn(a, 'metadataId')
+        ? a.metadataId?.toString() === id
+        : a.id?.toString() === id;
+    });
+  }
 }

@@ -1,8 +1,9 @@
+import { PoolService } from '@galacticcouncil/sdk';
 import {
   AssetAmount,
   ConfigService,
   ConfigBuilder,
-  AnyParachain,
+  EvmParachain,
 } from '@galacticcouncil/xcm-core';
 import {
   chainsConfigMap,
@@ -32,19 +33,27 @@ const configService = new ConfigService({
   chainsConfig: chainsConfigMap,
 });
 
+// Initialize hydration API
+const hydration = configService.getChain('hydration') as EvmParachain;
+const hydrationApi = await hydration.api;
+
+// Initialize pool service
+const poolService = new PoolService(hydrationApi);
+
 // Inialialize wallet & clients
 const whScan = new WormholeScan();
 const whClient = new WormholeClient();
-const wallet: Wallet = new Wallet({
-  config: configService,
+const wallet = new Wallet({
+  configService: configService,
+  poolService: poolService,
 });
 
 // Dynamically add external asset to xcm
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('hydradx');
-const destChain = configService.getChain('ethereum');
+const srcChain = configService.getChain('hydration');
+const destChain = configService.getChain('moonbeam');
 const asset = configService.getAsset('dai_mwh');
 
 const configBuilder = ConfigBuilder(configService);
@@ -81,7 +90,7 @@ const xTransfer = await wallet.transfer(
 );
 
 // Construct calldata with transfer amount
-const call: XCall = await xTransfer.buildCall('0.1');
+const call: XCall = await xTransfer.buildCall('1');
 
 // Dump transfer info
 console.log(xTransfer);
