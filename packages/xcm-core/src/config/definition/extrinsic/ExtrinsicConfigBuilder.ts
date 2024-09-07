@@ -1,5 +1,5 @@
-import { Asset, AssetAmount } from '../../../asset';
-import { AnyChain, EvmParachain } from '../../../chain';
+import { TransferData } from '../../types';
+import { EvmParachain } from '../../../chain';
 
 import { ExtrinsicConfig } from './ExtrinsicConfig';
 
@@ -13,14 +13,7 @@ export interface TransactInfo {
   weight: TxWeight;
 }
 
-export interface ExtrinsicConfigBuilderParams {
-  address: string;
-  amount: bigint;
-  asset: Asset;
-  destination: AnyChain;
-  fee: AssetAmount;
-  sender: string;
-  source: AnyChain;
+export interface ExtrinsicConfigBuilderParams extends TransferData {
   transact?: TransactInfo;
   via?: EvmParachain;
 }

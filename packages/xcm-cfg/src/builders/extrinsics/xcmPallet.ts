@@ -22,7 +22,7 @@ const limitedReserveTransferAssets = (parent: Parents) => {
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             const account = getExtrinsicAccount(address);
             return [
               toDest(version, rcv),
@@ -47,7 +47,7 @@ const limitedTeleportAssets = (parent: Parents) => {
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             const account = getExtrinsicAccount(address);
             return [
               toDest(version, rcv),

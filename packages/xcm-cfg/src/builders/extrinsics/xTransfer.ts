@@ -14,7 +14,7 @@ export function xTransfer() {
       return {
         here: (): ExtrinsicConfigBuilder => ({
           build: ({ address, amount, destination }) => {
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return new ExtrinsicConfig({
               module: pallet,
               func: method,

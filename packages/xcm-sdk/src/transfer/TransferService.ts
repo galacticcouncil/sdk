@@ -10,6 +10,7 @@ import {
   FeeAssetConfigBuilder,
   Parachain,
   TransactInfo,
+  TransferData,
 } from '@galacticcouncil/xcm-core';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
@@ -83,73 +84,57 @@ export class TransferService {
     });
   }
 
-  async getNetworkFee(
+  async getDestinationFeeBalance(
     address: string,
-    amount: bigint,
-    feeBalance: AssetAmount,
-    destAddress: string,
-    destChain: AnyChain,
-    destFee: AssetAmount,
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { chain, config } = transferConfig;
-    const transfer = await this.getTransfer(
-      address,
-      amount,
-      destAddress,
-      destChain,
-      destFee,
-      transferConfig
-    );
 
-    const sender = config.contract
+    if (config.asset.isEqual(config.destinationFee.asset)) {
+      return this.getBalance(address, transferConfig);
+    }
+
+    const feeAsset = config.destinationFee.asset;
+    const feeAssetId = chain.getBalanceAssetId(feeAsset);
+    const account = addr.isH160(feeAssetId.toString())
       ? await getH160Address(address, chain)
       : address;
-    return this.transfer.estimateFee(sender, amount, feeBalance, transfer);
+    const feeBalanceConfig = config.destinationFee.balance.build({
+      address: account,
+      asset: feeAssetId,
+    });
+    return this.balance.read(feeAsset, feeBalanceConfig);
+  }
+
+  async getNetworkFee(
+    transferData: TransferData,
+    transferConfig: ChainTransferConfig
+  ): Promise<AssetAmount> {
+    const { amount, sender, source } = transferData;
+    const { chain, config } = transferConfig;
+    const transfer = await this.getTransfer(transferData, transferConfig);
+
+    const address = config.contract
+      ? await getH160Address(sender, chain)
+      : sender;
+    return this.transfer.estimateFee(
+      address,
+      amount,
+      source.fee ?? source.feeBalance,
+      transfer
+    );
   }
 
   async getFee(
-    address: string,
-    amount: bigint,
-    feeBalance: AssetAmount,
-    destAddress: string,
-    destChain: AnyChain,
-    destFee: AssetAmount,
+    transferData: TransferData,
     transferConfig: ChainTransferConfig
   ): Promise<AssetAmount> {
     const { config } = transferConfig;
-    const fee = await this.getNetworkFee(
-      address,
-      amount,
-      feeBalance,
-      destAddress,
-      destChain,
-      destFee,
-      transferConfig
-    );
+    const fee = await this.getNetworkFee(transferData, transferConfig);
 
     const xcmDeliveryFee = getXcmDeliveryFee(fee.decimals, config.fee);
     const totalFee = fee.amount + xcmDeliveryFee;
     return fee.copyWith({ amount: totalFee });
-  }
-
-  async getCall(
-    address: string,
-    amount: bigint,
-    destAddress: string,
-    destChain: AnyChain,
-    destFee: AssetAmount,
-    transferConfig: ChainTransferConfig
-  ): Promise<XCall> {
-    const transfer = await this.getTransfer(
-      address,
-      amount,
-      destAddress,
-      destChain,
-      destFee,
-      transferConfig
-    );
-    return this.transfer.calldata(address, amount, transfer);
   }
 
   async getFeeBalance(
@@ -173,6 +158,15 @@ export class TransferService {
     });
 
     return this.balance.read(feeAsset, feeBalanceConfig);
+  }
+
+  async getCall(
+    transferData: TransferData,
+    transferConfig: ChainTransferConfig
+  ): Promise<XCall> {
+    const { amount, address } = transferData;
+    const transfer = await this.getTransfer(transferData, transferConfig);
+    return this.transfer.calldata(address, amount, transfer);
   }
 
   async getMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
@@ -232,42 +226,19 @@ export class TransferService {
   }
 
   private async getTransfer(
-    address: string,
-    amount: bigint,
-    destAddress: string,
-    destChain: AnyChain,
-    destFee: AssetAmount,
+    transferData: TransferData,
     transferConfig: ChainTransferConfig
   ) {
     const { config } = transferConfig;
     const transactInfo = config.transact
-      ? await this.getTransactInfo(
-          address,
-          amount,
-          destAddress,
-          destChain,
-          destFee,
-          transferConfig
-        )
+      ? await this.getTransactInfo(transferData, transferConfig)
       : undefined;
 
-    return buildTransfer(
-      address,
-      amount,
-      destAddress,
-      destChain,
-      destFee,
-      transferConfig,
-      transactInfo
-    );
+    return buildTransfer(transferData, transferConfig, transactInfo);
   }
 
   private async getTransactInfo(
-    address: string,
-    amount: bigint,
-    destAddress: string,
-    destChain: AnyChain,
-    destFee: AssetAmount,
+    transferData: TransferData,
     transferConfig: ChainTransferConfig
   ): Promise<TransactInfo | undefined> {
     const { config } = transferConfig;
@@ -276,18 +247,11 @@ export class TransferService {
       throw new Error('Proxy chain config missing. Specify [via] parameter');
     }
 
-    const transactConfig = buildTransact(
-      address,
-      amount,
-      destAddress,
-      destChain,
-      destFee,
-      transferConfig
-    );
+    const transactConfig = buildTransact(transferData, transferConfig);
 
     const substrate = await SubstrateService.create(config.via);
     const extrinsic = substrate.getExtrinsic(transactConfig);
-    const { weight } = await extrinsic.paymentInfo(address);
+    const { weight } = await extrinsic.paymentInfo(transferData.address);
     return {
       call: extrinsic.method.toHex(),
       weight: {

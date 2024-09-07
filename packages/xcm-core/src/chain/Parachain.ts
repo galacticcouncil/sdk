@@ -10,6 +10,14 @@ import {
   ChainType,
 } from './Chain';
 
+/**
+ * Parachain Asset Data
+ *
+ * @interface ParachainAssetsData
+ * @member {ChainAssetId} metadataId asset "on chain" id
+ * @member {AssetAmount} minId asset "on chain" id to fetch minimal deposit
+ * @member {AssetAmount} palletInstance asset pallet instance (if any)
+ */
 export interface ParachainAssetsData extends ChainAssetData {
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;

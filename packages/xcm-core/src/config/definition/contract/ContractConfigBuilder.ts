@@ -1,15 +1,9 @@
-import { Asset, AssetAmount } from '../../../asset';
-import { AnyChain, EvmParachain } from '../../../chain';
+import { TransferData } from '../../types';
+import { EvmParachain } from '../../../chain';
 
 import { ContractConfig } from './ContractConfig';
 
-export interface ContractConfigBuilderParams {
-  address: string;
-  amount: bigint;
-  asset: Asset;
-  destination: AnyChain;
-  fee: AssetAmount;
-  source: AnyChain;
+export interface ContractConfigBuilderParams extends TransferData {
   via?: EvmParachain;
 }
 

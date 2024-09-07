@@ -11,9 +11,9 @@ export function Erc20() {
     approve: (): ContractConfigBuilder => ({
       build: (params) => {
         const { amount, asset, destination, source, via } = params;
-        const ctx = via || source;
+        const ctx = via || source.chain;
         const ctxWh = ctx as WormholeChain;
-        const rcvWh = destination as WormholeChain;
+        const rcvWh = destination.chain as WormholeChain;
         const assetId = ctx.getAssetId(asset);
 
         const spender = rcvWh.getTokenRelayer()

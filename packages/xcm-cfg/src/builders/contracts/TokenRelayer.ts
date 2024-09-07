@@ -9,9 +9,9 @@ import { formatDestAddress, parseAssetId } from '../utils';
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, asset, source, destination, via } = params;
-    const ctx = via || source;
+    const ctx = via || source.chain;
     const ctxWh = ctx as WormholeChain;
-    const rcvWh = destination as WormholeChain;
+    const rcvWh = destination.chain as WormholeChain;
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({

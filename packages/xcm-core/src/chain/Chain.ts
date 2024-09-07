@@ -18,6 +18,16 @@ export type ChainAssetId =
   | bigint
   | { [key: string]: ChainAssetId };
 
+/**
+ * Chain Asset Data
+ *
+ * @interface ChainAssetData
+ * @member {Asset} asset Chain asset
+ * @member {ChainAssetId} balanceId asset id to fetch the balance
+ * @member {number} decimals asset decimals
+ * @member {ChainAssetId} id asset "transfer" id
+ * @member {AssetAmount} min asset minimum (existentional deposit)
+ */
 export interface ChainAssetData {
   asset: Asset;
   balanceId?: ChainAssetId;

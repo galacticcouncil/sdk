@@ -33,7 +33,7 @@ const limitedReserveTransferAssets = () => {
           getArgs: (ext) => {
             const version = getExtrinsicArgumentVersion(ext);
             const account = getExtrinsicAccount(address);
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
@@ -52,7 +52,7 @@ const limitedReserveTransferAssets = () => {
           getArgs: () => {
             const version = XcmVersion.v1;
             const account = getExtrinsicAccount(address);
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
@@ -64,15 +64,15 @@ const limitedReserveTransferAssets = () => {
         }),
     }),
     X2: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, asset, destination, fee, source }) =>
+      build: ({ address, amount, asset, destination, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            const ctx = source as Parachain;
-            const rcv = destination as Parachain;
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
             const assetId = ctx.getAssetId(asset);
             const palletInstance = ctx.getAssetPalletInstance(asset);
             const assets = [
@@ -92,7 +92,7 @@ const limitedReserveTransferAssets = () => {
               ),
             ];
 
-            if (asset.key === fee.key) {
+            if (asset.key === destination.fee.key) {
               return [
                 toDest(version, rcv),
                 toBeneficiary(version, account),
@@ -104,7 +104,7 @@ const limitedReserveTransferAssets = () => {
               ];
             }
 
-            const feeAssetId = ctx.getAssetId(fee);
+            const feeAssetId = ctx.getAssetId(destination.fee);
             assets.push(
               toAsset(
                 0,
@@ -118,7 +118,7 @@ const limitedReserveTransferAssets = () => {
                     },
                   ],
                 },
-                fee.amount
+                destination.fee.amount
               )
             );
 
@@ -161,7 +161,7 @@ const limitedTeleportAssets = (parent: Parents) => {
           getArgs: () => {
             const version = XcmVersion.v2;
             const account = getExtrinsicAccount(address);
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
@@ -186,7 +186,7 @@ const teleportAssets = (parent: Parents) => {
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
@@ -210,7 +210,7 @@ const reserveTransferAssets = () => {
           getArgs: () => {
             const version = XcmVersion.v3;
             const account = getExtrinsicAccount(address);
-            const rcv = destination as Parachain;
+            const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
@@ -245,8 +245,8 @@ const send = () => {
             const version = XcmVersion.v3;
             const tAccount = getTransactAccount(params);
             const account = getExtrinsicAccount(tAccount);
-            const ctx = source as Parachain;
-            const rcv = destination as Parachain;
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
 
             const feePalletInstance = ctx.getAssetPalletInstance(opts.fee);
             const feeAssetDecimals = ctx.getAssetDecimals(opts.fee);

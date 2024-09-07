@@ -18,13 +18,16 @@ export function Xtokens() {
   return {
     transfer: (weight = U_64_MAX): ContractConfigBuilder => ({
       build: ({ address, amount, asset, destination, source }) => {
-        const assetId = source.getAssetId(asset);
+        const assetId = source.chain.getAssetId(asset);
         return new ContractConfig({
           address: Precompile.Xtokens,
           args: [
             isString(assetId) ? formatAssetIdToERC20(assetId) : asset,
             amount,
-            getDestinationMultilocation(address, destination as Parachain),
+            getDestinationMultilocation(
+              address,
+              destination.chain as Parachain
+            ),
             weight,
           ],
           func: 'transfer',
@@ -33,10 +36,13 @@ export function Xtokens() {
       },
     }),
     transferMultiCurrencies: (weight = U_64_MAX): ContractConfigBuilder => ({
-      build: ({ address, amount, asset, destination, fee, source }) => {
-        const assetId = source.getAssetId(asset);
-        const feeAssetId = source.getAssetId(fee);
-        const feeAmount = big.toBigInt(fee.amount, fee.decimals!);
+      build: ({ address, amount, asset, destination, source }) => {
+        const assetId = source.chain.getAssetId(asset);
+        const feeAssetId = source.chain.getAssetId(destination.feeBalance);
+        const feeAmount = big.toBigInt(
+          destination.fee.amount,
+          destination.fee.decimals
+        );
         return new ContractConfig({
           address: Precompile.Xtokens,
           args: [
@@ -53,7 +59,10 @@ export function Xtokens() {
               ],
             ],
             1,
-            getDestinationMultilocation(address, destination as Parachain),
+            getDestinationMultilocation(
+              address,
+              destination.chain as Parachain
+            ),
             weight,
           ],
           func: 'transferMultiCurrencies',

@@ -9,16 +9,16 @@ const pallet = 'router';
 const buy = (): ExtrinsicConfigBuilder => {
   const func = 'buy';
   return {
-    build: ({ fee, source }) =>
+    build: ({ destination, source }) =>
       new ExtrinsicConfig({
         module: pallet,
         func,
         getArgs: () => {
-          const ctx = source as Parachain;
+          const ctx = source.chain as Parachain;
           return [
-            ctx.getAssetId(fee),
+            ctx.getAssetId(destination.fee),
             // payment asset
-            fee.amount,
+            destination.fee.amount,
             // max amount in
             // route
           ];

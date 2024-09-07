@@ -21,8 +21,8 @@ const transfer = (): ExtrinsicConfigBuilder => ({
       module: pallet,
       func: 'transfer',
       getArgs: (func) => {
-        const rcv = destination as Parachain;
-        const assetId = source.getAssetId(asset);
+        const rcv = destination.chain as Parachain;
+        const assetId = source.chain.getAssetId(asset);
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
@@ -38,8 +38,8 @@ const transferMultiasset = (originParachainId?: number) => {
           module: pallet,
           func: 'transferMultiasset',
           getArgs: () => {
-            const ctx = source as Parachain;
-            const rcv = destination as Parachain;
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
             const assetId = ctx.getAssetId(asset);
             const palletInstance = ctx.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
@@ -76,13 +76,13 @@ const transferMultiasset = (originParachainId?: number) => {
 const transferMultiassets = (originParachainId?: number) => {
   return {
     X3: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, asset, destination, fee, source }) =>
+      build: ({ address, amount, asset, destination, source }) =>
         new ExtrinsicConfig({
           module: pallet,
           func: 'transferMultiassets',
           getArgs: () => {
-            const ctx = source as Parachain;
-            const rcv = destination as Parachain;
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
             const assetId = ctx.getAssetId(asset);
             const palletInstance = ctx.getAssetPalletInstance(asset);
             const version = XcmVersion.v3;
@@ -106,8 +106,7 @@ const transferMultiassets = (originParachainId?: number) => {
               ),
             ];
 
-            if (asset.key === fee.key) {
-              console.log('fdf');
+            if (asset.key === destination.fee.key) {
               return [
                 {
                   [version]: assets,
@@ -118,7 +117,7 @@ const transferMultiassets = (originParachainId?: number) => {
               ];
             }
 
-            const feeAssetId = ctx.getAssetId(fee);
+            const feeAssetId = ctx.getAssetId(destination.fee);
             assets.push(
               toAsset(
                 {
@@ -134,7 +133,7 @@ const transferMultiassets = (originParachainId?: number) => {
                     },
                   ],
                 },
-                fee.amount
+                destination.fee.amount
               )
             );
 
@@ -177,19 +176,19 @@ const transferMultiCurrencies = (
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
-        const { amount, asset, destination, fee, source, via } = params;
+        const { amount, asset, destination, source, via } = params;
 
-        let feeAssetId = source.getAssetId(fee);
-        let feeAmount = fee.amount;
+        let feeAssetId = source.chain.getAssetId(destination.fee);
+        let feeAmount = destination.fee.amount;
         if (opts) {
-          const feeAssetDecimals = source.getAssetDecimals(opts.fee);
-          feeAssetId = source.getAssetId(opts.fee);
+          const feeAssetDecimals = source.chain.getAssetDecimals(opts.fee);
+          feeAssetId = source.chain.getAssetId(opts.fee);
           feeAmount = big.toBigInt(opts.feeAmount, feeAssetDecimals!);
         }
 
-        const rcv = destination as Parachain;
+        const rcv = destination.chain as Parachain;
         const version = XcmVersion.v3;
-        const assetId = source.getAssetId(asset);
+        const assetId = source.chain.getAssetId(asset);
         const tAccount = getTransactAccount(params);
         const account = getExtrinsicAccount(tAccount);
         return [

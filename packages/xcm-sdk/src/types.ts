@@ -14,17 +14,13 @@ import { AssetAmount } from '@galacticcouncil/xcm-core';
 export interface XTransfer {
   balance: AssetAmount;
   dstFee: AssetAmount;
+  dstFeeBalance: AssetAmount;
   max: AssetAmount;
   min: AssetAmount;
   srcFee: AssetAmount;
   srcFeeBalance: AssetAmount;
-  buildCall(amount: bigint | number | string, opts?: XCallOpts): Promise<XCall>;
+  buildCall(amount: bigint | number | string): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
-}
-
-export interface XCallOpts {
-  /** Owner of transation. */
-  swapFee: boolean;
 }
 
 export interface XCall {
