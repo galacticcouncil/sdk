@@ -61,7 +61,7 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
    */
   async exchangeFee(fee: bigint, feeBalance: AssetAmount): Promise<bigint> {
     const { asset, decimals, chain } = await this.#substrate;
-    if (chain.ss58Format === DEX_PARACHAIN_ID) {
+    if (chain.parachainId === DEX_PARACHAIN_ID) {
       const amountIn = Number(fee) / 10 ** decimals;
       const assetIn = chain.getMetadataAssetId(asset);
       const assetOut = chain.getMetadataAssetId(feeBalance);
