@@ -69,8 +69,9 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
+//const srcAddr = '7KATdGb8zx9suUQPm7XhXKDAbsTSJZ1JtKrx5a92WYaWdUxQ';
+const destAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);

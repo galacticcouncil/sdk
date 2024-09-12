@@ -1,4 +1,3 @@
-import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   addr,
   big,
@@ -15,7 +14,7 @@ import {
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { SubstrateService } from '../substrate';
-import { XCall } from '../types';
+import { Dex, XCall } from '../types';
 
 import {
   buildTransact,
@@ -30,13 +29,13 @@ export class TransferService {
   readonly transfer: TransferAdapter;
   readonly metadata: MetadataUtils;
 
-  readonly router: TradeRouter;
+  readonly dex: Dex;
 
-  constructor(chain: AnyChain, router: TradeRouter) {
+  constructor(chain: AnyChain, dex: Dex) {
     this.balance = new BalanceAdapter(chain);
-    this.transfer = new TransferAdapter(chain, router);
+    this.transfer = new TransferAdapter(chain, dex);
     this.metadata = new MetadataUtils(chain);
-    this.router = router;
+    this.dex = dex;
   }
 
   async getBalance(

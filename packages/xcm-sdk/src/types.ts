@@ -1,4 +1,5 @@
-import { AssetAmount } from '@galacticcouncil/xcm-core';
+import { TradeRouter } from '@galacticcouncil/sdk';
+import { AnyParachain, AssetAmount } from '@galacticcouncil/xcm-core';
 
 /**
  * Transfer (X) data
@@ -39,4 +40,9 @@ export interface XCallEvm extends XCall {
   to: `0x${string}`;
   /** Value sent with this transaction. */
   value?: bigint;
+}
+
+export interface Dex {
+  chain: AnyParachain;
+  router: TradeRouter;
 }

@@ -1,4 +1,3 @@
-import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   AnyParachain,
   AssetAmount,
@@ -7,17 +6,15 @@ import {
 
 import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
-import { XCall } from '../../types';
-
-const DEX_PARACHAIN_ID = 2034;
+import { Dex, XCall } from '../../types';
 
 export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
   readonly #substrate: Promise<SubstrateService>;
-  readonly #router: TradeRouter;
+  readonly #dex: Dex;
 
-  constructor(chain: AnyParachain, router: TradeRouter) {
+  constructor(chain: AnyParachain, dex: Dex) {
     this.#substrate = SubstrateService.create(chain);
-    this.#router = router;
+    this.#dex = dex;
   }
 
   async calldata(
@@ -61,13 +58,13 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
    */
   async exchangeFee(fee: bigint, feeBalance: AssetAmount): Promise<bigint> {
     const { asset, decimals, chain } = await this.#substrate;
-    if (chain.parachainId === DEX_PARACHAIN_ID) {
+    if (chain.parachainId === this.#dex.chain.parachainId) {
       const amountIn = Number(fee) / 10 ** decimals;
       const assetIn = chain.getMetadataAssetId(asset);
       const assetOut = chain.getMetadataAssetId(feeBalance);
 
       if (assetIn !== assetOut) {
-        const { amountOut } = await this.#router.getBestSell(
+        const { amountOut } = await this.#dex.router.getBestSell(
           assetIn.toString(),
           assetOut.toString(),
           amountIn

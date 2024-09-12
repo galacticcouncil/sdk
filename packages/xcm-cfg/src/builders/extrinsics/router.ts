@@ -1,7 +1,7 @@
 import {
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
-  Parachain,
+  EvmParachain,
 } from '@galacticcouncil/xcm-core';
 
 const pallet = 'router';
@@ -9,29 +9,24 @@ const pallet = 'router';
 const buy = (): ExtrinsicConfigBuilder => {
   const func = 'buy';
   return {
-    build: ({ destination, source }) =>
+    build: ({ destination, source, swap }) =>
       new ExtrinsicConfig({
         module: pallet,
         func,
         getArgs: () => {
-          const ctx = source.chain as Parachain;
-          return [
-            ctx.getAssetId(destination.fee),
-            // payment asset
-            destination.fee.amount,
-            // max amount in
-            // route
-          ];
+          const ctx = source.chain as EvmParachain;
+          const amount = swap?.amount!;
+          const route = swap?.route!;
+          const assetIn = ctx.getAssetId(source.fee!);
+          const assetOut = ctx.getAssetId(destination.fee);
+
+          const amountOut = destination.fee.amount;
+          const maxAmountIn = amount + (amount * 5n) / 100n;
+          return [assetIn, assetOut, amountOut, maxAmountIn, route];
         },
       }),
   };
 };
-
-// asset_in: T::AssetId,
-// asset_out: T::AssetId,
-// amount_out: T::Balance,
-// max_amount_in: T::Balance,
-// route: Vec<Trade<T::AssetId>>
 
 export const router = () => {
   return {

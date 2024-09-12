@@ -1,4 +1,3 @@
-import { TradeRouter } from '@galacticcouncil/sdk';
 import {
   AnyChain,
   AssetAmount,
@@ -12,13 +11,13 @@ import {
 import { SubstrateTransfer } from './SubstrateTransfer';
 import { ContractTransfer } from './ContractTransfer';
 
-import { XCall } from '../../types';
+import { Dex, XCall } from '../../types';
 import { TransferProvider } from '../types';
 
 export class TransferAdapter {
   private readonly providers: Record<string, TransferProvider<BaseConfig>> = {};
 
-  constructor(chain: AnyChain, router: TradeRouter) {
+  constructor(chain: AnyChain, dex: Dex) {
     switch (chain.getType()) {
       case ChainType.EvmChain:
         this.providers.Evm = new ContractTransfer(chain as EvmChain);
@@ -27,13 +26,13 @@ export class TransferAdapter {
         this.providers.Evm = new ContractTransfer(chain as EvmParachain);
         this.providers.Substrate = new SubstrateTransfer(
           chain as EvmParachain,
-          router
+          dex
         );
         break;
       case ChainType.Parachain:
         this.providers.Substrate = new SubstrateTransfer(
           chain as Parachain,
-          router
+          dex
         );
         break;
       default:

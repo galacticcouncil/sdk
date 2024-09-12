@@ -1,4 +1,9 @@
-import { PoolService, PoolType, TradeRouter } from '@galacticcouncil/sdk';
+import {
+  buildRoute,
+  PoolService,
+  PoolType,
+  TradeRouter,
+} from '@galacticcouncil/sdk';
 import {
   addr,
   big,
@@ -8,6 +13,7 @@ import {
   ConfigBuilder,
   ConfigService,
   TransferData,
+  Parachain,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { BalanceAdapter } from './adapters';
@@ -17,7 +23,9 @@ import {
   calculateMin,
   getH160Address,
 } from './transfer';
-import { XCall, XTransfer } from './types';
+import { Dex, XCall, XTransfer } from './types';
+
+const DEX_PARACHAIN_ID = 2034;
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -33,6 +41,21 @@ export class Wallet {
     this.router = new TradeRouter(poolService, {
       includeOnly: [PoolType.Omni, PoolType.Stable],
     });
+  }
+
+  get dex(): Dex {
+    const chains = this.config.chains.values();
+    const hydration = Array.from(chains).find(
+      (c) => c instanceof Parachain && c.parachainId === DEX_PARACHAIN_ID
+    );
+
+    if (hydration) {
+      return {
+        chain: hydration,
+        router: this.router,
+      } as Dex;
+    }
+    throw new Error('Hydration DEX chain config not found');
   }
 
   public async transfer(
@@ -52,8 +75,8 @@ export class Wallet {
     const srcConf = transfer.source;
     const dstConf = transfer.destination;
 
-    const src = new TransferService(srcConf.chain, this.router);
-    const dst = new TransferService(dstConf.chain, this.router);
+    const src = new TransferService(srcConf.chain, this.dex);
+    const dst = new TransferService(dstConf.chain, this.dex);
 
     const [
       srcBalance,
@@ -75,8 +98,8 @@ export class Wallet {
 
     const transferData: TransferData = {
       address: dstAddr,
-      amount: srcBalance.amount,
-      asset: srcBalance,
+      amount: 0n,
+      asset: transfer.asset,
       balance: srcBalance,
       destination: {
         chain: dstConf.chain,
@@ -90,6 +113,25 @@ export class Wallet {
       },
     };
 
+    const isSufficientPaymentAsset = transfer.asset.isEqual(dstFee);
+    if (!isSufficientPaymentAsset) {
+      // If not sufficient asset calculate dest fee exchange rate
+      const assetIn = this.dex.chain.getMetadataAssetId(srcFeeBalance);
+      const assetOut = this.dex.chain.getMetadataAssetId(dstFee);
+      const amountOut = dstFee.toDecimal(dstFee.decimals);
+
+      const trade = await this.router.getBestBuy(
+        assetIn.toString(),
+        assetOut.toString(),
+        amountOut
+      );
+      const swap = {
+        amount: BigInt(trade.amountIn.toNumber()),
+        route: buildRoute(trade.swaps),
+      };
+      transferData.swap = swap;
+    }
+
     const srcFee = await src.getFee(transferData, srcConf);
 
     const dstEd = await dst.metadata.getEd();
@@ -97,11 +139,6 @@ export class Wallet {
 
     const srcEd = await src.metadata.getEd();
     const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
-
-    const isSufficientPaymentAsset = transfer.asset.isEqual(dstFee);
-    if (!isSufficientPaymentAsset) {
-      // if not sufficient asset calculate swap rate
-    }
 
     return {
       balance: srcBalance,
