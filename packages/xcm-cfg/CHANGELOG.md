@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.4.3
+
+### Patch Changes
+
+- Fix moonbeam weth transfer
+
 ## 3.4.2
 
 ### Patch Changes
