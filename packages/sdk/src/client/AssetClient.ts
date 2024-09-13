@@ -15,7 +15,13 @@ import { findNestedKey } from '../utils/json';
 import { PolkadotApiClient } from './PolkadotApi';
 
 export class AssetClient extends PolkadotApiClient {
-  private SUPPORTED_TYPES = ['StableSwap', 'Bond', 'Token', 'External'];
+  private SUPPORTED_TYPES = [
+    'StableSwap',
+    'Bond',
+    'Token',
+    'External',
+    'Erc20',
+  ];
 
   constructor(api: ApiPromise) {
     super(api);
