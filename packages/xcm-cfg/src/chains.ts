@@ -1017,6 +1017,23 @@ export const basilisk = new Parachain({
   explorer: 'https://basilisk.subscan.io',
 });
 
+export const encointer = new Parachain({
+  assetsData: [
+    {
+      asset: ksm,
+      decimals: 12,
+    },
+  ],
+  ecosystem: Ecosystem.Kusama,
+  genesisHash:
+    '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b',
+  key: 'encointer',
+  name: 'Encointer',
+  parachainId: 1001,
+  ss58Format: 2,
+  ws: 'wss://kusama.api.encointer.org',
+});
+
 export const karura = new Parachain({
   assetsData: [
     {
@@ -1148,6 +1165,7 @@ export const tinkernet = new Parachain({
 
 const kusamaChains: AnyChain[] = [
   basilisk,
+  encointer,
   integritee,
   karura,
   kusama,
