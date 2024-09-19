@@ -1,5 +1,15 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.5.0
+
+### Minor Changes
+
+- 58343be: Added WUD static XCM config
+
+### Patch Changes
+
+- Fix WUD configuration (sufficient asset)
+
 ## 3.4.3
 
 ### Patch Changes
