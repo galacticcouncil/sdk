@@ -215,6 +215,11 @@ export const wbtc_mwh = new Asset({
   key: 'wbtc_mwh',
 });
 
+export const wud = new Asset({
+  key: 'wud',
+  originSymbol: 'WUD',
+});
+
 export const xrt = new Asset({
   key: 'xrt',
   originSymbol: 'XRT',
@@ -274,6 +279,7 @@ export const assets: Asset[] = [
   weth,
   weth_awh,
   weth_mwh,
+  wud,
   xrt,
   ztg,
   ajun,
