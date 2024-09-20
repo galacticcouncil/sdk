@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 
 </p>
-HydraDX trade router & pool utilities.
+Hydration trade router & pool utilities.
 <br />
 <br />
 Table of content:
@@ -58,6 +58,8 @@ Off-chain optimization of orders across pools for best price execution. TradeRou
 getBestSpotPrice(tokenIn: string, tokenOut: string): Amount
 getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Trade
 getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Trade
+getBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string, route?: Hop[]): Trade
+getSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string, route?: Hop[]): Trade
 ```
 
 For type signature visit [types.ts](src/types.ts)<br />

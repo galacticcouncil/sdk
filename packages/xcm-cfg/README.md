@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xcm-cfg.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-cfg)
 
-Cross-chain configuration for HydraDX & Basilisk dapps.
+Cross-chain configuration for Hydration & Basilisk dapps.
 
 ## Installation
 
