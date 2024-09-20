@@ -52,7 +52,10 @@ export class PoolService implements IPoolService {
   }
 
   async syncRegistry(external?: ExternalAsset[]) {
-    this.onChainAssets = await this.assetClient.getOnChainAssets(false, external);
+    this.onChainAssets = await this.assetClient.getOnChainAssets(
+      false,
+      external
+    );
     this.onChainAssetsLoaded = true;
   }
 

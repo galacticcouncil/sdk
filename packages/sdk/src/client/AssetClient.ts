@@ -331,7 +331,8 @@ export class AssetClient extends PolkadotApiClient {
   }
 
   private isValidAsset(asset: Asset): boolean {
-    return !!asset.symbol && !!asset.decimals;
+    const decimalSign = Math.sign(asset.decimals);
+    return !!asset.symbol && (decimalSign === 0 || decimalSign === 1);
   }
 
   private isSupportedAsset(details: PalletAssetRegistryAssetDetails): boolean {
