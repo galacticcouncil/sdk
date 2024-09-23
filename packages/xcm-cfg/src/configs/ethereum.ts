@@ -92,6 +92,24 @@ const toHydration: AssetConfig[] = [
 
 const toMoonbeam: AssetConfig[] = [
   new AssetConfig({
+    asset: eth,
+    balance: BalanceBuilder().evm().native(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .wrapAndTransferETHWithPayload()
+      .mrl(),
+    destination: moonbeam,
+    destinationFee: {
+      amount: 0.08,
+      asset: glmr,
+      balance: BalanceBuilder().evm().erc20(),
+    },
+    fee: {
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
+    },
+  }),
+  new AssetConfig({
     asset: dai,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder().TokenBridge().transferTokens(),

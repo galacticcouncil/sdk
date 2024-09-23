@@ -243,6 +243,26 @@ const toAcalaViaWormhole: AssetConfig[] = [
 
 const toEthereumViaWormhole: AssetConfig[] = [
   new AssetConfig({
+    asset: weth_mwh,
+    balance: BalanceBuilder().evm().erc20(),
+    contract: ContractBuilder()
+      .Batch()
+      .batchAll([
+        ContractBuilder().Erc20().approve(),
+        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+      ]),
+    destination: ethereum,
+    destinationFee: {
+      amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+      asset: weth_mwh,
+      balance: BalanceBuilder().evm().erc20(),
+    },
+    fee: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  }),
+  new AssetConfig({
     asset: dai_mwh,
     balance: BalanceBuilder().evm().erc20(),
     contract: ContractBuilder()
