@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 4.3.1
+
+### Patch Changes
+
+- Fix min amount calc
+
 ## 4.3.0
 
 ### Minor Changes
