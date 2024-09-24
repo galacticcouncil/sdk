@@ -27,7 +27,7 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
           return [
             {
               [version]: {
-                gasLimit: 800000n,
+                gasLimit: 5000000n,
                 feePayment: 'Auto',
                 action: {
                   Call: contract.address,

@@ -10,8 +10,8 @@ import { assetHub, ethereum, moonbeam } from '../../../chains';
 
 import { balance, fee } from './configs';
 
-export const MRL_EXECUTION_FEE = 0.15;
-export const MRL_XCM_FEE = 0.25;
+export const MRL_EXECUTION_FEE = 0.9;
+export const MRL_XCM_FEE = 1;
 
 export function toAssethubExtTemplate(asset: Asset): AssetConfig {
   return new AssetConfig({
