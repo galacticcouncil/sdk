@@ -70,8 +70,8 @@ import {
   FeeBuilder,
 } from '../../builders';
 
-const MRL_EXECUTION_FEE = 0.15;
-const MRL_XCM_FEE = 0.25;
+const MRL_EXECUTION_FEE = 0.9;
+const MRL_XCM_FEE = 1;
 
 const toAcala: AssetConfig[] = [
   new AssetConfig({
