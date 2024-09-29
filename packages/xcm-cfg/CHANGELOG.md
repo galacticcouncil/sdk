@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 3.5.1
+
+### Patch Changes
+
+- Bump gasLimit & mrl fees (tmp) to fix ethereum transfer
+
 ## 3.5.0
 
 ### Minor Changes
