@@ -8,32 +8,34 @@ export interface ChainTransferConfig {
   config: AssetConfig;
 }
 
+export interface FeeSwap {
+  amount: bigint;
+  route: any;
+  enabled: boolean;
+}
+
 export interface TransferConfig {
   asset: Asset;
   source: ChainTransferConfig;
   destination: ChainTransferConfig;
 }
 
-export interface TransferSwap {
-  amount: bigint;
-  route: any;
-}
-
 export interface TransferData {
   address: string;
   amount: bigint;
   asset: Asset;
-  balance: AssetAmount;
   destination: {
+    balance: AssetAmount;
     chain: AnyChain;
     fee: AssetAmount;
     feeBalance: AssetAmount;
   };
   sender: string;
   source: {
+    balance: AssetAmount;
     chain: AnyChain;
     fee?: AssetAmount;
     feeBalance: AssetAmount;
+    feeSwap?: FeeSwap;
   };
-  swap?: TransferSwap;
 }
