@@ -96,12 +96,19 @@ export async function getH160Address(
   chain: AnyChain
 ): Promise<string> {
   if (chain.isEvmParachain()) {
-    const evmPara = chain as EvmParachain;
-    return evmPara.getDerivatedAddress(address);
+    const evmParachain = chain as EvmParachain;
+    return evmParachain.getDerivatedAddress(address);
   }
   return address;
 }
 
+/**
+ * Return formatted xcm delivery fee if defined
+ *
+ * @param decimals - fee asset decimals
+ * @param feeConfig - fee config
+ * @returns formatted xcm delivery fee or 0
+ */
 export function getXcmDeliveryFee(
   decimals: number,
   feeConfig?: FeeConfig

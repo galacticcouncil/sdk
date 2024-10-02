@@ -1,12 +1,10 @@
 import { Asset, AssetConfig } from '@galacticcouncil/xcm-core';
 
 import { dot, usdt } from '../../../assets';
-import {
-  AssetMinBuilder,
-  BalanceBuilder,
-  ExtrinsicBuilder,
-} from '../../../builders';
+import { AssetMinBuilder, BalanceBuilder } from '../../../builders';
 import { hydration } from '../../../chains';
+
+import { extrinsicSwap } from './configs';
 
 export const xcmDeliveryFeeAmount = 0.036;
 
@@ -20,10 +18,7 @@ export function toHydrationExtTemplate(asset: Asset): AssetConfig {
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+    extrinsic: extrinsicSwap(),
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),

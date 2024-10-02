@@ -21,7 +21,7 @@ export async function signAndSend(
   const api = await ctx.api;
   const extrinsic = api.tx(call.data);
 
-  const wallet = getWalletBySource('talisman');
+  const wallet = getWalletBySource('polkadot-js');
   if (!wallet) {
     throw new Error('No polkadot-js wallet found!');
   }

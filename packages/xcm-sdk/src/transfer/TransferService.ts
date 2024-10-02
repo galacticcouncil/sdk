@@ -14,7 +14,8 @@ import {
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
 import { SubstrateService } from '../substrate';
-import { Dex, XCall } from '../types';
+import { XCall } from '../types';
+import { Dex } from '../Dex';
 
 import {
   buildTransact,
@@ -29,13 +30,10 @@ export class TransferService {
   readonly transfer: TransferAdapter;
   readonly metadata: MetadataUtils;
 
-  readonly dex: Dex;
-
   constructor(chain: AnyChain, dex: Dex) {
     this.balance = new BalanceAdapter(chain);
     this.transfer = new TransferAdapter(chain, dex);
     this.metadata = new MetadataUtils(chain);
-    this.dex = dex;
   }
 
   async getBalance(
@@ -239,7 +237,7 @@ export class TransferService {
   private async getTransactInfo(
     transferData: TransferData,
     transferConfig: ChainTransferConfig
-  ): Promise<TransactInfo | undefined> {
+  ): Promise<TransactInfo> {
     const { config } = transferConfig;
 
     if (!config.via) {

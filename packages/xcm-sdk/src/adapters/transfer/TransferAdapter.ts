@@ -11,8 +11,9 @@ import {
 import { SubstrateTransfer } from './SubstrateTransfer';
 import { ContractTransfer } from './ContractTransfer';
 
-import { Dex, XCall } from '../../types';
 import { TransferProvider } from '../types';
+import { XCall } from '../../types';
+import { Dex } from '../../Dex';
 
 export class TransferAdapter {
   private readonly providers: Record<string, TransferProvider<BaseConfig>> = {};
@@ -20,20 +21,17 @@ export class TransferAdapter {
   constructor(chain: AnyChain, dex: Dex) {
     switch (chain.getType()) {
       case ChainType.EvmChain:
-        this.providers.Evm = new ContractTransfer(chain as EvmChain);
+        const evmChain = chain as EvmChain;
+        this.providers.Evm = new ContractTransfer(evmChain);
         break;
       case ChainType.EvmParachain:
-        this.providers.Evm = new ContractTransfer(chain as EvmParachain);
-        this.providers.Substrate = new SubstrateTransfer(
-          chain as EvmParachain,
-          dex
-        );
+        const evmParachain = chain as EvmParachain;
+        this.providers.Evm = new ContractTransfer(evmParachain);
+        this.providers.Substrate = new SubstrateTransfer(evmParachain, dex);
         break;
       case ChainType.Parachain:
-        this.providers.Substrate = new SubstrateTransfer(
-          chain as Parachain,
-          dex
-        );
+        const parachain = chain as Parachain;
+        this.providers.Substrate = new SubstrateTransfer(parachain, dex);
         break;
       default:
         throw new Error('Unsupported platform: ' + chain.getType);

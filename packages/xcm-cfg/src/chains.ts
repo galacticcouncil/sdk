@@ -58,7 +58,7 @@ import {
 } from './assets';
 
 import { acalaEvm, hydrationEvm, moonbeamEvm } from './evm';
-import { evmResolvers } from './resolver';
+import { evmResolvers } from './resolvers';
 
 export const polkadot = new Parachain({
   assetsData: [
@@ -235,7 +235,10 @@ export const assetHub = new Parachain({
   name: 'AssetHub',
   parachainId: 1000,
   ss58Format: 42,
-  ws: 'wss://polkadot-asset-hub-rpc.polkadot.io',
+  ws: [
+    'wss://polkadot-asset-hub-rpc.polkadot.io',
+    'wss://statemint.api.onfinality.io/public-ws',
+  ],
   explorer: 'https://assethub-polkadot.subscan.io',
 });
 

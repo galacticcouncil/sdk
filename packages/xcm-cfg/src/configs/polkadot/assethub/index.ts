@@ -13,6 +13,7 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
 } from '../../../builders';
+
 import { toHydrationExtTemplate, xcmDeliveryFeeAmount } from './templates';
 
 const toHydration: AssetConfig[] = [
@@ -56,33 +57,7 @@ const toHydration: AssetConfig[] = [
     },
     min: AssetMinBuilder().assets().asset(),
   }),
-
-  new AssetConfig({
-    asset: pink,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.02,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
-    // extrinsic: ExtrinsicBuilder()
-    //   .utility()
-    //   .batchAll([
-    //     ExtrinsicBuilder().assetConversion().swapTokensForExactTokens(),
-    //     ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().X2(),
-    //   ]),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
-    },
-    min: AssetMinBuilder().assets().asset(),
-  }),
+  toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
   toHydrationExtTemplate(dota),
   toHydrationExtTemplate(wud),

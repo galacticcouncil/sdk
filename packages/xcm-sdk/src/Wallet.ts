@@ -1,9 +1,4 @@
-import {
-  buildRoute,
-  PoolService,
-  PoolType,
-  TradeRouter,
-} from '@galacticcouncil/sdk';
+import { PoolService } from '@galacticcouncil/sdk';
 import {
   addr,
   big,
@@ -13,49 +8,41 @@ import {
   ConfigBuilder,
   ConfigService,
   TransferData,
-  Parachain,
+  TransferValidator,
+  TransferValidation,
+  TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { BalanceAdapter } from './adapters';
 import {
-  TransferService,
   calculateMax,
   calculateMin,
   getH160Address,
+  TransferService,
 } from './transfer';
-import { Dex, XCall, XTransfer } from './types';
+import { XCall, XTransfer } from './types';
 
-const DEX_PARACHAIN_ID = 2034;
+import { Dex } from './Dex';
 
 export interface WalletOptions {
   configService: ConfigService;
   poolService: PoolService;
+  transferValidations?: TransferValidation[];
 }
 
 export class Wallet {
   private readonly config: ConfigService;
-  private readonly router: TradeRouter;
+  private readonly dex: Dex;
+  private readonly validations: TransferValidation[];
 
-  constructor({ configService, poolService }: WalletOptions) {
+  constructor({
+    configService,
+    poolService,
+    transferValidations,
+  }: WalletOptions) {
     this.config = configService;
-    this.router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Omni, PoolType.Stable],
-    });
-  }
-
-  get dex(): Dex {
-    const chains = this.config.chains.values();
-    const hydration = Array.from(chains).find(
-      (c) => c instanceof Parachain && c.parachainId === DEX_PARACHAIN_ID
-    );
-
-    if (hydration) {
-      return {
-        chain: hydration,
-        router: this.router,
-      } as Dex;
-    }
-    throw new Error('Hydration DEX chain config not found');
+    this.dex = new Dex(configService, poolService);
+    this.validations = transferValidations || [];
   }
 
   public async transfer(
@@ -77,6 +64,7 @@ export class Wallet {
 
     const src = new TransferService(srcConf.chain, this.dex);
     const dst = new TransferService(dstConf.chain, this.dex);
+    const validator = new TransferValidator(...this.validations);
 
     const [
       srcBalance,
@@ -96,54 +84,42 @@ export class Wallet {
       dst.getMin(dstConf),
     ]);
 
+    const dstBalanceNormalized = srcBalance.copyWith({
+      amount: dstBalance.amount,
+    });
+
     const transferData: TransferData = {
       address: dstAddr,
-      amount: 0n,
+      amount: srcBalance.amount,
       asset: transfer.asset,
-      balance: srcBalance,
       destination: {
+        balance: dstBalanceNormalized,
         chain: dstConf.chain,
         fee: dstFee,
         feeBalance: dstFeeBalance,
       },
       sender: srcAddr,
       source: {
+        balance: srcBalance,
         chain: srcConf.chain,
         feeBalance: srcFeeBalance,
       },
     };
 
-    const isSufficientPaymentAsset = transfer.asset.isEqual(dstFee);
-    if (!isSufficientPaymentAsset) {
-      // If not sufficient asset calculate dest fee exchange rate
-      const assetIn = this.dex.chain.getMetadataAssetId(srcFeeBalance);
-      const assetOut = this.dex.chain.getMetadataAssetId(dstFee);
-      const amountOut = dstFee.toDecimal(dstFee.decimals);
-
-      const trade = await this.router.getBestBuy(
-        assetIn.toString(),
-        assetOut.toString(),
-        amountOut
-      );
-      const swap = {
-        amount: BigInt(trade.amountIn.toNumber()),
-        route: buildRoute(trade.swaps),
-      };
-      transferData.swap = swap;
-    }
-
     const srcFee = await src.getFee(transferData, srcConf);
+    const srcFeeSwap = this.dex.isSwapSupported(transferData)
+      ? await this.dex.calculateFeeSwap(srcFee, transferData)
+      : undefined;
 
     const dstEd = await dst.metadata.getEd();
-    const min = calculateMin(
-      srcBalance.copyWith({ amount: dstBalance.amount }),
-      dstFee,
-      dstMin,
-      dstEd
-    );
+    const min = calculateMin(dstBalanceNormalized, dstFee, dstMin, dstEd);
 
     const srcEd = await src.metadata.getEd();
     const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
+
+    transferData.amount = 0n;
+    transferData.source.fee = srcFee;
+    transferData.source.feeSwap = srcFeeSwap;
 
     return {
       balance: srcBalance,
@@ -154,15 +130,17 @@ export class Wallet {
       srcFee,
       srcFeeBalance,
       async buildCall(amount): Promise<XCall> {
-        const transferDataCopy = Object.assign({}, transferData);
-        transferDataCopy.amount = big.toBigInt(amount, srcBalance.decimals);
-        transferDataCopy.source.fee = srcFee;
-        return src.getCall(transferDataCopy, srcConf);
+        const data = Object.assign({}, transferData);
+        data.amount = big.toBigInt(amount, srcBalance.decimals);
+        return src.getCall(data, srcConf);
       },
       async estimateFee(amount): Promise<AssetAmount> {
-        const transferDataCopy = Object.assign({}, transferData);
-        transferDataCopy.amount = big.toBigInt(amount, srcBalance.decimals);
-        return src.getFee(transferDataCopy, srcConf);
+        const data = Object.assign({}, transferData);
+        data.amount = big.toBigInt(amount, srcBalance.decimals);
+        return src.getFee(data, srcConf);
+      },
+      async validate(): Promise<TransferValidationReport[]> {
+        return validator.validate(transferData);
       },
     } as XTransfer;
   }

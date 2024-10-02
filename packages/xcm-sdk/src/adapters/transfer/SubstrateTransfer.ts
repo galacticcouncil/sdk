@@ -6,7 +6,8 @@ import {
 
 import { TransferProvider } from '../types';
 import { SubstrateService, normalizeAssetAmount } from '../../substrate';
-import { Dex, XCall } from '../../types';
+import { XCall } from '../../types';
+import { Dex } from '../../Dex';
 
 export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
   readonly #substrate: Promise<SubstrateService>;
