@@ -1,7 +1,7 @@
 import {
   ContractConfig,
   ContractConfigBuilder,
-  WormholeChain,
+  Wormhole,
 } from '@galacticcouncil/xcm-core';
 
 import { formatDestAddress, parseAssetId } from '../utils';
@@ -10,8 +10,8 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, asset, source, destination, via } = params;
     const ctx = via || source.chain;
-    const ctxWh = ctx as WormholeChain;
-    const rcvWh = destination.chain as WormholeChain;
+    const ctxWh = ctx as Wormhole;
+    const rcvWh = destination.chain as Wormhole;
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({

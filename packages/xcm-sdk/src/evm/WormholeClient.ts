@@ -1,9 +1,9 @@
 import {
   Abi,
+  AnyChain,
   AnyEvmChain,
   Precompile,
-  WormholeChain,
-  AnyChain,
+  Wormhole,
 } from '@galacticcouncil/xcm-core';
 
 import { encoding } from '@wormhole-foundation/sdk-base';
@@ -19,7 +19,7 @@ export class WormholeClient {
     vaaBytes: string
   ): Promise<boolean> {
     const ctx = chain as AnyEvmChain;
-    const ctxWh = ctx as WormholeChain;
+    const ctxWh = ctx as Wormhole;
     const provider = ctx.client.getProvider();
     const tokenBridge = ctxWh.getTokenBridge();
 
@@ -38,7 +38,7 @@ export class WormholeClient {
   }
 
   redeem(chain: AnyChain, from: string, vaaBytes: string): XCallEvm {
-    const ctxWh = chain as WormholeChain;
+    const ctxWh = chain as Wormhole;
     const vaaArray = encoding.b64.decode(vaaBytes);
     const vaaHex = encoding.hex.encode(vaaArray);
 

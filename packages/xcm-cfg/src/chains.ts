@@ -6,8 +6,6 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { mainnet as ethereumEvm, darwinia as darwiniaEvm } from 'viem/chains';
-
 import {
   aca,
   astr,
@@ -57,8 +55,13 @@ import {
   ajun,
 } from './assets';
 
-import { acalaEvm, hydrationEvm, moonbeamEvm } from './evm';
-import { evmResolvers } from './resolvers';
+import {
+  mainnet as evmMainetDef,
+  darwinia as evmDarwiniaDef,
+} from 'viem/chains';
+
+import { evmAcalaDef, evmHydrationDef, evmMoonbeamDef } from './evm';
+import { evmAcalaResolver, evmHydrationResolver } from './resolvers';
 
 export const polkadot = new Parachain({
   assetsData: [
@@ -67,6 +70,7 @@ export const polkadot = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://polkadot.subscan.io',
   genesisHash:
     '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
   key: 'polkadot',
@@ -74,7 +78,6 @@ export const polkadot = new Parachain({
   parachainId: 0,
   ss58Format: 0,
   ws: 'wss://polkadot-rpc.dwellir.com',
-  explorer: 'https://polkadot.subscan.io',
 });
 
 export const acala = new EvmParachain({
@@ -119,21 +122,22 @@ export const acala = new EvmParachain({
       min: 0.000005555555555555,
     },
   ],
-  defEvm: acalaEvm,
-  defWormhole: {
-    id: 12,
-    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
-  },
+
   ecosystem: Ecosystem.Polkadot,
-  evmResolver: evmResolvers['acala'],
+  evmChain: evmAcalaDef,
+  evmResolver: evmAcalaResolver,
+  explorer: 'https://acala.subscan.io',
   genesisHash:
     '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
   key: 'acala',
   name: 'Acala',
   parachainId: 2000,
   ss58Format: 10,
+  wormhole: {
+    id: 12,
+    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
+  },
   ws: 'wss://acala-rpc.aca-api.network',
-  explorer: 'https://acala.subscan.io',
 });
 
 export const acala_evm = new EvmParachain({
@@ -165,20 +169,20 @@ export const acala_evm = new EvmParachain({
       min: 0.000005555555555555,
     },
   ],
-  defEvm: acalaEvm,
-  defWormhole: {
-    id: 12,
-    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
-  },
-  h160AccOnly: true,
   ecosystem: Ecosystem.Polkadot,
-  evmResolver: evmResolvers['acala'],
+  evmChain: evmAcalaDef,
+  evmResolver: evmAcalaResolver,
   genesisHash:
     '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
   key: 'acala-evm',
   name: 'Acala EVM',
   parachainId: 2000,
   ss58Format: 10,
+  usesH160Acc: true,
+  wormhole: {
+    id: 12,
+    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
+  },
   ws: 'wss://acala-rpc.aca-api.network',
 });
 
@@ -229,6 +233,7 @@ export const assetHub = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://assethub-polkadot.subscan.io',
   genesisHash:
     '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
   key: 'assethub',
@@ -239,7 +244,6 @@ export const assetHub = new Parachain({
     'wss://polkadot-asset-hub-rpc.polkadot.io',
     'wss://statemint.api.onfinality.io/public-ws',
   ],
-  explorer: 'https://assethub-polkadot.subscan.io',
 });
 
 export const astar = new Parachain({
@@ -262,6 +266,7 @@ export const astar = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://astar.subscan.io',
   genesisHash:
     '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
   key: 'astar',
@@ -269,7 +274,6 @@ export const astar = new Parachain({
   parachainId: 2006,
   ss58Format: 5,
   ws: 'wss://rpc.astar.network',
-  explorer: 'https://astar.subscan.io',
 });
 
 export const bifrost = new Parachain({
@@ -327,6 +331,7 @@ export const bifrost = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://bifrost.subscan.io',
   genesisHash:
     '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
   key: 'bifrost',
@@ -334,7 +339,6 @@ export const bifrost = new Parachain({
   parachainId: 2030,
   ss58Format: 6,
   ws: 'wss://bifrost-polkadot-rpc.dwellir.com',
-  explorer: 'https://bifrost.subscan.io',
 });
 
 export const centrifuge = new Parachain({
@@ -345,6 +349,7 @@ export const centrifuge = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://centrifuge.subscan.io',
   genesisHash:
     '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',
   key: 'centrifuge',
@@ -352,7 +357,6 @@ export const centrifuge = new Parachain({
   parachainId: 2031,
   ss58Format: 36,
   ws: 'wss://fullnode.centrifuge.io',
-  explorer: 'https://centrifuge.subscan.io',
 });
 
 export const hydration = new EvmParachain({
@@ -595,9 +599,10 @@ export const hydration = new EvmParachain({
       min: 0.100786131828,
     },
   ],
-  defEvm: hydrationEvm,
   ecosystem: Ecosystem.Polkadot,
-  evmResolver: evmResolvers['hydration'],
+  evmChain: evmHydrationDef,
+  evmResolver: evmHydrationResolver,
+  explorer: 'https://hydration.subscan.io',
   genesisHash:
     '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
   key: 'hydration',
@@ -610,7 +615,6 @@ export const hydration = new EvmParachain({
     'wss://rpc.helikon.io/hydradx',
     'wss://hydradx.paras.dotters.network',
   ],
-  explorer: 'https://hydration.subscan.io',
 });
 
 export const interlay = new Parachain({
@@ -642,6 +646,7 @@ export const interlay = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://interlay.subscan.io',
   genesisHash:
     '0xbf88efe70e9e0e916416e8bed61f2b45717f517d7f3523e33c7b001e5ffcbc72',
   key: 'interlay',
@@ -649,7 +654,6 @@ export const interlay = new Parachain({
   parachainId: 2032,
   ss58Format: 2032,
   ws: 'wss://api.interlay.io/parachain',
-  explorer: 'https://interlay.subscan.io',
 });
 
 export const moonbeam = new EvmParachain({
@@ -716,22 +720,23 @@ export const moonbeam = new EvmParachain({
       id: '311091173110107856861649819128533077277',
     },
   ],
-  defEvm: moonbeamEvm,
-  defWormhole: {
-    id: 16,
-    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
-    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
-  },
-  h160AccOnly: true,
+
   ecosystem: Ecosystem.Polkadot,
+  evmChain: evmMoonbeamDef,
+  explorer: 'https://moonbeam.subscan.io',
   genesisHash:
     '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
   key: 'moonbeam',
   name: 'Moonbeam',
   parachainId: 2004,
   ss58Format: 1284,
+  usesH160Acc: true,
+  wormhole: {
+    id: 16,
+    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
+  },
   ws: 'wss://wss.api.moonbeam.network',
-  explorer: 'https://moonbeam.subscan.io',
 });
 
 export const mythos = new Parachain({
@@ -742,15 +747,15 @@ export const mythos = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://mythos.subscan.io',
   genesisHash:
     '0xf6ee56e9c5277df5b4ce6ae9983ee88f3cbed27d31beeb98f9f84f997a1ab0b9',
   key: 'mythos',
   name: 'Mythos',
-  h160AccOnly: true,
   parachainId: 3369,
   ss58Format: 29972,
+  usesH160Acc: true,
   ws: 'wss://polkadot-mythos-rpc.polkadot.io',
-  explorer: 'https://mythos.subscan.io',
 });
 
 export const subsocial = new Parachain({
@@ -788,6 +793,7 @@ export const zeitgeist = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://zeitgeist.subscan.io',
   genesisHash:
     '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060',
   key: 'zeitgeist',
@@ -800,7 +806,6 @@ export const zeitgeist = new Parachain({
     'wss://zeitgeist-rpc.dwellir.com',
     'wss://zeitgeist.api.onfinality.io/public-ws',
   ],
-  explorer: 'https://zeitgeist.subscan.io',
 });
 
 export const phala = new Parachain({
@@ -811,6 +816,7 @@ export const phala = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://phala.subscan.io',
   genesisHash:
     '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
   key: 'phala',
@@ -818,7 +824,6 @@ export const phala = new Parachain({
   parachainId: 2035,
   ss58Format: 30,
   ws: 'wss://api.phala.network/ws',
-  explorer: 'https://phala.subscan.io',
 });
 
 export const nodle = new Parachain({
@@ -829,6 +834,7 @@ export const nodle = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://nodle.subscan.io',
   genesisHash:
     '0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21',
   key: 'nodle',
@@ -836,7 +842,6 @@ export const nodle = new Parachain({
   parachainId: 2026,
   ss58Format: 37,
   ws: 'wss://nodle-rpc.dwellir.com',
-  explorer: 'https://nodle.subscan.io',
 });
 
 export const unique = new Parachain({
@@ -847,6 +852,7 @@ export const unique = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://unique.subscan.io',
   genesisHash:
     '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
   key: 'unique',
@@ -854,7 +860,6 @@ export const unique = new Parachain({
   parachainId: 2037,
   ss58Format: 7391,
   ws: 'wss://unique-rpc.dwellir.com',
-  explorer: 'https://unique.subscan.io',
 });
 
 export const crust = new Parachain({
@@ -865,6 +870,7 @@ export const crust = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://crust.subscan.io',
   genesisHash:
     '0x4319cc49ee79495b57a1fec4d2bd43f59052dcc690276de566c2691d6df4f7b8',
   key: 'crust',
@@ -872,7 +878,6 @@ export const crust = new Parachain({
   parachainId: 2008,
   ss58Format: 88,
   ws: 'wss://crust-parachain.crustapps.net',
-  explorer: 'https://crust.subscan.io',
 });
 
 export const kilt_chain = new Parachain({
@@ -883,6 +888,7 @@ export const kilt_chain = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://spiritnet.subscan.io',
   genesisHash:
     '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',
   key: 'kilt',
@@ -890,7 +896,6 @@ export const kilt_chain = new Parachain({
   parachainId: 2086,
   ss58Format: 38,
   ws: 'wss://kilt-rpc.dwellir.com',
-  explorer: 'https://spiritnet.subscan.io',
 });
 
 export const pendulum = new Parachain({
@@ -901,6 +906,7 @@ export const pendulum = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Polkadot,
+  explorer: 'https://pendulum.subscan.io',
   genesisHash:
     '0x5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86',
   key: 'pendulum',
@@ -908,7 +914,6 @@ export const pendulum = new Parachain({
   parachainId: 2094,
   ss58Format: 56,
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
-  explorer: 'https://pendulum.subscan.io',
 });
 
 export const darwinia = new EvmParachain({
@@ -918,17 +923,17 @@ export const darwinia = new EvmParachain({
       id: 'SelfReserve',
     },
   ],
-  defEvm: darwiniaEvm,
-  h160AccOnly: true,
   ecosystem: Ecosystem.Polkadot,
+  evmChain: evmDarwiniaDef,
+  explorer: 'https://darwinia.subscan.io',
   genesisHash:
     '0xf0b8924b12e8108550d28870bc03f7b45a947e1b2b9abf81bfb0b89ecb60570e',
   key: 'darwinia',
   name: 'Darwinia',
   parachainId: 2046,
   ss58Format: 18,
+  usesH160Acc: true,
   ws: 'wss://darwinia-rpc.dwellir.com',
-  explorer: 'https://darwinia.subscan.io',
 });
 
 export const ajuna = new Parachain({
@@ -1011,6 +1016,7 @@ export const basilisk = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://basilisk.subscan.io',
   genesisHash:
     '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755',
   key: 'basilisk',
@@ -1018,7 +1024,6 @@ export const basilisk = new Parachain({
   parachainId: 2090,
   ss58Format: 10041,
   ws: 'wss://rpc.basilisk.cloud',
-  explorer: 'https://basilisk.subscan.io',
 });
 
 export const karura = new Parachain({
@@ -1046,6 +1051,7 @@ export const karura = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://karura.subscan.io',
   genesisHash:
     '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
   key: 'karura',
@@ -1053,7 +1059,6 @@ export const karura = new Parachain({
   parachainId: 2000,
   ss58Format: 8,
   ws: 'wss://karura-rpc-0.aca-api.network',
-  explorer: 'https://karura.subscan.io',
 });
 
 export const integritee = new Parachain({
@@ -1064,6 +1069,7 @@ export const integritee = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://integritee.subscan.io',
   genesisHash:
     '0xcdedc8eadbfa209d3f207bba541e57c3c58a667b05a2e1d1e86353c9000758da',
   key: 'integritee',
@@ -1071,7 +1077,6 @@ export const integritee = new Parachain({
   parachainId: 2015,
   ss58Format: 13,
   ws: 'wss://kusama.api.integritee.network',
-  explorer: 'https://integritee.subscan.io',
 });
 
 export const kusama = new Parachain({
@@ -1081,6 +1086,7 @@ export const kusama = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://kusama.subscan.io',
   genesisHash:
     '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
   key: 'kusama',
@@ -1088,7 +1094,6 @@ export const kusama = new Parachain({
   parachainId: 0,
   ss58Format: 2,
   ws: 'wss://kusama-rpc.dwellir.com',
-  explorer: 'https://kusama.subscan.io',
 });
 
 export const kusamaAssetHub = new Parachain({
@@ -1105,6 +1110,7 @@ export const kusamaAssetHub = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://assethub-kusama.subscan.io',
   genesisHash:
     '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
   key: 'kusama-assethub',
@@ -1112,7 +1118,6 @@ export const kusamaAssetHub = new Parachain({
   parachainId: 1000,
   ss58Format: 2,
   ws: 'wss://kusama-asset-hub-rpc.polkadot.io',
-  explorer: 'https://assethub-kusama.subscan.io',
 });
 
 export const robonomics = new Parachain({
@@ -1123,6 +1128,7 @@ export const robonomics = new Parachain({
     },
   ],
   ecosystem: Ecosystem.Kusama,
+  explorer: 'https://robonomics.subscan.io',
   genesisHash:
     '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc',
   key: 'robonomics',
@@ -1130,7 +1136,6 @@ export const robonomics = new Parachain({
   parachainId: 2048,
   ss58Format: 32,
   ws: 'wss://kusama.rpc.robonomics.network',
-  explorer: 'https://robonomics.subscan.io',
 });
 
 export const tinkernet = new Parachain({
@@ -1160,9 +1165,10 @@ const kusamaChains: AnyChain[] = [
   tinkernet,
 ];
 
-// EVM chains config (Wormhole)
+// EVM chains config
 
 export const ethereum = new EvmChain({
+  id: 1,
   key: 'ethereum',
   name: 'Ethereum',
   assetsData: [
@@ -1192,8 +1198,9 @@ export const ethereum = new EvmChain({
       id: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     },
   ],
-  defEvm: ethereumEvm,
-  defWormhole: {
+  ecosystem: Ecosystem.Ethereum,
+  evmChain: evmMainetDef,
+  wormhole: {
     id: 2,
     tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
     tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,

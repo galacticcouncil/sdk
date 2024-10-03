@@ -1,24 +1,28 @@
-import { Chain as EvmDef } from 'viem';
+import { Chain as EvmChainDef } from 'viem';
 import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
-import { EvmClient, WormholeChain, WormholeDef } from '../evm';
+import { Wormhole, WormholeDef } from './types';
+import { EvmClient } from '../evm';
 
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
-  defEvm: EvmDef;
-  defWormhole?: WormholeDef;
+  evmChain: EvmChainDef;
+  id: number;
+  wormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> implements WormholeChain {
-  readonly defEvm: EvmDef;
-  readonly defWormhole?: WormholeDef;
+export class EvmChain extends Chain<ChainAssetData> implements Wormhole {
+  readonly evmChain: EvmChainDef;
+  readonly id: number;
+  readonly wormhole?: WormholeDef;
 
-  constructor({ defEvm, defWormhole, ...others }: EvmChainParams) {
+  constructor({ evmChain, id, wormhole, ...others }: EvmChainParams) {
     super({ ...others });
-    this.defEvm = defEvm;
-    this.defWormhole = defWormhole;
+    this.evmChain = evmChain;
+    this.id = id;
+    this.wormhole = wormhole;
   }
 
   get client(): EvmClient {
-    return new EvmClient(this.defEvm);
+    return new EvmClient(this.evmChain);
   }
 
   getType(): ChainType {
@@ -26,22 +30,22 @@ export class EvmChain extends Chain<ChainAssetData> implements WormholeChain {
   }
 
   getWormholeId(): number {
-    if (this.defWormhole) {
-      return this.defWormhole.id;
+    if (this.wormhole) {
+      return this.wormhole.id;
     }
     throw new Error('Wormhole configuration missing');
   }
 
   getTokenBridge(): string {
-    if (this.defWormhole) {
-      return this.defWormhole.tokenBridge;
+    if (this.wormhole) {
+      return this.wormhole.tokenBridge;
     }
     throw new Error('Wormhole configuration missing');
   }
 
   getTokenRelayer(): string | undefined {
-    if (this.defWormhole) {
-      return this.defWormhole.tokenRelayer;
+    if (this.wormhole) {
+      return this.wormhole.tokenRelayer;
     }
     throw new Error('Wormhole configuration missing');
   }

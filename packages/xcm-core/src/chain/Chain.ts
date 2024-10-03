@@ -1,5 +1,6 @@
+import { Wormhole } from './types';
+
 import { Asset } from '../asset';
-import { WormholeChain } from '../evm';
 
 export enum ChainType {
   'Parachain' = 'parachain',
@@ -8,6 +9,7 @@ export enum ChainType {
 }
 
 export enum ChainEcosystem {
+  Ethereum = 'ethereum',
   Polkadot = 'polkadot',
   Kusama = 'kusama',
 }
@@ -97,8 +99,8 @@ export abstract class Chain<T extends ChainAssetData> {
     return this.getType() === ChainType.Parachain;
   }
 
-  isWormholeChain(): this is WormholeChain {
-    return 'defWormhole' in this && !!this['defWormhole'];
+  isWormholeChain(): this is Wormhole {
+    return 'wormhole' in this && !!this['wormhole'];
   }
 
   getAsset(key: string): Asset | undefined {

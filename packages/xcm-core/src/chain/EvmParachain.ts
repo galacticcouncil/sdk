@@ -1,34 +1,35 @@
-import { Chain as EvmDef } from 'viem';
+import { Chain as EvmChainDef } from 'viem';
 import { ChainType } from './Chain';
 import { Parachain, ParachainParams } from './Parachain';
-import { EvmClient, EvmResolver, WormholeChain, WormholeDef } from '../evm';
+import { Wormhole, WormholeDef } from './types';
+import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
 export interface EvmParachainParams extends ParachainParams {
-  defEvm: EvmDef;
-  defWormhole?: WormholeDef;
+  evmChain: EvmChainDef;
   evmResolver?: EvmResolver;
+  wormhole?: WormholeDef;
 }
 
-export class EvmParachain extends Parachain implements WormholeChain {
-  readonly defEvm: EvmDef;
-  readonly defWormhole?: WormholeDef;
+export class EvmParachain extends Parachain implements Wormhole {
+  readonly evmChain: EvmChainDef;
   readonly evmResolver?: EvmResolver;
+  readonly wormhole?: WormholeDef;
 
   constructor({
-    defEvm,
-    defWormhole,
+    evmChain,
     evmResolver,
+    wormhole,
     ...others
   }: EvmParachainParams) {
     super({ ...others });
-    this.defEvm = defEvm;
-    this.defWormhole = defWormhole;
+    this.evmChain = evmChain;
     this.evmResolver = evmResolver;
+    this.wormhole = wormhole;
   }
 
   get client(): EvmClient {
-    return new EvmClient(this.defEvm);
+    return new EvmClient(this.evmChain);
   }
 
   getType(): ChainType {
@@ -36,22 +37,22 @@ export class EvmParachain extends Parachain implements WormholeChain {
   }
 
   getWormholeId(): number {
-    if (this.defWormhole) {
-      return this.defWormhole.id;
+    if (this.wormhole) {
+      return this.wormhole.id;
     }
     throw new Error('Wormhole configuration missing');
   }
 
   getTokenBridge(): string {
-    if (this.defWormhole) {
-      return this.defWormhole.tokenBridge;
+    if (this.wormhole) {
+      return this.wormhole.tokenBridge;
     }
     throw new Error('Wormhole configuration missing');
   }
 
   getTokenRelayer(): string | undefined {
-    if (this.defWormhole) {
-      return this.defWormhole.tokenRelayer;
+    if (this.wormhole) {
+      return this.wormhole.tokenRelayer;
     }
     throw new Error('Wormhole configuration missing');
   }

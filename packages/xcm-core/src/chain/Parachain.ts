@@ -25,17 +25,18 @@ export interface ParachainAssetsData extends ChainAssetData {
 }
 
 export interface ParachainParams extends ChainParams<ParachainAssetsData> {
+  explorer?: string;
   genesisHash: string;
   parachainId: number;
   ss58Format: number;
+  usesH160Acc?: boolean;
   usesChainDecimals?: boolean;
-  weight?: number;
   ws: string | string[];
-  h160AccOnly?: boolean;
-  explorer?: string;
 }
 
 export class Parachain extends Chain<ParachainAssetsData> {
+  readonly explorer?: string;
+
   readonly genesisHash: string;
 
   readonly parachainId: number;
@@ -44,34 +45,28 @@ export class Parachain extends Chain<ParachainAssetsData> {
 
   readonly usesChainDecimals: boolean;
 
-  readonly weight?: number;
+  readonly usesH160Acc: boolean;
 
   readonly ws: string | string[];
 
-  readonly h160AccOnly: boolean;
-
-  readonly explorer?: string;
-
   constructor({
+    explorer,
     genesisHash,
     parachainId,
     usesChainDecimals,
+    usesH160Acc = false,
     ss58Format,
-    weight,
     ws,
-    h160AccOnly = false,
-    explorer,
     ...others
   }: ParachainParams) {
     super({ ...others });
+    this.explorer = explorer;
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
     this.usesChainDecimals = !!usesChainDecimals;
-    this.weight = weight;
+    this.usesH160Acc = usesH160Acc;
     this.ws = ws;
-    this.h160AccOnly = h160AccOnly;
-    this.explorer = explorer;
   }
 
   get api(): Promise<ApiPromise> {

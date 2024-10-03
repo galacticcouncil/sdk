@@ -4,7 +4,7 @@ import {
   EvmParachain,
   Parachain,
   Precompile,
-  WormholeChain,
+  Wormhole,
 } from '@galacticcouncil/xcm-core';
 
 import { createMRLPayload } from './TokenBridge.utils';
@@ -23,8 +23,8 @@ const transferTokensWithPayload = () => {
       build: (params) => {
         const { address, amount, asset, source, destination, via } = params;
         mrlGuard(via);
-        const ctxWh = source.chain as WormholeChain;
-        const rcvWh = via as WormholeChain;
+        const ctxWh = source.chain as Wormhole;
+        const rcvWh = via as Wormhole;
         const recipient = Precompile.Bridge;
         const assetId = source.chain.getAssetId(asset);
         const payload = createMRLPayload(
@@ -53,8 +53,8 @@ const transferTokens = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, asset, source, destination, via } = params;
     const ctx = via || source.chain;
-    const ctxWh = ctx as WormholeChain;
-    const rcvWh = destination.chain as WormholeChain;
+    const ctxWh = ctx as Wormhole;
+    const rcvWh = destination.chain as Wormhole;
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
@@ -79,8 +79,8 @@ const wrapAndTransferETHWithPayload = () => {
       build: (params) => {
         const { address, source, destination, via } = params;
         mrlGuard(via);
-        const ctxWh = source.chain as WormholeChain;
-        const rcvWh = via as WormholeChain;
+        const ctxWh = source.chain as Wormhole;
+        const rcvWh = via as Wormhole;
         const recipient = Precompile.Bridge;
         const payload = createMRLPayload(
           destination.chain as Parachain,

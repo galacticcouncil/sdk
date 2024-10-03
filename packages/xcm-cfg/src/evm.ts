@@ -1,6 +1,6 @@
 import { defineChain, Chain } from 'viem';
 
-export const acalaEvm: Chain = defineChain({
+export const evmAcalaDef: Chain = defineChain({
   id: 787,
   name: 'Acala',
   network: 'acala',
@@ -28,7 +28,7 @@ export const acalaEvm: Chain = defineChain({
   testnet: false,
 });
 
-export const hydrationEvm: Chain = defineChain({
+export const evmHydrationDef: Chain = defineChain({
   id: 222222,
   name: 'Hydration',
   network: 'hydration',
@@ -56,7 +56,7 @@ export const hydrationEvm: Chain = defineChain({
   testnet: false,
 });
 
-export const moonbeamEvm: Chain = defineChain({
+export const evmMoonbeamDef: Chain = defineChain({
   id: 1284,
   name: 'Moonbeam',
   network: 'moonbeam',
