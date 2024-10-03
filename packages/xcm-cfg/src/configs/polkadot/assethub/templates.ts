@@ -1,24 +1,48 @@
-import { Asset, AssetConfig } from '@galacticcouncil/xcm-core';
+import {
+  AnyChain,
+  Asset,
+  AssetConfig,
+  ExtrinsicConfigBuilderParams,
+} from '@galacticcouncil/xcm-core';
 
 import { dot, usdt } from '../../../assets';
-import { AssetMinBuilder, BalanceBuilder } from '../../../builders';
-import { hydration } from '../../../chains';
-
-import { extrinsicSwap } from './configs';
+import {
+  AssetMinBuilder,
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  ExtrinsicInstruction,
+} from '../../../builders';
+import { hydration, moonbeam } from '../../../chains';
 
 export const xcmDeliveryFeeAmount = 0.036;
 
-export function toHydrationExtTemplate(asset: Asset): AssetConfig {
+const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
+  const { source } = params;
+  const { enabled } = source.feeSwap || {};
+  return !!enabled;
+};
+
+const swapExtrinsic = ExtrinsicBuilder()
+  .assetConversion()
+  .swapTokensForExactTokens();
+
+function toParachainExtTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  fee: number
+): AssetConfig {
   return new AssetConfig({
     asset: asset,
     balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydration,
+    destination: destination,
     destinationFee: {
-      amount: 0.02,
+      amount: fee,
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: extrinsicSwap(),
+    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).prior(
+      ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().X2()
+    ),
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
@@ -26,4 +50,12 @@ export function toHydrationExtTemplate(asset: Asset): AssetConfig {
     },
     min: AssetMinBuilder().assets().asset(),
   });
+}
+
+export function toHydrationExtTemplate(asset: Asset): AssetConfig {
+  return toParachainExtTemplate(asset, hydration, 0.02);
+}
+
+export function toMoonbeamExtTemplate(asset: Asset): AssetConfig {
+  return toParachainExtTemplate(asset, moonbeam, 0.03);
 }

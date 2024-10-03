@@ -72,8 +72,10 @@ import { balance, fee } from './configs';
 import {
   MRL_EXECUTION_FEE,
   MRL_XCM_FEE,
-  toAssethubExtTemplate,
+  toHubExtTemplate,
   toEthereumWithRelayerTemplate,
+  toMoonbeamErc20Template,
+  toZeitgeistErc20Template,
 } from './templates';
 
 const toAcala: AssetConfig[] = [
@@ -164,10 +166,10 @@ const toAssetHub: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
     fee: fee(),
   }),
-  toAssethubExtTemplate(pink),
-  toAssethubExtTemplate(ded),
-  toAssethubExtTemplate(dota),
-  toAssethubExtTemplate(wud),
+  toHubExtTemplate(pink),
+  toHubExtTemplate(ded),
+  toHubExtTemplate(dota),
+  toHubExtTemplate(wud),
 ];
 
 const toAstar: AssetConfig[] = [
@@ -379,54 +381,6 @@ const toMoonbeam: AssetConfig[] = [
     fee: fee(),
   }),
   new AssetConfig({
-    asset: dai_mwh,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
-  }),
-  new AssetConfig({
-    asset: usdc_mwh,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
-  }),
-  new AssetConfig({
-    asset: usdt_mwh,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
-  }),
-  new AssetConfig({
-    asset: wbtc_mwh,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
-  }),
-  new AssetConfig({
     asset: dot,
     balance: balance(),
     destination: moonbeam,
@@ -436,18 +390,6 @@ const toMoonbeam: AssetConfig[] = [
       balance: balance(),
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
-  }),
-  new AssetConfig({
-    asset: weth_mwh,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
     fee: fee(),
   }),
   // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
@@ -475,6 +417,11 @@ const toMoonbeam: AssetConfig[] = [
   //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
   //   fee: fee(),
   // }),
+  toMoonbeamErc20Template(dai_mwh),
+  toMoonbeamErc20Template(usdc_mwh),
+  toMoonbeamErc20Template(usdt_mwh),
+  toMoonbeamErc20Template(wbtc_mwh),
+  toMoonbeamErc20Template(weth_mwh),
 ];
 
 const toPolkadot: AssetConfig[] = [
@@ -521,18 +468,6 @@ const toZeitgeist: AssetConfig[] = [
     fee: fee(),
   }),
   new AssetConfig({
-    asset: usdc_mwh,
-    balance: balance(),
-    destination: zeitgeist,
-    destinationFee: {
-      amount: 0.1,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
-  }),
-  new AssetConfig({
     asset: glmr,
     balance: balance(),
     destination: zeitgeist,
@@ -544,6 +479,7 @@ const toZeitgeist: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
     fee: fee(),
   }),
+  toZeitgeistErc20Template(usdc_mwh),
 ];
 
 const toPhala: AssetConfig[] = [

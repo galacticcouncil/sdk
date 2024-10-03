@@ -14,7 +14,11 @@ import {
   ExtrinsicBuilder,
 } from '../../../builders';
 
-import { toHydrationExtTemplate, xcmDeliveryFeeAmount } from './templates';
+import {
+  toHydrationExtTemplate,
+  toMoonbeamExtTemplate,
+  xcmDeliveryFeeAmount,
+} from './templates';
 
 const toHydration: AssetConfig[] = [
   new AssetConfig({
@@ -85,31 +89,10 @@ const toPolkadot: AssetConfig[] = [
 
 const toMoonbeam: AssetConfig[] = [
   new AssetConfig({
-    asset: pink,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.03,
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
-    },
-    min: AssetMinBuilder().assets().asset(),
-  }),
-  new AssetConfig({
     asset: usdt,
     balance: BalanceBuilder().substrate().assets().account(),
     destination: moonbeam,
     destinationFee: {
-      //amount: FeeBuilder().assetManager().assetTypeUnitsPerSecond(),
       amount: 0.02,
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
@@ -145,6 +128,7 @@ const toMoonbeam: AssetConfig[] = [
     },
     min: AssetMinBuilder().assets().asset(),
   }),
+  toMoonbeamExtTemplate(pink),
 ];
 
 const toBifrost: AssetConfig[] = [

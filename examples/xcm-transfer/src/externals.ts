@@ -139,6 +139,6 @@ function buildAssethubConfig(
   );
   configService.updateChainAssetConfig(
     hydration,
-    templates.hydration.toAssethubExtTemplate(assetData.asset)
+    templates.hydration.toHubExtTemplate(assetData.asset)
   );
 }

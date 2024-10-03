@@ -27,8 +27,9 @@ export class FeeValidation extends TransferValidation {
 export class DestFeeValidation extends TransferValidation {
   protected async skipFor(data: TransferData): Promise<boolean> {
     const { asset, source, destination } = data;
+    const { enabled } = source.feeSwap || {};
     const isSufficientFeeAsset = asset.isEqual(destination.fee);
-    const isFeeSwap = !!source.feeSwap?.enabled;
+    const isFeeSwap = !!enabled;
     return isSufficientFeeAsset || isFeeSwap;
   }
 

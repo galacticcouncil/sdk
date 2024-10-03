@@ -55,7 +55,9 @@ export class HydrationEdValidation extends TransferValidation {
 export class HydrationMrlFeeValidation extends TransferValidation {
   protected async skipFor(data: TransferData): Promise<boolean> {
     const { source } = data;
-    const isFeeSwap = !!source.feeSwap?.enabled;
+    const { enabled } = source.feeSwap || {};
+
+    const isFeeSwap = !!enabled;
     return isFeeSwap;
   }
 
