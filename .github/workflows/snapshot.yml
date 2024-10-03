@@ -43,7 +43,7 @@ jobs:
 
       - name: Checkout hydration-ui repository
         if: env.UPDATE_AVAILABLE == 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
@@ -52,6 +52,7 @@ jobs:
       - name: Check for package updates
         id: check-updates
         run: |
+          echo $PWD
           cd hydration-ui
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION=grep @galacticcouncil/sdk package.json | cut -d '"' -f4
