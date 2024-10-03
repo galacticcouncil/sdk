@@ -52,6 +52,7 @@ jobs:
           if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
             echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
             echo "NEW_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+            echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           fi
 
       - name: Checkout hydration-ui repository
@@ -77,11 +78,11 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
-          commit-message: "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
-          title: "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
+          commit-message: 'Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}'
+          title: 'Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}'
           body: |
             This PR updates ${{ env.PACKAGE_NAME }} to the latest version ${{ env.NEW_VERSION }}.
-            
+
             Current version: ${{ env.CURRENT_VERSION }}
             New version: ${{ env.NEW_VERSION }}
           branch: update-sdk-${{ env.NEW_VERSION }}
