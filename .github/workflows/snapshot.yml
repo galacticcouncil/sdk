@@ -51,6 +51,7 @@ jobs:
 
       - name: Check for package updates
         run: |
+          cd $GITHUB_WORKSPACE/hydration-ui
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION="$(grep $PACKAGE_NAME package.json | cut -d '"' -f4)"
           LATEST_VERSION="$(npm view $PACKAGE_NAME versions --json | jq -r '.[-1]')"
@@ -66,7 +67,7 @@ jobs:
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
-          npm install -g corepack
+          corepack enable
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
