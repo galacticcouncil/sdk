@@ -50,10 +50,8 @@ jobs:
 
       - name: Check for package updates
         run: |
-          echo * 
-          cd ..
-          echo *
-          cd $GITHUB_WORKSPACE
+          echo cat package.json
+          cd ../..
           echo *
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION="$(grep $PACKAGE_NAME package.json | cut -d '"' -f4)"
