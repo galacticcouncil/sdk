@@ -44,7 +44,7 @@ jobs:
       - name: Check for package updates
         id: check-updates
         run: |
-          PACKAGE_NAME="@galacticcouncil/sdk"
+          PACKAGE_NAME="galacticcouncil/sdk"
           CURRENT_VERSION=$(npm list $PACKAGE_NAME | grep $PACKAGE_NAME | cut -d@ -f2)
           LATEST_VERSION=$(npm view $PACKAGE_NAME version)
           echo "Current version: $CURRENT_VERSION"
