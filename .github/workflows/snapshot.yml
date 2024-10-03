@@ -52,7 +52,7 @@ jobs:
       - name: Check for package updates
         run: |
           echo *
-          cd ..
+          cd ../..
           echo *
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION="$(grep $PACKAGE_NAME package.json | cut -d '"' -f4)"
