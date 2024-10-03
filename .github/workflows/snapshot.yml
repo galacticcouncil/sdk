@@ -50,10 +50,8 @@ jobs:
           path: 'hydration-ui'
 
       - name: Check for package updates
-        id: check-updates
         run: |
-          echo $PWD
-          cd hydration-ui
+          echo *
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION=grep @galacticcouncil/sdk package.json | cut -d '"' -f4
           LATEST_VERSION=npm view $PACKAGE_NAME versions --json | jq -r '.[-1]'
