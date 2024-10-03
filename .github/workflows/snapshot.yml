@@ -68,8 +68,8 @@ jobs:
         run: |
           cd hydration-ui
           npm install ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
+          echo $PWD
+          echo *
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
 
