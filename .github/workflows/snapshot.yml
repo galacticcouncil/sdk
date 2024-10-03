@@ -41,20 +41,6 @@ jobs:
       - name: 🚀 Publish snapshot
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
-      - name: Check for package updates
-        id: check-updates
-        run: |
-          PACKAGE_NAME="galacticcouncil/sdk"
-          CURRENT_VERSION=$(npm list $PACKAGE_NAME | grep $PACKAGE_NAME | cut -d@ -f2)
-          LATEST_VERSION=$(npm view $PACKAGE_NAME version)
-          echo "Current version: $CURRENT_VERSION"
-          echo "Latest version: $LATEST_VERSION"
-          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
-            echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
-            echo "NEW_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
-            echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
-          fi
-
       - name: Checkout hydration-ui repository
         if: env.UPDATE_AVAILABLE == 'true'
         uses: actions/checkout@v2
@@ -63,13 +49,25 @@ jobs:
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
 
+      - name: Check for package updates
+        id: check-updates
+        run: |
+          cd hydration-ui
+          PACKAGE_NAME="@galacticcouncil/sdk"
+          CURRENT_VERSION=grep @galacticcouncil/sdk package.json | cut -d '"' -f4
+          LATEST_VERSION=npm view $PACKAGE_NAME versions --json | jq -r '.[-1]'
+          echo "Current version: $CURRENT_VERSION"
+          echo "Latest version: $LATEST_VERSION"
+          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+            echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
+            echo "NEW_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+            echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          fi
+
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
-          cd hydration-ui
-          npm install ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
-          echo $PWD
-          echo *
+          yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
 
