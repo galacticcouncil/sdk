@@ -164,8 +164,10 @@ export class Wallet {
         data.amount = big.toBigInt(amount, srcBalance.decimals);
         return src.getFee(data, srcConf);
       },
-      async validate(): Promise<TransferValidationReport[]> {
-        return validator.validate(transferData);
+      async validate(delta): Promise<TransferValidationReport[]> {
+        const data = Object.assign({}, transferData);
+        const withDelta = { ...data, ...delta };
+        return validator.validate(withDelta);
       },
     } as XTransfer;
   }

@@ -1,6 +1,7 @@
 import {
   AssetAmount,
   SwapInfo,
+  TransferData,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 
@@ -15,6 +16,7 @@ import {
  * @member {AssetAmount} min Minimum required amount of asset to send
  * @member {AssetAmount} srcFee Source chain fee
  * @member {AssetAmount} srcFeeBalance Source chain fee asset balance
+ * @member {SwapInfo} srcFeeSwap Source chain fee swap details
  */
 export interface XTransfer {
   balance: AssetAmount;
@@ -27,7 +29,7 @@ export interface XTransfer {
   srcFeeSwap: SwapInfo;
   buildCall(amount: bigint | number | string): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
-  validate(): Promise<TransferValidationReport[]>;
+  validate(delta?: TransferData): Promise<TransferValidationReport[]>;
 }
 
 export interface XCall {
