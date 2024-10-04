@@ -1,7 +1,6 @@
 import {
   AssetAmount,
   SwapInfo,
-  TransferData,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 
@@ -29,7 +28,7 @@ export interface XTransfer {
   srcFeeSwap: SwapInfo;
   buildCall(amount: bigint | number | string): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
-  validate(delta?: TransferData): Promise<TransferValidationReport[]>;
+  validate(fee: bigint): Promise<TransferValidationReport[]>;
 }
 
 export interface XCall {
