@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: 🤘 Checkout
         uses: actions/checkout@v4
+        with:
+          path: sdk
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,13 +43,6 @@ jobs:
       - name: 🚀 Publish snapshot
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
-      - name: Checkout hydration-ui repository
-        if: env.UPDATE_AVAILABLE == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: 'galacticcouncil/hydration-ui'
-          token: ${{ secrets.TARGET_REPO_PAT }}
-
       - name: Check for package updates
         run: |
           cat package.json
@@ -62,6 +57,14 @@ jobs:
             echo "NEW_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           fi
+
+      - name: Checkout hydration-ui repository
+        if: env.UPDATE_AVAILABLE == 'true'
+        uses: actions/checkout@v4
+        with:
+          path: ui
+          repository: 'galacticcouncil/hydration-ui'
+          token: ${{ secrets.TARGET_REPO_PAT }}
 
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
