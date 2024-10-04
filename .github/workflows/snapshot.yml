@@ -43,7 +43,6 @@ jobs:
 
       - name: Check for package updates
         run: |
-          cat package.json
           PACKAGE_NAME="@galacticcouncil/sdk"
           CURRENT_VERSION="$(grep $PACKAGE_NAME package.json | cut -d '"' -f4)"
           LATEST_VERSION="$(npm view $PACKAGE_NAME versions --json | jq -r '.[-1]')"
@@ -68,7 +67,7 @@ jobs:
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
           cd ui
-          cat package.json
+          npm install -g yarn@latest
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
