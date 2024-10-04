@@ -74,6 +74,8 @@ jobs:
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
+          cat package.json
+          cat package-lock.json
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
