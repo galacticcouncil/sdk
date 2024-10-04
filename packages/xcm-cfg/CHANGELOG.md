@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 4.0.0
+
+### Major Changes
+
+- Fee swaps & validations
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@4.0.0
+
 ## 3.5.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 4.0.0
+
+### Major Changes
+
+- Fee swaps & validations
+
 ## 3.0.0
 
 ### Major Changes
