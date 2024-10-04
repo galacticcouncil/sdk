@@ -166,7 +166,7 @@ export class Wallet {
       },
       async validate(fee): Promise<TransferValidationReport[]> {
         const data = Object.assign({}, transferData);
-        data.source.fee = srcFee.copyWith({ amount: fee });
+        data.source.fee = fee ? srcFee.copyWith({ amount: fee }) : srcFee;
         return validator.validate(data);
       },
     } as XTransfer;
