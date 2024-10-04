@@ -67,7 +67,7 @@ jobs:
         if: env.UPDATE_AVAILABLE == 'true'
         uses: actions/checkout@v4
         with:
-          path: ui
+          path: hydration-ui
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
 
@@ -81,7 +81,7 @@ jobs:
           git config --global user.name "SDK Action"
           git add package.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
-        working-directory: ui
+        working-directory: hydration-ui
 
       - name: Create Pull Request in target repository
         if: env.UPDATE_AVAILABLE == 'true'
