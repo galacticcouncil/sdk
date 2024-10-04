@@ -4,7 +4,7 @@ import { ksm } from '../../assets';
 import { kusama, kusamaAssetHub, basilisk, karura } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const xcmDeliveryFeeAmount = 0.002;
+const xcmDeliveryFee = 0.002;
 
 const toBasilisk: AssetConfig[] = [
   new AssetConfig({
@@ -23,7 +23,7 @@ const toBasilisk: AssetConfig[] = [
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
   }),
 ];
@@ -45,7 +45,7 @@ const toKarura: AssetConfig[] = [
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
   }),
 ];
@@ -64,7 +64,7 @@ const toAssetHub: AssetConfig[] = [
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
   }),
 ];

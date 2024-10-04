@@ -9,7 +9,7 @@ import { toAsset, toDest } from './xTokens.utils';
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  getTransactAccount,
+  getDerivatedAccount,
   XcmVersion,
 } from '../ExtrinsicBuilder.utils';
 
@@ -163,14 +163,7 @@ const transferMultiassets = (originParachainId?: number) => {
   };
 };
 
-type XTokensOpts = {
-  fee: Asset;
-  feeAmount: number;
-};
-
-const transferMultiCurrencies = (
-  opts?: XTokensOpts
-): ExtrinsicConfigBuilder => ({
+const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
   build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
@@ -178,26 +171,27 @@ const transferMultiCurrencies = (
       getArgs: () => {
         const { amount, asset, destination, source, via } = params;
 
+        let rcv = destination.chain as Parachain;
         let feeAssetId = source.chain.getAssetId(destination.fee);
         let feeAmount = destination.fee.amount;
-        if (opts) {
-          const feeAssetDecimals = source.chain.getAssetDecimals(opts.fee);
-          feeAssetId = source.chain.getAssetId(opts.fee);
-          feeAmount = big.toBigInt(opts.feeAmount, feeAssetDecimals!);
+        if (via && via.fee) {
+          const { amount, decimals } = via.fee;
+          rcv = via.chain as Parachain;
+          feeAssetId = source.chain.getAssetId(via.fee);
+          feeAmount = big.toBigInt(amount, decimals);
         }
 
-        const rcv = destination.chain as Parachain;
         const version = XcmVersion.v3;
         const assetId = source.chain.getAssetId(asset);
-        const tAccount = getTransactAccount(params);
-        const account = getExtrinsicAccount(tAccount);
+        const derivatedAccount = getDerivatedAccount(params);
+        const account = getExtrinsicAccount(derivatedAccount);
         return [
           [
             [assetId, amount],
             [feeAssetId, feeAmount],
           ],
           1,
-          toDest(version, via || rcv, account),
+          toDest(version, rcv, account),
           'Unlimited',
         ];
       },

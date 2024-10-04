@@ -1,6 +1,5 @@
 import {
   big,
-  Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
@@ -15,7 +14,7 @@ import {
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  getTransactAccount,
+  getDerivatedAccount,
   Parents,
   XcmVersion,
 } from '../ExtrinsicBuilder.utils';
@@ -224,8 +223,7 @@ const reserveTransferAssets = () => {
 };
 
 type TransactOpts = {
-  fee: Asset;
-  feeAmount: number;
+  fee: number;
 };
 
 const send = () => {
@@ -233,36 +231,37 @@ const send = () => {
   return {
     transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { destination, source, transact, via } = params;
+        const { destination, source, via } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
-            if (!transact) {
-              throw new Error('Ethereum transact not provided');
+            if (via && via.fee && via.transact) {
+              const version = XcmVersion.v3;
+              const derivatedAccount = getDerivatedAccount(params);
+              const account = getExtrinsicAccount(derivatedAccount);
+              const ctx = source.chain as Parachain;
+              const rcv = destination.chain as Parachain;
+
+              const { fee, transact } = via;
+              const feePalletInstance = ctx.getAssetPalletInstance(fee);
+              const feeAmount = big.toBigInt(opts.fee, fee.decimals);
+
+              return [
+                toDest(version, via.chain || rcv),
+                toTransactMessage(
+                  version,
+                  account,
+                  { X1: { PalletInstance: feePalletInstance } },
+                  transact.call,
+                  transact.weight,
+                  feeAmount
+                ),
+              ];
             }
-
-            const version = XcmVersion.v3;
-            const tAccount = getTransactAccount(params);
-            const account = getExtrinsicAccount(tAccount);
-            const ctx = source.chain as Parachain;
-            const rcv = destination.chain as Parachain;
-
-            const feePalletInstance = ctx.getAssetPalletInstance(opts.fee);
-            const feeAssetDecimals = ctx.getAssetDecimals(opts.fee);
-            const fee = big.toBigInt(opts.feeAmount, feeAssetDecimals!);
-
-            return [
-              toDest(version, via || rcv),
-              toTransactMessage(
-                version,
-                account,
-                { X1: { PalletInstance: feePalletInstance } },
-                transact.call,
-                transact.weight,
-                fee
-              ),
-            ];
+            throw new Error(
+              'Route via configuration is incorrect. Specify transact & fee configs.'
+            );
           },
         });
       },

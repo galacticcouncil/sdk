@@ -1,7 +1,7 @@
 import {
+  AnyParachain,
   ContractConfig,
   ContractConfigBuilder,
-  EvmParachain,
   Parachain,
   Precompile,
   Wormhole,
@@ -11,7 +11,7 @@ import { createMRLPayload } from './TokenBridge.utils';
 
 import { formatDestAddress, parseAssetId } from '../utils';
 
-function mrlGuard(via: EvmParachain | undefined) {
+function mrlGuard(via: AnyParachain | undefined) {
   if (via?.key !== 'moonbeam') {
     throw new Error('Mrl transfer supported only via moonbeam');
   }
@@ -22,9 +22,9 @@ const transferTokensWithPayload = () => {
     mrl: (): ContractConfigBuilder => ({
       build: (params) => {
         const { address, amount, asset, source, destination, via } = params;
-        mrlGuard(via);
+        mrlGuard(via?.chain);
         const ctxWh = source.chain as Wormhole;
-        const rcvWh = via as Wormhole;
+        const rcvWh = via?.chain as Wormhole;
         const recipient = Precompile.Bridge;
         const assetId = source.chain.getAssetId(asset);
         const payload = createMRLPayload(
@@ -52,9 +52,10 @@ const transferTokensWithPayload = () => {
 const transferTokens = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, asset, source, destination, via } = params;
-    const ctx = via || source.chain;
+    const ctx = via?.chain || source.chain;
+    const rcv = destination.chain;
     const ctxWh = ctx as Wormhole;
-    const rcvWh = destination.chain as Wormhole;
+    const rcvWh = rcv as Wormhole;
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
@@ -78,9 +79,9 @@ const wrapAndTransferETHWithPayload = () => {
     mrl: (): ContractConfigBuilder => ({
       build: (params) => {
         const { address, source, destination, via } = params;
-        mrlGuard(via);
+        mrlGuard(via?.chain);
         const ctxWh = source.chain as Wormhole;
-        const rcvWh = via as Wormhole;
+        const rcvWh = via?.chain as Wormhole;
         const recipient = Precompile.Bridge;
         const payload = createMRLPayload(
           destination.chain as Parachain,

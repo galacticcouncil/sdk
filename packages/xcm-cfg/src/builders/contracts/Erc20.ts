@@ -11,7 +11,7 @@ export function Erc20() {
     approve: (): ContractConfigBuilder => ({
       build: (params) => {
         const { amount, asset, destination, source, via } = params;
-        const ctx = via || source.chain;
+        const ctx = via?.chain || source.chain;
         const ctxWh = ctx as Wormhole;
         const rcvWh = destination.chain as Wormhole;
         const assetId = ctx.getAssetId(asset);

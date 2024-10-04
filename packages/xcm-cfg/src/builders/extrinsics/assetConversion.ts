@@ -20,16 +20,17 @@ const swapTokensForExactTokens = (): ExtrinsicConfigBuilder => {
           const assetId = ctx.getAssetId(destination.fee);
           const palletInstance = ctx.getAssetPalletInstance(destination.fee);
 
-          const { amount } = source.feeSwap!;
-          const amountWithSlippage = amount + (amount * 30n) / 100n;
+          const { aIn } = source.feeSwap!;
+          const maxAmountIn = aIn.amount + (aIn.amount * 30n) / 100n;
+          const amountOut = destination.fee.amount;
 
           return [
             [
               getNativeLocation(),
               getAssetLocation(assetId.toString(), palletInstance),
             ],
-            destination.fee.amount,
-            amountWithSlippage,
+            amountOut,
+            maxAmountIn,
             address,
             true,
           ];

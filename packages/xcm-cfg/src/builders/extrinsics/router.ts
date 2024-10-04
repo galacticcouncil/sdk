@@ -15,12 +15,12 @@ const buy = (): ExtrinsicConfigBuilder => {
         func,
         getArgs: () => {
           const ctx = source.chain as EvmParachain;
-          const { amount, route } = source.feeSwap!;
-          const assetIn = ctx.getAssetId(source.fee!);
-          const assetOut = ctx.getAssetId(destination.fee);
+          const { aIn, route } = source.feeSwap!;
+          const assetIn = ctx.getMetadataAssetId(source.fee!);
+          const assetOut = ctx.getMetadataAssetId(destination.fee);
 
           const amountOut = destination.fee.amount;
-          const maxAmountIn = amount + (amount * 30n) / 100n;
+          const maxAmountIn = aIn.amount + (aIn.amount * 30n) / 100n;
           return [assetIn, assetOut, amountOut, maxAmountIn, route];
         },
       }),

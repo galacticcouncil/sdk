@@ -9,8 +9,8 @@ import {
   AssetAmount,
   ChainEcosystem,
   ConfigService,
-  FeeSwap,
   Parachain,
+  SwapInfo,
   TransferData,
 } from '@galacticcouncil/xcm-core';
 
@@ -28,8 +28,6 @@ const IS_DEX = (c: AnyChain) => isHydration(c) || isBasilisk(c);
 
 const IS_HUB = (c: AnyChain) =>
   c instanceof Parachain && c.parachainId === 1000;
-
-const SLIPPAGE_PCT = 30n;
 
 export class Dex {
   readonly chain: Parachain;
@@ -49,21 +47,25 @@ export class Dex {
     });
   }
 
-  isSwapSupported(transferData: TransferData): boolean {
-    const { asset, source, destination } = transferData;
+  isSwapSupported(fee: AssetAmount, transferData: TransferData): boolean {
+    const { asset, source } = transferData;
+    const destFee = this.parseDestFee(transferData);
     const isSupported = IS_HUB(source.chain) || IS_DEX(source.chain);
-    const isSufficientAssetTransfer = asset.isEqual(destination.fee);
-    return isSupported || !isSufficientAssetTransfer;
+    const isSufficientAssetTransfer = asset.isEqual(destFee);
+    const isFeePaymentAsset = fee.isSame(destFee);
+    return isSupported && !isSufficientAssetTransfer && !isFeePaymentAsset;
   }
 
   async calculateFeeSwap(
     fee: AssetAmount,
     transferData: TransferData
-  ): Promise<FeeSwap> {
-    const { source, destination } = transferData;
+  ): Promise<SwapInfo> {
+    const { source } = transferData;
+    const destFee = this.parseDestFee(transferData);
+    const destFeeBalance = this.parseDestFeeBalance(transferData);
     const assetIn = this.chain.getMetadataAssetId(fee);
-    const assetOut = this.chain.getMetadataAssetId(destination.fee);
-    const amountOut = destination.fee.toDecimal(destination.fee.decimals);
+    const assetOut = this.chain.getMetadataAssetId(destFee);
+    const amountOut = destFee.toDecimal(destFee.decimals);
 
     const trade = await this.router.getBestBuy(
       assetIn.toString(),
@@ -71,18 +73,30 @@ export class Dex {
       amountOut
     );
 
-    const amount = BigInt(trade.amountIn.toNumber());
-    const maxAmountIn = amount * 2n; // Cover slippage up to 100%
+    const amountIn = BigInt(trade.amountIn.toNumber());
+    const maxAmountIn = amountIn * 2n; // Support slippage up to 100%
 
-    const hasNotEnoughDestFee =
-      destination.feeBalance.amount < destination.fee.amount;
+    const hasNotEnoughDestFee = destFeeBalance.amount < destFee.amount;
     const hasEnoughReservesToSwap =
       source.feeBalance.amount - fee.amount > maxAmountIn;
 
     return {
-      amount: amount,
+      aIn: fee.copyWith({ amount: amountIn }),
+      aOut: destFee,
       enabled: hasNotEnoughDestFee && hasEnoughReservesToSwap,
       route: buildRoute(trade.swaps),
-    } as FeeSwap;
+    } as SwapInfo;
+  }
+
+  private parseDestFee(transferData: TransferData) {
+    const { destination, via } = transferData;
+    const routeFee = via && via.fee;
+    return routeFee || destination.fee;
+  }
+
+  private parseDestFeeBalance(transferData: TransferData) {
+    const { destination, via } = transferData;
+    const routeFeeBalance = via && via.feeBalance;
+    return routeFeeBalance || destination.feeBalance;
   }
 }

@@ -18,13 +18,13 @@ import {
  * @member {AssetAmount} minId asset "on chain" id to fetch minimal deposit
  * @member {AssetAmount} palletInstance asset pallet instance (if any)
  */
-export interface ParachainAssetsData extends ChainAssetData {
+export interface ParachainAssetData extends ChainAssetData {
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;
   palletInstance?: number;
 }
 
-export interface ParachainParams extends ChainParams<ParachainAssetsData> {
+export interface ParachainParams extends ChainParams<ParachainAssetData> {
   explorer?: string;
   genesisHash: string;
   parachainId: number;
@@ -34,7 +34,7 @@ export interface ParachainParams extends ChainParams<ParachainAssetsData> {
   ws: string | string[];
 }
 
-export class Parachain extends Chain<ParachainAssetsData> {
+export class Parachain extends Chain<ParachainAssetData> {
   readonly explorer?: string;
 
   readonly genesisHash: string;

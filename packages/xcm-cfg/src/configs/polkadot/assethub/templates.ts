@@ -14,7 +14,7 @@ import {
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
-export const xcmDeliveryFeeAmount = 0.036;
+export const xcmDeliveryFee = 0.036;
 
 const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
   const { source } = params;
@@ -46,7 +46,7 @@ function toParachainExtTemplate(
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   });

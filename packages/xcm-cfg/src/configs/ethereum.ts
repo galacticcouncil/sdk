@@ -19,7 +19,9 @@ const toHydration: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+    },
   }),
   new AssetConfig({
     asset: eth,
@@ -38,7 +40,9 @@ const toHydration: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+    },
   }),
   new AssetConfig({
     asset: wbtc,
@@ -54,7 +58,9 @@ const toHydration: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+    },
   }),
   new AssetConfig({
     asset: usdc,
@@ -70,7 +76,9 @@ const toHydration: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+    },
   }),
   new AssetConfig({
     asset: usdt,
@@ -86,7 +94,9 @@ const toHydration: AssetConfig[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
     },
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+    },
   }),
 ];
 

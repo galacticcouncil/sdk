@@ -17,7 +17,7 @@ import {
 import {
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
-  xcmDeliveryFeeAmount,
+  xcmDeliveryFee,
 } from './templates';
 
 const toHydration: AssetConfig[] = [
@@ -37,7 +37,7 @@ const toHydration: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -57,7 +57,7 @@ const toHydration: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -81,7 +81,7 @@ const toPolkadot: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -104,7 +104,7 @@ const toMoonbeam: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -124,7 +124,7 @@ const toMoonbeam: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -148,7 +148,7 @@ const toBifrost: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -168,7 +168,7 @@ const toBifrost: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),
@@ -188,7 +188,7 @@ const toBifrost: AssetConfig[] = [
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      xcmDeliveryFeeAmount,
+      extra: xcmDeliveryFee,
     },
     min: AssetMinBuilder().assets().asset(),
   }),

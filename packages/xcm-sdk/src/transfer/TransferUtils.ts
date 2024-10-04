@@ -2,14 +2,7 @@ import {
   big,
   AnyChain,
   AssetAmount,
-  AssetConfig,
-  ChainTransferConfig,
-  ContractConfig,
   EvmParachain,
-  ExtrinsicConfig,
-  FeeConfig,
-  TransactInfo,
-  TransferData,
 } from '@galacticcouncil/xcm-core';
 
 import Big from 'big.js';
@@ -91,7 +84,7 @@ export function calculateMin(
  * @param chain - transfer chain ctx
  * @returns - derivated address if evm resolver defined, fallback to default
  */
-export async function getH160Address(
+export async function formatEvmAddress(
   address: string,
   chain: AnyChain
 ): Promise<string> {
@@ -103,74 +96,12 @@ export async function getH160Address(
 }
 
 /**
- * Return formatted xcm delivery fee if defined
+ * Format amount if defined
  *
  * @param decimals - fee asset decimals
- * @param feeConfig - fee config
- * @returns formatted xcm delivery fee or 0
+ * @param amount - fee amount
+ * @returns formatted amount or 0
  */
-export function getXcmDeliveryFee(
-  decimals: number,
-  feeConfig?: FeeConfig
-): bigint {
-  return feeConfig?.xcmDeliveryFeeAmount
-    ? big.toBigInt(feeConfig.xcmDeliveryFeeAmount, decimals)
-    : 0n;
-}
-
-export function buildTransact(
-  transferData: TransferData,
-  transferConfig: ChainTransferConfig
-): ExtrinsicConfig {
-  const config = transferConfig.config as AssetConfig;
-
-  if (!config.transact) {
-    throw new Error('Ethereum transact must be provided');
-  }
-
-  return config.transact.build({
-    ...transferData,
-    via: config.via,
-  });
-}
-
-export function buildTransfer(
-  transferData: TransferData,
-  transferConfig: ChainTransferConfig,
-  transactInfo?: TransactInfo
-): ExtrinsicConfig | ContractConfig {
-  const config = transferConfig.config;
-  if (config.extrinsic) {
-    return buildExtrinsic(transferData, transferConfig, transactInfo)!;
-  }
-
-  if (config.contract) {
-    return buildContract(transferData, transferConfig)!;
-  }
-
-  throw new Error('Either contract or extrinsic must be provided');
-}
-
-function buildExtrinsic(
-  transferData: TransferData,
-  transferConfig: ChainTransferConfig,
-  transactInfo?: TransactInfo
-): ExtrinsicConfig | undefined {
-  const config = transferConfig.config as AssetConfig;
-  return config.extrinsic?.build({
-    ...transferData,
-    transact: transactInfo,
-    via: config.via,
-  });
-}
-
-function buildContract(
-  transferData: TransferData,
-  transferConfig: ChainTransferConfig
-): ContractConfig | undefined {
-  const { config } = transferConfig;
-  return config.contract?.build({
-    ...transferData,
-    via: config.via,
-  });
+export function formatAmount(decimals: number, amount?: number): bigint {
+  return amount ? big.toBigInt(amount, decimals) : 0n;
 }

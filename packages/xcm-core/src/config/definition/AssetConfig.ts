@@ -4,8 +4,14 @@ import { AnyChain, EvmParachain } from '../../chain';
 import { BalanceConfigBuilder } from './balance';
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
-import { FeeConfig, DestinationFeeConfig } from './fee';
+import { FeeConfig, DestinationFeeConfig, RouteFeeConfig } from './fee';
 import { MinConfigBuilder } from './min';
+
+export interface RoutedViaConfig {
+  chain: EvmParachain;
+  fee?: RouteFeeConfig;
+  transact?: ExtrinsicConfigBuilder;
+}
 
 export interface AssetConfigParams {
   asset: Asset;
@@ -16,8 +22,7 @@ export interface AssetConfigParams {
   extrinsic?: ExtrinsicConfigBuilder;
   fee?: FeeConfig;
   min?: MinConfigBuilder;
-  transact?: ExtrinsicConfigBuilder;
-  via?: EvmParachain;
+  via?: RoutedViaConfig;
 }
 
 export class AssetConfig {
@@ -37,9 +42,7 @@ export class AssetConfig {
 
   readonly min?: MinConfigBuilder;
 
-  readonly transact?: ExtrinsicConfigBuilder;
-
-  readonly via?: EvmParachain;
+  readonly via?: RoutedViaConfig;
 
   constructor({
     asset,
@@ -50,7 +53,6 @@ export class AssetConfig {
     extrinsic,
     fee,
     min,
-    transact,
     via,
   }: AssetConfigParams) {
     this.asset = asset;
@@ -61,7 +63,6 @@ export class AssetConfig {
     this.extrinsic = extrinsic;
     this.fee = fee;
     this.min = min;
-    this.transact = transact;
     this.via = via;
   }
 }

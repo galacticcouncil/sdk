@@ -17,7 +17,7 @@ import { BalanceAdapter } from './adapters';
 import {
   calculateMax,
   calculateMin,
-  getH160Address,
+  formatEvmAddress,
   TransferService,
 } from './transfer';
 import { XCall, XTransfer } from './types';
@@ -106,8 +106,32 @@ export class Wallet {
       },
     };
 
+    const route = srcConf.config;
+    const routedFromParachain = route.extrinsic && route.via;
+    const routedFromEvm = route.contract && route.via;
+
+    if (routedFromParachain) {
+      const [transact, fee, feeBalance] = await Promise.all([
+        src.getTransactInfo(transferData, route.via),
+        src.getRouteFee(route.via),
+        src.getRouteFeeBalance(transferData, route.via),
+      ]);
+      transferData.via = {
+        chain: route.via.chain,
+        fee: fee,
+        feeBalance: feeBalance,
+        transact: transact,
+      };
+    }
+
+    if (routedFromEvm) {
+      transferData.via = {
+        chain: route.via.chain,
+      };
+    }
+
     const srcFee = await src.getFee(transferData, srcConf);
-    const srcFeeSwap = this.dex.isSwapSupported(transferData)
+    const srcFeeSwap = this.dex.isSwapSupported(srcFee, transferData)
       ? await this.dex.calculateFeeSwap(srcFee, transferData)
       : undefined;
 
@@ -129,6 +153,7 @@ export class Wallet {
       min,
       srcFee,
       srcFeeBalance,
+      srcFeeSwap,
       async buildCall(amount): Promise<XCall> {
         const data = Object.assign({}, transferData);
         data.amount = big.toBigInt(amount, srcBalance.decimals);
@@ -159,7 +184,7 @@ export class Wallet {
         const { chain } = chainConfig;
         const assetId = chain.getBalanceAssetId(asset);
         const account = addr.isH160(assetId.toString())
-          ? await getH160Address(address, chain)
+          ? await formatEvmAddress(address, chain)
           : address;
         const balanceConfig = balance.build({
           address: account,

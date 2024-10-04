@@ -58,13 +58,13 @@ export function getExtrinsicAccount(address: string) {
       };
 }
 
-export function getTransactAccount({
+export function getDerivatedAccount({
   address,
   sender,
   source,
   via,
 }: ExtrinsicConfigBuilderParams) {
-  if (via?.key === 'moonbeam' && source instanceof Parachain) {
+  if (via?.chain.key === 'moonbeam' && source instanceof Parachain) {
     return mda.calculateMDA(sender, source.parachainId.toString(), 1);
   }
   return address;

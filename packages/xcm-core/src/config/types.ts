@@ -1,5 +1,5 @@
 import { Asset, AssetAmount } from '../asset';
-import { AnyChain } from '../chain';
+import { AnyChain, AnyParachain } from '../chain';
 
 import { AssetConfig } from './definition';
 
@@ -8,16 +8,27 @@ export interface ChainTransferConfig {
   config: AssetConfig;
 }
 
-export interface FeeSwap {
-  amount: bigint;
-  route: any;
-  enabled: boolean;
-}
-
 export interface TransferConfig {
   asset: Asset;
   source: ChainTransferConfig;
   destination: ChainTransferConfig;
+}
+
+export interface SwapInfo {
+  aIn: AssetAmount;
+  aOut: AssetAmount;
+  enabled: boolean;
+  route: any;
+}
+
+export interface TxWeight {
+  proofSize: string;
+  refTime: number;
+}
+
+export interface TransactInfo {
+  call: `0x${string}`;
+  weight: TxWeight;
 }
 
 export interface TransferData {
@@ -36,6 +47,12 @@ export interface TransferData {
     chain: AnyChain;
     fee?: AssetAmount;
     feeBalance: AssetAmount;
-    feeSwap?: FeeSwap;
+    feeSwap?: SwapInfo;
+  };
+  via?: {
+    chain: AnyParachain;
+    fee?: AssetAmount;
+    feeBalance?: AssetAmount;
+    transact?: TransactInfo;
   };
 }

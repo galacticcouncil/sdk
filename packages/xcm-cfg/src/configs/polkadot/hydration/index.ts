@@ -630,26 +630,31 @@ const toAcalaViaWormhole: AssetConfig[] = [
     extrinsic: ExtrinsicBuilder()
       .utility()
       .batchAll([
-        ExtrinsicBuilder()
-          .xTokens()
-          .transferMultiCurrencies({ fee: glmr, feeAmount: MRL_XCM_FEE }),
+        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
         ExtrinsicBuilder()
           .polkadotXcm()
           .send()
-          .transact({ fee: glmr, feeAmount: MRL_EXECUTION_FEE }),
+          .transact({ fee: MRL_EXECUTION_FEE }),
       ]),
     fee: fee(),
-    transact: ExtrinsicBuilder()
-      .ethereumXcm()
-      .transact(
-        ContractBuilder()
-          .Batch()
-          .batchAll([
-            ContractBuilder().Erc20().approve(),
-            ContractBuilder().TokenBridge().transferTokens(),
-          ])
-      ),
-    via: moonbeam,
+    via: {
+      chain: moonbeam,
+      fee: {
+        amount: MRL_XCM_FEE,
+        asset: glmr,
+        balance: balance(),
+      },
+      transact: ExtrinsicBuilder()
+        .ethereumXcm()
+        .transact(
+          ContractBuilder()
+            .Batch()
+            .batchAll([
+              ContractBuilder().Erc20().approve(),
+              ContractBuilder().TokenBridge().transferTokens(),
+            ])
+        ),
+    },
   }),
 ];
 
