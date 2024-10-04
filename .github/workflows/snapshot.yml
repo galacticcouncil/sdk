@@ -96,5 +96,5 @@ jobs:
             Current version: ${{ env.CURRENT_VERSION }}
             New version: ${{ env.NEW_VERSION }}
           branch: update-sdk-${{ env.NEW_VERSION }}
-          base: main
+          base: master
           path: 'hydration-ui'
