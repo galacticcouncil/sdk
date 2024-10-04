@@ -9,6 +9,7 @@ import {
   chainsConfigMap,
   chainsMap,
   assetsMap,
+  validations,
 } from '@galacticcouncil/xcm-cfg';
 import {
   Wallet,
@@ -46,6 +47,7 @@ const whClient = new WormholeClient();
 const wallet = new Wallet({
   configService: configService,
   poolService: poolService,
+  transferValidations: validations,
 });
 
 // Dynamically add external asset to xcm
@@ -69,9 +71,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
-//const srcAddr = '7KATdGb8zx9suUQPm7XhXKDAbsTSJZ1JtKrx5a92WYaWdUxQ';
-const destAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -90,11 +91,15 @@ const xTransfer = await wallet.transfer(
   destChain
 );
 
+// Validate transfer
+const status = await xTransfer.validate();
+
 // Construct calldata with transfer amount
-const call: XCall = await xTransfer.buildCall('1');
+const call: XCall = await xTransfer.buildCall('0.1');
 
 // Dump transfer info
 console.log(xTransfer);
+console.log(status);
 console.log(call);
 
 // Unsubscribe source chain balance
