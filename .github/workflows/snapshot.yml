@@ -74,9 +74,11 @@ jobs:
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
-          cat package.json
+          cat package.json | grep @galacticcouncil
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
-          cat package.json
+          cat package.json | grep @galacticcouncil
+          git config --global user.email "sdk@galacticcouncil"
+          git config --global user.name "SDK Action"
           git add package.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
         working-directory: ui
