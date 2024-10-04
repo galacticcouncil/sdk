@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: 🤘 Checkout
         uses: actions/checkout@v4
+        with:
+          path: sdk
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,7 +26,9 @@ jobs:
           cache: 'npm'
 
       - name: 🔐 Authenticate with NPM
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        run: |
+          cd sdk
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: 🧩 Install dependencies
         run: npm ci --ignore-scripts
@@ -66,8 +70,7 @@ jobs:
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
-          cd ui
-          YARN_IGNORE_PATH=true
+          cd ../ui
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
