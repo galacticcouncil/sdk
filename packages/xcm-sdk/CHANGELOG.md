@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- Optional transfer data delta to validation fn
+
 ## 5.0.0
 
 ### Major Changes
