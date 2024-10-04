@@ -19,6 +19,9 @@ jobs:
         with:
           path: sdk
 
+      - name: cd sdk
+        run: cd sdk
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -27,7 +30,6 @@ jobs:
 
       - name: 🔐 Authenticate with NPM
         run: |
-          cd sdk
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: 🧩 Install dependencies
@@ -67,10 +69,19 @@ jobs:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
 
+      - name: cd ui
+        if: env.UPDATE_AVAILABLE == 'true'
+        run: cd ../ui
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'yarn'
+
       - name: Update package.json in target repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
-          cd ../ui
           yarn add ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
           git add package.json package-lock.json
           git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
