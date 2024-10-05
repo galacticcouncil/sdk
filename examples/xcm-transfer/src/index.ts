@@ -54,9 +54,9 @@ const wallet = new Wallet({
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('hydration');
-const destChain = configService.getChain('moonbeam');
-const asset = configService.getAsset('dai_mwh');
+const srcChain = configService.getChain('ethereum');
+const destChain = configService.getChain('hydration');
+const asset = configService.getAsset('eth');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -95,11 +95,18 @@ const xTransfer = await wallet.transfer(
 const status = await xTransfer.validate();
 
 // Construct calldata with transfer amount
+const fee: AssetAmount = await xTransfer.estimateFee('0.1');
+const feeInfo = [
+  'Estimated fee:',
+  fee.toDecimal(fee.decimals),
+  fee.originSymbol,
+].join(' ');
 const call: XCall = await xTransfer.buildCall('0.1');
 
 // Dump transfer info
 console.log(xTransfer);
 console.log(status);
+console.log(feeInfo);
 console.log(call);
 
 // Unsubscribe source chain balance

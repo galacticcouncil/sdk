@@ -1,4 +1,4 @@
-import { Abi, EvmClient } from '@galacticcouncil/xcm-core';
+import { Abi, EvmClient, addr } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData } from 'viem';
 
 export class Erc20Client {
@@ -21,6 +21,13 @@ export class Erc20Client {
   private validateContract(address: string) {
     if (!address) {
       throw new Error('Contract address is required');
+    }
+    this.validateContractAddress(address);
+  }
+
+  private validateContractAddress(address: string) {
+    if (!addr.isH160(address)) {
+      throw new Error('Contract address is not valid h160 address');
     }
   }
 

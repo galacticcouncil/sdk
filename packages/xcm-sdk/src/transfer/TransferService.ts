@@ -160,9 +160,9 @@ export class TransferService {
     transferData: TransferData,
     transferConfig: ChainTransferConfig
   ): Promise<XCall> {
-    const { amount, address } = transferData;
+    const { amount, sender } = transferData;
     const transfer = await this.getTransfer(transferData, transferConfig);
-    return this.transfer.calldata(address, amount, transfer);
+    return this.transfer.calldata(sender, amount, transfer);
   }
 
   async getMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
