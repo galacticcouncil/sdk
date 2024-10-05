@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 5.2.1
+
+### Patch Changes
+
+- Fix calldata sender
+
 ## 5.2.0
 
 ### Minor Changes

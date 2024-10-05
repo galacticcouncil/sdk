@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 4.0.1
+
+### Patch Changes
+
+- Fix ethereum dest fee config (free relaying)
+
 ## 4.0.0
 
 ### Major Changes
