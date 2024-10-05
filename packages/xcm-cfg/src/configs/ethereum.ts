@@ -1,6 +1,6 @@
 import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
 
-import { dai, glmr, eth, wbtc, usdc, usdt } from '../assets';
+import { dai, eth, wbtc, usdc, usdt } from '../assets';
 import { ethereum, hydration, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
 
@@ -11,8 +11,8 @@ const toHydration: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydration,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
+      amount: 0,
+      asset: dai,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -32,9 +32,9 @@ const toHydration: AssetConfig[] = [
       .mrl(),
     destination: hydration,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: BalanceBuilder().evm().erc20(),
+      amount: 0,
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
     },
     fee: {
       asset: eth,
@@ -50,8 +50,8 @@ const toHydration: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydration,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
+      amount: 0,
+      asset: wbtc,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -68,8 +68,8 @@ const toHydration: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydration,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
+      amount: 0,
+      asset: usdc,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -86,8 +86,8 @@ const toHydration: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
     destination: hydration,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
+      amount: 0,
+      asset: usdt,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
@@ -110,9 +110,9 @@ const toMoonbeam: AssetConfig[] = [
       .mrl(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: BalanceBuilder().evm().erc20(),
+      amount: 0,
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
     },
     fee: {
       asset: eth,
@@ -125,8 +125,8 @@ const toMoonbeam: AssetConfig[] = [
     contract: ContractBuilder().TokenBridge().transferTokens(),
     destination: moonbeam,
     destinationFee: {
-      amount: 0.08,
-      asset: glmr,
+      amount: 0,
+      asset: dai,
       balance: BalanceBuilder().evm().erc20(),
     },
     fee: {
