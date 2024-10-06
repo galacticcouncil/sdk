@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 4.1.0
+
+### Minor Changes
+
+- Customizable xcm swap slippage
+
 ## 4.0.1
 
 ### Patch Changes
