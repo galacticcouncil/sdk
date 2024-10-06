@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 4.0.1
+
+### Patch Changes
+
+- export chain prop types
+
 ## 4.0.0
 
 ### Major Changes
