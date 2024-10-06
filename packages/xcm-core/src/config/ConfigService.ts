@@ -1,12 +1,12 @@
 import { Asset } from '../asset';
 import { AnyChain, ChainEcosystem } from '../chain';
 
-import { AssetConfig, ChainConfig } from './definition';
+import { AssetRoute, ChainRoutes } from './definition';
 
 export interface ConfigServiceOptions {
   assets: Map<string, Asset>;
   chains: Map<string, AnyChain>;
-  chainsConfig: Map<string, ChainConfig>;
+  routes: Map<string, ChainRoutes>;
 }
 
 export class ConfigService {
@@ -14,12 +14,12 @@ export class ConfigService {
 
   readonly chains: Map<string, AnyChain>;
 
-  readonly chainsConfig: Map<string, ChainConfig>;
+  readonly routes: Map<string, ChainRoutes>;
 
-  constructor({ assets, chains, chainsConfig }: ConfigServiceOptions) {
+  constructor({ assets, chains, routes }: ConfigServiceOptions) {
     this.assets = new Map(assets);
     this.chains = new Map(chains);
-    this.chainsConfig = new Map(chainsConfig);
+    this.routes = new Map(routes);
   }
 
   getEcosystemAssets(ecosystem?: ChainEcosystem): Asset[] {
@@ -29,11 +29,11 @@ export class ConfigService {
 
     return Array.from(
       new Set(
-        Array.from(this.chainsConfig.values())
-          .filter((chainConfig) => chainConfig.chain.ecosystem === ecosystem)
-          .map((chainConfig) => chainConfig.getAssetsConfigs())
+        Array.from(this.routes.values())
+          .filter((routes) => routes.chain.ecosystem === ecosystem)
+          .map((routes) => routes.getRoutes())
           .flat(2)
-          .map((assetConfig) => assetConfig.asset)
+          .map((route) => route.source.asset)
       )
     ).sort((a, b) => a.key.localeCompare(b.key));
   }
@@ -58,48 +58,38 @@ export class ConfigService {
     return chain;
   }
 
-  getChainConfig(keyOrChain: string | AnyChain): ChainConfig {
+  getChainRoutes(keyOrChain: string | AnyChain): ChainRoutes {
     const key = typeof keyOrChain === 'string' ? keyOrChain : keyOrChain.key;
-    const chainConfig = this.chainsConfig.get(key);
+    const route = this.routes.get(key);
 
-    if (!chainConfig) {
-      throw new Error(`Chain config for ${key} not found`);
+    if (!route) {
+      throw new Error(`Chain route for ${key} not found`);
     }
-    return chainConfig;
+    return route;
   }
 
   getSourceChains(
     asset: Asset,
     ecosystem: ChainEcosystem | undefined
   ): AnyChain[] {
-    return Array.from(this.chainsConfig.values())
-      .filter((chainConfig) => chainConfig.getAssetConfigs(asset).length)
-      .filter(
-        (chainConfig) => !ecosystem || chainConfig.chain.ecosystem === ecosystem
-      )
-      .map((chainConfig) => chainConfig.chain);
+    return Array.from(this.routes.values())
+      .filter((route) => !ecosystem || route.chain.ecosystem === ecosystem)
+      .filter((route) => route.getAssetRoutes(asset).length)
+      .map((route) => route.chain);
   }
 
   getDestinationChains(asset: Asset, source: AnyChain): AnyChain[] {
-    const chainConfig = this.chainsConfig.get(source.key);
-
-    if (!chainConfig) {
-      throw new Error(`Config for chain ${source.key} not found`);
-    }
-    return chainConfig.getAssetDestinations(asset);
+    const routes = this.getChainRoutes(source);
+    return routes.getAssetDestinations(asset);
   }
 
-  getAssetDestinationConfig(
+  getAssetRoute(
     asset: Asset,
     source: AnyChain,
     destination: AnyChain
-  ): AssetConfig {
-    const chainConfig = this.chainsConfig.get(source.key);
-
-    if (!chainConfig) {
-      throw new Error(`Config for chain ${source.key} not found`);
-    }
-    return chainConfig.getAssetDestinationConfig(asset, destination);
+  ): AssetRoute {
+    const routes = this.getChainRoutes(source);
+    return routes.getAssetRoute(asset, destination);
   }
 
   updateAsset(asset: Asset): void {
@@ -110,27 +100,29 @@ export class ConfigService {
     this.chains.set(chain.key, chain);
   }
 
-  updateChainConfig(chainConfig: ChainConfig): void {
-    this.chainsConfig.set(chainConfig.chain.key, chainConfig);
+  updateRoutes(routes: ChainRoutes): void {
+    this.routes.set(routes.chain.key, routes);
   }
 
-  updateChainAssetConfig(chain: AnyChain, assetConfig: AssetConfig): void {
-    const chainConfig = this.getChainConfig(chain);
-    const assetsConfig = chainConfig.getAssetsConfigs();
-    const isExisting: (chain: AssetConfig) => boolean = ({
-      asset,
+  updateChainRoute(chain: AnyChain, route: AssetRoute): void {
+    const chainRoutes = this.getChainRoutes(chain);
+    const routes = chainRoutes.getRoutes();
+    const isExisting: (route: AssetRoute) => boolean = ({
+      source,
       destination,
     }) =>
-      asset === assetConfig.asset && destination === assetConfig.destination;
+      source.asset === route.source.asset &&
+      destination.asset === route.destination.asset &&
+      destination.chain === route.destination.chain;
 
-    const updatedAssetsConfig: AssetConfig[] = assetsConfig
-      .filter((config) => !isExisting(config))
-      .concat(assetConfig);
+    const updatedRoutes: AssetRoute[] = routes
+      .filter((route) => !isExisting(route))
+      .concat(route);
 
-    const updatedConfig = new ChainConfig({
-      ...chainConfig,
-      assets: updatedAssetsConfig,
+    const updatedConfig = new ChainRoutes({
+      ...chainRoutes,
+      routes: updatedRoutes,
     });
-    this.chainsConfig.set(chainConfig.chain.key, updatedConfig);
+    this.routes.set(chainRoutes.chain.key, updatedConfig);
   }
 }

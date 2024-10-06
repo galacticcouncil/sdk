@@ -1,19 +1,6 @@
 import { Asset, AssetAmount } from '../asset';
 import { AnyChain, AnyParachain } from '../chain';
 
-import { AssetConfig } from './definition';
-
-export interface ChainTransferConfig {
-  chain: AnyChain;
-  config: AssetConfig;
-}
-
-export interface TransferConfig {
-  asset: Asset;
-  source: ChainTransferConfig;
-  destination: ChainTransferConfig;
-}
-
 export interface SwapInfo {
   aIn: AssetAmount;
   aOut: AssetAmount;

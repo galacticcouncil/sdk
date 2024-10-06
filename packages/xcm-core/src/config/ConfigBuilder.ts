@@ -2,7 +2,7 @@ import { Asset } from '../asset';
 import { AnyChain, ChainEcosystem } from '../chain';
 
 import { ConfigService } from './ConfigService';
-import { TransferConfig } from './types';
+import { AssetRoute } from './definition';
 
 export function ConfigBuilder(service: ConfigService) {
   const config = service;
@@ -29,29 +29,9 @@ export function ConfigBuilder(service: ConfigService) {
                 destinationChains,
                 destination: (keyOrChain: string | AnyChain) => {
                   const destination = config.getChain(keyOrChain);
-                  const sourceConfig = config.getAssetDestinationConfig(
-                    asset,
-                    source,
-                    destination
-                  );
-                  const destinationConfig = config.getAssetDestinationConfig(
-                    asset,
-                    destination,
-                    source
-                  );
-
                   return {
-                    build: (): TransferConfig => ({
-                      asset,
-                      source: {
-                        chain: source,
-                        config: sourceConfig,
-                      },
-                      destination: {
-                        chain: destination,
-                        config: destinationConfig,
-                      },
-                    }),
+                    build: (): AssetRoute =>
+                      config.getAssetRoute(asset, source, destination),
                   };
                 },
               };

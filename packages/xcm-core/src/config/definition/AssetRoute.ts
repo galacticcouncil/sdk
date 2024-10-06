@@ -7,62 +7,59 @@ import { ExtrinsicConfigBuilder } from './extrinsic';
 import { FeeConfig, DestinationFeeConfig, RouteFeeConfig } from './fee';
 import { MinConfigBuilder } from './min';
 
+export interface SourceConfig {
+  asset: Asset;
+  balance: BalanceConfigBuilder;
+  destinationFee: {
+    balance: BalanceConfigBuilder;
+  };
+  fee?: FeeConfig;
+  min?: MinConfigBuilder;
+}
+
+export interface DestinationConfig {
+  asset: Asset;
+  balance: BalanceConfigBuilder;
+  chain: AnyChain;
+  fee: DestinationFeeConfig;
+}
+
 export interface RoutedViaConfig {
   chain: EvmParachain;
   fee?: RouteFeeConfig;
   transact?: ExtrinsicConfigBuilder;
 }
 
-export interface AssetConfigParams {
-  asset: Asset;
-  balance: BalanceConfigBuilder;
+export interface AssetRouteParams {
+  source: SourceConfig;
+  destination: DestinationConfig;
   contract?: ContractConfigBuilder;
-  destination: AnyChain;
-  destinationFee: DestinationFeeConfig;
   extrinsic?: ExtrinsicConfigBuilder;
-  fee?: FeeConfig;
-  min?: MinConfigBuilder;
   via?: RoutedViaConfig;
 }
 
-export class AssetConfig {
-  readonly asset: Asset;
+export class AssetRoute {
+  readonly source: SourceConfig;
 
-  readonly balance: BalanceConfigBuilder;
+  readonly destination: DestinationConfig;
 
   readonly contract?: ContractConfigBuilder;
 
-  readonly destination: AnyChain;
-
-  readonly destinationFee: DestinationFeeConfig;
-
   readonly extrinsic?: ExtrinsicConfigBuilder;
-
-  readonly fee?: FeeConfig;
-
-  readonly min?: MinConfigBuilder;
 
   readonly via?: RoutedViaConfig;
 
   constructor({
-    asset,
-    balance,
-    contract,
+    source,
     destination,
-    destinationFee,
+    contract,
     extrinsic,
-    fee,
-    min,
     via,
-  }: AssetConfigParams) {
-    this.asset = asset;
-    this.balance = balance;
-    this.contract = contract;
+  }: AssetRouteParams) {
+    this.source = source;
     this.destination = destination;
-    this.destinationFee = destinationFee;
+    this.contract = contract;
     this.extrinsic = extrinsic;
-    this.fee = fee;
-    this.min = min;
     this.via = via;
   }
 }

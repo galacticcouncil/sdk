@@ -1,5 +1,5 @@
-export * from './AssetConfig';
-export * from './ChainConfig';
+export * from './AssetRoute';
+export * from './ChainRoutes';
 
 export * from './balance';
 export * from './base';
