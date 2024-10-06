@@ -9,11 +9,11 @@
     "url": "git+https://github.com/galacticcouncil/sdk.git"
   },
   "keywords": [
-    "erc20",
     "evm",
+    "substrate",
     "wallet",
     "xcm",
-    "xTokens"
+    "wormhole"
   ],
   "bugs": {
     "url": "https://github.com/galacticcouncil/sdk/issues"

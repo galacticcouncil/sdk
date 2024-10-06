@@ -9,9 +9,10 @@
     "url": "git+https://github.com/galacticcouncil/sdk.git"
   },
   "keywords": [
-    "hydradx",
-    "basilisk",
-    "xcm"
+    "evm",
+    "substrate",
+    "xcm",
+    "sdk"
   ],
   "bugs": {
     "url": "https://github.com/galacticcouncil/sdk/issues"
