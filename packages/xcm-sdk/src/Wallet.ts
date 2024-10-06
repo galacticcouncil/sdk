@@ -31,9 +31,9 @@ export interface WalletOptions {
 }
 
 export class Wallet {
-  private readonly config: ConfigService;
-  private readonly dex: Dex;
-  private readonly validations: TransferValidation[];
+  readonly config: ConfigService;
+  readonly dex: Dex;
+  readonly validations: TransferValidation[];
 
   constructor({
     configService,

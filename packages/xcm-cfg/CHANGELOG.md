@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- Fix ethereum dest fee config (free relaying)
+- Fix ethereum dest fee config (free redeem)
 
 ## 4.0.0
 
