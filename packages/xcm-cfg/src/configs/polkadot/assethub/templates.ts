@@ -10,7 +10,7 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
-  ExtrinsicInstruction,
+  ExtrinsicDecorator,
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
@@ -24,7 +24,7 @@ const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
 
 const swapExtrinsic = ExtrinsicBuilder()
   .assetConversion()
-  .swapTokensForExactTokens();
+  .swapTokensForExactTokens({ withSlippage: 30 });
 
 function toParachainExtTemplate(
   asset: Asset,
@@ -40,7 +40,7 @@ function toParachainExtTemplate(
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
     },
-    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).prior(
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().X2()
     ),
     fee: {

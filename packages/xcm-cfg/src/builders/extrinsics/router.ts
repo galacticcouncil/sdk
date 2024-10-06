@@ -6,7 +6,11 @@ import {
 
 const pallet = 'router';
 
-const buy = (): ExtrinsicConfigBuilder => {
+type SwapOpts = {
+  withSlippage: number;
+};
+
+const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
   const func = 'buy';
   return {
     build: ({ destination, source }) =>
@@ -20,7 +24,8 @@ const buy = (): ExtrinsicConfigBuilder => {
           const assetOut = ctx.getMetadataAssetId(destination.fee);
 
           const amountOut = destination.fee.amount;
-          const maxAmountIn = aIn.amount + (aIn.amount * 30n) / 100n;
+          const maxAmountIn =
+            aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
           return [assetIn, assetOut, amountOut, maxAmountIn, route];
         },
       }),

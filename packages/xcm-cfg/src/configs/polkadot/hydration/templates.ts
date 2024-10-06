@@ -8,7 +8,7 @@ import { glmr, usdt } from '../../../assets';
 import {
   ContractBuilder,
   ExtrinsicBuilder,
-  ExtrinsicInstruction,
+  ExtrinsicDecorator,
   FeeAmountBuilder,
 } from '../../../builders';
 import { assetHub, ethereum, moonbeam, zeitgeist } from '../../../chains';
@@ -24,7 +24,7 @@ const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
   return !!enabled;
 };
 
-const swapExtrinsic = ExtrinsicBuilder().router().buy();
+const swapExtrinsic = ExtrinsicBuilder().router().buy({ withSlippage: 30 });
 
 export function toHubExtTemplate(asset: Asset): AssetConfig {
   return new AssetConfig({
@@ -36,7 +36,7 @@ export function toHubExtTemplate(asset: Asset): AssetConfig {
       asset: usdt,
       balance: balance(),
     },
-    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).prior(
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().xTokens().transferMultiassets().X3()
     ),
     fee: fee(),
@@ -53,7 +53,7 @@ export function toMoonbeamErc20Template(asset: Asset): AssetConfig {
       asset: glmr,
       balance: balance(),
     },
-    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).prior(
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().xTokens().transferMultiCurrencies()
     ),
     fee: fee(),
@@ -70,7 +70,7 @@ export function toZeitgeistErc20Template(asset: Asset): AssetConfig {
       asset: glmr,
       balance: balance(),
     },
-    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).prior(
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().xTokens().transferMultiCurrencies()
     ),
     fee: fee(),
@@ -87,7 +87,7 @@ export function toEthereumWithRelayerTemplate(asset: Asset): AssetConfig {
       asset: asset,
       balance: balance(),
     },
-    extrinsic: ExtrinsicInstruction(isSwapSupported, swapExtrinsic).priorMulti([
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
       ExtrinsicBuilder()
         .polkadotXcm()

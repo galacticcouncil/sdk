@@ -25,9 +25,9 @@ export function ExtrinsicBuilder() {
   };
 }
 
-export function ExtrinsicInstruction(
+export function ExtrinsicDecorator(
   predicate: (params: ExtrinsicConfigBuilderParams) => boolean,
-  instruction: ExtrinsicConfigBuilder
+  extrinsic: ExtrinsicConfigBuilder
 ) {
   return {
     prior: function (config: ExtrinsicConfigBuilder): ExtrinsicConfigBuilder {
@@ -36,7 +36,7 @@ export function ExtrinsicInstruction(
           if (predicate(params)) {
             return ExtrinsicBuilder()
               .utility()
-              .batchAll([instruction, config])
+              .batchAll([extrinsic, config])
               .build(params);
           }
           return config.build(params);
@@ -51,7 +51,7 @@ export function ExtrinsicInstruction(
           if (predicate(params)) {
             return ExtrinsicBuilder()
               .utility()
-              .batchAll([instruction, ...configs])
+              .batchAll([extrinsic, ...configs])
               .build(params);
           }
           return ExtrinsicBuilder()

@@ -8,7 +8,11 @@ import { getAssetLocation, getNativeLocation } from './assetConversion.utils';
 
 const pallet = 'assetConversion';
 
-const swapTokensForExactTokens = (): ExtrinsicConfigBuilder => {
+type SwapOpts = {
+  withSlippage: number;
+};
+
+const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
   const func = 'swapTokensForExactTokens';
   return {
     build: ({ address, destination, source }) =>
@@ -21,7 +25,8 @@ const swapTokensForExactTokens = (): ExtrinsicConfigBuilder => {
           const palletInstance = ctx.getAssetPalletInstance(destination.fee);
 
           const { aIn } = source.feeSwap!;
-          const maxAmountIn = aIn.amount + (aIn.amount * 30n) / 100n;
+          const maxAmountIn =
+            aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
           const amountOut = destination.fee.amount;
 
           return [
