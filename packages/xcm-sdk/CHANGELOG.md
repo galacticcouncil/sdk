@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 5.2.2
+
+### Patch Changes
+
+- Wallet props to default
+
 ## 5.2.1
 
 ### Patch Changes
