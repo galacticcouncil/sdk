@@ -1,4 +1,4 @@
-import { ChainConfig } from '@galacticcouncil/xcm-core';
+import { ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { acalaConfig } from './acala';
 import { acalaEvmConfig } from './acala-evm';
@@ -22,7 +22,7 @@ import { pendulumConfig } from './pendulum';
 import { darwiniaConfig } from './darwinia';
 import { ajunaConfig } from './ajuna';
 
-export const polkadotChainsConfig: ChainConfig[] = [
+export const polkadotChainsConfig: ChainRoutes[] = [
   acalaConfig,
   acalaEvmConfig,
   ajunaConfig,

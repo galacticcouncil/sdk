@@ -1,7 +1,7 @@
 import {
   AnyChain,
   Asset,
-  AssetConfig,
+  AssetRoute,
   ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
 
@@ -29,33 +29,40 @@ const swapExtrinsic = ExtrinsicBuilder()
 function toParachainExtTemplate(
   asset: Asset,
   destination: AnyChain,
-  fee: number
-): AssetConfig {
-  return new AssetConfig({
-    asset: asset,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: destination,
-    destinationFee: {
-      amount: fee,
-      asset: usdt,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
       balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+      min: AssetMinBuilder().assets().asset(),
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: usdt,
+      },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets().X2()
     ),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
-    min: AssetMinBuilder().assets().asset(),
   });
 }
 
-export function toHydrationExtTemplate(asset: Asset): AssetConfig {
+export function toHydrationExtTemplate(asset: Asset): AssetRoute {
   return toParachainExtTemplate(asset, hydration, 0.02);
 }
 
-export function toMoonbeamExtTemplate(asset: Asset): AssetConfig {
+export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
   return toParachainExtTemplate(asset, moonbeam, 0.03);
 }

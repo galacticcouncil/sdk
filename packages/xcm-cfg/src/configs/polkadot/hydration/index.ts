@@ -1,72 +1,71 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import {
   aca,
+  ajun,
   astr,
   bnc,
   cfg,
   cru,
+  dai,
   dai_awh,
   dai_mwh,
   ded,
   dot,
   dota,
+  eth,
   glmr,
   hdx,
   ibtc,
   intr,
   kilt,
+  ldot,
+  myth,
   nodl,
   pen,
   pha,
   pink,
+  ring,
   sub,
   unq,
   usdc,
   usdc_mwh,
   usdt,
   usdt_mwh,
+  vastr,
   vdot,
+  ztg,
+  wbtc,
   wbtc_awh,
   wbtc_mwh,
   weth_awh,
   weth_mwh,
-  ztg,
-  ring,
-  ldot,
-  myth,
-  vastr,
-  ajun,
   wud,
 } from '../../../assets';
 import {
   acala,
+  acala_evm,
+  ajuna,
   assetHub,
   astar,
   bifrost,
   centrifuge,
   crust,
+  darwinia,
   hydration,
   interlay,
-  polkadot,
   kilt_chain,
   moonbeam,
+  mythos,
   nodle,
+  pendulum,
+  polkadot,
   phala,
   subsocial,
   unique,
   zeitgeist,
-  pendulum,
-  acala_evm,
-  darwinia,
-  mythos,
-  ajuna,
 } from '../../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  ExtrinsicBuilder,
-} from '../../../builders';
+import { ContractBuilder, ExtrinsicBuilder } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
@@ -78,93 +77,142 @@ import {
   toZeitgeistErc20Template,
 } from './templates';
 
-const toAcala: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_awh,
-    balance: balance(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.00092696,
+const toAcala: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: dai_awh,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala,
+      asset: dai_awh,
+      fee: {
+        amount: 0.00092696,
+        asset: dai_awh,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: wbtc_awh,
-    balance: balance(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.00000004,
+  new AssetRoute({
+    source: {
       asset: wbtc_awh,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala,
+      asset: wbtc_awh,
+      fee: {
+        amount: 0.00000004,
+        asset: wbtc_awh,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: weth_awh,
-    balance: balance(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.000000687004,
+  new AssetRoute({
+    source: {
       asset: weth_awh,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala,
+      asset: weth_awh,
+      fee: {
+        amount: 0.000000687004,
+        asset: weth_awh,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: aca,
-    balance: balance(),
-    destination: acala,
-    destinationFee: {
-      amount: 1,
+  new AssetRoute({
+    source: {
       asset: aca,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala,
+      asset: aca,
+      fee: {
+        amount: 1,
+        asset: aca,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: ldot,
-    balance: balance(),
-    destination: acala,
-    destinationFee: {
-      amount: 0.06,
+  new AssetRoute({
+    source: {
       asset: ldot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala,
+      asset: ldot,
+      fee: {
+        amount: 0.06,
+        asset: ldot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toAssetHub: AssetConfig[] = [
-  new AssetConfig({
-    asset: usdt,
-    balance: balance(),
-    destination: assetHub,
-    destinationFee: {
-      amount: 0.07,
+const toAssetHub: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: usdt,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: usdt,
+      fee: {
+        amount: 0.07,
+        asset: usdt,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: usdc,
-    balance: balance(),
-    destination: assetHub,
-    destinationFee: {
-      amount: 0.7,
+  new AssetRoute({
+    source: {
       asset: usdc,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: usdc,
+      fee: {
+        amount: 0.7,
+        asset: usdc,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
-    fee: fee(),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -172,251 +220,285 @@ const toAssetHub: AssetConfig[] = [
   toHubExtTemplate(wud),
 ];
 
-const toAstar: AssetConfig[] = [
-  new AssetConfig({
-    asset: astr,
-    balance: balance(),
-    destination: astar,
-    destinationFee: {
-      amount: 0.00404146544,
+const toAstar: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: astr,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: astr,
+      fee: {
+        amount: 0.00404146544,
+        asset: astr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: balance(),
-    destination: astar,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: balance(),
-  //   destination: astar,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: balance(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
-  //   fee: fee(),
-  // }),
 ];
 
-const toBifrost: AssetConfig[] = [
-  new AssetConfig({
-    asset: bnc,
-    balance: balance(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 0.000563136,
+const toBifrost: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: bnc,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: bnc,
+      fee: {
+        amount: 0.000563136,
+        asset: bnc,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: vdot,
-    balance: balance(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 0.0000000703,
+  new AssetRoute({
+    source: {
       asset: vdot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: vdot,
+      fee: {
+        amount: 0.0000000703,
+        asset: vdot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: vastr,
-    balance: balance(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 0.000000643,
+  new AssetRoute({
+    source: {
       asset: vastr,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: vastr,
+      fee: {
+        amount: 0.000000643,
+        asset: vastr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: balance(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: balance(),
-  //   destination: bifrost,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: balance(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
-  //   fee: fee(),
-  // }),
 ];
 
-const toCentrifuge: AssetConfig[] = [
-  new AssetConfig({
-    asset: cfg,
-    balance: balance(),
-    destination: centrifuge,
-    destinationFee: {
-      amount: 0.0092696,
+const toCentrifuge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: cfg,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: centrifuge,
+      asset: cfg,
+      fee: {
+        amount: 0.0092696,
+        asset: cfg,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toInterlay: AssetConfig[] = [
-  new AssetConfig({
-    asset: ibtc,
-    balance: balance(),
-    destination: interlay,
-    destinationFee: {
-      amount: 0.00000062,
+const toInterlay: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ibtc,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: ibtc,
+      fee: {
+        amount: 0.00000062,
+        asset: ibtc,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: intr,
-    balance: balance(),
-    destination: interlay,
-    destinationFee: {
-      amount: 0.0019213457,
+  new AssetRoute({
+    source: {
       asset: intr,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: intr,
+      fee: {
+        amount: 0.0019213457,
+        asset: intr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: balance(),
-    destination: interlay,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: hdx,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: interlay,
-    destinationFee: {
-      amount: 0.5,
+  new AssetRoute({
+    source: {
       asset: hdx,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: hdx,
+      fee: {
+        amount: 0.5,
+        asset: hdx,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: balance(),
-  //   destination: interlay,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: balance(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
-  //   fee: fee(),
-  // }),
 ];
 
-const toMoonbeam: AssetConfig[] = [
-  new AssetConfig({
-    asset: hdx,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.835,
+const toMoonbeam: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: hdx,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: moonbeam,
+      asset: hdx,
+      fee: {
+        amount: 0.835,
+        asset: hdx,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: glmr,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.01,
+  new AssetRoute({
+    source: {
       asset: glmr,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: moonbeam,
+      asset: glmr,
+      fee: {
+        amount: 0.01,
+        asset: glmr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: moonbeam,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: balance(),
-  //   destination: moonbeam,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: balance(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
-  //   fee: fee(),
-  // }),
-  // new AssetConfig({
-  //   asset: usdc,
-  //   balance: balance(),
-  //   destination: moonbeam,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdc,
-  //     balance: balance(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(1000).X3(),
-  //   fee: fee(),
-  // }),
   toMoonbeamErc20Template(dai_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
@@ -424,208 +506,307 @@ const toMoonbeam: AssetConfig[] = [
   toMoonbeamErc20Template(weth_mwh),
 ];
 
-const toPolkadot: AssetConfig[] = [
-  new AssetConfig({
-    asset: dot,
-    balance: balance(),
-    destination: polkadot,
-    destinationFee: {
-      amount: 0.003,
+const toPolkadot: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(), //relay using x1 interior !!!
-    fee: fee(),
+    destination: {
+      chain: polkadot,
+      asset: dot,
+      fee: {
+        amount: 0.003,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(), // relay using x1 interior !!!
   }),
 ];
 
-const toSubsocial: AssetConfig[] = [
-  new AssetConfig({
-    asset: sub,
-    balance: balance(),
-    destination: subsocial,
-    destinationFee: {
-      amount: 0.064,
+const toSubsocial: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: sub,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: subsocial,
+      asset: sub,
+      fee: {
+        amount: 0.064,
+        asset: sub,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toZeitgeist: AssetConfig[] = [
-  new AssetConfig({
-    asset: ztg,
-    balance: balance(),
-    destination: zeitgeist,
-    destinationFee: {
-      amount: 0.0093,
+const toZeitgeist: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ztg,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: zeitgeist,
+      asset: ztg,
+      fee: {
+        amount: 0.0093,
+        asset: ztg,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
-  new AssetConfig({
-    asset: glmr,
-    balance: balance(),
-    destination: zeitgeist,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: glmr,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: zeitgeist,
+      asset: glmr,
+      fee: {
+        amount: 0.1,
+        asset: glmr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-    fee: fee(),
   }),
   toZeitgeistErc20Template(usdc_mwh),
 ];
 
-const toPhala: AssetConfig[] = [
-  new AssetConfig({
-    asset: pha,
-    balance: balance(),
-    destination: phala,
-    destinationFee: {
-      amount: 0.064296,
+const toPhala: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: pha,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: phala,
+      asset: pha,
+      fee: {
+        amount: 0.064296,
+        asset: pha,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toMythos: AssetConfig[] = [
-  new AssetConfig({
-    asset: myth,
-    balance: balance(),
-    destination: mythos,
-    destinationFee: {
-      amount: 0.3,
+const toMythos: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: myth,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: mythos,
+      asset: myth,
+      fee: {
+        amount: 0.3,
+        asset: myth,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toNodle: AssetConfig[] = [
-  new AssetConfig({
-    asset: nodl,
-    balance: balance(),
-    destination: nodle,
-    destinationFee: {
-      amount: 0.0012,
+const toNodle: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: nodl,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: nodle,
+      asset: nodl,
+      fee: {
+        amount: 0.0012,
+        asset: nodl,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toUnique: AssetConfig[] = [
-  new AssetConfig({
-    asset: unq,
-    balance: balance(),
-    destination: unique,
-    destinationFee: {
-      amount: 0,
+const toUnique: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: unq,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: unique,
+      asset: unq,
+      fee: {
+        amount: 0,
+        asset: unq,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toCrust: AssetConfig[] = [
-  new AssetConfig({
-    asset: cru,
-    balance: balance(),
-    destination: crust,
-    destinationFee: {
-      amount: 0.04,
+const toCrust: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: cru,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: crust,
+      asset: cru,
+      fee: {
+        amount: 0.04,
+        asset: cru,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toKilt: AssetConfig[] = [
-  new AssetConfig({
-    asset: kilt,
-    balance: balance(),
-    destination: kilt_chain,
-    destinationFee: {
-      amount: 0.02,
+const toKilt: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: kilt,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: kilt_chain,
+      asset: kilt,
+      fee: {
+        amount: 0.02,
+        asset: kilt,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toPendulum: AssetConfig[] = [
-  new AssetConfig({
-    asset: pen,
-    balance: balance(),
-    destination: pendulum,
-    destinationFee: {
-      amount: 1.1,
+const toPendulum: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: pen,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: pendulum,
+      asset: pen,
+      fee: {
+        amount: 1.1,
+        asset: pen,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toDarwinia: AssetConfig[] = [
-  new AssetConfig({
-    asset: ring,
-    balance: balance(),
-    destination: darwinia,
-    destinationFee: {
-      amount: 4,
+const toDarwinia: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ring,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: darwinia,
+      asset: ring,
+      fee: {
+        amount: 4,
+        asset: ring,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toAjuna: AssetConfig[] = [
-  new AssetConfig({
-    asset: ajun,
-    balance: balance(),
-    destination: ajuna,
-    destinationFee: {
-      amount: 0.001,
+const toAjuna: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ajun,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ajuna,
+      asset: ajun,
+      fee: {
+        amount: 0.001,
+        asset: ajun,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: fee(),
   }),
 ];
 
-const toAcalaViaWormhole: AssetConfig[] = [
-  new AssetConfig({
-    asset: dai_mwh,
-    balance: balance(),
-    destination: acala_evm,
-    destinationFee: {
-      amount: 0.06,
-      asset: aca,
+const toAcalaViaWormhole: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: dai_mwh,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: acala_evm,
+      asset: dai_mwh,
+      fee: {
+        amount: 0.06,
+        asset: aca,
+      },
     },
     extrinsic: ExtrinsicBuilder()
       .utility()
@@ -636,7 +817,6 @@ const toAcalaViaWormhole: AssetConfig[] = [
           .send()
           .transact({ fee: MRL_EXECUTION_FEE }),
       ]),
-    fee: fee(),
     via: {
       chain: moonbeam,
       fee: {
@@ -658,16 +838,17 @@ const toAcalaViaWormhole: AssetConfig[] = [
   }),
 ];
 
-const toEthereumViaWormhole: AssetConfig[] = [
-  toEthereumWithRelayerTemplate(dai_mwh),
-  toEthereumWithRelayerTemplate(weth_mwh),
-  toEthereumWithRelayerTemplate(wbtc_mwh),
-  toEthereumWithRelayerTemplate(usdt_mwh),
-  toEthereumWithRelayerTemplate(usdc_mwh),
+const toEthereumViaWormhole: AssetRoute[] = [
+  toEthereumWithRelayerTemplate(dai_mwh, dai),
+  toEthereumWithRelayerTemplate(weth_mwh, eth),
+  toEthereumWithRelayerTemplate(wbtc_mwh, wbtc),
+  toEthereumWithRelayerTemplate(usdt_mwh, usdt),
+  toEthereumWithRelayerTemplate(usdc_mwh, usdc),
 ];
 
-export const hydrationConfig = new ChainConfig({
-  assets: [
+export const hydrationConfig = new ChainRoutes({
+  chain: hydration,
+  routes: [
     ...toAcala,
     ...toAcalaViaWormhole,
     ...toAjuna,
@@ -690,5 +871,4 @@ export const hydrationConfig = new ChainConfig({
     ...toUnique,
     ...toZeitgeist,
   ],
-  chain: hydration,
 });

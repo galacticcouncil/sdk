@@ -1,4 +1,4 @@
-import { ChainConfig } from '@galacticcouncil/xcm-core';
+import { ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { assetHubConfig } from './assethub';
 import { basiliskConfig } from './basilisk';
@@ -8,7 +8,7 @@ import { kusamaConfig } from './kusama';
 import { tinkernetConfig } from './tinkernet';
 import { robonomicsConfig } from './robonomics';
 
-export const kusamaChainsConfig: ChainConfig[] = [
+export const kusamaChainsConfig: ChainRoutes[] = [
   assetHubConfig,
   basiliskConfig,
   integriteeConfig,

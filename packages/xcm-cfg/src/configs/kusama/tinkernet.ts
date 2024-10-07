@@ -1,22 +1,31 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { tnkr } from '../../assets';
 import { basilisk, tinkernet } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-export const tinkernetConfig = new ChainConfig({
-  assets: [
-    new AssetConfig({
+const toBasilisk: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: tnkr,
       balance: BalanceBuilder().substrate().system().account(),
-      destination: basilisk,
       destinationFee: {
-        amount: 0.01355438643,
-        asset: tnkr,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    }),
-  ],
+    },
+    destination: {
+      chain: basilisk,
+      asset: tnkr,
+      fee: {
+        amount: 0.01355438643,
+        asset: tnkr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+];
+
+export const tinkernetConfig = new ChainRoutes({
   chain: tinkernet,
+  routes: [...toBasilisk],
 });

@@ -10,12 +10,14 @@ export interface FeeConfig {
   extra?: number;
 }
 
-export interface DestinationFeeConfig extends FeeConfig {
-  asset: Asset;
+export interface DestinationFeeConfig {
   amount: number | FeeAmountConfigBuilder;
+  asset: Asset;
+  balance?: BalanceConfigBuilder;
 }
 
-export interface RouteFeeConfig extends FeeConfig {
-  asset: Asset;
+export interface RouteFeeConfig {
   amount: number;
+  asset: Asset;
+  balance: BalanceConfigBuilder;
 }

@@ -1,85 +1,97 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { ibtc, intr, dot, hdx, usdt } from '../../assets';
+import { dot, hdx, ibtc, intr } from '../../assets';
 import { hydration, interlay } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydration: AssetConfig[] = [
-  new AssetConfig({
-    asset: intr,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.136389,
+const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: intr,
       balance: BalanceBuilder().substrate().tokens().accounts(),
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: intr,
+      fee: {
+        amount: 0.136389,
+        asset: intr,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  new AssetConfig({
-    asset: ibtc,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.00000007,
+  new AssetRoute({
+    source: {
       asset: ibtc,
       balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: intr,
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: ibtc,
+      fee: {
+        amount: 0.00000007,
+        asset: ibtc,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: {
-      asset: intr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: intr,
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: {
-      asset: intr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
   }),
-  new AssetConfig({
-    asset: hdx,
-    balance: BalanceBuilder().substrate().tokens().accounts(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: hdx,
       balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: intr,
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: hdx,
+      fee: {
+        amount: 0.1,
+        asset: hdx,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-    fee: {
-      asset: intr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-    },
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   destination: hydration,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  //   fee: {
-  //     asset: intr,
-  //     balance: BalanceBuilder().substrate().tokens().accounts(),
-  //   },
-  // }),
 ];
 
-export const interlayConfig = new ChainConfig({
-  assets: [...toHydration],
+export const interlayConfig = new ChainRoutes({
   chain: interlay,
+  routes: [...toHydration],
 });

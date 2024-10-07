@@ -1,25 +1,34 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { xrt } from '../../assets';
 import { basilisk, robonomics } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-export const robonomicsConfig = new ChainConfig({
-  assets: [
-    new AssetConfig({
+const toBasilisk: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: xrt,
       balance: BalanceBuilder().substrate().system().account(),
-      destination: basilisk,
       destinationFee: {
-        amount: 0.000447703,
-        asset: xrt,
         balance: BalanceBuilder().substrate().system().account(),
       },
-      extrinsic: ExtrinsicBuilder()
-        .polkadotXcm()
-        .limitedReserveTransferAssets()
-        .X1(),
-    }),
-  ],
+    },
+    destination: {
+      chain: basilisk,
+      asset: xrt,
+      fee: {
+        amount: 0.000447703,
+        asset: xrt,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets()
+      .X1(),
+  }),
+];
+
+export const robonomicsConfig = new ChainRoutes({
   chain: robonomics,
+  routes: [...toBasilisk],
 });

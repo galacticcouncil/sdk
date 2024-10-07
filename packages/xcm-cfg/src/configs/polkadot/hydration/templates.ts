@@ -1,6 +1,6 @@
 import {
   Asset,
-  AssetConfig,
+  AssetRoute,
   ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
 
@@ -26,66 +26,98 @@ const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
 
 const swapExtrinsic = ExtrinsicBuilder().router().buy({ withSlippage: 30 });
 
-export function toHubExtTemplate(asset: Asset): AssetConfig {
-  return new AssetConfig({
-    asset: asset,
-    balance: balance(),
-    destination: assetHub,
-    destinationFee: {
-      amount: 0.18,
-      asset: usdt,
+export function toHubExtTemplate(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: asset,
+      fee: {
+        amount: 0.18,
+        asset: usdt,
+      },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
       ExtrinsicBuilder().xTokens().transferMultiassets().X3()
     ),
-    fee: fee(),
   });
 }
 
-export function toMoonbeamErc20Template(asset: Asset): AssetConfig {
-  return new AssetConfig({
-    asset: asset,
-    balance: balance(),
-    destination: moonbeam,
-    destinationFee: {
-      amount: 0.08,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
-    fee: fee(),
-  });
-}
-
-export function toZeitgeistErc20Template(asset: Asset): AssetConfig {
-  return new AssetConfig({
-    asset: asset,
-    balance: balance(),
-    destination: zeitgeist,
-    destinationFee: {
-      amount: 0.1,
-      asset: glmr,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
-    fee: fee(),
-  });
-}
-
-export function toEthereumWithRelayerTemplate(asset: Asset): AssetConfig {
-  return new AssetConfig({
-    asset: asset,
-    balance: balance(),
-    destination: ethereum,
-    destinationFee: {
-      amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
       asset: asset,
       balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: moonbeam,
+      asset: asset,
+      fee: {
+        amount: 0.08,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
+    ),
+  });
+}
+
+export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: zeitgeist,
+      asset: asset,
+      fee: {
+        amount: 0.1,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
+    ),
+  });
+}
+
+export function toEthereumWithRelayerTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ethereum,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        asset: assetOut,
+      },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
@@ -94,7 +126,6 @@ export function toEthereumWithRelayerTemplate(asset: Asset): AssetConfig {
         .send()
         .transact({ fee: MRL_EXECUTION_FEE }),
     ]),
-    fee: fee(),
     via: {
       chain: moonbeam,
       fee: {

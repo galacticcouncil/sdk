@@ -1,4 +1,4 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { ksm } from '../../assets';
 import { kusama, kusamaAssetHub, basilisk, karura } from '../../chains';
@@ -6,70 +6,91 @@ import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const xcmDeliveryFee = 0.002;
 
-const toBasilisk: AssetConfig[] = [
-  new AssetConfig({
-    asset: ksm,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: basilisk,
-    destinationFee: {
-      amount: 0.000072711796,
+const toBasilisk: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: ksm,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: basilisk,
+      asset: ksm,
+      fee: {
+        amount: 0.000072711796,
+        asset: ksm,
+      },
     },
     extrinsic: ExtrinsicBuilder()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
-    fee: {
-      asset: ksm,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-const toKarura: AssetConfig[] = [
-  new AssetConfig({
-    asset: ksm,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: karura,
-    destinationFee: {
-      amount: 0.00004416361,
+const toKarura: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: ksm,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: karura,
+      asset: ksm,
+      fee: {
+        amount: 0.00004416361,
+        asset: ksm,
+      },
     },
     extrinsic: ExtrinsicBuilder()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
-    fee: {
-      asset: ksm,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-const toAssetHub: AssetConfig[] = [
-  new AssetConfig({
-    asset: ksm,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: kusamaAssetHub,
-    destinationFee: {
-      amount: 0.000034368318,
+const toAssetHub: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: ksm,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: kusamaAssetHub,
+      asset: ksm,
+      fee: {
+        amount: 0.000034368318,
+        asset: ksm,
+      },
     },
     extrinsic: ExtrinsicBuilder().xcmPallet().limitedTeleportAssets(0).here(),
-    fee: {
-      asset: ksm,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-export const kusamaConfig = new ChainConfig({
-  assets: [...toBasilisk, ...toAssetHub, ...toKarura],
+export const kusamaConfig = new ChainRoutes({
   chain: kusama,
+  routes: [...toBasilisk, ...toAssetHub, ...toKarura],
 });

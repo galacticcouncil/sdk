@@ -1,4 +1,4 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { dot } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
@@ -6,70 +6,91 @@ import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const xcmDeliveryFee = 0.047;
 
-const toHydration: AssetConfig[] = [
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.002172,
+const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.002172,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-const toBifrost: AssetConfig[] = [
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: bifrost,
-    destinationFee: {
-      amount: 0.001,
+const toBifrost: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: dot,
+      fee: {
+        amount: 0.001,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder()
       .xcmPallet()
       .limitedReserveTransferAssets(0)
       .here(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-const toAssetHub: AssetConfig[] = [
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: assetHub,
-    destinationFee: {
-      amount: 0.00014,
+const toAssetHub: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: dot,
+      fee: {
+        amount: 0.00014,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xcmPallet().limitedTeleportAssets(0).here(),
-    fee: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
-    },
   }),
 ];
 
-export const polkadotConfig = new ChainConfig({
-  assets: [...toHydration, ...toBifrost, ...toAssetHub],
+export const polkadotConfig = new ChainRoutes({
   chain: polkadot,
+  routes: [...toHydration, ...toBifrost, ...toAssetHub],
 });

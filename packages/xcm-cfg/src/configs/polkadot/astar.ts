@@ -1,55 +1,53 @@
-import { AssetConfig, ChainConfig } from '@galacticcouncil/xcm-core';
+import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { astr, dot, hdx, usdt } from '../../assets';
+import { astr, dot } from '../../assets';
 import { astar, hydration } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const toHydration: AssetConfig[] = [
-  new AssetConfig({
-    asset: astr,
-    balance: BalanceBuilder().substrate().system().account(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.044306118,
+const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
       asset: astr,
       balance: BalanceBuilder().substrate().system().account(),
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: astr,
+      fee: {
+        amount: 0.044306118,
+        asset: astr,
+      },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets().here(),
   }),
-  new AssetConfig({
-    asset: dot,
-    balance: BalanceBuilder().substrate().assets().account(),
-    destination: hydration,
-    destinationFee: {
-      amount: 0.1,
+  new AssetRoute({
+    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
     },
-    fee: {
-      asset: astr,
-      balance: BalanceBuilder().substrate().system().account(),
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  // TODO: Uncomment with asset hub release 1.7 (jit_withdraw fix)
-  // new AssetConfig({
-  //   asset: usdt,
-  //   balance: BalanceBuilder().substrate().assets().account(),
-  //   destination: hydraDX,
-  //   destinationFee: {
-  //     amount: 1.4,
-  //     asset: usdt,
-  //     balance: BalanceBuilder().substrate().assets().account(),
-  //   },
-  //   fee: {
-  //     asset: astr,
-  //     balance: BalanceBuilder().substrate().system().account(),
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transfer()
-  // }),
 ];
 
-export const astarConfig = new ChainConfig({
-  assets: [...toHydration],
+export const astarConfig = new ChainRoutes({
   chain: astar,
+  routes: [...toHydration],
 });

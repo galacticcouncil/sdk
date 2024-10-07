@@ -696,7 +696,7 @@ export const moonbeam = new EvmParachain({
     // xc-20 assets
     {
       asset: aca,
-      decimals: 10,
+      decimals: 12,
       id: '224821240862170613278369189818311486111',
     },
     {
