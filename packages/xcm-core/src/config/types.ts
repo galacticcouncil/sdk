@@ -1,5 +1,6 @@
 import { Asset, AssetAmount } from '../asset';
 import { AnyChain, AnyParachain } from '../chain';
+import { AssetRoute } from './definition';
 
 export interface SwapInfo {
   aIn: AssetAmount;
@@ -18,7 +19,7 @@ export interface TransactInfo {
   weight: TxWeight;
 }
 
-export interface TransferData {
+export interface TransferCtx {
   address: string;
   amount: bigint;
   asset: Asset;
@@ -42,4 +43,9 @@ export interface TransferData {
     feeBalance?: AssetAmount;
     transact?: TransactInfo;
   };
+}
+
+export interface TransferConfig {
+  origin: AssetRoute;
+  reverse: AssetRoute;
 }

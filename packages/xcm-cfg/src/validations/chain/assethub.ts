@@ -1,6 +1,6 @@
 import {
   Parachain,
-  TransferData,
+  TransferCtx,
   TransferValidation,
   TransferValidationError,
 } from '@galacticcouncil/xcm-core';
@@ -8,8 +8,8 @@ import {
 import { HubClient } from '../../clients';
 
 export class HubEdValidation extends TransferValidation {
-  async validate(data: TransferData) {
-    const { address, destination } = data;
+  async validate(ctx: TransferCtx) {
+    const { address, destination } = ctx;
 
     const chain = destination.chain as Parachain;
     const client = new HubClient(chain);
@@ -26,8 +26,8 @@ export class HubEdValidation extends TransferValidation {
 }
 
 export class HubFrozenValidation extends TransferValidation {
-  async validate(data: TransferData) {
-    const { address, asset, source } = data;
+  async validate(ctx: TransferCtx) {
+    const { address, asset, source } = ctx;
 
     const chain = source.chain as Parachain;
     const client = new HubClient(chain);

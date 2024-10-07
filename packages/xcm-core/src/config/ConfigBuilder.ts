@@ -1,8 +1,9 @@
 import { Asset } from '../asset';
 import { AnyChain, ChainEcosystem } from '../chain';
 
+import { TransferConfig } from './types';
+
 import { ConfigService } from './ConfigService';
-import { AssetRoute } from './definition';
 
 export function ConfigBuilder(service: ConfigService) {
   const config = service;
@@ -29,9 +30,22 @@ export function ConfigBuilder(service: ConfigService) {
                 destinationChains,
                 destination: (keyOrChain: string | AnyChain) => {
                   const destination = config.getChain(keyOrChain);
+                  const origin = config.getAssetRoute(
+                    asset,
+                    source,
+                    destination
+                  );
+                  const reverse = config.getAssetRoute(
+                    origin.destination.asset,
+                    destination,
+                    source
+                  );
+
                   return {
-                    build: (): AssetRoute =>
-                      config.getAssetRoute(asset, source, destination),
+                    build: (): TransferConfig => ({
+                      origin,
+                      reverse,
+                    }),
                   };
                 },
               };

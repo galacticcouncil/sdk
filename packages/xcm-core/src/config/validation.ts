@@ -1,6 +1,6 @@
 import { AnyChain } from '../chain';
 
-import { TransferData } from './types';
+import { TransferCtx } from './types';
 
 export interface TransferValidationReport {
   [key: string]: any;
@@ -30,19 +30,19 @@ export abstract class TransferValidation {
     this.destinationConstraint = destinationConstraint;
   }
 
-  private ruleFor(data: TransferData): boolean {
-    const { source, destination } = data;
+  private ruleFor(ctx: TransferCtx): boolean {
+    const { source, destination } = ctx;
     return (
       this.sourceConstraint(source.chain) &&
       this.destinationConstraint(destination.chain)
     );
   }
 
-  abstract validate(data: TransferData): void;
+  abstract validate(ctx: TransferCtx): void;
 
-  check(data: TransferData) {
-    if (this.ruleFor(data)) {
-      return this.validate(data);
+  check(ctx: TransferCtx) {
+    if (this.ruleFor(ctx)) {
+      return this.validate(ctx);
     }
   }
 }
@@ -54,12 +54,12 @@ export class TransferValidator {
     this.criterias = criterias;
   }
 
-  async validate(data: TransferData): Promise<TransferValidationReport[]> {
+  async validate(ctx: TransferCtx): Promise<TransferValidationReport[]> {
     const summary: TransferValidationReport[] = [];
     const promises = [];
 
     for (const criterion of this.criterias) {
-      promises.push(criterion.check(data));
+      promises.push(criterion.check(ctx));
     }
 
     await Promise.allSettled(promises).then((results) =>

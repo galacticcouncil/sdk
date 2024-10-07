@@ -1,6 +1,6 @@
 import {
   Parachain,
-  TransferData,
+  TransferCtx,
   TransferValidation,
   TransferValidationError,
 } from '@galacticcouncil/xcm-core';
@@ -14,8 +14,8 @@ const SYSTEM_MIN = 1;
 const ERC20_DECIMALS = 18;
 
 export class HydrationEdValidation extends TransferValidation {
-  protected async skipFor(data: TransferData): Promise<boolean> {
-    const { asset, destination } = data;
+  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
+    const { asset, destination } = ctx;
     const chain = destination.chain as Parachain;
     const client = new HydrationClient(chain);
     const isExistingAccount = destination.balance.amount > 0n;
@@ -23,13 +23,13 @@ export class HydrationEdValidation extends TransferValidation {
     return isExistingAccount || isSufficientAsset;
   }
 
-  async validate(data: TransferData) {
-    const shouldSkip = await this.skipFor(data);
+  async validate(ctx: TransferCtx) {
+    const shouldSkip = await this.skipFor(ctx);
     if (shouldSkip) {
       return;
     }
 
-    const { address, destination } = data;
+    const { address, destination } = ctx;
     const chain = destination.chain as Parachain;
     const client = new HydrationClient(chain);
 
@@ -53,21 +53,21 @@ export class HydrationEdValidation extends TransferValidation {
 }
 
 export class HydrationMrlFeeValidation extends TransferValidation {
-  protected async skipFor(data: TransferData): Promise<boolean> {
-    const { source } = data;
+  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
+    const { source } = ctx;
     const { enabled } = source.feeSwap || {};
 
     const isFeeSwap = !!enabled;
     return isFeeSwap;
   }
 
-  async validate(data: TransferData) {
-    const shouldSkip = await this.skipFor(data);
+  async validate(ctx: TransferCtx) {
+    const shouldSkip = await this.skipFor(ctx);
     if (shouldSkip) {
       return;
     }
 
-    const { sender, source } = data;
+    const { sender, source } = ctx;
     const chain = source.chain as Parachain;
     const client = new HydrationClient(chain);
 

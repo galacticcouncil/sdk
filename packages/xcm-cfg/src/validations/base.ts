@@ -2,7 +2,7 @@ import {
   AnyChain,
   AssetAmount,
   Parachain,
-  TransferData,
+  TransferCtx,
   TransferValidation,
   TransferValidationError,
 } from '@galacticcouncil/xcm-core';
@@ -10,8 +10,8 @@ import {
 import { HubClient } from '../clients';
 
 export class FeeValidation extends TransferValidation {
-  async validate(data: TransferData) {
-    const { source } = data;
+  async validate(ctx: TransferCtx) {
+    const { source } = ctx;
     const { fee, feeBalance } = source;
     if (fee && feeBalance.amount < fee.amount) {
       throw new TransferValidationError('Insufficient_Fee_Balance', {
@@ -25,21 +25,21 @@ export class FeeValidation extends TransferValidation {
 }
 
 export class DestFeeValidation extends TransferValidation {
-  protected async skipFor(data: TransferData): Promise<boolean> {
-    const { asset, source, destination } = data;
+  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
+    const { asset, source, destination } = ctx;
     const { enabled } = source.feeSwap || {};
     const isSufficientFeeAsset = asset.isEqual(destination.fee);
     const isFeeSwap = !!enabled;
     return isSufficientFeeAsset || isFeeSwap;
   }
 
-  async validate(data: TransferData) {
-    const shouldSkip = await this.skipFor(data);
+  async validate(ctx: TransferCtx) {
+    const shouldSkip = await this.skipFor(ctx);
     if (shouldSkip) {
       return;
     }
 
-    const { source, destination } = data;
+    const { source, destination } = ctx;
     const min = await this.getMin(source.chain, destination.fee);
     const minBalance = destination.fee.copyWith({
       amount: destination.fee.amount + min,
