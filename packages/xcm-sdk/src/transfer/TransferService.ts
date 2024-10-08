@@ -1,16 +1,15 @@
 import {
   addr,
   big,
-  AnyChain,
   Asset,
   AssetAmount,
-  ChainTransferConfig,
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
   RoutedViaConfig,
   TransactInfo,
-  TransferData,
+  TransferCtx,
+  TransferConfig,
 } from '@galacticcouncil/xcm-core';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
@@ -19,30 +18,37 @@ import { XCall } from '../types';
 import { Dex } from '../Dex';
 
 import { formatAmount, formatEvmAddress } from './TransferUtils';
-import { MetadataUtils } from './MetadataUtils';
+import { Metadata } from './Metadata';
 
 export class TransferService {
   readonly balance: BalanceAdapter;
   readonly transfer: TransferAdapter;
-  readonly metadata: MetadataUtils;
 
-  constructor(chain: AnyChain, dex: Dex) {
-    this.balance = new BalanceAdapter(chain);
-    this.transfer = new TransferAdapter(chain, dex);
-    this.metadata = new MetadataUtils(chain);
+  readonly config: TransferConfig;
+
+  constructor(config: TransferConfig, dex: Dex) {
+    this.config = config;
+    this.balance = new BalanceAdapter(config.chain);
+    this.transfer = new TransferAdapter(config.chain, dex);
   }
 
-  async getBalance(
-    address: string,
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
-    const asset = config.asset;
+  async getEd(): Promise<AssetAmount | undefined> {
+    const { chain } = this.config;
+    const metadata = new Metadata(chain);
+    return metadata.getEd();
+  }
+
+  async getBalance(address: string): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { source } = route;
+
+    const asset = source.asset;
+
     const assetId = chain.getBalanceAssetId(asset);
     const account = addr.isH160(assetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const balanceConfig = config.balance.build({
+    const balanceConfig = route.source.balance.build({
       address: account,
       asset: assetId,
     });
@@ -50,64 +56,64 @@ export class TransferService {
     return this.balance.read(asset, balanceConfig);
   }
 
-  async getDestinationFee(
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
-    const { asset, amount } = config.destinationFee;
-    const decimals = await this.metadata.getDecimals(asset);
+  async getDestinationFee(): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { destination, via } = route;
 
-    if (Number.isFinite(amount)) {
-      return AssetAmount.fromAsset(asset, {
-        amount: big.toBigInt(amount as number, decimals),
-        decimals,
+    const metadata = new Metadata(destination.chain);
+
+    const feeAmount = destination.fee.amount;
+    const feeAsset = destination.fee.asset;
+    const feeDecimals = await metadata.getDecimals(feeAsset);
+
+    if (Number.isFinite(feeAmount)) {
+      return AssetAmount.fromAsset(feeAsset, {
+        amount: big.toBigInt(feeAmount as number, feeDecimals),
+        decimals: feeDecimals,
       });
     }
 
-    const feeConfigBuilder = amount as FeeAmountConfigBuilder;
+    const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
-      asset: asset,
-      destination: this.metadata.chain,
+      asset: feeAsset,
+      destination: destination.chain,
       source: chain,
-      via: config.via?.chain,
+      via: via?.chain,
     });
-    return AssetAmount.fromAsset(asset, {
+    return AssetAmount.fromAsset(feeAsset, {
       amount: fee,
-      decimals,
+      decimals: feeDecimals,
     });
   }
 
-  async getDestinationFeeBalance(
-    address: string,
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
+  async getDestinationFeeBalance(address: string): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { source, destination } = route;
 
-    if (config.asset.isEqual(config.destinationFee.asset)) {
-      return this.getBalance(address, transferConfig);
+    const asset = source.asset;
+    const feeAsset = source.destinationFee.asset || destination.fee.asset;
+
+    if (asset.isEqual(feeAsset)) {
+      return this.getBalance(address);
     }
 
-    const feeAsset = config.destinationFee.asset;
-    const feeAssetId = chain.getBalanceAssetId(feeAsset);
+    const feeAssetId = destination.chain.getBalanceAssetId(feeAsset);
     const account = addr.isH160(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const feeBalanceConfig = config.destinationFee.balance.build({
+    const feeBalanceConfig = source.destinationFee.balance.build({
       address: account,
       asset: feeAssetId,
     });
     return this.balance.read(feeAsset, feeBalanceConfig);
   }
 
-  async getNetworkFee(
-    transferData: TransferData,
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { amount, sender, source } = transferData;
-    const { chain, config } = transferConfig;
-    const transfer = await this.getTransfer(transferData, transferConfig);
+  private async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { amount, sender, source } = ctx;
 
-    const address = config.contract
+    const transfer = await this.getTransfer(ctx);
+    const address = route.contract
       ? await formatEvmAddress(sender, chain)
       : sender;
     return this.transfer.estimateFee(
@@ -118,37 +124,32 @@ export class TransferService {
     );
   }
 
-  async getFee(
-    transferData: TransferData,
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { config } = transferConfig;
-    const fee = await this.getNetworkFee(transferData, transferConfig);
+  async getFee(ctx: TransferCtx): Promise<AssetAmount> {
+    const { route } = this.config;
+    const { source } = route;
 
-    const extraFee = config.fee
-      ? formatAmount(fee.decimals, config.fee.extra)
-      : 0n;
+    const fee = source.fee;
 
-    const totalFee = fee.amount + extraFee;
-    return fee.copyWith({ amount: totalFee });
+    const networkFee = await this.getNetworkFee(ctx);
+    const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
+    const totalFee = networkFee.amount + extraFee;
+    return networkFee.copyWith({ amount: totalFee });
   }
 
-  async getFeeBalance(
-    address: string,
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
+  async getFeeBalance(address: string): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { source } = route;
 
-    if (!config.fee) {
-      return this.getBalance(address, transferConfig);
+    if (!source.fee) {
+      return this.getBalance(address);
     }
 
-    const feeAsset = await this.getFeeAsset(address, transferConfig);
+    const feeAsset = await this.getFeeAsset(address);
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
     const account = addr.isH160(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const feeBalanceConfig = config.fee.balance.build({
+    const feeBalanceConfig = source.fee.balance.build({
       address: account,
       asset: feeAssetId,
     });
@@ -156,41 +157,42 @@ export class TransferService {
     return this.balance.read(feeAsset, feeBalanceConfig);
   }
 
-  async getCall(
-    transferData: TransferData,
-    transferConfig: ChainTransferConfig
-  ): Promise<XCall> {
-    const { amount, sender } = transferData;
-    const transfer = await this.getTransfer(transferData, transferConfig);
+  async getCall(ctx: TransferCtx): Promise<XCall> {
+    const { amount, sender } = ctx;
+    const transfer = await this.getTransfer(ctx);
     return this.transfer.calldata(sender, amount, transfer);
   }
 
-  async getMin(transferConfig: ChainTransferConfig): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
-    const asset = config.asset;
+  async getMin(): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { source } = route;
 
-    if (chain instanceof Parachain && config.min) {
+    const asset = source.asset;
+    const min = source.min;
+
+    if (chain instanceof Parachain && min) {
       const minAssetId = chain.getMinAssetId(asset);
-      const minBalanceConfig = config.min.build({
+      const minBalanceConfig = min.build({
         asset: minAssetId,
       });
       return this.balance.read(asset, minBalanceConfig);
     }
 
-    return this.getAssetMin(transferConfig);
+    return this.getAssetMin();
   }
 
-  private async getFeeAsset(
-    address: string,
-    transferConfig: ChainTransferConfig
-  ): Promise<Asset> {
-    const { chain, config } = transferConfig;
+  private async getFeeAsset(address: string): Promise<Asset> {
+    const { chain, route } = this.config;
+    const { source } = route;
 
-    if (!config.fee) {
-      return config.asset;
+    const fee = source.fee;
+    const asset = source.asset;
+
+    if (!fee) {
+      return asset;
     }
 
-    const feeAssetConfig = config.fee.asset;
+    const feeAssetConfig = fee.asset;
     if (chain instanceof Parachain && 'build' in feeAssetConfig) {
       const feeAssetBuilder = feeAssetConfig as FeeAssetConfigBuilder;
       const feeAssetCall = feeAssetBuilder.build({
@@ -202,17 +204,19 @@ export class TransferService {
     return feeAssetConfig as Asset;
   }
 
-  private async getAssetMin(
-    transferConfig: ChainTransferConfig
-  ): Promise<AssetAmount> {
-    const { chain, config } = transferConfig;
-    const asset = config.asset;
-    const assetMin = chain.getAssetMin(asset);
-    const decimals = await this.metadata.getDecimals(asset);
+  private async getAssetMin(): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { source } = route;
+
+    const metadata = new Metadata(chain);
+    const asset = source.asset;
+
+    const min = chain.getAssetMin(asset);
+    const decimals = await metadata.getDecimals(asset);
 
     let balance: bigint = 0n;
-    if (assetMin) {
-      balance = big.toBigInt(assetMin, decimals);
+    if (min) {
+      balance = big.toBigInt(min, decimals);
     }
 
     return AssetAmount.fromAsset(asset, {
@@ -221,31 +225,30 @@ export class TransferService {
     });
   }
 
-  private async getTransfer(
-    transferData: TransferData,
-    transferConfig: ChainTransferConfig
-  ) {
-    const { config } = transferConfig;
-    if (config.extrinsic) {
-      return config.extrinsic.build({
-        ...transferData,
+  private async getTransfer(ctx: TransferCtx) {
+    const { route } = this.config;
+    const { extrinsic, contract } = route;
+
+    if (extrinsic) {
+      return extrinsic.build({
+        ...ctx,
       });
     }
 
-    if (config.contract) {
-      return config.contract.build({
-        ...transferData,
+    if (contract) {
+      return contract.build({
+        ...ctx,
       });
     }
     throw new Error('Either contract or extrinsic must be provided');
   }
 
   async getTransactInfo(
-    transferData: TransferData,
-    routedVia: RoutedViaConfig
+    ctx: TransferCtx,
+    via: RoutedViaConfig
   ): Promise<TransactInfo> {
-    const { address } = transferData;
-    const { chain, transact } = routedVia;
+    const { address } = ctx;
+    const { chain, transact } = via;
 
     if (!transact) {
       throw new Error('Route via [transact] config is missing.');
@@ -253,7 +256,7 @@ export class TransferService {
 
     const substrate = await SubstrateService.create(chain);
     const transactConfig = transact.build({
-      ...transferData,
+      ...ctx,
       via: {
         chain,
       },
@@ -270,14 +273,16 @@ export class TransferService {
     } as TransactInfo;
   }
 
-  async getRouteFee(routedVia: RoutedViaConfig): Promise<AssetAmount> {
-    const { fee } = routedVia;
+  async getRouteFee(via: RoutedViaConfig): Promise<AssetAmount> {
+    const { chain } = this.config;
+    const { fee } = via;
 
     if (!fee) {
       throw new Error('Route via [fee] config is missing.');
     }
 
-    const decimals = await this.metadata.getDecimals(fee.asset);
+    const metadata = new Metadata(chain);
+    const decimals = await metadata.getDecimals(fee.asset);
     return AssetAmount.fromAsset(fee.asset, {
       amount: big.toBigInt(fee.amount, decimals),
       decimals,
@@ -285,11 +290,11 @@ export class TransferService {
   }
 
   async getRouteFeeBalance(
-    transferData: TransferData,
-    routedVia: RoutedViaConfig
+    ctx: TransferCtx,
+    via: RoutedViaConfig
   ): Promise<AssetAmount> {
-    const { sender, source } = transferData;
-    const { fee } = routedVia;
+    const { sender, source } = ctx;
+    const { fee } = via;
 
     if (!fee) {
       throw new Error('Route via [fee] config is missing.');

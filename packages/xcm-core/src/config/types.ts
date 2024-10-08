@@ -23,19 +23,19 @@ export interface TransferCtx {
   address: string;
   amount: bigint;
   asset: Asset;
-  destination: {
-    balance: AssetAmount;
-    chain: AnyChain;
-    fee: AssetAmount;
-    feeBalance: AssetAmount;
-  };
   sender: string;
   source: {
     balance: AssetAmount;
     chain: AnyChain;
     fee?: AssetAmount;
     feeBalance: AssetAmount;
+    feeBalanceDest: AssetAmount;
     feeSwap?: SwapInfo;
+  };
+  destination: {
+    balance: AssetAmount;
+    chain: AnyChain;
+    fee: AssetAmount;
   };
   via?: {
     chain: AnyParachain;
@@ -45,7 +45,12 @@ export interface TransferCtx {
   };
 }
 
+export interface TransferConfigs {
+  origin: TransferConfig;
+  reverse: TransferConfig;
+}
+
 export interface TransferConfig {
-  origin: AssetRoute;
-  reverse: AssetRoute;
+  chain: AnyChain;
+  route: AssetRoute;
 }

@@ -11,7 +11,7 @@ import {
   ConfigService,
   Parachain,
   SwapInfo,
-  TransferData,
+  TransferCtx,
 } from '@galacticcouncil/xcm-core';
 
 const isHydration = (c: AnyChain) =>
@@ -47,9 +47,9 @@ export class Dex {
     });
   }
 
-  isSwapSupported(fee: AssetAmount, transferData: TransferData): boolean {
-    const { asset, source } = transferData;
-    const destFee = this.parseDestFee(transferData);
+  isSwapSupported(fee: AssetAmount, ctx: TransferCtx): boolean {
+    const { asset, source } = ctx;
+    const destFee = this.parseDestFee(ctx);
     const isSupported = IS_HUB(source.chain) || IS_DEX(source.chain);
     const isSufficientAssetTransfer = asset.isEqual(destFee);
     const isFeePaymentAsset = fee.isSame(destFee);
@@ -58,11 +58,11 @@ export class Dex {
 
   async calculateFeeSwap(
     fee: AssetAmount,
-    transferData: TransferData
+    ctx: TransferCtx
   ): Promise<SwapInfo> {
-    const { source } = transferData;
-    const destFee = this.parseDestFee(transferData);
-    const destFeeBalance = this.parseDestFeeBalance(transferData);
+    const { source } = ctx;
+    const destFee = this.parseDestFee(ctx);
+    const destFeeBalance = this.parseDestFeeBalance(ctx);
     const assetIn = this.chain.getMetadataAssetId(fee);
     const assetOut = this.chain.getMetadataAssetId(destFee);
     const amountOut = destFee.toDecimal(destFee.decimals);
@@ -88,14 +88,14 @@ export class Dex {
     } as SwapInfo;
   }
 
-  private parseDestFee(transferData: TransferData) {
-    const { destination, via } = transferData;
+  private parseDestFee(ctx: TransferCtx) {
+    const { destination, via } = ctx;
     const routeFee = via && via.fee;
     return routeFee || destination.fee;
   }
 
-  private parseDestFeeBalance(transferData: TransferData) {
-    const { destination, via } = transferData;
+  private parseDestFeeBalance(ctx: TransferCtx) {
+    const { destination, via } = ctx;
     const routeFeeBalance = via && via.feeBalance;
     return routeFeeBalance || destination.feeBalance;
   }

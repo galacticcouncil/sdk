@@ -7,7 +7,7 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
-  TransferData,
+  TransferCtx,
   TransferValidator,
   TransferValidation,
   TransferValidationReport,
@@ -59,11 +59,11 @@ export class Wallet {
       .destination(dstChain)
       .build();
 
-    const srcConf = transfer.source;
-    const dstConf = transfer.destination;
+    const srcConf = transfer.origin;
+    const dstConf = transfer.reverse;
 
-    const src = new TransferService(srcConf.chain, this.dex);
-    const dst = new TransferService(dstConf.chain, this.dex);
+    const src = new TransferService(srcConf, this.dex);
+    const dst = new TransferService(dstConf, this.dex);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -75,48 +75,50 @@ export class Wallet {
       dstFeeBalance,
       dstMin,
     ] = await Promise.all([
-      src.getBalance(srcAddr, srcConf),
-      src.getFeeBalance(srcAddr, srcConf),
-      src.getMin(srcConf),
-      dst.getBalance(dstAddr, dstConf),
-      dst.getDestinationFee(srcConf),
-      src.getDestinationFeeBalance(srcAddr, srcConf),
-      dst.getMin(dstConf),
+      src.getBalance(srcAddr),
+      src.getFeeBalance(srcAddr),
+      src.getMin(),
+      dst.getBalance(dstAddr),
+      src.getDestinationFee(),
+      src.getDestinationFeeBalance(srcAddr),
+      dst.getMin(),
     ]);
 
     const dstBalanceNormalized = srcBalance.copyWith({
       amount: dstBalance.amount,
     });
 
-    const transferData: TransferData = {
+    const ctx: TransferCtx = {
       address: dstAddr,
       amount: srcBalance.amount,
-      asset: transfer.asset,
+      asset: srcConf.route.source.asset,
       destination: {
-        balance: dstBalanceNormalized,
+        balance: dstBalance,
         chain: dstConf.chain,
         fee: dstFee,
-        feeBalance: dstFeeBalance,
       },
       sender: srcAddr,
       source: {
         balance: srcBalance,
         chain: srcConf.chain,
         feeBalance: srcFeeBalance,
+        feeBalanceDest: dstFeeBalance,
       },
     };
 
-    const route = srcConf.config;
+    console.log(ctx);
+
+    const route = srcConf.route;
     const routedFromParachain = route.extrinsic && route.via;
     const routedFromEvm = route.contract && route.via;
 
     if (routedFromParachain) {
       const [transact, fee, feeBalance] = await Promise.all([
-        src.getTransactInfo(transferData, route.via),
+        src.getTransactInfo(ctx, route.via),
         src.getRouteFee(route.via),
-        src.getRouteFeeBalance(transferData, route.via),
+        src.getRouteFeeBalance(ctx, route.via),
       ]);
-      transferData.via = {
+      ctx.via = {
         chain: route.via.chain,
         fee: fee,
         feeBalance: feeBalance,
@@ -125,25 +127,25 @@ export class Wallet {
     }
 
     if (routedFromEvm) {
-      transferData.via = {
+      ctx.via = {
         chain: route.via.chain,
       };
     }
 
-    const srcFee = await src.getFee(transferData, srcConf);
-    const srcFeeSwap = this.dex.isSwapSupported(srcFee, transferData)
-      ? await this.dex.calculateFeeSwap(srcFee, transferData)
+    const srcFee = await src.getFee(ctx);
+    const srcFeeSwap = this.dex.isSwapSupported(srcFee, ctx)
+      ? await this.dex.calculateFeeSwap(srcFee, ctx)
       : undefined;
 
-    const dstEd = await dst.metadata.getEd();
+    const dstEd = await dst.getEd();
     const min = calculateMin(dstBalanceNormalized, dstFee, dstMin, dstEd);
 
-    const srcEd = await src.metadata.getEd();
+    const srcEd = await src.getEd();
     const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
 
-    transferData.amount = 0n;
-    transferData.source.fee = srcFee;
-    transferData.source.feeSwap = srcFeeSwap;
+    ctx.amount = 0n;
+    ctx.source.fee = srcFee;
+    ctx.source.feeSwap = srcFeeSwap;
 
     return {
       balance: srcBalance,
@@ -155,19 +157,19 @@ export class Wallet {
       srcFeeBalance,
       srcFeeSwap,
       async buildCall(amount): Promise<XCall> {
-        const data = Object.assign({}, transferData);
-        data.amount = big.toBigInt(amount, srcBalance.decimals);
-        return src.getCall(data, srcConf);
+        const ctxCp = Object.assign({}, ctx);
+        ctxCp.amount = big.toBigInt(amount, srcBalance.decimals);
+        return src.getCall(ctxCp);
       },
       async estimateFee(amount): Promise<AssetAmount> {
-        const data = Object.assign({}, transferData);
-        data.amount = big.toBigInt(amount, srcBalance.decimals);
-        return src.getFee(data, srcConf);
+        const ctxCp = Object.assign({}, ctx);
+        ctxCp.amount = big.toBigInt(amount, srcBalance.decimals);
+        return src.getFee(ctxCp);
       },
       async validate(fee): Promise<TransferValidationReport[]> {
-        const data = Object.assign({}, transferData);
-        data.source.fee = fee ? srcFee.copyWith({ amount: fee }) : srcFee;
-        return validator.validate(data);
+        const ctxCp = Object.assign({}, ctx);
+        ctxCp.source.fee = fee ? srcFee.copyWith({ amount: fee }) : srcFee;
+        return validator.validate(ctxCp);
       },
     } as XTransfer;
   }
@@ -177,16 +179,16 @@ export class Wallet {
     chain: string | AnyChain,
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
-    const chainConfig = this.config.getChainConfig(chain);
-    const balanceAdapter = new BalanceAdapter(chainConfig.chain);
+    const chainRoutes = this.config.getChainRoutes(chain);
+    const balanceAdapter = new BalanceAdapter(chainRoutes.chain);
 
-    const observables = chainConfig
-      .getUniqueAssetsConfigs()
-      .map(async ({ asset, balance }) => {
-        const { chain } = chainConfig;
-        const assetId = chain.getBalanceAssetId(asset);
+    const observables = chainRoutes
+      .getUniqueRoutes()
+      .map(async ({ source }) => {
+        const { asset, balance } = source;
+        const assetId = chainRoutes.chain.getBalanceAssetId(asset);
         const account = addr.isH160(assetId.toString())
-          ? await formatEvmAddress(address, chain)
+          ? await formatEvmAddress(address, chainRoutes.chain)
           : address;
         const balanceConfig = balance.build({
           address: account,

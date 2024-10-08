@@ -1,7 +1,7 @@
 import { Asset } from '../asset';
 import { AnyChain, ChainEcosystem } from '../chain';
 
-import { TransferConfig } from './types';
+import { TransferConfigs } from './types';
 
 import { ConfigService } from './ConfigService';
 
@@ -42,9 +42,15 @@ export function ConfigBuilder(service: ConfigService) {
                   );
 
                   return {
-                    build: (): TransferConfig => ({
-                      origin,
-                      reverse,
+                    build: (): TransferConfigs => ({
+                      origin: {
+                        chain: source,
+                        route: origin,
+                      },
+                      reverse: {
+                        chain: destination,
+                        route: reverse,
+                      },
                     }),
                   };
                 },

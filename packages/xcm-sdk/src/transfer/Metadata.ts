@@ -7,7 +7,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { SubstrateService } from '../substrate';
 
-export class MetadataUtils {
+export class Metadata {
   readonly chain: AnyChain;
 
   constructor(chain: AnyChain) {
@@ -15,8 +15,7 @@ export class MetadataUtils {
   }
 
   async getDecimals(asset: Asset): Promise<number> {
-    const normalizedAsset = this.normalizeAsset(asset);
-    const decimals = this.chain.getAssetDecimals(normalizedAsset);
+    const decimals = this.chain.getAssetDecimals(asset);
     if (decimals) {
       return decimals;
     }
@@ -40,17 +39,5 @@ export class MetadataUtils {
       return substrate.existentialDeposit;
     }
     return undefined;
-  }
-
-  private normalizeAsset(asset: Asset) {
-    const isEvm = this.chain.isEvmChain();
-    if (isEvm) {
-      const { key } = asset;
-      return {
-        ...asset,
-        key: key.split('_')[0],
-      } as Asset;
-    }
-    return asset;
   }
 }

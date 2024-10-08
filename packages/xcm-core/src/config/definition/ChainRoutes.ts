@@ -33,6 +33,13 @@ export class ChainRoutes {
     return Array.from(this.routes.values());
   }
 
+  getUniqueRoutes(): AssetRoute[] {
+    const routes = this.getRoutes();
+    return [
+      ...new Map(routes.map((route) => [route.source.asset, route])).values(),
+    ];
+  }
+
   getAssetRoutes(asset: Asset): AssetRoute[] {
     return this.getRoutes().filter(
       (route) => route.source.asset.key === asset.key
@@ -40,9 +47,7 @@ export class ChainRoutes {
   }
 
   getAssetDestinations(asset: Asset): AnyChain[] {
-    return this.getAssetRoutes(asset).map(
-      (assetConfig) => assetConfig.destination.chain
-    );
+    return this.getAssetRoutes(asset).map((route) => route.destination.chain);
   }
 
   getAssetRoute(asset: Asset, destination: AnyChain): AssetRoute {

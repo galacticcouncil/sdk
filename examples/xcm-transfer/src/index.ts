@@ -6,9 +6,9 @@ import {
   EvmParachain,
 } from '@galacticcouncil/xcm-core';
 import {
-  chainsConfigMap,
-  chainsMap,
   assetsMap,
+  chainsMap,
+  routesMap,
   validations,
 } from '@galacticcouncil/xcm-cfg';
 import {
@@ -31,7 +31,7 @@ import { signAndSendEvm, signAndSend } from './signers';
 const configService = new ConfigService({
   assets: assetsMap,
   chains: chainsMap,
-  chainsConfig: chainsConfigMap,
+  routes: routesMap,
 });
 
 // Initialize hydration API
@@ -51,7 +51,7 @@ const wallet = new Wallet({
 });
 
 // Dynamically add external asset to xcm
-configureExternal(externals, configService);
+// configureExternal(externals, configService);
 
 // Define transfer
 const srcChain = configService.getChain('ethereum');
@@ -71,8 +71,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
+const destAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
