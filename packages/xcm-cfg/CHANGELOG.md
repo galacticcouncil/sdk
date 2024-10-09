@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 4.1.1
+
+### Patch Changes
+
+- Fix mda account fn
+- Fix hub ed validation
+
 ## 4.1.0
 
 ### Minor Changes

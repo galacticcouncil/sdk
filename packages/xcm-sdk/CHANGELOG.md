@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 5.2.3
+
+### Patch Changes
+
+- Fix contract calldata validation
+
 ## 5.2.2
 
 ### Patch Changes
