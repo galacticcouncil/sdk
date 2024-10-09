@@ -27,7 +27,9 @@ export class Erc20Client {
 
   private validateContractAddress(address: string) {
     if (!addr.isH160(address)) {
-      throw new Error('Contract address is not valid h160 address');
+      throw new Error(
+        'Contract address ' + address + ' is not valid h160 address'
+      );
     }
   }
 
