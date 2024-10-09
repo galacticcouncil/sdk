@@ -64,8 +64,9 @@ export function getDerivatedAccount({
   source,
   via,
 }: ExtrinsicConfigBuilderParams) {
-  if (via?.chain.key === 'moonbeam' && source instanceof Parachain) {
-    return mda.calculateMDA(sender, source.parachainId.toString(), 1);
+  if (source.chain instanceof Parachain && via?.chain.key === 'moonbeam') {
+    const parachainId = source.chain.parachainId;
+    return mda.calculateMDA(sender, parachainId.toString(), 1);
   }
   return address;
 }
