@@ -8,9 +8,19 @@ import {
 import { HubClient } from '../../clients';
 
 export class HubEdValidation extends TransferValidation {
-  async validate(data: TransferData) {
-    const { address, destination } = data;
+  protected async skipFor(data: TransferData): Promise<boolean> {
+    const { asset, destination } = data;
+    const isSufficientFeeAsset = asset.isEqual(destination.fee);
+    return isSufficientFeeAsset;
+  }
 
+  async validate(data: TransferData) {
+    const shouldSkip = await this.skipFor(data);
+    if (shouldSkip) {
+      return;
+    }
+
+    const { address, destination } = data;
     const chain = destination.chain as Parachain;
     const client = new HubClient(chain);
     const balance = await client.getSystemAccountBalance(address);
