@@ -5,27 +5,49 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 /**
+ * Transfer source data
+ *
+ * @interface TransferSourceData
+ * @member {AssetAmount} balance Transfer asset balance
+ * @member {AssetAmount} destinationFeeBalance Transfer destination fee asset balance
+ * @member {AssetAmount} fee Transfer fee
+ * @member {AssetAmount} feeBalance Transfer fee asset balance
+ * @member {SwapInfo} feeSwap Transfer fee swap details
+ * @member {AssetAmount} max Maximum allowed amount of transfer asset to send
+ * @member {AssetAmount} min Minimum required amount of transfer asset to send
+ */
+export interface TransferSourceData {
+  balance: AssetAmount;
+  destinationFeeBalance: AssetAmount;
+  fee: AssetAmount;
+  feeBalance: AssetAmount;
+  feeSwap: SwapInfo;
+  max: AssetAmount;
+  min: AssetAmount;
+}
+
+/**
+ * Transfer destination data
+ *
+ * @interface TransferDestinationData
+ * @member {AssetAmount} balance Received asset balance
+ * @member {AssetAmount} fee Transfer destination fee
+ */
+export interface TransferDestinationData {
+  balance: AssetAmount;
+  fee: AssetAmount;
+}
+
+/**
  * Transfer (X) data
  *
  * @interface XTransfer
- * @member {AssetAmount} balance Asset balance
- * @member {AssetAmount} dstFee Destination chain fee
- * @member {AssetAmount} dstFeeBalance Destination chain fee asset balance
- * @member {AssetAmount} max Maximum allowed amount of asset to send
- * @member {AssetAmount} min Minimum required amount of asset to send
- * @member {AssetAmount} srcFee Source chain fee
- * @member {AssetAmount} srcFeeBalance Source chain fee asset balance
- * @member {SwapInfo} srcFeeSwap Source chain fee swap details
+ * @member {TransferSourceData} source Source chain data
+ * @member {TransferDestinationData} destination Destination chain data
  */
 export interface XTransfer {
-  balance: AssetAmount;
-  dstFee: AssetAmount;
-  dstFeeBalance: AssetAmount;
-  max: AssetAmount;
-  min: AssetAmount;
-  srcFee: AssetAmount;
-  srcFeeBalance: AssetAmount;
-  srcFeeSwap: SwapInfo;
+  source: TransferSourceData;
+  destination: TransferDestinationData;
   buildCall(amount: bigint | number | string): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;

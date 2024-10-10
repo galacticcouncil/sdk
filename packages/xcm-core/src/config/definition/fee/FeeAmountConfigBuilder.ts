@@ -1,11 +1,10 @@
 import { Asset } from '../../../asset';
-import { AnyChain, EvmParachain } from '../../../chain';
+import { AnyChain } from '../../../chain';
 
 export interface FeeAmountConfigParams {
   asset: Asset;
-  destination: AnyChain;
   source: AnyChain;
-  via?: EvmParachain;
+  destination: AnyChain;
 }
 
 export interface FeeAmountConfigBuilder {

@@ -58,7 +58,7 @@ export class TransferService {
 
   async getDestinationFee(): Promise<AssetAmount> {
     const { chain, route } = this.config;
-    const { destination, via } = route;
+    const { source, destination, via } = route;
 
     const metadata = new Metadata(destination.chain);
 
@@ -75,10 +75,9 @@ export class TransferService {
 
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
-      asset: feeAsset,
+      asset: source.destinationFee.asset || feeAsset,
+      source: via ? via.chain : chain,
       destination: destination.chain,
-      source: chain,
-      via: via?.chain,
     });
     return AssetAmount.fromAsset(feeAsset, {
       amount: fee,
@@ -97,7 +96,7 @@ export class TransferService {
       return this.getBalance(address);
     }
 
-    const feeAssetId = destination.chain.getBalanceAssetId(feeAsset);
+    const feeAssetId = chain.getBalanceAssetId(feeAsset);
     const account = addr.isH160(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;

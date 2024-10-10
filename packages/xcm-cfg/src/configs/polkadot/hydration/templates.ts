@@ -108,6 +108,7 @@ export function toEthereumWithRelayerTemplate(
       balance: balance(),
       fee: fee(),
       destinationFee: {
+        asset: assetIn,
         balance: balance(),
       },
     },

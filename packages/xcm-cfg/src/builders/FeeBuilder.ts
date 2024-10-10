@@ -18,8 +18,8 @@ export function FeeAmountBuilder() {
 function TokenRelayer() {
   return {
     calculateRelayerFee: (): FeeAmountConfigBuilder => ({
-      build: ({ asset, destination, source, via }) => {
-        const ctx = via || (source as EvmChain);
+      build: ({ asset, destination, source }) => {
+        const ctx = source as EvmChain;
         const rcv = destination as EvmChain;
         const assetId = ctx.getAssetId(asset);
         const assetDecimals = ctx.getAssetDecimals(asset);

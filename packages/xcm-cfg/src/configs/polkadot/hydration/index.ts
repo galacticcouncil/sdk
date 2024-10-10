@@ -524,7 +524,7 @@ const toPolkadot: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(), // relay using x1 interior !!!
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -802,7 +802,7 @@ const toAcalaViaWormhole: AssetRoute[] = [
     },
     destination: {
       chain: acala_evm,
-      asset: dai_mwh,
+      asset: dai_awh,
       fee: {
         amount: 0.06,
         asset: aca,
@@ -850,7 +850,6 @@ export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
     ...toAcala,
-    ...toAcalaViaWormhole,
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,

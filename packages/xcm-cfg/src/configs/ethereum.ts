@@ -25,6 +25,7 @@ const toHydration: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
+        asset: dai,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -32,7 +33,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dai_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying on moonbeam
         asset: dai_mwh,
       },
     },
@@ -46,6 +47,7 @@ const toHydration: AssetRoute[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
       destinationFee: {
+        asset: eth,
         balance: BalanceBuilder().evm().native(),
       },
     },
@@ -53,7 +55,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: weth_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying on moonbeam
         asset: weth_mwh,
       },
     },
@@ -74,6 +76,7 @@ const toHydration: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
+        asset: wbtc,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -81,7 +84,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: wbtc_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying on moonbeam
         asset: wbtc_mwh,
       },
     },
@@ -99,6 +102,7 @@ const toHydration: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
+        asset: usdc,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -106,7 +110,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdc_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying on moonbeam
         asset: usdc_mwh,
       },
     },
@@ -124,6 +128,7 @@ const toHydration: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
+        asset: usdt,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -131,7 +136,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdt_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying on moonbeam
         asset: usdt_mwh,
       },
     },
@@ -148,6 +153,7 @@ const toMoonbeam: AssetRoute[] = [
       asset: eth,
       balance: BalanceBuilder().evm().native(),
       destinationFee: {
+        asset: eth,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -155,7 +161,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: weth_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying
         asset: weth_mwh,
       },
     },
@@ -173,6 +179,7 @@ const toMoonbeam: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
+        asset: dai,
         balance: BalanceBuilder().evm().erc20(),
       },
     },
@@ -180,7 +187,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: dai_mwh,
       fee: {
-        amount: 0,
+        amount: 0, // free relaying
         asset: dai_mwh,
       },
     },

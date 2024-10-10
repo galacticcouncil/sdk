@@ -45,7 +45,7 @@ export class DestFeeValidation extends TransferValidation {
       amount: destination.fee.amount + min,
     });
 
-    if (destination.feeBalance.amount < minBalance.amount) {
+    if (source.destinationFeeBalance.amount < minBalance.amount) {
       throw new TransferValidationError('Insufficient_Fee_Balance', {
         amount: minBalance.toDecimal(minBalance.decimals),
         asset: minBalance.symbol,

@@ -69,24 +69,20 @@ export class Wallet {
     const [
       srcBalance,
       srcFeeBalance,
+      srcDestinationFeeBalance,
       srcMin,
       dstBalance,
       dstFee,
-      dstFeeBalance,
       dstMin,
     ] = await Promise.all([
       src.getBalance(srcAddr),
       src.getFeeBalance(srcAddr),
+      src.getDestinationFeeBalance(srcAddr),
       src.getMin(),
       dst.getBalance(dstAddr),
       src.getDestinationFee(),
-      src.getDestinationFeeBalance(srcAddr),
       dst.getMin(),
     ]);
-
-    const dstBalanceNormalized = srcBalance.copyWith({
-      amount: dstBalance.amount,
-    });
 
     const ctx: TransferCtx = {
       address: dstAddr,
@@ -101,12 +97,11 @@ export class Wallet {
       source: {
         balance: srcBalance,
         chain: srcConf.chain,
+        fee: srcFeeBalance.copyWith({ amount: 0n }),
         feeBalance: srcFeeBalance,
-        feeBalanceDest: dstFeeBalance,
+        destinationFeeBalance: srcDestinationFeeBalance,
       },
     };
-
-    console.log(ctx);
 
     const route = srcConf.route;
     const routedFromParachain = route.extrinsic && route.via;
@@ -138,7 +133,7 @@ export class Wallet {
       : undefined;
 
     const dstEd = await dst.getEd();
-    const min = calculateMin(dstBalanceNormalized, dstFee, dstMin, dstEd);
+    const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.getEd();
     const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
@@ -148,14 +143,19 @@ export class Wallet {
     ctx.source.feeSwap = srcFeeSwap;
 
     return {
-      balance: srcBalance,
-      dstFee,
-      dstFeeBalance,
-      max,
-      min,
-      srcFee,
-      srcFeeBalance,
-      srcFeeSwap,
+      source: {
+        balance: srcBalance,
+        destinationFeeBalance: srcDestinationFeeBalance,
+        fee: srcFee,
+        feeBalance: srcFeeBalance,
+        feeSwap: srcFeeSwap,
+        max,
+        min: srcBalance.copyWith({ amount: min.amount }),
+      },
+      destination: {
+        balance: dstBalance,
+        fee: dstFee,
+      },
       async buildCall(amount): Promise<XCall> {
         const ctxCp = Object.assign({}, ctx);
         ctxCp.amount = big.toBigInt(amount, srcBalance.decimals);

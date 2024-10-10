@@ -38,7 +38,9 @@ export function Xtokens() {
     transferMultiCurrencies: (weight = U_64_MAX): ContractConfigBuilder => ({
       build: ({ address, amount, asset, destination, source }) => {
         const assetId = source.chain.getAssetId(asset);
-        const feeAssetId = source.chain.getAssetId(destination.feeBalance);
+        const feeAssetId = source.chain.getAssetId(
+          source.destinationFeeBalance
+        );
         const feeAmount = big.toBigInt(
           destination.fee.amount,
           destination.fee.decimals

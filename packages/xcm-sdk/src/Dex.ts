@@ -49,10 +49,10 @@ export class Dex {
 
   isSwapSupported(fee: AssetAmount, ctx: TransferCtx): boolean {
     const { asset, source } = ctx;
-    const destFee = this.parseDestFee(ctx);
+    const effectiveFee = this.parseEffectiveFee(ctx);
     const isSupported = IS_HUB(source.chain) || IS_DEX(source.chain);
-    const isSufficientAssetTransfer = asset.isEqual(destFee);
-    const isFeePaymentAsset = fee.isSame(destFee);
+    const isSufficientAssetTransfer = asset.isEqual(effectiveFee);
+    const isFeePaymentAsset = fee.isSame(effectiveFee);
     return isSupported && !isSufficientAssetTransfer && !isFeePaymentAsset;
   }
 
@@ -61,11 +61,11 @@ export class Dex {
     ctx: TransferCtx
   ): Promise<SwapInfo> {
     const { source } = ctx;
-    const destFee = this.parseDestFee(ctx);
-    const destFeeBalance = this.parseDestFeeBalance(ctx);
+    const effectiveFee = this.parseEffectiveFee(ctx);
+    const effectiveFeeBalance = this.parseEffectiveFeeBalance(ctx);
     const assetIn = this.chain.getMetadataAssetId(fee);
-    const assetOut = this.chain.getMetadataAssetId(destFee);
-    const amountOut = destFee.toDecimal(destFee.decimals);
+    const assetOut = this.chain.getMetadataAssetId(effectiveFee);
+    const amountOut = effectiveFee.toDecimal(effectiveFee.decimals);
 
     const trade = await this.router.getBestBuy(
       assetIn.toString(),
@@ -76,27 +76,28 @@ export class Dex {
     const amountIn = BigInt(trade.amountIn.toNumber());
     const maxAmountIn = amountIn * 2n; // Support slippage up to 100%
 
-    const hasNotEnoughDestFee = destFeeBalance.amount < destFee.amount;
+    const hasNotEnoughDestFee =
+      effectiveFeeBalance.amount < effectiveFee.amount;
     const hasEnoughReservesToSwap =
       source.feeBalance.amount - fee.amount > maxAmountIn;
 
     return {
       aIn: fee.copyWith({ amount: amountIn }),
-      aOut: destFee,
+      aOut: effectiveFee,
       enabled: hasNotEnoughDestFee && hasEnoughReservesToSwap,
       route: buildRoute(trade.swaps),
     } as SwapInfo;
   }
 
-  private parseDestFee(ctx: TransferCtx) {
+  private parseEffectiveFee(ctx: TransferCtx) {
     const { destination, via } = ctx;
     const routeFee = via && via.fee;
     return routeFee || destination.fee;
   }
 
-  private parseDestFeeBalance(ctx: TransferCtx) {
-    const { destination, via } = ctx;
+  private parseEffectiveFeeBalance(ctx: TransferCtx) {
+    const { source, via } = ctx;
     const routeFeeBalance = via && via.feeBalance;
-    return routeFeeBalance || destination.feeBalance;
+    return routeFeeBalance || source.destinationFeeBalance;
   }
 }
