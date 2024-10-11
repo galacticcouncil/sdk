@@ -472,11 +472,11 @@ const toZeitgeist: AssetConfig[] = [
     balance: balance(),
     destination: zeitgeist,
     destinationFee: {
-      amount: 0.1,
+      amount: 0.002,
       asset: glmr,
       balance: balance(),
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
     fee: fee(),
   }),
   toZeitgeistErc20Template(usdc_mwh),

@@ -1,6 +1,5 @@
 import {
   big,
-  Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
@@ -172,17 +171,17 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
         const { amount, asset, destination, source, via } = params;
 
         let rcv = destination.chain as Parachain;
-        let feeAssetId = source.chain.getAssetId(destination.fee);
+        let feeAsset = destination.fee;
         let feeAmount = destination.fee.amount;
         if (via && via.fee) {
-          const { amount, decimals } = via.fee;
           rcv = via.chain as Parachain;
-          feeAssetId = source.chain.getAssetId(via.fee);
-          feeAmount = big.toBigInt(amount, decimals);
+          feeAsset = via.fee;
+          feeAmount = big.toBigInt(feeAsset.amount, feeAsset.decimals);
         }
 
         const version = XcmVersion.v3;
         const assetId = source.chain.getAssetId(asset);
+        const feeAssetId = source.chain.getAssetId(feeAsset);
         const derivatedAccount = getDerivatedAccount(params);
         const account = getExtrinsicAccount(derivatedAccount);
         return [
