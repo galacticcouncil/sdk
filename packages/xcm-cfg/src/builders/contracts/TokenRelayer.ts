@@ -1,10 +1,11 @@
 import {
+  addr,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { formatDestAddress, parseAssetId } from '../utils';
+import { parseAssetId } from '../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
@@ -22,7 +23,7 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
         amount,
         '0',
         rcvWh.getWormholeId(),
-        formatDestAddress(address) as `0x${string}`,
+        addr.toHex(address) as `0x${string}`,
         '0',
       ],
       func: 'transferTokensWithRelay',

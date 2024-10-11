@@ -1,4 +1,5 @@
 import {
+  addr,
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
@@ -6,7 +7,7 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { formatDestAddress, parseAssetId } from '../utils';
+import { parseAssetId } from '../utils';
 
 const transferTokensWithPayload = (
   createPayload: (dest: Parachain, address: string) => string
@@ -24,7 +25,7 @@ const transferTokensWithPayload = (
         parseAssetId(assetId),
         amount,
         rcvWh.getWormholeId(),
-        formatDestAddress(recipient) as `0x${string}`,
+        addr.toHex(recipient) as `0x${string}`,
         '0',
         payload,
       ],
@@ -49,7 +50,7 @@ const transferTokens = (): ContractConfigBuilder => ({
         parseAssetId(assetId),
         amount,
         rcvWh.getWormholeId(),
-        formatDestAddress(address) as `0x${string}`,
+        addr.toHex(address) as `0x${string}`,
         '0',
         '0',
       ],
@@ -72,7 +73,7 @@ const wrapAndTransferETHWithPayload = (
       address: ctxWh.getTokenBridge(),
       args: [
         rcvWh.getWormholeId(),
-        formatDestAddress(recipient) as `0x${string}`,
+        addr.toHex(recipient) as `0x${string}`,
         '0',
         payload,
       ],
