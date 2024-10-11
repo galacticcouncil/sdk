@@ -14,6 +14,7 @@ import {
 } from '../assets';
 import { ethereum, hydration, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
+import { mrl } from '../utils';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -37,7 +38,9 @@ const toHydration: AssetRoute[] = [
         asset: dai_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .transferTokensWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },
@@ -61,8 +64,7 @@ const toHydration: AssetRoute[] = [
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .wrapAndTransferETHWithPayload()
-      .mrl(),
+      .wrapAndTransferETHWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },
@@ -88,7 +90,9 @@ const toHydration: AssetRoute[] = [
         asset: wbtc_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .transferTokensWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },
@@ -114,7 +118,9 @@ const toHydration: AssetRoute[] = [
         asset: usdc_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .transferTokensWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },
@@ -140,7 +146,9 @@ const toHydration: AssetRoute[] = [
         asset: usdt_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .transferTokensWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },
@@ -167,8 +175,7 @@ const toMoonbeam: AssetRoute[] = [
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .wrapAndTransferETHWithPayload()
-      .mrl(),
+      .wrapAndTransferETHWithPayload(mrl.createPayload),
   }),
   new AssetRoute({
     source: {

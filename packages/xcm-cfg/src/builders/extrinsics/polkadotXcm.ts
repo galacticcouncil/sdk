@@ -14,7 +14,6 @@ import {
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  getDerivatedAccount,
   Parents,
   XcmVersion,
 } from '../ExtrinsicBuilder.utils';
@@ -224,6 +223,7 @@ const reserveTransferAssets = () => {
 
 type TransactOpts = {
   fee: number;
+  toAddress?: (source: Parachain, sender: string, parents: number) => string;
 };
 
 const send = () => {
@@ -231,15 +231,17 @@ const send = () => {
   return {
     transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { destination, source, via } = params;
+        const { address, destination, sender, source, via } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
             if (via && via.fee && via.transact) {
               const version = XcmVersion.v3;
-              const derivatedAccount = getDerivatedAccount(params);
-              const account = getExtrinsicAccount(derivatedAccount);
+              const receiver = opts.toAddress
+                ? opts.toAddress(source.chain as Parachain, sender, 1)
+                : address;
+              const account = getExtrinsicAccount(receiver);
               const ctx = source.chain as Parachain;
               const rcv = destination.chain as Parachain;
 

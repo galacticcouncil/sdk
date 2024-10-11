@@ -3,6 +3,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 import { aca, dai_awh } from '../../assets';
 import { hydration, moonbeam, acala_evm } from '../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../builders';
+import { mrl } from '../../utils';
 
 const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
@@ -26,7 +27,9 @@ const toHydrationViaWormhole: AssetRoute[] = [
         asset: dai_awh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokensWithPayload().mrl(),
+    contract: ContractBuilder()
+      .TokenBridge()
+      .transferTokensWithPayload(mrl.createPayload),
     via: {
       chain: moonbeam,
     },

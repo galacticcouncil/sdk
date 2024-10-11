@@ -1,15 +1,14 @@
 import {
   big,
-  Asset,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
+  ExtrinsicConfigBuilderParams,
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import { toAsset, toDest } from './xTokens.utils';
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  getDerivatedAccount,
   XcmVersion,
 } from '../ExtrinsicBuilder.utils';
 
@@ -163,13 +162,20 @@ const transferMultiassets = (originParachainId?: number) => {
   };
 };
 
-const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
+type TransferOpts = {
+  toAddress: (source: Parachain, sender: string, parents: number) => string;
+};
+
+const transferMultiCurrencies = (
+  opts?: TransferOpts
+): ExtrinsicConfigBuilder => ({
   build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
-        const { amount, asset, destination, source, via } = params;
+        const { address, amount, asset, destination, sender, source, via } =
+          params;
 
         let rcv = destination.chain as Parachain;
         let feeAssetId = source.chain.getAssetId(destination.fee);
@@ -183,8 +189,10 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
 
         const version = XcmVersion.v3;
         const assetId = source.chain.getAssetId(asset);
-        const derivatedAccount = getDerivatedAccount(params);
-        const account = getExtrinsicAccount(derivatedAccount);
+        const receiver = opts?.toAddress
+          ? opts?.toAddress(source.chain as Parachain, sender, 1)
+          : address;
+        const account = getExtrinsicAccount(receiver);
         return [
           [
             [assetId, amount],

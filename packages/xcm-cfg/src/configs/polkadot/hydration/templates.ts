@@ -12,6 +12,7 @@ import {
   FeeAmountBuilder,
 } from '../../../builders';
 import { assetHub, ethereum, moonbeam, zeitgeist } from '../../../chains';
+import { mda } from '../../../utils';
 
 import { balance, fee } from './configs';
 
@@ -121,11 +122,13 @@ export function toEthereumWithRelayerTemplate(
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-      ExtrinsicBuilder()
-        .polkadotXcm()
-        .send()
-        .transact({ fee: MRL_EXECUTION_FEE }),
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies({
+        toAddress: mda.getDerivatedAccount,
+      }),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
+        fee: MRL_EXECUTION_FEE,
+        toAddress: mda.getDerivatedAccount,
+      }),
     ]),
     via: {
       chain: moonbeam,

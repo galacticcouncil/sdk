@@ -15,11 +15,11 @@ class XcmRoutingUserAction extends Struct {
   }
 }
 
-export function createMRLPayload(
+export function createPayload(
   parachain: Parachain,
-  account: string,
+  address: string,
   isEthereumStyle = false
-): VersionedUserAction {
+): string {
   const multilocation = {
     V1: {
       parents: 1,
@@ -27,8 +27,8 @@ export function createMRLPayload(
         X2: [
           { Parachain: parachain.parachainId },
           isEthereumStyle
-            ? { AccountKey20: { key: account } }
-            : { AccountId32: { id: account } },
+            ? { AccountKey20: { key: address } }
+            : { AccountId32: { id: address } },
         ],
       },
     },
@@ -42,5 +42,6 @@ export function createMRLPayload(
   const userAction = new XcmRoutingUserAction({
     destination: versionedMultilocation,
   });
-  return new VersionedUserAction({ V1: userAction });
+  const action = new VersionedUserAction({ V1: userAction });
+  return action.toHex();
 }
