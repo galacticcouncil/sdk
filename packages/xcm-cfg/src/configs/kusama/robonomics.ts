@@ -18,7 +18,7 @@ export const robonomicsConfig = new ChainConfig({
       extrinsic: ExtrinsicBuilder()
         .polkadotXcm()
         .limitedReserveTransferAssets()
-        .X1(),
+        .here(),
     }),
   ],
   chain: robonomics,
