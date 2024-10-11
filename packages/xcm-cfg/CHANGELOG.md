@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 4.1.2
+
+### Patch Changes
+
+- Fix hydration <-> zeitgeist glmr transfer (no need for multicurrencies)
+
 ## 4.1.1
 
 ### Patch Changes
