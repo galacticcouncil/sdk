@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 2.8.2
+
+### Patch Changes
+
+- Fix robonomics -> basilisk transfer
+
 ## 2.8.1
 
 ### Patch Changes
