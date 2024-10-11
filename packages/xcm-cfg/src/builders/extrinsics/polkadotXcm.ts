@@ -43,25 +43,6 @@ const limitedReserveTransferAssets = () => {
           },
         }),
     }),
-    X1: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, destination }) =>
-        new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getArgs: () => {
-            const version = XcmVersion.v1;
-            const account = getExtrinsicAccount(address);
-            const rcv = destination.chain as Parachain;
-            return [
-              toDest(version, rcv),
-              toBeneficiary(version, account),
-              toAssets(version, 0, 'Here', amount),
-              0,
-              'Unlimited',
-            ];
-          },
-        }),
-    }),
     X2: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, asset, destination, source }) =>
         new ExtrinsicConfig({
