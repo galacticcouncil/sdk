@@ -10,7 +10,7 @@ import {
   ChainEcosystem,
   ConfigService,
   Parachain,
-  SwapInfo,
+  SwapCtx,
   TransferCtx,
 } from '@galacticcouncil/xcm-core';
 
@@ -56,10 +56,7 @@ export class Dex {
     return isSupported && !isSufficientAssetTransfer && !isFeePaymentAsset;
   }
 
-  async calculateFeeSwap(
-    fee: AssetAmount,
-    ctx: TransferCtx
-  ): Promise<SwapInfo> {
+  async calculateFeeSwap(fee: AssetAmount, ctx: TransferCtx): Promise<SwapCtx> {
     const { source } = ctx;
     const effectiveFee = this.parseEffectiveFee(ctx);
     const effectiveFeeBalance = this.parseEffectiveFeeBalance(ctx);
@@ -86,18 +83,16 @@ export class Dex {
       aOut: effectiveFee,
       enabled: hasNotEnoughDestFee && hasEnoughReservesToSwap,
       route: buildRoute(trade.swaps),
-    } as SwapInfo;
+    } as SwapCtx;
   }
 
   private parseEffectiveFee(ctx: TransferCtx) {
-    const { destination, via } = ctx;
-    const routeFee = via && via.fee;
-    return routeFee || destination.fee;
+    const { destination, transact } = ctx;
+    return transact ? transact.fee : destination.fee;
   }
 
   private parseEffectiveFeeBalance(ctx: TransferCtx) {
-    const { source, via } = ctx;
-    const routeFeeBalance = via && via.feeBalance;
-    return routeFeeBalance || source.destinationFeeBalance;
+    const { source, transact } = ctx;
+    return transact ? transact.fee : source.destinationFeeBalance;
   }
 }

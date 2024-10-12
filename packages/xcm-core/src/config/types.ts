@@ -2,7 +2,7 @@ import { Asset, AssetAmount } from '../asset';
 import { AnyChain, AnyParachain } from '../chain';
 import { AssetRoute } from './definition';
 
-export interface SwapInfo {
+export interface SwapCtx {
   aIn: AssetAmount;
   aOut: AssetAmount;
   enabled: boolean;
@@ -14,7 +14,10 @@ export interface TxWeight {
   refTime: number;
 }
 
-export interface TransactInfo {
+export interface TransactCtx {
+  chain: AnyParachain;
+  fee: AssetAmount;
+  feeBalance: AssetAmount;
   call: `0x${string}`;
   weight: TxWeight;
 }
@@ -27,22 +30,17 @@ export interface TransferCtx {
   source: {
     balance: AssetAmount;
     chain: AnyChain;
+    destinationFeeBalance: AssetAmount;
     fee: AssetAmount;
     feeBalance: AssetAmount;
-    feeSwap?: SwapInfo;
-    destinationFeeBalance: AssetAmount;
+    feeSwap?: SwapCtx;
   };
   destination: {
     balance: AssetAmount;
     chain: AnyChain;
     fee: AssetAmount;
   };
-  via?: {
-    chain: AnyParachain;
-    fee?: AssetAmount;
-    feeBalance?: AssetAmount;
-    transact?: TransactInfo;
-  };
+  transact?: TransactCtx;
 }
 
 export interface TransferConfigs {

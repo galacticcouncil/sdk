@@ -1,8 +1,8 @@
 import {
+  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
-  ExtrinsicConfigBuilderParams,
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import { toAsset, toDest } from './xTokens.utils';
@@ -162,36 +162,41 @@ const transferMultiassets = (originParachainId?: number) => {
   };
 };
 
-type TransferOpts = {
-  toAddress: (source: Parachain, sender: string, parents: number) => string;
-};
-
-const transferMultiCurrencies = (
-  opts?: TransferOpts
-): ExtrinsicConfigBuilder => ({
+const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
   build: (params) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
       getArgs: () => {
-        const { address, amount, asset, destination, sender, source, via } =
-          params;
+        const {
+          address,
+          amount,
+          asset,
+          destination,
+          sender,
+          source,
+          transact,
+        } = params;
 
+        const ctx = source.chain as Parachain;
         let rcv = destination.chain as Parachain;
+        let receiver = address;
         let feeAssetId = source.chain.getAssetId(destination.fee);
         let feeAmount = destination.fee.amount;
-        if (via && via.fee) {
-          const { amount, decimals } = via.fee;
-          rcv = via.chain as Parachain;
-          feeAssetId = source.chain.getAssetId(via.fee);
+        if (transact) {
+          const { amount, decimals } = transact.fee;
+          rcv = transact.chain as Parachain;
+          feeAssetId = source.chain.getAssetId(transact.fee);
           feeAmount = big.toBigInt(amount, decimals);
+          receiver = acc.getMultilocationDerivatedAccount(
+            ctx.parachainId,
+            sender,
+            1
+          );
         }
 
         const version = XcmVersion.v3;
-        const assetId = source.chain.getAssetId(asset);
-        const receiver = opts?.toAddress
-          ? opts?.toAddress(source.chain as Parachain, sender, 1)
-          : address;
+        const assetId = ctx.getAssetId(asset);
         const account = getExtrinsicAccount(receiver);
         return [
           [

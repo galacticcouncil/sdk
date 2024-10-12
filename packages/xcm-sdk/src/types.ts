@@ -1,6 +1,6 @@
 import {
   AssetAmount,
-  SwapInfo,
+  SwapCtx,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 
@@ -12,7 +12,7 @@ import {
  * @member {AssetAmount} destinationFeeBalance Transfer destination fee asset balance
  * @member {AssetAmount} fee Transfer fee
  * @member {AssetAmount} feeBalance Transfer fee asset balance
- * @member {SwapInfo} feeSwap Transfer fee swap details
+ * @member {SwapCtx} feeSwap Transfer fee swap context details
  * @member {AssetAmount} max Maximum allowed amount of transfer asset to send
  * @member {AssetAmount} min Minimum required amount of transfer asset to send
  */
@@ -21,7 +21,7 @@ export interface TransferSourceData {
   destinationFeeBalance: AssetAmount;
   fee: AssetAmount;
   feeBalance: AssetAmount;
-  feeSwap: SwapInfo;
+  feeSwap: SwapCtx;
   max: AssetAmount;
   min: AssetAmount;
 }

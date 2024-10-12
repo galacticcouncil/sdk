@@ -7,6 +7,7 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
+  TransactCtx,
   TransferCtx,
   TransferValidator,
   TransferValidation,
@@ -103,28 +104,19 @@ export class Wallet {
       },
     };
 
-    const route = srcConf.route;
-    const routedFromParachain = route.extrinsic && route.via;
-    const routedFromEvm = route.contract && route.via;
-
-    if (routedFromParachain) {
-      const [transact, fee, feeBalance] = await Promise.all([
-        src.getTransactInfo(ctx, route.via),
-        src.getRouteFee(route.via),
-        src.getRouteFeeBalance(ctx, route.via),
+    const transact = srcConf.route.transact;
+    if (transact) {
+      const [delta, fee, feeBalance] = await Promise.all([
+        src.getTransact(ctx),
+        src.getTransactFee(),
+        src.getTransactFeeBalance(ctx),
       ]);
-      ctx.via = {
-        chain: route.via.chain,
+      ctx.transact = {
+        ...delta,
+        chain: transact.chain,
         fee: fee,
         feeBalance: feeBalance,
-        transact: transact,
-      };
-    }
-
-    if (routedFromEvm) {
-      ctx.via = {
-        chain: route.via.chain,
-      };
+      } as TransactCtx;
     }
 
     const srcFee = await src.getFee(ctx);

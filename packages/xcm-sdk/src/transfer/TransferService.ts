@@ -6,8 +6,7 @@ import {
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
-  RoutedViaConfig,
-  TransactInfo,
+  TransactCtx,
   TransferCtx,
   TransferConfig,
 } from '@galacticcouncil/xcm-core';
@@ -58,7 +57,7 @@ export class TransferService {
 
   async getDestinationFee(): Promise<AssetAmount> {
     const { chain, route } = this.config;
-    const { source, destination, via } = route;
+    const { source, destination, transact } = route;
 
     const metadata = new Metadata(destination.chain);
 
@@ -76,7 +75,7 @@ export class TransferService {
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
       asset: source.destinationFee.asset || feeAsset,
-      source: via ? via.chain : chain,
+      source: transact ? transact.chain : chain,
       destination: destination.chain,
     });
     return AssetAmount.fromAsset(feeAsset, {
@@ -242,44 +241,45 @@ export class TransferService {
     throw new Error('Either contract or extrinsic must be provided');
   }
 
-  async getTransactInfo(
-    ctx: TransferCtx,
-    via: RoutedViaConfig
-  ): Promise<TransactInfo> {
-    const { address } = ctx;
-    const { chain, transact } = via;
+  async getTransact(ctx: TransferCtx): Promise<Partial<TransactCtx>> {
+    const { route } = this.config;
+    const { transact } = route;
 
     if (!transact) {
-      throw new Error('Route via [transact] config is missing.');
+      throw new Error('Transact config is missing.');
     }
 
-    const substrate = await SubstrateService.create(chain);
-    const transactConfig = transact.build({
-      ...ctx,
-      via: {
-        chain,
+    const substrate = await SubstrateService.create(transact.chain);
+    const augmentedCtx = Object.assign(
+      {
+        transact: {
+          chain: transact.chain,
+        },
       },
-    });
+      ctx
+    );
 
-    const extrinsic = substrate.getExtrinsic(transactConfig);
-    const { weight } = await extrinsic.paymentInfo(address);
+    const config = transact.extrinsic.build(augmentedCtx);
+    const extrinsic = substrate.getExtrinsic(config);
+    const { weight } = await extrinsic.paymentInfo(ctx.address);
     return {
       call: extrinsic.method.toHex(),
       weight: {
         refTime: weight.refTime.toNumber(),
         proofSize: weight.proofSize.toString(),
       },
-    } as TransactInfo;
+    } as Partial<TransactCtx>;
   }
 
-  async getRouteFee(via: RoutedViaConfig): Promise<AssetAmount> {
-    const { chain } = this.config;
-    const { fee } = via;
+  async getTransactFee(): Promise<AssetAmount> {
+    const { chain, route } = this.config;
+    const { transact } = route;
 
-    if (!fee) {
-      throw new Error('Route via [fee] config is missing.');
+    if (!transact) {
+      throw new Error('Transact config is missing.');
     }
 
+    const { fee } = transact;
     const metadata = new Metadata(chain);
     const decimals = await metadata.getDecimals(fee.asset);
     return AssetAmount.fromAsset(fee.asset, {
@@ -288,17 +288,16 @@ export class TransferService {
     });
   }
 
-  async getRouteFeeBalance(
-    ctx: TransferCtx,
-    via: RoutedViaConfig
-  ): Promise<AssetAmount> {
-    const { sender, source } = ctx;
-    const { fee } = via;
+  async getTransactFeeBalance(ctx: TransferCtx): Promise<AssetAmount> {
+    const { route } = this.config;
+    const { transact } = route;
 
-    if (!fee) {
-      throw new Error('Route via [fee] config is missing.');
+    if (!transact) {
+      throw new Error('Transact config is missing.');
     }
 
+    const { sender, source } = ctx;
+    const { fee } = transact;
     const feeAssetId = source.chain.getBalanceAssetId(fee.asset);
     const feeBalanceConfig = fee.balance.build({
       address: sender,

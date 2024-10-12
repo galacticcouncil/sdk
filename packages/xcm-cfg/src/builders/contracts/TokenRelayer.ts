@@ -1,5 +1,6 @@
 import {
   addr,
+  AnyChain,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
@@ -7,11 +8,21 @@ import {
 
 import { parseAssetId } from '../utils';
 
+function wormholeGuard(chain: AnyChain) {
+  if (!chain.isWormholeChain()) {
+    throw new Error(chain.name + ' is not supported Wormhole chain.');
+  }
+}
+
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
-    const { address, amount, asset, source, destination, via } = params;
-    const ctx = via?.chain || source.chain;
+    const { address, amount, asset, source, destination, transact } = params;
+    const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
+
+    wormholeGuard(ctx);
+    wormholeGuard(rcv);
+
     const ctxWh = ctx as Wormhole;
     const rcvWh = rcv as Wormhole;
 

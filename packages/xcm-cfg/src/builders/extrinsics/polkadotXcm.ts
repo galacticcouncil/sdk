@@ -1,4 +1,5 @@
 import {
+  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -223,7 +224,6 @@ const reserveTransferAssets = () => {
 
 type TransactOpts = {
   fee: number;
-  toAddress?: (source: Parachain, sender: string, parents: number) => string;
 };
 
 const send = () => {
@@ -231,39 +231,40 @@ const send = () => {
   return {
     transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
       build: (params) => {
-        const { address, destination, sender, source, via } = params;
+        const { sender, source, transact } = params;
         return new ExtrinsicConfig({
           module: pallet,
           func,
           getArgs: () => {
-            if (via && via.fee && via.transact) {
-              const version = XcmVersion.v3;
-              const receiver = opts.toAddress
-                ? opts.toAddress(source.chain as Parachain, sender, 1)
-                : address;
-              const account = getExtrinsicAccount(receiver);
-              const ctx = source.chain as Parachain;
-              const rcv = destination.chain as Parachain;
-
-              const { fee, transact } = via;
-              const feePalletInstance = ctx.getAssetPalletInstance(fee);
-              const feeAmount = big.toBigInt(opts.fee, fee.decimals);
-
-              return [
-                toDest(version, via.chain || rcv),
-                toTransactMessage(
-                  version,
-                  account,
-                  { X1: { PalletInstance: feePalletInstance } },
-                  transact.call,
-                  transact.weight,
-                  feeAmount
-                ),
-              ];
+            if (!transact) {
+              throw new Error('Transact ctx configuration is missing.');
             }
-            throw new Error(
-              'Route via configuration is incorrect. Specify transact & fee configs.'
+
+            const version = XcmVersion.v3;
+            const ctx = source.chain as Parachain;
+            const rcv = transact.chain as Parachain;
+            const mda = acc.getMultilocationDerivatedAccount(
+              ctx.parachainId,
+              sender,
+              1
             );
+            const account = getExtrinsicAccount(mda);
+
+            const { fee } = transact;
+            const feePalletInstance = ctx.getAssetPalletInstance(fee);
+            const feeAmount = big.toBigInt(opts.fee, fee.decimals);
+
+            return [
+              toDest(version, rcv),
+              toTransactMessage(
+                version,
+                account,
+                { X1: { PalletInstance: feePalletInstance } },
+                transact.call,
+                transact.weight,
+                feeAmount
+              ),
+            ];
           },
         });
       },

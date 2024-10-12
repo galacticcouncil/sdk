@@ -14,9 +14,30 @@ import {
 } from '../assets';
 import { ethereum, hydration, moonbeam } from '../chains';
 import { BalanceBuilder, ContractBuilder } from '../builders';
-import { mrl } from '../utils';
 
 const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
+      destinationFee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: weth_mwh,
+      fee: {
+        amount: 0,
+        asset: weth_mwh,
+      },
+    },
+    contract: ContractBuilder()
+      .TokenBridge()
+      .wrapAndTransferETHWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
+  }),
   new AssetRoute({
     source: {
       asset: dai,
@@ -34,41 +55,16 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dai_mwh,
       fee: {
-        amount: 0, // free relaying on moonbeam
+        amount: 0,
         asset: dai_mwh,
       },
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .transferTokensWithPayload(mrl.createPayload),
-    via: {
-      chain: moonbeam,
-    },
+      .transferTokensWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
   }),
-  new AssetRoute({
-    source: {
-      asset: eth,
-      balance: BalanceBuilder().evm().native(),
-      destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: weth_mwh,
-      fee: {
-        amount: 0, // free relaying on moonbeam
-        asset: weth_mwh,
-      },
-    },
-    contract: ContractBuilder()
-      .TokenBridge()
-      .wrapAndTransferETHWithPayload(mrl.createPayload),
-    via: {
-      chain: moonbeam,
-    },
-  }),
+
   new AssetRoute({
     source: {
       asset: wbtc,
@@ -86,16 +82,14 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: wbtc_mwh,
       fee: {
-        amount: 0, // free relaying on moonbeam
+        amount: 0,
         asset: wbtc_mwh,
       },
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .transferTokensWithPayload(mrl.createPayload),
-    via: {
-      chain: moonbeam,
-    },
+      .transferTokensWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
   }),
   new AssetRoute({
     source: {
@@ -114,16 +108,14 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdc_mwh,
       fee: {
-        amount: 0, // free relaying on moonbeam
+        amount: 0,
         asset: usdc_mwh,
       },
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .transferTokensWithPayload(mrl.createPayload),
-    via: {
-      chain: moonbeam,
-    },
+      .transferTokensWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
   }),
   new AssetRoute({
     source: {
@@ -142,16 +134,14 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdt_mwh,
       fee: {
-        amount: 0, // free relaying on moonbeam
+        amount: 0,
         asset: usdt_mwh,
       },
     },
     contract: ContractBuilder()
       .TokenBridge()
-      .transferTokensWithPayload(mrl.createPayload),
-    via: {
-      chain: moonbeam,
-    },
+      .transferTokensWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
   }),
 ];
 
@@ -169,13 +159,11 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: weth_mwh,
       fee: {
-        amount: 0, // free relaying
+        amount: 0,
         asset: weth_mwh,
       },
     },
-    contract: ContractBuilder()
-      .TokenBridge()
-      .wrapAndTransferETHWithPayload(mrl.createPayload),
+    contract: ContractBuilder().TokenBridge().wrapAndTransferETH(),
   }),
   new AssetRoute({
     source: {
@@ -194,7 +182,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: dai_mwh,
       fee: {
-        amount: 0, // free relaying
+        amount: 0,
         asset: dai_mwh,
       },
     },

@@ -66,7 +66,6 @@ import {
   zeitgeist,
 } from '../../../chains';
 import { ContractBuilder, ExtrinsicBuilder } from '../../../builders';
-import { mda } from '../../../utils';
 
 import { balance, fee } from './configs';
 import {
@@ -812,22 +811,19 @@ const toAcalaViaWormhole: AssetRoute[] = [
     extrinsic: ExtrinsicBuilder()
       .utility()
       .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiCurrencies({
-          toAddress: mda.getDerivatedAccount,
-        }),
+        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
         ExtrinsicBuilder().polkadotXcm().send().transact({
           fee: MRL_EXECUTION_FEE,
-          toAddress: mda.getDerivatedAccount,
         }),
       ]),
-    via: {
+    transact: {
       chain: moonbeam,
       fee: {
         amount: MRL_XCM_FEE,
         asset: glmr,
         balance: balance(),
       },
-      transact: ExtrinsicBuilder()
+      extrinsic: ExtrinsicBuilder()
         .ethereumXcm()
         .transact(
           ContractBuilder()

@@ -10,7 +10,7 @@ import {
   robonomics,
   tinkernet,
 } from '../../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
+import { ExtrinsicBuilder } from '../../../builders';
 
 import { balance, fee } from './configs';
 

@@ -16,7 +16,7 @@ export interface DestinationFeeConfig {
   balance?: BalanceConfigBuilder;
 }
 
-export interface RouteFeeConfig {
+export interface TransactFeeConfig {
   amount: number;
   asset: Asset;
   balance: BalanceConfigBuilder;
