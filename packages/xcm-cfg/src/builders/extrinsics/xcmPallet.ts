@@ -4,11 +4,9 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import { toAssets, toBeneficiary, toDest } from './xcmPallet.utils';
-import {
-  getExtrinsicAccount,
-  Parents,
-  XcmVersion,
-} from '../ExtrinsicBuilder.utils';
+import { getExtrinsicAccount } from '../ExtrinsicBuilder.utils';
+
+import { Parents, XcmVersion } from '../types';
 
 const pallet = 'xcmPallet';
 

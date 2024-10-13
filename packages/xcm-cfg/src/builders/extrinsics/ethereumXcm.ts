@@ -5,7 +5,8 @@ import {
   ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData } from 'viem';
-import { XcmVersion } from '../ExtrinsicBuilder.utils';
+
+import { XcmVersion } from '../types';
 
 const pallet = 'ethereumXcm';
 

@@ -3,6 +3,8 @@ import { getTypeDef } from '@polkadot/types';
 import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
+import { XcmVersion } from './types';
+
 export function getExtrinsicArgumentVersion(
   func?: SubmittableExtrinsicFunction<'promise'>,
   index: number = 0
@@ -52,12 +54,3 @@ export function getExtrinsicAccount(address: string) {
         },
       };
 }
-
-export enum XcmVersion {
-  v1 = 'V1',
-  v2 = 'V2',
-  v3 = 'V3',
-  v4 = 'V4',
-}
-
-export type Parents = 0 | 1;

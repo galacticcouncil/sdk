@@ -9,8 +9,9 @@ import { toAsset, toDest } from './xTokens.utils';
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  XcmVersion,
 } from '../ExtrinsicBuilder.utils';
+
+import { XcmVersion } from '../types';
 
 const pallet = 'xTokens';
 

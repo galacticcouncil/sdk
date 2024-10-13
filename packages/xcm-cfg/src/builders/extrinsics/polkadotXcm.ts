@@ -15,9 +15,9 @@ import {
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  Parents,
-  XcmVersion,
 } from '../ExtrinsicBuilder.utils';
+
+import { Parents, XcmVersion } from '../types';
 
 const pallet = 'polkadotXcm';
 

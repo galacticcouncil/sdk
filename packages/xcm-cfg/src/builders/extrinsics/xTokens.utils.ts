@@ -1,5 +1,6 @@
 import { Parachain } from '@galacticcouncil/xcm-core';
-import { XcmVersion } from '../ExtrinsicBuilder.utils';
+
+import { XcmVersion } from '../types';
 
 export const toDest = (
   version: XcmVersion,
