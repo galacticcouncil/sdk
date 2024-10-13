@@ -583,11 +583,11 @@ const toZeitgeist: AssetRoute[] = [
       chain: zeitgeist,
       asset: glmr,
       fee: {
-        amount: 0.1,
+        amount: 0.002,
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   toZeitgeistErc20Template(usdc_mwh),
 ];

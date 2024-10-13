@@ -24,7 +24,7 @@ const toBasilisk: AssetRoute[] = [
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
       .limitedReserveTransferAssets()
-      .X1(),
+      .here(),
   }),
 ];
 

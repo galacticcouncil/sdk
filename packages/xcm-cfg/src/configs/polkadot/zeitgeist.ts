@@ -25,7 +25,7 @@ const toHydration: AssetRoute[] = [
   }),
   new AssetRoute({
     source: {
-      asset: usdc_mwh,
+      asset: glmr,
       balance: BalanceBuilder().substrate().system().account(),
       fee: {
         asset: glmr,
@@ -37,17 +37,17 @@ const toHydration: AssetRoute[] = [
     },
     destination: {
       chain: hydration,
-      asset: usdc_mwh,
+      asset: glmr,
       fee: {
-        amount: 0.1,
+        amount: 0.0035,
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
-      asset: glmr,
+      asset: usdc_mwh,
       balance: BalanceBuilder().substrate().system().account(),
       fee: {
         asset: glmr,
@@ -59,7 +59,7 @@ const toHydration: AssetRoute[] = [
     },
     destination: {
       chain: hydration,
-      asset: glmr,
+      asset: usdc_mwh,
       fee: {
         amount: 0.1,
         asset: glmr,
