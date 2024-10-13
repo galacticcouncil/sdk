@@ -238,7 +238,7 @@ export class TransferService {
         ...ctx,
       });
     }
-    throw new Error('Either contract or extrinsic must be provided');
+    throw new Error('AssetRoute contract or extrinsic config must be provided');
   }
 
   async getTransact(ctx: TransferCtx): Promise<Partial<TransactCtx>> {
@@ -246,7 +246,7 @@ export class TransferService {
     const { transact } = route;
 
     if (!transact) {
-      throw new Error('Transact config is missing.');
+      throw new Error(`AssetRoute transact config not found`);
     }
 
     const substrate = await SubstrateService.create(transact.chain);
@@ -276,7 +276,7 @@ export class TransferService {
     const { transact } = route;
 
     if (!transact) {
-      throw new Error('Transact config is missing.');
+      throw new Error(`AssetRoute transact config not found`);
     }
 
     const { fee } = transact;
@@ -293,7 +293,7 @@ export class TransferService {
     const { transact } = route;
 
     if (!transact) {
-      throw new Error('Transact config is missing.');
+      throw new Error(`AssetRoute transact config not found`);
     }
 
     const { sender, source } = ctx;

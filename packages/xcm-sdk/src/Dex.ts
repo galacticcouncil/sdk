@@ -52,8 +52,9 @@ export class Dex {
     const effectiveFee = this.parseEffectiveFee(ctx);
     const isSupported = IS_HUB(source.chain) || IS_DEX(source.chain);
     const isSufficientAssetTransfer = asset.isEqual(effectiveFee);
-    const isFeePaymentAsset = fee.isSame(effectiveFee);
-    return isSupported && !isSufficientAssetTransfer && !isFeePaymentAsset;
+    return (
+      isSupported && !isSufficientAssetTransfer && !fee.isSame(effectiveFee)
+    );
   }
 
   async calculateFeeSwap(fee: AssetAmount, ctx: TransferCtx): Promise<SwapCtx> {
@@ -71,7 +72,7 @@ export class Dex {
     );
 
     const amountIn = BigInt(trade.amountIn.toNumber());
-    const maxAmountIn = amountIn * 2n; // Support slippage up to 100%
+    const maxAmountIn = amountIn * 2n; // Allows max slippage up to 100%
 
     const hasNotEnoughDestFee =
       effectiveFeeBalance.amount < effectiveFee.amount;
@@ -87,12 +88,12 @@ export class Dex {
   }
 
   private parseEffectiveFee(ctx: TransferCtx) {
-    const { destination, transact } = ctx;
-    return transact ? transact.fee : destination.fee;
+    const { source, transact } = ctx;
+    return transact ? transact.fee : source.destinationFee;
   }
 
   private parseEffectiveFeeBalance(ctx: TransferCtx) {
     const { source, transact } = ctx;
-    return transact ? transact.fee : source.destinationFeeBalance;
+    return transact ? transact.feeBalance : source.destinationFeeBalance;
   }
 }

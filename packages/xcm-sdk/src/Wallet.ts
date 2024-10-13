@@ -85,10 +85,17 @@ export class Wallet {
       dst.getMin(),
     ]);
 
+    const { source, destination, transact } = srcConf.route;
+
+    // Normalize dest fee ctx in case of bridge transfers
+    const srcDestinationFeeAsset =
+      source.destinationFee.asset || destination.fee.asset;
+    const srcDestinationFee = dstFee.copyWith(srcDestinationFeeAsset);
+
     const ctx: TransferCtx = {
       address: dstAddr,
       amount: srcBalance.amount,
-      asset: srcConf.route.source.asset,
+      asset: source.asset,
       destination: {
         balance: dstBalance,
         chain: dstConf.chain,
@@ -100,11 +107,11 @@ export class Wallet {
         chain: srcConf.chain,
         fee: srcFeeBalance.copyWith({ amount: 0n }),
         feeBalance: srcFeeBalance,
+        destinationFee: srcDestinationFee,
         destinationFeeBalance: srcDestinationFeeBalance,
       },
     };
 
-    const transact = srcConf.route.transact;
     if (transact) {
       const [delta, fee, feeBalance] = await Promise.all([
         src.getTransact(ctx),
@@ -137,6 +144,7 @@ export class Wallet {
     return {
       source: {
         balance: srcBalance,
+        destinationFee: srcDestinationFee,
         destinationFeeBalance: srcDestinationFeeBalance,
         fee: srcFee,
         feeBalance: srcFeeBalance,

@@ -15,19 +15,21 @@ type SwapOpts = {
 const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
   const func = 'swapTokensForExactTokens';
   return {
-    build: ({ address, destination, source }) =>
+    build: ({ address, source }) =>
       new ExtrinsicConfig({
         module: pallet,
         func,
         getArgs: () => {
-          const ctx = source.chain as Parachain;
-          const assetId = ctx.getAssetId(destination.fee);
-          const palletInstance = ctx.getAssetPalletInstance(destination.fee);
+          const { chain, feeSwap, destinationFee } = source;
 
-          const { aIn } = source.feeSwap!;
+          const ctx = chain as Parachain;
+          const assetId = ctx.getAssetId(destinationFee);
+          const palletInstance = ctx.getAssetPalletInstance(destinationFee);
+
+          const { aIn } = feeSwap!;
           const maxAmountIn =
             aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
-          const amountOut = destination.fee.amount;
+          const amountOut = destinationFee.amount;
 
           return [
             [

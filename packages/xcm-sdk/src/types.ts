@@ -9,6 +9,7 @@ import {
  *
  * @interface TransferSourceData
  * @member {AssetAmount} balance Transfer asset balance
+ * @member {AssetAmount} destinationFee Transfer destination fee
  * @member {AssetAmount} destinationFeeBalance Transfer destination fee asset balance
  * @member {AssetAmount} fee Transfer fee
  * @member {AssetAmount} feeBalance Transfer fee asset balance
@@ -18,6 +19,7 @@ import {
  */
 export interface TransferSourceData {
   balance: AssetAmount;
+  destinationFee: AssetAmount;
   destinationFeeBalance: AssetAmount;
   fee: AssetAmount;
   feeBalance: AssetAmount;

@@ -9,8 +9,8 @@ import { HubClient } from '../../clients';
 
 export class HubEdValidation extends TransferValidation {
   protected async skipFor(data: TransferCtx): Promise<boolean> {
-    const { asset, destination } = data;
-    const isSufficientFeeAsset = asset.isEqual(destination.fee);
+    const { asset, source } = data;
+    const isSufficientFeeAsset = asset.isEqual(source.destinationFee);
     return isSufficientFeeAsset;
   }
 
@@ -21,6 +21,7 @@ export class HubEdValidation extends TransferValidation {
     }
 
     const { address, destination } = ctx;
+
     const chain = destination.chain as Parachain;
     const client = new HubClient(chain);
     const balance = await client.getSystemAccountBalance(address);
@@ -41,7 +42,6 @@ export class HubFrozenValidation extends TransferValidation {
 
     const chain = source.chain as Parachain;
     const client = new HubClient(chain);
-
     const isFrozen = await client.checkIfFrozen(address, asset);
     if (isFrozen) {
       throw new TransferValidationError('Asset_Frozen', {
