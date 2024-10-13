@@ -1,10 +1,6 @@
 import { ExternalAsset } from '@galacticcouncil/sdk';
-import { templates } from '@galacticcouncil/xcm-cfg';
-import {
-  Asset,
-  ChainAssetData,
-  ConfigService,
-} from '@galacticcouncil/xcm-core';
+import { HydrationConfigService } from '@galacticcouncil/xcm-cfg';
+import { Asset, ChainAssetData } from '@galacticcouncil/xcm-core';
 
 const defaultExternals = [
   '18', // DOTA
@@ -89,23 +85,19 @@ export const externals: ExternalAsset[] = [
 
 export function configureExternal(
   external: ExternalAsset[],
-  configService: ConfigService
+  configService: HydrationConfigService
 ) {
   external.forEach((ext) => {
     if (ext.origin === 1000 && !defaultExternals.includes(ext.id)) {
-      const assetData = buildAssetData(ext, '_ah_');
+      const assetData = toAssetData(ext, '_ah_');
       console.log('Registering ' + assetData.asset.key);
-      buildAssethubConfig(assetData, configService);
+      configService.addExternalHubRoute(assetData);
     }
   });
 }
 
-function buildAssetData(
-  external: ExternalAsset,
-  suffix: string
-): ChainAssetData {
+function toAssetData(external: ExternalAsset, suffix: string): ChainAssetData {
   const { decimals, id, symbol, internalId } = external;
-
   const key = symbol.toLowerCase();
   const asset = new Asset({
     key: key + suffix + id,
@@ -119,26 +111,4 @@ function buildAssetData(
     id: id,
     palletInstance: 50,
   } as ChainAssetData;
-}
-
-function buildAssethubConfig(
-  assetData: ChainAssetData,
-  configService: ConfigService
-) {
-  const assethub = configService.getChain('assethub');
-  const hydration = configService.getChain('hydration');
-  const { balanceId, ...base } = assetData;
-
-  assethub.updateAsset(base);
-  hydration.updateAsset(assetData);
-
-  configService.updateAsset(assetData.asset);
-  configService.updateChainAssetConfig(
-    assethub,
-    templates.assethub.toHydrationExtTemplate(assetData.asset)
-  );
-  configService.updateChainAssetConfig(
-    hydration,
-    templates.hydration.toHubExtTemplate(assetData.asset)
-  );
 }

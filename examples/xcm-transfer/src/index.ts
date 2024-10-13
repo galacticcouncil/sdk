@@ -1,7 +1,6 @@
 import { PoolService } from '@galacticcouncil/sdk';
 import {
   AssetAmount,
-  ConfigService,
   ConfigBuilder,
   EvmParachain,
 } from '@galacticcouncil/xcm-core';
@@ -10,6 +9,7 @@ import {
   chainsMap,
   routesMap,
   validations,
+  HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
 import {
   Wallet,
@@ -28,7 +28,7 @@ import {
 import { signAndSendEvm, signAndSend } from './signers';
 
 // Inialialize config
-const configService = new ConfigService({
+const configService = new HydrationConfigService({
   assets: assetsMap,
   chains: chainsMap,
   routes: routesMap,
@@ -51,12 +51,12 @@ const wallet = new Wallet({
 });
 
 // Dynamically add external asset to xcm
-// configureExternal(externals, configService);
+configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('ethereum');
-const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const srcChain = configService.getChain('hydration');
+const destChain = configService.getChain('assethub');
+const asset = configService.getAsset('beefy_ah_420');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -71,8 +71,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
-const destAddr = '7KATdGamwo5s8P31iNxKbKStR4SmprTjkwzeSnSbQuQJsgym';
+const srcAddr = '5FkNiM6iAQ6rrNk9muuWbSnfWufdJ5wdRa4uQmkxnCAit88n';
+const destAddr = '5FkNiM6iAQ6rrNk9muuWbSnfWufdJ5wdRa4uQmkxnCAit88n';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
