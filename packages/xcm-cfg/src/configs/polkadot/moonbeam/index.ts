@@ -16,13 +16,21 @@ import {
   usdt_mwh,
   wbtc_mwh,
   weth_mwh,
-} from '../../assets';
-import { acala, assetHub, ethereum, hydration, moonbeam } from '../../chains';
+} from '../../../assets';
+import {
+  acala,
+  assetHub,
+  ethereum,
+  hydration,
+  moonbeam,
+} from '../../../chains';
 import {
   BalanceBuilder,
   ContractBuilder,
   FeeAmountBuilder,
-} from '../../builders';
+} from '../../../builders';
+
+import { toHydrationErc20Template } from './templates';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -67,116 +75,6 @@ const toHydration: AssetRoute[] = [
   }),
   new AssetRoute({
     source: {
-      asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: dai_mwh,
-      fee: {
-        amount: 0.004,
-        asset: dai_mwh,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: usdc_mwh,
-      fee: {
-        amount: 0.004,
-        asset: usdc_mwh,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdt_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: usdt_mwh,
-      fee: {
-        amount: 0.004,
-        asset: usdc_mwh,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: wbtc_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: wbtc_mwh,
-      fee: {
-        amount: 0.0000001,
-        asset: wbtc_mwh,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: weth_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: weth_mwh,
-      fee: {
-        amount: 0.000002,
-        asset: weth_mwh,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
       asset: dot,
       balance: BalanceBuilder().substrate().assets().account(),
       fee: {
@@ -197,6 +95,11 @@ const toHydration: AssetRoute[] = [
     },
     contract: ContractBuilder().Xtokens().transfer(),
   }),
+  toHydrationErc20Template(dai_mwh, 0.004),
+  toHydrationErc20Template(usdc_mwh, 0.004),
+  toHydrationErc20Template(usdt_mwh, 0.004),
+  toHydrationErc20Template(wbtc_mwh, 0.0000001),
+  toHydrationErc20Template(weth_mwh, 0.000002),
 ];
 
 const toAssetHub: AssetRoute[] = [
