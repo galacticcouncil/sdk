@@ -27,7 +27,8 @@
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
-    "link": "npm ln"
+    "link": "npm ln",
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@galacticcouncil/xcm-core": "^4.0.0"

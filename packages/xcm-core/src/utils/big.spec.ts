@@ -6,7 +6,7 @@ import {
   toDecimal,
 } from './big';
 
-describe('Amount utils', () => {
+describe('Big utils', () => {
   describe('toDecimals', () => {
     it('should convert to decimals with 18 decimals', () => {
       expect(toDecimal(1_678_578_001_143_648_100n, 18)).toBe('1.678578');

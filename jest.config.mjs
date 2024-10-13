@@ -1,5 +1,5 @@
 export const config = {
-  roots: ['<rootDir>/test'],
+  roots: ['<rootDir>'],
   modulePaths: ['<rootDir>'],
   moduleDirectories: ['node_modules'],
   moduleNameMapper: {

@@ -15,7 +15,7 @@
       "cache": false
     },
     "test": {
-      "inputs": ["test/**/*.ts"]
+      "inputs": ["**/*.spec.ts"]
     }
   }
 }
