@@ -12,13 +12,13 @@ describe('Address utils', () => {
       });
     });
 
-    it('should get correct addresses for paraId 3019', async () => {
-      expect(getSovereignAccounts(3019)).toStrictEqual({
+    it('should get correct addresses for paraId 2034', async () => {
+      expect(getSovereignAccounts(2034)).toStrictEqual({
         generic:
-          '0x7369626ccb0b0000000000000000000000000000000000000000000000000000',
-        moonbeam: '0x7369626ccb0b0000000000000000000000000000',
+          '0x7369626cf2070000000000000000000000000000000000000000000000000000',
+        moonbeam: '0x7369626cf2070000000000000000000000000000',
         relay:
-          '0x70617261cb0b0000000000000000000000000000000000000000000000000000',
+          '0x70617261f2070000000000000000000000000000000000000000000000000000',
       });
     });
   });

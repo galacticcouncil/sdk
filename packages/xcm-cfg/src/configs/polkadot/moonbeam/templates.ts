@@ -1,11 +1,12 @@
-import { Asset, AssetRoute } from '@galacticcouncil/xcm-core';
+import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xcm-core';
 
 import { glmr } from '../../../assets';
 import { BalanceBuilder, ContractBuilder } from '../../../builders';
 import { hydration } from '../../../chains';
 
-export function toHydrationErc20Template(
+function toErc20Template(
   asset: Asset,
+  destination: AnyChain,
   destinationFee: number
 ): AssetRoute {
   return new AssetRoute({
@@ -21,7 +22,7 @@ export function toHydrationErc20Template(
       },
     },
     destination: {
-      chain: hydration,
+      chain: destination,
       asset: asset,
       fee: {
         amount: destinationFee,
@@ -30,4 +31,47 @@ export function toHydrationErc20Template(
     },
     contract: ContractBuilder().Xtokens().transfer(),
   });
+}
+
+function toXcTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: glmr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    contract: ContractBuilder().Xtokens().transfer(),
+  });
+}
+
+export function toHydrationErc20Template(
+  asset: Asset,
+  destinationFee: number
+): AssetRoute {
+  return toErc20Template(asset, hydration, destinationFee);
+}
+
+export function toHydrationXcTemplate(
+  asset: Asset,
+  destinationFee: number
+): AssetRoute {
+  return toXcTemplate(asset, hydration, destinationFee);
 }

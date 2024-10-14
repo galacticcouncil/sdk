@@ -30,7 +30,7 @@ import {
   FeeAmountBuilder,
 } from '../../../builders';
 
-import { toHydrationErc20Template } from './templates';
+import { toHydrationErc20Template, toHydrationXcTemplate } from './templates';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -51,50 +51,8 @@ const toHydration: AssetRoute[] = [
     },
     contract: ContractBuilder().Xtokens().transfer(),
   }),
-  new AssetRoute({
-    source: {
-      asset: hdx,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: hdx,
-      fee: {
-        amount: 0.6,
-        asset: hdx,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transfer(),
-  }),
+  toHydrationXcTemplate(hdx, 0.6),
+  toHydrationXcTemplate(dot, 0.1),
   toHydrationErc20Template(dai_mwh, 0.004),
   toHydrationErc20Template(usdc_mwh, 0.004),
   toHydrationErc20Template(usdt_mwh, 0.004),
