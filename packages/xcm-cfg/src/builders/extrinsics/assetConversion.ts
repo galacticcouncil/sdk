@@ -20,16 +20,17 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          const { chain, feeSwap, destinationFee } = source;
+          const { chain, feeSwap } = source;
+
+          const { aIn, aOut } = feeSwap!;
 
           const ctx = chain as Parachain;
-          const assetId = ctx.getAssetId(destinationFee);
-          const palletInstance = ctx.getAssetPalletInstance(destinationFee);
+          const assetId = ctx.getAssetId(aOut);
+          const palletInstance = ctx.getAssetPalletInstance(aOut);
 
-          const { aIn } = feeSwap!;
           const maxAmountIn =
             aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
-          const amountOut = destinationFee.amount;
+          const amountOut = aOut.amount;
 
           return [
             [

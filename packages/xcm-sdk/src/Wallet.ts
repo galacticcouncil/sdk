@@ -7,7 +7,6 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
-  TransactCtx,
   TransferCtx,
   TransferValidator,
   TransferValidation,
@@ -85,7 +84,7 @@ export class Wallet {
       dst.getMin(),
     ]);
 
-    const { source, destination, transact } = srcConf.route;
+    const { source, destination } = srcConf.route;
 
     // Normalize dest fee ctx in case of bridge transfers
     const srcDestinationFeeAsset =
@@ -112,19 +111,7 @@ export class Wallet {
       },
     };
 
-    if (transact) {
-      const [delta, fee, feeBalance] = await Promise.all([
-        src.getTransact(ctx),
-        src.getTransactFee(),
-        src.getTransactFeeBalance(ctx),
-      ]);
-      ctx.transact = {
-        ...delta,
-        chain: transact.chain,
-        fee: fee,
-        feeBalance: feeBalance,
-      } as TransactCtx;
-    }
+    ctx.transact = await src.getTransact(ctx);
 
     const srcFee = await src.getFee(ctx);
     const srcFeeSwap = this.dex.isSwapSupported(srcFee, ctx)
@@ -157,19 +144,22 @@ export class Wallet {
         fee: dstFee,
       },
       async buildCall(amount): Promise<XCall> {
-        const ctxCp = Object.assign({}, ctx);
-        ctxCp.amount = big.toBigInt(amount, srcBalance.decimals);
-        return src.getCall(ctxCp);
+        const copyCtx = Object.assign({}, ctx);
+        copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
+        copyCtx.transact = await src.getTransact(copyCtx);
+        return src.getCall(copyCtx);
       },
       async estimateFee(amount): Promise<AssetAmount> {
-        const ctxCp = Object.assign({}, ctx);
-        ctxCp.amount = big.toBigInt(amount, srcBalance.decimals);
-        return src.getFee(ctxCp);
+        const copyCtx = Object.assign({}, ctx);
+        copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
+        copyCtx.transact = await src.getTransact(copyCtx);
+        return src.getFee(copyCtx);
       },
       async validate(fee): Promise<TransferValidationReport[]> {
-        const ctxCp = Object.assign({}, ctx);
-        ctxCp.source.fee = fee ? srcFee.copyWith({ amount: fee }) : srcFee;
-        return validator.validate(ctxCp);
+        const copyCtx = Object.assign({}, ctx);
+        const srcFeeAmount = fee || srcFee.amount;
+        copyCtx.source.fee = srcFee.copyWith({ amount: srcFeeAmount });
+        return validator.validate(copyCtx);
       },
     } as XTransfer;
   }

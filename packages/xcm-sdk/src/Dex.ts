@@ -64,7 +64,6 @@ export class Dex {
     const assetIn = this.chain.getMetadataAssetId(fee);
     const assetOut = this.chain.getMetadataAssetId(effectiveFee);
     const amountOut = effectiveFee.toDecimal(effectiveFee.decimals);
-
     const trade = await this.router.getBestBuy(
       assetIn.toString(),
       assetOut.toString(),

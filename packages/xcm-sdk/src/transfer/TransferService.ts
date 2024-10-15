@@ -9,6 +9,7 @@ import {
   TransactCtx,
   TransferCtx,
   TransferConfig,
+  TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
 import { BalanceAdapter, TransferAdapter } from '../adapters';
@@ -241,29 +242,49 @@ export class TransferService {
     throw new Error('AssetRoute contract or extrinsic config must be provided');
   }
 
-  async getTransact(ctx: TransferCtx): Promise<Partial<TransactCtx>> {
+  async getTransact(ctx: TransferCtx): Promise<TransactCtx | undefined> {
     const { route } = this.config;
     const { transact } = route;
 
-    if (!transact) {
-      throw new Error(`AssetRoute transact config not found`);
-    }
-
-    const substrate = await SubstrateService.create(transact.chain);
-    const augmentedCtx = Object.assign(
-      {
+    if (transact) {
+      const ctxTransactBase = Object.assign({
         transact: {
           chain: transact.chain,
         },
-      },
-      ctx
-    );
+      });
 
-    const config = transact.extrinsic.build(augmentedCtx);
-    const extrinsic = substrate.getExtrinsic(config);
-    const { weight } = await extrinsic.paymentInfo(ctx.address);
+      const context = {
+        ...ctx,
+        ...ctxTransactBase,
+      };
+
+      const [data, fee, feeBalance] = await Promise.all([
+        this.getTransactData(transact, context),
+        this.getTransactFee(transact),
+        this.getTransactFeeBalance(transact, context),
+      ]);
+      return {
+        ...data,
+        chain: transact.chain,
+        fee: fee,
+        feeBalance: feeBalance,
+      } as TransactCtx;
+    }
+    return undefined;
+  }
+
+  private async getTransactData(
+    cfg: TransactConfig,
+    ctx: TransferCtx
+  ): Promise<Partial<TransactCtx>> {
+    const { extrinsic, chain } = cfg;
+    const config = extrinsic.build(ctx);
+    const substrate = await SubstrateService.create(chain);
+    const submittable = substrate.getExtrinsic(config);
+    const { weight } = await submittable.paymentInfo(ctx.address);
     return {
-      call: extrinsic.method.toHex(),
+      call: submittable.method.toHex(),
+      chain: chain,
       weight: {
         refTime: weight.refTime.toNumber(),
         proofSize: weight.proofSize.toString(),
@@ -271,15 +292,9 @@ export class TransferService {
     } as Partial<TransactCtx>;
   }
 
-  async getTransactFee(): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { transact } = route;
-
-    if (!transact) {
-      throw new Error(`AssetRoute transact config not found`);
-    }
-
-    const { fee } = transact;
+  private async getTransactFee(cfg: TransactConfig): Promise<AssetAmount> {
+    const { chain } = this.config;
+    const { fee } = cfg;
     const metadata = new Metadata(chain);
     const decimals = await metadata.getDecimals(fee.asset);
     return AssetAmount.fromAsset(fee.asset, {
@@ -288,19 +303,15 @@ export class TransferService {
     });
   }
 
-  async getTransactFeeBalance(ctx: TransferCtx): Promise<AssetAmount> {
-    const { route } = this.config;
-    const { transact } = route;
-
-    if (!transact) {
-      throw new Error(`AssetRoute transact config not found`);
-    }
-
-    const { sender, source } = ctx;
-    const { fee } = transact;
-    const feeAssetId = source.chain.getBalanceAssetId(fee.asset);
+  private async getTransactFeeBalance(
+    cfg: TransactConfig,
+    ctx: TransferCtx
+  ): Promise<AssetAmount> {
+    const { chain } = this.config;
+    const { fee } = cfg;
+    const feeAssetId = chain.getBalanceAssetId(fee.asset);
     const feeBalanceConfig = fee.balance.build({
-      address: sender,
+      address: ctx.sender,
       asset: feeAssetId,
     });
     return this.balance.read(fee.asset, feeBalanceConfig);

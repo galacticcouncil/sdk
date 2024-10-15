@@ -18,16 +18,18 @@ const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          const { chain, fee, feeSwap, destinationFee } = source;
+          const { chain, feeSwap } = source;
+
+          const { aIn, aOut, route } = feeSwap!;
 
           const ctx = chain as EvmParachain;
-          const assetIn = ctx.getMetadataAssetId(fee);
-          const assetOut = ctx.getMetadataAssetId(destinationFee);
+          const assetIn = ctx.getMetadataAssetId(aIn);
+          const assetOut = ctx.getMetadataAssetId(aOut);
 
-          const { aIn, route } = feeSwap!;
-          const amountOut = destinationFee.amount;
+          const amountOut = aOut.amount;
           const maxAmountIn =
             aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
+
           return [assetIn, assetOut, amountOut, maxAmountIn, route];
         },
       }),
