@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.0.0
+
+### Major Changes
+
+- New config/route setup, HydrationConfigService
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.0.0
+
 ## 4.1.2
 
 ### Patch Changes

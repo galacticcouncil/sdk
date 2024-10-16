@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 5.0.0
+
+### Major Changes
+
+- New config/route definition, context upgrade
+
 ## 4.0.1
 
 ### Patch Changes

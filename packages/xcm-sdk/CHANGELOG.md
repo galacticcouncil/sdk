@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 6.0.0
+
+### Major Changes
+
+- New config/route changes, XTransfer v2
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.0.0
+
 ## 5.2.3
 
 ### Patch Changes

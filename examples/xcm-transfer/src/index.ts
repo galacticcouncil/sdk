@@ -54,9 +54,9 @@ const wallet = new Wallet({
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('hydration');
-const destChain = configService.getChain('assethub');
-const asset = configService.getAsset('beefy_ah_420');
+const srcChain = configService.getChain('ethereum');
+const destChain = configService.getChain('hydration');
+const asset = configService.getAsset('eth');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -71,8 +71,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '5FkNiM6iAQ6rrNk9muuWbSnfWufdJ5wdRa4uQmkxnCAit88n';
-const destAddr = '5FkNiM6iAQ6rrNk9muuWbSnfWufdJ5wdRa4uQmkxnCAit88n';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
