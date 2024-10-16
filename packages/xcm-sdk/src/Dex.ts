@@ -49,7 +49,7 @@ export class Dex {
 
   isSwapSupported(fee: AssetAmount, ctx: TransferCtx): boolean {
     const { asset, source } = ctx;
-    const effectiveFee = this.parseEffectiveFee(ctx);
+    const effectiveFee = this.getEffectiveFee(ctx);
     const isSupported = IS_HUB(source.chain) || IS_DEX(source.chain);
     const isSufficientAssetTransfer = asset.isEqual(effectiveFee);
     return (
@@ -59,11 +59,12 @@ export class Dex {
 
   async calculateFeeSwap(fee: AssetAmount, ctx: TransferCtx): Promise<SwapCtx> {
     const { source } = ctx;
-    const effectiveFee = this.parseEffectiveFee(ctx);
-    const effectiveFeeBalance = this.parseEffectiveFeeBalance(ctx);
+    const effectiveFee = this.getEffectiveFee(ctx);
+    const effectiveFeeBalance = this.getEffectiveFeeBalance(ctx);
     const assetIn = this.chain.getMetadataAssetId(fee);
     const assetOut = this.chain.getMetadataAssetId(effectiveFee);
     const amountOut = effectiveFee.toDecimal(effectiveFee.decimals);
+
     const trade = await this.router.getBestBuy(
       assetIn.toString(),
       assetOut.toString(),
@@ -71,7 +72,8 @@ export class Dex {
     );
 
     const amountIn = BigInt(trade.amountIn.toNumber());
-    const maxAmountIn = amountIn * 2n; // Allows max slippage up to 100%
+    // Allow max slippage up to 100% in builder conf
+    const maxAmountIn = amountIn * 2n;
 
     const hasNotEnoughDestFee =
       effectiveFeeBalance.amount < effectiveFee.amount;
@@ -86,12 +88,12 @@ export class Dex {
     } as SwapCtx;
   }
 
-  private parseEffectiveFee(ctx: TransferCtx) {
+  private getEffectiveFee(ctx: TransferCtx) {
     const { source, transact } = ctx;
     return transact ? transact.fee : source.destinationFee;
   }
 
-  private parseEffectiveFeeBalance(ctx: TransferCtx) {
+  private getEffectiveFeeBalance(ctx: TransferCtx) {
     const { source, transact } = ctx;
     return transact ? transact.feeBalance : source.destinationFeeBalance;
   }
