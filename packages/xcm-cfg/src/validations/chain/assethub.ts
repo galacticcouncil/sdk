@@ -38,11 +38,11 @@ export class HubEdValidation extends TransferValidation {
 
 export class HubFrozenValidation extends TransferValidation {
   async validate(ctx: TransferCtx) {
-    const { address, asset, source } = ctx;
+    const { asset, sender, source } = ctx;
 
     const chain = source.chain as Parachain;
     const client = new HubClient(chain);
-    const isFrozen = await client.checkIfFrozen(address, asset);
+    const isFrozen = await client.checkIfFrozen(sender, asset);
     if (isFrozen) {
       throw new TransferValidationError('Asset_Frozen', {
         asset: asset.originSymbol,
