@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.0.1
+
+### Patch Changes
+
+- Fix hub frozen validation
+
 ## 5.0.0
 
 ### Major Changes
