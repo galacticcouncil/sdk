@@ -48,6 +48,7 @@ jobs:
           path: release-plan.json
 
   hydration-ui-pr:
+    needs: [release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
