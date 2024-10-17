@@ -51,7 +51,7 @@ jobs:
         run: npm run build
 
       - name: 🚀 Publish snapshot
-        if: env.UPDATE_AVAILABLE == 'true'
+        if: false
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
       - name: 🤘 Checkout hydration-ui repository
@@ -66,6 +66,7 @@ jobs:
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
           cd ..
+          ls -la
           cp ./sdk/scripts/changeset-update-ext.mjs ./hydration-ui/changeset-update-ext.mjs
           node ./hydration-ui/changeset-update-ext.mjs
           cat ./hydration-ui/package.json
