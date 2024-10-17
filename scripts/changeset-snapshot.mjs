@@ -1,3 +1,5 @@
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
 
@@ -31,7 +33,8 @@ const main = async () => {
   });
 
   const releases = JSON.stringify(releasePlan.releases, null, 2);
-  const { stdout } = await sh(`export RELEASE_PLAN="${releases}"`);
+  writeFileSync('releases.json', releases);
+  const { stdout } = await sh(`ls -la`);
   console.log(stdout);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
