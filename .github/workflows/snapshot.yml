@@ -35,12 +35,17 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
-      - name: Check for package updates
+      - name: ⏳ Check for updates
         run: |
-          cat ../releases.json
-          ls -la ..
+          if [ "$(cat ../releases.json | jq '. | length')" -eq 0 ]; then
+            echo "No update available :("
+          else
+            echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
+            echo "Release plan:"
+            cat ../releases.json
+          fi
 
-      - name: Bump releases
+      - name: 🖊️ Bump release metadata
         uses: actions/github-script@v6
         with:
           script: |
@@ -50,7 +55,9 @@ jobs:
             console.log(releases);
 
       - name: 🛠️ Build SDK
+        if: env.UPDATE_AVAILABLE == 'true'
         run: npm run build
 
       - name: 🚀 Publish snapshot
+        if: env.UPDATE_AVAILABLE == 'true'
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
