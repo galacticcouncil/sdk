@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+
 import * as git from '@changesets/git';
 import outdent from 'outdent';
 
@@ -34,7 +36,8 @@ const main = async () => {
 
   await git.config('user.name', 'GitHub Action');
   await git.config('user.email', 'action@github.com');
-  await git.add('.', cwd);
+  await git.add('package.json', cwd);
+  await git.add('package-lock.json', cwd);
   await git.commit(releaseMessage, cwd);
   console.log(releaseMessage);
 };
