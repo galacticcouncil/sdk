@@ -33,7 +33,7 @@ const main = async () => {
   });
 
   const releasePlanJson = JSON.stringify(releasePlan, null, 2);
-  writeFileSync('../releasePlan.json', releasePlanJson);
+  writeFileSync('release-plan.json', releasePlanJson);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 

@@ -35,39 +35,42 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
+      - name: 🛠️ Build SDK
+        run: npm run build
+
+      - name: 🚀 Publish snapshot
+        run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
+
+      - name: 😎 Upload release plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-plan
+          path: release-plan.json
+
+  hydration-ui-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: 😎 Download release plan
+        uses: actions/download-artifact@v4
+        with:
+          name: release-plan
+          path: release-plan.json
       - name: ⏳ Check for updates
         shell: bash
         run: |
-          if [ "$(cat ../releasePlan.json | jq '. | length')" -eq 0 ]; then
+          if [ "$(cat release-plan.json | jq '. | length')" -eq 0 ]; then
             echo "No update available :("
           else
             echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
             echo "Release plan:"
-            cat ../releasePlan.json
+            cat release-plan.json
           fi
-
-      - name: 🛠️ Build SDK
-        if: env.UPDATE_AVAILABLE == 'true'
-        run: npm run build
-
-      - name: 🚀 Publish snapshot
-        if: false
-        run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
-
       - name: 🤘 Checkout hydration-ui repository
-        if: env.UPDATE_AVAILABLE == 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
-
-      - name: 🧩 Bump dependecies in hydration-ui repository
-        if: env.UPDATE_AVAILABLE == 'true'
-        run: |
-          ls -la
-          cd ..
-          ls -la
-          cp ./sdk/scripts/changeset-update-ext.mjs ./hydration-ui/changeset-update-ext.mjs
-          node ./hydration-ui/changeset-update-ext.mjs
-          cat ./hydration-ui/package.json
