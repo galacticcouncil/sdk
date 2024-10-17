@@ -42,14 +42,28 @@ jobs:
         if: false
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
+      - name: ✅ Verify release plan
+        id: verify
+        run: |
+          if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
+            echo "No release plan available :("
+          else
+            echo "::set-output name=run_ui_upgrade::yes"
+          fi
+
       - name: 😎 Upload release plan
         uses: actions/upload-artifact@v4
         with:
           name: release-plan
           path: release-plan.json
 
-  hydration-ui-pr:
-    needs: [release]
+    outputs:
+      run_ui_upgrade: ${{ steps.verify.outputs.run_ui_upgrade }}
+
+  ui-upgrade:
+    needs:
+      - release
+    if: needs.release.outputs.run_ui_upgrade == 'yes'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -59,11 +73,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-plan
-      - name: ⏳ Check for updates
-        shell: bash
-        run: |
-          ls -la
-          cat ./release-plan.json
       - name: 🤘 Checkout hydration-ui repository
         uses: actions/checkout@v4
         with:
