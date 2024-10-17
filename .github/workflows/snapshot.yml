@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           ls -la
-          cat release-plan.json
+          cat ./release-plan.json
       - name: 🤘 Checkout hydration-ui repository
         uses: actions/checkout@v4
         with:
