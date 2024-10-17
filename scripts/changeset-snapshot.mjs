@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs';
+
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
 
@@ -29,6 +31,10 @@ const main = async () => {
       commitSha.substring(0, 7),
     ].join('-');
   });
+
+  const releasePlanJson = JSON.stringify(releasePlan, null, 2);
+  console.log(releasePlanJson);
+  writeFileSync('release-plan.json', releasePlanJson);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 
