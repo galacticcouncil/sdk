@@ -39,6 +39,7 @@ jobs:
         run: npm run build
 
       - name: 🚀 Publish snapshot
+        if: false
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
       - name: 😎 Upload release plan
@@ -62,6 +63,7 @@ jobs:
       - name: ⏳ Check for updates
         shell: bash
         run: |
+          ls -la
           if [ "$(cat release-plan.json | jq '. | length')" -eq 0 ]; then
             echo "No update available :("
           else
