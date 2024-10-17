@@ -38,12 +38,12 @@ jobs:
       - name: ⏳ Check for updates
         shell: bash
         run: |
-          if [ "$(cat ../releases.json | jq '. | length')" -eq 0 ]; then
+          if [ "$(cat ../releasePlan.json | jq '. | length')" -eq 0 ]; then
             echo "No update available :("
           else
             echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
             echo "Release plan:"
-            cat ../releases.json
+            cat ../releasePlan.json
           fi
 
       - name: 🛠️ Build SDK
