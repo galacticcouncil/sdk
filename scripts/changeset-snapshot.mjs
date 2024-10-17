@@ -32,8 +32,8 @@ const main = async () => {
     ].join('-');
   });
 
-  const releases = JSON.stringify(releasePlan.releases, null, 2);
-  writeFileSync('../releases.json', releases);
+  const releasePlanJson = JSON.stringify(releasePlan, null, 2);
+  writeFileSync('../releasePlan.json', releasePlanJson);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 

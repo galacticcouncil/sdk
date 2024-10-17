@@ -36,6 +36,7 @@ jobs:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
       - name: ⏳ Check for updates
+        shell: bash
         run: |
           if [ "$(cat ../releases.json | jq '. | length')" -eq 0 ]; then
             echo "No update available :("
@@ -45,15 +46,6 @@ jobs:
             cat ../releases.json
           fi
 
-      - name: 🖊️ Bump release metadata
-        uses: actions/github-script@v6
-        with:
-          script: |
-            let fs = require('fs');
-            let data = fs.readFileSync('../releases.json');
-            const releases = JSON.parse(data);
-            console.log(releases);
-
       - name: 🛠️ Build SDK
         if: env.UPDATE_AVAILABLE == 'true'
         run: npm run build
@@ -61,3 +53,18 @@ jobs:
       - name: 🚀 Publish snapshot
         if: env.UPDATE_AVAILABLE == 'true'
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
+
+      - name: 🤘 Checkout hydration-ui repository
+        if: env.UPDATE_AVAILABLE == 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: 'galacticcouncil/hydration-ui'
+          token: ${{ secrets.TARGET_REPO_PAT }}
+          path: 'hydration-ui'
+
+      - name: 🧩 Bump dependecies in hydration-ui repository
+        if: env.UPDATE_AVAILABLE == 'true'
+        run: |
+          cd hydration-ui
+          npm run changeset:snapshot-pr
+          cat package.json
