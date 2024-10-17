@@ -36,7 +36,9 @@ jobs:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
       - name: Check for package updates
-        run: ls -la
+        run: |
+          cat releases.json
+          ls -la ..
 
       - name: 🛠️ Build SDK
         run: npm run build
