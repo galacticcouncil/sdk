@@ -65,6 +65,7 @@ jobs:
       - name: 🧩 Bump dependecies in hydration-ui repository
         if: env.UPDATE_AVAILABLE == 'true'
         run: |
+          ls -la
           cd ..
           ls -la
           cp ./sdk/scripts/changeset-update-ext.mjs ./hydration-ui/changeset-update-ext.mjs
