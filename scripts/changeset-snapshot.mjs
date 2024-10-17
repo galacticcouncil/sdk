@@ -36,7 +36,8 @@ const main = async () => {
   writeFileSync('../releases.json', releases);
   const { stdout } = await sh(`ls -la`);
   console.log(stdout);
-  await applyReleasePlan(releasePlan, packages, releaseConfig, true);
+  const a = await applyReleasePlan(releasePlan, packages, releaseConfig, true);
+  console.log(a);
 };
 
 main()
