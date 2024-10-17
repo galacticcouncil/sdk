@@ -29,6 +29,7 @@ const main = async () => {
       commitSha.substring(0, 7),
     ].join('-');
   });
+  console.log(releasePlan);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 
