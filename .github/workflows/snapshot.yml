@@ -37,7 +37,7 @@ jobs:
 
       - name: Check for package updates
         run: |
-          cat releases.json
+          cat ../releases.json
           ls -la ..
 
       - name: 🛠️ Build SDK
