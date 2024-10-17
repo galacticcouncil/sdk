@@ -46,7 +46,8 @@ jobs:
           script: |
             let fs = require('fs');
             let data = fs.readFileSync('../releases.json');
-            return JSON.parse(data);
+            const releases = JSON.parse(data);
+            console.log(releases);
 
       - name: 🛠️ Build SDK
         run: npm run build
