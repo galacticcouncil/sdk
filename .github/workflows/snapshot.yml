@@ -40,6 +40,14 @@ jobs:
           cat ../releases.json
           ls -la ..
 
+      - name: Bump releases
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let fs = require('fs');
+            let data = fs.readFileSync('../releases.json');
+            return JSON.parse(data);
+
       - name: 🛠️ Build SDK
         run: npm run build
 

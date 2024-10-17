@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
@@ -6,7 +6,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
-import { parseArgs, sh } from './common.mjs';
+import { parseArgs } from './common.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -34,10 +34,7 @@ const main = async () => {
 
   const releases = JSON.stringify(releasePlan.releases, null, 2);
   writeFileSync('../releases.json', releases);
-  const { stdout } = await sh(`ls -la`);
-  console.log(stdout);
-  const a = await applyReleasePlan(releasePlan, packages, releaseConfig, true);
-  console.log(a);
+  await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 
 main()
