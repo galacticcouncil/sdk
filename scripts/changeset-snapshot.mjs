@@ -4,7 +4,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
-import { parseArgs } from './common.mjs';
+import { parseArgs, sh } from './common.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -29,7 +29,10 @@ const main = async () => {
       commitSha.substring(0, 7),
     ].join('-');
   });
-  console.log(releasePlan);
+
+  const releases = JSON.stringify(releasePlan.releases, null, 2);
+  const { stdout } = await sh(`export RELEASE_PLAN="${releases}"`);
+  console.log(stdout);
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 

@@ -35,6 +35,9 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
+      - name: Check for package updates
+        run: echo $RELEASE_PLAN
+
       - name: 🛠️ Build SDK
         run: npm run build
 
