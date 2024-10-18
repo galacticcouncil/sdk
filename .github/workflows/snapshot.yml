@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: ['master']
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: 🤘 Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
@@ -30,7 +30,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🖊️ Bump version
-        run: npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA
+        run: npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA --output release-plan.json
         env:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -46,12 +46,13 @@ jobs:
         id: verify
         run: |
           if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
-            echo "No release plan available :("
+            echo "No new releases available :("
           else
-            echo "::set-output name=run_ui_upgrade::yes"
+            cat release-plan.json
+            echo "run_ui_upgrade=yes" >> $GITHUB_STATE
           fi
 
-      - name: 😎 Upload release plan
+      - name: ⬆️ Upload release plan
         uses: actions/upload-artifact@v4
         with:
           name: release-plan
@@ -69,7 +70,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: 😎 Download release plan
+      - name: ⬇️ Download release plan
         uses: actions/download-artifact@v4
         with:
           name: release-plan

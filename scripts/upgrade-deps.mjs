@@ -24,7 +24,7 @@ const getReleaseMessage = (releasePlan) => {
 const main = async () => {
   const cwd = process.cwd();
 
-  const releasePlan = readFileSync('../releasePlan.json');
+  const releasePlan = readFileSync('release-plan.json');
   const releaseMessage = getReleaseMessage(releasePlan);
 
   await Promise.all(

@@ -7,6 +7,7 @@ import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
 import { parseArgs } from './common.mjs';
+import { getReleaseMessage } from './changeset-utils.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -23,6 +24,7 @@ const main = async () => {
   const releasePlan = await getReleasePlan(cwd, undefined);
   const pullRequest = params['pr'];
   const commitSha = params['sha'];
+  const output = params['output'];
 
   releasePlan.releases.map((r) => {
     r.newVersion = [
@@ -32,9 +34,18 @@ const main = async () => {
     ].join('-');
   });
 
-  const releasePlanJson = JSON.stringify(releasePlan, null, 2);
-  console.log(releasePlanJson);
-  writeFileSync('release-plan.json', releasePlanJson);
+  if (output) {
+    const releaseMessage = getReleaseMessage(releasePlan);
+    const releaseJson = JSON.stringify(
+      {
+        releases: releasePlan.releases,
+        releaseMessage: releaseMessage,
+      },
+      null,
+      2
+    );
+    writeFileSync(output, releaseJson);
+  }
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 
