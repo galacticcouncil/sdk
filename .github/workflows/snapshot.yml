@@ -88,8 +88,7 @@ jobs:
             package_version=$(jq --raw-output '.newVersion' <<< "$i")
             echo $package_name
             echo $package_version
-            npm
-            npm install $package_name@$package_version
+            npm install ${package_name}@${package_version}
           done
           RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
           echo $RELEASE_MESSAGE
