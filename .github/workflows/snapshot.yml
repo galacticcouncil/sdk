@@ -103,5 +103,5 @@ jobs:
           title: '👷🏻‍♂️ SDK Preview >> ${{ github.event.pull_request.title }}'
           body: $(jq '.releaseMessage' ../release-plan.json)
           branch: upgrade-sdk-pr${{ github.event.pull_request.number }}
-          base: main
+          base: master
           path: 'hydration-ui'
