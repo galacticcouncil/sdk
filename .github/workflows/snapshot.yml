@@ -83,7 +83,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-      - name: 🖊️ Bump versions
+      - name: 🔧 Upgrade packages
         run: |
           cd hydration-ui
           jq -c '.releases[]' ../release-plan.json | while read i; do
@@ -105,6 +105,8 @@ jobs:
             This PR was triggered by SDK upgrade no. ${{ github.event.pull_request.number }}
 
             For details visit: https://github.com/galacticcouncil/sdk/pull/${{ github.event.pull_request.number }}
+
+            ![Alt Text](https://media.tenor.com/DNCBqbguizsAAAAM/magic.gif)
           branch: upgrade-sdk-pr${{ github.event.pull_request.number }}
           base: master
           path: 'hydration-ui'
