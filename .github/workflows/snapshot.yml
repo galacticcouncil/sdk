@@ -84,7 +84,10 @@ jobs:
         run: |
           cd hydration-ui
           jq -c '.releases[]' ../release-plan.json | while read i; do
-            echo $i
+            package_name=$(jq --raw-output '.name' <<< "$i")
+            package_version=$(jq --raw-output '.newVersion' <<< "$i")
+            echo $package_name
+            npm install $package_name@$package_version
           done
           RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
           echo $RELEASE_MESSAGE
