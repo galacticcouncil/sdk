@@ -83,7 +83,7 @@ jobs:
       - name: 🖊️ Bump versions
         run: |
           cd hydration-ui
-          jq -c '.releases' ../release-plan.json | while read i; do
+          jq -c '.releases[]' ../release-plan.json | while read i; do
             echo $i
           done
           RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
