@@ -94,7 +94,7 @@ jobs:
           done
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          git add package.json package-lock.json
+          git add package.json yarn.lock
           git commit -m $(jq '.releaseMessage' ../release-plan.json)
       - name: 📝 Create PR in hydration-ui repository
         uses: peter-evans/create-pull-request@v7
