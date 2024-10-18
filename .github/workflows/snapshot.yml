@@ -79,6 +79,10 @@ jobs:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
       - name: 🖊️ Bump versions
         run: |
           cd hydration-ui
