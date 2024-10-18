@@ -48,7 +48,7 @@ jobs:
           if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
             echo "No new releases available :("
           else
-            echo "run_ui_upgrade=yes" >> $GITHUB_OUTPUT
+            echo "upgrade_ui_deps=yes" >> $GITHUB_OUTPUT
           fi
 
       - name: ⬆️ Upload release plan
@@ -58,12 +58,12 @@ jobs:
           path: release-plan.json
 
     outputs:
-      run_ui_upgrade: ${{ steps.verify.outputs.run_ui_upgrade }}
+      upgrade_ui_deps: ${{ steps.verify.outputs.upgrade_ui_deps }}
 
-  ui-upgrade:
+  upgrade-ui-deps:
     needs:
       - release
-    if: needs.release.outputs.run_ui_upgrade == 'yes'
+    if: needs.release.outputs.upgrade_ui_deps == 'yes'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -73,16 +73,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-plan
+
       - name: 🤘 Checkout hydration-ui repository
         uses: actions/checkout@v4
         with:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
+
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+
       - name: 🔧 Upgrade packages
         run: |
           cd hydration-ui
@@ -96,17 +99,21 @@ jobs:
           git config user.email "action@github.com"
           git add package.json yarn.lock
           git commit -m "$(jq '.releaseMessage' ../release-plan.json)"
-      - name: 📝 Create PR in hydration-ui repository
+
+      - name: 📝 Open PR in hydration-ui repository
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
-          title: '👷🏻‍♂️ SDK Preview >> ${{ github.event.pull_request.title }}'
+          title: '👷🏻‍♂️ SDK Preview >> ${{ env.PR_TITLE }}'
           body: |
-            This PR was triggered by SDK upgrade no. ${{ github.event.pull_request.number }}
+            This PR was triggered by SDK upgrade no. ${{ env.PR }}
 
-            For details visit: https://github.com/galacticcouncil/sdk/pull/${{ github.event.pull_request.number }}
+            For details visit: https://github.com/galacticcouncil/sdk/pull/${{ env.PR }}
 
             ![Alt Text](https://media.tenor.com/DNCBqbguizsAAAAM/magic.gif)
-          branch: upgrade-sdk-pr${{ github.event.pull_request.number }}
+          branch: upgrade-sdk-pr${{ env.PR }}
           base: master
           path: 'hydration-ui'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
