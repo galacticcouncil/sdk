@@ -7,7 +7,7 @@ import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
 import { parseArgs } from './common.mjs';
-import { getReleaseMessage } from './changeset-utils.mjs';
+import { getUpgradeMessage } from './changeset-utils.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -35,7 +35,7 @@ const main = async () => {
   });
 
   if (output) {
-    const releaseMessage = getReleaseMessage(releasePlan);
+    const releaseMessage = getUpgradeMessage(releasePlan);
     const releaseJson = JSON.stringify(
       {
         releases: releasePlan.releases,

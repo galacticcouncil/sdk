@@ -89,10 +89,19 @@ jobs:
           jq -c '.releases[]' ../release-plan.json | while read i; do
             package_name=$(jq --raw-output '.name' <<< "$i")
             package_version=$(jq --raw-output '.newVersion' <<< "$i")
-            echo $package_name
-            echo $package_version
+            echo Installing $package_name@$package_version
             yarn add $package_name@$package_version
           done
-          RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
-          echo $RELEASE_MESSAGE
-          cat package.json
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add package.json package-lock.json
+          git commit -m $(jq '.releaseMessage' ../release-plan.json)
+      - name: 📝 Create PR in hydration-ui repository
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.TARGET_REPO_PAT }}
+          title: '👷🏻‍♂️ SDK Preview >> ${{ github.event.pull_request.title }}'
+          body: $(jq '.releaseMessage' ../release-plan.json)
+          branch: upgrade-sdk-pr${{ github.event.pull_request.number }}
+          base: main
+          path: 'hydration-ui'
