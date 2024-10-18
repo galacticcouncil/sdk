@@ -3,25 +3,9 @@ import applyReleasePlan from '@changesets/apply-release-plan';
 import { read } from '@changesets/config';
 import * as git from '@changesets/git';
 import { getPackages } from '@manypkg/get-packages';
-import outdent from 'outdent';
 
 import { sh } from './common.mjs';
-
-const getReleaseMessage = (releasePlan) => {
-  const releases = releasePlan.releases.filter(
-    (release) => release.type !== 'none'
-  );
-  const releasesLines = releases
-    .map((release) => `  ${release.name}@${release.newVersion}`)
-    .join('\n');
-  const releaseMessage = outdent`
-    RELEASE: Releasing ${releases.length} package(s)
-  
-    Releases:
-    ${releasesLines}
-  `;
-  return releaseMessage;
-};
+import { getReleaseMessage } from './changeset-utils.mjs';
 
 const main = async () => {
   const cwd = process.cwd();

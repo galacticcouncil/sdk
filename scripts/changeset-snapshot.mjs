@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs';
+
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
 
@@ -5,6 +7,7 @@ import { read } from '@changesets/config';
 import { getPackages } from '@manypkg/get-packages';
 
 import { parseArgs } from './common.mjs';
+import { getUpgradeMessage } from './changeset-utils.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -21,6 +24,7 @@ const main = async () => {
   const releasePlan = await getReleasePlan(cwd, undefined);
   const pullRequest = params['pr'];
   const commitSha = params['sha'];
+  const output = params['output'];
 
   releasePlan.releases.map((r) => {
     r.newVersion = [
@@ -29,6 +33,19 @@ const main = async () => {
       commitSha.substring(0, 7),
     ].join('-');
   });
+
+  if (output) {
+    const releaseMessage = getUpgradeMessage(releasePlan);
+    const releaseJson = JSON.stringify(
+      {
+        releases: releasePlan.releases,
+        releaseMessage: releaseMessage,
+      },
+      null,
+      2
+    );
+    writeFileSync(output, releaseJson);
+  }
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 

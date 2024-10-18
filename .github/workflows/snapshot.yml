@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: ['master']
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: 🤘 Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
@@ -30,7 +30,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🖊️ Bump version
-        run: npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA
+        run: npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA --output release-plan.json
         env:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -41,49 +41,79 @@ jobs:
       - name: 🚀 Publish snapshot
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
-      - name: Check for package updates
-        id: check-updates
+      - name: ✅ Verify release plan
+        id: verify
         run: |
-          PACKAGE_NAME="@galacticcouncil/sdk"
-          CURRENT_VERSION=$(npm list $PACKAGE_NAME | grep $PACKAGE_NAME | cut -d@ -f2)
-          LATEST_VERSION=$(npm view $PACKAGE_NAME version)
-          echo "Current version: $CURRENT_VERSION"
-          echo "Latest version: $LATEST_VERSION"
-          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
-            echo "UPDATE_AVAILABLE=true" >> $GITHUB_ENV
-            echo "NEW_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+          cat release-plan.json
+          if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
+            echo "No new releases available :("
+          else
+            echo "upgrade_ui_deps=yes" >> $GITHUB_OUTPUT
           fi
 
-      - name: Checkout hydration-ui repository
-        if: env.UPDATE_AVAILABLE == 'true'
-        uses: actions/checkout@v2
+      - name: ⬆️ Upload release plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-plan
+          path: release-plan.json
+
+    outputs:
+      upgrade_ui_deps: ${{ steps.verify.outputs.upgrade_ui_deps }}
+
+  upgrade-ui-deps:
+    needs:
+      - release
+    if: needs.release.outputs.upgrade_ui_deps == 'yes'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: ⬇️ Download release plan
+        uses: actions/download-artifact@v4
+        with:
+          name: release-plan
+
+      - name: 🤘 Checkout hydration-ui repository
+        uses: actions/checkout@v4
         with:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
 
-      - name: Update package.json in target repository
-        if: env.UPDATE_AVAILABLE == 'true'
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: 🔧 Upgrade packages
         run: |
           cd hydration-ui
-          npm install ${{ env.PACKAGE_NAME }}@${{ env.NEW_VERSION }}
+          jq -c '.releases[]' ../release-plan.json | while read i; do
+            package_name=$(jq --raw-output '.name' <<< "$i")
+            package_version=$(jq --raw-output '.newVersion' <<< "$i")
+            echo Installing $package_name@$package_version
+            yarn add $package_name@$package_version
+          done
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          git add package.json package-lock.json
-          git commit -m "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
+          git add package.json yarn.lock
+          git commit -m "$(jq '.releaseMessage' ../release-plan.json)"
 
-      - name: Create Pull Request in target repository
-        if: env.UPDATE_AVAILABLE == 'true'
+      - name: 📝 Open PR in hydration-ui repository
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
-          commit-message: "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
-          title: "Update ${{ env.PACKAGE_NAME }} to version ${{ env.NEW_VERSION }}"
+          title: '👷🏻‍♂️ SDK Preview >> ${{ env.PR_TITLE }}'
           body: |
-            This PR updates ${{ env.PACKAGE_NAME }} to the latest version ${{ env.NEW_VERSION }}.
-            
-            Current version: ${{ env.CURRENT_VERSION }}
-            New version: ${{ env.NEW_VERSION }}
-          branch: update-sdk-${{ env.NEW_VERSION }}
-          base: main
+            This PR was triggered by SDK upgrade no. ${{ env.PR }}
+
+            For details visit: https://github.com/galacticcouncil/sdk/pull/${{ env.PR }}
+
+            ![Alt Text](https://media.tenor.com/DNCBqbguizsAAAAM/magic.gif)
+          branch: upgrade-sdk-pr${{ env.PR }}
+          base: master
           path: 'hydration-ui'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
