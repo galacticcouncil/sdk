@@ -101,7 +101,10 @@ jobs:
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
           title: '👷🏻‍♂️ SDK Preview >> ${{ github.event.pull_request.title }}'
-          body: $(jq '.releaseMessage' ../release-plan.json)
+          body: |
+            This PR was triggered by SDK upgrade no. ${{ github.event.pull_request.number }}
+
+            For details visit: https://github.com/galacticcouncil/sdk/pull/${{ github.event.pull_request.number }}
           branch: upgrade-sdk-pr${{ github.event.pull_request.number }}
           base: master
           path: 'hydration-ui'
