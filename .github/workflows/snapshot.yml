@@ -45,11 +45,11 @@ jobs:
       - name: ✅ Verify release plan
         id: verify
         run: |
+          cat release-plan.json
           if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
             echo "No new releases available :("
           else
-            cat release-plan.json
-            echo "run_ui_upgrade=yes" >> $GITHUB_STATE
+            echo "run_ui_upgrade=yes" >> $GITHUB_OUTPUT
           fi
 
       - name: ⬆️ Upload release plan
@@ -80,3 +80,11 @@ jobs:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ secrets.TARGET_REPO_PAT }}
           path: 'hydration-ui'
+      - name: 🖊️ Bump versions
+        run: |
+          cd hydration-ui
+          jq -c '.releases' ../release-plan.json | while read i; do
+            echo $i
+          done
+          RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
+          echo $RELEASE_MESSAGE
