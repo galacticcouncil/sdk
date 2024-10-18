@@ -95,4 +95,4 @@ jobs:
           done
           RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
           echo $RELEASE_MESSAGE
-          echo package.json
+          cat package.json
