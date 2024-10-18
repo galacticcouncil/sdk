@@ -39,7 +39,6 @@ jobs:
         run: npm run build
 
       - name: 🚀 Publish snapshot
-        if: false
         run: npm run changeset -- publish --no-git-tag --snapshot --tag beta
 
       - name: ✅ Verify release plan
@@ -88,7 +87,8 @@ jobs:
             package_version=$(jq --raw-output '.newVersion' <<< "$i")
             echo $package_name
             echo $package_version
-            npm install ${package_name}@${package_version}
+            yarn add $package_name@$package_version
           done
           RELEASE_MESSAGE=$(jq '.releaseMessage' ../release-plan.json)
           echo $RELEASE_MESSAGE
+          echo package.json
