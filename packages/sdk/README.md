@@ -27,10 +27,6 @@ As of **v2.x** .wasm files are no longer embedded in bundle
 but rather deferred to improve load performance & decrease
 module size (esm only).
 
-If you upgrading from **v1.x** to **v2.x** make sure you use
-appropriate wasm plugin in your build config to directly
-import .wasm files as if they were a javascript module.
-
 For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ## Components
@@ -80,9 +76,12 @@ const poolService = new PoolService(api);
 await poolService.syncRegistry(); // Wait until pools initialized (optional), fallback to lazy init
 const tradeRouter = new TradeRouter(poolService);
 
-// Do something
-const result = await tradeRouter.getAllAssets();
-console.log(result);
+// Sell 5 USDT(10) for HDX(0)
+const trade = await tradeRouter.getBestSell('10', '0', '5');
+// Human readable output
+console.log(trade.toHuman());
+// Build tx given the slippage amount
+console.log(trade.toTx(amount));
 ```
 
 ## Examples
@@ -105,8 +104,10 @@ Component list and current status ⬇️
 
 | Name        | Type |     |
 | ----------- | :--: | --: |
+| Dca         | API  |  ⏳ |
 | Router      | API  |  🧪 |
 | TradeRouter | API  |  🧪 |
+| Twap        | API  |  ⏳ |
 | XYK         | Math |  🧪 |
 | XYK         | Pool |  🧪 |
 | Omni        | Math |  🧪 |
