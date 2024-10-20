@@ -10,13 +10,14 @@
 
 ### Patch Changes
 
-- export chain prop types
+- Export missing chain types
 
 ## 4.0.0
 
 ### Major Changes
 
-- Fee swaps & validations
+- Support xchain swaps
+- Support transfer validations
 
 ## 3.0.0
 

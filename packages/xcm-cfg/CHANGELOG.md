@@ -46,7 +46,8 @@
 
 ### Major Changes
 
-- Fee swaps & validations
+- Support xchain swaps
+- Support transfer validations
 
 ### Patch Changes
 
