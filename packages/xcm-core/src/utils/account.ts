@@ -1,10 +1,4 @@
-import {
-  bnToU8a,
-  hexToU8a,
-  stringToU8a,
-  u8aToHex,
-  u8aToString,
-} from '@polkadot/util';
+import { bnToU8a, hexToU8a, stringToU8a, u8aToHex } from '@polkadot/util';
 
 import { decodeAddress, blake2AsU8a } from '@polkadot/util-crypto';
 import { TypeRegistry } from '@polkadot/types';

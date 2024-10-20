@@ -108,11 +108,11 @@ Component list and current status ⬇️
 | Router      | API  |  🧪 |
 | TradeRouter | API  |  🧪 |
 | Twap        | API  |  ⏳ |
-| XYK         | Math |  🧪 |
-| XYK         | Pool |  🧪 |
-| Omni        | Math |  🧪 |
-| Omni        | Pool |  🧪 |
 | LBP         | Math |  🧪 |
 | LBP         | Pool |  🧪 |
+| Omni        | Math |  🧪 |
+| Omni        | Pool |  🧪 |
 | Stable      | Math |  🧪 |
 | Stable      | Pool |  🧪 |
+| XYK         | Math |  🧪 |
+| XYK         | Pool |  🧪 |
