@@ -23,6 +23,33 @@ import {
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      min: AssetMinBuilder().assets().asset(),
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.0001,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .limitedReserveTransferAssets(1)
+      .here(),
+  }),
+  new AssetRoute({
+    source: {
       asset: usdt,
       balance: BalanceBuilder().substrate().assets().account(),
       fee: {
