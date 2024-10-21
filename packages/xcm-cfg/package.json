@@ -32,5 +32,7 @@
   },
   "dependencies": {
     "@galacticcouncil/xcm-core": "^5.0.0"
-  }
+  },
+  "license": "ISC",
+  "homepage": "https://github.com/galacticcouncil/sdk#readme"
 }
