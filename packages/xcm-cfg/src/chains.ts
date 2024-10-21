@@ -330,6 +330,13 @@ export const bifrost = new Parachain({
       metadataId: 23,
       palletInstance: 50,
     },
+    {
+      asset: astr,
+      decimals: 18,
+      id: { Token2: 3 },
+      metadataId: { Token2: 3 },
+      min: 0.01,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',
