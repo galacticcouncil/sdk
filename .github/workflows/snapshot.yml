@@ -132,5 +132,5 @@ jobs:
               pull_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: context.payload.pull_request.body + '\n🧚 Live preview here -> ${{ steps.cpr.outputs.pull-request-url }}'
+              body: context.payload.pull_request.body + '\n🧚 Live preview: ${{ steps.cpr.outputs.pull-request-url }}'
             })
