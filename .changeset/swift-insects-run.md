@@ -1,6 +1,5 @@
 ---
-'xcm-transfer': major
-'@galacticcouncil/xcm-cfg': major
+'@galacticcouncil/xcm-cfg': minor
 ---
 
 ASTR Hydration<>Bifrost
