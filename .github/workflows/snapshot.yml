@@ -44,7 +44,7 @@ jobs:
         run: |
           cat release-plan.json
           if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
-            echo "No new releases available :("
+            printf "\nNo new releases available :("
           else
             echo "upgrade_ui_deps=yes" >> $GITHUB_OUTPUT
           fi
@@ -103,7 +103,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
-          title: '🧚 SDK Preview >> ${{ env.PR_TITLE }}'
+          title: '🧚 SDK Preview: [${{ env.PR_TITLE }}]'
           body: |
             This PR was triggered by SDK upgrade no. ${{ env.PR }}
 

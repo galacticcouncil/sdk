@@ -6,9 +6,9 @@ import type {
 } from '@polkadot/types/lookup';
 import { Option } from '@polkadot/types';
 
-import { ParachainClient } from './base';
+import { BalanceClient } from '../balance';
 
-export class HubClient extends ParachainClient {
+export class HubClient extends BalanceClient {
   constructor(chain: Parachain) {
     super(chain);
   }

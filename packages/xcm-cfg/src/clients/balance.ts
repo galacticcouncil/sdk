@@ -6,7 +6,7 @@ import {
   PalletBalancesAccountData,
 } from '@polkadot/types/lookup';
 
-export abstract class ParachainClient {
+export abstract class BalanceClient {
   readonly chain: Parachain;
 
   constructor(chain: Parachain) {
