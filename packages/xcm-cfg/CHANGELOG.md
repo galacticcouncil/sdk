@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.1.0
+
+### Minor Changes
+
+- Add Assethub <-> Hydration DOT transfer (new reserve)
+
 ## 5.0.1
 
 ### Patch Changes
@@ -46,7 +52,8 @@
 
 ### Major Changes
 
-- Fee swaps & validations
+- Support xchain swaps
+- Support transfer validations
 
 ### Patch Changes
 

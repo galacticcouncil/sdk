@@ -56,6 +56,21 @@ export const toAssets = (
   };
 };
 
+export const toRemoteFeesId = (
+  version: XcmVersion,
+  parents: Parents,
+  interior: any
+) => {
+  return {
+    [version]: {
+      Concrete: {
+        parents: parents,
+        interior: interior,
+      },
+    },
+  };
+};
+
 export const toAsset = (parents: Parents, interior: any, amount: any) => {
   return {
     id: {
@@ -67,6 +82,24 @@ export const toAsset = (parents: Parents, interior: any, amount: any) => {
     fun: {
       Fungible: amount,
     },
+  };
+};
+
+export const toCustomXcmOnDest = (version: XcmVersion, account: any) => {
+  return {
+    [version]: [
+      {
+        DepositAsset: {
+          assets: { Wild: { AllCounted: 1 } },
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: account,
+            },
+          },
+        },
+      },
+    ],
   };
 };
 

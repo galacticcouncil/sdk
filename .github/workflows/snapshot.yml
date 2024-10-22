@@ -44,7 +44,7 @@ jobs:
         run: |
           cat release-plan.json
           if [ $(jq '.releases | length' release-plan.json) -eq 0 ]; then
-            echo "No new releases available :("
+            printf "\nNo new releases available :("
           else
             echo "upgrade_ui_deps=yes" >> $GITHUB_OUTPUT
           fi
@@ -84,7 +84,7 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: 🔧 Upgrade packages
+      - name: 🔧 Upgrade hydration-ui sdk packages
         run: |
           cd hydration-ui
           jq -c '.releases[]' ../release-plan.json | while read i; do
@@ -98,11 +98,12 @@ jobs:
           git add package.json yarn.lock
           git commit -m "$(jq '.releaseMessage' ../release-plan.json)"
 
-      - name: 📝 Open PR in hydration-ui repository
+      - name: 🧚 Open hydration-ui PR with sdk upgrade
+        id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TARGET_REPO_PAT }}
-          title: '🧚 SDK Preview >> ${{ env.PR_TITLE }}'
+          title: '🧚 SDK Preview: [${{ env.PR_TITLE }}]'
           body: |
             This PR was triggered by SDK upgrade no. ${{ env.PR }}
 
@@ -115,3 +116,21 @@ jobs:
         env:
           PR: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+
+      - name: 🧚 Print hydration-ui PR details
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
+      - name: 🧚 Update sdk PR with live preview link
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.update({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: context.payload.pull_request.body + '\n🧚 Live preview: ${{ steps.cpr.outputs.pull-request-url }}'
+            })

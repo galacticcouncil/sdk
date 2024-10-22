@@ -178,6 +178,28 @@ const toAcala: AssetRoute[] = [
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: dot,
+      fee: {
+        amount: 0.0036,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .transferAssetsUsingTypeAndThen(1)
+      .here(),
+  }),
+  new AssetRoute({
+    source: {
       asset: usdt,
       balance: balance(),
       fee: fee(),

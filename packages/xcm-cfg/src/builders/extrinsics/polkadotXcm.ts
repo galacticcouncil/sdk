@@ -9,7 +9,9 @@ import {
   toAsset,
   toAssets,
   toBeneficiary,
+  toCustomXcmOnDest,
   toDest,
+  toRemoteFeesId,
   toTransactMessage,
 } from './polkadotXcm.utils';
 import {
@@ -21,7 +23,7 @@ import { Parents, XcmVersion } from '../types';
 
 const pallet = 'polkadotXcm';
 
-const limitedReserveTransferAssets = () => {
+const limitedReserveTransferAssets = (parents: Parents = 0) => {
   const func = 'limitedReserveTransferAssets';
   return {
     here: (): ExtrinsicConfigBuilder => ({
@@ -36,7 +38,7 @@ const limitedReserveTransferAssets = () => {
             return [
               toDest(version, rcv),
               toBeneficiary(version, account),
-              toAssets(version, 0, 'Here', amount),
+              toAssets(version, parents, 'Here', amount),
               0,
               'Unlimited',
             ];
@@ -155,6 +157,30 @@ const limitedTeleportAssets = (parent: Parents) => {
   };
 };
 
+const reserveTransferAssets = () => {
+  const func = 'reserveTransferAssets';
+  return {
+    here: (): ExtrinsicConfigBuilder => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v3;
+            const account = getExtrinsicAccount(address);
+            const rcv = destination.chain as Parachain;
+            return [
+              toDest(version, rcv),
+              toBeneficiary(version, account),
+              toAssets(version, 0, 'Here', amount),
+              0,
+            ];
+          },
+        }),
+    }),
+  };
+};
+
 const teleportAssets = (parent: Parents) => {
   const func = 'teleportAssets';
   return {
@@ -179,8 +205,8 @@ const teleportAssets = (parent: Parents) => {
   };
 };
 
-const reserveTransferAssets = () => {
-  const func = 'reserveTransferAssets';
+const transferAssetsUsingTypeAndThen = (parent: Parents) => {
+  const func = 'transferAssetsUsingTypeAndThen';
   return {
     here: (): ExtrinsicConfigBuilder => ({
       build: ({ address, amount, destination }) =>
@@ -193,9 +219,12 @@ const reserveTransferAssets = () => {
             const rcv = destination.chain as Parachain;
             return [
               toDest(version, rcv),
-              toBeneficiary(version, account),
-              toAssets(version, 0, 'Here', amount),
-              0,
+              toAssets(version, parent, 'Here', amount),
+              'DestinationReserve',
+              toRemoteFeesId(version, parent, 'Here'),
+              'DestinationReserve',
+              toCustomXcmOnDest(version, account),
+              'Unlimited',
             ];
           },
         }),
@@ -259,6 +288,7 @@ export const polkadotXcm = () => {
     limitedTeleportAssets,
     reserveTransferAssets,
     teleportAssets,
+    transferAssetsUsingTypeAndThen,
     send,
   };
 };
