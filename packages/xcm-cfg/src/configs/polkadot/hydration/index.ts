@@ -351,8 +351,27 @@ const toBifrost: AssetRoute[] = [
       chain: bifrost,
       asset: astr,
       fee: {
-        amount: 0.00001,
+        amount: 0.5,
         asset: astr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: glmr,
+      fee: {
+        amount: 0.1,
+        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),

@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { bnc, dot, pink, usdc, usdt, vdot, vastr, astr } from '../../assets';
+import { bnc, dot, pink, usdc, usdt, vdot, vastr, astr, glmr } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -105,8 +105,30 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: astr,
       fee: {
-        amount: 0.01,
+        amount: 0.5,
         asset: astr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: bnc,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: glmr,
+      fee: {
+        amount: 0.1,
+        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),

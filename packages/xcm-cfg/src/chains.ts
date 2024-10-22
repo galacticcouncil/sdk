@@ -337,6 +337,13 @@ export const bifrost = new Parachain({
       metadataId: { Token2: 3 },
       min: 0.01,
     },
+    {
+      asset: glmr,
+      decimals: 18,
+      id: { Token2: 1 },
+      metadataId: { Token2: 1 },
+      min: 0.00001,
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',
