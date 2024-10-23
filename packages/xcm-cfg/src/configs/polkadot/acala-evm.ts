@@ -27,6 +27,7 @@ const toHydrationViaWormhole: AssetRoute[] = [
       },
     },
     contract: ContractBuilder()
+      .Wormhole()
       .TokenBridge()
       .transferTokensWithPayload()
       .viaMrl({ moonchain: moonbeam }),

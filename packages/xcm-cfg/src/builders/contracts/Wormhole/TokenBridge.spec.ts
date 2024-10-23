@@ -4,8 +4,8 @@ import {
   ContractConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
 
-import { dai, eth } from '../../assets';
-import { ethereum, hydration, moonbeam } from '../../chains';
+import { dai, eth } from '../../../assets';
+import { ethereum, hydration, moonbeam } from '../../../chains';
 
 import { TokenBridge } from './TokenBridge';
 

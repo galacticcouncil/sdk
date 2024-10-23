@@ -1,6 +1,5 @@
 import {
   addr,
-  AnyChain,
   ContractConfig,
   ContractConfigBuilder,
   EvmParachain,
@@ -9,14 +8,9 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { parseAssetId } from '../utils';
-import { mrl } from '../../utils';
-
-function wormholeGuard(chain: AnyChain) {
-  if (!chain.isWormholeChain()) {
-    throw new Error(chain.name + ' is not supported Wormhole chain.');
-  }
-}
+import { wormholeGuard } from './utils';
+import { parseAssetId } from '../../utils';
+import { mrl } from '../../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;

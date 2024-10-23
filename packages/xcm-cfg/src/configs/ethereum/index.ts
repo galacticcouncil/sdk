@@ -36,6 +36,7 @@ const toHydration: AssetRoute[] = [
       },
     },
     contract: ContractBuilder()
+      .Wormhole()
       .TokenBridge()
       .wrapAndTransferETHWithPayload()
       .viaMrl({ moonchain: moonbeam }),
@@ -64,7 +65,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: weth_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().wrapAndTransferETH(),
+    contract: ContractBuilder().Wormhole().TokenBridge().wrapAndTransferETH(),
   }),
   new AssetRoute({
     source: {
@@ -87,7 +88,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: dai_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokens(),
+    contract: ContractBuilder().Wormhole().TokenBridge().transferTokens(),
   }),
 ];
 

@@ -154,7 +154,7 @@ const toAcalaViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenBridge().transferTokens(),
+        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
       ]),
   }),
 ];
@@ -185,7 +185,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
   }),
   new AssetRoute({
@@ -213,7 +213,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
   }),
 ];

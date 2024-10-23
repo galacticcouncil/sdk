@@ -140,7 +140,10 @@ export function toEthereumWithRelayerTemplate(
             .Batch()
             .batchAll([
               ContractBuilder().Erc20().approve(),
-              ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+              ContractBuilder()
+                .Wormhole()
+                .TokenRelayer()
+                .transferTokensWithRelay(),
             ])
         ),
     },

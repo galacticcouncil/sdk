@@ -1,18 +1,12 @@
 import {
   addr,
-  AnyChain,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { parseAssetId } from '../utils';
-
-function wormholeGuard(chain: AnyChain) {
-  if (!chain.isWormholeChain()) {
-    throw new Error(chain.name + ' is not supported Wormhole chain.');
-  }
-}
+import { wormholeGuard } from './utils';
+import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
