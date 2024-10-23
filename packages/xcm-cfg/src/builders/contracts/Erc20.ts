@@ -1,4 +1,5 @@
 import {
+  Abi,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
@@ -21,6 +22,7 @@ export function Erc20() {
           ? ctxWh.getTokenRelayer()
           : ctxWh.getTokenBridge();
         return new ContractConfig({
+          abi: Abi.Erc20,
           address: parseAssetId(assetId).toString(),
           args: [spender, amount],
           func: 'approve',

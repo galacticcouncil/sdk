@@ -1,4 +1,5 @@
 import {
+  Abi,
   BalanceConfigBuilder,
   ContractConfig,
   SubstrateQueryConfig,
@@ -39,6 +40,7 @@ function native(): BalanceConfigBuilder {
   return {
     build: ({ address }) => {
       return new ContractConfig({
+        abi: [],
         address: address,
         args: [],
         func: 'eth_getBalance',
@@ -56,6 +58,7 @@ function erc20(): BalanceConfigBuilder {
       }
 
       return new ContractConfig({
+        abi: Abi.Erc20,
         address: asset,
         args: [address],
         func: 'balanceOf',

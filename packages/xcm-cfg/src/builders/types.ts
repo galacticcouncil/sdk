@@ -5,4 +5,4 @@ export enum XcmVersion {
   v4 = 'V4',
 }
 
-export type Parents = 0 | 1;
+export type Parents = 0 | 1 | 2;

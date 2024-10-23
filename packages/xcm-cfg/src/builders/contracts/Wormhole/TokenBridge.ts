@@ -1,5 +1,6 @@
 import {
   addr,
+  Abi,
   ContractConfig,
   ContractConfigBuilder,
   EvmParachain,
@@ -31,6 +32,7 @@ const transferTokensWithPayload = () => {
           address
         );
         return new ContractConfig({
+          abi: Abi.TokenBridge,
           address: ctxWh.getTokenBridge(),
           args: [
             parseAssetId(assetId),
@@ -62,6 +64,7 @@ const wrapAndTransferETHWithPayload = () => {
           address
         );
         return new ContractConfig({
+          abi: Abi.TokenBridge,
           address: ctxWh.getTokenBridge(),
           args: [
             rcvWh.getWormholeId(),
@@ -90,6 +93,7 @@ const transferTokens = (): ContractConfigBuilder => ({
     const rcvWh = rcv as Wormhole;
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
+      abi: Abi.TokenBridge,
       address: ctxWh.getTokenBridge(),
       args: [
         parseAssetId(assetId),
@@ -112,6 +116,7 @@ const wrapAndTransferETH = (): ContractConfigBuilder => ({
     const rcvWh = destination.chain as Wormhole;
 
     return new ContractConfig({
+      abi: Abi.TokenBridge,
       address: ctxWh.getTokenBridge(),
       args: [
         rcvWh.getWormholeId(),

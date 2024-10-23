@@ -1,5 +1,6 @@
 import {
   big,
+  Abi,
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
@@ -20,6 +21,7 @@ export function Xtokens() {
       build: ({ address, amount, asset, destination, source }) => {
         const assetId = source.chain.getAssetId(asset);
         return new ContractConfig({
+          abi: Abi.Xtokens,
           address: Precompile.Xtokens,
           args: [
             isString(assetId) ? formatAssetIdToERC20(assetId) : asset,
@@ -46,6 +48,7 @@ export function Xtokens() {
           destination.fee.decimals
         );
         return new ContractConfig({
+          abi: Abi.Xtokens,
           address: Precompile.Xtokens,
           args: [
             [

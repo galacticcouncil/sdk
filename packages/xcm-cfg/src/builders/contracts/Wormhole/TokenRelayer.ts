@@ -1,5 +1,6 @@
 import {
   addr,
+  Abi,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
@@ -22,6 +23,7 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
+      abi: Abi.TokenRelayer,
       address: ctxWh.getTokenRelayer()!,
       args: [
         parseAssetId(assetId),
