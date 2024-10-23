@@ -721,7 +721,6 @@ export const moonbeam = new EvmParachain({
       id: '311091173110107856861649819128533077277',
     },
   ],
-
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmMoonbeamDef,
   explorer: 'https://moonbeam.subscan.io',

@@ -10,7 +10,7 @@
 
 ### Minor Changes
 
-- Add Assethub <-> Hydration DOT transfer (new reserve)
+- Add Assethub <-> Hydration DOT transfer (new DOT reserve)
 
 ## 5.0.1
 
