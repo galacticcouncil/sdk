@@ -281,6 +281,139 @@ const toAstar: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: bnc,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: bnc,
+      fee: {
+        amount: 0.05,
+        asset: bnc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: glmr,
+      fee: {
+        amount: 0.025,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: ibtc,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: ibtc,
+      fee: {
+        amount: 0.025,
+        asset: ibtc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: intr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: intr,
+      fee: {
+        amount: 0.01,
+        asset: intr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: pha,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: pha,
+      fee: {
+        amount: 0.3,
+        asset: pha,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: vdot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: vdot,
+      fee: {
+        amount: 0.0004,
+        asset: vdot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: vastr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: vastr,
+      fee: {
+        amount: 0.005,
+        asset: vastr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
 ];
 
 const toBifrost: AssetRoute[] = [
@@ -398,6 +531,25 @@ const toBifrost: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: ibtc,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: ibtc,
+      fee: {
+        amount: 0.000002,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
 ];
 
 const toCentrifuge: AssetRoute[] = [
@@ -416,6 +568,44 @@ const toCentrifuge: AssetRoute[] = [
       fee: {
         amount: 0.0092696,
         asset: cfg,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: centrifuge,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: centrifuge,
+      asset: glmr,
+      fee: {
+        amount: 0.05,
+        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
