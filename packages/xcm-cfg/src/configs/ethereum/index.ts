@@ -6,6 +6,7 @@ import {
   eth,
   wbtc,
   wbtc_mwh,
+  weth,
   weth_mwh,
   usdc,
   usdc_mwh,
@@ -45,6 +46,31 @@ const toHydration: AssetRoute[] = [
   toHydrationErc20Template(wbtc, wbtc_mwh),
   toHydrationErc20Template(usdc, usdc_mwh),
   toHydrationErc20Template(usdt, usdt_mwh),
+];
+
+const toHydrationViaSnowbridge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: weth,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().erc20(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: weth,
+      fee: {
+        amount: 0,
+        asset: weth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
+  }),
 ];
 
 const toMoonbeam: AssetRoute[] = [
@@ -94,5 +120,5 @@ const toMoonbeam: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [...toHydration],
+  routes: [...toHydration, ...toHydrationViaSnowbridge],
 });

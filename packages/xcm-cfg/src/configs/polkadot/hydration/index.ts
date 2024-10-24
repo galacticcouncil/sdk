@@ -38,6 +38,7 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
+  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -64,6 +65,7 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  ethereum,
 } from '../../../chains';
 import { ContractBuilder, ExtrinsicBuilder } from '../../../builders';
 
@@ -867,6 +869,31 @@ const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumWithRelayerTemplate(usdc_mwh, usdc),
 ];
 
+const toEthereumViaSnowbridge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: weth,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ethereum,
+      asset: weth,
+      fee: {
+        amount: 0,
+        asset: weth,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .transferAssets(2)
+      .viaSnowbridge(),
+  }),
+];
+
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
@@ -878,6 +905,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
+    ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

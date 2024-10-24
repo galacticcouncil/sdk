@@ -232,6 +232,50 @@ const transferAssetsUsingTypeAndThen = (parent: Parents) => {
   };
 };
 
+const transferAssets = (parent: Parents) => {
+  const func = 'transferAssets';
+  return {
+    viaSnowbridge: (): ExtrinsicConfigBuilder => ({
+      build: ({ address, amount, destination }) =>
+        new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v3;
+            const account = getExtrinsicAccount(address);
+            const rcv = destination.chain as Parachain;
+            const assetId = rcv.getAssetId(destination.balance);
+            const assetContract = getExtrinsicAccount(assetId.toString());
+
+            return [
+              toDest(version, rcv),
+              toBeneficiary(version, account),
+              toAssets(
+                version,
+                parent,
+                {
+                  X2: [
+                    {
+                      GlobalConsensus: {
+                        Ethereum: {
+                          chainId: 1,
+                        },
+                      },
+                    },
+                    assetContract,
+                  ],
+                },
+                amount
+              ),
+              0,
+              'Unlimited',
+            ];
+          },
+        }),
+    }),
+  };
+};
+
 type TransactOpts = {
   fee: number;
 };
@@ -282,12 +326,16 @@ const send = () => {
   };
 };
 
+// Snowbridge
+// 0x6b0b030201090704030001030000000000000000000000000000000000000000000304000202090704030026f5c2370e563e9f4dda435f03a63d7c109d8d04000700f2052a010000000000
+
 export const polkadotXcm = () => {
   return {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
     reserveTransferAssets,
     teleportAssets,
+    transferAssets,
     transferAssetsUsingTypeAndThen,
     send,
   };

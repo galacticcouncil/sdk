@@ -555,6 +555,12 @@ export const hydration = new EvmParachain({
       min: 0.0018761726,
     },
     {
+      asset: wbtc,
+      decimals: 8,
+      id: 1000190,
+      min: 0.00000023,
+    },
+    {
       asset: wbtc_awh,
       decimals: 8,
       id: 3,
@@ -566,6 +572,12 @@ export const hydration = new EvmParachain({
       id: 19,
       min: 0.00000034,
       palletInstance: 110,
+    },
+    {
+      asset: weth,
+      decimals: 18,
+      id: 1000189,
+      min: 0.0000061,
     },
     {
       asset: weth_awh,
@@ -1174,6 +1186,11 @@ export const ethereum = new EvmChain({
   assetsData: [
     {
       asset: eth,
+      decimals: 18,
+      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    },
+    {
+      asset: weth,
       decimals: 18,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },

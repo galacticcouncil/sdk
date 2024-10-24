@@ -9,9 +9,10 @@ import {
 import { encoding } from '@wormhole-foundation/sdk-base';
 import { keccak256 } from '@wormhole-foundation/sdk-connect';
 import { deserialize } from '@wormhole-foundation/sdk-definitions';
-import { XCallEvm } from 'types';
 
 import { encodeFunctionData } from 'viem';
+
+import { XCallEvm } from '../types';
 
 export class WormholeClient {
   async isTransferCompleted(
