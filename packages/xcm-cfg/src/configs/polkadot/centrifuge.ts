@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { cfg } from '../../assets';
+import { cfg, dot, glmr } from '../../assets';
 import { centrifuge, hydration } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -19,6 +19,50 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: 0.006373834498834048,
         asset: cfg,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().ormlTokens().accounts(),
+      fee: {
+        asset: cfg,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().ormlTokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().ormlTokens().accounts(),
+      fee: {
+        asset: cfg,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().ormlTokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: glmr,
+      fee: {
+        amount: 0.05,
+        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),

@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { astr, dot } from '../../assets';
+import { astr, bnc, dot, glmr, ibtc, intr, pha, vastr, vdot } from '../../assets';
 import { astar, hydration } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -26,7 +26,7 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
+      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
         balance: BalanceBuilder().substrate().system().account(),
@@ -41,6 +41,160 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: 0.1,
         asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: bnc,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: bnc,
+      fee: {
+        amount: 0.1,
+        asset: bnc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: glmr,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: glmr,
+      fee: {
+        amount: 0.04,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: ibtc,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: ibtc,
+      fee: {
+        amount: 0.04,
+        asset: ibtc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: intr,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: intr,
+      fee: {
+        amount: 0.2,
+        asset: intr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: pha,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: pha,
+      fee: {
+        amount: 0.3,
+        asset: pha,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: vdot,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: vdot,
+      fee: {
+        amount: 0.0004,
+        asset: vdot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: vastr,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: vastr,
+      fee: {
+        amount: 0.025,
+        asset: vastr,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
