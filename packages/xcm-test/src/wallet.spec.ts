@@ -5,13 +5,13 @@ import {
   Asset,
   AssetRoute,
   ChainEcosystem,
-  Parachain,
   SubstrateApis,
 } from '@galacticcouncil/xcm-core';
 import {
+  BalanceAdapter,
   Erc20Client,
   Metadata,
-  TransferService,
+  TransferAdapter,
   Wallet,
   XCall,
 } from '@galacticcouncil/xcm-sdk';
@@ -28,7 +28,6 @@ const jestConsole = console;
 
 const BALANCE = 10;
 const FEE = 0.1;
-const FEE_BALANCE = 1;
 
 const getCalldata = async (
   wallet: Wallet,
@@ -42,53 +41,29 @@ const getCalldata = async (
   const srcAddress = getAddress(chain);
   const destAddress = getAddress(destination.chain);
 
-  const getBalanceMock = jest
-    .spyOn(TransferService.prototype, 'getBalance')
-    .mockImplementation(async () =>
-      getAmount(BALANCE, source.asset, sourceMeta)
-    );
-
-  const getFeeBalanceMock = jest
-    .spyOn(TransferService.prototype, 'getFeeBalance')
-    .mockImplementation(async () => {
-      if (source.fee) {
-        const feeAsset = source.fee.asset;
-        const asset: Asset =
-          'build' in feeAsset
-            ? await feeAsset
-                .build({
-                  chain: chain as Parachain,
-                  address: srcAddress,
-                })
-                .call()
-            : feeAsset;
-        return getAmount(FEE, asset, sourceMeta);
+  // Mock transfer & fee asset balances to 10 units
+  const readBalanceMock = jest
+    .spyOn(BalanceAdapter.prototype, 'read')
+    .mockImplementation(async (asset: Asset) => {
+      if (asset.isEqual(destination.asset)) {
+        return getAmount(BALANCE, asset, destinationMeta);
       }
-      return getAmount(FEE, source.asset, sourceMeta);
+      return getAmount(BALANCE, asset, sourceMeta);
     });
 
-  const getDestinationFeeBalanceMock = jest
-    .spyOn(TransferService.prototype, 'getDestinationFeeBalance')
-    .mockImplementation(async () => {
-      return getAmount(FEE_BALANCE, destination.fee.asset, destinationMeta);
-    });
-
-  const getDestinationFeeMock = jest
-    .spyOn(TransferService.prototype, 'getDestinationFee')
-    .mockImplementation(async () => {
-      return getAmount(FEE, destination.fee.asset, destinationMeta);
-    });
-
-  const getFeeMock = jest
-    .spyOn(TransferService.prototype, 'getFee')
+  // Mock source fee to 0.1 unit
+  const estimateFeeMock = jest
+    .spyOn(TransferAdapter.prototype, 'estimateFee')
     .mockImplementation(async () => {
       return getAmount(FEE, source.asset, sourceMeta);
     });
 
+  // Mock source fee swap support to false (disabled)
   const isSwapSupportedMock = jest
     .spyOn(wallet.dex, 'isSwapSupported')
     .mockImplementation(() => false);
 
+  // Mock Erc20 spending cap to current balance (10 units)
   const allowanceMock = jest
     .spyOn(Erc20Client.prototype, 'allowance')
     .mockImplementation(async () => {
@@ -105,19 +80,17 @@ const getCalldata = async (
     destination.chain
   );
 
-  expect(getBalanceMock).toHaveBeenCalled();
-  expect(getFeeBalanceMock).toHaveBeenCalled();
-  expect(getDestinationFeeBalanceMock).toHaveBeenCalled();
-  expect(getDestinationFeeMock).toHaveBeenCalled();
-  expect(getFeeMock).toHaveBeenCalled();
+  expect(readBalanceMock).toHaveBeenCalled();
+  expect(estimateFeeMock).toHaveBeenCalled();
   expect(isSwapSupportedMock).toHaveBeenCalled();
 
+  // Called only if contract bridge transfer from EVM chain, except native
   expect(allowanceMock).toBeDefined();
 
   return xTransfer.buildCall('1');
 };
 
-describe('Wallet', () => {
+describe('Wallet with XCM config', () => {
   jest.setTimeout(2 * 60 * 1000); // Max execution time 2 min
 
   let wallet: Wallet;
@@ -142,8 +115,8 @@ describe('Wallet', () => {
     global.console = jestConsole;
     SubstrateApis.getInstance().release();
 
+    // Create snapshot on init
     if (snapshot.size === 0) {
-      // Initialize snapshot from report on boot
       const json = JSON.stringify(Object.fromEntries(report), null, 2);
       const file = ['./src/snapshot.json'].join('');
       writeFileSync(file, json);
@@ -163,7 +136,7 @@ describe('Wallet', () => {
       const config = configService.getChainRoutes(c);
       const { chain, routes } = config;
 
-      for (const [_, route] of routes.entries()) {
+      for (const route of Array.from(routes.values())) {
         const { source, destination } = route;
         const transferFrom = chain.name;
         const transferTo = destination.chain.name;

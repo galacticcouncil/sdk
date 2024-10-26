@@ -1,5 +1,6 @@
 export { Wallet } from './Wallet';
+export { BalanceAdapter, TransferAdapter } from './adapters';
+export { Metadata } from './transfer';
 export * from './evm';
 export * from './substrate';
-export * from './transfer';
 export * from './types';
