@@ -6,5 +6,5 @@
   "access": "public",
   "baseBranch": "origin/master",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": ["sdk-cjs", "sdk-esm", "xcm-transfer", "xcm-test"]
 }
