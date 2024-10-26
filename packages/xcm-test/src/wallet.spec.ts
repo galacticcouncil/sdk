@@ -84,19 +84,20 @@ const getCalldata = async (
   expect(estimateFeeMock).toHaveBeenCalled();
   expect(isSwapSupportedMock).toHaveBeenCalled();
 
-  // Called only if contract bridge transfer from EVM chain, except native
+  // Used only if contract bridge transfer from EVM chain, except native
   expect(allowanceMock).toBeDefined();
 
   return xTransfer.buildCall('1');
 };
 
 describe('Wallet with XCM config', () => {
-  jest.setTimeout(2 * 60 * 1000); // Max execution time 2 min
+  jest.setTimeout(2 * 60 * 1000); // Execution time <= 2 min
 
   let wallet: Wallet;
 
   const snapshot = new Map(Object.entries(snapshotJson));
   const report = new Map();
+  const delta: string[] = [];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
@@ -113,7 +114,10 @@ describe('Wallet with XCM config', () => {
 
   afterAll(async () => {
     global.console = jestConsole;
-    SubstrateApis.getInstance().release();
+    await SubstrateApis.getInstance().release();
+
+    // Print changes
+    delta.forEach((d) => console.log(d));
 
     // Create snapshot on init
     if (snapshot.size === 0) {
@@ -155,7 +159,7 @@ describe('Wallet with XCM config', () => {
               Call: ${result.data}
               Status: Unknown. Queued for processing. \n
             `;
-            console.info(routeInfo);
+            delta.push(routeInfo);
           }
           report.set(key, result.data);
         });
