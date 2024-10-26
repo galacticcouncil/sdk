@@ -29,6 +29,20 @@ const jestConsole = console;
 const BALANCE = 10;
 const FEE = 0.1;
 
+/**
+ * Construct chain route calldata.
+ *
+ * For the sake of simplicity following contraints are defined:
+ *  - asset & fee balance is 10 units
+ *  - source fee is 0.1 unit
+ *  - source fee swap is disabled
+ *  - erc20 spending cap is same as balance
+ *
+ * @param wallet - Wallet instance with Hydration XCM config
+ * @param chain - Origin chain
+ * @param route - Origin chain asset transfer route
+ * @returns calldata hex string
+ */
 const getCalldata = async (
   wallet: Wallet,
   chain: AnyChain,
@@ -91,13 +105,13 @@ const getCalldata = async (
 };
 
 describe('Wallet with XCM config', () => {
-  jest.setTimeout(2 * 60 * 1000); // Execution time <= 2 min
+  jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
 
   let wallet: Wallet;
 
   const snapshot = new Map(Object.entries(snapshotJson));
   const report = new Map();
-  const delta: string[] = [];
+  const unsupported: string[] = [];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
@@ -108,18 +122,22 @@ describe('Wallet with XCM config', () => {
 
   beforeAll(async () => {
     global.console = console;
+    console.log('Starting JurAI 👷 ...\n');
     wallet = await init();
-    console.log('\nStarting JurAI 👷 ...\n');
   });
 
   afterAll(async () => {
     global.console = jestConsole;
     await SubstrateApis.getInstance().release();
 
-    // Print changes
-    delta.forEach((d) => console.log(d));
+    // Print routes not present in snapshot (missing validation)
+    if (unsupported.length > 0) {
+      console.log('\nⓘ  Skipping:\n');
+      unsupported.forEach((d) => console.log(d));
+      console.log('Please update snapshot !!!\n');
+    }
 
-    // Create snapshot on init
+    // Populate snapshot file on init
     if (snapshot.size === 0) {
       const json = JSON.stringify(Object.fromEntries(report), null, 2);
       const file = ['./src/snapshot.json'].join('');
@@ -144,22 +162,29 @@ describe('Wallet with XCM config', () => {
         const { source, destination } = route;
         const transferFrom = chain.name;
         const transferTo = destination.chain.name;
-        const transferAsset = source.asset.originSymbol;
+        const transferAsset = source.asset;
+        const routeInfo = [
+          transferFrom,
+          '->',
+          transferTo,
+          transferAsset.originSymbol,
+          `[${transferAsset.key}]`,
+        ].join(' ');
 
         const key = getRouteKey(chain, route);
         const calldata = snapshot.get(key);
 
-        it(`${transferFrom} -> ${transferTo} [ ${transferAsset} ] transfer`, async () => {
+        it(`${routeInfo} transfer`, async () => {
           const result = await getCalldata(wallet, chain, route);
           if (calldata) {
             expect(result.data).toStrictEqual(calldata);
           } else {
-            const routeInfo = outdent`
-              Route: ${chain.name} -> ${destination.chain.name} [ ${source.asset.originSymbol} ]
-              Call: ${result.data}
-              Status: Unknown. Queued for processing. \n
+            const info = outdent`
+              Route: ${routeInfo}
+              Key: ${key}
+              Call: ${result.data}\n
             `;
-            delta.push(routeInfo);
+            unsupported.push(info);
           }
           report.set(key, result.data);
         });
