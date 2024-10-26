@@ -11,6 +11,9 @@ packages/*/build-meta.json
 # compile folders
 examples/*/out
 
+# jest test results
+integration-tests/*/output.json
+
 # turbo files
 .turbo
 

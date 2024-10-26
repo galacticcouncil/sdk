@@ -4,10 +4,11 @@
   "keywords": [
     "wallet",
     "xcm",
-    "test"
+    "integration"
   ],
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:file": "jest --json --outputFile=output.json"
   },
   "dependencies": {
     "@galacticcouncil/xcm-cfg": "^5.0.0",
