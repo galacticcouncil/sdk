@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.1.1
+
+### Patch Changes
+
+- Fix Astar -> Hydration DOT transfer balance cfg
+
 ## 5.1.0
 
 ### Minor Changes
