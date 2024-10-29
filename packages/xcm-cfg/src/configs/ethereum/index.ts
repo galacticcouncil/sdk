@@ -14,7 +14,11 @@ import {
   usdt_mwh,
 } from '../../assets';
 import { ethereum, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, ContractBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 import { toHydrationErc20Template } from './templates';
 
@@ -65,8 +69,8 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
       chain: hydration,
       asset: weth,
       fee: {
-        amount: 0,
-        asset: weth,
+        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
+        asset: eth,
       },
     },
     contract: ContractBuilder().Snowbridge().sendToken(),

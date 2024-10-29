@@ -55,7 +55,7 @@ const wrapAndTransferETHWithPayload = () => {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
       build: (params) => {
         wormholeGuard(opts.moonchain);
-        const { address, source, destination } = params;
+        const { address, amount, source, destination } = params;
         const ctxWh = source.chain as Wormhole;
         const rcvWh = opts.moonchain as Wormhole;
         const recipient = Precompile.Bridge;
@@ -72,6 +72,7 @@ const wrapAndTransferETHWithPayload = () => {
             '0',
             payload,
           ],
+          value: amount,
           func: 'wrapAndTransferETHWithPayload',
           module: 'TokenBridge',
         });
@@ -111,7 +112,7 @@ const transferTokens = (): ContractConfigBuilder => ({
 
 const wrapAndTransferETH = (): ContractConfigBuilder => ({
   build: (params) => {
-    const { address, source, destination } = params;
+    const { address, amount, source, destination } = params;
     const ctxWh = source.chain as Wormhole;
     const rcvWh = destination.chain as Wormhole;
 
@@ -124,6 +125,7 @@ const wrapAndTransferETH = (): ContractConfigBuilder => ({
         '0',
         '0',
       ],
+      value: amount,
       func: 'wrapAndTransferETH',
       module: 'TokenBridge',
     });

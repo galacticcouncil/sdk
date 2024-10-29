@@ -1,6 +1,5 @@
 import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
 import { Abi, BaseError } from 'viem';
-import { isNativeEthBridge } from './utils';
 
 export class EvmTransfer {
   protected readonly client: EvmClient;
@@ -32,15 +31,15 @@ export class EvmTransfer {
     return this.config.encodeFunctionData();
   }
 
-  async estimateGas(account: string, balance: bigint): Promise<bigint> {
-    const { address, args, func } = this.config;
+  async estimateGas(account: string): Promise<bigint> {
+    const { address, args, value, func } = this.config;
     const provider = this.client.getProvider();
     return await provider.estimateContractGas({
       address: address as `0x${string}`,
       abi: this.abi,
       functionName: func,
       args: args,
-      value: isNativeEthBridge(this.config) ? balance : undefined,
+      value: value,
       account: account as `0x${string}`,
     });
   }
@@ -55,7 +54,7 @@ export class EvmTransfer {
     }
 
     try {
-      const estimatedGas = await this.estimateGas(account, balance);
+      const estimatedGas = await this.estimateGas(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
     } catch (error) {

@@ -33,7 +33,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
       data: calldata as `0x${string}`,
       from: account as `0x${string}`,
       to: config.address as `0x${string}`,
-      value: isNativeEthBridge(config) ? amount : undefined,
+      value: config.value,
     } as XCallEvm;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
