@@ -11,7 +11,8 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "integration-tests/*"
   ],
   "scripts": {
     "build": "turbo run build",
