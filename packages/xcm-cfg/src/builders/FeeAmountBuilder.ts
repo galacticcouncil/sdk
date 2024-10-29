@@ -1,19 +1,10 @@
 import {
   Abi,
-  Asset,
   EvmChain,
   FeeAmountConfigBuilder,
-  FeeAssetConfigBuilder,
-  SubstrateCallConfig,
+  Parachain,
+  Snowbridge as bridge,
 } from '@galacticcouncil/xcm-core';
-
-import { hdx } from '../assets';
-
-export function FeeAmountBuilder() {
-  return {
-    TokenRelayer,
-  };
-}
 
 function TokenRelayer() {
   return {
@@ -35,25 +26,34 @@ function TokenRelayer() {
   };
 }
 
-export function FeeAssetBuilder() {
+function Wormhole() {
   return {
-    multiTransactionPayment,
+    TokenRelayer,
   };
 }
 
-function multiTransactionPayment(): FeeAssetConfigBuilder {
+function Snowbridge() {
   return {
-    build: ({ address, chain }) =>
-      new SubstrateCallConfig({
-        chain,
-        call: async (): Promise<Asset> => {
-          const api = await chain.api;
-          const asset =
-            await api.query.multiTransactionPayment.accountCurrencyMap(address);
-          const assetd = asset.isSome ? asset.toString() : '0';
-          const feeAsset = chain.findAssetById(assetd);
-          return feeAsset ? feeAsset.asset : hdx;
-        },
-      }),
+    quoteSendTokenFee: (): FeeAmountConfigBuilder => ({
+      build: ({ asset, destination, source }) => {
+        const ctx = source as EvmChain;
+        const rcv = destination as Parachain;
+        const assetId = ctx.getAssetId(asset);
+        const output = ctx.client.getProvider().readContract({
+          abi: Abi.Snowbridge,
+          address: bridge.Gateway as `0x${string}`,
+          args: [assetId as `0x${string}`, rcv.parachainId, 100_000_000n],
+          functionName: 'quoteSendTokenFee',
+        });
+        return output as Promise<bigint>;
+      },
+    }),
+  };
+}
+
+export function FeeAmountBuilder() {
+  return {
+    Snowbridge,
+    Wormhole,
   };
 }

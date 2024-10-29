@@ -25,7 +25,7 @@ export const balance = (): BalanceConfigBuilder => {
 
 export const fee = (): FeeConfig => {
   return {
-    asset: FeeAssetBuilder().multiTransactionPayment(),
+    asset: FeeAssetBuilder().multiTransactionPayment().accountCurrencyMap(),
     balance: balance(),
   };
 };

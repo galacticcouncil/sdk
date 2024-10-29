@@ -116,7 +116,10 @@ export function toEthereumWithRelayerTemplate(
       chain: ethereum,
       asset: assetOut,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: assetOut,
       },
     },

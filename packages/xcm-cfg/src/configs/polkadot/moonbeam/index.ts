@@ -177,7 +177,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
       chain: ethereum,
       asset: eth,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: eth,
       },
     },
@@ -205,7 +208,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
       chain: ethereum,
       asset: dai,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: dai,
       },
     },
