@@ -6,6 +6,7 @@ export interface ContractConfigParams extends Omit<BaseConfigParams, 'type'> {
   abi: TAbi;
   args: any[];
   address: string;
+  value?: bigint;
 }
 
 export class ContractConfig extends BaseConfig {
@@ -15,11 +16,14 @@ export class ContractConfig extends BaseConfig {
 
   readonly args: any[];
 
-  constructor({ abi, address, args, ...other }: ContractConfigParams) {
+  readonly value?: bigint;
+
+  constructor({ abi, address, args, value, ...other }: ContractConfigParams) {
     super({ ...other, type: CallType.Evm });
     this.abi = abi;
     this.address = address;
     this.args = args;
+    this.value = value;
   }
 
   encodeFunctionData() {
