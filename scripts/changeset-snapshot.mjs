@@ -26,13 +26,15 @@ const main = async () => {
   const commitSha = params['sha'];
   const output = params['output'];
 
-  releasePlan.releases.map((r) => {
-    r.newVersion = [
-      r.newVersion,
-      'pr' + pullRequest,
-      commitSha.substring(0, 7),
-    ].join('-');
-  });
+  releasePlan.releases = releasePlan.releases
+    .filter((r) => r.changesets.length > 0)
+    .map((r) => {
+      r.newVersion = [
+        r.newVersion,
+        'pr' + pullRequest,
+        commitSha.substring(0, 7),
+      ].join('-');
+    });
 
   if (output) {
     const releaseMessage = getUpgradeMessage(releasePlan);
