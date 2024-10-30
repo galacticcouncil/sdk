@@ -7,7 +7,7 @@
     "integration"
   ],
   "scripts": {
-    "test": "jest",
+    "test:xcm": "jest",
     "test:file": "jest --json --outputFile=output.json"
   },
   "devDependencies": {
