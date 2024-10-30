@@ -1,11 +1,12 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { ded, dot, dota, pink, usdc, usdt, wud } from '../../../assets';
+import { ded, dot, dota, myth, pink, usdc, usdt, wud } from '../../../assets';
 import {
   assetHub,
   bifrost,
   hydration,
   moonbeam,
+  mythos,
   polkadot,
 } from '../../../chains';
 import {
@@ -19,6 +20,7 @@ import {
   toMoonbeamExtTemplate,
   xcmDeliveryFee,
 } from './templates';
+import { XcmVersion } from 'builders/types';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -101,6 +103,31 @@ const toHydration: AssetRoute[] = [
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: myth,
+      balance: BalanceBuilder().substrate().foreignAssets().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().foreignAssets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: myth,
+      fee: {
+        amount: 1,
+        asset: myth,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .polkadotXcm()
+      .transferAssetsUsingTypeAndThen(),
   }),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
