@@ -1,10 +1,12 @@
 import { SubstrateQueryConfig } from '../base';
 import { ContractConfig } from '../contract';
-import { ChainAssetId } from '../../../chain';
+import { Asset } from '../../../asset';
+import { AnyChain } from '../../../chain';
 
 export interface BalanceConfigBuilderParams {
   address: string;
-  asset: ChainAssetId;
+  asset: Asset;
+  chain: AnyChain;
 }
 
 export interface BalanceConfigBuilder {

@@ -6,19 +6,19 @@ const NATIVE_ASSET_ID = '0';
 
 export const balance = (): BalanceConfigBuilder => {
   return {
-    build: ({ address, asset }) => {
+    build: ({ address, asset, chain }) => {
       if (asset.toString() === NATIVE_ASSET_ID) {
         return BalanceBuilder()
           .substrate()
           .system()
           .account()
-          .build({ address, asset });
+          .build({ address, asset, chain });
       }
       return BalanceBuilder()
         .substrate()
         .tokens()
         .accounts()
-        .build({ address, asset });
+        .build({ address, asset, chain });
     },
   };
 };

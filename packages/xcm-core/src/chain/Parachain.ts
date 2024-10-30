@@ -22,6 +22,7 @@ export interface ParachainAssetData extends ChainAssetData {
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;
   palletInstance?: number;
+  xcmLocation?: object;
 }
 
 export interface ParachainParams extends ChainParams<ParachainAssetData> {
@@ -80,6 +81,10 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   getAssetPalletInstance(asset: Asset): number | undefined {
     return this.assetsData.get(asset.key)?.palletInstance;
+  }
+
+  getAssetXcmLocation(asset: Asset): object | undefined {
+    return this.assetsData.get(asset.key)?.xcmLocation;
   }
 
   getMinAssetId(asset: Asset): ChainAssetId {

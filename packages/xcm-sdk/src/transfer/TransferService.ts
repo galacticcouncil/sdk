@@ -50,7 +50,8 @@ export class TransferService {
       : address;
     const balanceConfig = route.source.balance.build({
       address: account,
-      asset: assetId,
+      asset: asset,
+      chain: chain,
     });
 
     return this.balance.read(asset, balanceConfig);
@@ -102,7 +103,8 @@ export class TransferService {
       : address;
     const feeBalanceConfig = source.destinationFee.balance.build({
       address: account,
-      asset: feeAssetId,
+      asset: feeAsset,
+      chain: chain,
     });
     return this.balance.read(feeAsset, feeBalanceConfig);
   }
@@ -150,7 +152,8 @@ export class TransferService {
       : address;
     const feeBalanceConfig = source.fee.balance.build({
       address: account,
-      asset: feeAssetId,
+      asset: feeAsset,
+      chain: chain,
     });
 
     return this.balance.read(feeAsset, feeBalanceConfig);
@@ -309,10 +312,10 @@ export class TransferService {
   ): Promise<AssetAmount> {
     const { chain } = this.config;
     const { fee } = cfg;
-    const feeAssetId = chain.getBalanceAssetId(fee.asset);
     const feeBalanceConfig = fee.balance.build({
       address: ctx.sender,
-      asset: feeAssetId,
+      asset: fee.asset,
+      chain: chain,
     });
     return this.balance.read(fee.asset, feeBalanceConfig);
   }
