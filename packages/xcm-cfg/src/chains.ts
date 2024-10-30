@@ -209,6 +209,18 @@ export const assetHub = new Parachain({
       palletInstance: 50,
     },
     {
+      asset: myth,
+      decimals: 18,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3369,
+          },
+        },
+      },
+    },
+    {
       asset: pink,
       decimals: 10,
       id: 23,
@@ -409,6 +421,10 @@ export const hydration = new EvmParachain({
       decimals: 10,
       id: 5,
       min: 0.001754,
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
     {
       asset: dota,
@@ -466,6 +482,14 @@ export const hydration = new EvmParachain({
       decimals: 18,
       id: 30,
       min: 0.0213675213675214,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3369,
+          },
+        },
+      },
     },
     {
       asset: nodl,
@@ -559,6 +583,26 @@ export const hydration = new EvmParachain({
       decimals: 8,
       id: 1000190,
       min: 0.00000023,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: wbtc_awh,
@@ -578,6 +622,26 @@ export const hydration = new EvmParachain({
       decimals: 18,
       id: 1000189,
       min: 0.0000061,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: weth_awh,

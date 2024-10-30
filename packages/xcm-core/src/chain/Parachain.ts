@@ -1,4 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
+import { AnyJson } from '@polkadot/types/types';
 
 import { Asset } from '../asset';
 import { SubstrateApis } from '../substrate';
@@ -22,7 +23,7 @@ export interface ParachainAssetData extends ChainAssetData {
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;
   palletInstance?: number;
-  xcmLocation?: object;
+  xcmLocation?: Record<string, AnyJson>;
 }
 
 export interface ParachainParams extends ChainParams<ParachainAssetData> {
@@ -83,7 +84,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     return this.assetsData.get(asset.key)?.palletInstance;
   }
 
-  getAssetXcmLocation(asset: Asset): object | undefined {
+  getAssetXcmLocation(asset: Asset): Record<string, AnyJson> | undefined {
     return this.assetsData.get(asset.key)?.xcmLocation;
   }
 

@@ -9,14 +9,16 @@ import {
   toAsset,
   toAssets,
   toBeneficiary,
-  toCustomXcmOnDest,
   toDest,
-  toRemoteFeesId,
   toTransactMessage,
 } from './polkadotXcm.utils';
+
+import * as v4 from './polkadotXcm.utils.v4';
+
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
+  getExtrinsicAssetLocation,
 } from '../ExtrinsicBuilder.utils';
 
 import { Parents, XcmVersion } from '../types';
@@ -205,76 +207,83 @@ const teleportAssets = (parent: Parents) => {
   };
 };
 
-const transferAssetsUsingTypeAndThen = (parent: Parents) => {
-  const func = 'transferAssetsUsingTypeAndThen';
-  return {
-    here: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, destination }) =>
-        new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getArgs: () => {
-            const version = XcmVersion.v3;
-            const account = getExtrinsicAccount(address);
-            const rcv = destination.chain as Parachain;
-            return [
-              toDest(version, rcv),
-              toAssets(version, parent, 'Here', amount),
-              'DestinationReserve',
-              toRemoteFeesId(version, parent, 'Here'),
-              'DestinationReserve',
-              toCustomXcmOnDest(version, account),
-              'Unlimited',
-            ];
-          },
-        }),
-    }),
-  };
-};
+const transferAssetsUsingTypeAndThen = (): ExtrinsicConfigBuilder => ({
+  build: ({ address, asset, amount, destination, sender, source }) =>
+    new ExtrinsicConfig({
+      module: pallet,
+      func: 'transferAssetsUsingTypeAndThen',
+      getArgs: () => {
+        const version = XcmVersion.v4;
+        const from = getExtrinsicAccount(sender);
+        const account = getExtrinsicAccount(address);
+        const ctx = source.chain as Parachain;
+        const rcv = destination.chain as Parachain;
 
-const transferAssets = (parent: Parents) => {
-  const func = 'transferAssets';
-  return {
-    viaSnowbridge: (): ExtrinsicConfigBuilder => ({
-      build: ({ address, amount, destination }) =>
-        new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getArgs: () => {
-            const version = XcmVersion.v3;
-            const account = getExtrinsicAccount(address);
-            const rcv = destination.chain as Parachain;
-            const assetId = rcv.getAssetId(destination.balance);
-            const assetContract = getExtrinsicAccount(assetId.toString());
+        const transferAssetLocation = getExtrinsicAssetLocation(
+          ctx.getAssetXcmLocation(asset)!,
+          version
+        );
+        const transferFeeLocation = getExtrinsicAssetLocation(
+          ctx.getAssetXcmLocation(destination.fee)!,
+          version
+        );
 
-            return [
-              toDest(version, rcv),
-              toBeneficiary(version, account),
-              toAssets(
+        const transferAsset = v4.toAsset(transferAssetLocation, amount);
+        const transferFee = v4.toAsset(
+          transferFeeLocation,
+          destination.fee.amount
+        );
+
+        const isSufficientPaymentAsset = asset.isEqual(destination.fee);
+
+        const dest = v4.toDest(version, rcv);
+
+        const assets = {
+          [version]: asset.isEqual(destination.fee)
+            ? [transferAsset]
+            : [transferFee, transferAsset],
+        };
+
+        const assetTransferType = v4.toTransferType(
+          version,
+          transferAssetLocation,
+          rcv
+        );
+
+        const remoteFeeId = {
+          [version]: isSufficientPaymentAsset
+            ? transferAssetLocation
+            : transferFeeLocation,
+        };
+
+        const feesTransferType = v4.toTransferType(
+          version,
+          transferFeeLocation,
+          rcv
+        );
+
+        const customXcmOnDest =
+          destination.chain.key === 'ethereum'
+            ? v4.toCustomXcmOnDest_bridge(
                 version,
-                parent,
-                {
-                  X2: [
-                    {
-                      GlobalConsensus: {
-                        Ethereum: {
-                          chainId: 1,
-                        },
-                      },
-                    },
-                    assetContract,
-                  ],
-                },
-                amount
-              ),
-              0,
-              'Unlimited',
-            ];
-          },
-        }),
+                account,
+                from,
+                transferAssetLocation
+              )
+            : v4.toCustomXcmOnDest(version, account);
+
+        return [
+          dest,
+          assets,
+          assetTransferType,
+          remoteFeeId,
+          feesTransferType,
+          customXcmOnDest,
+          'Unlimited',
+        ];
+      },
     }),
-  };
-};
+});
 
 type TransactOpts = {
   fee: number;
@@ -326,16 +335,12 @@ const send = () => {
   };
 };
 
-// Snowbridge
-// 0x6b0b030201090704030001030000000000000000000000000000000000000000000304000202090704030026f5c2370e563e9f4dda435f03a63d7c109d8d04000700f2052a010000000000
-
 export const polkadotXcm = () => {
   return {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
     reserveTransferAssets,
     teleportAssets,
-    transferAssets,
     transferAssetsUsingTypeAndThen,
     send,
   };
