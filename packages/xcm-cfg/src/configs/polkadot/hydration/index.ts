@@ -78,7 +78,7 @@ import {
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
 } from './templates';
-import { XcmVersion } from 'builders/types';
+import { XcmTransferType, XcmVersion } from 'builders/types';
 
 const toAcala: AssetRoute[] = [
   new AssetRoute({
@@ -198,7 +198,7 @@ const toAssetHub: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(),
+      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
   new AssetRoute({
     source: {
@@ -257,7 +257,7 @@ const toAssetHub: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(),
+      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -910,7 +910,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(),
+      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
 ];
 

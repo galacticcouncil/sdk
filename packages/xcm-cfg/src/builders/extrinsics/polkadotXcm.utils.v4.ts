@@ -1,6 +1,6 @@
 import { Parachain } from '@galacticcouncil/xcm-core';
 
-import { XcmVersion } from '../types';
+import { XcmTransferType, XcmVersion } from '../types';
 import { findNestedKey } from '../utils';
 
 const ETHEREUM_CHAIN_ID = 1;
@@ -36,24 +36,23 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
 
 export const toTransferType = (
   version: XcmVersion,
-  assetLocation: object,
-  destination: Parachain
+  type: XcmTransferType,
+  assetLocation: object
 ) => {
-  if (destination.key === 'assethub' || destination.key === 'ethereum') {
-    return 'DestinationReserve';
-  }
-
-  const reserveChain = findNestedKey(assetLocation, 'Parachain');
-  return {
-    RemoteReserve: {
-      [version]: {
-        parents: 1,
-        interior: {
-          X1: [reserveChain],
+  if (type === XcmTransferType.RemoteReserve) {
+    const reserveChain = findNestedKey(assetLocation, 'Parachain');
+    return {
+      RemoteReserve: {
+        [version]: {
+          parents: 1,
+          interior: {
+            X1: [reserveChain],
+          },
         },
       },
-    },
-  };
+    };
+  }
+  return type;
 };
 
 export const toAsset = (assetLocation: object, amount: any) => {

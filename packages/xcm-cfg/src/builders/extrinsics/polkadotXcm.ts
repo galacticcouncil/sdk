@@ -21,7 +21,7 @@ import {
   getExtrinsicAssetLocation,
 } from '../ExtrinsicBuilder.utils';
 
-import { Parents, XcmVersion } from '../types';
+import { Parents, XcmTransferType, XcmVersion } from '../types';
 
 const pallet = 'polkadotXcm';
 
@@ -207,7 +207,9 @@ const teleportAssets = (parent: Parents) => {
   };
 };
 
-const transferAssetsUsingTypeAndThen = (): ExtrinsicConfigBuilder => ({
+const transferAssetsUsingTypeAndThen = (
+  transferType: XcmTransferType
+): ExtrinsicConfigBuilder => ({
   build: ({ address, asset, amount, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
@@ -246,8 +248,8 @@ const transferAssetsUsingTypeAndThen = (): ExtrinsicConfigBuilder => ({
 
         const assetTransferType = v4.toTransferType(
           version,
-          transferAssetLocation,
-          rcv
+          transferType,
+          transferAssetLocation
         );
 
         const remoteFeeId = {
@@ -258,8 +260,8 @@ const transferAssetsUsingTypeAndThen = (): ExtrinsicConfigBuilder => ({
 
         const feesTransferType = v4.toTransferType(
           version,
-          transferFeeLocation,
-          rcv
+          transferType,
+          transferFeeLocation
         );
 
         const customXcmOnDest =

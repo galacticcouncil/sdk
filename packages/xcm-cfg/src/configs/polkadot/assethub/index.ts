@@ -20,7 +20,7 @@ import {
   toMoonbeamExtTemplate,
   xcmDeliveryFee,
 } from './templates';
-import { XcmVersion } from 'builders/types';
+import { XcmTransferType, XcmVersion } from 'builders/types';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -127,7 +127,7 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(),
+      .transferAssetsUsingTypeAndThen(XcmTransferType.RemoteReserve),
   }),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
