@@ -13,6 +13,8 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
+  ExtrinsicBuilderV4,
+  XcmTransferType,
 } from '../../../builders';
 
 import {
@@ -20,7 +22,6 @@ import {
   toMoonbeamExtTemplate,
   xcmDeliveryFee,
 } from './templates';
-import { XcmTransferType, XcmVersion } from 'builders/types';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -103,31 +104,6 @@ const toHydration: AssetRoute[] = [
       .polkadotXcm()
       .limitedReserveTransferAssets()
       .X2(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: myth,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: myth,
-      fee: {
-        amount: 1,
-        asset: myth,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(XcmTransferType.RemoteReserve),
   }),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
@@ -220,6 +196,32 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamExtTemplate(pink),
 ];
 
+const toMythos: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: myth,
+      balance: BalanceBuilder().substrate().foreignAssets().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().foreignAssets().account(),
+      },
+    },
+    destination: {
+      chain: mythos,
+      asset: myth,
+      fee: {
+        amount: 0.33,
+        asset: myth,
+      },
+    },
+    extrinsic: ExtrinsicBuilderV4().polkadotXcm().limitedTeleportAssets(),
+  }),
+];
+
 const toBifrost: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -306,5 +308,11 @@ const toBifrost: AssetRoute[] = [
 
 export const assetHubConfig = new ChainRoutes({
   chain: assetHub,
-  routes: [...toHydration, ...toPolkadot, ...toMoonbeam, ...toBifrost],
+  routes: [
+    ...toHydration,
+    ...toPolkadot,
+    ...toMoonbeam,
+    ...toMythos,
+    ...toBifrost,
+  ],
 });

@@ -67,7 +67,12 @@ import {
   zeitgeist,
   ethereum,
 } from '../../../chains';
-import { ContractBuilder, ExtrinsicBuilder } from '../../../builders';
+import {
+  ContractBuilder,
+  ExtrinsicBuilder,
+  ExtrinsicBuilderV4,
+  XcmTransferType,
+} from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
@@ -78,7 +83,6 @@ import {
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
 } from './templates';
-import { XcmTransferType, XcmVersion } from 'builders/types';
 
 const toAcala: AssetRoute[] = [
   new AssetRoute({
@@ -196,7 +200,7 @@ const toAssetHub: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
       .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
@@ -237,27 +241,6 @@ const toAssetHub: AssetRoute[] = [
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset().X3(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: myth,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: myth,
-      fee: {
-        amount: 0.001,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -908,7 +891,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
       .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
@@ -925,7 +908,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
-    ...toEthereumViaSnowbridge,
+    //...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

@@ -193,6 +193,10 @@ export const assetHub = new Parachain({
       asset: dot,
       decimals: 10,
       id: 0,
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
     {
       asset: usdt,
@@ -820,6 +824,10 @@ export const mythos = new Parachain({
     {
       asset: myth,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,
