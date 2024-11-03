@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.2.0
+
+### Minor Changes
+
+- Snowbridge config & builders
+- ExtrinsicBuilderv4 support (transferAssetsUsingTypeAndThen) plus xcmLocations
+- Add Assethub <-> Mythos Myth transfer
+
 ## 5.1.1
 
 ### Patch Changes

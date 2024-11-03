@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- Unify transfer adapters
+- Unify contract transfer value calc
+
 ## 6.0.0
 
 ### Major Changes

@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-sdk",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "description": "Cross-chain sdk",
   "author": "GalacticCouncil",
   "repository": {
@@ -32,7 +32,7 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-core": "^5.0.0"
+    "@galacticcouncil/xcm-core": "^5.1.0"
   },
   "peerDependencies": {
     "@galacticcouncil/sdk": "^4.2.1"
