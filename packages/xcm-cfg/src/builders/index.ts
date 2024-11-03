@@ -6,5 +6,8 @@ export * from './AssetMinBuilder';
 export * from './BalanceBuilder';
 export * from './ContractBuilder';
 export * from './ExtrinsicBuilder';
+export * from './ExtrinsicBuilder.v4';
 export * from './FeeAmountBuilder';
 export * from './FeeAssetBuilder';
+
+export * from './types';

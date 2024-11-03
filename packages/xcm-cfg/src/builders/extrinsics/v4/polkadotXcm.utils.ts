@@ -1,7 +1,7 @@
 import { Parachain } from '@galacticcouncil/xcm-core';
 
-import { XcmTransferType, XcmVersion } from '../types';
-import { findNestedKey } from '../utils';
+import { XcmTransferType, XcmVersion } from '../../types';
+import { findNestedKey } from '../../utils';
 
 const ETHEREUM_CHAIN_ID = 1;
 const ETHEREUM_BRIDGE_LOCATION = {
@@ -10,6 +10,7 @@ const ETHEREUM_BRIDGE_LOCATION = {
     X1: [{ GlobalConsensus: { Ethereum: { chain_id: ETHEREUM_CHAIN_ID } } }],
   },
 };
+const HUB_PARACHAIN_ID = 1000;
 
 export const toDest = (version: XcmVersion, destination: Parachain) => {
   if (destination.key === 'polkadot' || destination.key === 'kusama') {
@@ -22,13 +23,27 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
   }
 
   const toParachain = {
-    Parachain: destination.key === 'ethereum' ? 1000 : destination.parachainId,
+    Parachain:
+      destination.key === 'ethereum'
+        ? HUB_PARACHAIN_ID
+        : destination.parachainId,
   };
   return {
     [version]: {
       parents: 1,
       interior: {
         X1: [toParachain],
+      },
+    },
+  };
+};
+
+export const toBeneficiary = (version: XcmVersion, account: any) => {
+  return {
+    [version]: {
+      parents: 0,
+      interior: {
+        X1: [account],
       },
     },
   };

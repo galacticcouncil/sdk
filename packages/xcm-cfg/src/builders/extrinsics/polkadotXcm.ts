@@ -13,15 +13,12 @@ import {
   toTransactMessage,
 } from './polkadotXcm.utils';
 
-import * as v4 from './polkadotXcm.utils.v4';
-
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
-  getExtrinsicAssetLocation,
 } from '../ExtrinsicBuilder.utils';
 
-import { Parents, XcmTransferType, XcmVersion } from '../types';
+import { Parents, XcmVersion } from '../types';
 
 const pallet = 'polkadotXcm';
 
@@ -207,86 +204,6 @@ const teleportAssets = (parent: Parents) => {
   };
 };
 
-const transferAssetsUsingTypeAndThen = (
-  transferType: XcmTransferType
-): ExtrinsicConfigBuilder => ({
-  build: ({ address, asset, amount, destination, sender, source }) =>
-    new ExtrinsicConfig({
-      module: pallet,
-      func: 'transferAssetsUsingTypeAndThen',
-      getArgs: () => {
-        const version = XcmVersion.v4;
-        const from = getExtrinsicAccount(sender);
-        const account = getExtrinsicAccount(address);
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-
-        const transferAssetLocation = getExtrinsicAssetLocation(
-          ctx.getAssetXcmLocation(asset)!,
-          version
-        );
-        const transferFeeLocation = getExtrinsicAssetLocation(
-          ctx.getAssetXcmLocation(destination.fee)!,
-          version
-        );
-
-        const transferAsset = v4.toAsset(transferAssetLocation, amount);
-        const transferFee = v4.toAsset(
-          transferFeeLocation,
-          destination.fee.amount
-        );
-
-        const isSufficientPaymentAsset = asset.isEqual(destination.fee);
-
-        const dest = v4.toDest(version, rcv);
-
-        const assets = {
-          [version]: asset.isEqual(destination.fee)
-            ? [transferAsset]
-            : [transferFee, transferAsset],
-        };
-
-        const assetTransferType = v4.toTransferType(
-          version,
-          transferType,
-          transferAssetLocation
-        );
-
-        const remoteFeeId = {
-          [version]: isSufficientPaymentAsset
-            ? transferAssetLocation
-            : transferFeeLocation,
-        };
-
-        const feesTransferType = v4.toTransferType(
-          version,
-          transferType,
-          transferFeeLocation
-        );
-
-        const customXcmOnDest =
-          destination.chain.key === 'ethereum'
-            ? v4.toCustomXcmOnDest_bridge(
-                version,
-                account,
-                from,
-                transferAssetLocation
-              )
-            : v4.toCustomXcmOnDest(version, account);
-
-        return [
-          dest,
-          assets,
-          assetTransferType,
-          remoteFeeId,
-          feesTransferType,
-          customXcmOnDest,
-          'Unlimited',
-        ];
-      },
-    }),
-});
-
 type TransactOpts = {
   fee: number;
 };
@@ -343,7 +260,6 @@ export const polkadotXcm = () => {
     limitedTeleportAssets,
     reserveTransferAssets,
     teleportAssets,
-    transferAssetsUsingTypeAndThen,
     send,
   };
 };

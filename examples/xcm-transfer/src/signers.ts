@@ -25,7 +25,7 @@ export async function signAndSend(
   if (!wallet) {
     throw new Error('No polkadot-js wallet found!');
   }
-  await wallet.enable('xcm-example');
+  await wallet.enable('xcm-transfer');
   const nextNonce = await api.rpc.system.accountNextIndex(address);
 
   extrinsic
