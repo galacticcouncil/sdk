@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-core
 
+## 5.1.0
+
+### Minor Changes
+
+- Asset xcm locations support
+- Link abi with contract config
+- Increase SubstrateApis cache to 40 conn
+
 ## 5.0.0
 
 ### Major Changes
