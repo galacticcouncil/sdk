@@ -729,6 +729,11 @@ export const interlay = new Parachain({
       decimals: 12,
       id: { ForeignAsset: 13 },
     },
+    {
+      asset: vdot,
+      decimals: 10,
+      id: { ForeignAsset: 3 },
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://interlay.subscan.io',
