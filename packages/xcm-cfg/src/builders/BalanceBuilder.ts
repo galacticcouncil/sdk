@@ -1,6 +1,8 @@
 import {
+  Abi,
   BalanceConfigBuilder,
   ContractConfig,
+  Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xcm-core';
 import { Option } from '@polkadot/types';
@@ -25,6 +27,7 @@ export function substrate() {
     system,
     tokens,
     ormlTokens,
+    foreignAssets,
   };
 }
 
@@ -39,6 +42,7 @@ function native(): BalanceConfigBuilder {
   return {
     build: ({ address }) => {
       return new ContractConfig({
+        abi: [],
         address: address,
         args: [],
         func: 'eth_getBalance',
@@ -50,13 +54,15 @@ function native(): BalanceConfigBuilder {
 
 function erc20(): BalanceConfigBuilder {
   return {
-    build: ({ address, asset }) => {
-      if (!asset || !isString(asset)) {
+    build: ({ address, asset, chain }) => {
+      const assetId = chain.getBalanceAssetId(asset);
+      if (!assetId || !isString(assetId)) {
         throw new Error(`Invalid contract address: ${asset}`);
       }
 
       return new ContractConfig({
-        address: asset,
+        abi: Abi.Erc20,
+        address: assetId,
         args: [address],
         func: 'balanceOf',
         module: 'Erc20',
@@ -68,15 +74,41 @@ function erc20(): BalanceConfigBuilder {
 function assets() {
   return {
     account: (): BalanceConfigBuilder => ({
-      build: ({ address, asset }) =>
-        new SubstrateQueryConfig({
+      build: ({ address, asset, chain }) => {
+        const assetId = chain.getBalanceAssetId(asset);
+        return new SubstrateQueryConfig({
           module: 'assets',
           func: 'account',
-          args: [asset, address],
+          args: [assetId, address],
           transform: async (
             response: Option<PalletAssetsAssetAccount>
           ): Promise<bigint> => response.unwrapOrDefault().balance.toBigInt(),
-        }),
+        });
+      },
+    }),
+  };
+}
+
+function foreignAssets() {
+  return {
+    account: (): BalanceConfigBuilder => ({
+      build: ({ address, asset, chain }) => {
+        const ctx = chain as Parachain;
+
+        const assetLocation = ctx.getAssetXcmLocation(asset);
+        if (!assetLocation) {
+          throw new Error('Missing asset xcm location for ' + asset.key);
+        }
+
+        return new SubstrateQueryConfig({
+          module: 'foreignAssets',
+          func: 'account',
+          args: [assetLocation, address],
+          transform: async (
+            response: Option<PalletAssetsAssetAccount>
+          ): Promise<bigint> => response.unwrapOrDefault().balance.toBigInt(),
+        });
+      },
     }),
   };
 }
@@ -105,17 +137,19 @@ function system() {
 function tokens() {
   return {
     accounts: (): BalanceConfigBuilder => ({
-      build: ({ address, asset }) =>
-        new SubstrateQueryConfig({
+      build: ({ address, asset, chain }) => {
+        const assetId = chain.getBalanceAssetId(asset);
+        return new SubstrateQueryConfig({
           module: 'tokens',
           func: 'accounts',
-          args: [address, asset],
+          args: [address, assetId],
           transform: async ({
             free,
             frozen,
           }: OrmlTokensAccountData): Promise<bigint> =>
             BigInt(free.sub(frozen).toString()),
-        }),
+        });
+      },
     }),
   };
 }
@@ -123,17 +157,76 @@ function tokens() {
 function ormlTokens() {
   return {
     accounts: (): BalanceConfigBuilder => ({
-      build: ({ address, asset }) =>
-        new SubstrateQueryConfig({
+      build: ({ address, asset, chain }) => {
+        const assetId = chain.getBalanceAssetId(asset);
+        return new SubstrateQueryConfig({
           module: 'ormlTokens',
           func: 'accounts',
-          args: [address, asset],
+          args: [address, assetId],
           transform: async ({
             free,
             frozen,
           }: OrmlTokensAccountData): Promise<bigint> =>
             BigInt(free.sub(frozen).toString()),
-        }),
+        });
+      },
     }),
   };
 }
+
+/* function foreignAssets(parachain: Parachain) {
+  return {
+    account: () => {
+      return {
+        X1: (): BalanceConfigBuilder => ({
+          build: ({ address }) =>
+            new SubstrateQueryConfig({
+              module: 'foreignAssets',
+              func: 'account',
+              args: [
+                {
+                  X1: [
+                    {
+                      Parachain: parachain.parachainId,
+                    },
+                  ],
+                },
+                address,
+              ],
+              transform: async (
+                response: Option<PalletAssetsAssetAccount>
+              ): Promise<bigint> =>
+                response.unwrapOrDefault().balance.toBigInt(),
+            }),
+        }),
+        X2: (): BalanceConfigBuilder => ({
+          build: ({ address, asset }) => {
+            const assetData = parachain.findAssetById(asset.toString());
+            return new SubstrateQueryConfig({
+              module: 'foreignAssets',
+              func: 'account',
+              args: [
+                {
+                  X2: [
+                    {
+                      Parachain: parachain.parachainId,
+                    },
+                    {
+                      PalletInstance: assetData?.palletInstance,
+                    },
+                  ],
+                },
+                address,
+              ],
+              transform: async (
+                response: Option<PalletAssetsAssetAccount>
+              ): Promise<bigint> =>
+                response.unwrapOrDefault().balance.toBigInt(),
+            });
+          },
+        }),
+      };
+    },
+  };
+}
+ */

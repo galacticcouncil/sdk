@@ -193,6 +193,10 @@ export const assetHub = new Parachain({
       asset: dot,
       decimals: 10,
       id: 0,
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
     {
       asset: usdt,
@@ -207,6 +211,18 @@ export const assetHub = new Parachain({
       id: 1337,
       min: 0.7,
       palletInstance: 50,
+    },
+    {
+      asset: myth,
+      decimals: 18,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3369,
+          },
+        },
+      },
     },
     {
       asset: pink,
@@ -493,6 +509,10 @@ export const hydration = new EvmParachain({
       decimals: 10,
       id: 5,
       min: 0.001754,
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
     {
       asset: dota,
@@ -550,6 +570,14 @@ export const hydration = new EvmParachain({
       decimals: 18,
       id: 30,
       min: 0.0213675213675214,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3369,
+          },
+        },
+      },
     },
     {
       asset: nodl,
@@ -639,6 +667,32 @@ export const hydration = new EvmParachain({
       min: 0.0018761726,
     },
     {
+      asset: wbtc,
+      decimals: 8,
+      id: 1000190,
+      min: 0.00000023,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: wbtc_awh,
       decimals: 8,
       id: 3,
@@ -650,6 +704,32 @@ export const hydration = new EvmParachain({
       id: 19,
       min: 0.00000034,
       palletInstance: 110,
+    },
+    {
+      asset: weth,
+      decimals: 18,
+      id: 1000189,
+      min: 0.0000061,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: weth_awh,
@@ -810,7 +890,6 @@ export const moonbeam = new EvmParachain({
       id: '311091173110107856861649819128533077277',
     },
   ],
-
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmMoonbeamDef,
   explorer: 'https://moonbeam.subscan.io',
@@ -834,6 +913,10 @@ export const mythos = new Parachain({
     {
       asset: myth,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -1264,6 +1347,11 @@ export const ethereum = new EvmChain({
   assetsData: [
     {
       asset: eth,
+      decimals: 18,
+      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    },
+    {
+      asset: weth,
       decimals: 18,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },

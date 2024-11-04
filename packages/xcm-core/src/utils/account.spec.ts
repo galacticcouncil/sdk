@@ -1,6 +1,6 @@
 import { getSovereignAccounts } from './account';
 
-describe('Address utils', () => {
+describe('Account utils', () => {
   describe('getSovereignAccountAddresses', () => {
     it('should get correct addresses for paraId 1000', async () => {
       expect(getSovereignAccounts(1000)).toStrictEqual({

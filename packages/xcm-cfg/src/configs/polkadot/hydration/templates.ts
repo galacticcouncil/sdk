@@ -116,7 +116,10 @@ export function toEthereumWithRelayerTemplate(
       chain: ethereum,
       asset: assetOut,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: assetOut,
       },
     },
@@ -140,7 +143,10 @@ export function toEthereumWithRelayerTemplate(
             .Batch()
             .batchAll([
               ContractBuilder().Erc20().approve(),
-              ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+              ContractBuilder()
+                .Wormhole()
+                .TokenRelayer()
+                .transferTokensWithRelay(),
             ])
         ),
     },

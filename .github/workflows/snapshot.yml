@@ -113,6 +113,7 @@ jobs:
           branch: upgrade-sdk-pr${{ env.PR }}
           base: master
           path: 'hydration-ui'
+          draft: true
         env:
           PR: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -122,6 +123,7 @@ jobs:
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "Pull Request Action - ${{ steps.cpr.outputs.pull-request-operation }}"
 
       - name: 🧚 Update sdk PR with live preview link
         if: ${{ steps.cpr.outputs.pull-request-number }}

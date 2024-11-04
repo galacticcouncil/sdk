@@ -16,7 +16,7 @@ export class SubstrateApis {
     string,
     Promise<ApiPromise>
   >({
-    max: 20,
+    max: 40,
     dispose: this.dispose,
   });
 
@@ -96,5 +96,15 @@ export class SubstrateApis {
     const api = await promise;
     await api.isReady;
     return api;
+  }
+
+  public async release() {
+    for (const [key, apiPromise] of this._cache.entries()) {
+      const api = await apiPromise;
+      if (api.isConnected) {
+        await api.disconnect();
+        console.log('Disconnecting from ' + key);
+      }
+    }
   }
 }

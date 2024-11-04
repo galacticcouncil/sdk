@@ -1,10 +1,24 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.2.0
+
+### Minor Changes
+
+- Snowbridge config & builders
+- ExtrinsicBuilderv4 support (transferAssetsUsingTypeAndThen) plus xcmLocations
+- Add Assethub <-> Mythos Myth transfer
+
+## 5.1.1
+
+### Patch Changes
+
+- Fix Astar -> Hydration DOT transfer balance cfg
+
 ## 5.1.0
 
 ### Minor Changes
 
-- Add Assethub <-> Hydration DOT transfer (new reserve)
+- Add Assethub <-> Hydration DOT transfer (new DOT reserve)
 
 ## 5.0.1
 

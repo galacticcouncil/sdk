@@ -16,6 +16,12 @@ export class HubClient extends BalanceClient {
   async checkIfFrozen(address: string, asset: Asset): Promise<boolean> {
     const api = await this.chain.api;
     const assetId = this.chain.getAssetId(asset);
+
+    // If no internal ID (foreign asset) skip
+    if (assetId === asset.originSymbol) {
+      return false;
+    }
+
     const response = await api.query.assets.account<
       Option<PalletAssetsAssetAccount>
     >(assetId, address);

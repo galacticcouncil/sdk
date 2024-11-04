@@ -1,18 +1,13 @@
 import {
   addr,
-  AnyChain,
+  Abi,
   ContractConfig,
   ContractConfigBuilder,
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { parseAssetId } from '../utils';
-
-function wormholeGuard(chain: AnyChain) {
-  if (!chain.isWormholeChain()) {
-    throw new Error(chain.name + ' is not supported Wormhole chain.');
-  }
-}
+import { wormholeGuard } from './utils';
+import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
   build: (params) => {
@@ -28,6 +23,7 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
+      abi: Abi.TokenRelayer,
       address: ctxWh.getTokenRelayer()!,
       args: [
         parseAssetId(assetId),

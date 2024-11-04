@@ -1,7 +1,10 @@
 import { ContractConfig, Precompile } from '@galacticcouncil/xcm-core';
 
 export function isNativeEthBridge(config: ContractConfig): boolean {
-  return config.func === 'wrapAndTransferETHWithPayload';
+  return (
+    config.func === 'wrapAndTransferETHWithPayload' ||
+    config.func === 'wrapAndTransferETH'
+  );
 }
 
 export function isPrecompile(config: ContractConfig): boolean {

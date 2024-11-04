@@ -154,7 +154,7 @@ const toAcalaViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenBridge().transferTokens(),
+        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
       ]),
   }),
 ];
@@ -177,7 +177,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
       chain: ethereum,
       asset: eth,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: eth,
       },
     },
@@ -185,7 +188,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
   }),
   new AssetRoute({
@@ -205,7 +208,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
       chain: ethereum,
       asset: dai,
       fee: {
-        amount: FeeAmountBuilder().TokenRelayer().calculateRelayerFee(),
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
         asset: dai,
       },
     },
@@ -213,7 +219,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
       .Batch()
       .batchAll([
         ContractBuilder().Erc20().approve(),
-        ContractBuilder().TokenRelayer().transferTokensWithRelay(),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
   }),
 ];

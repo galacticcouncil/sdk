@@ -182,7 +182,8 @@ export class Wallet {
           : address;
         const balanceConfig = balance.build({
           address: account,
-          asset: assetId,
+          asset: asset,
+          chain: chainRoutes.chain,
         });
         return balanceAdapter.subscribe(asset, balanceConfig);
       });

@@ -1,8 +1,7 @@
 import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
-import { Abi, encodeFunctionData, BaseError } from 'viem';
-import { isNativeEthBridge } from './utils';
+import { Abi, BaseError } from 'viem';
 
-export abstract class EvmTransfer {
+export class EvmTransfer {
   protected readonly client: EvmClient;
   protected readonly config: ContractConfig;
 
@@ -18,27 +17,29 @@ export abstract class EvmTransfer {
     }
   }
 
-  abstract get abi(): Abi;
-  abstract get asset(): string;
-
-  get data(): string {
-    const { args, func } = this.config;
-    return encodeFunctionData({
-      abi: this.abi,
-      functionName: func,
-      args: args,
-    });
+  get abi(): Abi {
+    return this.config.abi;
   }
 
-  async estimateGas(account: string, balance: bigint): Promise<bigint> {
-    const { address, args, func } = this.config;
+  get asset(): string {
+    const args = this.config.args;
+    const [asset] = args;
+    return asset;
+  }
+
+  get calldata(): string {
+    return this.config.encodeFunctionData();
+  }
+
+  async estimateGas(account: string): Promise<bigint> {
+    const { address, args, value, func } = this.config;
     const provider = this.client.getProvider();
     return await provider.estimateContractGas({
       address: address as `0x${string}`,
       abi: this.abi,
       functionName: func,
       args: args,
-      value: isNativeEthBridge(this.config) ? balance : undefined,
+      value: value,
       account: account as `0x${string}`,
     });
   }
@@ -53,7 +54,7 @@ export abstract class EvmTransfer {
     }
 
     try {
-      const estimatedGas = await this.estimateGas(account, balance);
+      const estimatedGas = await this.estimateGas(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
     } catch (error) {

@@ -6,6 +6,7 @@ import {
   eth,
   wbtc,
   wbtc_mwh,
+  weth,
   weth_mwh,
   usdc,
   usdc_mwh,
@@ -13,7 +14,11 @@ import {
   usdt_mwh,
 } from '../../assets';
 import { ethereum, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, ContractBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 import { toHydrationErc20Template } from './templates';
 
@@ -36,6 +41,7 @@ const toHydration: AssetRoute[] = [
       },
     },
     contract: ContractBuilder()
+      .Wormhole()
       .TokenBridge()
       .wrapAndTransferETHWithPayload()
       .viaMrl({ moonchain: moonbeam }),
@@ -44,6 +50,31 @@ const toHydration: AssetRoute[] = [
   toHydrationErc20Template(wbtc, wbtc_mwh),
   toHydrationErc20Template(usdc, usdc_mwh),
   toHydrationErc20Template(usdt, usdt_mwh),
+];
+
+const toHydrationViaSnowbridge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: weth,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().erc20(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: weth,
+      fee: {
+        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
+  }),
 ];
 
 const toMoonbeam: AssetRoute[] = [
@@ -64,7 +95,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: weth_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().wrapAndTransferETH(),
+    contract: ContractBuilder().Wormhole().TokenBridge().wrapAndTransferETH(),
   }),
   new AssetRoute({
     source: {
@@ -87,11 +118,14 @@ const toMoonbeam: AssetRoute[] = [
         asset: dai_mwh,
       },
     },
-    contract: ContractBuilder().TokenBridge().transferTokens(),
+    contract: ContractBuilder().Wormhole().TokenBridge().transferTokens(),
   }),
 ];
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [...toHydration],
+  routes: [
+    ...toHydration,
+    //...toHydrationViaSnowbridge
+  ],
 });

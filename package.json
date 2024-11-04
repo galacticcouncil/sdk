@@ -11,14 +11,15 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "integration-tests/*"
   ],
   "scripts": {
     "build": "turbo run build",
     "build:watch": "turbo run build:watch",
     "clean": "turbo run clean",
     "link": "turbo run link",
-    "test": "turbo run test",
+    "test": "turbo run test --concurrency=1",
     "changeset": "changeset",
     "changeset:version": "node ./scripts/changeset-version.mjs",
     "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",

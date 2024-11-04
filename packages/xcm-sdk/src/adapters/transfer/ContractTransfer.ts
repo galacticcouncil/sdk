@@ -23,14 +23,17 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
     amount: bigint,
     config: ContractConfig
   ): Promise<XCall> {
-    const { abi, asset, data } = EvmTransferFactory.get(this.#client, config);
+    const { abi, asset, calldata } = EvmTransferFactory.get(
+      this.#client,
+      config
+    );
 
     const transferCall = {
       abi: JSON.stringify(abi),
-      data: data as `0x${string}`,
+      data: calldata as `0x${string}`,
       from: account as `0x${string}`,
       to: config.address as `0x${string}`,
-      value: isNativeEthBridge(config) ? amount : undefined,
+      value: config.value,
     } as XCallEvm;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {

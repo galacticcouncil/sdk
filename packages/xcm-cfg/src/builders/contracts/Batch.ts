@@ -21,6 +21,7 @@ const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
     });
 
     return new ContractConfig({
+      abi: Abi.Batch,
       address: Precompile.Batch,
       args: [to, value, calldata, []],
       func: 'batchAll',

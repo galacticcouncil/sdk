@@ -38,6 +38,7 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
+  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -64,8 +65,14 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  ethereum,
 } from '../../../chains';
-import { ContractBuilder, ExtrinsicBuilder } from '../../../builders';
+import {
+  ContractBuilder,
+  ExtrinsicBuilder,
+  ExtrinsicBuilderV4,
+  XcmTransferType,
+} from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
@@ -193,10 +200,9 @@ const toAssetHub: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(1)
-      .here(),
+      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
   }),
   new AssetRoute({
     source: {
@@ -1099,7 +1105,7 @@ const toAcalaViaWormhole: AssetRoute[] = [
             .Batch()
             .batchAll([
               ContractBuilder().Erc20().approve(),
-              ContractBuilder().TokenBridge().transferTokens(),
+              ContractBuilder().Wormhole().TokenBridge().transferTokens(),
             ])
         ),
     },
@@ -1114,6 +1120,30 @@ const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumWithRelayerTemplate(usdc_mwh, usdc),
 ];
 
+const toEthereumViaSnowbridge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: weth,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ethereum,
+      asset: weth,
+      fee: {
+        amount: 6,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilderV4()
+      .polkadotXcm()
+      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
+  }),
+];
+
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
@@ -1125,6 +1155,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
+    //...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

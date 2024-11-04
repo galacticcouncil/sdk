@@ -1,0 +1,20 @@
+{
+  "name": "xcm-test",
+  "private": true,
+  "keywords": [
+    "wallet",
+    "xcm",
+    "integration"
+  ],
+  "scripts": {
+    "test:xcm": "jest",
+    "test:file": "jest --json --outputFile=output.json"
+  },
+  "devDependencies": {
+    "@acala-network/chopsticks-testing": "^0.16.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/xcm-cfg": "^5.2.0",
+    "@galacticcouncil/xcm-sdk": "^6.1.0"
+  }
+}

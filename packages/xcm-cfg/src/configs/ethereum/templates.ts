@@ -30,6 +30,7 @@ export function toHydrationErc20Template(
       },
     },
     contract: ContractBuilder()
+      .Wormhole()
       .TokenBridge()
       .transferTokensWithPayload()
       .viaMrl({ moonchain: moonbeam }),
