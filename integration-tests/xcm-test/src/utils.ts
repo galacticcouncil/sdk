@@ -7,8 +7,8 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { Metadata } from '@galacticcouncil/xcm-sdk';
 
-const SS85_ADDRESS = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
-const H160_ADDRESS = '0x0000000000000000000000000000000000000000';
+const SS85_ADDRESS = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'; // Alice
+const H160_ADDRESS = '0x0000000000000000000000000000000000000000'; // Evm default
 
 const isfullAddressSpace = (chain: AnyChain): boolean => {
   return (

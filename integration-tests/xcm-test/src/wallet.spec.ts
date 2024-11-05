@@ -22,7 +22,7 @@ import outdent from 'outdent';
 import { configService, init } from './wallet';
 import { getAddress, getAmount, getRouteKey } from './utils';
 
-import snapshotJson from './snapshot.json';
+import snapshotJson from './snapshot.db.json';
 
 const jestConsole = console;
 
@@ -32,13 +32,13 @@ const FEE = 0.1;
 /**
  * Construct chain route calldata.
  *
- * For the sake of simplicity following contraints are defined:
+ * For the sake of simplicity following contraints are in place:
  *  - asset & fee balance is 10 units
  *  - source fee is 0.1 unit
  *  - source fee swap is disabled
  *  - erc20 spending cap is same as balance
  *
- * @param wallet - Wallet instance with Hydration XCM config
+ * @param wallet - Wallet instance with latest Hydration XCM config
  * @param chain - Origin chain
  * @param route - Origin chain asset transfer route
  * @returns calldata hex string
@@ -98,7 +98,7 @@ const getCalldata = async (
   expect(estimateFeeMock).toHaveBeenCalled();
   expect(isSwapSupportedMock).toHaveBeenCalled();
 
-  // Used only if contract bridge transfer from EVM chain, except native
+  // Called only if contract bridge transfer from EVM chain, except native
   expect(allowanceMock).toBeDefined();
 
   return xTransfer.buildCall('1');
@@ -137,7 +137,7 @@ describe('Wallet with XCM config', () => {
       console.log('Please update snapshot !!!\n');
     }
 
-    // Populate snapshot file on init
+    // Populate snapshot db file on init
     if (snapshot.size === 0) {
       const json = JSON.stringify(Object.fromEntries(report), null, 2);
       const file = ['./src/snapshot.json'].join('');
