@@ -7,7 +7,8 @@ const NATIVE_ASSET_ID = '0';
 export const balance = (): BalanceConfigBuilder => {
   return {
     build: ({ address, asset, chain }) => {
-      if (asset.toString() === NATIVE_ASSET_ID) {
+      const assetId = chain.getAssetId(asset);
+      if (assetId.toString() === NATIVE_ASSET_ID) {
         return BalanceBuilder()
           .substrate()
           .system()
