@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.3.0
+
+### Minor Changes
+
+- Add Snowbridge WETH transfer
+- Add Snowbridge fee builders
+
+### Patch Changes
+
+- Fix hydration balance config
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.2.0
+
 ## 5.2.0
 
 ### Minor Changes

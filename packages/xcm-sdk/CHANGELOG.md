@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 6.2.0
+
+### Minor Changes
+
+- Support native bridge
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.2.0
+
 ## 6.1.0
 
 ### Minor Changes

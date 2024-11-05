@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 5.2.0
+
+### Minor Changes
+
+- Multilocation utils
+
 ## 5.1.0
 
 ### Minor Changes
