@@ -7,8 +7,8 @@ import {
 import {
   toAsset,
   toBeneficiary,
-  toCustomXcmOnDest,
-  toCustomXcmOnDest_bridge,
+  toBridgeXcmOnDest,
+  toParaXcmOnDest,
   toDest,
   toTransferType,
 } from './polkadotXcm.utils';
@@ -50,8 +50,12 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     }),
 });
 
+type TransferOpts = {
+  transferType: XcmTransferType;
+};
+
 const transferAssetsUsingTypeAndThen = (
-  transferType: XcmTransferType
+  opts: TransferOpts
 ): ExtrinsicConfigBuilder => ({
   build: ({ address, asset, amount, destination, sender, source }) =>
     new ExtrinsicConfig({
@@ -63,6 +67,8 @@ const transferAssetsUsingTypeAndThen = (
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const { transferType } = opts;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           ctx.getAssetXcmLocation(asset)!,
@@ -109,13 +115,8 @@ const transferAssetsUsingTypeAndThen = (
 
         const customXcmOnDest =
           destination.chain.key === 'ethereum'
-            ? toCustomXcmOnDest_bridge(
-                version,
-                account,
-                from,
-                transferAssetLocation
-              )
-            : toCustomXcmOnDest(version, account);
+            ? toBridgeXcmOnDest(version, account, from, transferAssetLocation)
+            : toParaXcmOnDest(version, account);
 
         return [
           dest,

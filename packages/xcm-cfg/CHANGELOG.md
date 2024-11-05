@@ -1,5 +1,30 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.3.2
+
+### Patch Changes
+
+- Disable snowbridge until tags ready
+
+## 5.3.1
+
+### Patch Changes
+
+- Fix mrl validation
+
+## 5.3.0
+
+### Minor Changes
+
+- Add Snowbridge WETH transfer
+- Add Snowbridge fee builders
+
+### Patch Changes
+
+- Fix hydration balance config
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.2.0
+
 ## 5.2.0
 
 ### Minor Changes

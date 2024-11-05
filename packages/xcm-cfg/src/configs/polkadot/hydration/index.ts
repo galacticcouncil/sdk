@@ -71,6 +71,7 @@ import {
   ContractBuilder,
   ExtrinsicBuilder,
   ExtrinsicBuilderV4,
+  FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
 
@@ -202,7 +203,9 @@ const toAssetHub: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
+      .transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      }),
   }),
   new AssetRoute({
     source: {
@@ -1134,13 +1137,15 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
       chain: ethereum,
       asset: weth,
       fee: {
-        amount: 6,
+        amount: FeeAmountBuilder().Snowbridge().getSendFee(),
         asset: dot,
       },
     },
     extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .transferAssetsUsingTypeAndThen(XcmTransferType.DestinationReserve),
+      .transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      }),
   }),
 ];
 

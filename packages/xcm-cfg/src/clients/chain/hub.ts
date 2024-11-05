@@ -5,6 +5,9 @@ import type {
   PalletAssetsAssetDetails,
 } from '@polkadot/types/lookup';
 import { Option } from '@polkadot/types';
+import { Codec } from '@polkadot/types/types';
+import { BN } from '@polkadot/util';
+import { xxhashAsHex } from '@polkadot/util-crypto';
 
 import { BalanceClient } from '../balance';
 
@@ -39,5 +42,22 @@ export class HubClient extends BalanceClient {
       await api.query.assets.asset<Option<PalletAssetsAssetDetails>>(assetId);
     const details = response.unwrap();
     return details.minBalance.toBigInt();
+  }
+
+  async getBridgeFee(
+    options = {
+      executionFee: 3_500_000_000n,
+    }
+  ): Promise<bigint> {
+    const api = await this.chain.api;
+    const feeStorageKey = xxhashAsHex(':BridgeHubEthereumBaseFee:', 128, true);
+    const feeStorageItem = await api.rpc.state.getStorage(feeStorageKey);
+    const leFee = new BN(
+      (feeStorageItem as Codec).toHex().replace('0x', ''),
+      'hex',
+      'le'
+    );
+    const bridgeFee = BigInt(leFee.toString());
+    return bridgeFee + options.executionFee;
   }
 }

@@ -1,7 +1,6 @@
-import { Parachain } from '@galacticcouncil/xcm-core';
+import { multiloc, Parachain } from '@galacticcouncil/xcm-core';
 
 import { XcmTransferType, XcmVersion } from '../../types';
-import { findNestedKey } from '../../utils';
 
 const ETHEREUM_CHAIN_ID = 1;
 const ETHEREUM_BRIDGE_LOCATION = {
@@ -55,7 +54,7 @@ export const toTransferType = (
   assetLocation: object
 ) => {
   if (type === XcmTransferType.RemoteReserve) {
-    const reserveChain = findNestedKey(assetLocation, 'Parachain');
+    const reserveChain = multiloc.findNestedKey(assetLocation, 'Parachain');
     return {
       RemoteReserve: {
         [version]: {
@@ -79,7 +78,7 @@ export const toAsset = (assetLocation: object, amount: any) => {
   };
 };
 
-export const toCustomXcmOnDest = (version: XcmVersion, account: any) => {
+export const toParaXcmOnDest = (version: XcmVersion, account: any) => {
   return {
     [version]: [
       {
@@ -98,7 +97,7 @@ export const toCustomXcmOnDest = (version: XcmVersion, account: any) => {
 };
 
 /**
- * Instructions are divided in 2 steps:
+ * Instructions are executed in 2 steps:
  *
  * 1) SetAppendix - Error Handling, return everything to sender on Asset hub
  * 2) InitiateReserveWithdraw - Initiate the bridged transfer
@@ -107,9 +106,9 @@ export const toCustomXcmOnDest = (version: XcmVersion, account: any) => {
  * @param account - destination account (receiver)
  * @param sender - sender account
  * @param transferAssetLocation - transfer asset xcm location
- * @returns toCustomXcmOnDest ethereum bridge instruction
+ * @returns xcm ethereum bridge instructions
  */
-export const toCustomXcmOnDest_bridge = (
+export const toBridgeXcmOnDest = (
   version: XcmVersion,
   account: any,
   sender: any,
@@ -183,7 +182,7 @@ export const toCustomXcmOnDest_bridge = (
  * @returns fixed location
  */
 const reanchorLocation = (assetLocation: object) => {
-  const erc20Key = findNestedKey(assetLocation, 'key');
+  const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
   return {
     parents: 0,
     interior: { X1: [{ AccountKey20: erc20Key }] },
