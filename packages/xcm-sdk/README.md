@@ -39,9 +39,8 @@ import {
   chainsMap,
   routesMap,
   validations,
-  HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
-import { EvmParachain } from '@galacticcouncil/xcm-core';
+import { ConfigService, EvmParachain } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 // Initialize hydration API
@@ -52,7 +51,7 @@ const hydrationApi = await hydration.api;
 const poolService = new PoolService(hydrationApi);
 
 // Initialize config service
-const configService = new HydrationConfigService({
+const configService = new ConfigService({
   assets: assetsMap,
   chains: chainsMap,
   routes: routesMap,
