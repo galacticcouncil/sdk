@@ -6,6 +6,8 @@ import {
   Snowbridge as bridge,
 } from '@galacticcouncil/xcm-core';
 
+import { HubClient } from '../clients';
+
 function TokenRelayer() {
   return {
     calculateRelayerFee: (): FeeAmountConfigBuilder => ({
@@ -46,6 +48,14 @@ function Snowbridge() {
           functionName: 'quoteSendTokenFee',
         });
         return output as Promise<bigint>;
+      },
+    }),
+    getSendFee: (): FeeAmountConfigBuilder => ({
+      build: ({ source }) => {
+        const ctx = source as Parachain;
+        const client = new HubClient(ctx);
+        const fee = client.getBridgeFee();
+        return fee as Promise<bigint>;
       },
     }),
   };

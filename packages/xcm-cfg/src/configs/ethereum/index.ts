@@ -124,8 +124,5 @@ const toMoonbeam: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [
-    ...toHydration,
-    //...toHydrationViaSnowbridge
-  ],
+  routes: [...toHydration, ...toHydrationViaSnowbridge],
 });

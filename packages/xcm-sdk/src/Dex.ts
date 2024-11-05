@@ -5,43 +5,23 @@ import {
   TradeRouter,
 } from '@galacticcouncil/sdk';
 import {
-  AnyChain,
   AssetAmount,
-  ChainEcosystem,
   ConfigService,
   Parachain,
   SwapCtx,
   TransferCtx,
 } from '@galacticcouncil/xcm-core';
 
-const isHydration = (c: AnyChain) =>
-  c instanceof Parachain &&
-  c.ecosystem === ChainEcosystem.Polkadot &&
-  c.parachainId === 2034;
-
-const isBasilisk = (c: AnyChain) =>
-  c instanceof Parachain &&
-  c.ecosystem === ChainEcosystem.Kusama &&
-  c.parachainId === 2090;
-
-const IS_DEX = (c: AnyChain) => isHydration(c) || isBasilisk(c);
-
-const IS_HUB = (c: AnyChain) =>
-  c instanceof Parachain && c.parachainId === 1000;
+import { IS_DEX, IS_HUB, findChain } from './Dex.utils';
 
 export class Dex {
   readonly chain: Parachain;
+  readonly hub: Parachain;
   readonly router: TradeRouter;
 
   constructor(configService: ConfigService, poolService: PoolService) {
-    const chains = configService.chains.values();
-    const dex = Array.from(chains).find(IS_DEX);
-    if (dex) {
-      this.chain = dex as Parachain;
-    } else {
-      throw new Error('DEX parachain config is missing');
-    }
-
+    this.chain = findChain(configService.chains, IS_DEX, 'DEX');
+    this.hub = findChain(configService.chains, IS_HUB, 'HUB');
     this.router = new TradeRouter(poolService, {
       includeOnly: [PoolType.Omni, PoolType.Stable],
     });

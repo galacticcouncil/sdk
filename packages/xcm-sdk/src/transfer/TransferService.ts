@@ -1,6 +1,7 @@
 import {
   addr,
   big,
+  multiloc,
   Asset,
   AssetAmount,
   FeeAmountConfigBuilder,
@@ -24,9 +25,11 @@ export class TransferService {
   readonly balance: BalanceAdapter;
   readonly transfer: TransferAdapter;
 
+  readonly dex: Dex;
   readonly config: TransferConfig;
 
   constructor(config: TransferConfig, dex: Dex) {
+    this.dex = dex;
     this.config = config;
     this.balance = new BalanceAdapter(config.chain);
     this.transfer = new TransferAdapter(config.chain, dex);
@@ -61,11 +64,12 @@ export class TransferService {
     const { chain, route } = this.config;
     const { source, destination, transact } = route;
 
-    const metadata = new Metadata(destination.chain);
+    const metadata = new Metadata(chain);
 
     const feeAmount = destination.fee.amount;
     const feeAsset = destination.fee.asset;
-    const feeDecimals = await metadata.getDecimals(feeAsset);
+    const feeAssetNormalized = source.destinationFee.asset || feeAsset;
+    const feeDecimals = await metadata.getDecimals(feeAssetNormalized);
 
     if (Number.isFinite(feeAmount)) {
       return AssetAmount.fromAsset(feeAsset, {
@@ -76,8 +80,12 @@ export class TransferService {
 
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
-      asset: source.destinationFee.asset || feeAsset,
-      source: transact ? transact.chain : chain,
+      asset: feeAssetNormalized,
+      source: this.isNativeBridgeTransfer()
+        ? this.dex.hub
+        : transact
+          ? transact.chain
+          : chain,
       destination: destination.chain,
     });
     return AssetAmount.fromAsset(feeAsset, {
@@ -318,5 +326,20 @@ export class TransferService {
       chain: chain,
     });
     return this.balance.read(fee.asset, feeBalanceConfig);
+  }
+
+  private isNativeBridgeTransfer() {
+    const { chain, route } = this.config;
+    const { source } = route;
+
+    if (chain instanceof Parachain) {
+      const assetLocation = chain.getAssetXcmLocation(source.asset);
+      const globalConsensus = multiloc.findNestedKey(
+        assetLocation || {},
+        'GlobalConsensus'
+      );
+      return !!globalConsensus;
+    }
+    return false;
   }
 }
