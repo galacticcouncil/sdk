@@ -22,7 +22,7 @@ import {
 
 import { toHydrationErc20Template } from './templates';
 
-const toHydration: AssetRoute[] = [
+const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
@@ -124,5 +124,8 @@ const toMoonbeam: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [...toHydration, ...toHydrationViaSnowbridge],
+  routes: [
+    ...toHydrationViaWormhole,
+    //...toHydrationViaSnowbridge
+  ],
 });

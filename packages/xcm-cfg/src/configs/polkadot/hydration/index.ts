@@ -913,7 +913,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
-    ...toEthereumViaSnowbridge,
+    //...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

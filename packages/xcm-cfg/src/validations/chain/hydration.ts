@@ -59,7 +59,7 @@ export class HydrationMrlFeeValidation extends TransferValidation {
 
     const isMrl = !!transact && transact.chain.key === 'moonbeam';
     const isFeeSwap = !!enabled;
-    return isMrl && isFeeSwap;
+    return !isMrl || isFeeSwap;
   }
 
   async validate(ctx: TransferCtx) {
