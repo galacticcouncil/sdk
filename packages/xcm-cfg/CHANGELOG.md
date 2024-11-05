@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.3.2
+
+### Patch Changes
+
+- Disable snowbridge until tags ready
+
 ## 5.3.1
 
 ### Patch Changes
