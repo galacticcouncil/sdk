@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.3.1
+
+### Patch Changes
+
+- Fix mrl validation
+
 ## 5.3.0
 
 ### Minor Changes
