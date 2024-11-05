@@ -2,7 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-sdk)
 
-Wallet interface for cross-chain interactions in the Polkadot/Kusama ecosystem.
+Wallet interface for asset multi-platform transfer supporting fee swaps & bridging.
+
+Wallet does not perform any signing rather provide transfer data to maintain loose coupling & interoperability with 3rd party code.
 
 ## Installation
 
@@ -10,12 +12,7 @@ Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/xcm-sdk`
 
-## Wallet
-
-Unified interface for asset multi-platform transfer supporting fee swaps & bridging. Wallet does not perform any signing
-rather provide transfer data to maintain loose coupling & interoperability with 3rd party code.
-
-### API
+## API
 
 ```typescript
 transfer(
@@ -32,7 +29,7 @@ subscribeBalance(
   )
 ```
 
-### Usage
+## Usage
 
 ```typescript
 // Import
