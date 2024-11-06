@@ -1,5 +1,7 @@
 # Galactic SDK
 
+[![Build SDK](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml/badge.svg)](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml)
+
 Collection of SDK(s) crafted to ease Hydration & Basilisk chains integration.
 
 ## Project Structure
