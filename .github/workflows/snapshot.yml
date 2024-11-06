@@ -126,7 +126,7 @@ jobs:
           echo "Pull Request Action - ${{ steps.cpr.outputs.pull-request-operation }}"
 
       - name: 🧚 Update sdk PR with live preview link
-        if: ${{ steps.cpr.outputs.pull-request-number }}
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
         uses: actions/github-script@v7
         with:
           script: |
