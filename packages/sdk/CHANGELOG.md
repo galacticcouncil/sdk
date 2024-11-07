@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.3.0
+
+### Minor Changes
+
+- 0c3290f: Use CurrenciesApi in BalanceClient, support for ERC20 tokens
+
 ## 4.2.1
 
 ### Patch Changes
