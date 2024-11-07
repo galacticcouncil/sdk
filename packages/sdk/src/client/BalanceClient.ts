@@ -1,4 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
+import { u32, Vec } from '@polkadot/types';
+import { ITuple } from '@polkadot/types-codec/types';
+import { OrmlTokensAccountData } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber } from '../utils/bignumber';
@@ -10,26 +13,37 @@ export class BalanceClient extends PolkadotApiClient {
     super(api);
   }
 
-  async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
-    return tokenKey === SYSTEM_ASSET_ID
-      ? await this.getSystemBalance(accountId)
-      : await this.getTokenBalance(accountId, tokenKey);
-  }
-
-  async getSystemBalance(accountId: string): Promise<BigNumber> {
-    const { data } = await this.api.query.system.account(accountId);
-    return this.calculateFreeBalance(data);
-  }
-
-  async getTokenBalance(
-    accountId: string,
-    tokenKey: string
-  ): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts(
+  async getTokenBalanceData(accountId: string, tokenKey: string) {
+    const params = this.api.createType('(AssetId, AccountId)', [
+      tokenKey,
       accountId,
-      tokenKey
+    ]);
+    const result = await this.api.rpc.state.call(
+      'CurrenciesApi_account',
+      params.toHex()
     );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+    return this.api.createType<OrmlTokensAccountData>(
+      'OrmlTokensAccountData',
+      result
+    );
+  }
+
+  async getAccountBalanceData(accountId: string) {
+    const params = this.api.createType('AccountId', accountId);
+    const result = await this.api.rpc.state.call(
+      'CurrenciesApi_accounts',
+      params.toHex()
+    );
+
+    return this.api.createType<Vec<ITuple<[u32, OrmlTokensAccountData]>>>(
+      'Vec<(AssetId, OrmlTokensAccountData)>',
+      result
+    );
+  }
+
+  async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
+    const data = this.getTokenBalanceData(accountId, tokenKey);
+    return this.calculateFreeBalance(data);
   }
 
   async subscribeBalance(
