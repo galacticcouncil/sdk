@@ -68,7 +68,7 @@ export abstract class PoolClient extends BalanceClient {
   private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
     return this.subscribeBalances(
       pool.address,
-      this.updateBalanceCallback(pool)
+      this.updateBalancesCallback(pool)
     );
   }
 
@@ -78,6 +78,17 @@ export abstract class PoolClient extends BalanceClient {
       pool.id!,
       this.updateBalanceCallback(pool)
     );
+  }
+
+  private updateBalancesCallback(pool: PoolBase) {
+    return function (balances: [string, BigNumber][]) {
+      balances.forEach(([token, balance]) => {
+        const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+        if (tokenIndex >= 0) {
+          pool.tokens[tokenIndex].balance = balance.toString();
+        }
+      });
+    };
   }
 
   private updateBalanceCallback(pool: PoolBase) {
