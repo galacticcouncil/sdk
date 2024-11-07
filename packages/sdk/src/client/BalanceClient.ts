@@ -46,7 +46,40 @@ export class BalanceClient extends PolkadotApiClient {
     return this.calculateFreeBalance(data);
   }
 
+  async subscribeBalances(
+    address: string,
+    onChange: (token: string, balance: BigNumber) => void
+  ): UnsubscribePromise {
+    const getBalances = () =>
+      this.getAccountBalanceData(address).then((balances) => {
+        balances.forEach(([token, data]) => {
+          onChange(token.toString(), this.calculateFreeBalance(data));
+        });
+      });
+
+    await getBalances();
+    return this.api.rpc.chain.subscribeNewHeads(async () => {
+      getBalances();
+    });
+  }
+
   async subscribeBalance(
+    address: string,
+    token: string,
+    onChange: (token: string, balance: BigNumber) => void
+  ): UnsubscribePromise {
+    const getBalance = () =>
+      this.getTokenBalanceData(address, token).then((data) => {
+        onChange(token.toString(), this.calculateFreeBalance(data));
+      });
+
+    await getBalance();
+    return this.api.rpc.chain.subscribeNewHeads(async () => {
+      getBalance();
+    });
+  }
+
+  async subscribeTokenBalance(
     address: string,
     tokens: string[],
     onChange: (token: string, balance: BigNumber) => void
@@ -61,23 +94,6 @@ export class BalanceClient extends PolkadotApiClient {
           feeFrozen: reserved,
           frozen,
         });
-        const token = tokenAccArgs[i][1];
-        onChange(token, freeBalance);
-      });
-    });
-  }
-
-  async subscribeTokenBalance(
-    address: string,
-    tokens: string[],
-    onChange: (token: string, balance: BigNumber) => void
-  ): UnsubscribePromise {
-    const tokenAccArgs = tokens
-      .filter((t) => t !== SYSTEM_ASSET_ID)
-      .map((t) => [address, t]);
-    return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
-      balances.forEach((data, i) => {
-        const freeBalance = this.calculateFreeBalance(data);
         const token = tokenAccArgs[i][1];
         onChange(token, freeBalance);
       });

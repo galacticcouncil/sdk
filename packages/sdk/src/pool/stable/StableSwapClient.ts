@@ -15,7 +15,7 @@ import { toPoolFee } from '../../utils/mapper';
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 
-import { PoolClient } from '../PoolClient';
+import { PoolClient } from '../PoolClientV2';
 
 export class StableSwapClient extends PoolClient {
   private stablePools: Map<string, PalletStableswapPoolInfo> = new Map([]);
