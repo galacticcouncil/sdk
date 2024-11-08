@@ -6,23 +6,26 @@ import { EvmClient } from '../evm';
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
   evmChain: EvmChainDef;
   id: number;
+  rpcs?: string[];
   wormhole?: WormholeDef;
 }
 
 export class EvmChain extends Chain<ChainAssetData> implements Wormhole {
   readonly evmChain: EvmChainDef;
   readonly id: number;
+  readonly rpcs?: string[];
   readonly wormhole?: WormholeDef;
 
-  constructor({ evmChain, id, wormhole, ...others }: EvmChainParams) {
+  constructor({ evmChain, id, rpcs, wormhole, ...others }: EvmChainParams) {
     super({ ...others });
     this.evmChain = evmChain;
     this.id = id;
+    this.rpcs = rpcs;
     this.wormhole = wormhole;
   }
 
   get client(): EvmClient {
-    return new EvmClient(this.evmChain);
+    return new EvmClient(this.evmChain, this.rpcs);
   }
 
   getType(): ChainType {

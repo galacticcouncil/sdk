@@ -1289,6 +1289,11 @@ export const ethereum = new EvmChain({
   ],
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmMainetDef,
+  rpcs: [
+    'https://ethereum-rpc.publicnode.com',
+    'https://eth.llamarpc.com',
+    'https://1rpc.io/eth',
+  ],
   wormhole: {
     id: 2,
     tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
