@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 6.2.1
+
+### Patch Changes
+
+- Bump sdk to latest
+
 ## 6.2.0
 
 ### Minor Changes
