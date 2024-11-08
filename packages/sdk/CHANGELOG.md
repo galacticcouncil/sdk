@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.4.0
+
+### Minor Changes
+
+- ea2c5e6: PoolClientV2 (currency api support)
+
 ## 4.3.0
 
 ### Minor Changes
