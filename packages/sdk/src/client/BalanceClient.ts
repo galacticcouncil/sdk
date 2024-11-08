@@ -3,6 +3,7 @@ import { u32, Vec } from '@polkadot/types';
 import { ITuple } from '@polkadot/types-codec/types';
 import { OrmlTokensAccountData } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
+
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber } from '../utils/bignumber';
 
@@ -14,31 +15,15 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getTokenBalanceData(accountId: string, tokenKey: string) {
-    const params = this.api.createType('(AssetId, AccountId)', [
-      tokenKey,
-      accountId,
-    ]);
-    const result = await this.api.rpc.state.call(
-      'CurrenciesApi_account',
-      params.toHex()
-    );
-    return this.api.createType<OrmlTokensAccountData>(
-      'OrmlTokensAccountData',
-      result
-    );
+    return this.api.call.currenciesApi.account<
+      ITuple<[u32, OrmlTokensAccountData]>
+    >(tokenKey, accountId);
   }
 
   async getAccountBalanceData(accountId: string) {
-    const params = this.api.createType('AccountId', accountId);
-    const result = await this.api.rpc.state.call(
-      'CurrenciesApi_accounts',
-      params.toHex()
-    );
-
-    return this.api.createType<Vec<ITuple<[u32, OrmlTokensAccountData]>>>(
-      'Vec<(AssetId, OrmlTokensAccountData)>',
-      result
-    );
+    return this.api.call.currenciesApi.accounts<
+      Vec<ITuple<[u32, OrmlTokensAccountData]>>
+    >(accountId);
   }
 
   async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
@@ -111,7 +96,7 @@ export class BalanceClient extends PolkadotApiClient {
     );
   }
 
-  private calculateFreeBalance(data: any): BigNumber {
+  protected calculateFreeBalance(data: any): BigNumber {
     const { free, miscFrozen, feeFrozen, frozen } = data;
     const freeBN = new BigNumber(free);
     const miscFrozenBN = new BigNumber(miscFrozen || frozen);
