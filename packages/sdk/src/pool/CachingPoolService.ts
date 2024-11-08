@@ -25,7 +25,7 @@ export class CachingPoolService extends PoolService {
     const key = [pool.address, feeAsset].join('-');
     const hasKey = this.feeCache.has(key);
     if (hasKey) {
-      return this.feeCache.get(key);
+      return this.feeCache.get(key)!;
     } else {
       const fees = await super.getPoolFees(feeAsset, pool);
       this.feeCache.set(key, fees);

@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 4.5.0
+
+### Minor Changes
+
+- Bump pjs to 14.x
+- Call currencies api directly
+
 ## 4.4.0
 
 ### Minor Changes

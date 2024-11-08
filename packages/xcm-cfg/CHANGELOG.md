@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.4.0
+
+### Minor Changes
+
+- Custom ethereum rpcs (fallback)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.3.0
+
 ## 5.3.2
 
 ### Patch Changes
