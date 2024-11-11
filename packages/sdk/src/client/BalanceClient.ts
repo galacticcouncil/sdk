@@ -1,5 +1,9 @@
 import { ApiPromise } from '@polkadot/api';
+import { u32, Vec } from '@polkadot/types';
+import { ITuple } from '@polkadot/types-codec/types';
+import { OrmlTokensAccountData } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
+
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber } from '../utils/bignumber';
 
@@ -10,29 +14,59 @@ export class BalanceClient extends PolkadotApiClient {
     super(api);
   }
 
-  async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
-    return tokenKey === SYSTEM_ASSET_ID
-      ? await this.getSystemBalance(accountId)
-      : await this.getTokenBalance(accountId, tokenKey);
+  async getTokenBalanceData(accountId: string, tokenKey: string) {
+    return this.api.call.currenciesApi.account<
+      ITuple<[u32, OrmlTokensAccountData]>
+    >(tokenKey, accountId);
   }
 
-  async getSystemBalance(accountId: string): Promise<BigNumber> {
-    const { data } = await this.api.query.system.account(accountId);
+  async getAccountBalanceData(accountId: string) {
+    return this.api.call.currenciesApi.accounts<
+      Vec<ITuple<[u32, OrmlTokensAccountData]>>
+    >(accountId);
+  }
+
+  async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
+    const data = this.getTokenBalanceData(accountId, tokenKey);
     return this.calculateFreeBalance(data);
   }
 
-  async getTokenBalance(
-    accountId: string,
-    tokenKey: string
-  ): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts(
-      accountId,
-      tokenKey
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+  async subscribeBalances(
+    address: string,
+    onChange: (balances: [string, BigNumber][]) => void
+  ): UnsubscribePromise {
+    const getBalances = async () => {
+      const result: [string, BigNumber][] = [];
+      const balances = await this.getAccountBalanceData(address);
+      balances.forEach(([token, data]) => {
+        result.push([token.toString(), this.calculateFreeBalance(data)]);
+      });
+      onChange(result);
+    };
+
+    await getBalances();
+    return this.api.rpc.chain.subscribeNewHeads(async () => {
+      getBalances();
+    });
   }
 
   async subscribeBalance(
+    address: string,
+    token: string,
+    onChange: (token: string, balance: BigNumber) => void
+  ): UnsubscribePromise {
+    const getBalance = async () => {
+      const data = await this.getTokenBalanceData(address, token);
+      onChange(token.toString(), this.calculateFreeBalance(data));
+    };
+
+    await getBalance();
+    return this.api.rpc.chain.subscribeNewHeads(async () => {
+      getBalance();
+    });
+  }
+
+  async subscribeTokenBalance(
     address: string,
     tokens: string[],
     onChange: (token: string, balance: BigNumber) => void
@@ -53,23 +87,6 @@ export class BalanceClient extends PolkadotApiClient {
     });
   }
 
-  async subscribeTokenBalance(
-    address: string,
-    tokens: string[],
-    onChange: (token: string, balance: BigNumber) => void
-  ): UnsubscribePromise {
-    const tokenAccArgs = tokens
-      .filter((t) => t !== SYSTEM_ASSET_ID)
-      .map((t) => [address, t]);
-    return this.api.query.tokens.accounts.multi(tokenAccArgs, (balances) => {
-      balances.forEach((data, i) => {
-        const freeBalance = this.calculateFreeBalance(data);
-        const token = tokenAccArgs[i][1];
-        onChange(token, freeBalance);
-      });
-    });
-  }
-
   async subscribeSystemBalance(
     address: string,
     onChange: (token: string, balance: BigNumber) => void
@@ -79,7 +96,7 @@ export class BalanceClient extends PolkadotApiClient {
     );
   }
 
-  private calculateFreeBalance(data: any): BigNumber {
+  protected calculateFreeBalance(data: any): BigNumber {
     const { free, miscFrozen, feeFrozen, frozen } = data;
     const freeBN = new BigNumber(free);
     const miscFrozenBN = new BigNumber(miscFrozen || frozen);

@@ -1,6 +1,8 @@
 # Galactic SDK
 
-Collection of SDK(s) crafted to ease Basilisk & Hydration chains integration.
+[![Build SDK](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml/badge.svg)](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml)
+
+Collection of SDK(s) crafted to ease Hydration & Basilisk chains integration.
 
 ## Project Structure
 
@@ -8,8 +10,8 @@ Collection of SDK(s) crafted to ease Basilisk & Hydration chains integration.
 |:----------------------|:--------------------|:-----------------------|:-----------------------|
 | [`@galacticcouncil/sdk`](./packages/sdk)                          | [![version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)                | [changelog](./packages/sdk/CHANGELOG.md)  |  Trade router & pool utilities
 | [`@galacticcouncil/xcm-core`](./packages/xcm-core)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-core.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-core)      | [changelog](./packages/xcm-core/CHANGELOG.md)  |  Cross-chain definitions & types
-| [`@galacticcouncil/xcm-cfg`](./packages/xcm-cfg)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-cfg.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-cfg)            | [changelog](./packages/xcm-cfg/CHANGELOG.md)  |  Cross-chain configuration
-| [`@galacticcouncil/xcm-sdk`](./packages/xcm-sdk)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-sdk)            | [changelog](./packages/xcm-sdk/CHANGELOG.md)  |  Cross-chain sdk
+| [`@galacticcouncil/xcm-cfg`](./packages/xcm-cfg)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-cfg.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-cfg)            | [changelog](./packages/xcm-cfg/CHANGELOG.md)  |  Cross-chain routes & configs
+| [`@galacticcouncil/xcm-sdk`](./packages/xcm-sdk)                  | [![version](https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-sdk)            | [changelog](./packages/xcm-sdk/CHANGELOG.md)  |  Cross-chain transfer sdk
 | [`@galacticcouncil/math-ema`](./packages/math-ema)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-ema.svg)](https://www.npmjs.com/package/@galacticcouncil/math-ema)           | [changelog](./packages/math-ema/CHANGELOG.md)  |  EMA math
 | [`@galacticcouncil/math-lbp`](./packages/math-lbp)                | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-lbp.svg)](https://www.npmjs.com/package/@galacticcouncil/math-lbp)           | [changelog](./packages/math-lbp/CHANGELOG.md)  |  LBP math
 | [`@galacticcouncil/math-liquidity-mining`](./packages/math-liquidity-mining)  | [![version](https://img.shields.io/npm/v/@galacticcouncil/math-liquidity-mining.svg)](https://www.npmjs.com/package/@galacticcouncil/math-liquidity-mining)  | [changelog](./packages/math-liquidity-mining/CHANGELOG.md)  |  Liquidity mining math

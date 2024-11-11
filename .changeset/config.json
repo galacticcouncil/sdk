@@ -6,5 +6,8 @@
   "access": "public",
   "baseBranch": "origin/master",
   "updateInternalDependencies": "patch",
-  "ignore": ["sdk-cjs", "sdk-esm", "xcm-transfer", "xcm-test"]
+  "ignore": ["sdk-cjs", "sdk-esm", "xcm-transfer", "xcm-test"],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }

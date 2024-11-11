@@ -16,7 +16,7 @@ import {
 
 import { OmniPoolFees, OmniPoolToken } from './OmniPool';
 
-import { PoolClient } from '../PoolClient';
+import { PoolClient } from '../PoolClientV2';
 
 export class OmniPoolClient extends PoolClient {
   isSupported(): boolean {

@@ -2,6 +2,7 @@ import {
   createPublicClient,
   createWalletClient,
   custom,
+  fallback,
   http,
   Chain,
   PublicClient,
@@ -11,9 +12,11 @@ import {
 
 export class EvmClient {
   readonly chain: Chain;
+  readonly rpcs: string[];
 
-  constructor(chain: Chain) {
+  constructor(chain: Chain, rpcs?: string[]) {
     this.chain = chain;
+    this.rpcs = rpcs || [];
   }
 
   get chainId(): number {
@@ -41,9 +44,10 @@ export class EvmClient {
   }
 
   getProvider(): PublicClient {
+    const withFallback = this.rpcs.map((rpc) => http(rpc));
     return createPublicClient({
       chain: this.chain,
-      transport: http(),
+      transport: this.rpcs.length > 0 ? fallback(withFallback) : http(),
     });
   }
 

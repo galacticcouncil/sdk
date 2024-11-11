@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-core
 
+## 5.3.0
+
+### Minor Changes
+
+- Bump pjs to 14.x
+- Support EvmChain rpcs fallback
+
 ## 5.2.0
 
 ### Minor Changes

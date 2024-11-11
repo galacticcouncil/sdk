@@ -1,5 +1,24 @@
 # @galacticcouncil/sdk
 
+## 4.5.0
+
+### Minor Changes
+
+- Bump pjs to 14.x
+- Call currencies api directly
+
+## 4.4.0
+
+### Minor Changes
+
+- ea2c5e6: PoolClientV2 (currency api support)
+
+## 4.3.0
+
+### Minor Changes
+
+- 0c3290f: Use CurrenciesApi in BalanceClient, support for ERC20 tokens
+
 ## 4.2.1
 
 ### Patch Changes
