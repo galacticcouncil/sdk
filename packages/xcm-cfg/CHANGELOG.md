@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.4.1
+
+### Patch Changes
+
+- Fix zeitgeist
+- Bump Hub -> Moonbeam DOT fees
+
 ## 5.4.0
 
 ### Minor Changes
