@@ -11,5 +11,15 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
-  "prettier.printWidth": 100
+  "prettier.printWidth": 100,
+  "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "foreground": "#000",
+      "background": "#ddd317"
+    },
+    "FIXME": {
+      "foreground": "#f44336",
+      "background": "#592c2c"
+    }
+  }
 }
