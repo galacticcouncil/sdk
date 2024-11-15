@@ -666,6 +666,7 @@ export const hydration = new EvmParachain({
       balanceId: 1000085,
       decimals: 10,
       palletInstance: 50,
+      min: 20000,
     },
     {
       asset: ztg,
