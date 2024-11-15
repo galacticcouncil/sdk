@@ -15,9 +15,10 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getTokenBalanceData(accountId: string, tokenKey: string) {
-    return this.api.call.currenciesApi.account<
-      ITuple<[u32, OrmlTokensAccountData]>
-    >(tokenKey, accountId);
+    return this.api.call.currenciesApi.account<OrmlTokensAccountData>(
+      tokenKey,
+      accountId
+    );
   }
 
   async getAccountBalanceData(accountId: string) {
@@ -27,7 +28,7 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getBalance(accountId: string, tokenKey: string): Promise<BigNumber> {
-    const data = this.getTokenBalanceData(accountId, tokenKey);
+    const data = await this.getTokenBalanceData(accountId, tokenKey);
     return this.calculateFreeBalance(data);
   }
 
