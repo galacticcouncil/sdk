@@ -1,17 +1,31 @@
 import { sendTransaction } from '@acala-network/chopsticks-testing';
 import {
   AnyChain,
-  AssetAmount,
   AssetRoute,
+  CallType,
   Parachain,
 } from '@galacticcouncil/xcm-core';
-import { Wallet, XTransfer } from '@galacticcouncil/xcm-sdk';
+import {
+  TransferAdapter,
+  Wallet,
+  XCallEvm,
+  XTransfer,
+} from '@galacticcouncil/xcm-sdk';
 
 import { getAccount } from './account';
-import { checkSystemEvents } from './matchers';
+import { getAmount } from './amount';
+import { checkIfFailed, checkIfProcessed, checkIfSent } from './events';
+import { moonbeam } from './hooks';
+import {
+  getSourceBalanceDiff,
+  getDestinationBalanceDiff,
+  getDestinationFee,
+} from './xcm.utils';
 import { SetupCtx } from './types';
 
 import { getRouteKey } from '../utils';
+
+const TRANSFER_AMOUNT = '10';
 
 export const runXcm = (
   name: string,
@@ -20,6 +34,7 @@ export const runXcm = (
     route: AssetRoute;
   }>,
   ctx: () => Promise<{
+    report: Map<any, any>;
     networks: SetupCtx[];
     wallet: Wallet;
   }>,
@@ -30,7 +45,7 @@ export const runXcm = (
     name,
     async () => {
       const { chain, route } = await cfg();
-      const { networks, wallet } = await ctx();
+      const { report, networks, wallet } = await ctx();
 
       const srcChain = chain as Parachain;
       const srcNetwork = networks.find((n) => n.config.key === srcChain.key)!;
@@ -39,7 +54,7 @@ export const runXcm = (
 
       const key = getRouteKey(chain, route);
 
-      console.log('\n🥢 Executing ' + name);
+      console.log('\n🥢 Executing ' + name + ' ...');
       console.log('🥢 Route key: ' + key);
 
       const transfer = await getTransfer(
@@ -49,16 +64,26 @@ export const runXcm = (
         route
       );
 
-      const { data } = await transfer.buildCall('10');
-      const extrinsic = srcNetwork.api.tx(data);
+      const calldata = await transfer.buildCall(TRANSFER_AMOUNT);
+
+      let extrinsic;
+      if (calldata.type === CallType.Evm && chain.key === 'moonbeam') {
+        // Skipped for now
+        extrinsic = moonbeam.toTransferExtrinsic(
+          srcNetwork.api,
+          calldata as XCallEvm
+        );
+      } else {
+        extrinsic = srcNetwork.api.tx(calldata.data);
+      }
 
       const srcAccount = getAccount(srcChain);
       await sendTransaction(extrinsic.signAsync(srcAccount));
 
       await srcNetwork.chain.newBlock();
-      await checkSystemEvents(srcNetwork, 'xcmpQueue').toMatchSnapshot(
-        'xcmpQueue'
-      );
+      const srcEvents = await srcNetwork.api.query.system.events();
+      expect(checkIfFailed(srcNetwork.api, srcEvents)).toBeFalsy();
+      checkIfSent(srcEvents);
 
       if (isMoonbeamReserve(srcChain, route)) {
         const moonbeam = networks.find((n) => n.config.key === 'moonbeam')!;
@@ -71,17 +96,49 @@ export const runXcm = (
       }
 
       await destNetwork.chain.newBlock();
-      await checkSystemEvents(
-        destNetwork,
-        'xcmpQueue',
-        'messageQueue'
-      ).toMatchSnapshot('messageQueue');
+      const destEvents = await destNetwork.api.query.system.events();
+      expect(checkIfProcessed(destEvents)).toBeTruthy();
+      expect([key, calldata.data]).toMatchSnapshot();
 
-      const after = await getTransfer(wallet, srcNetwork, destNetwork, route);
-      getTransferTable(transfer, after);
-      console.log('🥢 DONE: ' + name);
+      const postTransfer = await getTransfer(
+        wallet,
+        srcNetwork,
+        destNetwork,
+        route
+      );
+
+      const destinationFee = getDestinationFee(
+        TRANSFER_AMOUNT,
+        transfer,
+        postTransfer
+      );
+
+      report.set(key, {
+        updated: Date.now(),
+        destination: {
+          fee: destinationFee.delta,
+          feeAsset: destinationFee.asset,
+          feeNative: destinationFee.deltaBn,
+        },
+      });
+
+      console.table(
+        [
+          tableRow(
+            'Balance (Source)',
+            getSourceBalanceDiff(transfer, postTransfer)
+          ),
+          tableRow(
+            'Balance (Destination)',
+            getDestinationBalanceDiff(transfer, postTransfer)
+          ),
+          tableRow('Fee', destinationFee),
+        ],
+        ['name', 'asset', 'delta']
+      );
+      console.log('🥢 ' + name + ' complete.');
     },
-    240000
+    2 * 60 * 1000
   );
 };
 
@@ -122,6 +179,14 @@ const getTransfer = async (
     .spyOn(destNetwork.config, 'api', 'get')
     .mockImplementation(async () => destNetwork.api);
 
+  if (route.contract) {
+    jest
+      .spyOn(TransferAdapter.prototype, 'estimateFee')
+      .mockImplementation(async () => {
+        return getAmount(0.1, source.asset, 18);
+      });
+  }
+
   const isSwapSupportedMock = jest
     .spyOn(wallet.dex, 'isSwapSupported')
     .mockImplementation(() => false);
@@ -141,51 +206,16 @@ const getTransfer = async (
   return xTransfer;
 };
 
-const getTransferTable = (before: XTransfer, after: XTransfer) => {
-  const isSufficientAssetTransfer = before.source.balance.isSame(
-    before.source.destinationFee
-  );
-
-  const balance = getTransferTableRow(
-    'Balance',
-    before.source.balance,
-    after.source.balance
-  );
-
-  const balanceDest = getTransferTableRow(
-    'Balance (Destination)',
-    before.destination.balance,
-    after.destination.balance
-  );
-
-  const report = [balance, balanceDest];
-
-  if (!isSufficientAssetTransfer) {
-    const fee = getTransferTableRow(
-      'Fee',
-      before.source.destinationFeeBalance,
-      after.source.destinationFeeBalance
-    );
-    report.push(fee);
-  }
-
-  console.table(report);
-};
-
-const getTransferTableRow = (
+const tableRow = (
   title: string,
-  before: AssetAmount,
-  after: AssetAmount
+  info: {
+    asset: string;
+    delta: string;
+    deltaBn: bigint;
+  }
 ) => {
-  const beforeFtm = before.toDecimal(before.decimals);
-  const afterFmt = after.toDecimal(after.decimals);
-  const delta = Number(beforeFtm) - Number(afterFmt);
-
   return {
     name: title,
-    asset: before.originSymbol,
-    before: beforeFtm,
-    after: afterFmt,
-    delta: delta < 0 ? '+' + Math.abs(delta) : '-' + delta,
+    ...info,
   };
 };

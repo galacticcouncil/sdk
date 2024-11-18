@@ -11,12 +11,8 @@ const jestConsole = console;
 const { configService, init } = setup;
 const { runXcm } = xcm;
 
-describe('Wallet with XCM config', () => {
-  jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
-
-  let wallet: Wallet;
-
-  const blacklist = ['acala-evm'];
+const getPolkadotChains = () => {
+  const blacklist: string[] = ['acala-evm'];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
@@ -24,6 +20,32 @@ describe('Wallet with XCM config', () => {
         c.ecosystem === ChainEcosystem.Ethereum
     )
     .filter((c) => !blacklist.includes(c.key));
+
+  return {
+    blacklist,
+    chains,
+  };
+};
+
+const getKusamaChains = () => {
+  const blacklist: string[] = ['basilisk'];
+  const chains = Array.from(configService.chains.values())
+    .filter((c) => c.ecosystem === ChainEcosystem.Kusama)
+    .filter((c) => !blacklist.includes(c.key));
+
+  return {
+    blacklist,
+    chains,
+  };
+};
+
+describe('Wallet with XCM config', () => {
+  jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
+
+  let wallet: Wallet;
+
+  const polkadot = getPolkadotChains();
+  const kusama = getKusamaChains();
 
   beforeAll(async () => {
     global.console = console;
@@ -40,27 +62,69 @@ describe('Wallet with XCM config', () => {
     expect(wallet).toBeDefined();
   });
 
-  describe.each(chains)('should return valid calldata for', (c) => {
-    const config = configService.getChainRoutes(c);
-    const { chain, routes } = config;
+  describe.each(polkadot.chains)(
+    'should return valid Polkadot calldata for',
+    (c) => {
+      const config = configService.getChainRoutes(c);
+      const { chain, routes } = config;
 
-    for (const route of Array.from(routes.values())) {
-      const info = getRouteInfo(chain, route);
+      for (const route of Array.from(routes.values())) {
+        const { blacklist } = polkadot;
+        const { destination } = route;
 
-      runXcm(
-        `${info} transfer`,
-        async () => {
-          return {
-            chain: chain,
-            route: route,
-          };
-        },
-        async () => {
-          return {
-            wallet: wallet,
-          };
+        if (blacklist.includes(destination.chain.key)) {
+          continue;
         }
-      );
+
+        const info = getRouteInfo(chain, route);
+        runXcm(
+          `${info} transfer`,
+          async () => {
+            return {
+              chain: chain,
+              route: route,
+            };
+          },
+          async () => {
+            return {
+              wallet: wallet,
+            };
+          }
+        );
+      }
     }
-  });
+  );
+
+  describe.each(kusama.chains)(
+    'should return valid Kusama calldata for',
+    (c) => {
+      const config = configService.getChainRoutes(c);
+      const { chain, routes } = config;
+
+      for (const route of Array.from(routes.values())) {
+        const { blacklist } = kusama;
+        const { destination } = route;
+
+        if (blacklist.includes(destination.chain.key)) {
+          continue;
+        }
+
+        const info = getRouteInfo(chain, route);
+        runXcm(
+          `${info} transfer`,
+          async () => {
+            return {
+              chain: chain,
+              route: route,
+            };
+          },
+          async () => {
+            return {
+              wallet: wallet,
+            };
+          }
+        );
+      }
+    }
+  );
 });

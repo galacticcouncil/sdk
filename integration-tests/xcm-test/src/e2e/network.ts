@@ -11,7 +11,7 @@ export async function createNetwork(chain: Parachain): Promise<SetupCtx> {
   });
 
   const chainStorage = await initStorage(ctx.api, chain);
-  console.log('🥢 Storage initialized for ' + chain.name);
+  console.log('🥢 ' + chain.name + ' storage ready.');
   await ctx.dev.setStorage(chainStorage);
   return {
     ...ctx,
