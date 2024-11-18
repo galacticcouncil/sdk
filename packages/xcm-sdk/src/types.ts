@@ -1,5 +1,6 @@
 import {
   AssetAmount,
+  CallType,
   SwapCtx,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
@@ -60,6 +61,8 @@ export interface XCall {
   from: string;
   /** Hex-encoded call data. */
   data: `0x${string}`;
+  /** Calltype. */
+  type: CallType;
 }
 
 export interface XCallEvm extends XCall {
