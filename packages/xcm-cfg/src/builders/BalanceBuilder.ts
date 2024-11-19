@@ -14,6 +14,9 @@ import {
 } from '@polkadot/types/lookup';
 import { isString } from '@polkadot/util';
 
+import { XcmVersion } from './types';
+import { normalizeInterior } from './ExtrinsicBuilder.utils';
+
 export function BalanceBuilder() {
   return {
     substrate,
@@ -95,7 +98,13 @@ function foreignAssets() {
       build: ({ address, asset, chain }) => {
         const ctx = chain as Parachain;
 
+        // TODO - use v4 locations
         const assetLocation = ctx.getAssetXcmLocation(asset);
+        const normalizeAssetLocation = normalizeInterior(
+          assetLocation!,
+          XcmVersion.v4
+        );
+
         if (!assetLocation) {
           throw new Error('Missing asset xcm location for ' + asset.key);
         }
@@ -103,7 +112,7 @@ function foreignAssets() {
         return new SubstrateQueryConfig({
           module: 'foreignAssets',
           func: 'account',
-          args: [assetLocation, address],
+          args: [normalizeAssetLocation, address],
           transform: async (
             response: Option<PalletAssetsAssetAccount>
           ): Promise<bigint> => response.unwrapOrDefault().balance.toBigInt(),

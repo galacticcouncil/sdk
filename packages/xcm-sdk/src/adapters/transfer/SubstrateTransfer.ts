@@ -1,6 +1,7 @@
 import {
   AnyParachain,
   AssetAmount,
+  CallType,
   ExtrinsicConfig,
 } from '@galacticcouncil/xcm-core';
 
@@ -28,6 +29,7 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     return {
       from: account,
       data: extrinsic.toHex(),
+      type: CallType.Substrate,
     } as XCall;
   }
 

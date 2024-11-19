@@ -15,6 +15,7 @@ import { getRouteKey } from '../utils';
 
 const BALANCE = 10;
 const FEE = 0.1;
+const TRANSFER_AMOUNT = '1';
 
 export const runXcm = (
   name: string,
@@ -37,11 +38,11 @@ export const runXcm = (
       const key = getRouteKey(chain, route);
 
       const transfer = await getTransfer(wallet, chain, route);
-      const calldata = await transfer.buildCall('1');
+      const { data } = await transfer.buildCall(TRANSFER_AMOUNT);
 
-      expect([key, calldata.data]).toMatchSnapshot();
+      expect([key, data]).toMatchSnapshot();
     },
-    4 * 60 * 1000
+    1 * 60 * 1000
   );
 };
 

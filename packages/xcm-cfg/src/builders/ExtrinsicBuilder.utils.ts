@@ -73,7 +73,7 @@ export function getExtrinsicAssetLocation(
  * @param version - xcm version
  * @returns normalized x1 interior if <= V3
  */
-function normalizeInterior(
+export function normalizeInterior(
   assetLocation: Record<string, AnyJson>,
   version: XcmVersion
 ) {
