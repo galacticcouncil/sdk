@@ -3,7 +3,7 @@ import { UnsubscribePromise, VoidFn } from '@polkadot/api-base/types';
 
 import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
-import { Asset, Pool, PoolBase, PoolFees, PoolType } from '../types';
+import { Asset, PoolBase, PoolFees, PoolType } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 export abstract class PoolClient extends BalanceClient {
@@ -22,57 +22,50 @@ export abstract class PoolClient extends BalanceClient {
   protected abstract loadPools(): Promise<PoolBase[]>;
   protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
 
+  get augmentedPools() {
+    return this.pools
+      .filter((p) => this.isValidPool(p))
+      .map((p) => this.withMetadata(p));
+  }
+
   async withAssets(assets: Asset[]) {
     this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
   }
 
   async getPools(): Promise<PoolBase[]> {
     if (this.loaded) {
-      return this.pools;
+      return this.augmentedPools;
     }
     this.pools = await this.loadPools();
     this.subs = await this.subscribe();
     this.loaded = true;
-    return this.pools;
+    return this.augmentedPools;
   }
 
   private async subscribe() {
-    const subs = this.pools
-      .map((p) => this.augmentTokens(p))
-      .map(async (pool: PoolBase) => {
-        const poolSubs = [
-          await this.subscribePoolChange(pool),
-          await this.subscribeSystemPoolBalance(pool),
-          await this.subscribeTokensPoolBalance(pool),
-        ];
+    const subs = this.augmentedPools.map(async (pool: PoolBase) => {
+      const poolSubs = [
+        await this.subscribePoolChange(pool),
+        await this.subscribeSystemPoolBalance(pool),
+        await this.subscribeTokensPoolBalance(pool),
+      ];
 
-        if (this.hasErc20Asset(pool)) {
-          const subErc20 = await this.subscribeErc20PoolBalance(pool);
-          poolSubs.push(subErc20);
-        }
+      if (this.hasErc20Asset(pool)) {
+        const subErc20 = await this.subscribeErc20PoolBalance(pool);
+        poolSubs.push(subErc20);
+      }
 
-        if (this.hasShareAsset(pool)) {
-          const subShare = await this.subscribeSharePoolBalance(pool);
-          poolSubs.push(subShare);
-        }
+      if (this.hasShareAsset(pool)) {
+        const subShare = await this.subscribeSharePoolBalance(pool);
+        poolSubs.push(subShare);
+      }
 
-        this.subscribeLog(pool);
-        return poolSubs;
-      });
+      this.subscribeLog(pool);
+      return poolSubs;
+    });
 
     const subsriptions = await Promise.all(subs);
     return subsriptions.flat();
-  }
-
-  private subscribeLog(pool: PoolBase) {
-    const poolAddr = pool.address.substring(0, 10).concat('...');
-    console.log(`${pool.type} [${poolAddr}] balance subscribed`);
-  }
-
-  unsubscribe() {
-    this.subs.forEach((unsub) => {
-      unsub();
-    });
   }
 
   private hasShareAsset(pool: PoolBase) {
@@ -81,6 +74,17 @@ export abstract class PoolClient extends BalanceClient {
 
   private hasErc20Asset(pool: PoolBase) {
     return pool.tokens.some((t) => t.type === 'Erc20');
+  }
+
+  unsubscribe() {
+    this.subs.forEach((unsub) => {
+      unsub();
+    });
+  }
+
+  private subscribeLog(pool: PoolBase) {
+    const poolAddr = pool.address.substring(0, 10).concat('...');
+    console.log(`${pool.type} [${poolAddr}] balance subscribed`);
   }
 
   private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
@@ -117,29 +121,32 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   /**
-   * Augment pool tokens with registry metadata
-   *
-   * In case of XYK pool we check if every asset is properly registered, if not
+   * Check if pool valid. Only XYK pools are being verified as those are
+   * considered permissionless.
    *
    * @param pool - pool
-   * @returns - pool with augmented token metadata
+   * @returns true if pool valid & assets known by registry, otherwise false
    */
-  private augmentTokens(pool: PoolBase) {
-    const isValidPool =
-      pool.type === PoolType.XYK
-        ? pool.tokens.every((t) => this.assets.get(t.id))
-        : true;
+  private isValidPool(pool: PoolBase): boolean {
+    return pool.type === PoolType.XYK
+      ? pool.tokens.every((t) => this.assets.get(t.id))
+      : true;
+  }
 
-    if (isValidPool) {
-      pool.tokens = pool.tokens.map((t) => {
-        const asset = this.assets.get(t.id);
-        return {
-          ...t,
-          ...asset,
-        };
-      });
-    }
-
+  /**
+   * Augment pool tokens with asset metadata
+   *
+   * @param pool - pool
+   * @returns pool with augmented tokens
+   */
+  private withMetadata(pool: PoolBase) {
+    pool.tokens = pool.tokens.map((t) => {
+      const asset = this.assets.get(t.id);
+      return {
+        ...t,
+        ...asset,
+      };
+    });
     return pool;
   }
 

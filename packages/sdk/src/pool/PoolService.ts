@@ -1,3 +1,6 @@
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+
 import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
@@ -19,8 +22,6 @@ import {
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { PoolClient } from './PoolClient';
 
 export class PoolService implements IPoolService {
@@ -79,8 +80,7 @@ export class PoolService implements IPoolService {
           .filter((client) => client.isSupported())
           .map((client) => client.getPools())
       );
-      const flatten = pools.flat();
-      return this.withMetadata(flatten);
+      return pools.flat();
     }
 
     const pools = await Promise.all(
@@ -88,8 +88,7 @@ export class PoolService implements IPoolService {
         .filter((client) => includeOnly.some((t) => t === client.getPoolType()))
         .map((client) => client.getPools())
     );
-    const flatten = pools.flat();
-    return this.withMetadata(flatten);
+    return pools.flat();
   }
 
   unsubscribe() {
@@ -97,35 +96,6 @@ export class PoolService implements IPoolService {
     this.omniClient.unsubscribe();
     this.lbpClient.unsubscribe();
     this.stableClient.unsubscribe();
-  }
-
-  private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
-    const assets: Map<string, Asset> = new Map(
-      this.onChainAssets.map((asset: Asset) => [asset.id, asset])
-    );
-
-    return pools
-      .filter((pool: PoolBase) => {
-        if (pool.type === PoolType.XYK) {
-          // Check if XYK pools contains valid assets, if not exclude them
-          return pool.tokens.every((t) => assets.get(t.id));
-        } else {
-          return true;
-        }
-      })
-      .map((pool: PoolBase) => {
-        const tokens = pool.tokens.map((t) => {
-          const asset = assets.get(t.id);
-          return {
-            ...t,
-            ...asset,
-          };
-        });
-        return {
-          ...pool,
-          tokens,
-        };
-      });
   }
 
   async getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {
