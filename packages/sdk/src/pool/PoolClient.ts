@@ -1,51 +1,64 @@
 import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise, VoidFn } from '@polkadot/api-base/types';
-import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
-import { PoolBase, PoolFees, PoolType } from '../types';
-import { BigNumber } from '../utils/bignumber';
 
+import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
+import { Asset, Pool, PoolBase, PoolFees, PoolType } from '../types';
+import { BigNumber } from '../utils/bignumber';
 
 export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];
   protected subs: VoidFn[] = [];
-  private poolsLoaded = false;
+  private loaded = false;
+  private assets: Map<string, Asset> = new Map([]);
 
   constructor(api: ApiPromise) {
     super(api);
   }
 
   abstract isSupported(): boolean;
-  protected abstract loadPools(): Promise<PoolBase[]>;
   abstract getPoolType(): PoolType;
   abstract getPoolFees(feeAsset: string, address: string): Promise<PoolFees>;
+  protected abstract loadPools(): Promise<PoolBase[]>;
   protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
 
+  async withAssets(assets: Asset[]) {
+    this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
+  }
+
   async getPools(): Promise<PoolBase[]> {
-    if (this.poolsLoaded) {
+    if (this.loaded) {
       return this.pools;
     }
     this.pools = await this.loadPools();
     this.subs = await this.subscribe();
-    this.poolsLoaded = true;
+    this.loaded = true;
     return this.pools;
   }
 
-  async subscribe() {
-    const subs = this.pools.map(async (pool: PoolBase) => {
-      const poolSubs = [
-        await this.subscribePoolChange(pool),
-        await this.subscribeTokensPoolBalance(pool),
-        await this.subscribeSystemPoolBalance(pool),
-      ];
+  private async subscribe() {
+    const subs = this.pools
+      .map((p) => this.augmentTokens(p))
+      .map(async (pool: PoolBase) => {
+        const poolSubs = [
+          await this.subscribePoolChange(pool),
+          await this.subscribeSystemPoolBalance(pool),
+          await this.subscribeTokensPoolBalance(pool),
+        ];
 
-      if (this.hasShareAsset(pool)) {
-        const sub = await this.subscribeSharePoolBalance(pool);
-        poolSubs.push(sub);
-      }
-      this.subscribeLog(pool);
-      return poolSubs;
-    });
+        if (this.hasErc20Asset(pool)) {
+          const subErc20 = await this.subscribeErc20PoolBalance(pool);
+          poolSubs.push(subErc20);
+        }
+
+        if (this.hasShareAsset(pool)) {
+          const subShare = await this.subscribeSharePoolBalance(pool);
+          poolSubs.push(subShare);
+        }
+
+        this.subscribeLog(pool);
+        return poolSubs;
+      });
 
     const subsriptions = await Promise.all(subs);
     return subsriptions.flat();
@@ -66,20 +79,8 @@ export abstract class PoolClient extends BalanceClient {
     return pool.type === PoolType.Stable && pool.id;
   }
 
-  private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
-    return this.subscribeTokenBalance(
-      pool.address,
-      pool.tokens.map((t) => t.id),
-      this.updateBalanceCallback(pool, (p, t) => p.id !== t)
-    );
-  }
-
-  private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
-    return this.subscribeTokenBalance(
-      HYDRADX_OMNIPOOL_ADDRESS,
-      [pool.id!],
-      this.updateBalanceCallback(pool, () => true)
-    );
+  private hasErc20Asset(pool: PoolBase) {
+    return pool.tokens.some((t) => t.type === 'Erc20');
   }
 
   private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
@@ -87,6 +88,59 @@ export abstract class PoolClient extends BalanceClient {
       pool.address,
       this.updateBalanceCallback(pool, () => true)
     );
+  }
+
+  private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
+    const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
+    return this.subscribeTokenBalance(
+      pool.address,
+      pool.tokens,
+      this.updateBalanceCallback(pool, isNotStableswap)
+    );
+  }
+
+  private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
+    return this.subscribeErc20Balance(
+      pool.address,
+      pool.tokens,
+      this.updateBalanceCallback(pool, () => true)
+    );
+  }
+
+  private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
+    const sharedAsset = this.assets.get(pool.id!);
+    return this.subscribeTokenBalance(
+      HYDRADX_OMNIPOOL_ADDRESS,
+      [sharedAsset!],
+      this.updateBalanceCallback(pool, () => true)
+    );
+  }
+
+  /**
+   * Augment pool tokens with registry metadata
+   *
+   * In case of XYK pool we check if every asset is properly registered, if not
+   *
+   * @param pool - pool
+   * @returns - pool with augmented token metadata
+   */
+  private augmentTokens(pool: PoolBase) {
+    const isValidPool =
+      pool.type === PoolType.XYK
+        ? pool.tokens.every((t) => this.assets.get(t.id))
+        : true;
+
+    if (isValidPool) {
+      pool.tokens = pool.tokens.map((t) => {
+        const asset = this.assets.get(t.id);
+        return {
+          ...t,
+          ...asset,
+        };
+      });
+    }
+
+    return pool;
   }
 
   private updateBalanceCallback(

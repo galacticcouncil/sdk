@@ -7,7 +7,7 @@ import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
-import { PoolClient } from '../PoolClientV2';
+import { PoolClient } from '../PoolClient';
 
 export class LbpPoolClient extends PoolClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);

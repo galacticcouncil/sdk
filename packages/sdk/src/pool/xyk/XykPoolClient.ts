@@ -12,7 +12,7 @@ import {
 
 import { XykPoolFees } from './XykPool';
 
-import { PoolClient } from '../PoolClientV2';
+import { PoolClient } from '../PoolClient';
 
 export class XykPoolClient extends PoolClient {
   isSupported(): boolean {
