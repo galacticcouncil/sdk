@@ -71,7 +71,6 @@ export class BalanceClient extends PolkadotApiClient {
       balances.forEach((data, i) => {
         const freeBalance = this.calculateFreeBalance(data);
         const token = callArgs[i][1];
-        console.log(address, token, freeBalance.toString());
         result.push([token, freeBalance]);
       });
       onChange(result);
