@@ -7,7 +7,8 @@ class GetAllAssetsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
-    return router.getPools();
+    await router.getPools();
+    return [];
   }
 }
 

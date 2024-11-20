@@ -59,7 +59,7 @@ export class BalanceClient extends PolkadotApiClient {
   async subscribeTokenBalance(
     address: string,
     assets: Asset[],
-    onChange: (token: string, balance: BigNumber) => void
+    onChange: (balances: [string, BigNumber][]) => void
   ): UnsubscribePromise {
     const supported = assets
       .filter((a) => a.type !== 'Erc20')
@@ -67,22 +67,26 @@ export class BalanceClient extends PolkadotApiClient {
 
     const callArgs = supported.map((a) => [address, a.id]);
     return this.api.query.tokens.accounts.multi(callArgs, (balances) => {
+      const result: [string, BigNumber][] = [];
       balances.forEach((data, i) => {
         const freeBalance = this.calculateFreeBalance(data);
         const token = callArgs[i][1];
-        onChange(token, freeBalance);
+        console.log(address, token, freeBalance.toString());
+        result.push([token, freeBalance]);
       });
+      onChange(result);
     });
   }
 
   async subscribeErc20Balance(
     address: string,
     assets: Asset[],
-    onChange: (token: string, balance: BigNumber) => void
+    onChange: (balances: [string, BigNumber][]) => void
   ): UnsubscribePromise {
     const supported = assets.filter((a) => a.type === 'Erc20');
 
     const getErc20Balance = async () => {
+      const result: [string, BigNumber][] = [];
       const balances: [string, BigNumber][] = await Promise.all(
         supported.map(async (token: Asset) => [
           token.id,
@@ -90,8 +94,9 @@ export class BalanceClient extends PolkadotApiClient {
         ])
       );
       balances.forEach(([token, balance]) => {
-        onChange(token, balance);
+        result.push([token, balance]);
       });
+      onChange(result);
     };
 
     await getErc20Balance();

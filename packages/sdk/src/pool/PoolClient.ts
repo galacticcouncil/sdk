@@ -90,16 +90,17 @@ export abstract class PoolClient extends BalanceClient {
   private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
     return this.subscribeSystemBalance(
       pool.address,
-      this.updateBalanceCallback(pool, () => true)
+      this.updateBalanceCallback(pool)
     );
   }
 
   private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
+    // Balance of shared token is stored in omnipool, not in stablepool, skip balance update otherwise getting 0
     const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
     return this.subscribeTokenBalance(
       pool.address,
       pool.tokens,
-      this.updateBalanceCallback(pool, isNotStableswap)
+      this.updateBalancesCallback(pool, isNotStableswap)
     );
   }
 
@@ -107,7 +108,7 @@ export abstract class PoolClient extends BalanceClient {
     return this.subscribeErc20Balance(
       pool.address,
       pool.tokens,
-      this.updateBalanceCallback(pool, () => true)
+      this.updateBalancesCallback(pool, () => true)
     );
   }
 
@@ -116,7 +117,7 @@ export abstract class PoolClient extends BalanceClient {
     return this.subscribeTokenBalance(
       HYDRADX_OMNIPOOL_ADDRESS,
       [sharedAsset!],
-      this.updateBalanceCallback(pool, () => true)
+      this.updateBalancesCallback(pool, () => true)
     );
   }
 
@@ -150,13 +151,27 @@ export abstract class PoolClient extends BalanceClient {
     return pool;
   }
 
-  private updateBalanceCallback(
+  private updateBalancesCallback(
     pool: PoolBase,
     canUpdate: (pool: PoolBase, token: string) => boolean
   ) {
+    return function (balances: [string, BigNumber][]) {
+      balances.forEach(([token, balance]) => {
+        const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+        if (tokenIndex >= 0 && canUpdate(pool, token)) {
+          pool.tokens[tokenIndex].balance = balance.toString();
+        }
+      });
+      /*     pool.tokens.forEach((t) => {
+        console.log(pool.type, pool.address, t.id, t.balance.toString());
+      }); */
+    };
+  }
+
+  private updateBalanceCallback(pool: PoolBase) {
     return function (token: string, balance: BigNumber) {
       const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-      if (tokenIndex >= 0 && canUpdate(pool, token)) {
+      if (tokenIndex >= 0) {
         pool.tokens[tokenIndex].balance = balance.toString();
       }
     };
