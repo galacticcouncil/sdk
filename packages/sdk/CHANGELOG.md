@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.5.1
+
+### Patch Changes
+
+- a17d1be: Fix balance subs perf issues
+
 ## 4.5.0
 
 ### Minor Changes
