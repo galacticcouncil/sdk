@@ -162,9 +162,6 @@ export abstract class PoolClient extends BalanceClient {
           pool.tokens[tokenIndex].balance = balance.toString();
         }
       });
-      /*     pool.tokens.forEach((t) => {
-        console.log(pool.type, pool.address, t.id, t.balance.toString());
-      }); */
     };
   }
 

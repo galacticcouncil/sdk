@@ -37,7 +37,6 @@ export class PoolService implements IPoolService {
   protected readonly clients: PoolClient[] = [];
 
   protected onChainAssets: Asset[] = [];
-  protected onChainAssetsLoaded = false;
 
   constructor(api: ApiPromise) {
     this.api = api;
@@ -63,10 +62,9 @@ export class PoolService implements IPoolService {
   }
 
   async syncRegistry(external?: ExternalAsset[]) {
-    this.assetClient.getOnChainAssets(false, external).then((assets) => {
-      this.onChainAssets = assets;
-      this.clients.forEach((c) => c.withAssets(assets));
-    });
+    const assets = await this.assetClient.getOnChainAssets(false, external);
+    this.clients.forEach((c) => c.withAssets(assets));
+    this.onChainAssets = assets;
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {

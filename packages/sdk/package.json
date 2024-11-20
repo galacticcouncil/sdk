@@ -42,20 +42,20 @@
     "lodash.clonedeep": "^4.5.0"
   },
   "peerDependencies": {
-    "@polkadot/api": "^14.2.3",
-    "@polkadot/api-augment": "^14.2.3",
-    "@polkadot/api-derive": "^14.2.3",
-    "@polkadot/api-base": "^14.2.3",
-    "@polkadot/rpc-augment": "^14.2.3",
-    "@polkadot/rpc-core": "^14.2.3",
-    "@polkadot/rpc-provider": "^14.2.3",
-    "@polkadot/types": "^14.2.3",
-    "@polkadot/types-augment": "^14.2.3",
-    "@polkadot/types-codec": "^14.2.3",
-    "@polkadot/types-create": "^14.2.3",
-    "@polkadot/types-known": "^14.2.3",
-    "@polkadot/keyring": "^13.2.2",
-    "@polkadot/util": "^13.2.2",
-    "@polkadot/util-crypto": "^13.2.2"
+    "@polkadot/api": "~14.0.1",
+    "@polkadot/api-augment": "~14.0.1",
+    "@polkadot/api-derive": "~14.0.1",
+    "@polkadot/api-base": "~14.0.1",
+    "@polkadot/rpc-augment": "~14.0.1",
+    "@polkadot/rpc-core": "~14.0.1",
+    "@polkadot/rpc-provider": "~14.0.1",
+    "@polkadot/types": "~14.0.1",
+    "@polkadot/types-augment": "~14.0.1",
+    "@polkadot/types-codec": "~14.0.1",
+    "@polkadot/types-create": "~14.0.1",
+    "@polkadot/types-known": "~14.0.1",
+    "@polkadot/keyring": "~13.1.1",
+    "@polkadot/util": "~13.1.1",
+    "@polkadot/util-crypto": "~13.1.1"
   }
 }
