@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- a2303e6: Dewngrade to pjs 14.0.x
+- a2303e6: Downgrade pjs to 14.0.x
 - 1f2929f: Downgrade pjs to 14.0.x
 
 ## 5.3.0
