@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 6.3.1
+
+### Patch Changes
+
+- bump sdk deps
+
 ## 6.3.0
 
 ### Patch Changes
