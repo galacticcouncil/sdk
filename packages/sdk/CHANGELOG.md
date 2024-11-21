@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.6.0
+
+### Minor Changes
+
+- Mem pools, perf upgrades)
+
 ## 4.5.2
 
 ### Patch Changes
