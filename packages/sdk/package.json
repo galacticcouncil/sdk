@@ -38,6 +38,7 @@
     "@galacticcouncil/math-stableswap": "^1.0.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@thi.ng/cache": "^2.1.35",
+    "@thi.ng/memoize": "^4.0.2",
     "bignumber.js": "^9.1.0",
     "lodash.clonedeep": "^4.5.0"
   },

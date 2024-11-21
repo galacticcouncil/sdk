@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
+import { memoize1 } from '@thi.ng/memoize';
+
 import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
@@ -38,6 +40,11 @@ export class PoolService implements IPoolService {
 
   protected onChainAssets: Asset[] = [];
 
+  private memRegistry = memoize1((x: number) => {
+    console.log('PoolService mem registry', x, '✅');
+    return this.syncRegistry();
+  });
+
   constructor(api: ApiPromise) {
     this.api = api;
     this.assetClient = new AssetClient(this.api);
@@ -69,14 +76,14 @@ export class PoolService implements IPoolService {
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
     if (!this.isRegistrySynced) {
-      await this.syncRegistry();
+      await this.memRegistry(1);
     }
 
     if (includeOnly.length == 0) {
       const pools = await Promise.all(
         this.clients
           .filter((client) => client.isSupported())
-          .map((client) => client.getPools())
+          .map((client) => client.getMemPools())
       );
       return pools.flat();
     }
@@ -84,7 +91,7 @@ export class PoolService implements IPoolService {
     const pools = await Promise.all(
       this.clients
         .filter((client) => includeOnly.some((t) => t === client.getPoolType()))
-        .map((client) => client.getPools())
+        .map((client) => client.getMemPools())
     );
     return pools.flat();
   }

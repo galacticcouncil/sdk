@@ -3,13 +3,12 @@ import { ApiUrl, PolkadotExecutor } from '../../executor';
 import { PoolService } from '../../../../src/pool';
 import { TradeRouter } from '../../../../src/api';
 
-class GetAllAssetsExample extends PolkadotExecutor {
+class GetPoolsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
-    await router.getPools();
-    return [];
+    return router.getPools();
   }
 }
 
-new GetAllAssetsExample(ApiUrl.HydraDx, 'Get pools', true).run();
+new GetPoolsExample(ApiUrl.HydraDx, 'Get pools', true).run();

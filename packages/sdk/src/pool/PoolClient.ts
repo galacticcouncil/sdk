@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise, VoidFn } from '@polkadot/api-base/types';
 
+import { memoize1 } from '@thi.ng/memoize';
+
 import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
 import { Asset, PoolBase, PoolFees, PoolType } from '../types';
@@ -9,8 +11,12 @@ import { BigNumber } from '../utils/bignumber';
 export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];
   protected subs: VoidFn[] = [];
-  private loaded = false;
   private assets: Map<string, Asset> = new Map([]);
+
+  private memPools = memoize1((x: number) => {
+    console.log(this.getPoolType(), 'mem pools', x, '✅');
+    return this.getPools();
+  });
 
   constructor(api: ApiPromise) {
     super(api);
@@ -32,13 +38,14 @@ export abstract class PoolClient extends BalanceClient {
     this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
   }
 
+  async getMemPools(): Promise<PoolBase[]> {
+    return this.memPools(1);
+  }
+
   async getPools(): Promise<PoolBase[]> {
-    if (this.loaded) {
-      return this.augmentedPools;
-    }
+    console.log(this.getPoolType(), 'getPools', '✅');
     this.pools = await this.loadPools();
     this.subs = await this.subscribe();
-    this.loaded = true;
     return this.augmentedPools;
   }
 
@@ -95,7 +102,14 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
-    // Balance of shared token is stored in omnipool, not in stablepool, skip balance update otherwise getting 0
+    /**
+     * Skip balance update for shared token in stablepool as balance is
+     * stored in omnipool instead
+     *
+     * @param p - asset pool
+     * @param t - pool token
+     * @returns true if pool id different than token, otherwise false (shared token)
+     */
     const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
     return this.subscribeTokenBalance(
       pool.address,
@@ -125,7 +139,7 @@ export abstract class PoolClient extends BalanceClient {
    * Check if pool valid. Only XYK pools are being verified as those are
    * considered permissionless.
    *
-   * @param pool - pool
+   * @param pool - asset pool
    * @returns true if pool valid & assets known by registry, otherwise false
    */
   private isValidPool(pool: PoolBase): boolean {
@@ -137,8 +151,8 @@ export abstract class PoolClient extends BalanceClient {
   /**
    * Augment pool tokens with asset metadata
    *
-   * @param pool - pool
-   * @returns pool with augmented tokens
+   * @param pool - asset pool
+   * @returns asset pool with augmented tokens
    */
   private withMetadata(pool: PoolBase) {
     pool.tokens = pool.tokens.map((t) => {

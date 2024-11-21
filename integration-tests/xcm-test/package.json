@@ -15,7 +15,7 @@
     "test:e2e": "jest e2e.spec.ts"
   },
   "devDependencies": {
-    "@acala-network/chopsticks-testing": "^1.0.1"
+    "@acala-network/chopsticks-testing": "1.0.1"
   },
   "dependencies": {
     "@galacticcouncil/xcm-cfg": "^5.4.2",
