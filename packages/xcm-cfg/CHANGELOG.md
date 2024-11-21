@@ -5,8 +5,7 @@
 ### Patch Changes
 
 - 84ef243: Fix assethub foreign balance location (v3 -> v4)
-- Updated dependencies [a2303e6]
-- Updated dependencies [1f2929f]
+- Updated dependencies
   - @galacticcouncil/xcm-core@5.3.1
 
 ## 5.4.1

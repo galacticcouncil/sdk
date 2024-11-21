@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- Mem pools, perf upgrades)
+- Mem pools, perf upgrades
 
 ## 4.5.2
 
