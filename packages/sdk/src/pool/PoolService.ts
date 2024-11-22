@@ -41,7 +41,7 @@ export class PoolService implements IPoolService {
   protected onChainAssets: Asset[] = [];
 
   private memRegistry = memoize1((x: number) => {
-    console.log('PoolService mem registry', x, '✅');
+    console.log('Registry mem sync', x, '✅');
     return this.syncRegistry();
   });
 

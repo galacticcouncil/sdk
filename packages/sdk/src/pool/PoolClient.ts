@@ -11,10 +11,12 @@ import { BigNumber } from '../utils/bignumber';
 export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];
   protected subs: VoidFn[] = [];
-  private assets: Map<string, Asset> = new Map([]);
 
-  private memPools = memoize1((x: number) => {
-    console.log(this.getPoolType(), 'mem pools', x, '✅');
+  private assets: Map<string, Asset> = new Map([]);
+  private mem: number = 0;
+
+  private memPools = memoize1((mem: number) => {
+    console.log(this.getPoolType(), 'mem pools', mem, '✅');
     return this.getPools();
   });
 
@@ -34,28 +36,43 @@ export abstract class PoolClient extends BalanceClient {
       .map((p) => this.withMetadata(p));
   }
 
+  /**
+   * Update registry assets, evict mempool
+   *
+   * @param assets - registry assets
+   */
   async withAssets(assets: Asset[]) {
     this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
+    this.mem = this.mem + 1;
   }
 
   async getMemPools(): Promise<PoolBase[]> {
-    return this.memPools(1);
+    return this.memPools(this.mem);
   }
 
   async getPools(): Promise<PoolBase[]> {
-    console.log(this.getPoolType(), 'getPools', '✅');
+    this.unsubscribe();
     this.pools = await this.loadPools();
     this.subs = await this.subscribe();
+    const type = this.getPoolType();
+    console.log(type, `pools(${this.augmentedPools.length})`, '✅');
+    console.log(type, `subs(${this.subs.length})`, '✅');
     return this.augmentedPools;
   }
 
   private async subscribe() {
     const subs = this.augmentedPools.map(async (pool: PoolBase) => {
-      const poolSubs = [
-        await this.subscribePoolChange(pool),
-        await this.subscribeSystemPoolBalance(pool),
-        await this.subscribeTokensPoolBalance(pool),
-      ];
+      const poolSubs = [await this.subscribeTokensPoolBalance(pool)];
+
+      try {
+        const subChange = await this.subscribePoolChange(pool);
+        poolSubs.push(subChange);
+      } catch (e) {}
+
+      if (this.hasSystemAsset(pool)) {
+        const subSystem = await this.subscribeSystemPoolBalance(pool);
+        poolSubs.push(subSystem);
+      }
 
       if (this.hasErc20Asset(pool)) {
         const subErc20 = await this.subscribeErc20PoolBalance(pool);
@@ -73,6 +90,10 @@ export abstract class PoolClient extends BalanceClient {
 
     const subsriptions = await Promise.all(subs);
     return subsriptions.flat();
+  }
+
+  private hasSystemAsset(pool: PoolBase) {
+    return pool.tokens.some((t) => t.id === '0');
   }
 
   private hasShareAsset(pool: PoolBase) {
