@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 4.6.1
+
+### Patch Changes
+
+- Evict mem pools on registry sync
+
 ## 4.6.0
 
 ### Minor Changes
