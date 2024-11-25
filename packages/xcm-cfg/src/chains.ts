@@ -55,6 +55,8 @@ import {
   ajun,
   eth,
   aave,
+  susde,
+  susds,
 } from './assets';
 
 import {
@@ -401,6 +403,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: aave,
+      decimals: 18,
+      id: 1000624,
+      min: 0.00006,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: aca,
       decimals: 12,
       id: 1000099,
@@ -416,6 +444,28 @@ export const hydration = new EvmParachain({
               GeneralKey: {
                 length: 2,
                 data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: ajun,
+      decimals: 12,
+      id: 32,
+      min: 0.100786131828,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2051,
+            },
+            {
+              GeneralKey: {
+                length: 4,
+                data: '0x414a554e00000000000000000000000000000000000000000000000000000000',
               },
             },
           ],
@@ -826,6 +876,58 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: susde,
+      decimals: 18,
+      id: 1000625,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: susds,
+      decimals: 18,
+      id: 1000626,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: unq,
       decimals: 18,
       id: 25,
@@ -1172,28 +1274,6 @@ export const hydration = new EvmParachain({
               GeneralKey: {
                 length: 2,
                 data: '0x0001000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: ajun,
-      decimals: 12,
-      id: 32,
-      min: 0.100786131828,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2051,
-            },
-            {
-              GeneralKey: {
-                length: 4,
-                data: '0x414a554e00000000000000000000000000000000000000000000000000000000',
               },
             },
           ],
@@ -1783,6 +1863,11 @@ export const ethereum = new EvmChain({
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },
     {
+      asset: aave,
+      decimals: 18,
+      id: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+    },
+    {
       asset: weth,
       decimals: 18,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -1791,6 +1876,16 @@ export const ethereum = new EvmChain({
       asset: dai,
       decimals: 18,
       id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    },
+    {
+      asset: susde,
+      decimals: 18,
+      id: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+    },
+    {
+      asset: susds,
+      decimals: 18,
+      id: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
     },
     {
       asset: wbtc,

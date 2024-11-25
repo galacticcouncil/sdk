@@ -42,6 +42,8 @@ import {
   weth_awh,
   weth_mwh,
   wud,
+  aave,
+  susde,
 } from '../../../assets';
 import {
   acala,
@@ -878,8 +880,8 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  toEthereumViaSnowbridgeTemplate(weth, weth),
-  //toEthereumViaSnowbridgeTemplate(weth, weth),
+  toEthereumViaSnowbridgeTemplate(aave, aave),
+  toEthereumViaSnowbridgeTemplate(susde, susde),
 ];
 
 export const hydrationConfig = new ChainRoutes({
