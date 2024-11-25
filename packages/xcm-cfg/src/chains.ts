@@ -54,6 +54,7 @@ import {
   ztg,
   ajun,
   eth,
+  aave,
 } from './assets';
 
 import {
@@ -100,6 +101,19 @@ export const acala = new EvmParachain({
       decimals: 18,
       id: { ForeignAsset: 0 },
       min: 0.1,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 10,
+            },
+          ],
+        },
+      },
     },
     {
       asset: dai_awh,
@@ -381,36 +395,104 @@ export const hydration = new EvmParachain({
     {
       asset: hdx,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
     {
       asset: aca,
       decimals: 12,
       id: 1000099,
       min: 0.090744101633,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2000,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: astr,
       decimals: 18,
       id: 9,
       min: 0.147058823529412,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2006,
+          },
+        },
+      },
     },
     {
       asset: bnc,
       decimals: 12,
       id: 14,
       min: 0.06879518984,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2030,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: cfg,
       decimals: 18,
       id: 13,
       min: 0.0324675324675325,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2031,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: cru,
       decimals: 12,
       id: 27,
       min: 0.007874015748,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2008,
+          },
+        },
+      },
     },
     {
       asset: ded,
@@ -419,6 +501,22 @@ export const hydration = new EvmParachain({
       id: 30,
       metadataId: 1000019,
       palletInstance: 50,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 30,
+            },
+          ],
+        },
+      },
     },
     {
       asset: dot,
@@ -437,18 +535,69 @@ export const hydration = new EvmParachain({
       id: 18,
       metadataId: 1000038,
       palletInstance: 50,
+      xcmLocation: {
+        parents: '1',
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 18,
+            },
+          ],
+        },
+      },
     },
     {
       asset: dai_awh,
       decimals: 18,
       id: 2,
       min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2000,
+            },
+            {
+              GeneralKey: {
+                length: 21,
+                data: '0x0254a37a01cd75b616d63e0ab665bffdb0143c52ae0000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: dai_mwh,
       decimals: 18,
       id: 18,
       min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x06e605775296e851ff43b4daa541bb0984e9d6fd',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: glmr,
@@ -456,30 +605,99 @@ export const hydration = new EvmParachain({
       id: 16,
       min: 0.034854864344868,
       palletInstance: 10,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 10,
+            },
+          ],
+        },
+      },
     },
     {
       asset: ibtc,
       decimals: 8,
       id: 11,
       min: 0.00000036,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2032,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: intr,
       decimals: 10,
       id: 17,
       min: 0.6164274209,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2032,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0002000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: kilt,
       decimals: 15,
       id: 28,
       min: 0.021358393848783,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2086,
+          },
+        },
+      },
     },
     {
       asset: ldot,
       decimals: 10,
       id: 1000100,
       min: 0.0100200401,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2000,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0003000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: myth,
@@ -500,12 +718,38 @@ export const hydration = new EvmParachain({
       decimals: 11,
       id: 26,
       min: 1.0989010989,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2026,
+            },
+            {
+              PalletInstance: 2,
+            },
+          ],
+        },
+      },
     },
     {
       asset: pen,
       decimals: 12,
       id: 1000081,
       min: 0.153256704981,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2094,
+            },
+            {
+              PalletInstance: 10,
+            },
+          ],
+        },
+      },
     },
     {
       asset: pink,
@@ -514,30 +758,86 @@ export const hydration = new EvmParachain({
       id: 23,
       metadataId: 1000021,
       palletInstance: 50,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 23,
+            },
+          ],
+        },
+      },
     },
     {
       asset: pha,
       decimals: 12,
       id: 8,
       min: 0.054945054945,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2035,
+          },
+        },
+      },
     },
     {
       asset: ring,
       decimals: 18,
       id: 31,
       min: 1,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2030,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0903000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: sub,
       decimals: 10,
       id: 24,
       min: 0.02,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2101,
+          },
+        },
+      },
     },
     {
       asset: unq,
       decimals: 18,
       id: 25,
       min: 1.22438434893974,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2037,
+          },
+        },
+      },
     },
     {
       asset: usdc,
@@ -547,12 +847,47 @@ export const hydration = new EvmParachain({
       metadataId: 22,
       min: 0.01,
       palletInstance: 50,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1337,
+            },
+          ],
+        },
+      },
     },
     {
       asset: usdc_mwh,
       decimals: 6,
       id: 21,
       min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x931715fee2d06333043d11f658c8ce934ac61d0c',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: usdt,
@@ -562,6 +897,22 @@ export const hydration = new EvmParachain({
       metadataId: 10,
       min: 0.01,
       palletInstance: 50,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
     },
     {
       asset: usdt_mwh,
@@ -569,18 +920,69 @@ export const hydration = new EvmParachain({
       id: 23,
       min: 0.01,
       palletInstance: 110,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xc30e9ca94cf52f3bf5692aacf81353a27052c46f',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: vastr,
       decimals: 18,
       id: 33,
       min: 0.133689839572193,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2030,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0903000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: vdot,
       decimals: 10,
       id: 15,
       min: 0.0018761726,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2030,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0900000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: wbtc,
@@ -613,6 +1015,22 @@ export const hydration = new EvmParachain({
       decimals: 8,
       id: 3,
       min: 0.00000044,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2000,
+            },
+            {
+              GeneralKey: {
+                length: 21,
+                data: '0x02c80084af223c8b598536178d9361dc55bfda68180000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: wbtc_mwh,
@@ -620,6 +1038,25 @@ export const hydration = new EvmParachain({
       id: 19,
       min: 0.00000034,
       palletInstance: 110,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xe57ebd2d67b462e9926e04a8e33f01cd0d64346d',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: weth,
@@ -652,6 +1089,22 @@ export const hydration = new EvmParachain({
       decimals: 18,
       id: 4,
       min: 0.000005,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2000,
+            },
+            {
+              GeneralKey: {
+                length: 21,
+                data: '0x025a4d6acdc4e3e5ab15717f407afe957f7a2425780000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: weth_mwh,
@@ -659,6 +1112,25 @@ export const hydration = new EvmParachain({
       id: 20,
       min: 0.000005390835579515,
       palletInstance: 110,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xab3f0245b83feb11d15aaffefd7ad465a59817ed',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: wud,
@@ -667,18 +1139,66 @@ export const hydration = new EvmParachain({
       decimals: 10,
       palletInstance: 50,
       min: 20000,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 31337,
+            },
+          ],
+        },
+      },
     },
     {
       asset: ztg,
       decimals: 10,
       id: 12,
       min: 0.090744101633,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2029,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: ajun,
       decimals: 12,
       id: 32,
       min: 0.100786131828,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2051,
+            },
+            {
+              GeneralKey: {
+                length: 4,
+                data: '0x414a554e00000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,

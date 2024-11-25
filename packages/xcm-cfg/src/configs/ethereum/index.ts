@@ -14,13 +14,12 @@ import {
   usdt_mwh,
 } from '../../assets';
 import { ethereum, hydration, moonbeam } from '../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../builders';
+import { BalanceBuilder, ContractBuilder } from '../../builders';
 
-import { toHydrationErc20Template } from './templates';
+import {
+  toHydrationErc20Template,
+  toHydrationSnowbridgeTemplate,
+} from './templates';
 
 const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
@@ -53,28 +52,8 @@ const toHydrationViaWormhole: AssetRoute[] = [
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: weth,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: weth,
-      fee: {
-        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
-        asset: eth,
-      },
-    },
-    contract: ContractBuilder().Snowbridge().sendToken(),
-  }),
+  toHydrationSnowbridgeTemplate(weth, weth),
+  //toHydrationSnowbridgeTemplate(weth, weth),
 ];
 
 const toMoonbeam: AssetRoute[] = [
@@ -124,8 +103,5 @@ const toMoonbeam: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [
-    ...toHydrationViaWormhole,
-    //...toHydrationViaSnowbridge
-  ],
+  routes: [...toHydrationViaWormhole, ...toHydrationViaSnowbridge],
 });

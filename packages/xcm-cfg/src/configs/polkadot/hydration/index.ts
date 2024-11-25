@@ -83,6 +83,7 @@ import {
   toEthereumWithRelayerTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
+  toEthereumViaSnowbridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -877,29 +878,8 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: weth,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: ethereum,
-      asset: weth,
-      fee: {
-        amount: FeeAmountBuilder().Snowbridge().getSendFee(),
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
-  }),
+  toEthereumViaSnowbridgeTemplate(weth, weth),
+  //toEthereumViaSnowbridgeTemplate(weth, weth),
 ];
 
 export const hydrationConfig = new ChainRoutes({
@@ -913,7 +893,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
-    //...toEthereumViaSnowbridge,
+    ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

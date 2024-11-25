@@ -1,7 +1,11 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xcm-core';
 
 import { eth } from '../../assets';
-import { BalanceBuilder, ContractBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 import { hydration, moonbeam } from '../../chains';
 
 export function toHydrationErc20Template(
@@ -34,5 +38,30 @@ export function toHydrationErc20Template(
       .TokenBridge()
       .transferTokensWithPayload()
       .viaMrl({ moonchain: moonbeam }),
+  });
+}
+
+export function toHydrationSnowbridgeTemplate(assetIn: Asset, assetOut: Asset) {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().erc20(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
   });
 }

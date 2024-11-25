@@ -30,6 +30,11 @@ export interface TransactConfig {
   extrinsic: ExtrinsicConfigBuilder;
 }
 
+export enum Bridge {
+  Snowbridge = 'Snowbridge',
+  Wormhole = 'Wormhole',
+}
+
 export interface AssetRouteParams {
   source: SourceConfig;
   destination: DestinationConfig;

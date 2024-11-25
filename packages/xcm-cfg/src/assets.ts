@@ -1,8 +1,18 @@
 import { Asset } from '@galacticcouncil/xcm-core';
 
+export const aave = new Asset({
+  key: 'aave',
+  originSymbol: 'AAVE',
+});
+
 export const aca = new Asset({
   key: 'aca',
   originSymbol: 'ACA',
+});
+
+export const ajun = new Asset({
+  key: 'ajun',
+  originSymbol: 'AJUN',
 });
 
 export const astr = new Asset({
@@ -140,6 +150,16 @@ export const sub = new Asset({
   originSymbol: 'SUB',
 });
 
+export const susde = new Asset({
+  key: 'susde',
+  originSymbol: 'sUSDe',
+});
+
+export const susds = new Asset({
+  key: 'susds',
+  originSymbol: 'sUSDS',
+});
+
 export const teer = new Asset({
   key: 'teer',
   originSymbol: 'TEER',
@@ -230,13 +250,10 @@ export const ztg = new Asset({
   originSymbol: 'ZTG',
 });
 
-export const ajun = new Asset({
-  key: 'ajun',
-  originSymbol: 'AJUN',
-});
-
 export const assets: Asset[] = [
+  aave,
   aca,
+  ajun,
   astr,
   bsx,
   cfg,
@@ -264,6 +281,8 @@ export const assets: Asset[] = [
   pink,
   ring,
   sub,
+  susde,
+  susds,
   teer,
   tnkr,
   unq,
@@ -282,7 +301,6 @@ export const assets: Asset[] = [
   wud,
   xrt,
   ztg,
-  ajun,
 ];
 
 export const assetsMap = new Map<string, Asset>(
