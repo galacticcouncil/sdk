@@ -46,7 +46,7 @@ export abstract class PoolClient extends BalanceClient {
     this.mem = this.mem + 1;
   }
 
-  async getMemPools(): Promise<PoolBase[]> {
+  async getPoolsMem(): Promise<PoolBase[]> {
     return this.memPools(this.mem);
   }
 

@@ -83,7 +83,7 @@ export class PoolService implements IPoolService {
       const pools = await Promise.all(
         this.clients
           .filter((client) => client.isSupported())
-          .map((client) => client.getMemPools())
+          .map((client) => client.getPoolsMem())
       );
       return pools.flat();
     }
@@ -91,7 +91,7 @@ export class PoolService implements IPoolService {
     const pools = await Promise.all(
       this.clients
         .filter((client) => includeOnly.some((t) => t === client.getPoolType()))
-        .map((client) => client.getMemPools())
+        .map((client) => client.getPoolsMem())
     );
     return pools.flat();
   }
