@@ -86,7 +86,7 @@ export class Wallet {
 
     const { source, destination } = srcConf.route;
 
-    // Normalize dest fee ctx in case of bridge transfers
+    // Normalize dest fee ctx in case of wrapped assets
     const srcDestinationFeeAsset =
       source.destinationFee.asset || destination.fee.asset;
     const srcDestinationFee = dstFee.copyWith(srcDestinationFeeAsset);

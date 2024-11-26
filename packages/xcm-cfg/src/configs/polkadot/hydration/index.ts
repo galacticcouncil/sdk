@@ -38,7 +38,6 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
-  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -47,7 +46,6 @@ import {
 } from '../../../assets';
 import {
   acala,
-  acala_evm,
   ajuna,
   assetHub,
   astar,
@@ -67,25 +65,20 @@ import {
   subsocial,
   unique,
   zeitgeist,
-  ethereum,
 } from '../../../chains';
 import {
-  ContractBuilder,
   ExtrinsicBuilder,
   ExtrinsicBuilderV4,
-  FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
-  MRL_EXECUTION_FEE,
-  MRL_XCM_FEE,
   toHubExtTemplate,
-  toEthereumWithRelayerTemplate,
+  toEthereumViaSnowbridgeTemplate,
+  toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
-  toEthereumViaSnowbridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -824,59 +817,12 @@ const toAjuna: AssetRoute[] = [
   }),
 ];
 
-const toAcalaViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dai_mwh,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala_evm,
-      asset: dai_awh,
-      fee: {
-        amount: 0.06,
-        asset: aca,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilder().polkadotXcm().send().transact({
-          fee: MRL_EXECUTION_FEE,
-        }),
-      ]),
-    transact: {
-      chain: moonbeam,
-      fee: {
-        amount: MRL_XCM_FEE,
-        asset: glmr,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder()
-        .ethereumXcm()
-        .transact(
-          ContractBuilder()
-            .Batch()
-            .batchAll([
-              ContractBuilder().Erc20().approve(),
-              ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-            ])
-        ),
-    },
-  }),
-];
-
 const toEthereumViaWormhole: AssetRoute[] = [
-  toEthereumWithRelayerTemplate(dai_mwh, dai),
-  toEthereumWithRelayerTemplate(weth_mwh, eth),
-  toEthereumWithRelayerTemplate(wbtc_mwh, wbtc),
-  toEthereumWithRelayerTemplate(usdt_mwh, usdt),
-  toEthereumWithRelayerTemplate(usdc_mwh, usdc),
+  toEthereumViaWormholeTemplate(dai_mwh, dai),
+  toEthereumViaWormholeTemplate(weth_mwh, eth),
+  toEthereumViaWormholeTemplate(wbtc_mwh, wbtc),
+  toEthereumViaWormholeTemplate(usdt_mwh, usdt),
+  toEthereumViaWormholeTemplate(usdc_mwh, usdc),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [

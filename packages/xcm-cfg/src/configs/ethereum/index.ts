@@ -6,7 +6,6 @@ import {
   eth,
   wbtc,
   wbtc_mwh,
-  weth,
   weth_mwh,
   usdc,
   usdc_mwh,
@@ -17,10 +16,11 @@ import {
 } from '../../assets';
 import { ethereum, hydration, moonbeam } from '../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../builders';
+import { Tag } from '../../tags';
 
 import {
-  toHydrationErc20Template,
-  toHydrationSnowbridgeTemplate,
+  toHydrationViaWormholeTemplate,
+  toHydrationViaSnowbridgeTemplate,
 } from './templates';
 
 const toHydrationViaWormhole: AssetRoute[] = [
@@ -46,19 +46,20 @@ const toHydrationViaWormhole: AssetRoute[] = [
       .TokenBridge()
       .wrapAndTransferETHWithPayload()
       .viaMrl({ moonchain: moonbeam }),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
-  toHydrationErc20Template(dai, dai_mwh),
-  toHydrationErc20Template(wbtc, wbtc_mwh),
-  toHydrationErc20Template(usdc, usdc_mwh),
-  toHydrationErc20Template(usdt, usdt_mwh),
+  toHydrationViaWormholeTemplate(dai, dai_mwh),
+  toHydrationViaWormholeTemplate(wbtc, wbtc_mwh),
+  toHydrationViaWormholeTemplate(usdc, usdc_mwh),
+  toHydrationViaWormholeTemplate(usdt, usdt_mwh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
-  toHydrationSnowbridgeTemplate(aave, aave),
-  toHydrationSnowbridgeTemplate(susde, susde),
+  toHydrationViaSnowbridgeTemplate(aave, aave),
+  toHydrationViaSnowbridgeTemplate(susde, susde),
 ];
 
-const toMoonbeam: AssetRoute[] = [
+const toMoonbeamViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
@@ -77,6 +78,7 @@ const toMoonbeam: AssetRoute[] = [
       },
     },
     contract: ContractBuilder().Wormhole().TokenBridge().wrapAndTransferETH(),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
   new AssetRoute({
     source: {
@@ -100,6 +102,7 @@ const toMoonbeam: AssetRoute[] = [
       },
     },
     contract: ContractBuilder().Wormhole().TokenBridge().transferTokens(),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
 ];
 

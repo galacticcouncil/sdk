@@ -7,8 +7,9 @@ import {
   FeeAmountBuilder,
 } from '../../builders';
 import { hydration, moonbeam } from '../../chains';
+import { Tag } from '../../tags';
 
-export function toHydrationErc20Template(
+export function toHydrationViaWormholeTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -38,10 +39,14 @@ export function toHydrationErc20Template(
       .TokenBridge()
       .transferTokensWithPayload()
       .viaMrl({ moonchain: moonbeam }),
+    tags: [Tag.Mrl, Tag.Wormhole],
   });
 }
 
-export function toHydrationSnowbridgeTemplate(assetIn: Asset, assetOut: Asset) {
+export function toHydrationViaSnowbridgeTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+) {
   return new AssetRoute({
     source: {
       asset: assetIn,
@@ -63,5 +68,6 @@ export function toHydrationSnowbridgeTemplate(assetIn: Asset, assetOut: Asset) {
       },
     },
     contract: ContractBuilder().Snowbridge().sendToken(),
+    tags: [Tag.Snowbridge],
   });
 }

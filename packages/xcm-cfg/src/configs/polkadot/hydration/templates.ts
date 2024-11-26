@@ -14,6 +14,7 @@ import {
   XcmTransferType,
 } from '../../../builders';
 import { assetHub, ethereum, moonbeam, zeitgeist } from '../../../chains';
+import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
 
@@ -100,7 +101,7 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
   });
 }
 
-export function toEthereumWithRelayerTemplate(
+export function toEthereumViaWormholeTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -152,6 +153,7 @@ export function toEthereumWithRelayerTemplate(
             ])
         ),
     },
+    tags: [Tag.Mrl, Tag.Wormhole],
   });
 }
 
@@ -181,5 +183,6 @@ export function toEthereumViaSnowbridgeTemplate(
       .transferAssetsUsingTypeAndThen({
         transferType: XcmTransferType.DestinationReserve,
       }),
+    tags: [Tag.Snowbridge],
   });
 }
