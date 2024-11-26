@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.5.0
+
+### Minor Changes
+
+- 9319ac9: Add AAVE & sUSDe snowbridge support
+
+### Patch Changes
+
+- Updated dependencies [c879417]
+  - @galacticcouncil/xcm-core@5.4.0
+
 ## 5.4.2
 
 ### Patch Changes

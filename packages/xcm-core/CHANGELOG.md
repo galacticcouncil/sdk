@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 5.4.0
+
+### Minor Changes
+
+- c879417: Support route tags
+
 ## 5.3.1
 
 ### Patch Changes
