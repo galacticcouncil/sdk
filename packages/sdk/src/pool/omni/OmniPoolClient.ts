@@ -54,8 +54,8 @@ export class OmniPoolClient extends PoolClient {
           shares: bnum(shares.toString()),
           tradeable: tradable.bits.toNumber(),
           balance: balance.toString(),
-          cap: cap.toString(),
-          protocolShares: protocolShares.toString(),
+          cap: bnum(cap.toString()),
+          protocolShares: bnum(protocolShares.toString()),
         } as OmniPoolToken;
       }
     );
@@ -125,11 +125,13 @@ export class OmniPoolClient extends PoolClient {
     token: PoolToken,
     tokenState: PalletOmnipoolAssetState
   ) {
-    const { hubReserve, shares, tradable } = tokenState;
+    const { hubReserve, shares, tradable, cap, protocolShares } = tokenState;
     return {
       ...token,
       hubReserves: bnum(hubReserve.toString()),
       shares: bnum(shares.toString()),
+      cap: bnum(cap.toString()),
+      protocolShares: bnum(protocolShares.toString()),
       tradeable: tradable.bits.toNumber(),
     } as OmniPoolToken;
   }

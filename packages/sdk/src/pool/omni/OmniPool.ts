@@ -28,8 +28,8 @@ export type OmniPoolPair = PoolPair & {
 export type OmniPoolToken = PoolToken & {
   hubReserves: BigNumber;
   shares: BigNumber;
-  cap: string;
-  protocolShares: string;
+  cap: BigNumber;
+  protocolShares: BigNumber;
 };
 
 export type OmniPoolFees = PoolFees & {
