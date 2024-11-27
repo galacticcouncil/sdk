@@ -100,6 +100,7 @@ export class Router {
             isSufficient: t.isSufficient,
             existentialDeposit: t.existentialDeposit,
             meta: t.meta,
+            location: t.location,
             isWhiteListed: t.isWhiteListed,
           } as Asset;
         })
