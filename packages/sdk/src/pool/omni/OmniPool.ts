@@ -26,8 +26,10 @@ export type OmniPoolPair = PoolPair & {
 };
 
 export type OmniPoolToken = PoolToken & {
-  hubReserves: BigNumber;
-  shares: BigNumber;
+  hubReserves: string;
+  shares: string;
+  cap: string;
+  protocolShares: string;
 };
 
 export type OmniPoolFees = PoolFees & {
@@ -101,10 +103,10 @@ export class OmniPool implements Pool {
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
-      hubReservesIn: tokenInMeta.hubReserves,
-      hubReservesOut: tokenOutMeta.hubReserves,
-      sharesIn: tokenInMeta.shares,
-      sharesOut: tokenOutMeta.shares,
+      hubReservesIn: bnum(tokenInMeta.hubReserves),
+      hubReservesOut: bnum(tokenOutMeta.hubReserves),
+      sharesIn: bnum(tokenInMeta.shares),
+      sharesOut: bnum(tokenOutMeta.shares),
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
       balanceIn: balanceIn,

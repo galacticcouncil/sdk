@@ -40,15 +40,22 @@ export class OmniPoolClient extends PoolClient {
         },
         state,
       ]) => {
-        const { hubReserve, shares, tradable }: PalletOmnipoolAssetState =
-          state.unwrap();
+        const {
+          hubReserve,
+          shares,
+          tradable,
+          cap,
+          protocolShares,
+        }: PalletOmnipoolAssetState = state.unwrap();
         const balance = await this.getBalance(poolAddress, id.toString());
         return {
           id: id.toString(),
-          hubReserves: bnum(hubReserve.toString()),
-          shares: bnum(shares.toString()),
+          hubReserves: hubReserve.toString(),
+          shares: shares.toString(),
           tradeable: tradable.bits.toNumber(),
           balance: balance.toString(),
+          cap: cap.toString(),
+          protocolShares: protocolShares.toString(),
         } as OmniPoolToken;
       }
     );
@@ -121,8 +128,8 @@ export class OmniPoolClient extends PoolClient {
     const { hubReserve, shares, tradable } = tokenState;
     return {
       ...token,
-      hubReserves: bnum(hubReserve.toString()),
-      shares: bnum(shares.toString()),
+      hubReserves: hubReserve.toString(),
+      shares: shares.toString(),
       tradeable: tradable.bits.toNumber(),
     } as OmniPoolToken;
   }
