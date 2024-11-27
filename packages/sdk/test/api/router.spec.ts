@@ -58,9 +58,7 @@ describe('Router with mocked XYK pool service', () => {
         type: 'Token',
         isSufficient: true,
         existentialDeposit: '1000',
-        origin: undefined,
         meta: undefined,
-        externalId: undefined,
         isWhiteListed: undefined,
       },
       {
@@ -72,9 +70,7 @@ describe('Router with mocked XYK pool service', () => {
         type: 'Token',
         isSufficient: true,
         existentialDeposit: '1000',
-        origin: undefined,
         meta: undefined,
-        externalId: undefined,
         isWhiteListed: undefined,
       },
       {
@@ -86,9 +82,7 @@ describe('Router with mocked XYK pool service', () => {
         type: 'Token',
         isSufficient: true,
         existentialDeposit: '1000',
-        origin: undefined,
         meta: undefined,
-        externalId: undefined,
         isWhiteListed: undefined,
       },
     ]);
@@ -108,9 +102,7 @@ describe('Router with mocked XYK pool service', () => {
         type: 'Token',
         isSufficient: true,
         existentialDeposit: '1000',
-        origin: undefined,
         meta: undefined,
-        externalId: undefined,
         isWhiteListed: undefined,
       },
       {
@@ -122,9 +114,7 @@ describe('Router with mocked XYK pool service', () => {
         type: 'Token',
         isSufficient: true,
         existentialDeposit: '1000',
-        origin: undefined,
         meta: undefined,
-        externalId: undefined,
         isWhiteListed: undefined,
       },
     ]);
