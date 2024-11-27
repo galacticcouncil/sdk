@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.0.1
+
+### Patch Changes
+
+- Fix asset location in router api
+
 ## 5.0.0
 
 ### Major Changes
