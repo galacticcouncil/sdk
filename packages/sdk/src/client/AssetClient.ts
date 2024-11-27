@@ -10,7 +10,6 @@ import { Option, StorageKey } from '@polkadot/types';
 import { ApiPromise } from '@polkadot/api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
-import { findNestedKey } from '../utils/json';
 
 import { PolkadotApiClient } from './PolkadotApi';
 
@@ -149,8 +148,6 @@ export class AssetClient extends PolkadotApiClient {
 
     const { name, assetType, isSufficient, existentialDeposit } = details;
     const { symbol, decimals } = metadata.get(tokenKey) ?? {};
-    const origin = this.parseLocation('parachain', location);
-    const pendulumId = 2094;
     return {
       id: tokenKey,
       name: name.toHuman(),
@@ -159,11 +156,7 @@ export class AssetClient extends PolkadotApiClient {
       icon: symbol,
       type: assetType.toHuman(),
       isSufficient: isSufficient ? isSufficient.toHuman() : true,
-      origin,
-      externalId: this.parseLocation(
-        pendulumId === origin ? 'generalKey' : 'generalIndex',
-        location
-      ),
+      location: location?.toJSON(),
       existentialDeposit: existentialDeposit.toString(),
     } as Asset;
   }
@@ -344,17 +337,5 @@ export class AssetClient extends PolkadotApiClient {
   private isSupportedAsset(details: PalletAssetRegistryAssetDetails): boolean {
     const type = details.assetType.toString();
     return this.SUPPORTED_TYPES.includes(type);
-  }
-
-  private parseLocation(
-    key: string,
-    location?: HydradxRuntimeXcmAssetLocation
-  ): any | undefined {
-    if (location) {
-      const entry = findNestedKey(location.toJSON(), key);
-      return entry && entry[key];
-    } else {
-      return undefined;
-    }
   }
 }
