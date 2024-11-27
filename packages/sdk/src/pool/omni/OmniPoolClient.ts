@@ -50,8 +50,8 @@ export class OmniPoolClient extends PoolClient {
         const balance = await this.getBalance(poolAddress, id.toString());
         return {
           id: id.toString(),
-          hubReserves: hubReserve.toString(),
-          shares: shares.toString(),
+          hubReserves: bnum(hubReserve.toString()),
+          shares: bnum(shares.toString()),
           tradeable: tradable.bits.toNumber(),
           balance: balance.toString(),
           cap: cap.toString(),
@@ -128,8 +128,8 @@ export class OmniPoolClient extends PoolClient {
     const { hubReserve, shares, tradable } = tokenState;
     return {
       ...token,
-      hubReserves: hubReserve.toString(),
-      shares: shares.toString(),
+      hubReserves: bnum(hubReserve.toString()),
+      shares: bnum(shares.toString()),
       tradeable: tradable.bits.toNumber(),
     } as OmniPoolToken;
   }
