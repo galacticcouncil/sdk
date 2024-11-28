@@ -12,7 +12,7 @@ const { configService, init } = setup;
 const { runXcm } = xcm;
 
 const getPolkadotChains = () => {
-  const blacklist: string[] = ['acala-evm'];
+  const blacklist: string[] = ['acala-evm', 'nodle'];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
@@ -28,7 +28,7 @@ const getPolkadotChains = () => {
 };
 
 const getKusamaChains = () => {
-  const blacklist: string[] = ['basilisk'];
+  const blacklist: string[] = [];
   const chains = Array.from(configService.chains.values())
     .filter((c) => c.ecosystem === ChainEcosystem.Kusama)
     .filter((c) => !blacklist.includes(c.key));
