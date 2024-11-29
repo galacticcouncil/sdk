@@ -95,13 +95,13 @@ const xTransfer = await wallet.transfer(
 const status = await xTransfer.validate();
 
 // Construct calldata with transfer amount
-const fee: AssetAmount = await xTransfer.estimateFee('0.0001');
+const fee: AssetAmount = await xTransfer.estimateFee('0.1');
 const feeInfo = [
   'Estimated fee:',
   fee.toDecimal(fee.decimals),
   fee.originSymbol,
 ].join(' ');
-const call: XCall = await xTransfer.buildCall('0.0001');
+const call: XCall = await xTransfer.buildCall('0.1');
 
 // Dump transfer info
 console.log(xTransfer);
