@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.5.1
+
+### Patch Changes
+
+- Fix snowbridge dest fee balance config
+
 ## 5.5.0
 
 ### Minor Changes
