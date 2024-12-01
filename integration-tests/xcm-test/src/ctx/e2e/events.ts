@@ -5,7 +5,7 @@ import type {
 import type { AnyJson } from '@polkadot/types-codec/types';
 import { ApiPromise } from '@polkadot/api';
 
-import { findNestedKey } from '../utils';
+import { findNestedKey } from '../../utils/json';
 
 export function checkIfFailed(api: ApiPromise, events: EventRecord[]): boolean {
   return events.some(({ event: { method, section, data } }) => {

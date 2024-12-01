@@ -7,6 +7,7 @@ import {
 import { ApiPromise } from '@polkadot/api';
 
 import { getAccount } from './account';
+import { jsonFormatter } from '../../utils/json';
 
 const BALANCE = 1000n;
 
@@ -14,7 +15,7 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
   const chainDecimals = api.registry.chainDecimals[0];
   const chainAssets = Array.from(chain.assetsData.values());
 
-  const system = {
+  let storage = {
     System: {
       Account: populateSystem(chain, chainDecimals),
     },
@@ -22,28 +23,45 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
 
   // Single asset (system only)
   if (chainAssets.length === 1) {
-    return system;
+    return storage;
   }
 
-  if (useTokensPallet(api)) {
-    return {
-      ...system,
-      Tokens: {
-        Accounts: populateTokens(chain, chainAssets, chainDecimals),
+  /*   if (chain.key === 'moonbeam') {
+    storage = Object.assign(
+      {
+        EVM: {
+          AccountStorages: populateErc20(chain, chainAssets, chainDecimals),
+        },
       },
-    };
+      storage
+    );
+  } */
+
+  if (useTokensPallet(api)) {
+    storage = Object.assign(
+      {
+        Tokens: {
+          Accounts: populateTokens(chain, chainAssets, chainDecimals),
+        },
+      },
+      storage
+    );
   }
 
   if (useAssetsPallet(api)) {
-    return {
-      ...system,
-      Assets: {
-        Account: populateAssets(chain, chainAssets, chainDecimals),
+    storage = Object.assign(
+      {
+        Assets: {
+          Account: populateAssets(chain, chainAssets, chainDecimals),
+        },
       },
-    };
+      storage
+    );
   }
 
-  return system;
+  //console.log(JSON.stringify(storage, jsonFormatter, 2));
+
+  return storage;
 };
 
 const useAssetsPallet = (api: ApiPromise): boolean => {
@@ -66,6 +84,24 @@ const useNormalizedBalance = (
   const assetMinFmt = big.toBigInt(assetMin, assetDecimals);
   const assetBalance = BALANCE * 10n ** BigInt(assetDecimals);
   return assetMinFmt > assetBalance ? assetMinFmt + assetBalance : assetBalance;
+};
+
+const populateErc20 = (
+  chain: Parachain,
+  assets: ParachainAssetData[],
+  decimals: number
+) => {
+  const acc = getAccount(chain);
+  return assets
+    .filter((a) => a.asset.key.toString().endsWith('_mwh'))
+    .map((a) => {
+      const assetId = chain.getBalanceAssetId(a.asset);
+      const balance = useNormalizedBalance(chain, decimals, a.asset);
+      return [
+        [assetId, acc.address],
+        `0x${balance.toString(16).toUpperCase()}`,
+      ];
+    });
 };
 
 const populateAssets = (

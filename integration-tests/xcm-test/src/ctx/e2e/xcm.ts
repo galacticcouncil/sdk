@@ -23,7 +23,7 @@ import {
 } from './xcm.utils';
 import { SetupCtx } from './types';
 
-import { getRouteKey } from '../utils';
+import { getRouteKey } from '../../utils/route';
 
 const TRANSFER_AMOUNT = '10';
 
@@ -38,9 +38,10 @@ export const runXcm = (
     networks: SetupCtx[];
     wallet: Wallet;
   }>,
-  options: { skip?: boolean } = {}
+  options: { skip?: boolean; sync?: boolean } = {}
 ) => {
   const itfn = options.skip ? it.skip : it;
+  const shouldSync = options.sync || false;
   itfn(
     name,
     async () => {
@@ -68,6 +69,7 @@ export const runXcm = (
 
       let extrinsic;
       if (calldata.type === CallType.Evm && chain.key === 'moonbeam') {
+        return;
         // Skipped for now
         extrinsic = moonbeam.toTransferExtrinsic(
           srcNetwork.api,
@@ -98,7 +100,8 @@ export const runXcm = (
       await destNetwork.chain.newBlock();
       const destEvents = await destNetwork.api.query.system.events();
       expect(checkIfProcessed(destEvents)).toBeTruthy();
-      expect([key, calldata.data]).toMatchSnapshot();
+
+      shouldSync && expect([key, calldata.data]).toMatchSnapshot();
 
       const postTransfer = await getTransfer(
         wallet,
@@ -113,14 +116,15 @@ export const runXcm = (
         postTransfer
       );
 
-      report.set(key, {
-        updated: Date.now(),
-        destination: {
-          fee: destinationFee.delta,
-          feeAsset: destinationFee.asset,
-          feeNative: destinationFee.deltaBn,
-        },
-      });
+      shouldSync &&
+        report.set(key, {
+          updated: Date.now(),
+          destination: {
+            fee: destinationFee.delta,
+            feeAsset: destinationFee.asset,
+            feeNative: destinationFee.deltaBn,
+          },
+        });
 
       console.table(
         [

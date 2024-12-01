@@ -11,7 +11,7 @@ import {
 import { getAddress } from './account';
 import { getAmount } from './amount';
 
-import { getRouteKey } from '../utils';
+import { getRouteKey } from '../../utils/route';
 
 const BALANCE = 10;
 const FEE = 0.1;
