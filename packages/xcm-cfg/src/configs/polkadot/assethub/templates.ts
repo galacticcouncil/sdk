@@ -64,5 +64,5 @@ export function toHydrationExtTemplate(asset: Asset): AssetRoute {
 }
 
 export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
-  return toParachainExtTemplate(asset, moonbeam, 0.15);
+  return toParachainExtTemplate(asset, moonbeam, 0.25);
 }
