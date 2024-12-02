@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.6.0
+
+### Minor Changes
+
+- Bump hub -> moonbeam fees
+- Bump hydration -> moonbeam hdx fee
+- Normalize hub x1 interior
+
 ## 5.5.1
 
 ### Patch Changes
