@@ -77,6 +77,13 @@ Array [
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub -> Hydration WUD [wud] transfer 1`] = `
+Array [
+  "assethub-hydration-wud",
+  "0x4d01041f0803010100c91f030001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0308000002043205011f0082380100000002043205a6e90100000700e87648170000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub -> Moonbeam USDC [usdc] transfer 1`] = `
 Array [
   "assethub-moonbeam-usdc",
