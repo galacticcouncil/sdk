@@ -1,4 +1,5 @@
 import {
+  AnyChain,
   ConfigBuilder,
   Parachain,
   SubstrateApis,
@@ -35,6 +36,17 @@ const getKey = () => {
   return key;
 };
 
+const getChainsCtx = (source: AnyChain, destination: AnyChain) => {
+  const relay = configService.getChain('polkadot');
+  const dex = configService.getChain('hydration');
+
+  const isDexTransfer = source.key === dex.key || destination.key === dex.key;
+  if (isDexTransfer) {
+    return [source, destination, relay] as Parachain[];
+  }
+  return [source, destination, relay, dex] as Parachain[];
+};
+
 describe('Wallet with XCM config', () => {
   jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
 
@@ -45,18 +57,15 @@ describe('Wallet with XCM config', () => {
 
   const key = getKey();
   const [srcChainKey, destChainKey, assetKey] = key.split('-');
-  const relay = configService.getChain('polkadot');
+
   const srcChain = configService.getChain(srcChainKey);
   const destChain = configService.getChain(destChainKey);
   const asset = configService.getAsset(assetKey);
 
   beforeAll(async () => {
     global.console = console;
-    networks = await createNetworks([
-      srcChain,
-      destChain,
-      relay,
-    ] as Parachain[]);
+    const chains = getChainsCtx(srcChain, destChain);
+    networks = await createNetworks(chains);
     const ctx = networks.find((n) => n.config.key === 'hydration')!;
     wallet = await initWithCtx(ctx);
   });
@@ -97,6 +106,9 @@ describe('Wallet with XCM config', () => {
           networks: networks,
           wallet: wallet,
         };
+      },
+      {
+        sync: true,
       }
     );
   });
