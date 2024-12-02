@@ -486,7 +486,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: hdx,
       fee: {
-        amount: 0.835,
+        amount: 5,
         asset: hdx,
       },
     },
