@@ -53,7 +53,7 @@ export function checkIfProcessed(events: EventRecord[]): boolean {
 
 function checkProcessedStatus(data: AnyJson): boolean {
   const dataEntry = findNestedKey(data, 'success');
-  return dataEntry['success'] === true;
+  return dataEntry && dataEntry['success'] === true;
 }
 
 function logEvent(section: string, method: string, data: AnyJson) {
