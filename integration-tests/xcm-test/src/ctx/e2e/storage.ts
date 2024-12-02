@@ -7,7 +7,7 @@ import {
 import { ApiPromise } from '@polkadot/api';
 
 import { getAccount } from './account';
-import { jsonFormatter } from '../../utils/json';
+import { findNestedKey } from '../../utils/json';
 
 const BALANCE = 1000n;
 
@@ -25,17 +25,6 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
   if (chainAssets.length === 1) {
     return storage;
   }
-
-  /*   if (chain.key === 'moonbeam') {
-    storage = Object.assign(
-      {
-        EVM: {
-          AccountStorages: populateErc20(chain, chainAssets, chainDecimals),
-        },
-      },
-      storage
-    );
-  } */
 
   if (useTokensPallet(api)) {
     storage = Object.assign(
@@ -59,7 +48,27 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
     );
   }
 
-  //console.log(JSON.stringify(storage, jsonFormatter, 2));
+  if (useForeignAssetsPallet(api)) {
+    storage = Object.assign(
+      {
+        ForeignAssets: {
+          Account: populateForeignAssets(chain, chainAssets, chainDecimals),
+        },
+      },
+      storage
+    );
+  }
+
+  if (useEvmAccountPallet(api)) {
+    storage = Object.assign(
+      {
+        EVM: {
+          AccountStorages: [],
+        },
+      },
+      storage
+    );
+  }
 
   return storage;
 };
@@ -68,8 +77,16 @@ const useAssetsPallet = (api: ApiPromise): boolean => {
   return !!api.query.assets?.account;
 };
 
+const useForeignAssetsPallet = (api: ApiPromise): boolean => {
+  return !!api.query.foreignAssets?.account;
+};
+
 const useTokensPallet = (api: ApiPromise): boolean => {
   return !!api.query.tokens?.accounts;
+};
+
+const useEvmAccountPallet = (api: ApiPromise): boolean => {
+  return !!api.query.evm?.accountStorages;
 };
 
 const useNormalizedBalance = (
@@ -117,6 +134,22 @@ const populateAssets = (
       const assetId = chain.getBalanceAssetId(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
       return [[assetId, acc.address], { balance: balance }];
+    });
+};
+
+const populateForeignAssets = (
+  chain: Parachain,
+  assets: ParachainAssetData[],
+  decimals: number
+) => {
+  const acc = getAccount(chain);
+  return assets
+    .filter((a) => !!a.xcmLocation)
+    .filter((a) => findNestedKey(a.xcmLocation, 'Parachain'))
+    .map((a) => {
+      const assetLocation = chain.getAssetXcmLocation(a.asset);
+      const balance = useNormalizedBalance(chain, decimals, a.asset);
+      return [[assetLocation, acc.address], { balance: balance }];
     });
 };
 

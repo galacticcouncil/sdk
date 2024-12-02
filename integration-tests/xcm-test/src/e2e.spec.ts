@@ -108,6 +108,7 @@ describe('Wallet with XCM config', () => {
           {
             skip: isContractTransfer || isAcalaErc20Transfer,
             sync: true,
+            snapshot: true,
           }
         );
       }

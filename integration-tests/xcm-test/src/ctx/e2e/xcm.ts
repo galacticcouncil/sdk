@@ -25,6 +25,7 @@ import { SetupCtx } from './types';
 
 import { getRouteKey } from '../../utils/route';
 
+const SNAPSHOT_NAME = '__snapshots__/e2e.spec.ts';
 const TRANSFER_AMOUNT = '10';
 
 export const runXcm = (
@@ -38,10 +39,12 @@ export const runXcm = (
     networks: SetupCtx[];
     wallet: Wallet;
   }>,
-  options: { skip?: boolean; sync?: boolean } = {}
+  options: { skip?: boolean; sync?: boolean; snapshot?: boolean } = {}
 ) => {
   const itfn = options.skip ? it.skip : it;
   const shouldSync = options.sync || false;
+  const shouldSnapshot = options.snapshot || false;
+
   itfn(
     name,
     async () => {
@@ -101,7 +104,8 @@ export const runXcm = (
       const destEvents = await destNetwork.api.query.system.events();
       expect(checkIfProcessed(destEvents)).toBeTruthy();
 
-      shouldSync && expect([key, calldata.data]).toMatchSnapshot();
+      shouldSnapshot &&
+        expect([key, calldata.data]).toMatchSnapshot(SNAPSHOT_NAME);
 
       const postTransfer = await getTransfer(
         wallet,

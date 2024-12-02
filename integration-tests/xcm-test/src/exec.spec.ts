@@ -102,13 +102,14 @@ describe('Wallet with XCM config', () => {
       },
       async () => {
         return {
-          report: new Map(),
+          report: reportCtx,
           networks: networks,
           wallet: wallet,
         };
       },
       {
         sync: true,
+        snapshot: true,
       }
     );
   });
