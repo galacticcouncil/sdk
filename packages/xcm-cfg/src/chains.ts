@@ -234,9 +234,11 @@ export const assetHub = new Parachain({
       xcmLocation: {
         parents: 1,
         interior: {
-          X1: {
-            Parachain: 3369,
-          },
+          X1: [
+            {
+              Parachain: 3369,
+            },
+          ],
         },
       },
     },

@@ -86,7 +86,7 @@ export function normalizeInterior(
     return {
       parents,
       interior: {
-        X1: [interior.X1],
+        X1: Array.isArray(interior.X1) ? interior.X1 : [interior.X1],
       },
     };
   }
