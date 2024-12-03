@@ -7,6 +7,7 @@ import {
 import { ApiPromise } from '@polkadot/api';
 
 import { getAccount } from './account';
+import { findNestedKey } from '../../utils/json';
 
 const BALANCE = 1000n;
 
@@ -14,7 +15,7 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
   const chainDecimals = api.registry.chainDecimals[0];
   const chainAssets = Array.from(chain.assetsData.values());
 
-  const system = {
+  let storage = {
     System: {
       Account: populateSystem(chain, chainDecimals),
     },
@@ -22,36 +23,70 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
 
   // Single asset (system only)
   if (chainAssets.length === 1) {
-    return system;
+    return storage;
   }
 
   if (useTokensPallet(api)) {
-    return {
-      ...system,
-      Tokens: {
-        Accounts: populateTokens(chain, chainAssets, chainDecimals),
+    storage = Object.assign(
+      {
+        Tokens: {
+          Accounts: populateTokens(chain, chainAssets, chainDecimals),
+        },
       },
-    };
+      storage
+    );
   }
 
   if (useAssetsPallet(api)) {
-    return {
-      ...system,
-      Assets: {
-        Account: populateAssets(chain, chainAssets, chainDecimals),
+    storage = Object.assign(
+      {
+        Assets: {
+          Account: populateAssets(chain, chainAssets, chainDecimals),
+        },
       },
-    };
+      storage
+    );
   }
 
-  return system;
+  if (useForeignAssetsPallet(api)) {
+    storage = Object.assign(
+      {
+        ForeignAssets: {
+          Account: populateForeignAssets(chain, chainAssets, chainDecimals),
+        },
+      },
+      storage
+    );
+  }
+
+  if (useEvmAccountPallet(api)) {
+    storage = Object.assign(
+      {
+        EVM: {
+          AccountStorages: [],
+        },
+      },
+      storage
+    );
+  }
+
+  return storage;
 };
 
 const useAssetsPallet = (api: ApiPromise): boolean => {
   return !!api.query.assets?.account;
 };
 
+const useForeignAssetsPallet = (api: ApiPromise): boolean => {
+  return !!api.query.foreignAssets?.account;
+};
+
 const useTokensPallet = (api: ApiPromise): boolean => {
   return !!api.query.tokens?.accounts;
+};
+
+const useEvmAccountPallet = (api: ApiPromise): boolean => {
+  return !!api.query.evm?.accountStorages;
 };
 
 const useNormalizedBalance = (
@@ -68,6 +103,24 @@ const useNormalizedBalance = (
   return assetMinFmt > assetBalance ? assetMinFmt + assetBalance : assetBalance;
 };
 
+const populateErc20 = (
+  chain: Parachain,
+  assets: ParachainAssetData[],
+  decimals: number
+) => {
+  const acc = getAccount(chain);
+  return assets
+    .filter((a) => a.asset.key.toString().endsWith('_mwh'))
+    .map((a) => {
+      const assetId = chain.getBalanceAssetId(a.asset);
+      const balance = useNormalizedBalance(chain, decimals, a.asset);
+      return [
+        [assetId, acc.address],
+        `0x${balance.toString(16).toUpperCase()}`,
+      ];
+    });
+};
+
 const populateAssets = (
   chain: Parachain,
   assets: ParachainAssetData[],
@@ -81,6 +134,22 @@ const populateAssets = (
       const assetId = chain.getBalanceAssetId(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
       return [[assetId, acc.address], { balance: balance }];
+    });
+};
+
+const populateForeignAssets = (
+  chain: Parachain,
+  assets: ParachainAssetData[],
+  decimals: number
+) => {
+  const acc = getAccount(chain);
+  return assets
+    .filter((a) => !!a.xcmLocation)
+    .filter((a) => findNestedKey(a.xcmLocation, 'Parachain'))
+    .map((a) => {
+      const assetLocation = chain.getAssetXcmLocation(a.asset);
+      const balance = useNormalizedBalance(chain, decimals, a.asset);
+      return [[assetLocation, acc.address], { balance: balance }];
     });
 };
 

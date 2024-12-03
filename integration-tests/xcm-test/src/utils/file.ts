@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 
-import { jsonFormatter } from './utils';
+import { jsonFormatter } from './json';
 
 const DB_PATH = './src/__db__/';
 

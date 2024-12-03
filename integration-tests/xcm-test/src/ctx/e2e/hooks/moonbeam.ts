@@ -5,7 +5,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { decodeFunctionData } from 'viem';
 
-import { jsonFormatter } from '../../utils';
+import { jsonFormatter } from '../../../utils/route';
 
 const NATIVE = '0x0000000000000000000000000000000000000802';
 const FOREIGN_PREFIX = '0xffffffff';

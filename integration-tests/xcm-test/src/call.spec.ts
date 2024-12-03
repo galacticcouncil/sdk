@@ -3,8 +3,9 @@ import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import console from 'console';
 
-import { setup, xcm } from './mock';
-import { getRouteInfo } from './utils';
+import { setup, xcm } from './ctx/call';
+
+import { getRouteInfo } from './utils/route';
 
 const jestConsole = console;
 
@@ -12,29 +13,29 @@ const { configService, init } = setup;
 const { runXcm } = xcm;
 
 const getPolkadotChains = () => {
-  const blacklist: string[] = ['acala-evm'];
+  const skipFor: string[] = ['acala-evm', 'nodle'];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
         c.ecosystem === ChainEcosystem.Polkadot ||
         c.ecosystem === ChainEcosystem.Ethereum
     )
-    .filter((c) => !blacklist.includes(c.key));
+    .filter((c) => !skipFor.includes(c.key));
 
   return {
-    blacklist,
+    skipFor,
     chains,
   };
 };
 
 const getKusamaChains = () => {
-  const blacklist: string[] = ['basilisk'];
+  const skipFor: string[] = [];
   const chains = Array.from(configService.chains.values())
     .filter((c) => c.ecosystem === ChainEcosystem.Kusama)
-    .filter((c) => !blacklist.includes(c.key));
+    .filter((c) => !skipFor.includes(c.key));
 
   return {
-    blacklist,
+    skipFor,
     chains,
   };
 };
@@ -69,10 +70,10 @@ describe('Wallet with XCM config', () => {
       const { chain, routes } = config;
 
       for (const route of Array.from(routes.values())) {
-        const { blacklist } = polkadot;
+        const { skipFor } = polkadot;
         const { destination } = route;
 
-        if (blacklist.includes(destination.chain.key)) {
+        if (skipFor.includes(destination.chain.key)) {
           continue;
         }
 
@@ -102,10 +103,10 @@ describe('Wallet with XCM config', () => {
       const { chain, routes } = config;
 
       for (const route of Array.from(routes.values())) {
-        const { blacklist } = kusama;
+        const { skipFor } = kusama;
         const { destination } = route;
 
-        if (blacklist.includes(destination.chain.key)) {
+        if (skipFor.includes(destination.chain.key)) {
           continue;
         }
 

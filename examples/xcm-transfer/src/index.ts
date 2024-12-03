@@ -54,9 +54,9 @@ const wallet = new Wallet({
 configureExternal(externals, configService);
 
 // Define transfer
-const srcChain = configService.getChain('ethereum');
-const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const srcChain = configService.getChain('hydration');
+const destChain = configService.getChain('ethereum');
+const asset = configService.getAsset('aave');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -71,8 +71,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '5HbftW2XCP77ypjeBEkL2iXHKw5rnRJoqKd3ySZCgxvxbxYj';
+const destAddr = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -95,13 +95,13 @@ const xTransfer = await wallet.transfer(
 const status = await xTransfer.validate();
 
 // Construct calldata with transfer amount
-const fee: AssetAmount = await xTransfer.estimateFee('0.0001');
+const fee: AssetAmount = await xTransfer.estimateFee('0.1');
 const feeInfo = [
   'Estimated fee:',
   fee.toDecimal(fee.decimals),
   fee.originSymbol,
 ].join(' ');
-const call: XCall = await xTransfer.buildCall('0.0001');
+const call: XCall = await xTransfer.buildCall('0.1');
 
 // Dump transfer info
 console.log(xTransfer);

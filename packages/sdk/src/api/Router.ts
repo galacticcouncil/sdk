@@ -99,9 +99,8 @@ export class Router {
             type: t.type,
             isSufficient: t.isSufficient,
             existentialDeposit: t.existentialDeposit,
-            origin: t.origin,
             meta: t.meta,
-            externalId: t.externalId,
+            location: t.location,
             isWhiteListed: t.isWhiteListed,
           } as Asset;
         })

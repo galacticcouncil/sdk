@@ -5,7 +5,7 @@ import type {
 import type { AnyJson } from '@polkadot/types-codec/types';
 import { ApiPromise } from '@polkadot/api';
 
-import { findNestedKey } from '../utils';
+import { findNestedKey } from '../../utils/json';
 
 export function checkIfFailed(api: ApiPromise, events: EventRecord[]): boolean {
   return events.some(({ event: { method, section, data } }) => {
@@ -53,7 +53,7 @@ export function checkIfProcessed(events: EventRecord[]): boolean {
 
 function checkProcessedStatus(data: AnyJson): boolean {
   const dataEntry = findNestedKey(data, 'success');
-  return dataEntry['success'] === true;
+  return dataEntry && dataEntry['success'] === true;
 }
 
 function logEvent(section: string, method: string, data: AnyJson) {

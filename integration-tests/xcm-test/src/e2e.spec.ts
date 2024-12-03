@@ -7,9 +7,10 @@ import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import console from 'console';
 
-import { setup, network, xcm, SetupCtx } from './e2e';
-import { getRouteInfo } from './utils';
-import { write, loadExisting } from './file';
+import { setup, network, xcm, SetupCtx } from './ctx/e2e';
+
+import { getRouteInfo } from './utils/route';
+import { write, loadExisting } from './utils/file';
 
 const jestConsole = console;
 const DB = 'metadata.db.json';
@@ -18,16 +19,27 @@ const { configService, initWithCtx } = setup;
 const { createNetworks } = network;
 const { runXcm } = xcm;
 
+/**
+ * Supported polkadot consensus ctx.
+ *
+ * Constraints:
+ * 1) Bridge transfers are not executed.
+ * 2) Acala EVM is skipped (testing chain)
+ * 2) Nodle is skipped (unstable rpc's)
+ * 3) Phala is skipped (unstable rpc's)
+ *
+ * @returns chains execution ctx
+ */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum'];
-  const blacklist: string[] = bridge.concat(['acala-evm', 'nodle']);
+  const skipFor: string[] = bridge.concat(['acala-evm', 'nodle', 'phala']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
-    .filter((c) => !blacklist.includes(c.key));
+    .filter((c) => !skipFor.includes(c.key));
 
   return {
-    blacklist,
+    skipFor,
     bridge,
     chains,
   };
@@ -67,14 +79,15 @@ describe('Wallet with XCM config', () => {
       const { chain, routes } = config;
 
       for (const route of Array.from(routes.values())) {
-        const { blacklist } = polkadot;
-        const { destination } = route;
+        const { skipFor } = polkadot;
+        const { source, destination } = route;
 
-        if (blacklist.includes(destination.chain.key)) {
+        if (skipFor.includes(destination.chain.key)) {
           continue;
         }
 
         const isContractTransfer = !!route.contract;
+        const isAcalaErc20Transfer = source.asset.key.endsWith('_awh');
 
         const info = getRouteInfo(chain, route);
         runXcm(
@@ -93,7 +106,9 @@ describe('Wallet with XCM config', () => {
             };
           },
           {
-            skip: isContractTransfer,
+            skip: isContractTransfer || isAcalaErc20Transfer,
+            sync: true,
+            snapshot: true,
           }
         );
       }

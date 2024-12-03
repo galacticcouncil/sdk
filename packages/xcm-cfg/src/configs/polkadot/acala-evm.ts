@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { aca, dai_awh } from '../../assets';
+import { aca, dai_awh, dai_mwh } from '../../assets';
 import { hydration, moonbeam, acala_evm } from '../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../builders';
 
@@ -20,10 +20,10 @@ const toHydrationViaWormhole: AssetRoute[] = [
     },
     destination: {
       chain: hydration,
-      asset: dai_awh,
+      asset: dai_mwh,
       fee: {
         amount: 0,
-        asset: dai_awh,
+        asset: dai_mwh,
       },
     },
     contract: ContractBuilder()

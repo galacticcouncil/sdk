@@ -56,7 +56,7 @@ export function toHydrationViaSnowbridgeTemplate(
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
+        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
