@@ -101,13 +101,13 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().evm().erc20(),
+      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: glmr,
         balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
+        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
