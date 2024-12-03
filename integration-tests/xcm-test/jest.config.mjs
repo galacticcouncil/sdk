@@ -4,7 +4,7 @@ import { config } from '../../jest.config.mjs';
  * Chopsticks log level, "fatal" | "error" | "warn" | "info" | "debug" | "trace".
  * Default is "info".
  */
-process.env.LOG_LEVEL = 'info';
+process.env.LOG_LEVEL = 'error';
 
 /**
  * Don't log objects. Default is `false`.
