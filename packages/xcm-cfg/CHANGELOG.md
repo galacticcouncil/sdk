@@ -1,5 +1,27 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.7.0
+
+### Minor Changes
+
+- Enable hydration <-> ethereum WETH (snowbridge)
+
+- Add astar <-> hydration BNC
+- Add astar <-> hydration GLMR
+- Add astar <-> hydration iBTC
+- Add astar <-> hydration INTR
+- Add astar <-> hydration PHA
+- Add astar <-> hydration vDOT
+- Add astar <-> hydration vASTR
+- Add bifrost <-> hydration BNC
+- Add bifrost <-> hydration GLMR
+- Add bifrost <-> hydration iBTC
+- Add centrifuge <-> hydration DOT
+- Add centrifuge <-> hydration GLMR
+- Add interlay <-> hydration vDOT
+
+- Add moonbeam & hub xcm locations
+
 ## 5.6.0
 
 ### Minor Changes

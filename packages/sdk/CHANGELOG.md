@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- Add Cap & ProtocolShare to Omnipool api
+
 ## 5.0.1
 
 ### Patch Changes
