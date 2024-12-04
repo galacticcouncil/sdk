@@ -4,6 +4,7 @@ import {
   dai,
   dai_mwh,
   eth,
+  weth,
   wbtc,
   wbtc_mwh,
   weth_mwh,
@@ -55,6 +56,7 @@ const toHydrationViaWormhole: AssetRoute[] = [
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
+  toHydrationViaSnowbridgeTemplate(weth, weth),
   toHydrationViaSnowbridgeTemplate(aave, aave),
   toHydrationViaSnowbridgeTemplate(susde, susde),
 ];
