@@ -25,7 +25,6 @@ import { SetupCtx } from './types';
 
 import { getRouteKey } from '../../utils/route';
 
-const SNAPSHOT_NAME = '__snapshots__/e2e.spec.ts';
 const TRANSFER_AMOUNT = '10';
 
 export const runXcm = (
