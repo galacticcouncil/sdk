@@ -304,7 +304,7 @@ const toAstar: AssetRoute[] = [
       chain: astar,
       asset: bnc,
       fee: {
-        amount: 0.05,
+        amount: 0.75,
         asset: bnc,
       },
     },
@@ -342,7 +342,7 @@ const toAstar: AssetRoute[] = [
       chain: astar,
       asset: ibtc,
       fee: {
-        amount: 0.025,
+        amount: 0.000002,
         asset: ibtc,
       },
     },
@@ -554,8 +554,8 @@ const toBifrost: AssetRoute[] = [
       chain: bifrost,
       asset: ibtc,
       fee: {
-        amount: 0.000002,
-        asset: glmr,
+        amount: 0.000005,
+        asset: ibtc,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
