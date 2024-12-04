@@ -104,8 +104,7 @@ export const runXcm = (
       const destEvents = await destNetwork.api.query.system.events();
       expect(checkIfProcessed(destEvents)).toBeTruthy();
 
-      shouldSnapshot &&
-        expect([key, calldata.data]).toMatchSnapshot(SNAPSHOT_NAME);
+      shouldSnapshot && expect([key, calldata.data]).toMatchSnapshot();
 
       const postTransfer = await getTransfer(
         wallet,

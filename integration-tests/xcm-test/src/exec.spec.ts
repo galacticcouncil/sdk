@@ -40,11 +40,19 @@ const getChainsCtx = (source: AnyChain, destination: AnyChain) => {
   const relay = configService.getChain('polkadot');
   const dex = configService.getChain('hydration');
 
-  const isDexTransfer = source.key === dex.key || destination.key === dex.key;
-  if (isDexTransfer) {
-    return [source, destination, relay] as Parachain[];
+  const base = [source, destination];
+
+  const isRelayTransfer = [source.key, destination.key].includes(relay.key);
+  if (!isRelayTransfer) {
+    base.push(relay);
   }
-  return [source, destination, relay, dex] as Parachain[];
+
+  const isDexTransfer = [source.key, destination.key].includes(dex.key);
+  if (!isDexTransfer) {
+    base.push(dex);
+  }
+
+  return base as Parachain[];
 };
 
 describe('Wallet with XCM config', () => {
