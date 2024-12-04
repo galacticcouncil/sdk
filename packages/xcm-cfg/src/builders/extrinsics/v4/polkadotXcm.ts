@@ -12,6 +12,7 @@ import {
   toDest,
   toTransferType,
 } from './polkadotXcm.utils';
+import { locationGuard } from './utils';
 
 import {
   getExtrinsicAccount,
@@ -34,7 +35,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         const rcv = destination.chain as Parachain;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          ctx.getAssetXcmLocation(asset)!,
+          locationGuard(ctx, asset),
           version
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
@@ -70,11 +71,11 @@ const transferAssetsUsingTypeAndThen = (
         const { transferType } = opts;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          ctx.getAssetXcmLocation(asset)!,
+          locationGuard(ctx, asset),
           version
         );
         const transferFeeLocation = getExtrinsicAssetLocation(
-          ctx.getAssetXcmLocation(destination.fee)!,
+          locationGuard(ctx, destination.fee),
           version
         );
 

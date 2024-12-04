@@ -48,7 +48,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiassets().X3()
+      ExtrinsicBuilderV4().xTokens().transferMultiassets()
     ),
   });
 }
@@ -72,7 +72,7 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
+      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies()
     ),
   });
 }
@@ -96,7 +96,7 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
+      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies()
     ),
   });
 }
