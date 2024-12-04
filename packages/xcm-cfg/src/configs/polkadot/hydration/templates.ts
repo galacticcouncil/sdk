@@ -127,8 +127,8 @@ export function toEthereumViaWormholeTemplate(
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
+      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilderV4().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
       }),
     ]),
