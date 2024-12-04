@@ -6,21 +6,22 @@ import {
   eth,
   wbtc,
   wbtc_mwh,
-  weth,
   weth_mwh,
   usdc,
   usdc_mwh,
   usdt,
   usdt_mwh,
+  aave,
+  susde,
 } from '../../assets';
 import { ethereum, hydration, moonbeam } from '../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../builders';
+import { BalanceBuilder, ContractBuilder } from '../../builders';
+import { Tag } from '../../tags';
 
-import { toHydrationErc20Template } from './templates';
+import {
+  toHydrationViaWormholeTemplate,
+  toHydrationViaSnowbridgeTemplate,
+} from './templates';
 
 const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
@@ -45,39 +46,20 @@ const toHydrationViaWormhole: AssetRoute[] = [
       .TokenBridge()
       .wrapAndTransferETHWithPayload()
       .viaMrl({ moonchain: moonbeam }),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
-  toHydrationErc20Template(dai, dai_mwh),
-  toHydrationErc20Template(wbtc, wbtc_mwh),
-  toHydrationErc20Template(usdc, usdc_mwh),
-  toHydrationErc20Template(usdt, usdt_mwh),
+  toHydrationViaWormholeTemplate(dai, dai_mwh),
+  toHydrationViaWormholeTemplate(wbtc, wbtc_mwh),
+  toHydrationViaWormholeTemplate(usdc, usdc_mwh),
+  toHydrationViaWormholeTemplate(usdt, usdt_mwh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: weth,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: weth,
-      fee: {
-        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
-        asset: eth,
-      },
-    },
-    contract: ContractBuilder().Snowbridge().sendToken(),
-  }),
+  toHydrationViaSnowbridgeTemplate(aave, aave),
+  toHydrationViaSnowbridgeTemplate(susde, susde),
 ];
 
-const toMoonbeam: AssetRoute[] = [
+const toMoonbeamViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
@@ -96,6 +78,7 @@ const toMoonbeam: AssetRoute[] = [
       },
     },
     contract: ContractBuilder().Wormhole().TokenBridge().wrapAndTransferETH(),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
   new AssetRoute({
     source: {
@@ -119,13 +102,11 @@ const toMoonbeam: AssetRoute[] = [
       },
     },
     contract: ContractBuilder().Wormhole().TokenBridge().transferTokens(),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
 ];
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [
-    ...toHydrationViaWormhole,
-    //...toHydrationViaSnowbridge
-  ],
+  routes: [...toHydrationViaWormhole, ...toHydrationViaSnowbridge],
 });

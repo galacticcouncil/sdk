@@ -14,7 +14,6 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
   ExtrinsicBuilderV4,
-  XcmTransferType,
 } from '../../../builders';
 
 import {
@@ -157,7 +156,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: usdt,
       fee: {
-        amount: 0.02,
+        amount: 0.25,
         asset: usdt,
       },
     },
@@ -184,7 +183,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: usdc,
       fee: {
-        amount: 0.03,
+        amount: 0.25,
         asset: usdc,
       },
     },
@@ -223,33 +222,6 @@ const toMythos: AssetRoute[] = [
 ];
 
 const toBifrost: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: pink,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: bifrost,
-      asset: pink,
-      fee: {
-        amount: 0.0001,
-        asset: pink,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
-  }),
   new AssetRoute({
     source: {
       asset: usdt,

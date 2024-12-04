@@ -174,8 +174,7 @@ export interface Asset extends AssetMetadata {
   type: string;
   existentialDeposit: string;
   isSufficient: boolean;
-  origin?: number;
-  externalId?: number;
+  location?: any;
   meta?: Record<string, string>;
   isWhiteListed?: boolean;
 }

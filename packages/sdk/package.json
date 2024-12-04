@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "4.5.0",
+  "version": "5.0.1",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
   "repository": {
@@ -38,24 +38,25 @@
     "@galacticcouncil/math-stableswap": "^1.0.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@thi.ng/cache": "^2.1.35",
+    "@thi.ng/memoize": "^4.0.2",
     "bignumber.js": "^9.1.0",
     "lodash.clonedeep": "^4.5.0"
   },
   "peerDependencies": {
-    "@polkadot/api": "^14.2.3",
-    "@polkadot/api-augment": "^14.2.3",
-    "@polkadot/api-derive": "^14.2.3",
-    "@polkadot/api-base": "^14.2.3",
-    "@polkadot/rpc-augment": "^14.2.3",
-    "@polkadot/rpc-core": "^14.2.3",
-    "@polkadot/rpc-provider": "^14.2.3",
-    "@polkadot/types": "^14.2.3",
-    "@polkadot/types-augment": "^14.2.3",
-    "@polkadot/types-codec": "^14.2.3",
-    "@polkadot/types-create": "^14.2.3",
-    "@polkadot/types-known": "^14.2.3",
-    "@polkadot/keyring": "^13.2.2",
-    "@polkadot/util": "^13.2.2",
-    "@polkadot/util-crypto": "^13.2.2"
+    "@polkadot/api": "~14.0.1",
+    "@polkadot/api-augment": "~14.0.1",
+    "@polkadot/api-derive": "~14.0.1",
+    "@polkadot/api-base": "~14.0.1",
+    "@polkadot/rpc-augment": "~14.0.1",
+    "@polkadot/rpc-core": "~14.0.1",
+    "@polkadot/rpc-provider": "~14.0.1",
+    "@polkadot/types": "~14.0.1",
+    "@polkadot/types-augment": "~14.0.1",
+    "@polkadot/types-codec": "~14.0.1",
+    "@polkadot/types-create": "~14.0.1",
+    "@polkadot/types-known": "~14.0.1",
+    "@polkadot/keyring": "~13.1.1",
+    "@polkadot/util": "~13.1.1",
+    "@polkadot/util-crypto": "~13.1.1"
   }
 }

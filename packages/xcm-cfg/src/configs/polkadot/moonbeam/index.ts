@@ -1,9 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import {
-  aca,
   dai,
-  dai_awh,
   dai_mwh,
   dot,
   eth,
@@ -17,18 +15,13 @@ import {
   wbtc_mwh,
   weth_mwh,
 } from '../../../assets';
-import {
-  acala,
-  assetHub,
-  ethereum,
-  hydration,
-  moonbeam,
-} from '../../../chains';
+import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
 import {
   BalanceBuilder,
   ContractBuilder,
   FeeAmountBuilder,
 } from '../../../builders';
+import { Tag } from '../../../tags';
 
 import { toHydrationErc20Template, toHydrationXcTemplate } from './templates';
 
@@ -129,36 +122,6 @@ const toAssetHub: AssetRoute[] = [
   }),
 ];
 
-const toAcalaViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: dai_awh,
-      fee: {
-        amount: 0.05,
-        asset: aca,
-      },
-    },
-    contract: ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder().Erc20().approve(),
-        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-      ]),
-  }),
-];
-
 const toEthereumViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -190,6 +153,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
         ContractBuilder().Erc20().approve(),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
   new AssetRoute({
     source: {
@@ -221,6 +185,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
         ContractBuilder().Erc20().approve(),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
 ];
 

@@ -1,6 +1,7 @@
 import {
   AnyEvmChain,
   AssetAmount,
+  CallType,
   ContractConfig,
   EvmClient,
 } from '@galacticcouncil/xcm-core';
@@ -34,6 +35,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
       from: account as `0x${string}`,
       to: config.address as `0x${string}`,
       value: config.value,
+      type: CallType.Evm,
     } as XCallEvm;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
@@ -53,6 +55,7 @@ export class ContractTransfer implements TransferProvider<ContractConfig> {
       data: approve as `0x${string}`,
       from: account as `0x${string}`,
       to: asset as `0x${string}`,
+      type: CallType.Evm,
     } as XCallEvm;
   }
 

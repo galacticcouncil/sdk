@@ -12,7 +12,7 @@ import {
 
 import { XykPoolFees } from './XykPool';
 
-import { PoolClient } from '../PoolClientV2';
+import { PoolClient } from '../PoolClient';
 
 export class XykPoolClient extends PoolClient {
   isSupported(): boolean {
@@ -65,10 +65,8 @@ export class XykPoolClient extends PoolClient {
     return PoolType.XYK;
   }
 
-  protected subscribePoolChange(pool: PoolBase): UnsubscribePromise {
-    return this.api.query.xyk.poolAssets(pool.address, (_states) => {
-      //do nothing
-    });
+  protected subscribePoolChange(_pool: PoolBase): UnsubscribePromise {
+    throw new Error('Pool change subscription not supported!');
   }
 
   private getExchangeFee(): PoolFee {

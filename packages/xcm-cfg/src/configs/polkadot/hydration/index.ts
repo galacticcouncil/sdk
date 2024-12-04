@@ -38,10 +38,11 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
-  weth,
   weth_awh,
   weth_mwh,
   wud,
+  aave,
+  susde,
 } from '../../../assets';
 import {
   acala,
@@ -65,24 +66,23 @@ import {
   subsocial,
   unique,
   zeitgeist,
-  ethereum,
 } from '../../../chains';
 import {
   ContractBuilder,
   ExtrinsicBuilder,
   ExtrinsicBuilderV4,
-  FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
-  MRL_EXECUTION_FEE,
-  MRL_XCM_FEE,
   toHubExtTemplate,
-  toEthereumWithRelayerTemplate,
+  toEthereumViaSnowbridgeTemplate,
+  toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
+  MRL_EXECUTION_FEE,
+  MRL_XCM_FEE,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -733,7 +733,7 @@ const toMoonbeam: AssetRoute[] = [
       chain: moonbeam,
       asset: hdx,
       fee: {
-        amount: 0.835,
+        amount: 5,
         asset: hdx,
       },
     },
@@ -1116,43 +1116,23 @@ const toAcalaViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaWormhole: AssetRoute[] = [
-  toEthereumWithRelayerTemplate(dai_mwh, dai),
-  toEthereumWithRelayerTemplate(weth_mwh, eth),
-  toEthereumWithRelayerTemplate(wbtc_mwh, wbtc),
-  toEthereumWithRelayerTemplate(usdt_mwh, usdt),
-  toEthereumWithRelayerTemplate(usdc_mwh, usdc),
+  toEthereumViaWormholeTemplate(dai_mwh, dai),
+  toEthereumViaWormholeTemplate(weth_mwh, eth),
+  toEthereumViaWormholeTemplate(wbtc_mwh, wbtc),
+  toEthereumViaWormholeTemplate(usdt_mwh, usdt),
+  toEthereumViaWormholeTemplate(usdc_mwh, usdc),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: weth,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: ethereum,
-      asset: weth,
-      fee: {
-        amount: FeeAmountBuilder().Snowbridge().getSendFee(),
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
-  }),
+  toEthereumViaSnowbridgeTemplate(aave, aave),
+  toEthereumViaSnowbridgeTemplate(susde, susde),
 ];
 
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
     ...toAcala,
+    ...toAcalaViaWormhole,
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,
@@ -1160,7 +1140,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCentrifuge,
     ...toCrust,
     ...toDarwinia,
-    //...toEthereumViaSnowbridge,
+    ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,

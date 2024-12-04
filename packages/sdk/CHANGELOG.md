@@ -1,5 +1,41 @@
 # @galacticcouncil/sdk
 
+## 5.0.1
+
+### Patch Changes
+
+- Fix asset location in router api
+
+## 5.0.0
+
+### Major Changes
+
+- Removing externalId & origin from Asset, using location instead (breaking change)
+
+## 4.6.1
+
+### Patch Changes
+
+- Evict mem pools on registry sync
+
+## 4.6.0
+
+### Minor Changes
+
+- Mem pools, perf upgrades
+
+## 4.5.2
+
+### Patch Changes
+
+- Remove debug logs
+
+## 4.5.1
+
+### Patch Changes
+
+- a17d1be: Fix balance subs perf issues
+
 ## 4.5.0
 
 ### Minor Changes

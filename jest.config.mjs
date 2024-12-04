@@ -4,6 +4,7 @@ export const config = {
   moduleDirectories: ['node_modules'],
   moduleNameMapper: {
     '@thi.ng/cache': 'test/lib/emptyModule.ts',
+    '@thi.ng/memoize': 'test/lib/emptyModule.ts',
   },
   testMatch: ['**/__tests__/**/*.+(ts|js)', '**/?(*.)+(spec|test).+(ts|js)'],
   transform: {

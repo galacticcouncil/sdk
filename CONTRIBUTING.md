@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) (**version 18 or higher**)
+- [Node.js](https://nodejs.org/) (**version 20 or higher**)
 
 ## Local development
 

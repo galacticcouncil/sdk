@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-core
 
+## 5.4.0
+
+### Minor Changes
+
+- c879417: Support route tags
+
+## 5.3.1
+
+### Patch Changes
+
+- a2303e6: Downgrade pjs to 14.0.x
+- 1f2929f: Downgrade pjs to 14.0.x
+
 ## 5.3.0
 
 ### Minor Changes

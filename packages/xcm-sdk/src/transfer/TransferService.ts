@@ -334,11 +334,14 @@ export class TransferService {
 
     if (chain instanceof Parachain) {
       const assetLocation = chain.getAssetXcmLocation(source.asset);
-      const globalConsensus = multiloc.findNestedKey(
-        assetLocation || {},
-        'GlobalConsensus'
-      );
-      return !!globalConsensus;
+      if (assetLocation) {
+        const globalConsensus = multiloc.findNestedKey(
+          assetLocation,
+          'GlobalConsensus'
+        );
+        return !!globalConsensus;
+      }
+      return false;
     }
     return false;
   }

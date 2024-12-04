@@ -26,10 +26,10 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
+      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
+        asset: ztg,
+        balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().tokens().accounts(),
@@ -48,10 +48,10 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc_mwh,
-      balance: BalanceBuilder().substrate().system().account(),
+      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
+        asset: ztg,
+        balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().tokens().accounts(),

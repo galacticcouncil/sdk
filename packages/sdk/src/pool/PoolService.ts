@@ -1,3 +1,8 @@
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+
+import { memoize1 } from '@thi.ng/memoize';
+
 import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
@@ -19,11 +24,11 @@ import {
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { PoolClient } from './PoolClient';
 
 export class PoolService implements IPoolService {
   protected readonly api: ApiPromise;
+
   protected readonly assetClient: AssetClient;
 
   protected readonly xykClient: XykPoolClient;
@@ -31,8 +36,14 @@ export class PoolService implements IPoolService {
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
 
+  protected readonly clients: PoolClient[] = [];
+
   protected onChainAssets: Asset[] = [];
-  protected onChainAssetsLoaded = false;
+
+  private memRegistry = memoize1((x: number) => {
+    console.log('Registry mem sync', x, '✅');
+    return this.syncRegistry();
+  });
 
   constructor(api: ApiPromise) {
     this.api = api;
@@ -41,6 +52,12 @@ export class PoolService implements IPoolService {
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
     this.stableClient = new StableSwapClient(this.api);
+    this.clients = [
+      this.xykClient,
+      this.omniClient,
+      this.lbpClient,
+      this.stableClient,
+    ];
   }
 
   get assets(): Asset[] {
@@ -48,53 +65,35 @@ export class PoolService implements IPoolService {
   }
 
   get isRegistrySynced(): boolean {
-    return this.onChainAssetsLoaded;
+    return this.onChainAssets.length > 0;
   }
 
   async syncRegistry(external?: ExternalAsset[]) {
-    this.onChainAssets = await this.assetClient.getOnChainAssets(
-      false,
-      external
-    );
-    this.onChainAssetsLoaded = true;
+    const assets = await this.assetClient.getOnChainAssets(false, external);
+    this.clients.forEach((c) => c.withAssets(assets));
+    this.onChainAssets = assets;
   }
 
   async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
-    if (!this.onChainAssetsLoaded) {
-      this.syncRegistry();
+    if (!this.isRegistrySynced) {
+      await this.memRegistry(1);
     }
 
     if (includeOnly.length == 0) {
       const pools = await Promise.all(
-        [this.xykClient, this.omniClient, this.lbpClient, this.stableClient]
+        this.clients
           .filter((client) => client.isSupported())
-          .map((client) => client.getPools())
+          .map((client) => client.getPoolsMem())
       );
-      const flatten = pools.flat();
-      return this.withMetadata(flatten);
+      return pools.flat();
     }
 
-    const poolList: Promise<PoolBase[]>[] = [];
-    includeOnly.forEach((poolType: PoolType) => {
-      switch (poolType) {
-        case PoolType.XYK:
-          poolList.push(this.xykClient.getPools());
-          break;
-        case PoolType.Omni:
-          poolList.push(this.omniClient.getPools());
-          break;
-        case PoolType.LBP:
-          poolList.push(this.lbpClient.getPools());
-          break;
-        case PoolType.Stable:
-          poolList.push(this.stableClient.getPools());
-          break;
-      }
-    });
-
-    const pools = await Promise.all(poolList);
-    const flatten = pools.flat();
-    return this.withMetadata(flatten);
+    const pools = await Promise.all(
+      this.clients
+        .filter((client) => includeOnly.some((t) => t === client.getPoolType()))
+        .map((client) => client.getPoolsMem())
+    );
+    return pools.flat();
   }
 
   unsubscribe() {
@@ -102,35 +101,6 @@ export class PoolService implements IPoolService {
     this.omniClient.unsubscribe();
     this.lbpClient.unsubscribe();
     this.stableClient.unsubscribe();
-  }
-
-  private async withMetadata(pools: PoolBase[]): Promise<PoolBase[]> {
-    const assets: Map<string, Asset> = new Map(
-      this.onChainAssets.map((asset: Asset) => [asset.id, asset])
-    );
-
-    return pools
-      .filter((pool: PoolBase) => {
-        if (pool.type === PoolType.XYK) {
-          // Check if XYK pools contains valid assets, if not exclude them
-          return pool.tokens.every((t) => assets.get(t.id));
-        } else {
-          return true;
-        }
-      })
-      .map((pool: PoolBase) => {
-        const tokens = pool.tokens.map((t) => {
-          const asset = assets.get(t.id);
-          return {
-            ...t,
-            ...asset,
-          };
-        });
-        return {
-          ...pool,
-          tokens,
-        };
-      });
   }
 
   async getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {

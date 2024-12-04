@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { bnc, dot, pink, usdc, usdt, vdot, vastr, astr, glmr, ibtc } from '../../assets';
+import { bnc, dot, usdc, usdt, vdot, vastr, astr, glmr, ibtc } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
@@ -183,28 +183,6 @@ const toPolkadot: AssetRoute[] = [
 ];
 
 const toAssetHub: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: pink,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: pink,
-      fee: {
-        amount: 0.18,
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets().X3(),
-  }),
   new AssetRoute({
     source: {
       asset: usdt,

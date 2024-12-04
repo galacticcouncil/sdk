@@ -48,5 +48,8 @@
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.20.2"
   },
+  "overrides": {
+    "cross-spawn": "^7.0.5"
+  },
   "packageManager": "npm@10.7.0"
 }

@@ -36,6 +36,7 @@ export interface AssetRouteParams {
   contract?: ContractConfigBuilder;
   extrinsic?: ExtrinsicConfigBuilder;
   transact?: TransactConfig;
+  tags?: string[];
 }
 
 export class AssetRoute {
@@ -49,17 +50,21 @@ export class AssetRoute {
 
   readonly transact?: TransactConfig;
 
+  readonly tags?: string[];
+
   constructor({
     source,
     destination,
     contract,
     extrinsic,
     transact,
+    tags,
   }: AssetRouteParams) {
     this.source = source;
     this.destination = destination;
     this.contract = contract;
     this.extrinsic = extrinsic;
     this.transact = transact;
+    this.tags = tags;
   }
 }

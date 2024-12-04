@@ -89,18 +89,18 @@ export function configureExternal(
 ) {
   external.forEach((ext) => {
     if (ext.origin === 1000 && !defaultExternals.includes(ext.id)) {
-      const assetData = toAssetData(ext, '_ah_');
-      console.log('Registering ' + assetData.asset.key);
+      const assetData = toAssetData(ext);
+      console.log('💀 Registering ' + assetData.asset.key);
       configService.addExternalHubRoute(assetData);
     }
   });
 }
 
-function toAssetData(external: ExternalAsset, suffix: string): ChainAssetData {
-  const { decimals, id, symbol, internalId } = external;
+function toAssetData(external: ExternalAsset): ChainAssetData {
+  const { decimals, id, internalId, origin, symbol } = external;
   const key = symbol.toLowerCase();
   const asset = new Asset({
-    key: key + suffix + id,
+    key: [key, origin, id].join('_'),
     originSymbol: symbol,
   });
 

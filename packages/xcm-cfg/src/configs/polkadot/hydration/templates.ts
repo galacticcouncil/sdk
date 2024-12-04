@@ -4,14 +4,17 @@ import {
   ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
 
-import { glmr, usdt } from '../../../assets';
+import { dot, glmr, usdt } from '../../../assets';
 import {
   ContractBuilder,
   ExtrinsicBuilder,
+  ExtrinsicBuilderV4,
   ExtrinsicDecorator,
   FeeAmountBuilder,
+  XcmTransferType,
 } from '../../../builders';
 import { assetHub, ethereum, moonbeam, zeitgeist } from '../../../chains';
+import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
 
@@ -98,7 +101,7 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
   });
 }
 
-export function toEthereumWithRelayerTemplate(
+export function toEthereumViaWormholeTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -150,5 +153,36 @@ export function toEthereumWithRelayerTemplate(
             ])
         ),
     },
+    tags: [Tag.Mrl, Tag.Wormhole],
+  });
+}
+
+export function toEthereumViaSnowbridgeTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ethereum,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Snowbridge().getSendFee(),
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilderV4()
+      .polkadotXcm()
+      .transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      }),
+    tags: [Tag.Snowbridge],
   });
 }
