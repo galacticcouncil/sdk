@@ -105,7 +105,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ibtc,
       fee: {
-        amount: 0.04,
+        amount: 0.000002,
         asset: ibtc,
       },
     },
