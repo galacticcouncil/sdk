@@ -1849,7 +1849,11 @@ export const phala = new Parachain({
   name: 'Phala',
   parachainId: 2035,
   ss58Format: 30,
-  ws: 'wss://api.phala.network/ws',
+  ws: [
+    'wss://api.phala.network/ws',
+    'wss://phala-rpc.dwellir.com',
+    'wss://rpc.helikon.io/phala',
+  ],
 });
 
 export const nodle = new Parachain({
