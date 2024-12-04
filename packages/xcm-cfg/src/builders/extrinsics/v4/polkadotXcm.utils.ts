@@ -1,4 +1,4 @@
-import { multiloc, Parachain } from '@galacticcouncil/xcm-core';
+import { multiloc, Parachain, TxWeight } from '@galacticcouncil/xcm-core';
 
 import { XcmTransferType, XcmVersion } from '../../types';
 
@@ -189,27 +189,66 @@ const reanchorLocation = (assetLocation: object) => {
   };
 };
 
-export const isParachainPrimaryNativeAsset = (
-  specName: string,
-  assetId?: string
+/**
+ * Instructions are executed in 3 steps:
+ *
+ * 1) WithdrawAsset - Withdraw fee asset from the target account
+ * 2) BuyExecution - Buy execution with the fee asset
+ * 3) Transact - Destination (Transact) chain call execution
+ *
+ * Note that DepositAsset using AllCounted and not All, since All
+ * has too high of a gas requirement.
+ *
+ * @param version - XCM Version
+ * @param account - destination account (receiver)
+ * @param transactFeeLocation - transact fee xcm location
+ * @param transactFeeAmount - transact fee amount
+ * @param transactCall - transact calldata
+ * @param transactWeight - transact weight
+ * @returns xcm transact message instructions
+ */
+export const toTransactMessage = (
+  version: XcmVersion,
+  account: any,
+  transactFeeLocation: object,
+  transactFeeAmount: any,
+  transactCall: `0x${string}`,
+  transactWeight: TxWeight
 ) => {
-  // in case of empty array, undefined assetId is considered to be the relay chains primary native asset
-  if (!assetId) {
-    return true;
-  }
-
-  // if assetId is an empty string
-  // treat it as the parachains primary native asset
-  if (assetId === '') {
-    return true;
-  }
-
-  // const currentChainId = registry.lookupChainIdBySpecName(specName);
-  // const { tokens } = registry.currentRelayRegistry[currentChainId];
-  // const primaryParachainNativeAsset = tokens[0];
-  // if (primaryParachainNativeAsset.toLowerCase() === assetId.toLowerCase()) {
-  // 	return true;
-  // }
-
-  return false;
+  return {
+    [version]: [
+      {
+        WithdrawAsset: [toAsset(transactFeeLocation, transactFeeAmount)],
+      },
+      {
+        BuyExecution: {
+          fees: toAsset(transactFeeLocation, transactFeeAmount),
+          weightLimit: 'Unlimited',
+        },
+      },
+      {
+        Transact: {
+          originKind: 'SovereignAccount',
+          requireWeightAtMost: transactWeight,
+          call: {
+            encoded: transactCall,
+          },
+        },
+      },
+      {
+        RefundSurplus: {},
+      },
+      {
+        DepositAsset: {
+          assets: { Wild: { AllCounted: 1 } },
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: [account],
+            },
+          },
+        },
+      },
+    ],
+  };
 };

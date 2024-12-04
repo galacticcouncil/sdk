@@ -8,7 +8,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { toAsset, toDest } from './xTokens.utils';
-import { locationGuard } from './utils';
+import { locationOrError } from './utils';
 
 import {
   getExtrinsicAccount,
@@ -46,7 +46,7 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
         const rcv = destination.chain as Parachain;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, asset),
+          locationOrError(ctx, asset),
           version
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
@@ -73,11 +73,11 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         const rcv = destination.chain as Parachain;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, asset),
+          locationOrError(ctx, asset),
           version
         );
         const transferFeeLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, destination.fee),
+          locationOrError(ctx, destination.fee),
           version
         );
 

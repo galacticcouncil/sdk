@@ -1,4 +1,6 @@
 import {
+  acc,
+  big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
@@ -11,8 +13,9 @@ import {
   toParaXcmOnDest,
   toDest,
   toTransferType,
+  toTransactMessage,
 } from './polkadotXcm.utils';
-import { locationGuard } from './utils';
+import { locationOrError } from './utils';
 
 import {
   getExtrinsicAccount,
@@ -35,7 +38,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         const rcv = destination.chain as Parachain;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, asset),
+          locationOrError(ctx, asset),
           version
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
@@ -71,11 +74,11 @@ const transferAssetsUsingTypeAndThen = (
         const { transferType } = opts;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, asset),
+          locationOrError(ctx, asset),
           version
         );
         const transferFeeLocation = getExtrinsicAssetLocation(
-          locationGuard(ctx, destination.fee),
+          locationOrError(ctx, destination.fee),
           version
         );
 
@@ -131,9 +134,64 @@ const transferAssetsUsingTypeAndThen = (
     }),
 });
 
+type TransactOpts = {
+  fee: number;
+};
+
+const send = () => {
+  const func = 'send';
+  return {
+    transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
+      build: (params) => {
+        const { sender, source, transact } = params;
+        return new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v4;
+
+            if (!transact) {
+              throw new Error('Transact ctx configuration is missing.');
+            }
+
+            const ctx = source.chain as Parachain;
+            const rcv = transact.chain as Parachain;
+            const mda = acc.getMultilocationDerivatedAccount(
+              ctx.parachainId,
+              sender,
+              1
+            );
+            const account = getExtrinsicAccount(mda);
+
+            const { fee } = transact;
+            const transactFeeLocation = getExtrinsicAssetLocation(
+              locationOrError(rcv, fee),
+              version
+            );
+            const transactFeeAmount = big.toBigInt(opts.fee, fee.decimals);
+
+            return [
+              toDest(version, rcv),
+              toTransactMessage(
+                version,
+                account,
+                transactFeeLocation,
+                transactFeeAmount,
+                transact.call,
+                transact.weight
+              ),
+            ];
+          },
+        });
+      },
+    }),
+  };
+};
+
 export const polkadotXcm = () => {
   return {
     limitedTeleportAssets,
     transferAssetsUsingTypeAndThen,
+    send,
   };
 };
