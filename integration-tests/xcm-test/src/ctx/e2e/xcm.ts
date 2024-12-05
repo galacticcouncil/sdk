@@ -1,5 +1,6 @@
 import { sendTransaction } from '@acala-network/chopsticks-testing';
 import {
+  multiloc,
   AnyChain,
   AssetRoute,
   CallType,
@@ -89,14 +90,16 @@ export const runXcm = (
       expect(checkIfFailed(srcNetwork.api, srcEvents)).toBeFalsy();
       checkIfSent(srcEvents);
 
-      if (isMoonbeamReserve(srcChain, route)) {
-        const moonbeam = networks.find((n) => n.config.key === 'moonbeam')!;
-        await moonbeam.chain.newBlock();
-      }
-
-      if (isDotReserve(srcChain, route)) {
-        const relay = networks.find((n) => n.config.key === 'polkadot')!;
-        await relay.chain.newBlock();
+      const assetReserve = getAssetReserve(srcChain, route);
+      if (Number.isFinite(assetReserve)) {
+        const reserveNetwork = networks.find(
+          (n) => n.config.parachainId === assetReserve
+        )!;
+        if (isViaReserve(srcChain, destChain, reserveNetwork.config)) {
+          await reserveNetwork.chain.newBlock();
+          const reserveEvents = await reserveNetwork.api.query.system.events();
+          checkIfProcessed(reserveEvents);
+        }
       }
 
       await destNetwork.chain.newBlock();
@@ -148,21 +151,29 @@ export const runXcm = (
   );
 };
 
-const isMoonbeamReserve = (chain: Parachain, route: AssetRoute): boolean => {
-  return (
-    chain.key !== 'moonbeam' &&
-    route.destination.chain.key !== 'moonbeam' &&
-    (route.source.asset.key === 'glmr' ||
-      route.source.asset.key.endsWith('_mwh'))
-  );
+const getAssetReserve = (
+  chain: Parachain,
+  route: AssetRoute
+): number | undefined => {
+  if (route.source.asset.key === 'dot') {
+    return 0;
+  }
+
+  const location = chain.getAssetXcmLocation(route.source.asset);
+  if (location) {
+    const parachainEntry = multiloc.findNestedKey(location, 'Parachain');
+    const parachain = parachainEntry && parachainEntry['Parachain'];
+    return Number(parachain);
+  }
+  return undefined;
 };
 
-const isDotReserve = (chain: Parachain, route: AssetRoute): boolean => {
-  return (
-    chain.key !== 'polkadot' &&
-    route.destination.chain.key !== 'polkadot' &&
-    route.source.asset.key === 'dot'
-  );
+const isViaReserve = (
+  srcChain: Parachain,
+  destChain: Parachain,
+  reserve: Parachain
+): boolean => {
+  return srcChain.key !== reserve.key && destChain.key !== reserve.key;
 };
 
 const getTransfer = async (

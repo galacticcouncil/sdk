@@ -26,6 +26,9 @@ export function checkIfSent(events: EventRecord[]): boolean {
       case 'xcmpQueue':
         logEvent(section, method, eventData);
         return method === 'XcmpMessageSent';
+      case 'parachainSystem':
+        logEvent(section, method, eventData);
+        return method === 'UpwardMessageSent';
       default:
         return false;
     }
@@ -57,7 +60,7 @@ function checkProcessedStatus(data: AnyJson): boolean {
 }
 
 function logEvent(section: string, method: string, data: AnyJson) {
-  console.log('🥢 STATUS: ' + section + '.' + method, data);
+  console.log('🥢 Event: ' + section + '.' + method, data);
 }
 
 function logError(api: ApiPromise, data: any) {
