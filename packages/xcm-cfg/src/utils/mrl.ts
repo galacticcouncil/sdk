@@ -45,3 +45,9 @@ export function createPayload(
   const action = new VersionedUserAction({ V1: userAction });
   return action.toHex();
 }
+
+export function decodePayload(payloadHex: string) {
+  return registry
+    .createType('VersionedMultiLocation', payloadHex.replace('0x00', '0x'))
+    .toJSON();
+}
