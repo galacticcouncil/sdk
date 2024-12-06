@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 5.7.1
+
+### Patch Changes
+
+- be231d1: Fix dest fee for bifrost & astar
+
 ## 5.7.0
 
 ### Minor Changes
