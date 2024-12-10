@@ -207,8 +207,8 @@ export const assetHub = new Parachain({
   assetsData: [
     {
       asset: dot,
-      decimals: 10,
       id: 0,
+      decimals: 10,
       xcmLocation: {
         parents: 1,
         interior: 'Here',
@@ -216,10 +216,9 @@ export const assetHub = new Parachain({
     },
     {
       asset: usdt,
-      decimals: 6,
       id: 1984,
+      decimals: 6,
       min: 0.7,
-      palletInstance: 50,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -236,10 +235,9 @@ export const assetHub = new Parachain({
     },
     {
       asset: usdc,
-      decimals: 6,
       id: 1337,
+      decimals: 6,
       min: 0.7,
-      palletInstance: 50,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -256,9 +254,8 @@ export const assetHub = new Parachain({
     },
     {
       asset: pink,
-      decimals: 10,
       id: 23,
-      palletInstance: 50,
+      decimals: 10,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -275,9 +272,8 @@ export const assetHub = new Parachain({
     },
     {
       asset: ded,
-      decimals: 10,
       id: 30,
-      palletInstance: 50,
+      decimals: 10,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -294,9 +290,8 @@ export const assetHub = new Parachain({
     },
     {
       asset: dota,
-      decimals: 4,
       id: 18,
-      palletInstance: 50,
+      decimals: 4,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -313,9 +308,8 @@ export const assetHub = new Parachain({
     },
     {
       asset: wud,
-      decimals: 10,
       id: 31337,
-      palletInstance: 50,
+      decimals: 10,
       xcmLocation: {
         parents: 0,
         interior: {
@@ -569,8 +563,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: aave,
-      decimals: 18,
       id: 1000624,
+      decimals: 18,
       min: 0.00006,
       xcmLocation: {
         parents: 2,
@@ -595,9 +589,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: aca,
-      decimals: 12,
       id: 1000099,
-      min: 0.090744101633,
+      decimals: 12,
+      min: 0.091,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -617,9 +611,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ajun,
-      decimals: 12,
       id: 32,
-      min: 0.100786131828,
+      decimals: 12,
+      min: 0.11,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -639,9 +633,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: astr,
-      decimals: 18,
       id: 9,
-      min: 0.147058823529412,
+      decimals: 18,
+      min: 0.15,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -653,9 +647,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: bnc,
-      decimals: 12,
       id: 14,
-      min: 0.06879518984,
+      decimals: 12,
+      min: 0.069,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -675,9 +669,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: cfg,
-      decimals: 18,
       id: 13,
-      min: 0.0324675324675325,
+      decimals: 18,
+      min: 0.033,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -697,9 +691,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: cru,
-      decimals: 12,
       id: 27,
-      min: 0.007874015748,
+      decimals: 12,
+      min: 0.0079,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -711,11 +705,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ded,
-      balanceId: 1000019,
+      id: 1000019,
       decimals: 10,
-      id: 30,
-      metadataId: 1000019,
-      palletInstance: 50,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -735,9 +726,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: dot,
-      decimals: 10,
       id: 5,
-      min: 0.001754,
+      decimals: 10,
+      min: 0.0018,
       xcmLocation: {
         parents: 1,
         interior: 'Here',
@@ -745,11 +736,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: dota,
-      balanceId: 1000038,
+      id: 1000038,
       decimals: 4,
-      id: 18,
-      metadataId: 1000038,
-      palletInstance: 50,
       xcmLocation: {
         parents: '1',
         interior: {
@@ -769,8 +757,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: dai_awh,
-      decimals: 18,
       id: 2,
+      decimals: 18,
       min: 0.01,
       xcmLocation: {
         parents: 1,
@@ -791,8 +779,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: dai_mwh,
-      decimals: 18,
       id: 18,
+      decimals: 18,
       min: 0.01,
       xcmLocation: {
         parents: 1,
@@ -816,10 +804,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: glmr,
-      decimals: 18,
       id: 16,
-      min: 0.034854864344868,
-      palletInstance: 10,
+      decimals: 18,
+      min: 0.035,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -836,8 +823,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ibtc,
-      decimals: 8,
       id: 11,
+      decimals: 8,
       min: 0.00000036,
       xcmLocation: {
         parents: 1,
@@ -858,9 +845,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: intr,
-      decimals: 10,
       id: 17,
-      min: 0.6164274209,
+      decimals: 10,
+      min: 0.62,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -880,9 +867,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: kilt,
-      decimals: 15,
       id: 28,
-      min: 0.021358393848783,
+      decimals: 15,
+      min: 0.022,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -894,9 +881,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ldot,
-      decimals: 10,
       id: 1000100,
-      min: 0.0100200401,
+      decimals: 10,
+      min: 0.011,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -916,9 +903,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: myth,
-      decimals: 18,
       id: 30,
-      min: 0.0213675213675214,
+      decimals: 18,
+      min: 0.022,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -930,9 +917,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: nodl,
-      decimals: 11,
       id: 26,
-      min: 1.0989010989,
+      decimals: 11,
+      min: 1.1,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -949,9 +936,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: pen,
-      decimals: 12,
       id: 1000081,
-      min: 0.153256704981,
+      decimals: 12,
+      min: 0.16,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -968,11 +955,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: pink,
-      balanceId: 1000021,
+      id: 1000021,
       decimals: 10,
-      id: 23,
-      metadataId: 1000021,
-      palletInstance: 50,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -992,9 +976,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: pha,
-      decimals: 12,
       id: 8,
-      min: 0.054945054945,
+      decimals: 12,
+      min: 0.055,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1006,8 +990,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ring,
-      decimals: 18,
       id: 31,
+      decimals: 18,
       min: 1,
       xcmLocation: {
         parents: 1,
@@ -1028,8 +1012,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: sub,
-      decimals: 10,
       id: 24,
+      decimals: 10,
       min: 0.02,
       xcmLocation: {
         parents: 1,
@@ -1042,8 +1026,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: susde,
-      decimals: 18,
       id: 1000625,
+      decimals: 18,
       min: 0.01,
       xcmLocation: {
         parents: 2,
@@ -1068,8 +1052,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: susds,
-      decimals: 18,
       id: 1000626,
+      decimals: 18,
       min: 0.01,
       xcmLocation: {
         parents: 2,
@@ -1094,9 +1078,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: unq,
-      decimals: 18,
       id: 25,
-      min: 1.22438434893974,
+      decimals: 18,
+      min: 1.23,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1108,12 +1092,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: usdc,
-      balanceId: 22,
+      id: 22,
       decimals: 6,
-      id: 1337,
-      metadataId: 22,
       min: 0.01,
-      palletInstance: 50,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1133,8 +1114,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: usdc_mwh,
-      decimals: 6,
       id: 21,
+      decimals: 6,
       min: 0.01,
       xcmLocation: {
         parents: 1,
@@ -1158,12 +1139,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: usdt,
-      balanceId: 10,
+      id: 10,
       decimals: 6,
-      id: 1984,
-      metadataId: 10,
       min: 0.01,
-      palletInstance: 50,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1183,10 +1161,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: usdt_mwh,
-      decimals: 6,
       id: 23,
+      decimals: 6,
       min: 0.01,
-      palletInstance: 110,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1209,9 +1186,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: vastr,
-      decimals: 18,
       id: 33,
-      min: 0.133689839572193,
+      decimals: 18,
+      min: 0.14,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1231,9 +1208,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: vdot,
-      decimals: 10,
       id: 15,
-      min: 0.0018761726,
+      decimals: 10,
+      min: 0.0019,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1253,8 +1230,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: wbtc,
-      decimals: 8,
       id: 1000190,
+      decimals: 8,
       min: 0.00000023,
       xcmLocation: {
         parents: 2,
@@ -1279,8 +1256,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: wbtc_awh,
-      decimals: 8,
       id: 3,
+      decimals: 8,
       min: 0.00000044,
       xcmLocation: {
         parents: 1,
@@ -1301,10 +1278,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: wbtc_mwh,
-      decimals: 8,
       id: 19,
+      decimals: 8,
       min: 0.00000034,
-      palletInstance: 110,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1327,8 +1303,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: weth,
-      decimals: 18,
       id: 1000189,
+      decimals: 18,
       min: 0.0000061,
       xcmLocation: {
         parents: 2,
@@ -1353,8 +1329,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: weth_awh,
-      decimals: 18,
       id: 4,
+      decimals: 18,
       min: 0.000005,
       xcmLocation: {
         parents: 1,
@@ -1375,10 +1351,9 @@ export const hydration = new EvmParachain({
     },
     {
       asset: weth_mwh,
-      decimals: 18,
       id: 20,
-      min: 0.000005390835579515,
-      palletInstance: 110,
+      decimals: 18,
+      min: 0.0000054,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -1401,10 +1376,8 @@ export const hydration = new EvmParachain({
     },
     {
       asset: wud,
-      id: 31337,
-      balanceId: 1000085,
+      id: 1000085,
       decimals: 10,
-      palletInstance: 50,
       min: 20000,
       xcmLocation: {
         parents: 1,
@@ -1425,15 +1398,15 @@ export const hydration = new EvmParachain({
     },
     {
       asset: ztg,
-      decimals: 10,
       id: 12,
-      min: 0.090744101633,
+      decimals: 10,
+      min: 0.091,
       xcmLocation: {
         parents: 1,
         interior: {
           X2: [
             {
-              Parachain: 2029,
+              Parachain: 2092,
             },
             {
               GeneralKey: {

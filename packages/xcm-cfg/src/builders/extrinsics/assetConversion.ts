@@ -4,7 +4,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { getAssetLocation, getNativeLocation } from './assetConversion.utils';
+import { getAssetLocation } from './assetConversion.utils';
 
 const pallet = 'assetConversion';
 
@@ -25,18 +25,15 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
           const { aIn, aOut } = feeSwap!;
 
           const ctx = chain as Parachain;
-          const assetId = ctx.getAssetId(aOut);
-          const palletInstance = ctx.getAssetPalletInstance(aOut);
+          const aInLocation = ctx.getAssetXcmLocation(aIn); // DOT
+          const aOutLocation = ctx.getAssetXcmLocation(aOut);
 
           const maxAmountIn =
             aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
           const amountOut = aOut.amount;
 
           return [
-            [
-              getNativeLocation(),
-              getAssetLocation(assetId.toString(), palletInstance),
-            ],
+            [getAssetLocation(aInLocation), getAssetLocation(aOutLocation)],
             amountOut,
             maxAmountIn,
             address,

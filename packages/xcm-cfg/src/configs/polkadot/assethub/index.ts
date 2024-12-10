@@ -45,10 +45,9 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets(1)
-      .here(),
+      .limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -72,10 +71,9 @@ const toHydration: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -99,10 +97,9 @@ const toHydration: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
@@ -133,7 +130,7 @@ const toPolkadot: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(1).here(),
+    extrinsic: ExtrinsicBuilderV4().polkadotXcm().limitedTeleportAssets(),
   }),
 ];
 
@@ -160,10 +157,9 @@ const toMoonbeam: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -187,10 +183,9 @@ const toMoonbeam: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
   toMoonbeamExtTemplate(pink),
 ];
@@ -244,10 +239,9 @@ const toBifrost: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -271,10 +265,9 @@ const toBifrost: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 

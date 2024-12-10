@@ -1,14 +1,13 @@
 import {
   acc,
   big,
-  multiloc,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
 import { toAsset, toDest } from './xTokens.utils';
-import { locationOrError } from './utils';
+import { locationOrError, shouldFeeAssetPrecede } from './utils';
 
 import {
   getExtrinsicAccount,
@@ -98,22 +97,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
           ];
         }
 
-        const assetGeneralIndex = multiloc.findNestedKey(
-          transferAssetLocation,
-          'GeneralIndex'
-        );
-
-        const feeGeneralIndex = multiloc.findNestedKey(
-          transferFeeLocation,
-          'GeneralIndex'
-        );
-
-        const assetIndex =
-          assetGeneralIndex && assetGeneralIndex['GeneralIndex'];
-        const feeIndex = feeGeneralIndex && feeGeneralIndex['GeneralIndex'];
-
         // Flip asset order if general index of asset greater than fee asset
-        if (Number(assetIndex) > Number(feeIndex)) {
+        if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
           return [
             {
               [version]: [transferFee, transferAsset],
