@@ -71,6 +71,10 @@ export const polkadot = new Parachain({
   assetsData: [
     {
       asset: dot,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,

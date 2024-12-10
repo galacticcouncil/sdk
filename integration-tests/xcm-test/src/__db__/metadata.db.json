@@ -600,23 +600,23 @@
     }
   },
   "polkadot-hydration-dot": {
-    "updated": 1733064343334,
+    "updated": 1733852272533,
     "destination": {
-      "fee": "0.000120622",
+      "fee": "0.0001237683",
       "feeAsset": "DOT",
-      "feeNative": "1206220"
+      "feeNative": "1237683"
     }
   },
   "polkadot-bifrost-dot": {
-    "updated": 1733157937400,
+    "updated": 1733852311409,
     "destination": {
-      "fee": "0.0059193589",
+      "fee": "0.0061632931",
       "feeAsset": "DOT",
-      "feeNative": "59193589"
+      "feeNative": "61632931"
     }
   },
   "polkadot-assethub-dot": {
-    "updated": 1733157940649,
+    "updated": 1733852323074,
     "destination": {
       "fee": "0.0017965",
       "feeAsset": "DOT",
