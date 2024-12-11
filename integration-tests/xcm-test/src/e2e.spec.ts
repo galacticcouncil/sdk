@@ -32,7 +32,7 @@ const { runXcm } = xcm;
  */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum'];
-  const skipFor: string[] = bridge.concat(['acala-evm', 'nodle', 'phala']);
+  const skipFor: string[] = bridge.concat(['acala-evm', 'nodle']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)

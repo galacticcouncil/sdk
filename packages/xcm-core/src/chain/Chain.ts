@@ -24,11 +24,11 @@ export type ChainAssetId =
  * Chain Asset Data
  *
  * @interface ChainAssetData
- * @member {Asset} asset Chain asset
- * @member {ChainAssetId} balanceId asset id to fetch the balance
+ * @member {Asset} asset asset key & symbol
  * @member {number} decimals asset decimals
- * @member {ChainAssetId} id asset "transfer" id
- * @member {AssetAmount} min asset minimum (existentional deposit)
+ * @member {ChainAssetId} id asset internal id
+ * @member {ChainAssetId} balanceId asset id to query balance (if other than internal)
+ * @member {AssetAmount} min asset minimal deposit
  */
 export interface ChainAssetData {
   asset: Asset;

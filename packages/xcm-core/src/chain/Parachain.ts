@@ -15,14 +15,13 @@ import {
  * Parachain Asset Data
  *
  * @interface ParachainAssetsData
- * @member {ChainAssetId} metadataId asset "on chain" id
- * @member {AssetAmount} minId asset "on chain" id to fetch minimal deposit
- * @member {AssetAmount} palletInstance asset pallet instance (if any)
+ * @member {ChainAssetId} metadataId asset id to query metadata (if other than internal)
+ * @member {ChainAssetId} minId asset id to query minimal deposit (if other than internal)
+ * @member {Record<string, AnyJson>} xcmLocation asset xcm location
  */
 export interface ParachainAssetData extends ChainAssetData {
   metadataId?: ChainAssetId;
   minId?: ChainAssetId;
-  palletInstance?: number;
   xcmLocation?: Record<string, AnyJson>;
 }
 
@@ -80,20 +79,16 @@ export class Parachain extends Chain<ParachainAssetData> {
     return ChainType.Parachain;
   }
 
-  getAssetPalletInstance(asset: Asset): number | undefined {
-    return this.assetsData.get(asset.key)?.palletInstance;
-  }
-
   getAssetXcmLocation(asset: Asset): Record<string, AnyJson> | undefined {
     return this.assetsData.get(asset.key)?.xcmLocation;
   }
 
-  getMinAssetId(asset: Asset): ChainAssetId {
-    return this.assetsData.get(asset.key)?.minId ?? this.getAssetId(asset);
-  }
-
   getMetadataAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.metadataId ?? this.getAssetId(asset);
+  }
+
+  getMinAssetId(asset: Asset): ChainAssetId {
+    return this.assetsData.get(asset.key)?.minId ?? this.getAssetId(asset);
   }
 
   findAssetById(id: string) {
