@@ -13,6 +13,6 @@
   "dependencies": {
     "@galacticcouncil/sdk": "^5.1.0",
     "@galacticcouncil/xcm-sdk": "^7.0.0",
-    "@galacticcouncil/xcm-cfg": "^5.7.1"
+    "@galacticcouncil/xcm-cfg": "^6.0.0"
   }
 }

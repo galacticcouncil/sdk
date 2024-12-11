@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 5.5.0
+
+### Minor Changes
+
+- Remove pallet instance from Parachain def
+
 ## 5.4.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 6.0.0
+
+### Major Changes
+
+- Use xcm location, unify extrinsic builders
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@5.5.0
+
 ## 5.7.1
 
 ### Patch Changes
