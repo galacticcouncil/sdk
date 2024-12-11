@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { glmr, usdc_mwh, ztg } from '../../assets';
 import { hydration, zeitgeist } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: ztg,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiCurrencies(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
   }),
 ];
 

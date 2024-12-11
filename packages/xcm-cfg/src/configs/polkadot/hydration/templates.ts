@@ -8,7 +8,6 @@ import { dot, glmr, usdt } from '../../../assets';
 import {
   ContractBuilder,
   ExtrinsicBuilder,
-  ExtrinsicBuilderV4,
   ExtrinsicDecorator,
   FeeAmountBuilder,
   XcmTransferType,
@@ -48,7 +47,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilderV4().xTokens().transferMultiassets()
+      ExtrinsicBuilder().xTokens().transferMultiassets()
     ),
   });
 }
@@ -72,7 +71,7 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies()
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
     ),
   });
 }
@@ -96,7 +95,7 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies()
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
     ),
   });
 }
@@ -127,8 +126,8 @@ export function toEthereumViaWormholeTemplate(
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
-      ExtrinsicBuilderV4().xTokens().transferMultiCurrencies(),
-      ExtrinsicBuilderV4().polkadotXcm().send().transact({
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
       }),
     ]),
@@ -178,11 +177,9 @@ export function toEthereumViaSnowbridgeTemplate(
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
     tags: [Tag.Snowbridge],
   });
 }

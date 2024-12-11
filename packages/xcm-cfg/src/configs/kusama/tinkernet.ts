@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { tnkr } from '../../assets';
 import { basilisk, tinkernet } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toBasilisk: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toBasilisk: AssetRoute[] = [
         asset: tnkr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

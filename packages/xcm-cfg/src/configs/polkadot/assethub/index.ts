@@ -13,7 +13,6 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
-  ExtrinsicBuilderV4,
 } from '../../../builders';
 
 import {
@@ -45,9 +44,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -71,9 +68,7 @@ const toHydration: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -97,9 +92,7 @@ const toHydration: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
@@ -130,7 +123,7 @@ const toPolkadot: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().polkadotXcm().limitedTeleportAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(),
   }),
 ];
 
@@ -157,9 +150,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -183,9 +174,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   toMoonbeamExtTemplate(pink),
 ];
@@ -212,7 +201,7 @@ const toMythos: AssetRoute[] = [
         asset: myth,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().polkadotXcm().limitedTeleportAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(),
   }),
 ];
 
@@ -239,9 +228,7 @@ const toBifrost: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -265,9 +252,7 @@ const toBifrost: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

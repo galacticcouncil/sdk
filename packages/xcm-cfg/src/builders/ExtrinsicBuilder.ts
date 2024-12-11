@@ -4,13 +4,14 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { assetConversion } from './extrinsics/assetConversion';
-import { ethereumXcm } from './extrinsics/ethereumXcm';
-import { polkadotXcm } from './extrinsics/polkadotXcm';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
-import { xcmPallet } from './extrinsics/xcmPallet';
-import { xTokens } from './extrinsics/xTokens';
-import { xTransfer } from './extrinsics/xTransfer';
+
+import { ethereumXcm } from './extrinsics/xcm/ethereumXcm';
+import { polkadotXcm } from './extrinsics/xcm/polkadotXcm';
+import { xcmPallet } from './extrinsics/xcm/xcmPallet';
+import { xTokens } from './extrinsics/xcm/xTokens';
+import { xTransfer } from './extrinsics/xcm/xTransfer';
 
 export function ExtrinsicBuilder() {
   return {

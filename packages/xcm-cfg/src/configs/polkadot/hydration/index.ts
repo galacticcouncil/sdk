@@ -67,12 +67,7 @@ import {
   unique,
   zeitgeist,
 } from '../../../chains';
-import {
-  ContractBuilder,
-  ExtrinsicBuilder,
-  ExtrinsicBuilderV4,
-  XcmTransferType,
-} from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
@@ -81,8 +76,6 @@ import {
   toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
-  MRL_EXECUTION_FEE,
-  MRL_XCM_FEE,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -103,7 +96,7 @@ const toAcala: AssetRoute[] = [
         asset: dai_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -122,7 +115,7 @@ const toAcala: AssetRoute[] = [
         asset: wbtc_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -141,7 +134,7 @@ const toAcala: AssetRoute[] = [
         asset: weth_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -160,7 +153,7 @@ const toAcala: AssetRoute[] = [
         asset: aca,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -179,7 +172,7 @@ const toAcala: AssetRoute[] = [
         asset: ldot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -201,11 +194,9 @@ const toAssetHub: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4()
-      .polkadotXcm()
-      .transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   }),
   new AssetRoute({
     source: {
@@ -224,7 +215,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
   }),
   new AssetRoute({
     source: {
@@ -243,7 +234,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -269,7 +260,7 @@ const toAstar: AssetRoute[] = [
         asset: astr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -288,7 +279,7 @@ const toAstar: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -307,7 +298,7 @@ const toAstar: AssetRoute[] = [
         asset: bnc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -326,7 +317,7 @@ const toAstar: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -345,7 +336,7 @@ const toAstar: AssetRoute[] = [
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -364,7 +355,7 @@ const toAstar: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -383,7 +374,7 @@ const toAstar: AssetRoute[] = [
         asset: pha,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -402,7 +393,7 @@ const toAstar: AssetRoute[] = [
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -421,7 +412,7 @@ const toAstar: AssetRoute[] = [
         asset: vastr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -443,7 +434,7 @@ const toBifrost: AssetRoute[] = [
         asset: bnc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -462,7 +453,7 @@ const toBifrost: AssetRoute[] = [
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -481,7 +472,7 @@ const toBifrost: AssetRoute[] = [
         asset: vastr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -500,7 +491,7 @@ const toBifrost: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -519,7 +510,7 @@ const toBifrost: AssetRoute[] = [
         asset: astr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -538,7 +529,7 @@ const toBifrost: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -557,7 +548,7 @@ const toBifrost: AssetRoute[] = [
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -579,7 +570,7 @@ const toCentrifuge: AssetRoute[] = [
         asset: cfg,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -598,7 +589,7 @@ const toCentrifuge: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -617,7 +608,7 @@ const toCentrifuge: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -639,7 +630,7 @@ const toInterlay: AssetRoute[] = [
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -658,7 +649,7 @@ const toInterlay: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -677,7 +668,7 @@ const toInterlay: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -696,7 +687,7 @@ const toInterlay: AssetRoute[] = [
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -715,7 +706,7 @@ const toInterlay: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -737,7 +728,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -756,7 +747,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -775,7 +766,7 @@ const toMoonbeam: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   toMoonbeamErc20Template(dai_mwh),
   toMoonbeamErc20Template(usdc_mwh),
@@ -802,7 +793,7 @@ const toPolkadot: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -824,7 +815,7 @@ const toSubsocial: AssetRoute[] = [
         asset: sub,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -846,7 +837,7 @@ const toZeitgeist: AssetRoute[] = [
         asset: ztg,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -865,7 +856,7 @@ const toZeitgeist: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   toZeitgeistErc20Template(usdc_mwh),
 ];
@@ -888,7 +879,7 @@ const toPhala: AssetRoute[] = [
         asset: pha,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -910,7 +901,7 @@ const toMythos: AssetRoute[] = [
         asset: myth,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -932,7 +923,7 @@ const toNodle: AssetRoute[] = [
         asset: nodl,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -954,7 +945,7 @@ const toUnique: AssetRoute[] = [
         asset: unq,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -976,7 +967,7 @@ const toCrust: AssetRoute[] = [
         asset: cru,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -998,7 +989,7 @@ const toKilt: AssetRoute[] = [
         asset: kilt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -1020,7 +1011,7 @@ const toPendulum: AssetRoute[] = [
         asset: pen,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -1042,7 +1033,7 @@ const toDarwinia: AssetRoute[] = [
         asset: ring,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -1064,7 +1055,7 @@ const toAjuna: AssetRoute[] = [
         asset: ajun,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { dot, hdx, ibtc, intr, vdot } from '../../assets';
 import { hydration, interlay } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -87,7 +87,7 @@ const toHydration: AssetRoute[] = [
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -109,7 +109,7 @@ const toHydration: AssetRoute[] = [
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

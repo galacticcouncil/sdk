@@ -10,7 +10,6 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
-  ExtrinsicBuilderV4,
   ExtrinsicDecorator,
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
@@ -55,7 +54,7 @@ function toParachainExtTemplate(
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilderV4().polkadotXcm().limitedReserveTransferAssets()
+      ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()
     ),
   });
 }

@@ -1,6 +1,6 @@
 import { AnyChain } from '@galacticcouncil/xcm-core';
 
-import { evmChains } from './ethereum';
+import { evmChains } from './evm';
 import { polkadotChains } from './polkadot';
 import { kusamaChains } from './kusama';
 
@@ -15,5 +15,5 @@ export const chainsMap = new Map<string, AnyChain>(
 );
 
 export * from './polkadot';
-export * from './ethereum';
+export * from './evm';
 export * from './kusama';

@@ -10,7 +10,7 @@ import {
   robonomics,
   tinkernet,
 } from '../../../chains';
-import { ExtrinsicBuilderV4 } from '../../../builders';
+import { ExtrinsicBuilder } from '../../../builders';
 
 import { balance, fee } from './configs';
 
@@ -32,7 +32,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
   }),
 ];
 
@@ -54,7 +54,7 @@ const toKarura: AssetRoute[] = [
         asset: bsx,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -76,7 +76,7 @@ const toKusama: AssetRoute[] = [
         asset: ksm,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -98,7 +98,7 @@ const toIntegritee: AssetRoute[] = [
         asset: teer,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -120,7 +120,7 @@ const toRobonomics: AssetRoute[] = [
         asset: xrt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -142,7 +142,7 @@ const toTinkernet: AssetRoute[] = [
         asset: tnkr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

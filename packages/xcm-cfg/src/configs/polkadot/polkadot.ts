@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { dot } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const xcmDeliveryFee = 0.047;
 
@@ -28,7 +28,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xcmPallet().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xcmPallet().limitedReserveTransferAssets(),
   }),
 ];
 
@@ -54,7 +54,7 @@ const toBifrost: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xcmPallet().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xcmPallet().limitedReserveTransferAssets(),
   }),
 ];
 
@@ -80,7 +80,7 @@ const toAssetHub: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xcmPallet().limitedTeleportAssets(),
+    extrinsic: ExtrinsicBuilder().xcmPallet().limitedTeleportAssets(),
   }),
 ];
 

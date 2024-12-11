@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { aca, dai_awh, ldot, wbtc_awh, weth_awh } from '../../assets';
 import { hydration, acala } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: aca,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
         asset: dai_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
         asset: wbtc_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -87,7 +87,7 @@ const toHydration: AssetRoute[] = [
         asset: weth_awh,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -109,7 +109,7 @@ const toHydration: AssetRoute[] = [
         asset: ldot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 

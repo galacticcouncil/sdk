@@ -12,7 +12,7 @@ import {
   ibtc,
 } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -31,7 +31,7 @@ const toHydration: AssetRoute[] = [
         asset: bnc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -53,7 +53,7 @@ const toHydration: AssetRoute[] = [
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -75,7 +75,7 @@ const toHydration: AssetRoute[] = [
         asset: vastr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -97,7 +97,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -119,7 +119,7 @@ const toHydration: AssetRoute[] = [
         asset: astr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -141,7 +141,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -163,7 +163,7 @@ const toHydration: AssetRoute[] = [
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -188,7 +188,7 @@ const toPolkadot: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
 ];
 
@@ -213,7 +213,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiassets(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets(),
   }),
   new AssetRoute({
     source: {
@@ -235,7 +235,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilderV4().xTokens().transferMultiassets(),
+    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets(),
   }),
 ];
 
