@@ -1,5 +1,6 @@
 import { multiloc, Parachain, TxWeight } from '@galacticcouncil/xcm-core';
 
+import { getX1Junction } from './utils';
 import { XcmTransferType, XcmVersion } from '../../types';
 
 const ETHEREUM_CHAIN_ID = 1;
@@ -31,7 +32,7 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
     [version]: {
       parents: 1,
       interior: {
-        X1: [toParachain],
+        X1: getX1Junction(version, toParachain),
       },
     },
   };
@@ -42,7 +43,7 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
     [version]: {
       parents: 0,
       interior: {
-        X1: [account],
+        X1: getX1Junction(version, account),
       },
     },
   };
@@ -60,7 +61,7 @@ export const toTransferType = (
         [version]: {
           parents: 1,
           interior: {
-            X1: [reserveChain],
+            X1: getX1Junction(version, reserveChain),
           },
         },
       },
@@ -87,7 +88,7 @@ export const toParaXcmOnDest = (version: XcmVersion, account: any) => {
           beneficiary: {
             parents: 0,
             interior: {
-              X1: [account],
+              X1: getX1Junction(version, account),
             },
           },
         },
@@ -124,7 +125,7 @@ export const toBridgeXcmOnDest = (
               beneficiary: {
                 parents: 0,
                 interior: {
-                  X1: [sender],
+                  X1: getX1Junction(version, sender),
                 },
               },
             },
@@ -146,7 +147,7 @@ export const toBridgeXcmOnDest = (
             {
               BuyExecution: {
                 fees: {
-                  id: reanchorLocation(transferAssetLocation),
+                  id: reanchorLocation(version, transferAssetLocation),
                   fun: { Fungible: 1 },
                 },
                 weightLimit: 'Unlimited',
@@ -162,7 +163,7 @@ export const toBridgeXcmOnDest = (
                 beneficiary: {
                   parents: 0,
                   interior: {
-                    X1: [account],
+                    X1: getX1Junction(version, account),
                   },
                 },
               },
@@ -178,14 +179,17 @@ export const toBridgeXcmOnDest = (
  * Re-anchor location of transfer asset in case
  * of bridge transfer for "BuyExecution"
  *
+ * @param version - XCM Version
  * @param assetLocation asset multilocation
  * @returns fixed location
  */
-const reanchorLocation = (assetLocation: object) => {
+const reanchorLocation = (version: XcmVersion, assetLocation: object) => {
   const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
   return {
     parents: 0,
-    interior: { X1: [{ AccountKey20: erc20Key }] },
+    interior: {
+      X1: getX1Junction(version, { AccountKey20: erc20Key }),
+    },
   };
 };
 
@@ -244,7 +248,7 @@ export const toTransactMessage = (
           beneficiary: {
             parents: 0,
             interior: {
-              X1: [account],
+              X1: getX1Junction(version, account),
             },
           },
         },

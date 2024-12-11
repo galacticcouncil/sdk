@@ -24,6 +24,10 @@ export function getExtrinsicArgumentVersion(
     ? raw.sub.map((x) => x.name)
     : [raw.sub.name];
 
+  if (versions.includes(XcmVersion.v4)) {
+    return XcmVersion.v4;
+  }
+
   if (versions.includes(XcmVersion.v3)) {
     return XcmVersion.v3;
   }
@@ -32,10 +36,7 @@ export function getExtrinsicArgumentVersion(
     return XcmVersion.v2;
   }
 
-  if (versions.includes(XcmVersion.v1)) {
-    return XcmVersion.v1;
-  }
-
+  console.log(JSON.stringify(func, null, 2)); // Dump func if invalid version
   throw new Error("Can't find Xcm version");
 }
 

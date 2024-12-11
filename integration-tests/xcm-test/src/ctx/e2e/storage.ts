@@ -59,6 +59,17 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
     );
   }
 
+  if (useOrmlTokensPallet(api)) {
+    storage = Object.assign(
+      {
+        OrmlTokens: {
+          Accounts: populateOrmlTokens(chain, chainAssets, chainDecimals),
+        },
+      },
+      storage
+    );
+  }
+
   if (useEvmAccountPallet(api)) {
     storage = Object.assign(
       {
@@ -87,6 +98,10 @@ const useTokensPallet = (api: ApiPromise): boolean => {
 
 const useEvmAccountPallet = (api: ApiPromise): boolean => {
   return !!api.query.evm?.accountStorages;
+};
+
+const useOrmlTokensPallet = (api: ApiPromise): boolean => {
+  return !!api.query.ormlTokens?.accounts;
 };
 
 const useNormalizedBalance = (
@@ -150,6 +165,21 @@ const populateForeignAssets = (
       const assetLocation = chain.getAssetXcmLocation(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
       return [[assetLocation, acc.address], { balance: balance }];
+    });
+};
+
+const populateOrmlTokens = (
+  chain: Parachain,
+  assets: ParachainAssetData[],
+  decimals: number
+) => {
+  const acc = getAccount(chain);
+  return assets
+    .filter((a) => !!a.xcmLocation)
+    .map((a) => {
+      const assetId = chain.getBalanceAssetId(a.asset);
+      const balance = useNormalizedBalance(chain, decimals, a.asset);
+      return [[acc.address, assetId], { free: balance }];
     });
 };
 

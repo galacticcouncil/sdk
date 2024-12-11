@@ -128,39 +128,39 @@
     }
   },
   "bifrost-hydration-bnc": {
-    "updated": 1733156360987,
+    "updated": 1733857744132,
     "destination": {
-      "fee": "0.002977302631",
+      "fee": "0.002856086697",
       "feeAsset": "BNC",
-      "feeNative": "2977302631"
+      "feeNative": "2856086697"
     }
   },
   "bifrost-hydration-vdot": {
-    "updated": 1733156368559,
+    "updated": 1733857752784,
     "destination": {
-      "fee": "0.0000700362",
+      "fee": "0.0000683267",
       "feeAsset": "vDOT",
-      "feeNative": "700362"
+      "feeNative": "683267"
     }
   },
   "bifrost-hydration-vastr": {
-    "updated": 1733156374701,
+    "updated": 1733857759630,
     "destination": {
-      "fee": "0.00943228310626571",
+      "fee": "0.009691075481661163",
       "feeAsset": "vASTR",
-      "feeNative": "9432283106265710"
+      "feeNative": "9691075481661163"
     }
   },
   "bifrost-hydration-dot": {
-    "updated": 1733156384016,
+    "updated": 1733857792526,
     "destination": {
-      "fee": "0.0442539306",
+      "fee": "0.0442515395",
       "feeAsset": "DOT",
-      "feeNative": "442539306"
+      "feeNative": "442515395"
     }
   },
   "bifrost-polkadot-dot": {
-    "updated": 1733857592690,
+    "updated": 1733857866313,
     "destination": {
       "fee": "0.0021232099",
       "feeAsset": "DOT",
@@ -176,7 +176,7 @@
     }
   },
   "bifrost-assethub-usdt": {
-    "updated": 1733857605654,
+    "updated": 1733857880592,
     "destination": {
       "fee": "0.027012",
       "feeAsset": "USDT",
@@ -184,35 +184,35 @@
     }
   },
   "bifrost-assethub-usdc": {
-    "updated": 1733156397623,
+    "updated": 1733867546038,
     "destination": {
-      "fee": "0.032339",
+      "fee": "0.033499",
       "feeAsset": "USDC",
-      "feeNative": "32339"
+      "feeNative": "33499"
     }
   },
   "centrifuge-hydration-cfg": {
-    "updated": 1733156406844,
+    "updated": 1733860368169,
     "destination": {
-      "fee": "0.002129996479933514",
+      "fee": "0.001898418059412911",
       "feeAsset": "CFG",
-      "feeNative": "2129996479933514"
+      "feeNative": "1898418059412911"
     }
   },
   "crust-hydration-cru": {
-    "updated": 1733156422033,
+    "updated": 1733945212595,
     "destination": {
-      "fee": "0.001281219233",
+      "fee": "0.001281923923",
       "feeAsset": "CRU",
-      "feeNative": "1281219233"
+      "feeNative": "1281923923"
     }
   },
   "darwinia-hydration-ring": {
-    "updated": 1733156431308,
+    "updated": 1733945361318,
     "destination": {
-      "fee": "0.427949228921642917",
+      "fee": "0.393016760227608899",
       "feeAsset": "RING",
-      "feeNative": "427949228921642917"
+      "feeNative": "393016760227608899"
     }
   },
   "hydration-acala-aca": {
@@ -536,23 +536,23 @@
     }
   },
   "kilt-hydration-kilt": {
-    "updated": 1733157091250,
+    "updated": 1733945280463,
     "destination": {
-      "fee": "0.005921940840834",
+      "fee": "0.004447104743468",
       "feeAsset": "KILT",
-      "feeNative": "5921940840834"
+      "feeNative": "4447104743468"
     }
   },
   "interlay-hydration-intr": {
-    "updated": 1733064300865,
+    "updated": 1733864773331,
     "destination": {
-      "fee": "0.057549725",
+      "fee": "0.0568046827",
       "feeAsset": "INTR",
-      "feeNative": "575497250"
+      "feeNative": "568046827"
     }
   },
   "interlay-hydration-ibtc": {
-    "updated": 1733064305686,
+    "updated": 1733864778421,
     "destination": {
       "fee": "0.01137864",
       "feeAsset": "INTR",
@@ -560,15 +560,15 @@
     }
   },
   "interlay-hydration-dot": {
-    "updated": 1733064312706,
+    "updated": 1733864809754,
     "destination": {
-      "fee": "0.0442536903",
+      "fee": "0.0442474243",
       "feeAsset": "DOT",
-      "feeNative": "442536903"
+      "feeNative": "442474243"
     }
   },
   "interlay-hydration-hdx": {
-    "updated": 1733064317768,
+    "updated": 1733864817032,
     "destination": {
       "fee": "0.062262236086",
       "feeAsset": "HDX",
@@ -576,19 +576,19 @@
     }
   },
   "mythos-hydration-myth": {
-    "updated": 1733064328688,
+    "updated": 1733930606827,
     "destination": {
-      "fee": "0.00315404891951223",
+      "fee": "0.003594757960787905",
       "feeAsset": "MYTH",
-      "feeNative": "3154048919512230"
+      "feeNative": "3594757960787905"
     }
   },
   "mythos-assethub-myth": {
-    "updated": 1733157693875,
+    "updated": 1733930617858,
     "destination": {
-      "fee": "0.057649836168124849",
+      "fee": "0.058155721604356138",
       "feeAsset": "MYTH",
-      "feeNative": "57649836168124849"
+      "feeNative": "58155721604356138"
     }
   },
   "pendulum-hydration-pen": {
@@ -624,39 +624,39 @@
     }
   },
   "subsocial-hydration-sub": {
-    "updated": 1733064356876,
+    "updated": 1733932276241,
     "destination": {
-      "fee": "0.6587642258",
+      "fee": "0.5496152554",
       "feeAsset": "SUB",
-      "feeNative": "6587642258"
+      "feeNative": "5496152554"
     }
   },
   "unique-hydration-unq": {
-    "updated": 1733064368766,
+    "updated": 1733945155743,
     "destination": {
-      "fee": "0.142758713876999205",
+      "fee": "0.123364814813155527",
       "feeAsset": "UNQ",
-      "feeNative": "142758713876999205"
+      "feeNative": "123364814813155527"
     }
   },
   "zeitgeist-hydration-ztg": {
-    "updated": 1733064376872,
+    "updated": 1733932775058,
     "destination": {
-      "fee": "0.0623190896",
+      "fee": "0.0537411398",
       "feeAsset": "ZTG",
-      "feeNative": "623190896"
+      "feeNative": "537411398"
     }
   },
   "zeitgeist-hydration-glmr": {
-    "updated": 1733064390238,
+    "updated": 1733932797127,
     "destination": {
-      "fee": "0.007937339454491052",
+      "fee": "0.007655243203596376",
       "feeAsset": "GLMR",
-      "feeNative": "7937339454491052"
+      "feeNative": "7655243203596376"
     }
   },
   "zeitgeist-hydration-usdc_mwh": {
-    "updated": 1733064403646,
+    "updated": 1733932814751,
     "destination": {
       "fee": "0.1",
       "feeAsset": "GLMR",
@@ -837,6 +837,70 @@
       "fee": "0.621886995213320128",
       "feeAsset": "vASTR",
       "feeNative": "621886995213320128"
+    }
+  },
+  "bifrost-hydration-astr": {
+    "updated": 1733857814158,
+    "destination": {
+      "fee": "0.056602796115013343",
+      "feeAsset": "ASTR",
+      "feeNative": "56602796115013343"
+    }
+  },
+  "bifrost-hydration-glmr": {
+    "updated": 1733857833094,
+    "destination": {
+      "fee": "0.007755162420970978",
+      "feeAsset": "GLMR",
+      "feeNative": "7755162420970978"
+    }
+  },
+  "centrifuge-hydration-glmr": {
+    "updated": 1733860388450,
+    "destination": {
+      "fee": "0.007665926747165278",
+      "feeAsset": "GLMR",
+      "feeNative": "7665926747165278"
+    }
+  },
+  "interlay-hydration-vdot": {
+    "updated": 1733864859059,
+    "destination": {
+      "fee": "0.0034649096",
+      "feeAsset": "vDOT",
+      "feeNative": "34649096"
+    }
+  },
+  "astar-hydration-ibtc": {
+    "updated": 1733866617103,
+    "destination": {
+      "fee": "0.00000063",
+      "feeAsset": "IBTC",
+      "feeNative": "63"
+    }
+  },
+  "bifrost-hydration-ibtc": {
+    "updated": 1733867426068,
+    "destination": {
+      "fee": "0.00000063",
+      "feeAsset": "IBTC",
+      "feeNative": "63"
+    }
+  },
+  "centrifuge-hydration-dot": {
+    "updated": 1733872211919,
+    "destination": {
+      "fee": "0.0442455022",
+      "feeAsset": "DOT",
+      "feeNative": "442455022"
+    }
+  },
+  "phala-hydration-pha": {
+    "updated": 1733934732008,
+    "destination": {
+      "fee": "0.00464917361",
+      "feeAsset": "PHA",
+      "feeNative": "4649173610"
     }
   }
 }

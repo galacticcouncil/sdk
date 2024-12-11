@@ -19,6 +19,7 @@ import { locationOrError, shouldFeeAssetPrecede } from './utils';
 
 import {
   getExtrinsicAccount,
+  getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
 } from '../../ExtrinsicBuilder.utils';
 
@@ -31,8 +32,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-      getArgs: () => {
-        const version = XcmVersion.v4;
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -95,8 +96,8 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedTeleportAssets',
-      getArgs: () => {
-        const version = XcmVersion.v4;
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -113,6 +114,33 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
           [version]: [transferAsset],
         };
         return [dest, beneficiary, assets, 0, 'Unlimited'];
+      },
+    }),
+});
+
+const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
+  build: ({ address, amount, asset, destination, source }) =>
+    new ExtrinsicConfig({
+      module: pallet,
+      func: 'reserveTransferAssets',
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
+        const account = getExtrinsicAccount(address);
+        const ctx = source.chain as Parachain;
+        const rcv = destination.chain as Parachain;
+
+        const transferAssetLocation = getExtrinsicAssetLocation(
+          locationOrError(ctx, asset),
+          version
+        );
+        const transferAsset = toAsset(transferAssetLocation, amount);
+
+        const dest = toDest(version, rcv);
+        const beneficiary = toBeneficiary(version, account);
+        const assets = {
+          [version]: [transferAsset],
+        };
+        return [dest, beneficiary, assets, 0];
       },
     }),
 });
@@ -256,6 +284,7 @@ export const polkadotXcm = () => {
   return {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
+    reserveTransferAssets,
     transferAssetsUsingTypeAndThen,
     send,
   };

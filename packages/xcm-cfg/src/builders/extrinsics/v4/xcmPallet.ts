@@ -8,9 +8,9 @@ import { locationOrError } from './utils';
 
 import {
   getExtrinsicAccount,
+  getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
 } from '../../ExtrinsicBuilder.utils';
-import { XcmVersion } from '../../types';
 
 const pallet = 'xcmPallet';
 
@@ -19,8 +19,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-      getArgs: () => {
-        const version = XcmVersion.v4;
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
 
         const ctx = source.chain as Parachain;
@@ -50,8 +50,8 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedTeleportAssets',
-      getArgs: () => {
-        const version = XcmVersion.v4;
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
 
         const ctx = source.chain as Parachain;
