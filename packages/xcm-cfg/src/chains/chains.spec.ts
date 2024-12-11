@@ -41,7 +41,7 @@ describe('chains config', () => {
           .filter((c) => h160AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()
-      ).toEqual(['acala-evm', 'darwinia', 'moonbeam', 'mythos'].sort());
+      ).toEqual(['darwinia', 'moonbeam', 'mythos'].sort());
     });
     it('should match given chains with substrate only address space support', async () => {
       expect(
