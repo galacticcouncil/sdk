@@ -1,6 +1,6 @@
-import { AnyChain, ChainEcosystem, Parachain } from '@galacticcouncil/xcm-core';
+import { AnyChain, Parachain } from '@galacticcouncil/xcm-core';
 
-import { chains } from './chains';
+import { polkadotChains } from './polkadot';
 
 const fullAddressSpace = (chain: AnyChain): boolean => {
   return (
@@ -29,8 +29,7 @@ describe('chains config', () => {
   describe('check address space support in polkadot ecosystem', () => {
     it('should match given chains with both evm & substrate address space support', async () => {
       expect(
-        chains
-          .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
+        polkadotChains
           .filter((c) => fullAddressSpace(c))
           .map((c) => c.key)
           .sort()
@@ -38,8 +37,7 @@ describe('chains config', () => {
     });
     it('should match given chains with evm only address space support', async () => {
       expect(
-        chains
-          .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
+        polkadotChains
           .filter((c) => h160AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()
@@ -47,8 +45,7 @@ describe('chains config', () => {
     });
     it('should match given chains with substrate only address space support', async () => {
       expect(
-        chains
-          .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
+        polkadotChains
           .filter((c) => ss58AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()

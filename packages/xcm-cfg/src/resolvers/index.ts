@@ -1,5 +1,2 @@
-import { AcalaEvmResolver } from './acala';
-import { HydrationEvmResolver } from './hydration';
-
-export const evmAcalaResolver = new AcalaEvmResolver();
-export const evmHydrationResolver = new HydrationEvmResolver();
+export * from './acala';
+export * from './hydration';
