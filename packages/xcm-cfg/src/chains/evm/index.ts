@@ -1,6 +1,6 @@
 import { AnyChain } from '@galacticcouncil/xcm-core';
 
-import { ethereum } from './mainnet';
+import { ethereum } from './ethereum';
 
 export const evmChains: AnyChain[] = [ethereum];
 

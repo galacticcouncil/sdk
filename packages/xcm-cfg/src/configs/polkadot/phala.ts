@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { pha } from '../../assets';
 import { hydration, phala } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: pha,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTransfer().transfer().here(),
+    extrinsic: ExtrinsicBuilderV4().xTransfer().transfer(),
   }),
 ];
 

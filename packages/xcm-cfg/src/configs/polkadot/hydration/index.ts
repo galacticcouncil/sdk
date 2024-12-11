@@ -47,7 +47,6 @@ import {
 } from '../../../assets';
 import {
   acala,
-  acala_evm,
   ajuna,
   assetHub,
   astar,
@@ -1069,53 +1068,6 @@ const toAjuna: AssetRoute[] = [
   }),
 ];
 
-const toAcalaViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dai_mwh,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala_evm,
-      asset: dai_awh,
-      fee: {
-        amount: 0.06,
-        asset: aca,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilderV4().xTokens().transferMultiCurrencies(),
-        ExtrinsicBuilderV4().polkadotXcm().send().transact({
-          fee: MRL_EXECUTION_FEE,
-        }),
-      ]),
-    transact: {
-      chain: moonbeam,
-      fee: {
-        amount: MRL_XCM_FEE,
-        asset: glmr,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder()
-        .ethereumXcm()
-        .transact(
-          ContractBuilder()
-            .Batch()
-            .batchAll([
-              ContractBuilder().Erc20().approve(),
-              ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-            ])
-        ),
-    },
-  }),
-];
-
 const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumViaWormholeTemplate(dai_mwh, dai),
   toEthereumViaWormholeTemplate(weth_mwh, eth),
@@ -1134,7 +1086,6 @@ export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
     ...toAcala,
-    ...toAcalaViaWormhole,
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,

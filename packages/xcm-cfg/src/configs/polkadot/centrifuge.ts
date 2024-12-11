@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { cfg, dot, glmr } from '../../assets';
 import { centrifuge, hydration } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: cfg,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
   }),
 ];
 

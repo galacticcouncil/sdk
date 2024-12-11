@@ -5,7 +5,7 @@ import {
 
 import { ded, dot, dota, myth, pink, usdc, usdt, wud } from '../../assets';
 
-export const assethub = new Parachain({
+export const assetHub = new Parachain({
   assetsData: [
     {
       asset: dot,

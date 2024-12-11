@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { xrt } from '../../assets';
 import { basilisk, robonomics } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toBasilisk: AssetRoute[] = [
   new AssetRoute({
@@ -21,10 +21,9 @@ const toBasilisk: AssetRoute[] = [
         asset: xrt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .here(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 

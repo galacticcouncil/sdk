@@ -9,6 +9,10 @@ export const kusama = new Parachain({
   assetsData: [
     {
       asset: ksm,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Kusama,

@@ -15,18 +15,49 @@ export const karura = new Parachain({
       asset: ksm,
       decimals: 12,
       id: { Token: ksm.originSymbol },
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
     {
       asset: bsx,
       decimals: 12,
       id: { ForeignAsset: 11 },
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2090,
+            },
+            {
+              GeneralIndex: 0,
+            },
+          ],
+        },
+      },
     },
     {
       asset: usdt,
-      balanceId: { ForeignAsset: 7 },
       decimals: 6,
-      id: 1984,
-      palletInstance: 50,
+      id: { ForeignAsset: 7 },
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
     },
   ],
   ecosystem: Ecosystem.Kusama,

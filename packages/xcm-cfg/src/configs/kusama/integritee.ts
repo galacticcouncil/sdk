@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { teer } from '../../assets';
 import { basilisk, integritee } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toBasilisk: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +21,7 @@ const toBasilisk: AssetRoute[] = [
         asset: teer,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilderV4().xTokens().transfer(),
   }),
 ];
 

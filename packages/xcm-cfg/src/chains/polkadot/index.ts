@@ -2,7 +2,7 @@ import { AnyChain } from '@galacticcouncil/xcm-core';
 
 import { acala } from './acala';
 import { ajuna } from './ajuna';
-import { assethub } from './assethub';
+import { assetHub } from './assethub';
 import { astar } from './astar';
 import { bifrost } from './bifrost';
 import { centrifuge } from './centrifuge';
@@ -24,7 +24,7 @@ import { zeitgeist } from './zeitgeist';
 export const polkadotChains: AnyChain[] = [
   acala,
   ajuna,
-  assethub,
+  assetHub,
   astar,
   bifrost,
   centrifuge,
@@ -47,7 +47,7 @@ export const polkadotChains: AnyChain[] = [
 export {
   acala,
   ajuna,
-  assethub,
+  assetHub,
   astar,
   bifrost,
   centrifuge,

@@ -11,11 +11,27 @@ export const kusamaAssetHub = new Parachain({
       asset: usdt,
       decimals: 6,
       id: 1984,
-      palletInstance: 50,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
     },
     {
       asset: ksm,
       decimals: 12,
+      xcmLocation: {
+        parents: 1,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Kusama,

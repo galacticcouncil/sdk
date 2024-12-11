@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { kilt } from '../../assets';
 import { hydration, kilt_chain } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,10 +21,9 @@ const toHydration: AssetRoute[] = [
         asset: kilt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .here(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 

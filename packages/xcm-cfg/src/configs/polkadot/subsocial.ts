@@ -2,7 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { sub } from '../../assets';
 import { hydration, subsocial } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilderV4 } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -21,10 +21,9 @@ const toHydration: AssetRoute[] = [
         asset: sub,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .here(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 

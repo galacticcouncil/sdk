@@ -9,7 +9,10 @@ export const robonomics = new Parachain({
   assetsData: [
     {
       asset: xrt,
-      metadataId: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Kusama,

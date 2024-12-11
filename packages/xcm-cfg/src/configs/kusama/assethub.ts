@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { ksm, usdt } from '../../assets';
 import { kusamaAssetHub, kusama, karura, basilisk } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  ExtrinsicBuilderV4,
+} from '../../builders';
 
 const xcmDeliveryFee = 0.0015;
 
@@ -28,10 +32,9 @@ const toBasilisk: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 
@@ -57,10 +60,9 @@ const toKarura: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder()
+    extrinsic: ExtrinsicBuilderV4()
       .polkadotXcm()
-      .limitedReserveTransferAssets()
-      .X2(),
+      .limitedReserveTransferAssets(),
   }),
 ];
 
@@ -86,7 +88,7 @@ const toKusama: AssetRoute[] = [
         asset: ksm,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(1).here(),
+    extrinsic: ExtrinsicBuilderV4().polkadotXcm().limitedTeleportAssets(),
   }),
 ];
 
