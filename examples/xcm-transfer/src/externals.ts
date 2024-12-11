@@ -89,14 +89,44 @@ export function configureExternal(
 ) {
   external.forEach((ext) => {
     if (ext.origin === 1000 && !defaultExternals.includes(ext.id)) {
-      const assetData = toAssetData(ext);
-      console.log('💀 Registering ' + assetData.asset.key);
-      configService.addExternalHubRoute(assetData);
+      const hubAsset = toHubAsset(ext);
+      const parachainAsset = toParachainAsset(ext);
+
+      console.log('💀 Registering ' + hubAsset.asset.key);
+      configService.addExternalHubRoute(hubAsset, parachainAsset);
     }
   });
 }
 
-function toAssetData(external: ExternalAsset): ChainAssetData {
+function toHubAsset(external: ExternalAsset): ChainAssetData {
+  const { decimals, id, origin, symbol } = external;
+  const key = symbol.toLowerCase();
+  const asset = new Asset({
+    key: [key, origin, id].join('_'),
+    originSymbol: symbol,
+  });
+
+  return {
+    asset: asset,
+    decimals: decimals,
+    id: id,
+    xcmLocation: {
+      parents: 0,
+      interior: {
+        X2: [
+          {
+            PalletInstance: 50,
+          },
+          {
+            GeneralIndex: id,
+          },
+        ],
+      },
+    },
+  } as ChainAssetData;
+}
+
+function toParachainAsset(external: ExternalAsset): ChainAssetData {
   const { decimals, id, internalId, origin, symbol } = external;
   const key = symbol.toLowerCase();
   const asset = new Asset({
@@ -106,9 +136,23 @@ function toAssetData(external: ExternalAsset): ChainAssetData {
 
   return {
     asset: asset,
-    balanceId: internalId,
     decimals: decimals,
-    id: id,
-    palletInstance: 50,
+    id: internalId,
+    xcmLocation: {
+      parents: 1,
+      interior: {
+        X3: [
+          {
+            Parachain: origin,
+          },
+          {
+            PalletInstance: 50,
+          },
+          {
+            GeneralIndex: id,
+          },
+        ],
+      },
+    },
   } as ChainAssetData;
 }
