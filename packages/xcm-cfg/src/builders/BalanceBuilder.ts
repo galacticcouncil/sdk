@@ -14,9 +14,6 @@ import {
 } from '@polkadot/types/lookup';
 import { isString } from '@polkadot/util';
 
-import { XcmVersion } from './types';
-import { normalizeInterior } from './ExtrinsicBuilder.utils';
-
 export function BalanceBuilder() {
   return {
     substrate,
@@ -176,60 +173,3 @@ function ormlTokens() {
     }),
   };
 }
-
-/* function foreignAssets(parachain: Parachain) {
-  return {
-    account: () => {
-      return {
-        X1: (): BalanceConfigBuilder => ({
-          build: ({ address }) =>
-            new SubstrateQueryConfig({
-              module: 'foreignAssets',
-              func: 'account',
-              args: [
-                {
-                  X1: [
-                    {
-                      Parachain: parachain.parachainId,
-                    },
-                  ],
-                },
-                address,
-              ],
-              transform: async (
-                response: Option<PalletAssetsAssetAccount>
-              ): Promise<bigint> =>
-                response.unwrapOrDefault().balance.toBigInt(),
-            }),
-        }),
-        X2: (): BalanceConfigBuilder => ({
-          build: ({ address, asset }) => {
-            const assetData = parachain.findAssetById(asset.toString());
-            return new SubstrateQueryConfig({
-              module: 'foreignAssets',
-              func: 'account',
-              args: [
-                {
-                  X2: [
-                    {
-                      Parachain: parachain.parachainId,
-                    },
-                    {
-                      PalletInstance: assetData?.palletInstance,
-                    },
-                  ],
-                },
-                address,
-              ],
-              transform: async (
-                response: Option<PalletAssetsAssetAccount>
-              ): Promise<bigint> =>
-                response.unwrapOrDefault().balance.toBigInt(),
-            });
-          },
-        }),
-      };
-    },
-  };
-}
- */
