@@ -4,7 +4,9 @@
 
 ### Major Changes
 
-- Use xcm location, unify extrinsic builders
+- Add missing asset xcm locations
+- Switch extrinsic builders to use multilocation
+- Add dynamic v4 location support
 
 ### Patch Changes
 

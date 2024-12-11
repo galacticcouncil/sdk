@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- Remove pallet instance from Parachain def
+- Remove getPalletInstance from Parachain def (present in xcmLocation if any)
 
 ## 5.4.0
 
