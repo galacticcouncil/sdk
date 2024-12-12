@@ -13,7 +13,7 @@ const { configService, init } = setup;
 const { runXcm } = xcm;
 
 const getPolkadotChains = () => {
-  const skipFor: string[] = ['acala-evm', 'nodle'];
+  const skipFor: string[] = ['nodle'];
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
