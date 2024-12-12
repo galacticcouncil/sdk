@@ -24,8 +24,6 @@ import {
 } from './xcm.utils';
 import { SetupCtx } from './types';
 
-import { getRouteKey } from '../../utils/route';
-
 const TRANSFER_AMOUNT = '10';
 
 export const runXcm = (
@@ -33,6 +31,7 @@ export const runXcm = (
   cfg: () => Promise<{
     chain: AnyChain;
     route: AssetRoute;
+    key: string;
   }>,
   ctx: () => Promise<{
     report: Map<any, any>;
@@ -48,15 +47,13 @@ export const runXcm = (
   itfn(
     name,
     async () => {
-      const { chain, route } = await cfg();
+      const { chain, route, key } = await cfg();
       const { report, networks, wallet } = await ctx();
 
       const srcChain = chain as Parachain;
       const srcNetwork = networks.find((n) => n.config.key === srcChain.key)!;
       const destChain = route.destination.chain as Parachain;
       const destNetwork = networks.find((n) => n.config.key === destChain.key)!;
-
-      const key = getRouteKey(chain, route);
 
       console.log('\n🥢 Executing ' + name + ' ...');
       console.log('🥢 Route key: ' + key);

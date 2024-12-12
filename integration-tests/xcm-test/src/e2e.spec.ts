@@ -6,10 +6,12 @@ import {
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import console from 'console';
+import outdent from 'outdent';
 
 import { setup, network, xcm, SetupCtx } from './ctx/e2e';
 
-import { getRouteInfo } from './utils/route';
+import { parseArgs } from './utils/cmd';
+import { getRouteInfo, getRouteKey } from './utils/route';
 import { write, loadExisting } from './utils/file';
 
 const jestConsole = console;
@@ -18,6 +20,19 @@ const DB = 'metadata.db.json';
 const { configService, initWithCtx } = setup;
 const { createNetworks } = network;
 const { runXcm } = xcm;
+
+const usage = outdent`
+  Usage:
+    npm run test:e2e
+
+  Options: 
+    -key      Execute transfer for given key
+    -chain    Execute transfers from given chain
+
+  Examples:
+    npm run test:e2e -- -key hydration-moonbeam-glmr
+    npm run test:e2e -- -chain hydration
+`;
 
 /**
  * Supported polkadot consensus ctx.
@@ -45,6 +60,13 @@ const getPolkadotChains = () => {
 
 describe('Wallet with XCM config', () => {
   jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
+  console.log(usage + '\n');
+
+  const args = process.argv.slice(2);
+  const params = parseArgs(args);
+
+  const keyParam = params['key'];
+  const chainParam = params['chain'];
 
   let wallet: Wallet;
   let networks: SetupCtx[] = [];
@@ -79,21 +101,28 @@ describe('Wallet with XCM config', () => {
       for (const route of Array.from(routes.values())) {
         const { skipFor } = polkadot;
         const { source, destination } = route;
+        const { asset } = source;
 
         if (skipFor.includes(destination.chain.key)) {
           continue;
         }
 
-        const isContractTransfer = !!route.contract;
-        const isAcalaErc20Transfer = source.asset.key.endsWith('_awh');
-
         const info = getRouteInfo(chain, route);
+        const key = getRouteKey(chain, route);
+
+        const isKeyConstraint = keyParam ? keyParam !== key : false;
+        const isChainConstraint = chainParam ? chainParam !== chain.key : false;
+
+        const isContractTransfer = !!route.contract;
+        const isAcalaErc20Transfer = asset.key.endsWith('_awh');
+
         runXcm(
           `${info} transfer`,
           async () => {
             return {
               chain: chain,
               route: route,
+              key: key,
             };
           },
           async () => {
@@ -104,7 +133,11 @@ describe('Wallet with XCM config', () => {
             };
           },
           {
-            skip: isContractTransfer || isAcalaErc20Transfer,
+            skip:
+              isKeyConstraint ||
+              isChainConstraint ||
+              isContractTransfer ||
+              isAcalaErc20Transfer,
             sync: true,
             snapshot: true,
           }

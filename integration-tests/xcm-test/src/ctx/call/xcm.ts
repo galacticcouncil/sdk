@@ -11,8 +11,6 @@ import {
 import { getAddress } from './account';
 import { getAmount } from './amount';
 
-import { getRouteKey } from '../../utils/route';
-
 const BALANCE = 10;
 const FEE = 0.1;
 const TRANSFER_AMOUNT = '1';
@@ -22,6 +20,7 @@ export const runXcm = (
   cfg: () => Promise<{
     chain: AnyChain;
     route: AssetRoute;
+    key: string;
   }>,
   ctx: () => Promise<{
     wallet: Wallet;
@@ -32,10 +31,8 @@ export const runXcm = (
   itfn(
     name,
     async () => {
-      const { chain, route } = await cfg();
+      const { chain, route, key } = await cfg();
       const { wallet } = await ctx();
-
-      const key = getRouteKey(chain, route);
 
       try {
         const transfer = await getTransfer(wallet, chain, route);

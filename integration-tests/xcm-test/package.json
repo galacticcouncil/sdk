@@ -11,8 +11,7 @@
   ],
   "scripts": {
     "test:call": "jest call.spec.ts",
-    "test:e2e": "jest --forceExit e2e.spec.ts",
-    "test:exec": "jest --forceExit exec.spec.ts"
+    "test:e2e": "jest --forceExit e2e.spec.ts"
   },
   "devDependencies": {
     "@acala-network/chopsticks-testing": "1.0.1"

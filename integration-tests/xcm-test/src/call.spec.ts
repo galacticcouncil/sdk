@@ -5,7 +5,7 @@ import console from 'console';
 
 import { setup, xcm } from './ctx/call';
 
-import { getRouteInfo } from './utils/route';
+import { getRouteInfo, getRouteKey } from './utils/route';
 
 const jestConsole = console;
 
@@ -78,12 +78,15 @@ describe('Wallet with XCM config', () => {
         }
 
         const info = getRouteInfo(chain, route);
+        const key = getRouteKey(chain, route);
+
         runXcm(
           `${info} transfer`,
           async () => {
             return {
               chain: chain,
               route: route,
+              key: key,
             };
           },
           async () => {
@@ -111,12 +114,15 @@ describe('Wallet with XCM config', () => {
         }
 
         const info = getRouteInfo(chain, route);
+        const key = getRouteKey(chain, route);
+
         runXcm(
           `${info} transfer`,
           async () => {
             return {
               chain: chain,
               route: route,
+              key: key,
             };
           },
           async () => {
