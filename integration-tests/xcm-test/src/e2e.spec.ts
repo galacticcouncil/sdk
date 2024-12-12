@@ -24,15 +24,13 @@ const { runXcm } = xcm;
  *
  * Constraints:
  * 1) Bridge transfers are not executed.
- * 2) Acala EVM is skipped (testing chain)
- * 2) Nodle is skipped (unstable rpc's)
- * 3) Phala is skipped (unstable rpc's)
+ * 2) Nodle is skipped (unstable rpc's).
  *
  * @returns chains execution ctx
  */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum'];
-  const skipFor: string[] = bridge.concat(['acala-evm', 'nodle']);
+  const skipFor: string[] = bridge.concat(['nodle']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
