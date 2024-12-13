@@ -16,6 +16,7 @@ import {
   usdc_mwh,
   usdt,
   usdt_mwh,
+  vdot,
   wbtc_mwh,
   weth_mwh,
 } from '../../assets';
@@ -281,6 +282,27 @@ export const moonbeam = new EvmParachain({
             },
             {
               GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: vdot,
+      decimals: 10,
+      id: '29085784439601774464560083082574142143',
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2030,
+            },
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0900000000000000000000000000000000000000000000000000000000000000',
+              },
             },
           ],
         },
