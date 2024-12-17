@@ -1,9 +1,10 @@
 import {
   AssetAmount,
-  CallType,
   SwapCtx,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
+
+import { XCall } from './platforms';
 
 /**
  * Transfer source data
@@ -54,24 +55,4 @@ export interface XTransfer {
   buildCall(amount: bigint | number | string): Promise<XCall>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
-}
-
-export interface XCall {
-  /** Owner of transation. */
-  from: string;
-  /** Hex-encoded call data. */
-  data: `0x${string}`;
-  /** Calltype. */
-  type: CallType;
-}
-
-export interface XCallEvm extends XCall {
-  /** Solidity JSON string ABI. */
-  abi?: string;
-  /** Spending CAP */
-  allowance?: bigint;
-  /** The address the transaction is directed to. */
-  to: `0x${string}`;
-  /** Value sent with this transaction. */
-  value?: bigint;
 }

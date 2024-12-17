@@ -1,16 +1,33 @@
 import {
   AnyParachain,
+  Asset,
   AssetAmount,
   CallType,
   ExtrinsicConfig,
+  SubstrateQueryConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { TransferProvider } from '../types';
-import { SubstrateService, normalizeAssetAmount } from '../../substrate';
-import { XCall } from '../../types';
+import { QueryableStorage } from '@polkadot/api/types';
+
+import {
+  concatMap,
+  distinctUntilChanged,
+  firstValueFrom,
+  map,
+  switchMap,
+  Observable,
+  ReplaySubject,
+} from 'rxjs';
+
+import { SubstrateService } from './SubstrateService';
+import { normalizeAssetAmount } from './utils';
+
+import { Platform, XCall } from '../types';
 import { Dex } from '../../Dex';
 
-export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
+export class SubstratePlatform
+  implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
+{
   readonly #substrate: Promise<SubstrateService>;
   readonly #dex: Dex;
 
@@ -52,6 +69,34 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
     return feeBalance.copyWith(params);
   }
 
+  async getBalance(
+    asset: Asset,
+    config: SubstrateQueryConfig
+  ): Promise<AssetAmount> {
+    const ob = await this.subscribeBalance(asset, config);
+    return firstValueFrom(ob);
+  }
+
+  async subscribeBalance(
+    asset: Asset,
+    config: SubstrateQueryConfig
+  ): Promise<Observable<AssetAmount>> {
+    const subject = new ReplaySubject<QueryableStorage<'rxjs'>>(1);
+    const substrate = await this.#substrate;
+    subject.next(substrate.api.rx.query);
+
+    const { module, func, args, transform } = config;
+    return subject.pipe(
+      switchMap((q) => q[module][func](...args)),
+      concatMap((b) => transform(b)),
+      distinctUntilChanged((prev, curr) => prev === curr),
+      map((balance) => {
+        const params = normalizeAssetAmount(balance, asset, substrate);
+        return AssetAmount.fromAsset(asset, params);
+      })
+    );
+  }
+
   /**
    * Display native fee in user preferred fee payment asset (dex only)
    *
@@ -59,7 +104,10 @@ export class SubstrateTransfer implements TransferProvider<ExtrinsicConfig> {
    * @param feeBalance - native fee balance
    * @returns - fee in user preferred payment asset
    */
-  async exchangeFee(fee: bigint, feeBalance: AssetAmount): Promise<bigint> {
+  private async exchangeFee(
+    fee: bigint,
+    feeBalance: AssetAmount
+  ): Promise<bigint> {
     const { asset, decimals, chain } = await this.#substrate;
     if (chain.parachainId === this.#dex.chain.parachainId) {
       const amountIn = Number(fee) / 10 ** decimals;

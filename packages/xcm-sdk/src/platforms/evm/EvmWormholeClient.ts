@@ -12,9 +12,9 @@ import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
 import { encodeFunctionData } from 'viem';
 
-import { XCallEvm } from '../types';
+import { XCallEvm } from './types';
 
-export class WormholeClient {
+export class EvmWormholeClient {
   async isTransferCompleted(
     chain: AnyChain,
     vaaBytes: string

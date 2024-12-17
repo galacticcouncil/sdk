@@ -13,26 +13,21 @@ import {
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { BalanceAdapter, TransferAdapter } from '../adapters';
-import { SubstrateService } from '../substrate';
-import { XCall } from '../types';
+import { PlatformAdapter, SubstrateService, XCall } from '../platforms';
 import { Dex } from '../Dex';
 
 import { formatAmount, formatEvmAddress } from './TransferUtils';
 import { Metadata } from './Metadata';
 
 export class TransferService {
-  readonly balance: BalanceAdapter;
-  readonly transfer: TransferAdapter;
-
+  readonly adapter: PlatformAdapter;
   readonly dex: Dex;
   readonly config: TransferConfig;
 
   constructor(config: TransferConfig, dex: Dex) {
-    this.dex = dex;
+    this.adapter = new PlatformAdapter(config.chain, dex);
     this.config = config;
-    this.balance = new BalanceAdapter(config.chain);
-    this.transfer = new TransferAdapter(config.chain, dex);
+    this.dex = dex;
   }
 
   async getEd(): Promise<AssetAmount | undefined> {
@@ -57,7 +52,7 @@ export class TransferService {
       chain: chain,
     });
 
-    return this.balance.read(asset, balanceConfig);
+    return this.adapter.getBalance(asset, balanceConfig);
   }
 
   async getDestinationFee(): Promise<AssetAmount> {
@@ -114,7 +109,7 @@ export class TransferService {
       asset: feeAsset,
       chain: chain,
     });
-    return this.balance.read(feeAsset, feeBalanceConfig);
+    return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
   private async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
@@ -125,7 +120,7 @@ export class TransferService {
     const address = route.contract
       ? await formatEvmAddress(sender, chain)
       : sender;
-    return this.transfer.estimateFee(
+    return this.adapter.estimateFee(
       address,
       amount,
       source.fee ?? source.feeBalance,
@@ -164,13 +159,13 @@ export class TransferService {
       chain: chain,
     });
 
-    return this.balance.read(feeAsset, feeBalanceConfig);
+    return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
   async getCall(ctx: TransferCtx): Promise<XCall> {
     const { amount, sender } = ctx;
     const transfer = await this.getTransfer(ctx);
-    return this.transfer.calldata(sender, amount, transfer);
+    return this.adapter.calldata(sender, amount, transfer);
   }
 
   async getMin(): Promise<AssetAmount> {
@@ -185,7 +180,7 @@ export class TransferService {
       const minBalanceConfig = min.build({
         asset: minAssetId,
       });
-      return this.balance.read(asset, minBalanceConfig);
+      return this.adapter.getBalance(asset, minBalanceConfig);
     }
 
     return this.getAssetMin();
@@ -325,7 +320,7 @@ export class TransferService {
       asset: fee.asset,
       chain: chain,
     });
-    return this.balance.read(fee.asset, feeBalanceConfig);
+    return this.adapter.getBalance(fee.asset, feeBalanceConfig);
   }
 
   private isNativeBridgeTransfer() {

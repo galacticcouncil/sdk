@@ -13,15 +13,14 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
-import { BalanceAdapter } from './adapters';
+import { PlatformAdapter, XCall } from './platforms';
 import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
   TransferService,
 } from './transfer';
-import { XCall, XTransfer } from './types';
-
+import { XTransfer } from './types';
 import { Dex } from './Dex';
 
 export interface WalletOptions {
@@ -170,8 +169,7 @@ export class Wallet {
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainRoutes = this.config.getChainRoutes(chain);
-    const balanceAdapter = new BalanceAdapter(chainRoutes.chain);
-
+    const adapter = new PlatformAdapter(chainRoutes.chain, this.dex);
     const observables = chainRoutes
       .getUniqueRoutes()
       .map(async ({ source }) => {
@@ -185,7 +183,7 @@ export class Wallet {
           asset: asset,
           chain: chainRoutes.chain,
         });
-        return balanceAdapter.subscribe(asset, balanceConfig);
+        return adapter.subscribeBalance(asset, balanceConfig);
       });
 
     const ob = await Promise.all(observables);
