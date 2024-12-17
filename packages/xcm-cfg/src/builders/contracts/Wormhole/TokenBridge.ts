@@ -9,9 +9,8 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { wormholeGuard } from './utils';
+import { mrl, wormholeOrError } from './utils';
 import { parseAssetId } from '../../utils';
-import { mrl } from '../../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;
@@ -21,7 +20,7 @@ const transferTokensWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
       build: (params) => {
-        wormholeGuard(opts.moonchain);
+        wormholeOrError(opts.moonchain);
         const { address, amount, asset, source, destination } = params;
         const ctxWh = source.chain as Wormhole;
         const rcvWh = opts.moonchain as Wormhole;
@@ -54,7 +53,7 @@ const wrapAndTransferETHWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
       build: (params) => {
-        wormholeGuard(opts.moonchain);
+        wormholeOrError(opts.moonchain);
         const { address, amount, source, destination } = params;
         const ctxWh = source.chain as Wormhole;
         const rcvWh = opts.moonchain as Wormhole;
@@ -87,8 +86,8 @@ const transferTokens = (): ContractConfigBuilder => ({
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
 
-    wormholeGuard(ctx);
-    wormholeGuard(rcv);
+    wormholeOrError(ctx);
+    wormholeOrError(rcv);
 
     const ctxWh = ctx as Wormhole;
     const rcvWh = rcv as Wormhole;

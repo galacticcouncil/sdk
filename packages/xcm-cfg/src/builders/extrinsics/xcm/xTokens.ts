@@ -7,13 +7,14 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { toAsset, toDest } from './xTokens.utils';
-import { locationOrError, shouldFeeAssetPrecede } from './utils';
 
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
-} from '../../ExtrinsicBuilder.utils';
+  locationOrError,
+  shouldFeeAssetPrecede,
+} from './utils';
 
 const pallet = 'xTokens';
 

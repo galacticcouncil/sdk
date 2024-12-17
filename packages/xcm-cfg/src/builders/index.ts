@@ -9,4 +9,4 @@ export * from './ExtrinsicBuilder';
 export * from './FeeAmountBuilder';
 export * from './FeeAssetBuilder';
 
-export * from './types';
+export { XcmVersion, XcmTransferType } from './extrinsics/xcm';

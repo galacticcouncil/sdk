@@ -4,14 +4,14 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { locationOrError } from './utils';
 import { toAsset, toDest } from './xTransfer.utils';
 
 import {
   getExtrinsicAccount,
   getExtrinsicAssetLocation,
-} from '../../ExtrinsicBuilder.utils';
-import { XcmVersion } from 'builders/types';
+  locationOrError,
+} from './utils';
+import { XcmVersion } from './types';
 
 const pallet = 'xTransfer';
 

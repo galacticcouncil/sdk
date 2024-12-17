@@ -6,7 +6,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { encodeFunctionData } from 'viem';
 
-import { XcmVersion } from '../../types';
+import { XcmVersion } from './types';
 
 const pallet = 'ethereumXcm';
 

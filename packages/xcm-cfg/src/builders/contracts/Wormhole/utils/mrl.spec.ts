@@ -1,6 +1,6 @@
 import { createPayload, decodePayload } from './mrl';
 
-import { hydration } from '../chains';
+import { hydration } from '../../../../chains';
 
 describe('Mrl utils', () => {
   describe('createPayload', () => {

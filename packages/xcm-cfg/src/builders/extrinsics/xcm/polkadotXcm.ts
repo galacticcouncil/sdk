@@ -15,15 +15,15 @@ import {
   toTransferType,
   toTransactMessage,
 } from './polkadotXcm.utils';
-import { locationOrError, shouldFeeAssetPrecede } from './utils';
 
 import {
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
-} from '../../ExtrinsicBuilder.utils';
-
-import { XcmTransferType, XcmVersion } from '../../types';
+  locationOrError,
+  shouldFeeAssetPrecede,
+} from './utils';
+import { XcmTransferType, XcmVersion } from './types';
 
 const pallet = 'polkadotXcm';
 

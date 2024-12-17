@@ -1,7 +1,7 @@
 import { multiloc, Parachain, TxWeight } from '@galacticcouncil/xcm-core';
 
 import { getX1Junction } from './utils';
-import { XcmTransferType, XcmVersion } from '../../types';
+import { XcmTransferType, XcmVersion } from './types';
 
 const ETHEREUM_CHAIN_ID = 1;
 const ETHEREUM_BRIDGE_LOCATION = {

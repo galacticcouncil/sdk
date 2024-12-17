@@ -7,11 +7,13 @@ import { assetConversion } from './extrinsics/assetConversion';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
-import { ethereumXcm } from './extrinsics/xcm/ethereumXcm';
-import { polkadotXcm } from './extrinsics/xcm/polkadotXcm';
-import { xcmPallet } from './extrinsics/xcm/xcmPallet';
-import { xTokens } from './extrinsics/xcm/xTokens';
-import { xTransfer } from './extrinsics/xcm/xTransfer';
+import {
+  ethereumXcm,
+  polkadotXcm,
+  xcmPallet,
+  xTokens,
+  xTransfer,
+} from './extrinsics/xcm';
 
 export function ExtrinsicBuilder() {
   return {

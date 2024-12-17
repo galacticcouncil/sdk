@@ -6,7 +6,7 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { wormholeGuard } from './utils';
+import { wormholeOrError } from './utils';
 import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
@@ -15,8 +15,8 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
 
-    wormholeGuard(ctx);
-    wormholeGuard(rcv);
+    wormholeOrError(ctx);
+    wormholeOrError(rcv);
 
     const ctxWh = ctx as Wormhole;
     const rcvWh = rcv as Wormhole;
