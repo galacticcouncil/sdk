@@ -1,13 +1,13 @@
 import { ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { kusamaChainsConfig } from './kusama';
+import { evmChainsConfig } from './evm';
 import { polkadotChainsConfig } from './polkadot';
-import { ethereumConfig } from './ethereum';
+import { kusamaChainsConfig } from './kusama';
 
 export const routes: ChainRoutes[] = [
-  ...kusamaChainsConfig,
+  ...evmChainsConfig,
   ...polkadotChainsConfig,
-  ethereumConfig,
+  ...kusamaChainsConfig,
 ];
 
 export const routesMap = new Map<string, ChainRoutes>(

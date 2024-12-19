@@ -6,7 +6,7 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { wormholeOrError } from './utils';
+import { wormholeOrError } from './check';
 import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({

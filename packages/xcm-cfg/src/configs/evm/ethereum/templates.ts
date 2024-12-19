@@ -1,13 +1,13 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xcm-core';
 
-import { eth } from '../../assets';
+import { eth } from '../../../assets';
 import {
   BalanceBuilder,
   ContractBuilder,
   FeeAmountBuilder,
-} from '../../builders';
-import { hydration, moonbeam } from '../../chains';
-import { Tag } from '../../tags';
+} from '../../../builders';
+import { hydration, moonbeam } from '../../../chains';
+import { Tag } from '../../../tags';
 
 export function toHydrationViaWormholeTemplate(
   assetIn: Asset,

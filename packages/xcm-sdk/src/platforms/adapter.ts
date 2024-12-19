@@ -37,7 +37,7 @@ export class PlatformAdapter {
         this.platform.Substrate = new SubstratePlatform(parachain, dex);
         break;
       default:
-        throw new Error('Unsupported platform:' + chain.getType);
+        throw new Error('Unsupported platform:' + chain.getType());
     }
   }
 

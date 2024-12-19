@@ -38,7 +38,7 @@ export class SubstratePlatform
 
   async calldata(
     account: string,
-    amount: bigint,
+    _amount: bigint,
     config: ExtrinsicConfig
   ): Promise<XCall> {
     const substrate = await this.#substrate;
@@ -52,7 +52,7 @@ export class SubstratePlatform
 
   async estimateFee(
     account: string,
-    amount: bigint,
+    _amount: bigint,
     feeBalance: AssetAmount,
     config: ExtrinsicConfig
   ): Promise<AssetAmount> {

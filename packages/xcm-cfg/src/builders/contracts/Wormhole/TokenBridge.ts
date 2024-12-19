@@ -9,8 +9,8 @@ import {
   Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { mrl, wormholeOrError } from './utils';
-import { parseAssetId } from '../../utils';
+import { wormholeOrError } from './check';
+import { mrl, parseAssetId } from '../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;

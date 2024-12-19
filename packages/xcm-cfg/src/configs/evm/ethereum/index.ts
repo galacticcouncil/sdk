@@ -14,10 +14,10 @@ import {
   usdt_mwh,
   aave,
   susde,
-} from '../../assets';
-import { ethereum, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, ContractBuilder } from '../../builders';
-import { Tag } from '../../tags';
+} from '../../../assets';
+import { ethereum, hydration, moonbeam } from '../../../chains';
+import { BalanceBuilder, ContractBuilder } from '../../../builders';
+import { Tag } from '../../../tags';
 
 import {
   toHydrationViaWormholeTemplate,

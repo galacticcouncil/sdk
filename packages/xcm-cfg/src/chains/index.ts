@@ -14,6 +14,6 @@ export const chainsMap = new Map<string, AnyChain>(
   chains.map((chain) => [chain.key, chain])
 );
 
-export * from './polkadot';
 export * from './evm';
+export * from './polkadot';
 export * from './kusama';
