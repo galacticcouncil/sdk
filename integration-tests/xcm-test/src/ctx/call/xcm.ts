@@ -1,9 +1,8 @@
 import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xcm-core';
 import {
-  BalanceAdapter,
   Erc20Client,
   Metadata,
-  TransferAdapter,
+  PlatformAdapter,
   Wallet,
   XTransfer,
 } from '@galacticcouncil/xcm-sdk';
@@ -76,7 +75,7 @@ const getTransfer = async (
 
   // Mock transfer & fee asset balances to 10 units
   const readBalanceMock = jest
-    .spyOn(BalanceAdapter.prototype, 'read')
+    .spyOn(PlatformAdapter.prototype, 'getBalance')
     .mockImplementation(async (asset: Asset) => {
       if (asset.isEqual(destination.asset)) {
         return getAmount(BALANCE, asset, destinationMeta);
@@ -86,7 +85,7 @@ const getTransfer = async (
 
   // Mock source fee to 0.1 unit
   const estimateFeeMock = jest
-    .spyOn(TransferAdapter.prototype, 'estimateFee')
+    .spyOn(PlatformAdapter.prototype, 'estimateFee')
     .mockImplementation(async () => {
       return getAmount(FEE, source.asset, sourceMeta);
     });

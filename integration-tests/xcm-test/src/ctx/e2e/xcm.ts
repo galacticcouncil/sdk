@@ -7,7 +7,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import {
-  TransferAdapter,
+  PlatformAdapter,
   Wallet,
   XCallEvm,
   XTransfer,
@@ -195,7 +195,7 @@ const getTransfer = async (
 
   if (route.contract) {
     jest
-      .spyOn(TransferAdapter.prototype, 'estimateFee')
+      .spyOn(PlatformAdapter.prototype, 'estimateFee')
       .mockImplementation(async () => {
         return getAmount(0.1, source.asset, 18);
       });
