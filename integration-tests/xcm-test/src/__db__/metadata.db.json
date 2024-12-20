@@ -240,7 +240,7 @@
     }
   },
   "hydration-assethub-dot": {
-    "updated": 1733843368768,
+    "updated": 1734687873863,
     "destination": {
       "fee": "0.1814465",
       "feeAsset": "DOT",
@@ -480,7 +480,7 @@
     }
   },
   "hydration-polkadot-dot": {
-    "updated": 1733843896518,
+    "updated": 1734693390098,
     "destination": {
       "fee": "0.0021232099",
       "feeAsset": "DOT",
@@ -616,7 +616,7 @@
     }
   },
   "polkadot-assethub-dot": {
-    "updated": 1733852323074,
+    "updated": 1734693594436,
     "destination": {
       "fee": "0.0017965",
       "feeAsset": "DOT",
