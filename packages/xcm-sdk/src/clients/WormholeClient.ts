@@ -12,15 +12,15 @@ import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
 import { encodeFunctionData } from 'viem';
 
-import { XCallEvm } from './types';
+import { XCallEvm } from '../platforms';
 
-export class EvmWormholeClient {
+export class WormholeClient {
   async isTransferCompleted(
     chain: AnyChain,
     vaaBytes: string
   ): Promise<boolean> {
     const ctx = chain as AnyEvmChain;
-    const ctxWh = ctx as Wormhole;
+    const ctxWh = ctx.wormhole as Wormhole;
     const provider = ctx.client.getProvider();
     const tokenBridge = ctxWh.getTokenBridge();
 
@@ -39,7 +39,8 @@ export class EvmWormholeClient {
   }
 
   redeem(chain: AnyChain, from: string, vaaBytes: string): XCallEvm {
-    const ctxWh = chain as Wormhole;
+    const ctx = chain as AnyEvmChain;
+    const ctxWh = ctx.wormhole as Wormhole;
     const vaaArray = encoding.b64.decode(vaaBytes);
     const vaaHex = encoding.hex.encode(vaaArray);
 

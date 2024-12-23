@@ -59,7 +59,7 @@ export class EvmTransfer {
       return estimatedGas * gasPrice;
     } catch (error) {
       const err = error as BaseError;
-      console.log("Can't estimate fees. " + err.shortMessage);
+      console.log("Can't estimate fees.", err.shortMessage);
       return 0n;
     }
   }

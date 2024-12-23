@@ -1,8 +1,13 @@
-import { Asset, AssetAmount, CallType } from '@galacticcouncil/xcm-core';
+import {
+  Asset,
+  AssetAmount,
+  BaseConfig,
+  CallType,
+} from '@galacticcouncil/xcm-core';
 
 import { Observable } from 'rxjs';
 
-export interface Platform<T, B> {
+export interface Platform<T extends BaseConfig, B extends BaseConfig> {
   calldata(account: string, amount: bigint, config: T): Promise<XCall>;
   estimateFee(
     account: string,

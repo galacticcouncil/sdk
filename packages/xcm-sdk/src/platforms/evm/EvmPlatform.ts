@@ -1,21 +1,21 @@
 import {
+  Abi,
   AnyEvmChain,
   Asset,
   AssetAmount,
   CallType,
   ContractConfig,
+  Erc20Client,
   EvmClient,
 } from '@galacticcouncil/xcm-core';
 
 import {
+  distinctUntilChanged,
+  finalize,
+  shareReplay,
   Observable,
   Subject,
-  shareReplay,
-  finalize,
-  distinctUntilChanged,
 } from 'rxjs';
-
-import { Erc20Client } from './Erc20Client';
 
 import { EvmBalanceFactory } from './balance';
 import { EvmTransferFactory } from './transfer';
@@ -62,7 +62,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
 
     const approve = erc20.approve(config.address, amount);
     return {
-      abi: JSON.stringify(erc20.abi),
+      abi: JSON.stringify(Abi.Erc20),
       allowance: allowance,
       data: approve as `0x${string}`,
       from: account as `0x${string}`,

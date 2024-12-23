@@ -12,7 +12,7 @@ export class EvmBalanceFactory {
       case 'Native':
         return new Native(client, config);
       default: {
-        throw new Error('Contract type ' + config.module + ' is not supported');
+        throw new Error('Module ' + config.module + ' is not supported');
       }
     }
   }

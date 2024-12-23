@@ -200,11 +200,10 @@ export class TransferService {
     const feeAssetConfig = fee.asset;
     if (chain instanceof Parachain && 'build' in feeAssetConfig) {
       const feeAssetBuilder = feeAssetConfig as FeeAssetConfigBuilder;
-      const feeAssetCall = feeAssetBuilder.build({
+      return await feeAssetBuilder.build({
         chain,
         address,
       });
-      return await feeAssetCall.call();
     }
     return feeAssetConfig as Asset;
   }
@@ -232,7 +231,13 @@ export class TransferService {
 
   private async getTransfer(ctx: TransferCtx) {
     const { route } = this.config;
-    const { extrinsic, contract } = route;
+    const { contract, extrinsic, program } = route;
+
+    if (contract) {
+      return contract.build({
+        ...ctx,
+      });
+    }
 
     if (extrinsic) {
       return extrinsic.build({
@@ -240,12 +245,15 @@ export class TransferService {
       });
     }
 
-    if (contract) {
-      return contract.build({
+    if (program) {
+      return program.build({
         ...ctx,
       });
     }
-    throw new Error('AssetRoute contract or extrinsic config must be provided');
+
+    throw new Error(
+      'AssetRoute transfer config is invalid. Specify contract, extrinsic or program.'
+    );
   }
 
   async getTransact(ctx: TransferCtx): Promise<TransactCtx | undefined> {

@@ -1,17 +1,18 @@
 import {
   AnyChain,
+  AnyEvmChain,
   Asset,
   AssetAmount,
   BaseConfig,
   ChainType,
-  EvmChain,
-  EvmParachain,
   Parachain,
+  SolanaChain,
 } from '@galacticcouncil/xcm-core';
 
 import { Observable } from 'rxjs';
 
 import { EvmPlatform } from './evm';
+import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
 import { Platform, XCall } from './types';
 
@@ -24,21 +25,36 @@ export class PlatformAdapter {
   constructor(chain: AnyChain, dex: Dex) {
     switch (chain.getType()) {
       case ChainType.EvmChain:
-        const evmChain = chain as EvmChain;
-        this.platform.Evm = new EvmPlatform(evmChain);
+        this.registerEvm(chain);
         break;
       case ChainType.EvmParachain:
-        const evmParachain = chain as EvmParachain;
-        this.platform.Evm = new EvmPlatform(evmParachain);
-        this.platform.Substrate = new SubstratePlatform(evmParachain, dex);
+        this.registerEvm(chain);
+        this.registerSubstrate(chain, dex);
         break;
       case ChainType.Parachain:
-        const parachain = chain as Parachain;
-        this.platform.Substrate = new SubstratePlatform(parachain, dex);
+        this.registerSubstrate(chain, dex);
+        break;
+      case ChainType.SolanaChain:
+        this.registerSolana(chain);
         break;
       default:
-        throw new Error('Unsupported platform:' + chain.getType());
+        throw new Error('Unsupported platform: ' + chain.getType());
     }
+  }
+
+  private registerEvm(chain: AnyChain) {
+    const evmChain = chain as AnyEvmChain;
+    this.platform.Evm = new EvmPlatform(evmChain);
+  }
+
+  private registerSolana(chain: AnyChain) {
+    const solanaChain = chain as SolanaChain;
+    this.platform.Solana = new SolanaPlatform(solanaChain);
+  }
+
+  private registerSubstrate(chain: AnyChain, dex: Dex) {
+    const parachain = chain as Parachain;
+    this.platform.Substrate = new SubstratePlatform(parachain, dex);
   }
 
   async calldata(

@@ -62,7 +62,11 @@ export class SubstratePlatform
       fee = await substrate.estimateFee(account, config);
       fee = await this.exchangeFee(fee, feeBalance);
     } catch (e) {
-      // Can't estimate fee if transferMultiasset with no balance
+      /**
+       * Transaction PaymentApi_query_info panic for V3 or higher
+       * multi-location version when using with some extrinsic if
+       * account has 0 balance of transferring asset.
+       */
       fee = 0n;
     }
     const params = normalizeAssetAmount(fee, feeBalance, substrate);

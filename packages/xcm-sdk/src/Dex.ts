@@ -52,7 +52,7 @@ export class Dex {
     );
 
     const amountIn = BigInt(trade.amountIn.toNumber());
-    // Allow max slippage up to 100% in builder conf
+    // Allow max slippage up to 100% in builder config
     const maxAmountIn = amountIn * 2n;
 
     const hasNotEnoughDestFee =
