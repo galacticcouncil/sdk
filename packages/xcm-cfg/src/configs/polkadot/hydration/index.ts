@@ -230,7 +230,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdc,
       fee: {
-        amount: 0.7,
+        amount: 0.07,
         asset: usdc,
       },
     },
