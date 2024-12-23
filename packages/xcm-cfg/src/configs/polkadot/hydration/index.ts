@@ -27,6 +27,7 @@ import {
   pha,
   pink,
   ring,
+  sol,
   sub,
   susde,
   unq,
@@ -75,6 +76,7 @@ import {
   toEthereumViaSnowbridgeTemplate,
   toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
+  toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
 } from './templates';
 
@@ -1073,6 +1075,10 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(susde, susde),
 ];
 
+const toSolanaViaWormhole: AssetRoute[] = [
+  toSolanaViaWormholeTemplate(sol, sol),
+];
+
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
@@ -1094,6 +1100,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toPhala,
     ...toPolkadot,
     ...toPendulum,
+    ...toSolanaViaWormhole,
     ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,

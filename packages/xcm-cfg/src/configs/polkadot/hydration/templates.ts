@@ -12,7 +12,13 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, ethereum, moonbeam, zeitgeist } from '../../../chains';
+import {
+  assetHub,
+  ethereum,
+  moonbeam,
+  solana,
+  zeitgeist,
+} from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -181,5 +187,61 @@ export function toEthereumViaSnowbridgeTemplate(
       transferType: XcmTransferType.DestinationReserve,
     }),
     tags: [Tag.Snowbridge],
+  });
+}
+
+export function toSolanaViaWormholeTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        asset: assetIn,
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: solana,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Wormhole()
+          .TokenRelayer()
+          .calculateRelayerFee(),
+        asset: assetOut,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
+        fee: MRL_EXECUTION_FEE,
+      }),
+    ]),
+    transact: {
+      chain: moonbeam,
+      fee: {
+        amount: MRL_XCM_FEE,
+        asset: glmr,
+        balance: balance(),
+      },
+      extrinsic: ExtrinsicBuilder()
+        .ethereumXcm()
+        .transact(
+          ContractBuilder()
+            .Batch()
+            .batchAll([
+              ContractBuilder().Erc20().approve(),
+              ContractBuilder()
+                .Wormhole()
+                .TokenRelayer()
+                .transferTokensWithRelay(),
+            ])
+        ),
+    },
+    tags: [Tag.Mrl, Tag.Wormhole],
   });
 }
