@@ -145,6 +145,11 @@ export const ring = new Asset({
   originSymbol: 'RING',
 });
 
+export const sol = new Asset({
+  key: 'sol',
+  originSymbol: 'SOL',
+});
+
 export const sub = new Asset({
   key: 'sub',
   originSymbol: 'SUB',
@@ -280,6 +285,7 @@ export const assets: Asset[] = [
   pen,
   pink,
   ring,
+  sol,
   sub,
   susde,
   susds,

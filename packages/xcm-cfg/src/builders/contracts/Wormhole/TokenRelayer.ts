@@ -3,10 +3,9 @@ import {
   Abi,
   ContractConfig,
   ContractConfigBuilder,
-  Wormhole,
+  Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
-import { wormholeOrError } from './check';
 import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
@@ -15,11 +14,8 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
 
-    wormholeOrError(ctx);
-    wormholeOrError(rcv);
-
-    const ctxWh = ctx as Wormhole;
-    const rcvWh = rcv as Wormhole;
+    const ctxWh = Wh.fromChain(ctx);
+    const rcvWh = Wh.fromChain(rcv);
 
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({

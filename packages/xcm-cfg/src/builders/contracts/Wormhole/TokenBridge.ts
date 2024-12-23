@@ -6,10 +6,9 @@ import {
   EvmParachain,
   Parachain,
   Precompile,
-  Wormhole,
+  Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
-import { wormholeOrError } from './check';
 import { mrl, parseAssetId } from '../../utils';
 
 type TransferMrlOpts = {
@@ -20,10 +19,11 @@ const transferTokensWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
       build: (params) => {
-        wormholeOrError(opts.moonchain);
         const { address, amount, asset, source, destination } = params;
-        const ctxWh = source.chain as Wormhole;
-        const rcvWh = opts.moonchain as Wormhole;
+
+        const ctxWh = Wh.fromChain(source.chain);
+        const rcvWh = Wh.fromChain(opts.moonchain);
+
         const recipient = Precompile.Bridge;
         const assetId = source.chain.getAssetId(asset);
         const payload = mrl.createPayload(
@@ -53,10 +53,11 @@ const wrapAndTransferETHWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
       build: (params) => {
-        wormholeOrError(opts.moonchain);
         const { address, amount, source, destination } = params;
-        const ctxWh = source.chain as Wormhole;
-        const rcvWh = opts.moonchain as Wormhole;
+
+        const ctxWh = Wh.fromChain(source.chain);
+        const rcvWh = Wh.fromChain(opts.moonchain);
+
         const recipient = Precompile.Bridge;
         const payload = mrl.createPayload(
           destination.chain as Parachain,
@@ -86,11 +87,9 @@ const transferTokens = (): ContractConfigBuilder => ({
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
 
-    wormholeOrError(ctx);
-    wormholeOrError(rcv);
+    const ctxWh = Wh.fromChain(ctx);
+    const rcvWh = Wh.fromChain(rcv);
 
-    const ctxWh = ctx as Wormhole;
-    const rcvWh = rcv as Wormhole;
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
       abi: Abi.TokenBridge,
@@ -112,8 +111,9 @@ const transferTokens = (): ContractConfigBuilder => ({
 const wrapAndTransferETH = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, source, destination } = params;
-    const ctxWh = source.chain as Wormhole;
-    const rcvWh = destination.chain as Wormhole;
+
+    const ctxWh = Wh.fromChain(source.chain);
+    const rcvWh = Wh.fromChain(destination.chain);
 
     return new ContractConfig({
       abi: Abi.TokenBridge,

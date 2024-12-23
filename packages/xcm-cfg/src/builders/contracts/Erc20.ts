@@ -2,7 +2,7 @@ import {
   Abi,
   ContractConfig,
   ContractConfigBuilder,
-  Wormhole,
+  Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
 import { parseAssetId } from '../utils';
@@ -14,8 +14,8 @@ export function Erc20() {
         const { amount, asset, destination, source, transact } = params;
         const ctx = transact ? transact.chain : source.chain;
         const rcv = destination.chain;
-        const ctxWh = ctx as Wormhole;
-        const rcvWh = rcv as Wormhole;
+        const ctxWh = Wh.fromChain(ctx);
+        const rcvWh = Wh.fromChain(rcv);
         const assetId = ctx.getAssetId(asset);
 
         const spender = rcvWh.getTokenRelayer()

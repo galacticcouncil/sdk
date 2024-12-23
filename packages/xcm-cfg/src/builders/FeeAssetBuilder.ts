@@ -1,25 +1,19 @@
-import {
-  Asset,
-  FeeAssetConfigBuilder,
-  SubstrateCallConfig,
-} from '@galacticcouncil/xcm-core';
+import { FeeAssetConfigBuilder } from '@galacticcouncil/xcm-core';
 
 import { hdx } from '../assets';
 
+const NATIVE_ASSET_ID = '0';
+
 function accountCurrencyMap(): FeeAssetConfigBuilder {
   return {
-    build: ({ address, chain }) =>
-      new SubstrateCallConfig({
-        chain,
-        call: async (): Promise<Asset> => {
-          const api = await chain.api;
-          const asset =
-            await api.query.multiTransactionPayment.accountCurrencyMap(address);
-          const assetd = asset.isSome ? asset.toString() : '0';
-          const feeAsset = chain.findAssetById(assetd);
-          return feeAsset ? feeAsset.asset : hdx;
-        },
-      }),
+    build: async ({ address, chain }) => {
+      const api = await chain.api;
+      const asset =
+        await api.query.multiTransactionPayment.accountCurrencyMap(address);
+      const assetd = asset.isSome ? asset.toString() : NATIVE_ASSET_ID;
+      const feeAsset = chain.findAssetById(assetd);
+      return feeAsset ? feeAsset.asset : hdx;
+    },
   };
 }
 

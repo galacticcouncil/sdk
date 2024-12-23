@@ -3,7 +3,8 @@ import {
   EvmChain,
   FeeAmountConfigBuilder,
   Parachain,
-  Snowbridge as bridge,
+  Snowbridge as Sb,
+  Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
 import { HubClient } from '../clients';
@@ -14,12 +15,20 @@ function TokenRelayer() {
       build: ({ asset, destination, source }) => {
         const ctx = source as EvmChain;
         const rcv = destination as EvmChain;
+
+        const ctxWh = Wh.fromChain(ctx);
+        const rcvWh = Wh.fromChain(rcv);
+
         const assetId = ctx.getAssetId(asset);
         const assetDecimals = ctx.getAssetDecimals(asset);
         const output = ctx.client.getProvider().readContract({
           abi: Abi.TokenRelayer,
-          address: ctx.getTokenRelayer() as `0x${string}`,
-          args: [rcv.getWormholeId(), assetId as `0x${string}`, assetDecimals],
+          address: ctxWh.getTokenRelayer() as `0x${string}`,
+          args: [
+            rcvWh.getWormholeId(),
+            assetId as `0x${string}`,
+            assetDecimals,
+          ],
           functionName: 'calculateRelayerFee',
         });
         return output as Promise<bigint>;
@@ -40,11 +49,18 @@ function Snowbridge() {
       build: ({ asset, destination, source }) => {
         const ctx = source as EvmChain;
         const rcv = destination as Parachain;
+
+        const ctxSb = Sb.fromChain(ctx);
+
         const assetId = ctx.getAssetId(asset);
         const output = ctx.client.getProvider().readContract({
           abi: Abi.Snowbridge,
-          address: bridge.Gateway as `0x${string}`,
-          args: [assetId as `0x${string}`, rcv.parachainId, 100_000_000n],
+          address: ctxSb.getGateway() as `0x${string}`,
+          args: [
+            assetId as `0x${string}`,
+            rcv.parachainId,
+            ctxSb.getBridgeFee(),
+          ],
           functionName: 'quoteSendTokenFee',
         });
         return output as Promise<bigint>;
