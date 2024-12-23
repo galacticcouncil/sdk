@@ -48,6 +48,7 @@ import {
   aave,
   susde,
   susds,
+  sol,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -551,6 +552,31 @@ export const hydration = new EvmParachain({
           X1: {
             Parachain: 2101,
           },
+        },
+      },
+    },
+    {
+      asset: sol,
+      decimals: 9,
+      id: 1000752,
+      min: 0.000047,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x99fec54a5ad36d50a4bba3a41cab983a5bb86a7d',
+              },
+            },
+          ],
         },
       },
     },

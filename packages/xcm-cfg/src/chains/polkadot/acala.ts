@@ -107,7 +107,8 @@ export const acala = new EvmParachain({
   ss58Format: 10,
   wormhole: {
     id: 12,
-    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624' as `0x${string}`,
+    coreBridge: '0xa321448d90d4e5b0A732867c18eA198e75CAC48E',
+    tokenBridge: '0xae9d7fe007b3327AA64A32824Aaac52C42a6E624',
   },
   ws: 'wss://acala-rpc.aca-api.network',
 });

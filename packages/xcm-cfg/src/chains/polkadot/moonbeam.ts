@@ -299,8 +299,9 @@ export const moonbeam = new EvmParachain({
   usesH160Acc: true,
   wormhole: {
     id: 16,
-    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92' as `0x${string}`,
-    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
+    coreBridge: '0xC8e2b0cD52Cf01b0Ce87d389Daa3d414d4cE29f3',
+    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92',
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA',
   },
   ws: 'wss://wss.api.moonbeam.network',
 });

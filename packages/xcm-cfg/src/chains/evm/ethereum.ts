@@ -75,9 +75,15 @@ export const ethereum = new EvmChain({
     'https://eth.llamarpc.com',
     'https://1rpc.io/eth',
   ],
+  snowbridge: {
+    id: 1,
+    gateway: '0x27ca963c279c93801941e1eb8799c23f407d68e7',
+    bridgeFee: 100_000_000n,
+  },
   wormhole: {
     id: 2,
-    tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585' as `0x${string}`,
-    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA' as `0x${string}`,
+    coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
+    tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
+    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA',
   },
 });
