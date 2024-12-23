@@ -1,27 +1,39 @@
 import { Chain as EvmChainDef } from 'viem';
+
 import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
-import { Wormhole, WormholeDef } from './types';
+
+import { Snowbridge, SnowbridgeDef, Wormhole, WormholeDef } from '../bridge';
 import { EvmClient } from '../evm';
 
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
+  snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> implements Wormhole {
+export class EvmChain extends Chain<ChainAssetData> {
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
-  readonly wormhole?: WormholeDef;
+  readonly snowbridge?: Snowbridge;
+  readonly wormhole?: Wormhole;
 
-  constructor({ evmChain, id, rpcs, wormhole, ...others }: EvmChainParams) {
+  constructor({
+    evmChain,
+    id,
+    rpcs,
+    snowbridge,
+    wormhole,
+    ...others
+  }: EvmChainParams) {
     super({ ...others });
     this.evmChain = evmChain;
     this.id = id;
     this.rpcs = rpcs;
-    this.wormhole = wormhole;
+    this.snowbridge = snowbridge && new Snowbridge(snowbridge);
+    this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
   get client(): EvmClient {
@@ -30,26 +42,5 @@ export class EvmChain extends Chain<ChainAssetData> implements Wormhole {
 
   getType(): ChainType {
     return ChainType.EvmChain;
-  }
-
-  getWormholeId(): number {
-    if (this.wormhole) {
-      return this.wormhole.id;
-    }
-    throw new Error('Wormhole configuration missing');
-  }
-
-  getTokenBridge(): string {
-    if (this.wormhole) {
-      return this.wormhole.tokenBridge;
-    }
-    throw new Error('Wormhole configuration missing');
-  }
-
-  getTokenRelayer(): string | undefined {
-    if (this.wormhole) {
-      return this.wormhole.tokenRelayer;
-    }
-    throw new Error('Wormhole configuration missing');
   }
 }

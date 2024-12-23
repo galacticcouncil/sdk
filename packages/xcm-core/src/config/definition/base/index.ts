@@ -1,4 +1,4 @@
 export * from './BaseConfig';
-export * from './SubstrateCallConfig';
+export * from './SolanaQueryConfig';
 export * from './SubstrateQueryConfig';
 export * from './types';

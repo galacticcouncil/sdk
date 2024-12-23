@@ -6,6 +6,7 @@ import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
 import { FeeConfig, DestinationFeeConfig, TransactFeeConfig } from './fee';
 import { MinConfigBuilder } from './min';
+import { ProgramConfigBuilder } from './program';
 
 export interface SourceConfig {
   asset: Asset;
@@ -35,6 +36,7 @@ export interface AssetRouteParams {
   destination: DestinationConfig;
   contract?: ContractConfigBuilder;
   extrinsic?: ExtrinsicConfigBuilder;
+  program?: ProgramConfigBuilder;
   transact?: TransactConfig;
   tags?: string[];
 }
@@ -48,6 +50,8 @@ export class AssetRoute {
 
   readonly extrinsic?: ExtrinsicConfigBuilder;
 
+  readonly program?: ProgramConfigBuilder;
+
   readonly transact?: TransactConfig;
 
   readonly tags?: string[];
@@ -57,6 +61,7 @@ export class AssetRoute {
     destination,
     contract,
     extrinsic,
+    program,
     transact,
     tags,
   }: AssetRouteParams) {
@@ -64,6 +69,7 @@ export class AssetRoute {
     this.destination = destination;
     this.contract = contract;
     this.extrinsic = extrinsic;
+    this.program = program;
     this.transact = transact;
     this.tags = tags;
   }

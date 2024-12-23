@@ -1,8 +1,8 @@
 import type { Abi as TAbi } from 'viem';
 
 import { BATCH } from './Batch';
-import { GMP } from './Gmp';
 import { ERC20 } from './Erc20';
+import { GMP } from './Gmp';
 import { META } from './Meta';
 import { SNOWBRIDGE } from './Snowbridge';
 import { TOKEN_BRIDGE } from './TokenBridge';

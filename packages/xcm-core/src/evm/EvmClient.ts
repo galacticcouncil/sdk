@@ -4,10 +4,10 @@ import {
   custom,
   fallback,
   http,
+  webSocket,
   Chain,
   PublicClient,
   WalletClient,
-  webSocket,
 } from 'viem';
 
 export class EvmClient {
@@ -29,14 +29,6 @@ export class EvmClient {
 
   get chainDecimals(): number {
     return this.chain.nativeCurrency.decimals;
-  }
-
-  get chainHttps(): readonly string[] {
-    return this.chain.rpcUrls.default.http;
-  }
-
-  get chainWss(): readonly string[] | undefined {
-    return this.chain.rpcUrls.default.webSocket;
   }
 
   get chainExplorer(): string | undefined {

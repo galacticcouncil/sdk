@@ -17,11 +17,11 @@ export function getMultilocationDerivatedAccount(
   address: string,
   parents: number
 ) {
-  // Check Ethereum Address and/or Decode
+  // Check ethereum address
   const ethAddress = address.length === 42;
   const accType = ethAddress ? 'AccountKey20' : 'AccountId32';
 
-  // Decode Address if Needed
+  // Decode address if needed
   let decodedAddress: Uint8Array;
   if (!ethAddress) {
     decodedAddress = decodeAddress(address);
@@ -29,12 +29,12 @@ export function getMultilocationDerivatedAccount(
     decodedAddress = hexToU8a(address);
   }
 
-  // Describe Family
+  // Describe family
   let family = 'SiblingChain';
   if (parents == 0 && parachainId) family = 'ChildChain';
   else if (parents == 1 && !parachainId) family = 'ParentChain';
 
-  // Calculate Hash Component
+  // Calculate hash component
   const registry = new TypeRegistry();
   let toHash = new Uint8Array([
     ...new TextEncoder().encode(family),

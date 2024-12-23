@@ -1,17 +1,17 @@
-import { Wormhole } from './types';
-
 import { Asset } from '../asset';
 
 export enum ChainType {
   'Parachain' = 'parachain',
   'EvmParachain' = 'evm-parachain',
   'EvmChain' = 'evm-chain',
+  'SolanaChain' = 'solana-chain',
 }
 
 export enum ChainEcosystem {
   Ethereum = 'ethereum',
   Polkadot = 'polkadot',
   Kusama = 'kusama',
+  Solana = 'solana',
 }
 
 export type ChainAssetId =
@@ -87,6 +87,10 @@ export abstract class Chain<T extends ChainAssetData> {
     );
   }
 
+  isSolana(): boolean {
+    return this.getType() === ChainType.SolanaChain;
+  }
+
   isEvmChain(): boolean {
     return this.getType() === ChainType.EvmChain;
   }
@@ -97,10 +101,6 @@ export abstract class Chain<T extends ChainAssetData> {
 
   isParachain(): boolean {
     return this.getType() === ChainType.Parachain;
-  }
-
-  isWormholeChain(): this is Wormhole {
-    return 'wormhole' in this && !!this['wormhole'];
   }
 
   getAsset(key: string): Asset | undefined {

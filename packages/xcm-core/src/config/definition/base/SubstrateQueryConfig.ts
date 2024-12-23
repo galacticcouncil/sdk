@@ -1,6 +1,6 @@
-import { CallType } from './types';
-
 import { BaseConfig, BaseConfigParams } from './BaseConfig';
+
+import { CallType } from './types';
 
 export interface SubstrateQueryConfigParams
   extends Omit<BaseConfigParams, 'type'> {
