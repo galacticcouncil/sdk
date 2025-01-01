@@ -1,4 +1,5 @@
 import {
+  acc,
   addr,
   big,
   multiloc,
@@ -295,7 +296,17 @@ export class TransferService {
     const config = extrinsic.build(ctx);
     const substrate = await SubstrateService.create(chain);
     const submittable = substrate.getExtrinsic(config);
-    const { weight } = await submittable.paymentInfo(ctx.address);
+
+    const fromChain = ctx.source.chain as Parachain;
+    const fromAddr = ctx.sender;
+
+    const mda = acc.getMultilocationDerivatedAccount(
+      fromChain.parachainId,
+      fromAddr,
+      1
+    );
+
+    const { weight } = await submittable.paymentInfo(mda);
     return {
       call: submittable.method.toHex(),
       chain: chain,
