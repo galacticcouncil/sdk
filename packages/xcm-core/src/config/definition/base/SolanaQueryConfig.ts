@@ -13,8 +13,6 @@ export class SolanaQueryConfig extends BaseConfig {
 
   readonly token?: string;
 
-  readonly type = CallType.Solana;
-
   constructor({ address, token, ...other }: SolanaQueryConfigParams) {
     super({ ...other, type: CallType.Solana });
     this.address = address;

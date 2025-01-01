@@ -40,7 +40,7 @@ describe('TokenBridge contract builder', () => {
           1000000000000000000n,
           16,
           '0x0000000000000000000000000000000000000000000000000000000000000816',
-          '0',
+          0,
           '0x0001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
         ],
         func: 'transferTokensWithPayload',
@@ -63,7 +63,7 @@ describe('TokenBridge contract builder', () => {
         args: [
           16,
           '0x0000000000000000000000000000000000000000000000000000000000000816',
-          '0',
+          0,
           '0x0001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
         ],
         func: 'wrapAndTransferETHWithPayload',

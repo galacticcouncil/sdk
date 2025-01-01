@@ -1,28 +1,34 @@
 import { Connection } from '@solana/web3.js';
 
 import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
+import { RpcUrls } from './types';
+
 import { Wormhole, WormholeDef } from '../bridge';
 
 export interface SolanaChainParams extends ChainParams<ChainAssetData> {
   id: number;
-  rpcs: string[];
+  rpcUrls: RpcUrls;
   wormhole?: WormholeDef;
 }
 
 export class SolanaChain extends Chain<ChainAssetData> {
   readonly id: number;
-  readonly rpcs: string[];
+  readonly rpcUrls: RpcUrls;
   readonly wormhole?: Wormhole;
 
-  constructor({ id, rpcs, wormhole, ...others }: SolanaChainParams) {
+  constructor({ id, rpcUrls, wormhole, ...others }: SolanaChainParams) {
     super({ ...others });
     this.id = id;
-    this.rpcs = rpcs;
+    this.rpcUrls = rpcUrls;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
   get connection(): Connection {
-    return new Connection(this.rpcs[0], 'confirmed');
+    const { http, webSocket } = this.rpcUrls;
+    return new Connection(http[0], {
+      wsEndpoint: webSocket[0],
+      commitment: 'confirmed',
+    });
   }
 
   getType(): ChainType {

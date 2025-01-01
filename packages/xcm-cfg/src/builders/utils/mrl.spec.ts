@@ -17,7 +17,7 @@ const parachain = new Parachain({
 describe('Mrl utils', () => {
   describe('createPayload', () => {
     it('should create correct VersionedMultiLocation payload hex for alice on hydration', async () => {
-      expect(createPayload(parachain, ALICE)).toStrictEqual(
+      expect(createPayload(parachain, ALICE).toHex()).toStrictEqual(
         '0x0001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
       );
     });

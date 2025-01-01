@@ -1,5 +1,7 @@
 import {
   EvmParachain,
+  Parachain,
+  Precompile,
   ProgramConfig,
   ProgramConfigBuilder,
   SolanaChain,
@@ -19,34 +21,40 @@ import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { UniversalAddress } from '@wormhole-foundation/sdk-connect';
 import {
   createApproveAuthoritySignerInstruction,
-  createTransferNativeInstruction,
+  createTransferNativeWithPayloadInstruction,
 } from '@wormhole-foundation/sdk-solana-tokenbridge';
+
+import { mrl } from '../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;
 };
 
-const transferNative = () => {
+const transferNativeWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ProgramConfigBuilder => ({
       build: async (params) => {
-        const { address, amount, source, sender } = params;
+        const { address, amount, source, sender, destination } = params;
         const ctx = source.chain;
-
         const ctxSol = ctx as SolanaChain;
+
         const ctxWh = Wh.fromChain(ctx);
         const rcvWh = Wh.fromChain(opts.moonchain);
 
-        const senderAddress = new PublicKey(sender);
-        const receiverAddress = new UniversalAddress(
-          '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04'
+        const recipient = Precompile.Bridge;
+        const payload = mrl.createPayload(
+          destination.chain as Parachain,
+          address
         );
+
+        const senderAddress = new PublicKey(sender);
+        const recipientAddress = new UniversalAddress(recipient);
+        const recipientChainId = rcvWh.getWormholeId();
 
         // Payer can be technically different from the sender.
         const payerPublicKey = senderAddress;
 
         const nonce = 0;
-        const relayerFee = 0n;
 
         const messageKeypair = Keypair.generate();
         const ancillaryKeypair = Keypair.generate();
@@ -87,20 +95,21 @@ const transferNative = () => {
           amount
         );
 
-        const tokenBridgeTransferIx = createTransferNativeInstruction(
-          ctxSol.connection,
-          ctxWh.getTokenBridge(),
-          ctxWh.getCoreBridge(),
-          sender,
-          messageKeypair.publicKey,
-          ancillaryKeypair.publicKey,
-          NATIVE_MINT,
-          nonce,
-          amount,
-          relayerFee,
-          receiverAddress.toUint8Array(),
-          rcvWh.getWormholeId()
-        );
+        const tokenBridgeTransferIx =
+          createTransferNativeWithPayloadInstruction(
+            ctxSol.connection,
+            ctxWh.getTokenBridge(),
+            ctxWh.getCoreBridge(),
+            sender,
+            messageKeypair.publicKey,
+            ancillaryKeypair.publicKey,
+            NATIVE_MINT,
+            nonce,
+            amount,
+            recipientAddress.toUint8Array(),
+            recipientChainId,
+            payload.toU8a()
+          );
 
         // Close the ancillary account for cleanup. Payer address receives any remaining funds
         const closeAccountIx = createCloseAccountInstruction(
@@ -119,7 +128,7 @@ const transferNative = () => {
             closeAccountIx,
           ],
           signers: [messageKeypair, ancillaryKeypair],
-          func: 'TransferNative',
+          func: 'TransferNativeWithPayload',
           module: 'TokenBridge',
         });
       },
@@ -129,6 +138,6 @@ const transferNative = () => {
 
 export const TokenBridge = () => {
   return {
-    transferNative,
+    transferNativeWithPayload,
   };
 };

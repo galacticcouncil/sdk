@@ -19,7 +19,7 @@ export function createPayload(
   parachain: Parachain,
   address: string,
   isEthereumStyle = false
-): string {
+): VersionedUserAction {
   const multilocation = {
     V1: {
       parents: 1,
@@ -42,8 +42,7 @@ export function createPayload(
   const userAction = new XcmRoutingUserAction({
     destination: versionedMultilocation,
   });
-  const action = new VersionedUserAction({ V1: userAction });
-  return action.toHex();
+  return new VersionedUserAction({ V1: userAction });
 }
 
 export function decodePayload(payloadHex: string) {

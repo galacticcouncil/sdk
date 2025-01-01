@@ -7,3 +7,8 @@ export type AnyChain = Parachain | EvmParachain | EvmChain | SolanaChain;
 
 export type AnyParachain = Parachain | EvmParachain;
 export type AnyEvmChain = EvmChain | EvmParachain;
+
+export type RpcUrls = {
+  http: string[];
+  webSocket: string[];
+};

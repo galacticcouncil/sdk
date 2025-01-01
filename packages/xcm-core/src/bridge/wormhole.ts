@@ -1,10 +1,16 @@
-import { AnyChain } from 'chain';
+import {
+  PlatformAddressFormat,
+  UniversalAddress,
+} from '@wormhole-foundation/sdk-connect';
+
+import { AnyChain } from '../chain';
 
 export type WormholeDef = {
   id: number;
   coreBridge: string;
   tokenBridge: string;
   tokenRelayer?: string;
+  platformAddressFormat?: PlatformAddressFormat;
 };
 
 export class Wormhole {
@@ -12,12 +18,20 @@ export class Wormhole {
   readonly coreBridge: string;
   readonly tokenBridge: string;
   readonly tokenRelayer?: string;
+  readonly platformAddressFormat?: PlatformAddressFormat;
 
-  constructor({ id, coreBridge, tokenBridge, tokenRelayer }: WormholeDef) {
+  constructor({
+    id,
+    coreBridge,
+    tokenBridge,
+    tokenRelayer,
+    platformAddressFormat,
+  }: WormholeDef) {
     this.id = id;
     this.coreBridge = coreBridge;
     this.tokenBridge = tokenBridge;
     this.tokenRelayer = tokenRelayer;
+    this.platformAddressFormat = platformAddressFormat;
   }
 
   static fromChain(chain: AnyChain): Wormhole {
@@ -48,5 +62,15 @@ export class Wormhole {
       return this.tokenRelayer;
     }
     throw new Error('Wormhole relayer configuration missing');
+  }
+
+  /**
+   * Format chain native address to Wormhole address
+   *
+   * @param address - chain native address
+   * @returns 32-byte universal multichain hex address representation
+   */
+  normalizeAddress(address: string): string {
+    return new UniversalAddress(address, this.platformAddressFormat).toString();
   }
 }

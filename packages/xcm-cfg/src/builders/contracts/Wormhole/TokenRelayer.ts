@@ -1,5 +1,4 @@
 import {
-  addr,
   Abi,
   ContractConfig,
   ContractConfigBuilder,
@@ -17,6 +16,9 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
     const ctxWh = Wh.fromChain(ctx);
     const rcvWh = Wh.fromChain(rcv);
 
+    const toNativeTokenAmount = 0;
+    const batchId = 0;
+
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
       abi: Abi.TokenRelayer,
@@ -24,10 +26,10 @@ const transferTokensWithRelay = (): ContractConfigBuilder => ({
       args: [
         parseAssetId(assetId),
         amount,
-        '0',
+        toNativeTokenAmount,
         rcvWh.getWormholeId(),
-        addr.toHex(address) as `0x${string}`,
-        '0',
+        rcvWh.normalizeAddress(address),
+        batchId,
       ],
       func: 'transferTokensWithRelay',
       module: 'TokenRelayer',

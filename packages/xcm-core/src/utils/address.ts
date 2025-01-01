@@ -29,6 +29,13 @@ export function validateSs58(ss58Addr: string) {
   }
 }
 
+export function validateSolana(solanaAddr: string) {
+  const re = /^[1-9A-HJ-NP-Za-km-z1-9]{32,44}$/;
+  if (!re.test(solanaAddr)) {
+    throw 'Invalid solana address provided!';
+  }
+}
+
 export function validatePubKey(pubkey: string) {
   const re = /0x[0-9a-fA-F]{64}/;
   if (!re.test(pubkey)) {
@@ -54,22 +61,11 @@ export function isH160(address: string) {
   }
 }
 
-/**
- * Format address in 32 bytes (left padded)
- *
- * @param address 20 bytes 0x address
- * @returns 32 bytes 0x address
- */
-export function toHex(address: string) {
-  return '0x000000000000000000000000' + address.substring(2);
-}
-
-/**
- * Format address in 20 bytes
- *
- * @param address 32 bytes lef padded 0x address
- * @returns 20 bytes 0x address
- */
-export function toNative(address: string) {
-  return '0x' + address.substring(26);
+export function isSolana(address: string) {
+  try {
+    validateSolana(address);
+    return true;
+  } catch {
+    return false;
+  }
 }

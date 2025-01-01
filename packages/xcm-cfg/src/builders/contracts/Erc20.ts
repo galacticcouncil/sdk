@@ -11,14 +11,12 @@ export function Erc20() {
   return {
     approve: (): ContractConfigBuilder => ({
       build: (params) => {
-        const { amount, asset, destination, source, transact } = params;
+        const { amount, asset, source, transact } = params;
         const ctx = transact ? transact.chain : source.chain;
-        const rcv = destination.chain;
         const ctxWh = Wh.fromChain(ctx);
-        const rcvWh = Wh.fromChain(rcv);
         const assetId = ctx.getAssetId(asset);
 
-        const spender = rcvWh.getTokenRelayer()
+        const spender = ctxWh.getTokenRelayer()
           ? ctxWh.getTokenRelayer()
           : ctxWh.getTokenBridge();
         return new ContractConfig({

@@ -1,4 +1,4 @@
-import { addr, Precompile } from '@galacticcouncil/xcm-core';
+import { Precompile } from '@galacticcouncil/xcm-core';
 
 const DEFAULT_URL = 'https://api.wormholescan.io';
 
@@ -119,10 +119,11 @@ export class WormholeScan {
 
   isMrlTransfer(payload: OperationPayload): boolean {
     const { payloadType, toAddress, toChain } = payload;
+    const nativeToAddress = '0x' + toAddress.substring(26);
     return (
       payloadType === 3 &&
       toChain === 16 &&
-      addr.toNative(toAddress) === Precompile.Bridge
+      nativeToAddress === Precompile.Bridge
     );
   }
 }

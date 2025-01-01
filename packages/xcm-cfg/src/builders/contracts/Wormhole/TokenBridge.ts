@@ -1,5 +1,4 @@
 import {
-  addr,
   Abi,
   ContractConfig,
   ContractConfigBuilder,
@@ -26,6 +25,7 @@ const transferTokensWithPayload = () => {
 
         const recipient = Precompile.Bridge;
         const assetId = source.chain.getAssetId(asset);
+        const nonce = 0;
         const payload = mrl.createPayload(
           destination.chain as Parachain,
           address
@@ -37,9 +37,9 @@ const transferTokensWithPayload = () => {
             parseAssetId(assetId),
             amount,
             rcvWh.getWormholeId(),
-            addr.toHex(recipient) as `0x${string}`,
-            '0',
-            payload,
+            rcvWh.normalizeAddress(recipient),
+            nonce,
+            payload.toHex(),
           ],
           func: 'transferTokensWithPayload',
           module: 'TokenBridge',
@@ -59,18 +59,20 @@ const wrapAndTransferETHWithPayload = () => {
         const rcvWh = Wh.fromChain(opts.moonchain);
 
         const recipient = Precompile.Bridge;
+        const nonce = 0;
         const payload = mrl.createPayload(
           destination.chain as Parachain,
           address
         );
+
         return new ContractConfig({
           abi: Abi.TokenBridge,
           address: ctxWh.getTokenBridge(),
           args: [
             rcvWh.getWormholeId(),
-            addr.toHex(recipient) as `0x${string}`,
-            '0',
-            payload,
+            rcvWh.normalizeAddress(recipient),
+            nonce,
+            payload.toHex(),
           ],
           value: amount,
           func: 'wrapAndTransferETHWithPayload',
@@ -90,6 +92,9 @@ const transferTokens = (): ContractConfigBuilder => ({
     const ctxWh = Wh.fromChain(ctx);
     const rcvWh = Wh.fromChain(rcv);
 
+    const arbiterFee = 0;
+    const nonce = 0;
+
     const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
       abi: Abi.TokenBridge,
@@ -98,9 +103,9 @@ const transferTokens = (): ContractConfigBuilder => ({
         parseAssetId(assetId),
         amount,
         rcvWh.getWormholeId(),
-        addr.toHex(address) as `0x${string}`,
-        '0',
-        '0',
+        rcvWh.normalizeAddress(address),
+        arbiterFee,
+        nonce,
       ],
       func: 'transferTokens',
       module: 'TokenBridge',
@@ -115,14 +120,17 @@ const wrapAndTransferETH = (): ContractConfigBuilder => ({
     const ctxWh = Wh.fromChain(source.chain);
     const rcvWh = Wh.fromChain(destination.chain);
 
+    const arbiterFee = 0;
+    const nonce = 0;
+
     return new ContractConfig({
       abi: Abi.TokenBridge,
       address: ctxWh.getTokenBridge(),
       args: [
         rcvWh.getWormholeId(),
-        addr.toHex(address) as `0x${string}`,
-        '0',
-        '0',
+        rcvWh.normalizeAddress(address),
+        arbiterFee,
+        nonce,
       ],
       value: amount,
       func: 'wrapAndTransferETH',

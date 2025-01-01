@@ -1,4 +1,4 @@
-import { getPubKey } from './address';
+import { getPubKey, isSolana } from './address';
 
 describe('Address utils', () => {
   describe('getPubKey', () => {
@@ -8,6 +8,13 @@ describe('Address utils', () => {
       ).toStrictEqual(
         '0xd06fca7ce18f3e9b217576e70c28529dc0b1bb71ae2c53bfdce054deada1ef6a'
       );
+    });
+  });
+  describe('isSolana', () => {
+    it('should return true for valid solana base58 address', async () => {
+      expect(
+        isSolana('AQHqDkgchJaSQHPMDj6BMFH9riTqbHjzEBWwUbAh8Fbq')
+      ).toBeTruthy();
     });
   });
 });
