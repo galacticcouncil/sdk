@@ -12,8 +12,8 @@ import {
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
 import {
-  Wallet,
   XCall,
+  Wallet,
   WormholeScan,
   WormholeClient,
 } from '@galacticcouncil/xcm-sdk';
@@ -25,7 +25,7 @@ import {
   logSrcChains,
   logDestChains,
 } from './utils';
-import { signAndSendEvm, signAndSend } from './signers';
+import { evm, solana, substrate } from './signers';
 
 // Inialialize config
 const configService = new HydrationConfigService({
@@ -50,13 +50,13 @@ const wallet = new Wallet({
   transferValidations: validations,
 });
 
-// Dynamically add external asset to xcm
+// Dynamically add external assets to xcm
 configureExternal(externals, configService);
 
-// Define transfer
+// Define transfer constraints
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const asset = configService.getAsset('weth');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -122,10 +122,10 @@ balanceSubscription.unsubscribe();
  * @param address - signer address
  */
 async function sign(address: string) {
-  signAndSend(
-    srcChain,
+  substrate.signAndSend(
     address,
     call,
+    srcChain,
     ({ status }) => {
       console.log(status.toHuman());
     },
@@ -141,15 +141,33 @@ async function sign(address: string) {
  * @param address - signer address
  */
 async function signEvm(address: string) {
-  signAndSendEvm(
-    srcChain,
+  evm.signAndSend(
     address,
     call,
+    srcChain,
     (hash) => {
       console.log('TxHash: ' + hash);
     },
     (receipt) => {
       console.log(receipt);
+    },
+    (error) => {
+      console.error(error);
+    }
+  );
+}
+
+/**
+ * Sign solana transaction
+ *
+ * @param address - signer address
+ */
+async function signSolana() {
+  solana.signAndSend(
+    call,
+    srcChain,
+    (hash) => {
+      console.log('TxHash: ' + hash);
     },
     (error) => {
       console.error(error);
@@ -176,10 +194,10 @@ async function checkAndRedeem(txHash: string, address: string) {
     const call = whScan.isMrlTransfer(payload)
       ? whClient.redeemMrl(address, vaa)
       : whClient.redeem(chain, address, vaa);
-    signAndSendEvm(
-      chain,
+    evm.signAndSend(
       address,
       call,
+      chain,
       (hash) => {
         console.log('TxHash: ' + hash);
       },
