@@ -23,7 +23,7 @@ export interface XCall {
   /** Owner of transation. */
   from: string;
   /** Hex-encoded call data. */
-  data: `0x${string}`;
+  data: string;
   /** Calltype. */
   type: CallType;
 }

@@ -40,12 +40,12 @@ export class SolanaPlatform
     config: ProgramConfig
   ): Promise<XCallSolana> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);
-    const message = await transfer.getPriorityMessage(account);
-    const messageArray = message.serialize();
-    const messageHex = '0x' + Buffer.from(messageArray).toString('hex');
+    const mssgV0 = await transfer.getPriorityMessage(account);
+    const mssgArray = mssgV0.serialize();
+    const mssgHex = Buffer.from(mssgArray).toString('hex');
     return {
       from: account,
-      data: messageHex,
+      data: mssgHex,
       ix: ixToHuman(config.instructions),
       signers: config.signers,
       type: CallType.Solana,
@@ -94,14 +94,11 @@ export class SolanaPlatform
       };
       await updateBalance();
       const sender = new PublicKey(config.address);
-      // const id = this.#connection.onAccountChange(
-      //   sender,
-      //   () => updateBalance(),
-      //   'confirmed'
-      // );
-
+      const id = this.#connection.onAccountChange(sender, () =>
+        updateBalance()
+      );
       return () => {
-        //this.#connection.removeAccountChangeListener(id);
+        this.#connection.removeAccountChangeListener(id);
       };
     };
 
