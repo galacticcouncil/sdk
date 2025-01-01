@@ -1,48 +1,12 @@
-import {
-  AnyChain,
-  AnyEvmChain,
-  AnyParachain,
-  EvmParachain,
-} from '@galacticcouncil/xcm-core';
+import { AnyChain, AnyEvmChain, EvmParachain } from '@galacticcouncil/xcm-core';
 import { XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
-import type { ISubmittableResult } from '@polkadot/types/types';
-import { getWalletBySource } from '@talismn/connect-wallets';
 
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
 export async function signAndSend(
-  chain: AnyChain,
   address: string,
   call: XCall,
-  onStatusChange: (status: ISubmittableResult) => void,
-  onError: (error: unknown) => void
-) {
-  const ctx = chain as AnyParachain;
-  const api = await ctx.api;
-  const extrinsic = api.tx(call.data);
-
-  const wallet = getWalletBySource('polkadot-js');
-  if (!wallet) {
-    throw new Error('No polkadot-js wallet found!');
-  }
-  await wallet.enable('xcm-transfer');
-  const nextNonce = await api.rpc.system.accountNextIndex(address);
-
-  extrinsic
-    .signAndSend(
-      address,
-      { signer: wallet.signer, nonce: nextNonce },
-      onStatusChange
-    )
-    .catch((error: any) => {
-      onError(error);
-    });
-}
-
-export async function signAndSendEvm(
   chain: AnyChain,
-  address: string,
-  call: XCall,
   onTransactionSend: (hash: string | null) => void,
   onTransactionReceipt: (receipt: any) => void,
   onError: (error: unknown) => void
@@ -53,6 +17,7 @@ export async function signAndSendEvm(
   const signer = client.getSigner(address);
 
   await signer.switchChain({ id: client.chain.id });
+  await signer.request({ method: 'eth_requestAccounts' });
 
   let data: `0x${string}` | null = null;
   let txHash: `0x${string}` | null = null;
@@ -69,7 +34,7 @@ export async function signAndSendEvm(
     const [gas, gasPrice] = await Promise.all([
       provider.estimateGas({
         account: address as `0x${string}`,
-        data: data,
+        data: data as `0x${string}`,
         to: DISPATCH_ADDRESS as `0x${string}`,
       }),
       provider.getGasPrice(),
@@ -90,8 +55,8 @@ export async function signAndSendEvm(
   } else {
     const { data, to, value } = call as XCallEvm;
     const estGas = await provider.estimateGas({
-      data: data,
       account: address as `0x${string}`,
+      data: data as `0x${string}`,
       to: to as `0x${string}`,
       value: value,
     });
@@ -100,7 +65,7 @@ export async function signAndSendEvm(
     txHash = await signer.sendTransaction({
       account: address as `0x${string}`,
       chain: client.chain,
-      data: data,
+      data: data as `0x${string}`,
       to: to as `0x${string}`,
       value: value,
     });
