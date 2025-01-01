@@ -1,5 +1,5 @@
 import { chainsMap } from '@galacticcouncil/xcm-cfg';
-import { AnyChain } from '@galacticcouncil/xcm-core';
+import { AnyChain, Wormhole } from '@galacticcouncil/xcm-core';
 
 export function logSrcChains(asset: string, chains: AnyChain[]) {
   const srcChains = chains.map((chain) => chain.name);
@@ -20,6 +20,6 @@ export function logAssets(chain: AnyChain) {
 
 export function getWormholeChainById(id: number): AnyChain | undefined {
   return Array.from(chainsMap.values()).find(
-    (c) => c.isWormholeChain() && c.getWormholeId() === id
+    (c) => Wormhole.isKnown(c) && Wormhole.fromChain(c).getWormholeId() === id
   );
 }

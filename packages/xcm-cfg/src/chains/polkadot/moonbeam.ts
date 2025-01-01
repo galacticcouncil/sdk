@@ -12,6 +12,7 @@ import {
   glmr,
   hdx,
   pink,
+  sol,
   usdc,
   usdc_mwh,
   usdt,
@@ -84,6 +85,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x06e605775296e851ff43b4daa541bb0984e9d6fd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: sol,
+      decimals: 9,
+      id: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
               },
             },
           ],

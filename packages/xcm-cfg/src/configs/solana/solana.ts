@@ -23,9 +23,13 @@ const toHydrationViaWormhole: AssetRoute[] = [
         asset: sol,
       },
     },
-    program: ProgramBuilder().Wormhole().TokenBridge().transferNative().viaMrl({
-      moonchain: moonbeam,
-    }),
+    program: ProgramBuilder()
+      .Wormhole()
+      .TokenBridge()
+      .transferNativeWithPayload()
+      .viaMrl({
+        moonchain: moonbeam,
+      }),
     tags: [Tag.Mrl, Tag.Wormhole],
   }),
 ];
