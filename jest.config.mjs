@@ -14,5 +14,6 @@ export const config = {
     'ts-jest': {
       tsconfig: 'tsconfig.json',
     },
+    window: {},
   },
 };

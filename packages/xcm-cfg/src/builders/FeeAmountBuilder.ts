@@ -43,6 +43,10 @@ function Wormhole() {
   };
 }
 
+type SendFeeOpts = {
+  hub: Parachain;
+};
+
 function Snowbridge() {
   return {
     quoteSendTokenFee: (): FeeAmountConfigBuilder => ({
@@ -66,10 +70,9 @@ function Snowbridge() {
         return output as Promise<bigint>;
       },
     }),
-    getSendFee: (): FeeAmountConfigBuilder => ({
-      build: ({ source }) => {
-        const ctx = source as Parachain;
-        const client = new HubClient(ctx);
+    getSendFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
+      build: () => {
+        const client = new HubClient(opts.hub);
         const fee = client.getBridgeFee();
         return fee as Promise<bigint>;
       },

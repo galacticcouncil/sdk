@@ -22,3 +22,6 @@ integration-tests/*/output.json
 
 # IntelliJ Idea
 .idea
+
+# Env
+.env

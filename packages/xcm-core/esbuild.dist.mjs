@@ -1,12 +1,23 @@
 import esbuild from 'esbuild';
+import { dotenvRun } from '@dotenv-run/esbuild';
 import { writeFileSync } from 'fs';
 import { esmConfig, cjsConfig } from '../../esbuild.config.mjs';
+
+const plugins = [
+  dotenvRun({
+    verbose: true,
+    root: '../../',
+    prefix: '^GC_XCM_',
+  }),
+];
 
 // ESM bundle
 esbuild
   .build({
     ...esmConfig,
     bundle: true,
+    inject: ['shim.src.js'],
+    plugins: plugins,
     packages: 'external',
   })
   .then(({ metafile }) => {
@@ -19,6 +30,7 @@ esbuild
   .build({
     ...cjsConfig,
     bundle: true,
+    plugins: plugins,
     packages: 'external',
   })
   .catch(() => process.exit(1));
