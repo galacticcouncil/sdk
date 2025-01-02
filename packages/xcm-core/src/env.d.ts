@@ -1,7 +1,8 @@
-interface ImportMetaEnv {
+declare interface Env {
+  readonly NODE_ENV: string;
   [key: string]: any;
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+declare interface ImportMeta {
+  readonly env: Env;
 }

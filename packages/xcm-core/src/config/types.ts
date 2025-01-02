@@ -31,12 +31,12 @@ export interface TransferCtx {
   transact?: TransactCtx;
 }
 
-export interface TransferConfigs {
-  origin: TransferConfig;
-  reverse: TransferConfig;
-}
-
 export interface TransferConfig {
   chain: AnyChain;
   route: AssetRoute;
+}
+
+export interface TransferConfigs {
+  origin: TransferConfig;
+  reverse: TransferConfig;
 }

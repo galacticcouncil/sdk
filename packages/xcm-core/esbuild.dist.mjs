@@ -5,7 +5,7 @@ import { esmConfig, cjsConfig } from '../../esbuild.config.mjs';
 
 const plugins = [
   dotenvRun({
-    verbose: true,
+    verbose: false,
     root: '../../',
     prefix: '^GC_XCM_',
   }),
