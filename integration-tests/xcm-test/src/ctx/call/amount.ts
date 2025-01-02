@@ -1,12 +1,12 @@
-import { Asset, AssetAmount } from '@galacticcouncil/xcm-core';
-import { Metadata } from '@galacticcouncil/xcm-sdk';
+import { AnyChain, Asset, AssetAmount } from '@galacticcouncil/xcm-core';
 
 export const getAmount = async (
   amount: number,
   asset: Asset,
-  metadata: Metadata
+  chain: AnyChain
 ) => {
-  const assetDecimals = await metadata.getDecimals(asset);
+  const { decimals } = await chain.getCurrency();
+  const assetDecimals = chain.getAssetDecimals(asset) || decimals;
   const assetAmount = amount * 10 ** assetDecimals;
   return AssetAmount.fromAsset(asset, {
     decimals: assetDecimals,

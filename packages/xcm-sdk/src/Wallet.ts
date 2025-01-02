@@ -72,29 +72,25 @@ export class Wallet {
     const [
       srcBalance,
       srcFeeBalance,
+      srcDestinationFee,
       srcDestinationFeeBalance,
       srcMin,
       dstBalance,
-      dstFee,
       dstMin,
     ] = await Promise.all([
       src.getBalance(srcAddr),
       src.getFeeBalance(srcAddr),
+      src.getDestinationFee(),
       src.getDestinationFeeBalance(srcAddr),
       src.getMin(),
       dst.getBalance(dstAddr),
-      src.getDestinationFee(),
       dst.getMin(),
     ]);
 
     const { source, destination } = srcConf.route;
 
-    // Normalize dest fee ctx in case of wrapped assets
-    const srcDestinationFeeAsset =
-      source.destinationFee.asset || destination.fee.asset;
-    const srcDestinationFee = dstFee.copyWith(srcDestinationFeeAsset);
-
-    //dstFee.copyWith(destination.fee.asset)
+    // Normalize destination fee asset
+    const dstFee = srcDestinationFee.copyWith(destination.fee.asset);
 
     const ctx: TransferCtx = {
       address: dstAddr,

@@ -34,9 +34,8 @@ export class TransferSrcData extends TransferData {
     const { source, destination, transact } = route;
 
     const feeAmount = destination.fee.amount;
-    const feeAsset = destination.fee.asset;
-    const feeAssetNormalized = source.destinationFee.asset || feeAsset;
-    const feeDecimals = await this.getDecimals(feeAssetNormalized);
+    const feeAsset = source.destinationFee.asset || destination.fee.asset;
+    const feeDecimals = await this.getDecimals(feeAsset);
 
     if (Number.isFinite(feeAmount)) {
       return AssetAmount.fromAsset(feeAsset, {
@@ -47,7 +46,7 @@ export class TransferSrcData extends TransferData {
 
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
-      asset: feeAssetNormalized,
+      asset: feeAsset,
       source: transact ? transact.chain : chain,
       destination: destination.chain,
     });

@@ -5,7 +5,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { decodeFunctionData } from 'viem';
 
-import { jsonFormatter } from '../../../utils/route';
+import { jsonFormatter } from '../../../utils/json';
 
 const NATIVE = '0x0000000000000000000000000000000000000802';
 const FOREIGN_PREFIX = '0xffffffff';
@@ -35,7 +35,7 @@ const getContractArgs = (calldata: XCallEvm) => {
   const { abi, data } = calldata;
   return decodeFunctionData({
     abi: JSON.parse(abi!!),
-    data: data,
+    data: data as `0x${string}`,
   });
 };
 

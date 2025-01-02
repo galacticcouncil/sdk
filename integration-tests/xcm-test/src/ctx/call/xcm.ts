@@ -4,12 +4,7 @@ import {
   AssetRoute,
   Erc20Client,
 } from '@galacticcouncil/xcm-core';
-import {
-  Metadata,
-  PlatformAdapter,
-  Wallet,
-  XTransfer,
-} from '@galacticcouncil/xcm-sdk';
+import { PlatformAdapter, Wallet, XTransfer } from '@galacticcouncil/xcm-sdk';
 
 import { getAddress } from './account';
 import { getAmount } from './amount';
@@ -71,8 +66,6 @@ const getTransfer = async (
   route: AssetRoute
 ): Promise<XTransfer> => {
   const { source, destination } = route;
-  const sourceMeta = new Metadata(chain);
-  const destinationMeta = new Metadata(destination.chain);
 
   const srcAddress = getAddress(chain);
   const destAddress = getAddress(destination.chain);
@@ -82,16 +75,16 @@ const getTransfer = async (
     .spyOn(PlatformAdapter.prototype, 'getBalance')
     .mockImplementation(async (asset: Asset) => {
       if (asset.isEqual(destination.asset)) {
-        return getAmount(BALANCE, asset, destinationMeta);
+        return getAmount(BALANCE, asset, destination.chain);
       }
-      return getAmount(BALANCE, asset, sourceMeta);
+      return getAmount(BALANCE, asset, chain);
     });
 
   // Mock source fee to 0.1 unit
   const estimateFeeMock = jest
     .spyOn(PlatformAdapter.prototype, 'estimateFee')
     .mockImplementation(async () => {
-      return getAmount(FEE, source.asset, sourceMeta);
+      return getAmount(FEE, source.asset, chain);
     });
 
   // Mock source fee swap support to false (disabled)
@@ -103,9 +96,10 @@ const getTransfer = async (
   const allowanceMock = jest
     .spyOn(Erc20Client.prototype, 'allowance')
     .mockImplementation(async () => {
-      const decimals = await sourceMeta.getDecimals(source.asset);
-      const balanceBn = BALANCE ** decimals;
-      return BigInt(balanceBn);
+      const { decimals } = await chain.getCurrency();
+      const assetDecimals = chain.getAssetDecimals(source.asset) || decimals;
+      const assetBalance = BALANCE ** assetDecimals;
+      return BigInt(assetBalance);
     });
 
   const xTransfer = await wallet.transfer(
