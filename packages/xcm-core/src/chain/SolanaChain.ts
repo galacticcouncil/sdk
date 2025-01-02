@@ -1,6 +1,12 @@
 import { Connection } from '@solana/web3.js';
 
-import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
+import {
+  Chain,
+  ChainAssetData,
+  ChainCurrency,
+  ChainParams,
+  ChainType,
+} from './Chain';
 import { RpcUrls } from './types';
 
 import { Wormhole, WormholeDef } from '../bridge';
@@ -25,13 +31,25 @@ export class SolanaChain extends Chain<ChainAssetData> {
 
   get connection(): Connection {
     const { http, webSocket } = this.rpcUrls;
-    return new Connection(http[0], {
-      wsEndpoint: webSocket[0],
+
+    let endpoint = http[0];
+    let wsEndpoint = webSocket[0];
+    try {
+      endpoint = import.meta.env.GC_XCM_SOLANA_HTTP;
+      wsEndpoint = import.meta.env.GC_XCM_SOLANA_WSS;
+    } catch {}
+
+    return new Connection(endpoint, {
+      wsEndpoint: wsEndpoint,
       commitment: 'confirmed',
     });
   }
 
   getType(): ChainType {
     return ChainType.SolanaChain;
+  }
+
+  async getCurrency(): Promise<ChainCurrency> {
+    return { symbol: 'SOL', decimals: 9 } as ChainCurrency;
   }
 }

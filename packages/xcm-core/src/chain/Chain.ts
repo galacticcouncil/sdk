@@ -14,6 +14,11 @@ export enum ChainEcosystem {
   Solana = 'solana',
 }
 
+export type ChainCurrency = {
+  symbol: string;
+  decimals: number;
+};
+
 export type ChainAssetId =
   | string
   | number
@@ -72,6 +77,7 @@ export abstract class Chain<T extends ChainAssetData> {
   }
 
   abstract getType(): ChainType;
+  abstract getCurrency(): Promise<ChainCurrency>;
 
   isSubstrate(): boolean {
     return (

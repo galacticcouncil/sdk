@@ -2,7 +2,6 @@ import {
   AnyChain,
   Asset,
   AssetAmount,
-  EvmChain,
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import { SubstrateService } from '../platforms';
@@ -20,17 +19,8 @@ export class Metadata {
       return decimals;
     }
 
-    if (this.chain instanceof Parachain) {
-      const substrate = await SubstrateService.create(this.chain);
-      return substrate.decimals;
-    }
-
-    if (this.chain instanceof EvmChain) {
-      const evmClient = this.chain.client;
-      return evmClient.chainDecimals;
-    }
-
-    throw new Error('Unknown asset decimals: ' + asset.key);
+    const chainCurrency = await this.chain.getCurrency();
+    return chainCurrency.decimals;
   }
 
   async getEd(): Promise<AssetAmount | undefined> {

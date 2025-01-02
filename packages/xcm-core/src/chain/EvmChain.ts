@@ -1,6 +1,12 @@
 import { Chain as EvmChainDef } from 'viem';
 
-import { Chain, ChainAssetData, ChainParams, ChainType } from './Chain';
+import {
+  Chain,
+  ChainAssetData,
+  ChainCurrency,
+  ChainParams,
+  ChainType,
+} from './Chain';
 
 import { Snowbridge, SnowbridgeDef, Wormhole, WormholeDef } from '../bridge';
 import { EvmClient } from '../evm';
@@ -42,5 +48,12 @@ export class EvmChain extends Chain<ChainAssetData> {
 
   getType(): ChainType {
     return ChainType.EvmChain;
+  }
+
+  async getCurrency(): Promise<ChainCurrency> {
+    const { nativeCurrency } = this.client.chain;
+    const symbol = nativeCurrency.symbol;
+    const decimals = nativeCurrency.decimals;
+    return { symbol, decimals } as ChainCurrency;
   }
 }

@@ -1,25 +1,12 @@
 import { Asset, AssetAmount } from '../asset';
-import { AnyChain, AnyParachain } from '../chain';
-import { AssetRoute } from './definition';
+import { AnyChain } from '../chain';
+import { AssetRoute, TransactCtx } from './definition';
 
 export interface SwapCtx {
   aIn: AssetAmount;
   aOut: AssetAmount;
   enabled: boolean;
   route: any;
-}
-
-export interface TxWeight {
-  proofSize: string;
-  refTime: number;
-}
-
-export interface TransactCtx {
-  chain: AnyParachain;
-  fee: AssetAmount;
-  feeBalance: AssetAmount;
-  call: `0x${string}`;
-  weight: TxWeight;
 }
 
 export interface TransferCtx {

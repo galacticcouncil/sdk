@@ -7,6 +7,7 @@ import {
   Chain,
   ChainAssetData,
   ChainAssetId,
+  ChainCurrency,
   ChainParams,
   ChainType,
 } from './Chain';
@@ -77,6 +78,13 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   getType(): ChainType {
     return ChainType.Parachain;
+  }
+
+  async getCurrency(): Promise<ChainCurrency> {
+    const api = await this.api;
+    const symbol = api.registry.chainTokens[0];
+    const decimals = api.registry.chainDecimals[0];
+    return { symbol, decimals } as ChainCurrency;
   }
 
   getAssetXcmLocation(asset: Asset): Record<string, AnyJson> | undefined {
