@@ -18,7 +18,8 @@ import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
-  TransferService,
+  TransferDstData,
+  TransferSrcData,
 } from './transfer';
 import { XTransfer } from './types';
 import { Dex } from './Dex';
@@ -61,8 +62,11 @@ export class Wallet {
     const srcConf = transfer.origin;
     const dstConf = transfer.reverse;
 
-    const src = new TransferService(srcConf, this.dex);
-    const dst = new TransferService(dstConf, this.dex);
+    const srcAdapter = new PlatformAdapter(srcConf.chain, this.dex);
+    const dstAdapter = new PlatformAdapter(dstConf.chain, this.dex);
+
+    const src = new TransferSrcData(srcAdapter, srcConf);
+    const dst = new TransferDstData(dstAdapter, dstConf);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -89,6 +93,8 @@ export class Wallet {
     const srcDestinationFeeAsset =
       source.destinationFee.asset || destination.fee.asset;
     const srcDestinationFee = dstFee.copyWith(srcDestinationFeeAsset);
+
+    //dstFee.copyWith(destination.fee.asset)
 
     const ctx: TransferCtx = {
       address: dstAddr,

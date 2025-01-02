@@ -2,70 +2,41 @@ import {
   acc,
   addr,
   big,
-  multiloc,
   Asset,
   AssetAmount,
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
-  TransactCtx,
   TransferCtx,
   TransferConfig,
+  TransactCtx,
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
+import { formatAmount, formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService, XCall } from '../platforms';
-import { Dex } from '../Dex';
 
-import { formatAmount, formatEvmAddress } from './TransferUtils';
-import { Metadata } from './Metadata';
+import { TransferData } from './TransferData';
 
-export class TransferService {
-  readonly adapter: PlatformAdapter;
-  readonly dex: Dex;
-  readonly config: TransferConfig;
-
-  constructor(config: TransferConfig, dex: Dex) {
-    this.adapter = new PlatformAdapter(config.chain, dex);
-    this.config = config;
-    this.dex = dex;
+export class TransferSrcData extends TransferData {
+  constructor(adapter: PlatformAdapter, config: TransferConfig) {
+    super(adapter, config);
   }
 
-  async getEd(): Promise<AssetAmount | undefined> {
-    const { chain } = this.config;
-    const metadata = new Metadata(chain);
-    return metadata.getEd();
-  }
-
-  async getBalance(address: string): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source } = route;
-
-    const asset = source.asset;
-
-    const assetId = chain.getBalanceAssetId(asset);
-    const account = addr.isH160(assetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const balanceConfig = route.source.balance.build({
-      address: account,
-      asset: asset,
-      chain: chain,
-    });
-
-    return this.adapter.getBalance(asset, balanceConfig);
+  async getCall(ctx: TransferCtx): Promise<XCall> {
+    const { amount, sender } = ctx;
+    const transfer = await this.getTransfer(ctx);
+    return this.adapter.calldata(sender, amount, transfer);
   }
 
   async getDestinationFee(): Promise<AssetAmount> {
     const { chain, route } = this.config;
     const { source, destination, transact } = route;
 
-    const metadata = new Metadata(chain);
-
     const feeAmount = destination.fee.amount;
     const feeAsset = destination.fee.asset;
     const feeAssetNormalized = source.destinationFee.asset || feeAsset;
-    const feeDecimals = await metadata.getDecimals(feeAssetNormalized);
+    const feeDecimals = await this.getDecimals(feeAssetNormalized);
 
     if (Number.isFinite(feeAmount)) {
       return AssetAmount.fromAsset(feeAsset, {
@@ -77,11 +48,7 @@ export class TransferService {
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
     const fee = await feeConfigBuilder.build({
       asset: feeAssetNormalized,
-      source: this.isNativeBridgeTransfer()
-        ? this.dex.hub
-        : transact
-          ? transact.chain
-          : chain,
+      source: transact ? transact.chain : chain,
       destination: destination.chain,
     });
     return AssetAmount.fromAsset(feeAsset, {
@@ -113,7 +80,7 @@ export class TransferService {
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
-  private async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
+  async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
     const { chain, route } = this.config;
     const { amount, sender, source } = ctx;
 
@@ -163,31 +130,7 @@ export class TransferService {
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
-  async getCall(ctx: TransferCtx): Promise<XCall> {
-    const { amount, sender } = ctx;
-    const transfer = await this.getTransfer(ctx);
-    return this.adapter.calldata(sender, amount, transfer);
-  }
-
-  async getMin(): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source } = route;
-
-    const asset = source.asset;
-    const min = source.min;
-
-    if (chain instanceof Parachain && min) {
-      const minAssetId = chain.getMinAssetId(asset);
-      const minBalanceConfig = min.build({
-        asset: minAssetId,
-      });
-      return this.adapter.getBalance(asset, minBalanceConfig);
-    }
-
-    return this.getAssetMin();
-  }
-
-  private async getFeeAsset(address: string): Promise<Asset> {
+  async getFeeAsset(address: string): Promise<Asset> {
     const { chain, route } = this.config;
     const { source } = route;
 
@@ -209,51 +152,19 @@ export class TransferService {
     return feeAssetConfig as Asset;
   }
 
-  private async getAssetMin(): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source } = route;
-
-    const metadata = new Metadata(chain);
-    const asset = source.asset;
-
-    const min = chain.getAssetMin(asset);
-    const decimals = await metadata.getDecimals(asset);
-
-    let balance: bigint = 0n;
-    if (min) {
-      balance = big.toBigInt(min, decimals);
-    }
-
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
   private async getTransfer(ctx: TransferCtx) {
     const { route } = this.config;
     const { contract, extrinsic, program } = route;
 
-    if (contract) {
-      return contract.build({
-        ...ctx,
-      });
-    }
-
-    if (extrinsic) {
-      return extrinsic.build({
-        ...ctx,
-      });
-    }
-
-    if (program) {
-      return program.build({
+    const callable = contract || extrinsic || program;
+    if (callable) {
+      return callable.build({
         ...ctx,
       });
     }
 
     throw new Error(
-      'AssetRoute transfer config is invalid. Specify contract, extrinsic or program.'
+      'AssetRoute transfer config is invalid! Specify contract, extrinsic or program instructions.'
     );
   }
 
@@ -262,6 +173,7 @@ export class TransferService {
     const { transact } = route;
 
     if (transact) {
+      // Augment transfer context with transact chain info
       const ctxTransactBase = Object.assign({
         transact: {
           chain: transact.chain,
@@ -288,6 +200,13 @@ export class TransferService {
     return undefined;
   }
 
+  /**
+   * Transact remote execution context
+   *
+   * @param cfg - transact config
+   * @param ctx - augmented transfer context
+   * @returns transact remote call context
+   */
   private async getTransactData(
     cfg: TransactConfig,
     ctx: TransferCtx
@@ -317,17 +236,28 @@ export class TransferService {
     } as Partial<TransactCtx>;
   }
 
+  /**
+   * Transact fee on source chain
+   *
+   * @param cfg - transact config
+   * @returns transact source chain fee
+   */
   private async getTransactFee(cfg: TransactConfig): Promise<AssetAmount> {
-    const { chain } = this.config;
     const { fee } = cfg;
-    const metadata = new Metadata(chain);
-    const decimals = await metadata.getDecimals(fee.asset);
+    const decimals = await this.getDecimals(fee.asset);
     return AssetAmount.fromAsset(fee.asset, {
       amount: big.toBigInt(fee.amount, decimals),
       decimals,
     });
   }
 
+  /**
+   * Transact fee balance on source chain
+   *
+   * @param cfg - transact config
+   * @param ctx - augmented transfer context
+   * @returns transact source chain fee balance
+   */
   private async getTransactFeeBalance(
     cfg: TransactConfig,
     ctx: TransferCtx
@@ -340,23 +270,5 @@ export class TransferService {
       chain: chain,
     });
     return this.adapter.getBalance(fee.asset, feeBalanceConfig);
-  }
-
-  private isNativeBridgeTransfer() {
-    const { chain, route } = this.config;
-    const { source } = route;
-
-    if (chain instanceof Parachain) {
-      const assetLocation = chain.getAssetXcmLocation(source.asset);
-      if (assetLocation) {
-        const globalConsensus = multiloc.findNestedKey(
-          assetLocation,
-          'GlobalConsensus'
-        );
-        return !!globalConsensus;
-      }
-      return false;
-    }
-    return false;
   }
 }
