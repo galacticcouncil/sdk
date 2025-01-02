@@ -46,6 +46,7 @@ export interface ChainAssetData {
 export interface ChainParams<T extends ChainAssetData> {
   assetsData: T[];
   ecosystem?: ChainEcosystem;
+  explorer?: string;
   isTestChain?: boolean;
   key: string;
   name: string;
@@ -56,6 +57,8 @@ export abstract class Chain<T extends ChainAssetData> {
 
   readonly ecosystem?: ChainEcosystem;
 
+  readonly explorer?: string;
+
   readonly isTestChain: boolean;
 
   readonly key: string;
@@ -65,12 +68,14 @@ export abstract class Chain<T extends ChainAssetData> {
   constructor({
     assetsData,
     ecosystem,
+    explorer,
     isTestChain = false,
     key,
     name,
   }: ChainParams<T>) {
     this.assetsData = new Map(assetsData.map((data) => [data.asset.key, data]));
     this.ecosystem = ecosystem;
+    this.explorer = explorer;
     this.isTestChain = isTestChain;
     this.key = key;
     this.name = name;

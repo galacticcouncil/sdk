@@ -70,6 +70,7 @@ export const ethereum = new EvmChain({
   ],
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
+  explorer: 'https://etherscan.io/',
   rpcs: [
     'https://ethereum-rpc.publicnode.com',
     'https://eth.llamarpc.com',

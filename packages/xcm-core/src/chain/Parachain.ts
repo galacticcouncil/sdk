@@ -27,7 +27,6 @@ export interface ParachainAssetData extends ChainAssetData {
 }
 
 export interface ParachainParams extends ChainParams<ParachainAssetData> {
-  explorer?: string;
   genesisHash: string;
   parachainId: number;
   ss58Format: number;
@@ -37,8 +36,6 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
 }
 
 export class Parachain extends Chain<ParachainAssetData> {
-  readonly explorer?: string;
-
   readonly genesisHash: string;
 
   readonly parachainId: number;
@@ -52,7 +49,6 @@ export class Parachain extends Chain<ParachainAssetData> {
   readonly ws: string | string[];
 
   constructor({
-    explorer,
     genesisHash,
     parachainId,
     usesChainDecimals,
@@ -62,7 +58,6 @@ export class Parachain extends Chain<ParachainAssetData> {
     ...others
   }: ParachainParams) {
     super({ ...others });
-    this.explorer = explorer;
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;

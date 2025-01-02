@@ -16,6 +16,7 @@ export const solana = new SolanaChain({
     },
   ],
   ecosystem: Ecosystem.Solana,
+  explorer: 'https://explorer.solana.com/',
   rpcUrls: {
     http: ['https://api.mainnet-beta.solana.com'],
     webSocket: ['wss://api.mainnet-beta.solana.com'],
