@@ -19,20 +19,21 @@ import { Platform, XCall } from './types';
 import { Dex } from '../Dex';
 
 export class PlatformAdapter {
-  private readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> =
-    {};
+  readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
+  readonly dex: Dex;
 
   constructor(chain: AnyChain, dex: Dex) {
+    this.dex = dex;
     switch (chain.getType()) {
       case ChainType.EvmChain:
         this.registerEvm(chain);
         break;
       case ChainType.EvmParachain:
         this.registerEvm(chain);
-        this.registerSubstrate(chain, dex);
+        this.registerSubstrate(chain);
         break;
       case ChainType.Parachain:
-        this.registerSubstrate(chain, dex);
+        this.registerSubstrate(chain);
         break;
       case ChainType.SolanaChain:
         this.registerSolana(chain);
@@ -52,9 +53,9 @@ export class PlatformAdapter {
     this.platform.Solana = new SolanaPlatform(solanaChain);
   }
 
-  private registerSubstrate(chain: AnyChain, dex: Dex) {
+  private registerSubstrate(chain: AnyChain) {
     const parachain = chain as Parachain;
-    this.platform.Substrate = new SubstratePlatform(parachain, dex);
+    this.platform.Substrate = new SubstratePlatform(parachain, this.dex);
   }
 
   async calldata(

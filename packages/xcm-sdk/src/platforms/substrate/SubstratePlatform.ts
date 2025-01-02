@@ -64,8 +64,8 @@ export class SubstratePlatform
     } catch (e) {
       /**
        * Transaction PaymentApi_query_info panic for V3 or higher
-       * multi-location version when using with some extrinsic if
-       * account has 0 balance of transferring asset.
+       * multi-location versions if used for an extrinsic with empty
+       * account (of transferred asset).
        */
       fee = 0n;
     }
