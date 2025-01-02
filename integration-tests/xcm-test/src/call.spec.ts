@@ -18,7 +18,8 @@ const getPolkadotChains = () => {
     .filter(
       (c) =>
         c.ecosystem === ChainEcosystem.Polkadot ||
-        c.ecosystem === ChainEcosystem.Ethereum
+        c.ecosystem === ChainEcosystem.Ethereum ||
+        c.ecosystem === ChainEcosystem.Solana
     )
     .filter((c) => !skipFor.includes(c.key));
 

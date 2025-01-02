@@ -623,6 +623,13 @@ Array [
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Phala PHA [pha] transfer 1`] = `
+Array [
+  "hydration-phala-pha",
+  "0x01010489000800000000a0724e18090000000000000000000004010200cd1f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Polkadot DOT [dot] transfer 1`] = `
 Array [
   "hydration-polkadot-dot",

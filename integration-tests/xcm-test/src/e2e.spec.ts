@@ -44,7 +44,7 @@ const usage = outdent`
  * @returns chains execution ctx
  */
 const getPolkadotChains = () => {
-  const bridge: string[] = ['ethereum'];
+  const bridge: string[] = ['ethereum', 'solana'];
   const skipFor: string[] = bridge.concat(['nodle']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)

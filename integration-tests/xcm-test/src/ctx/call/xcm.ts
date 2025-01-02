@@ -1,6 +1,10 @@
-import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xcm-core';
 import {
+  AnyChain,
+  Asset,
+  AssetRoute,
   Erc20Client,
+} from '@galacticcouncil/xcm-core';
+import {
   Metadata,
   PlatformAdapter,
   Wallet,
