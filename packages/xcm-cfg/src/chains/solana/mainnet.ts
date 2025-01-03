@@ -18,8 +18,8 @@ export const solana = new SolanaChain({
   ecosystem: Ecosystem.Solana,
   explorer: 'https://explorer.solana.com/',
   rpcUrls: {
-    http: ['https://api.mainnet-beta.solana.com'],
-    webSocket: ['wss://api.mainnet-beta.solana.com'],
+    http: ['https://solemn-chaotic-bush.solana-mainnet.quiknode.pro'],
+    webSocket: ['wss://solemn-chaotic-bush.solana-mainnet.quiknode.pro'],
   },
   wormhole: {
     id: 1,

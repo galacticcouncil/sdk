@@ -32,15 +32,8 @@ export class SolanaChain extends Chain<ChainAssetData> {
   get connection(): Connection {
     const { http, webSocket } = this.rpcUrls;
 
-    let endpoint = http[0];
-    let wsEndpoint = webSocket[0];
-    try {
-      endpoint = import.meta.env.GC_XCM_SOLANA_HTTP;
-      wsEndpoint = import.meta.env.GC_XCM_SOLANA_WSS;
-    } catch {}
-
-    return new Connection(endpoint, {
-      wsEndpoint: wsEndpoint,
+    return new Connection(http[0], {
+      wsEndpoint: webSocket[0],
       commitment: 'confirmed',
     });
   }
