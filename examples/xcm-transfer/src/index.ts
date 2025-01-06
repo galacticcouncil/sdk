@@ -1,24 +1,6 @@
-import { PoolService } from '@galacticcouncil/sdk';
-import {
-  AssetAmount,
-  ConfigBuilder,
-  EvmParachain,
-} from '@galacticcouncil/xcm-core';
-import {
-  assetsMap,
-  chainsMap,
-  routesMap,
-  validations,
-  HydrationConfigService,
-} from '@galacticcouncil/xcm-cfg';
-import {
-  XCall,
-  Wallet,
-  WormholeScan,
-  WormholeClient,
-} from '@galacticcouncil/xcm-sdk';
+import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
+import { XCall } from '@galacticcouncil/xcm-sdk';
 
-import { configureExternal, externals } from './externals';
 import {
   getWormholeChainById,
   logAssets,
@@ -26,37 +8,12 @@ import {
   logDestChains,
 } from './utils';
 import { evm, solana, substrate } from './signers';
-
-// Inialialize config
-const configService = new HydrationConfigService({
-  assets: assetsMap,
-  chains: chainsMap,
-  routes: routesMap,
-});
-
-// Initialize hydration API
-const hydration = configService.getChain('hydration') as EvmParachain;
-const hydrationApi = await hydration.api;
-
-// Initialize pool service
-const poolService = new PoolService(hydrationApi);
-
-// Inialialize wallet & clients
-const whScan = new WormholeScan();
-const whClient = new WormholeClient();
-const wallet = new Wallet({
-  configService: configService,
-  poolService: poolService,
-  transferValidations: validations,
-});
-
-// Dynamically add external assets to xcm
-configureExternal(externals, configService);
+import { configService, wallet, whClient, whScan } from './setup';
 
 // Define transfer constraints
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('weth');
+const asset = configService.getAsset('eth');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
