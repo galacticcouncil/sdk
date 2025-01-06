@@ -5,6 +5,7 @@ export { validations } from './validations';
 
 export * as builders from './builders';
 export * as clients from './clients';
+export * as swaps from './swaps';
 export * as tags from './tags';
 
 export { HydrationConfigService } from './configs/HydrationConfigService';

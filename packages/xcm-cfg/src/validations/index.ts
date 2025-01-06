@@ -19,7 +19,6 @@ const Matchers: Matcher = {
   isHydration: (c) => c instanceof Parachain && c.parachainId === 2034,
   isHub: (c) => c instanceof Parachain && c.parachainId === 1000,
   isEvm: (c) => c.isEvmChain(),
-  isNotEvm: (c) => !c.isEvmChain(),
 } as const;
 
 export const validations: TransferValidation[] = [
@@ -27,6 +26,6 @@ export const validations: TransferValidation[] = [
   new DestFeeValidation(Matchers.isAny, Matchers.isAny),
   new HubEdValidation(Matchers.isAny, Matchers.isHub),
   new HubFrozenValidation(Matchers.isHub, Matchers.isAny),
-  new HydrationEdValidation(Matchers.isNotEvm, Matchers.isHydration),
-  new HydrationMrlFeeValidation(Matchers.isHydration, Matchers.isEvm),
+  new HydrationEdValidation(Matchers.isAny, Matchers.isHydration),
+  new HydrationMrlFeeValidation(Matchers.isHydration, Matchers.isAny),
 ];

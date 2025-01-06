@@ -16,8 +16,10 @@ const ERC20_DECIMALS = 18;
 export class HydrationEdValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
     const { asset, destination } = ctx;
+
     const chain = destination.chain as Parachain;
     const client = new HydrationClient(chain);
+
     const isExistingAccount = destination.balance.amount > 0n;
     const isSufficientAsset = await client.checkIfSufficient(asset);
     return isExistingAccount || isSufficientAsset;
@@ -30,6 +32,7 @@ export class HydrationEdValidation extends TransferValidation {
     }
 
     const { address, destination } = ctx;
+
     const chain = destination.chain as Parachain;
     const client = new HydrationClient(chain);
 
@@ -37,11 +40,10 @@ export class HydrationEdValidation extends TransferValidation {
     const feeAsset = chain.findAssetById(feeAssetId)!;
     const feeAssetMin = feeAsset.min || SYSTEM_MIN;
     const feeAssetDecimals = feeAsset.decimals || SYSTEM_DECIMALS;
-    const feeAssetEd = feeAssetMin * 1.1;
+    const feeAssetEd = feeAssetMin * 1.1 * 10 ** feeAssetDecimals; // add 10 %
     const feeAssetBalance = await client.getAssetBalance(address, feeAssetId);
 
-    const feeAssetBalanceFmt = Number(feeAssetBalance) / 10 ** feeAssetDecimals;
-    if (feeAssetEd > feeAssetBalanceFmt) {
+    if (BigInt(feeAssetEd) > feeAssetBalance) {
       throw new TransferValidationError('Insufficient_Ed', {
         amount: feeAssetEd,
         asset: feeAsset.asset.originSymbol,
@@ -69,19 +71,19 @@ export class HydrationMrlFeeValidation extends TransferValidation {
     }
 
     const { sender, source } = ctx;
+
     const chain = source.chain as Parachain;
     const client = new HydrationClient(chain);
 
     const feeAssetId = chain.getBalanceAssetId(glmr);
     const feeAssetDecimals = chain.getAssetDecimals(glmr) || ERC20_DECIMALS;
-    const feeAssetMin = 1;
+    const feeAssetMin = 1 * 10 ** feeAssetDecimals;
     const feeAssetBalance = await client.getTokensAccountsBalance(
       sender,
       feeAssetId.toString()
     );
-    const feeAssetBalanceFmt = Number(feeAssetBalance) / 10 ** feeAssetDecimals;
 
-    if (feeAssetBalanceFmt < feeAssetMin) {
+    if (feeAssetBalance < BigInt(feeAssetMin)) {
       throw new TransferValidationError('Insufficient_Ed', {
         amount: 1,
         asset: glmr.originSymbol,

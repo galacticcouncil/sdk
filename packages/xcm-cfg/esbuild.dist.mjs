@@ -1,6 +1,7 @@
 import esbuild from 'esbuild';
 import { writeFileSync } from 'fs';
 import { esmConfig, cjsConfig } from '../../esbuild.config.mjs';
+import { externalizePackages } from '../../esbuild.plugin.mjs';
 
 // ESM bundle
 esbuild
@@ -19,6 +20,6 @@ esbuild
   .build({
     ...cjsConfig,
     bundle: true,
-    packages: 'external',
+    plugins: [externalizePackages()],
   })
   .catch(() => process.exit(1));

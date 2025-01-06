@@ -13,6 +13,7 @@ export class FeeValidation extends TransferValidation {
   async validate(ctx: TransferCtx) {
     const { source } = ctx;
     const { chain, fee, feeBalance } = source;
+
     if (feeBalance.amount < fee.amount) {
       throw new TransferValidationError('Insufficient_Fee_Balance', {
         amount: fee.toDecimal(fee.decimals),
@@ -28,6 +29,7 @@ export class DestFeeValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
     const { asset, source } = ctx;
     const { enabled } = source.feeSwap || {};
+
     const isSufficientFeeAsset = asset.isEqual(source.destinationFee);
     const isFeeSwap = !!enabled;
     return isSufficientFeeAsset || isFeeSwap;
