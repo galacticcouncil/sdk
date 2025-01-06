@@ -1,11 +1,15 @@
 import { Asset } from '../asset';
 
-export enum ChainType {
-  'Parachain' = 'parachain',
-  'EvmParachain' = 'evm-parachain',
-  'EvmChain' = 'evm-chain',
-  'SolanaChain' = 'solana-chain',
-}
+export type ChainAssetId =
+  | string
+  | number
+  | bigint
+  | { [key: string]: ChainAssetId };
+
+export type ChainCurrency = {
+  symbol: string;
+  decimals: number;
+};
 
 export enum ChainEcosystem {
   Ethereum = 'ethereum',
@@ -14,16 +18,17 @@ export enum ChainEcosystem {
   Solana = 'solana',
 }
 
-export type ChainCurrency = {
-  symbol: string;
-  decimals: number;
+export type ChainRpcs = {
+  http: string[];
+  webSocket: string[];
 };
 
-export type ChainAssetId =
-  | string
-  | number
-  | bigint
-  | { [key: string]: ChainAssetId };
+export enum ChainType {
+  'Parachain' = 'parachain',
+  'EvmParachain' = 'evm-parachain',
+  'EvmChain' = 'evm-chain',
+  'SolanaChain' = 'solana-chain',
+}
 
 /**
  * Chain Asset Data

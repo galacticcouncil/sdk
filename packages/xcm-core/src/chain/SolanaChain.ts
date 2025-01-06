@@ -5,21 +5,21 @@ import {
   ChainAssetData,
   ChainCurrency,
   ChainParams,
+  ChainRpcs,
   ChainType,
 } from './Chain';
-import { RpcUrls } from './types';
 
 import { Wormhole, WormholeDef } from '../bridge';
 
 export interface SolanaChainParams extends ChainParams<ChainAssetData> {
   id: number;
-  rpcUrls: RpcUrls;
+  rpcUrls: ChainRpcs;
   wormhole?: WormholeDef;
 }
 
 export class SolanaChain extends Chain<ChainAssetData> {
   readonly id: number;
-  readonly rpcUrls: RpcUrls;
+  readonly rpcUrls: ChainRpcs;
   readonly wormhole?: Wormhole;
 
   constructor({ id, rpcUrls, wormhole, ...others }: SolanaChainParams) {
