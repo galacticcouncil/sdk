@@ -16,14 +16,10 @@ import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
 import { Platform, XCall } from './types';
 
-import { Dex } from '../Dex';
-
 export class PlatformAdapter {
   readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
-  readonly dex: Dex;
 
-  constructor(chain: AnyChain, dex: Dex) {
-    this.dex = dex;
+  constructor(chain: AnyChain) {
     switch (chain.getType()) {
       case ChainType.EvmChain:
         this.registerEvm(chain);
@@ -55,7 +51,7 @@ export class PlatformAdapter {
 
   private registerSubstrate(chain: AnyChain) {
     const parachain = chain as Parachain;
-    this.platform.Substrate = new SubstratePlatform(parachain, this.dex);
+    this.platform.Substrate = new SubstratePlatform(parachain);
   }
 
   async calldata(

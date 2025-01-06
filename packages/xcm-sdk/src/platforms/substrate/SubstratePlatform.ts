@@ -5,6 +5,7 @@ import {
   CallType,
   ExtrinsicConfig,
   SubstrateQueryConfig,
+  SwapFactory,
 } from '@galacticcouncil/xcm-core';
 
 import { QueryableStorage } from '@polkadot/api/types';
@@ -23,17 +24,14 @@ import { SubstrateService } from './SubstrateService';
 import { normalizeAssetAmount } from './utils';
 
 import { Platform, XCall } from '../types';
-import { Dex } from '../../Dex';
 
 export class SubstratePlatform
   implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
 {
   readonly #substrate: Promise<SubstrateService>;
-  readonly #dex: Dex;
 
-  constructor(chain: AnyParachain, dex: Dex) {
+  constructor(chain: AnyParachain) {
     this.#substrate = SubstrateService.create(chain);
-    this.#dex = dex;
   }
 
   async calldata(
@@ -102,10 +100,12 @@ export class SubstratePlatform
   }
 
   /**
-   * Display native fee in user preferred fee payment asset (dex only)
+   * Display native fee in user preferred fee payment asset
+   *
+   * Supported only if on-chain swap enabled
    *
    * @param fee - native fee
-   * @param feeBalance - native fee balance
+   * @param feeBalance - user preferred payment asset balance
    * @returns - fee in user preferred payment asset
    */
   private async exchangeFee(
@@ -113,19 +113,19 @@ export class SubstratePlatform
     feeBalance: AssetAmount
   ): Promise<bigint> {
     const { asset, decimals, chain } = await this.#substrate;
-    if (chain.parachainId === this.#dex.chain.parachainId) {
-      const amountIn = Number(fee) / 10 ** decimals;
-      const assetIn = chain.getMetadataAssetId(asset);
-      const assetOut = chain.getMetadataAssetId(feeBalance);
 
-      if (assetIn !== assetOut) {
-        const { amountOut } = await this.#dex.router.getBestSell(
-          assetIn.toString(),
-          assetOut.toString(),
-          amountIn
-        );
-        return BigInt(amountOut.toNumber());
-      }
+    if (asset.isEqual(feeBalance)) {
+      return fee;
+    }
+
+    const swap = SwapFactory.getInstance().get(chain.key);
+    if (swap) {
+      const quote = await swap.getQuote(
+        feeBalance,
+        asset,
+        AssetAmount.fromAsset(asset, { amount: fee, decimals })
+      );
+      return quote.amount;
     }
     return fee;
   }

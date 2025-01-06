@@ -1,4 +1,3 @@
-import { PoolService } from '@galacticcouncil/sdk';
 import {
   addr,
   big,
@@ -11,6 +10,8 @@ import {
   TransferValidator,
   TransferValidation,
   TransferValidationReport,
+  SwapFactory,
+  Swap,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { PlatformAdapter, XCall } from './platforms';
@@ -22,27 +23,25 @@ import {
   TransferSrcData,
 } from './transfer';
 import { XTransfer } from './types';
-import { Dex } from './Dex';
+
+import { Swapper } from './Swapper';
 
 export interface WalletOptions {
   configService: ConfigService;
-  poolService: PoolService;
   transferValidations?: TransferValidation[];
 }
 
 export class Wallet {
   readonly config: ConfigService;
-  readonly dex: Dex;
   readonly validations: TransferValidation[];
 
-  constructor({
-    configService,
-    poolService,
-    transferValidations,
-  }: WalletOptions) {
+  constructor({ configService, transferValidations }: WalletOptions) {
     this.config = configService;
-    this.dex = new Dex(configService, poolService);
     this.validations = transferValidations || [];
+  }
+
+  registerSwaps(...swaps: Swap[]) {
+    swaps.forEach((s) => SwapFactory.getInstance().register(s));
   }
 
   public async transfer(
@@ -62,8 +61,8 @@ export class Wallet {
     const srcConf = transfer.origin;
     const dstConf = transfer.reverse;
 
-    const srcAdapter = new PlatformAdapter(srcConf.chain, this.dex);
-    const dstAdapter = new PlatformAdapter(dstConf.chain, this.dex);
+    const srcAdapter = new PlatformAdapter(srcConf.chain);
+    const dstAdapter = new PlatformAdapter(dstConf.chain);
 
     const src = new TransferSrcData(srcAdapter, srcConf);
     const dst = new TransferDstData(dstAdapter, dstConf);
@@ -114,9 +113,11 @@ export class Wallet {
 
     ctx.transact = await src.getTransact(ctx);
 
+    const swapper = new Swapper(ctx);
+
     const srcFee = await src.getFee(ctx);
-    const srcFeeSwap = this.dex.isSwapSupported(srcFee, ctx)
-      ? await this.dex.calculateFeeSwap(srcFee, ctx)
+    const srcFeeSwap = swapper.isSwapSupported(srcFee)
+      ? await swapper.calculateFeeSwap(srcFee)
       : undefined;
 
     const dstEd = await dst.getEd();
@@ -171,7 +172,7 @@ export class Wallet {
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainRoutes = this.config.getChainRoutes(chain);
-    const adapter = new PlatformAdapter(chainRoutes.chain, this.dex);
+    const adapter = new PlatformAdapter(chainRoutes.chain);
     const observables = chainRoutes
       .getUniqueRoutes()
       .map(async ({ source }) => {
