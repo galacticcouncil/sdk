@@ -4,7 +4,12 @@ import {
   AssetRoute,
   Erc20Client,
 } from '@galacticcouncil/xcm-core';
-import { PlatformAdapter, Wallet, XTransfer } from '@galacticcouncil/xcm-sdk';
+import {
+  PlatformAdapter,
+  Swapper,
+  Wallet,
+  XTransfer,
+} from '@galacticcouncil/xcm-sdk';
 
 import { getAddress } from './account';
 import { getAmount } from './amount';
@@ -89,7 +94,7 @@ const getTransfer = async (
 
   // Mock source fee swap support to false (disabled)
   const isSwapSupportedMock = jest
-    .spyOn(wallet.dex, 'isSwapSupported')
+    .spyOn(Swapper.prototype, 'isSwapSupported')
     .mockImplementation(() => false);
 
   // Mock Erc20 spending cap to current balance (10 units)

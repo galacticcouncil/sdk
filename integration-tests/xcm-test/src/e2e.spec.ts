@@ -45,7 +45,7 @@ const usage = outdent`
  */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum', 'solana'];
-  const skipFor: string[] = bridge.concat(['nodle']);
+  const skipFor: string[] = bridge.concat(['nodle', 'subsocial']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)

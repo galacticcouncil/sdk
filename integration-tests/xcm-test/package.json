@@ -1,6 +1,7 @@
 {
   "name": "xcm-test",
   "private": true,
+  "type": "module",
   "keywords": [
     "wallet",
     "xcm",
@@ -10,8 +11,8 @@
     "test"
   ],
   "scripts": {
-    "test:call": "jest call.spec.ts",
-    "test:e2e": "jest --forceExit e2e.spec.ts"
+    "test:call": "jest --silent call.spec.ts",
+    "test:e2e": "jest --silent --forceExit e2e.spec.ts"
   },
   "devDependencies": {
     "@acala-network/chopsticks-testing": "1.0.1"

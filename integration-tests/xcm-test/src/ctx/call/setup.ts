@@ -1,13 +1,12 @@
-import { PoolService } from '@galacticcouncil/sdk';
-
 import {
   assetsMap,
   chainsMap,
   routesMap,
   validations,
+  swaps,
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
-import { EvmParachain } from '@galacticcouncil/xcm-core';
+
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 export const configService = new HydrationConfigService({
@@ -17,16 +16,19 @@ export const configService = new HydrationConfigService({
 });
 
 export const init = async (): Promise<Wallet> => {
-  // Initialize hydration API
-  const hydration = configService.getChain('hydration') as EvmParachain;
-  const hydrationApi = await hydration.api;
-
-  // Initialize pool service (DEX)
-  const poolService = new PoolService(hydrationApi);
-
-  return new Wallet({
+  const wallet = new Wallet({
     configService: configService,
-    poolService: poolService,
     transferValidations: validations,
   });
+
+  // Register chain swaps
+  const hydration = configService.getChain('hydration');
+  const assethub = configService.getChain('assethub');
+
+  wallet.registerSwaps(
+    new swaps.HydrationSwap(hydration),
+    new swaps.AssethubSwap(assethub)
+  );
+
+  return wallet;
 };

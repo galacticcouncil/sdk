@@ -631,16 +631,9 @@ Array [
 `;
 
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Polkadot DOT [dot] transfer 1`] = `
-Array [
+[
   "hydration-polkadot-dot",
   "0xf40489000500000000e87648170000000000000000000000040101010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
-]
-`;
-
-exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Subsocial SUB [sub] transfer 1`] = `
-Array [
-  "hydration-subsocial-sub",
-  "0x01010489001800000000e8764817000000000000000000000004010200d520010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 
@@ -760,13 +753,6 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Pol
 Array [
   "polkadot-hydration-dot",
   "0xf804630804000100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040000000700e87648170000000000",
-]
-`;
-
-exports[`Wallet with XCM config should result in valid Polkadot transfer for Subsocial -> Hydration SUB [sub] transfer 1`] = `
-Array [
-  "subsocial-hydration-sub",
-  "0xfc041f0803010100c91f030001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0304000000000700e87648170000000000",
 ]
 `;
 

@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "src",
-    "declaration": false
+    "baseUrl": "src"
   },
   "include": ["src/**/*.ts"]
 }

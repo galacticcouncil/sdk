@@ -8,6 +8,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 import {
   PlatformAdapter,
+  Swapper,
   Wallet,
   XCallEvm,
   XTransfer,
@@ -202,7 +203,7 @@ const getTransfer = async (
   }
 
   const isSwapSupportedMock = jest
-    .spyOn(wallet.dex, 'isSwapSupported')
+    .spyOn(Swapper.prototype, 'isSwapSupported')
     .mockImplementation(() => false);
 
   const xTransfer = await wallet.transfer(
