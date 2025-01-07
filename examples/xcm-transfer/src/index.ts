@@ -1,5 +1,5 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { XCall } from '@galacticcouncil/xcm-sdk';
+import { Call } from '@galacticcouncil/xcm-sdk';
 
 import {
   getWormholeChainById,
@@ -40,7 +40,7 @@ const balanceSubscription = await wallet.subscribeBalance(
 );
 
 // Get transfer input data (dialog)
-const xTransfer = await wallet.transfer(
+const transfer = await wallet.transfer(
   asset,
   srcAddr,
   srcChain,
@@ -49,19 +49,19 @@ const xTransfer = await wallet.transfer(
 );
 
 // Validate transfer
-const status = await xTransfer.validate();
+const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const fee: AssetAmount = await xTransfer.estimateFee('0.1');
+const fee: AssetAmount = await transfer.estimateFee('0.1');
 const feeInfo = [
   'Estimated fee:',
   fee.toDecimal(fee.decimals),
   fee.originSymbol,
 ].join(' ');
-const call: XCall = await xTransfer.buildCall('0.1');
+const call: Call = await transfer.buildCall('0.1');
 
 // Dump transfer info
-console.log(xTransfer);
+console.log(transfer);
 console.log(status);
 console.log(feeInfo);
 console.log(call);
