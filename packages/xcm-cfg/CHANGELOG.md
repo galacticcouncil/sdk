@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 6.0.1
+
+### Patch Changes
+
+- Bump hyddration -> hub DOT destination fee
+
 ## 6.0.0
 
 ### Major Changes
