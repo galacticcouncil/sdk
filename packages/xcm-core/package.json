@@ -3,6 +3,7 @@
   "version": "5.5.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
+  "type": "module",
   "repository": {
     "directory": "packages/xcm-core",
     "type": "git",
@@ -29,7 +30,7 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "jest --passWithNoTests"
+    "test": "NODE_NO_WARNINGS=1 jest"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2"

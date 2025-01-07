@@ -3,6 +3,7 @@
   "version": "7.0.1",
   "description": "Cross-chain sdk",
   "author": "GalacticCouncil",
+  "type": "module",
   "repository": {
     "directory": "packages/xcm-sdk",
     "type": "git",

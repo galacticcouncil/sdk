@@ -1,6 +1,7 @@
 {
   "name": "@galacticcouncil/sdk",
   "private": false,
+  "type": "module",
   "bugs": {
     "url": "https://github.com/galacticcouncil/sdk/issues"
   },
@@ -8,7 +9,6 @@
     "type": "git",
     "url": "git+https://github.com/galacticcouncil/sdk.git"
   },
-  "type": "module",
   "workspaces": [
     "packages/*",
     "examples/*",
@@ -32,15 +32,14 @@
     "@changesets/cli": "^2.26.2",
     "@dotenv-run/esbuild": "^1.5.0",
     "@galacticcouncil/api-augment": "^0.3.0",
-    "@types/jest": "^28.1.8",
-    "es-jest": "^2.0.0",
+    "@types/jest": "^29.5.14",
     "esbuild": "^0.21.0",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
     "prettier": "^3.0.3",
     "rimraf": "^3.0.2",
-    "ts-jest": "^28.0.8",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
     "turbo": "^2.0.3",
