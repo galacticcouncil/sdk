@@ -1,32 +1,42 @@
 const {
-  chainsConfigMap,
-  chainsMap,
   assetsMap,
+  chainsMap,
+  routesMap,
+  swaps,
 } = require('@galacticcouncil/xcm-cfg');
-const { ConfigService } = require('@galacticcouncil/xcm-core');
+const { ConfigService, Parachain } = require('@galacticcouncil/xcm-core');
 const { Wallet } = require('@galacticcouncil/xcm-sdk');
 
 const main = async () => {
-  // Inialialize config
+  // Initialize config
   const configService = new ConfigService({
     assets: assetsMap,
     chains: chainsMap,
-    chainsConfig: chainsConfigMap,
+    routes: routesMap,
   });
 
-  // Inialialize wallet
+  // Initialize wallet
   const wallet = new Wallet({
-    config: configService,
+    configService: configService,
   });
+
+  // Register chain swaps
+  const hydration = configService.getChain('hydration');
+  const assethub = configService.getChain('assethub');
+
+  wallet.registerSwaps(
+    new swaps.HydrationSwap(hydration),
+    new swaps.AssethubSwap(assethub)
+  );
 
   // Define transfer
-  const srcChain = configService.getChain('hydradx');
+  const srcChain = configService.getChain('hydration');
   const destChain = configService.getChain('polkadot');
   const asset = configService.getAsset('dot');
 
   // Define source & dest accounts
-  const srcAddr = 'INSERT_ADDRESS';
-  const destAddr = 'INSERT_ADDRESS';
+  const srcAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+  const destAddr = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 
   // Get transfer input data (dialog)
   const xTransfer = await wallet.transfer(
