@@ -1,8 +1,8 @@
 import { Keypair } from '@solana/web3.js';
 
-import { XCall } from '../types';
+import { Call } from '../types';
 
-export interface XCallSolana extends XCall {
+export interface SolanaCall extends Call {
   ix: HumanizedIx[];
   signers: Keypair[];
 }

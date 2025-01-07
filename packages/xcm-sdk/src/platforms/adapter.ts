@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { EvmPlatform } from './evm';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
-import { Platform, XCall } from './types';
+import { Platform, Call } from './types';
 
 export class PlatformAdapter {
   readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
@@ -58,7 +58,7 @@ export class PlatformAdapter {
     account: string,
     amount: bigint,
     config: BaseConfig
-  ): Promise<XCall> {
+  ): Promise<Call> {
     return this.platform[config.type].calldata(account, amount, config);
   }
 

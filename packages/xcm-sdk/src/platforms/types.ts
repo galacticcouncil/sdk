@@ -8,7 +8,7 @@ import {
 import { Observable } from 'rxjs';
 
 export interface Platform<T extends BaseConfig, B extends BaseConfig> {
-  calldata(account: string, amount: bigint, config: T): Promise<XCall>;
+  calldata(account: string, amount: bigint, config: T): Promise<Call>;
   estimateFee(
     account: string,
     amount: bigint,
@@ -19,7 +19,7 @@ export interface Platform<T extends BaseConfig, B extends BaseConfig> {
   subscribeBalance(asset: Asset, config: B): Promise<Observable<AssetAmount>>;
 }
 
-export interface XCall {
+export interface Call {
   /** Owner of transation. */
   from: string;
   /** Hex-encoded call data. */

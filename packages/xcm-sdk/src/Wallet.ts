@@ -14,17 +14,17 @@ import {
   Swap,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
-import { PlatformAdapter, XCall } from './platforms';
+import { PlatformAdapter, Call } from './platforms';
 import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
-  TransferDstData,
-  TransferSrcData,
+  DataOriginProcessor,
+  DataReverseProcessor,
 } from './transfer';
-import { XTransfer } from './types';
+import { Transfer } from './types';
 
-import { Swapper } from './Swapper';
+import { SwapResolver } from './SwapResolver';
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -50,7 +50,7 @@ export class Wallet {
     srcChain: string | AnyChain,
     dstAddr: string,
     dstChain: string | AnyChain
-  ): Promise<XTransfer> {
+  ): Promise<Transfer> {
     const transfer = ConfigBuilder(this.config)
       .assets()
       .asset(asset)
@@ -64,8 +64,8 @@ export class Wallet {
     const srcAdapter = new PlatformAdapter(srcConf.chain);
     const dstAdapter = new PlatformAdapter(dstConf.chain);
 
-    const src = new TransferSrcData(srcAdapter, srcConf);
-    const dst = new TransferDstData(dstAdapter, dstConf);
+    const src = new DataOriginProcessor(srcAdapter, srcConf);
+    const dst = new DataReverseProcessor(dstAdapter, dstConf);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -113,11 +113,11 @@ export class Wallet {
 
     ctx.transact = await src.getTransact(ctx);
 
-    const swapper = new Swapper(ctx);
+    const swap = new SwapResolver(ctx);
 
     const srcFee = await src.getFee(ctx);
-    const srcFeeSwap = swapper.isSwapSupported(srcFee)
-      ? await swapper.calculateFeeSwap(srcFee)
+    const srcFeeSwap = swap.isSwapSupported(srcFee)
+      ? await swap.calculateFeeSwap(srcFee)
       : undefined;
 
     const dstEd = await dst.getEd();
@@ -145,7 +145,7 @@ export class Wallet {
         balance: dstBalance,
         fee: dstFee,
       },
-      async buildCall(amount): Promise<XCall> {
+      async buildCall(amount): Promise<Call> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
         copyCtx.transact = await src.getTransact(copyCtx);
@@ -163,7 +163,7 @@ export class Wallet {
         copyCtx.source.fee = srcFee.copyWith({ amount: srcFeeAmount });
         return validator.validate(copyCtx);
       },
-    } as XTransfer;
+    } as Transfer;
   }
 
   public async subscribeBalance(

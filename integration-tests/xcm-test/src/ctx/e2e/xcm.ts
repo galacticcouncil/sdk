@@ -7,11 +7,11 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import {
+  EvmCall,
   PlatformAdapter,
-  Swapper,
+  SwapResolver,
+  Transfer,
   Wallet,
-  XCallEvm,
-  XTransfer,
 } from '@galacticcouncil/xcm-sdk';
 
 import { getAccount } from './account';
@@ -74,7 +74,7 @@ export const runXcm = (
         // Skipped for now
         extrinsic = moonbeam.toTransferExtrinsic(
           srcNetwork.api,
-          calldata as XCallEvm
+          calldata as EvmCall
         );
       } else {
         extrinsic = srcNetwork.api.tx(calldata.data);
@@ -179,7 +179,7 @@ const getTransfer = async (
   srcNetwork: SetupCtx,
   destNetwork: SetupCtx,
   route: AssetRoute
-): Promise<XTransfer> => {
+): Promise<Transfer> => {
   const { source } = route;
 
   const srcChain = srcNetwork.config;
@@ -203,7 +203,7 @@ const getTransfer = async (
   }
 
   const isSwapSupportedMock = jest
-    .spyOn(Swapper.prototype, 'isSwapSupported')
+    .spyOn(SwapResolver.prototype, 'isSwapSupported')
     .mockImplementation(() => false);
 
   const xTransfer = await wallet.transfer(

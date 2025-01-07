@@ -23,7 +23,7 @@ import {
 import { SubstrateService } from './SubstrateService';
 import { normalizeAssetAmount } from './utils';
 
-import { Platform, XCall } from '../types';
+import { Platform, Call } from '../types';
 
 export class SubstratePlatform
   implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
@@ -38,14 +38,14 @@ export class SubstratePlatform
     account: string,
     _amount: bigint,
     config: ExtrinsicConfig
-  ): Promise<XCall> {
+  ): Promise<Call> {
     const substrate = await this.#substrate;
     const extrinsic = substrate.getExtrinsic(config);
     return {
       from: account,
       data: extrinsic.toHex(),
       type: CallType.Substrate,
-    } as XCall;
+    } as Call;
   }
 
   async estimateFee(

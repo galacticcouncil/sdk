@@ -8,8 +8,13 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { TypeRegistry } from '@polkadot/types';
+import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
 const registry = new TypeRegistry();
+
+const getAssetLocation = (location: any) => {
+  return registry.createType('MultiLocation', location);
+};
 
 export class AssethubSwap implements Swap {
   readonly chain: Parachain;
@@ -25,14 +30,16 @@ export class AssethubSwap implements Swap {
   ): Promise<SwapQuote> {
     const aIn = this.chain.getAssetXcmLocation(assetIn);
     const aOut = this.chain.getAssetXcmLocation(assetOut);
-    const amount = amountOut.toDecimal(amountOut.decimals);
+
+    const aInLocation = getAssetLocation(aIn);
+    const aOutLocation = getAssetLocation(aOut);
 
     const api = await this.chain.api;
     const balance =
-      await api.call.assetConversionApi.quotePriceExactTokensForTokens(
-        registry.createType('StagingXcmV3MultiLocation', aIn),
-        registry.createType('StagingXcmV3MultiLocation', aOut),
-        amount,
+      await api.call.assetConversionApi.quotePriceTokensForExactTokens(
+        aInLocation as unknown as StagingXcmV3MultiLocation,
+        aOutLocation as unknown as StagingXcmV3MultiLocation,
+        amountOut.amount,
         true
       );
 

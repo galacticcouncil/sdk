@@ -1,6 +1,6 @@
-import { XCall } from '../types';
+import { Call } from '../types';
 
-export interface XCallEvm extends XCall {
+export interface EvmCall extends Call {
   /** Solidity JSON string ABI. */
   abi?: string;
   /** Spending CAP */

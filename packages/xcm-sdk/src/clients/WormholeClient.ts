@@ -12,7 +12,7 @@ import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
 import { encodeFunctionData } from 'viem';
 
-import { XCallEvm } from '../platforms';
+import { EvmCall } from '../platforms';
 
 export class WormholeClient {
   async isTransferCompleted(
@@ -38,7 +38,7 @@ export class WormholeClient {
     return payload as boolean;
   }
 
-  redeem(chain: AnyChain, from: string, vaaBytes: string): XCallEvm {
+  redeem(chain: AnyChain, from: string, vaaBytes: string): EvmCall {
     const ctx = chain as AnyEvmChain;
     const ctxWh = ctx.wormhole as Wormhole;
     const vaaArray = encoding.b64.decode(vaaBytes);
@@ -56,10 +56,10 @@ export class WormholeClient {
       data: data,
       from: from,
       to: ctxWh.getTokenBridge(),
-    } as XCallEvm;
+    } as EvmCall;
   }
 
-  redeemMrl(from: string, vaaBytes: string): XCallEvm {
+  redeemMrl(from: string, vaaBytes: string): EvmCall {
     const vaaArray = encoding.b64.decode(vaaBytes);
     const vaaHex = encoding.hex.encode(vaaArray);
 
@@ -74,6 +74,6 @@ export class WormholeClient {
       data: data,
       from: from,
       to: Precompile.Bridge,
-    } as XCallEvm;
+    } as EvmCall;
   }
 }

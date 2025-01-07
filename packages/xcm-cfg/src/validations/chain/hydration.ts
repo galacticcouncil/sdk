@@ -15,13 +15,15 @@ const ERC20_DECIMALS = 18;
 
 export class HydrationEdValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
-    const { asset, destination } = ctx;
+    const { destination } = ctx;
 
     const chain = destination.chain as Parachain;
     const client = new HydrationClient(chain);
 
     const isExistingAccount = destination.balance.amount > 0n;
-    const isSufficientAsset = await client.checkIfSufficient(asset);
+    const isSufficientAsset = await client.checkIfSufficient(
+      destination.balance
+    );
     return isExistingAccount || isSufficientAsset;
   }
 
@@ -40,10 +42,10 @@ export class HydrationEdValidation extends TransferValidation {
     const feeAsset = chain.findAssetById(feeAssetId)!;
     const feeAssetMin = feeAsset.min || SYSTEM_MIN;
     const feeAssetDecimals = feeAsset.decimals || SYSTEM_DECIMALS;
-    const feeAssetEd = feeAssetMin * 1.1 * 10 ** feeAssetDecimals; // add 10 %
+    const feeAssetEd = feeAssetMin * Math.pow(10, feeAssetDecimals);
     const feeAssetBalance = await client.getAssetBalance(address, feeAssetId);
 
-    if (BigInt(feeAssetEd) > feeAssetBalance) {
+    if (BigInt(feeAssetEd * 1.1) > feeAssetBalance) {
       throw new TransferValidationError('Insufficient_Ed', {
         amount: feeAssetEd,
         asset: feeAsset.asset.originSymbol,
@@ -77,7 +79,7 @@ export class HydrationMrlFeeValidation extends TransferValidation {
 
     const feeAssetId = chain.getBalanceAssetId(glmr);
     const feeAssetDecimals = chain.getAssetDecimals(glmr) || ERC20_DECIMALS;
-    const feeAssetMin = 1 * 10 ** feeAssetDecimals;
+    const feeAssetMin = 1 * Math.pow(10, feeAssetDecimals);
     const feeAssetBalance = await client.getTokensAccountsBalance(
       sender,
       feeAssetId.toString()

@@ -5,7 +5,7 @@ import {
   TransferCtx,
 } from '@galacticcouncil/xcm-core';
 
-export class Swapper {
+export class SwapResolver {
   readonly ctx: TransferCtx;
 
   constructor(ctx: TransferCtx) {

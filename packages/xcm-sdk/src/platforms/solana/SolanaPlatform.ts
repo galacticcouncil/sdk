@@ -20,7 +20,7 @@ import {
 
 import { SolanaBalanceFactory } from './balance';
 import { SolanaTransferFactory } from './transfer';
-import { XCallSolana } from './types';
+import { SolanaCall } from './types';
 
 import { Platform } from '../types';
 import { ixToHuman } from './utils';
@@ -38,7 +38,7 @@ export class SolanaPlatform
     account: string,
     _amount: bigint,
     config: ProgramConfig
-  ): Promise<XCallSolana> {
+  ): Promise<SolanaCall> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);
     const mssgV0 = await transfer.getPriorityMessage(account);
     const mssgArray = mssgV0.serialize();
@@ -49,7 +49,7 @@ export class SolanaPlatform
       ix: ixToHuman(config.instructions),
       signers: config.signers,
       type: CallType.Solana,
-    } as XCallSolana;
+    } as SolanaCall;
   }
 
   async estimateFee(

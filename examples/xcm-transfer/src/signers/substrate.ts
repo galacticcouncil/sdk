@@ -1,11 +1,11 @@
 import { AnyChain, AnyParachain } from '@galacticcouncil/xcm-core';
-import type { XCall } from '@galacticcouncil/xcm-sdk';
+import type { Call } from '@galacticcouncil/xcm-sdk';
 import type { ISubmittableResult } from '@polkadot/types/types';
 import { getWalletBySource } from '@talismn/connect-wallets';
 
 export async function signAndSend(
   address: string,
-  call: XCall,
+  call: Call,
   chain: AnyChain,
   onStatusChange: (status: ISubmittableResult) => void,
   onError: (error: unknown) => void

@@ -6,9 +6,9 @@ import {
 } from '@galacticcouncil/xcm-core';
 import {
   PlatformAdapter,
-  Swapper,
+  SwapResolver,
+  Transfer,
   Wallet,
-  XTransfer,
 } from '@galacticcouncil/xcm-sdk';
 
 import { getAddress } from './account';
@@ -69,7 +69,7 @@ const getTransfer = async (
   wallet: Wallet,
   chain: AnyChain,
   route: AssetRoute
-): Promise<XTransfer> => {
+): Promise<Transfer> => {
   const { source, destination } = route;
 
   const srcAddress = getAddress(chain);
@@ -94,7 +94,7 @@ const getTransfer = async (
 
   // Mock source fee swap support to false (disabled)
   const isSwapSupportedMock = jest
-    .spyOn(Swapper.prototype, 'isSwapSupported')
+    .spyOn(SwapResolver.prototype, 'isSwapSupported')
     .mockImplementation(() => false);
 
   // Mock Erc20 spending cap to current balance (10 units)

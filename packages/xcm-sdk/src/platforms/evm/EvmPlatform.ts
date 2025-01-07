@@ -20,9 +20,9 @@ import {
 import { EvmBalanceFactory } from './balance';
 import { EvmTransferFactory } from './transfer';
 import { isNativeEthBridge, isPrecompile } from './transfer/utils';
-import { XCallEvm } from './types';
+import { EvmCall } from './types';
 
-import { Platform, XCall } from '../types';
+import { Platform } from '../types';
 
 export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
   readonly #client: EvmClient;
@@ -35,7 +35,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
     account: string,
     amount: bigint,
     config: ContractConfig
-  ): Promise<XCall> {
+  ): Promise<EvmCall> {
     const { abi, asset, calldata } = EvmTransferFactory.get(
       this.#client,
       config
@@ -48,7 +48,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       to: config.address as `0x${string}`,
       value: config.value,
       type: CallType.Evm,
-    } as XCallEvm;
+    } as EvmCall;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
       return transferCall;
@@ -68,7 +68,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       from: account as `0x${string}`,
       to: asset as `0x${string}`,
       type: CallType.Evm,
-    } as XCallEvm;
+    } as EvmCall;
   }
 
   async estimateFee(

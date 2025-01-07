@@ -1,11 +1,11 @@
 import { AnyChain, AnyEvmChain, EvmParachain } from '@galacticcouncil/xcm-core';
-import { XCall, XCallEvm } from '@galacticcouncil/xcm-sdk';
+import { Call, EvmCall } from '@galacticcouncil/xcm-sdk';
 
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
 export async function signAndSend(
   address: string,
-  call: XCall,
+  call: Call,
   chain: AnyChain,
   onTransactionSend: (hash: string | null) => void,
   onTransactionReceipt: (receipt: any) => void,
@@ -53,7 +53,7 @@ export async function signAndSend(
       to: DISPATCH_ADDRESS as `0x${string}`,
     });
   } else {
-    const { data, to, value } = call as XCallEvm;
+    const { data, to, value } = call as EvmCall;
     const estGas = await provider.estimateGas({
       account: address as `0x${string}`,
       data: data as `0x${string}`,

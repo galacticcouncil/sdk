@@ -1,16 +1,16 @@
-import type { XCall, XCallSolana } from '@galacticcouncil/xcm-sdk';
+import type { Call, SolanaCall } from '@galacticcouncil/xcm-sdk';
 import { AnyChain, SolanaChain } from '@galacticcouncil/xcm-core';
 
 import { MessageV0, VersionedTransaction } from '@solana/web3.js';
 
 export async function signAndSend(
-  call: XCall,
+  call: Call,
   chain: AnyChain,
   onTransactionSend: (hash: string | null) => void,
   onError: (error: unknown) => void
 ) {
   const ctx = chain as SolanaChain;
-  const { data, signers } = call as XCallSolana;
+  const { data, signers } = call as SolanaCall;
 
   const mssgBuffer = Buffer.from(data, 'hex');
   const mssgArray = Uint8Array.from(mssgBuffer);

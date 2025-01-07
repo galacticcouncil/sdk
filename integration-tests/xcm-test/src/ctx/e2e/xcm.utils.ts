@@ -1,11 +1,11 @@
 import { big } from '@galacticcouncil/xcm-core';
-import { XTransfer } from '@galacticcouncil/xcm-sdk';
+import { Transfer } from '@galacticcouncil/xcm-sdk';
 
-const isSufficientAssetTransfer = (transfer: XTransfer): boolean => {
+const isSufficientAssetTransfer = (transfer: Transfer): boolean => {
   return transfer.source.balance.isSame(transfer.source.destinationFee);
 };
 
-export const getSourceBalanceDiff = (before: XTransfer, after: XTransfer) => {
+export const getSourceBalanceDiff = (before: Transfer, after: Transfer) => {
   const balance = before.source.balance;
   const balanceAfter = after.source.balance;
 
@@ -20,8 +20,8 @@ export const getSourceBalanceDiff = (before: XTransfer, after: XTransfer) => {
 };
 
 export const getDestinationBalanceDiff = (
-  before: XTransfer,
-  after: XTransfer
+  before: Transfer,
+  after: Transfer
 ) => {
   const balance = before.destination.balance;
   const balanceAfter = after.destination.balance;
@@ -38,8 +38,8 @@ export const getDestinationBalanceDiff = (
 
 export const getDestinationFee = (
   amount: string,
-  before: XTransfer,
-  after: XTransfer
+  before: Transfer,
+  after: Transfer
 ) => {
   const isSufficient = isSufficientAssetTransfer(before);
 

@@ -1,5 +1,5 @@
 export { Wallet } from './Wallet';
-export { Swapper } from './Swapper';
+export { SwapResolver } from './SwapResolver';
 
 export * from './clients';
 export * from './platforms';

@@ -33,6 +33,7 @@ export class HydrationConfigService extends ConfigService {
         assethub.updateAsset(hubAsset);
         hydration.updateAsset(hydrationAsset);
 
+        this.updateAsset(asset);
         this.updateChainRoute(assethub, toHydrationExtTemplate(asset));
         this.updateChainRoute(hydration, toHubExtTemplate(asset));
       });

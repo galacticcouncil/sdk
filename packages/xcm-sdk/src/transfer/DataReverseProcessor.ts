@@ -2,9 +2,9 @@ import { TransferConfig } from '@galacticcouncil/xcm-core';
 
 import { PlatformAdapter } from '../platforms';
 
-import { TransferData } from './TransferData';
+import { DataProcessor } from './DataProcessor';
 
-export class TransferDstData extends TransferData {
+export class DataReverseProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
     super(adapter, config);
   }

@@ -4,7 +4,7 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 
-import { XCall } from './platforms';
+import { Call } from './platforms';
 
 /**
  * Transfer source data
@@ -43,16 +43,16 @@ export interface TransferDestinationData {
 }
 
 /**
- * Transfer (X) data
+ * Transfer input
  *
- * @interface XTransfer
+ * @interface Transfer
  * @member {TransferSourceData} source Source chain data
  * @member {TransferDestinationData} destination Destination chain data
  */
-export interface XTransfer {
+export interface Transfer {
   source: TransferSourceData;
   destination: TransferDestinationData;
-  buildCall(amount: bigint | number | string): Promise<XCall>;
+  buildCall(amount: bigint | number | string): Promise<Call>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
 }

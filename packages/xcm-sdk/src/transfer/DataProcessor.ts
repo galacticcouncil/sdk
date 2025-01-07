@@ -10,7 +10,7 @@ import {
 import { formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService } from '../platforms';
 
-export abstract class TransferData {
+export abstract class DataProcessor {
   readonly adapter: PlatformAdapter;
   readonly config: TransferConfig;
 

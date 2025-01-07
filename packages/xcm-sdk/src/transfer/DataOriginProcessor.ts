@@ -14,16 +14,16 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { formatAmount, formatEvmAddress } from './utils';
-import { PlatformAdapter, SubstrateService, XCall } from '../platforms';
+import { PlatformAdapter, SubstrateService, Call } from '../platforms';
 
-import { TransferData } from './TransferData';
+import { DataProcessor } from './DataProcessor';
 
-export class TransferSrcData extends TransferData {
+export class DataOriginProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
     super(adapter, config);
   }
 
-  async getCall(ctx: TransferCtx): Promise<XCall> {
+  async getCall(ctx: TransferCtx): Promise<Call> {
     const { amount, sender } = ctx;
     const transfer = await this.getTransfer(ctx);
     return this.adapter.calldata(sender, amount, transfer);
