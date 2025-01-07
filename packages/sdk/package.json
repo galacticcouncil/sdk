@@ -3,6 +3,7 @@
   "version": "5.1.0",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
+  "type": "module",
   "repository": {
     "directory": "packages/sdk",
     "type": "git",
@@ -29,7 +30,7 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "jest"
+    "test": "NODE_NO_WARNINGS=1 jest"
   },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^1.0.0",

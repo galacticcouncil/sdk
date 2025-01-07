@@ -17,6 +17,7 @@ export const stablePools = [
         name: 'DAI',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
       {
         id: '1',
@@ -27,6 +28,7 @@ export const stablePools = [
         name: 'USDC (Polkadot Asset Hub)',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
       {
         id: '2',
@@ -37,6 +39,7 @@ export const stablePools = [
         name: 'USDT (Polkadot Asset Hub)',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
       {
         id: '3',
@@ -47,6 +50,7 @@ export const stablePools = [
         name: 'Frax',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
     ],
   },
@@ -66,6 +70,7 @@ export const stablePools = [
         name: 'USDT (Polkadot Asset Hub)',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
       {
         id: '1',
@@ -76,6 +81,7 @@ export const stablePools = [
         name: 'USDC (Polkadot Asset Hub)',
         type: 'Token',
         existentialDeposit: '1000',
+        isSufficient: true,
       },
     ],
   },
