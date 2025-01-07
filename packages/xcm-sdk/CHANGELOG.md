@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.0.0
+
+### Major Changes
+
+- Add solana platform support
+- Support SwapResolver instead of DEX (removed)
+- Transfer API refactoring (breaking!!!)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.0.0
+
 ## 7.0.1
 
 ### Patch Changes

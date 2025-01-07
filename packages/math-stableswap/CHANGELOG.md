@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 1.1.0
+
+### Minor Changes
+
+- Fix stable pool spot price
+
 ## 1.0.0
 
 ### Major Changes

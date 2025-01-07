@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.0.0
+
+### Major Changes
+
+- Peer deps to @galacticcouncil/sdk (router)
+
+- Add chain swaps
+- Add solana chain & route configs
+- Move external asset config to HydrationConfigService
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.0.0
+
 ## 6.0.1
 
 ### Patch Changes

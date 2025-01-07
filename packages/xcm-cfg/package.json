@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-cfg",
-  "version": "6.0.1",
+  "version": "7.0.0",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "type": "module",
@@ -32,7 +32,7 @@
     "test": "NODE_NO_WARNINGS=1 jest --silent"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-core": "^5.5.0"
+    "@galacticcouncil/xcm-core": "^6.0.0"
   },
   "peerDependencies": {
     "@galacticcouncil/sdk": "^5.0.0"

@@ -1,5 +1,14 @@
 # @galacticcouncil/xcm-core
 
+## 6.0.0
+
+### Major Changes
+
+- Add solana platform support
+- Repackage bridges
+- Chain swap support
+- Chain currency support
+
 ## 5.5.0
 
 ### Minor Changes
