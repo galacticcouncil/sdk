@@ -3,7 +3,6 @@
   "version": "5.1.0",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
-  "type": "module",
   "repository": {
     "directory": "packages/sdk",
     "type": "git",

@@ -58,7 +58,7 @@ export abstract class PolkadotExecutor {
               })
               .finally(() => {
                 console.timeEnd('Execution time:');
-                //api.disconnect();
+                api.disconnect();
                 resolve('');
               });
           });
