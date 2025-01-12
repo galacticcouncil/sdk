@@ -336,11 +336,11 @@
     }
   },
   "hydration-bifrost-dot": {
-    "updated": 1735735738599,
+    "updated": 1736419721372,
     "destination": {
-      "fee": "0.0509521632",
+      "fee": "0.0505164222",
       "feeAsset": "DOT",
-      "feeNative": "509521632"
+      "feeNative": "505164222"
     }
   },
   "hydration-centrifuge-cfg": {
