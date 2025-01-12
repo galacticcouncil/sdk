@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.2.0
+
+### Minor Changes
+
+- e7f7192: Update pool subs (non-blocking)
+
 ## 5.1.0
 
 ### Minor Changes
