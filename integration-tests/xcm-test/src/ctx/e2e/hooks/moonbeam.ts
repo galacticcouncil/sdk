@@ -1,9 +1,10 @@
-import { XCallEvm } from '@galacticcouncil/xcm-sdk';
+import { EvmCall } from '@galacticcouncil/xcm-sdk';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { decodeFunctionData } from 'viem';
+import * as c from 'console';
 
 import { jsonFormatter } from '../../../utils/json';
 
@@ -31,7 +32,7 @@ const getAccountId32 = (account: string) => {
   return '0x' + account.replace('0x01', '').replace('0x03', '').slice(0, -2);
 };
 
-const getContractArgs = (calldata: XCallEvm) => {
+const getContractArgs = (calldata: EvmCall) => {
   const { abi, data } = calldata;
   return decodeFunctionData({
     abi: JSON.parse(abi!!),
@@ -41,7 +42,7 @@ const getContractArgs = (calldata: XCallEvm) => {
 
 export const toTransferExtrinsic = (
   api: ApiPromise,
-  calldata: XCallEvm
+  calldata: EvmCall
 ): SubmittableExtrinsic => {
   const { args, functionName } = getContractArgs(calldata);
 
@@ -75,10 +76,10 @@ export const toTransferExtrinsic = (
   ];
 
   const extrinsic = fn(...fnArgs);
-  console.log('🥢 Executing XTokens contract as extrinsic ...');
-  console.log('🥢 Contract: ' + calldata.data);
-  console.log('🥢 Extrinsic hex: ', extrinsic.toHex());
-  console.log('🥢 Extrinsic args: ', JSON.stringify(fnArgs, jsonFormatter, 2));
+  c.log('🥢 Executing XTokens contract as extrinsic ...');
+  c.log('🥢 Contract: ' + calldata.data);
+  c.log('🥢 Extrinsic hex: ', extrinsic.toHex());
+  c.log('🥢 Extrinsic args: ', JSON.stringify(fnArgs, jsonFormatter, 2));
 
   return extrinsic;
 };

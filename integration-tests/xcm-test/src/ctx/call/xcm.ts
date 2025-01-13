@@ -11,6 +11,8 @@ import {
   Wallet,
 } from '@galacticcouncil/xcm-sdk';
 
+import { log } from 'console';
+
 import { getAddress } from './account';
 import { getAmount } from './amount';
 
@@ -43,7 +45,7 @@ export const runXcm = (
         expect([key, data]).toMatchSnapshot();
       } catch (e) {
         const error = e as Error;
-        console.log('Ups, something went wrong...', error.message);
+        log('Ups, something went wrong...', error.message);
         return;
       }
     },

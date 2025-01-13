@@ -5,6 +5,8 @@ import type {
 import type { AnyJson } from '@polkadot/types-codec/types';
 import { ApiPromise } from '@polkadot/api';
 
+import * as c from 'console';
+
 import { findNestedKey } from '../../utils/json';
 
 export function checkIfFailed(api: ApiPromise, events: EventRecord[]): boolean {
@@ -60,14 +62,12 @@ function checkProcessedStatus(data: AnyJson): boolean {
 }
 
 function logEvent(section: string, method: string, data: AnyJson) {
-  console.log('🥢 Event: ' + section + '.' + method, data);
+  c.log('🥢 Event: ' + section + '.' + method, data);
 }
 
 function logError(api: ApiPromise, data: any) {
   const { dispatchError } = data;
   const error = dispatchError as DispatchError;
   const decoded = api.registry.findMetaError(error.asModule);
-  console.error(
-    `🥢 ${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`
-  );
+  c.error(`🥢 ${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`);
 }

@@ -1,13 +1,11 @@
 import { ChainEcosystem, SubstrateApis } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
-import console from 'console';
+import * as c from 'console';
 
 import { setup, xcm } from './ctx/call';
 
 import { getRouteInfo, getRouteKey } from './utils/route';
-
-const jestConsole = console;
 
 const { configService, init } = setup;
 const { runXcm } = xcm;
@@ -50,13 +48,11 @@ describe('Wallet with XCM config', () => {
   const kusama = getKusamaChains();
 
   beforeAll(async () => {
-    global.console = console;
-    console.log('Starting suite 👷 ...\n');
+    c.log('Starting suite 👷 ...\n');
     wallet = await init();
   });
 
   afterAll(async () => {
-    global.console = jestConsole;
     await SubstrateApis.getInstance().release();
   });
 

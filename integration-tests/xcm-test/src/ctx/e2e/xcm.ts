@@ -14,6 +14,8 @@ import {
   Wallet,
 } from '@galacticcouncil/xcm-sdk';
 
+import * as c from 'console';
+
 import { getAccount } from './account';
 import { getAmount } from './amount';
 import { checkIfFailed, checkIfProcessed, checkIfSent } from './events';
@@ -56,8 +58,8 @@ export const runXcm = (
       const destChain = route.destination.chain as Parachain;
       const destNetwork = networks.find((n) => n.config.key === destChain.key)!;
 
-      console.log('\n🥢 Executing ' + name + ' ...');
-      console.log('🥢 Route key: ' + key);
+      c.log('\n🥢 Executing ' + name + ' ...');
+      c.log('🥢 Route key: ' + key);
 
       const transfer = await getTransfer(
         wallet,
@@ -129,7 +131,7 @@ export const runXcm = (
           },
         });
 
-      console.table(
+      c.table(
         [
           tableRow(
             'Balance (Source)',
@@ -143,7 +145,7 @@ export const runXcm = (
         ],
         ['name', 'asset', 'delta']
       );
-      console.log('🥢 ' + name + ' complete.');
+      c.log('🥢 ' + name + ' complete.');
     },
     2 * 60 * 1000
   );

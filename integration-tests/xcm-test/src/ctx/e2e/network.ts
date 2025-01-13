@@ -2,6 +2,8 @@ import { connectParachains, connectVertical } from '@acala-network/chopsticks';
 import { setupContext } from '@acala-network/chopsticks-testing';
 import { Parachain } from '@galacticcouncil/xcm-core';
 
+import * as c from 'console';
+
 import { initStorage } from './storage';
 import { SetupCtx } from './types';
 
@@ -11,7 +13,7 @@ export async function createNetwork(chain: Parachain): Promise<SetupCtx> {
   });
 
   const chainStorage = await initStorage(ctx.api, chain);
-  console.log('🥢 ' + chain.name + ' storage ready.');
+  c.log('🥢 ' + chain.name + ' storage ready.');
   await ctx.dev.setStorage(chainStorage);
   return {
     ...ctx,

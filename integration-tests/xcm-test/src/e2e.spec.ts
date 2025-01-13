@@ -5,7 +5,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
-import console from 'console';
+import * as c from 'console';
 import outdent from 'outdent';
 
 import { setup, network, xcm, SetupCtx } from './ctx/e2e';
@@ -14,7 +14,6 @@ import { parseArgs } from './utils/cmd';
 import { getRouteInfo, getRouteKey } from './utils/route';
 import { write, loadExisting } from './utils/file';
 
-const jestConsole = console;
 const DB = 'metadata.db.json';
 
 const { configService, initWithCtx } = setup;
@@ -60,7 +59,7 @@ const getPolkadotChains = () => {
 
 describe('Wallet with XCM config', () => {
   jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
-  console.log(usage + '\n');
+  c.log(usage + '\n');
 
   const args = process.argv.slice(2);
   const params = parseArgs(args);
@@ -75,14 +74,12 @@ describe('Wallet with XCM config', () => {
   const polkadot = getPolkadotChains();
 
   beforeAll(async () => {
-    global.console = console;
     networks = await createNetworks(polkadot.chains);
     const ctx = networks.find((n) => n.config.key === 'hydration')!;
     wallet = await initWithCtx(ctx);
   });
 
   afterAll(async () => {
-    global.console = jestConsole;
     await SubstrateApis.getInstance().release();
     await Promise.all(networks.map((network) => network.teardown()));
     write(reportCtx, DB);
