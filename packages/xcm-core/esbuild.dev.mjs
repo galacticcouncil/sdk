@@ -1,9 +1,6 @@
 import esbuild from 'esbuild';
 
-import { esmConfig, getPackageJson } from '../../esbuild.config.mjs';
-
-const packageJson = getPackageJson(import.meta.url);
-const peerDependencies = packageJson.peerDependencies || {};
+import { esmConfig } from '../../esbuild.config.mjs';
 
 const plugins = [];
 
@@ -12,7 +9,7 @@ const options = {
   bundle: true,
   sourcemap: true,
   inject: ['shim.src.js'],
-  external: Object.keys(peerDependencies),
+  packages: 'external',
 };
 
 const ctx = await esbuild.context({ ...options, plugins });

@@ -33,18 +33,20 @@
     "test": "NODE_NO_WARNINGS=1 jest"
   },
   "devDependencies": {
-    "@types/big.js": "^6.2.2"
+    "@types/big.js": "^6.2.2",
+    "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
-    "big.js": "^6.2.1",
-    "buffer": "^6.0.3",
-    "lru-cache": "^11.0.0",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "^1.2.0",
     "@wormhole-foundation/sdk-connect": "^1.2.0",
     "@wormhole-foundation/sdk-definitions": "^1.2.0",
     "@wormhole-foundation/sdk-solana": "^1.2.0",
-    "@wormhole-foundation/sdk-solana-tokenbridge": "^1.2.0"
+    "@wormhole-foundation/sdk-solana-tokenbridge": "^1.2.0",
+    "big.js": "^6.2.1",
+    "bigint-buffer": "^1.1.5",
+    "buffer": "^6.0.3",
+    "lru-cache": "^11.0.0"
   },
   "peerDependencies": {
     "@polkadot/api": "~14.0.1",

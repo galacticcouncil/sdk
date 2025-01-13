@@ -1,21 +1,14 @@
 import esbuild from 'esbuild';
 import { writeFileSync } from 'fs';
-import { esmConfig, cjsConfig, getPackageJson } from '../../esbuild.config.mjs';
-
-const packageJson = getPackageJson(import.meta.url);
-const peerDependencies = Object.keys(packageJson.peerDependencies);
-const dependencies = Object.keys(packageJson.dependencies);
-
-const mathDependencies = dependencies.filter((v) =>
-  v.startsWith('@galacticcouncil/math-')
-);
+import { esmConfig, cjsConfig } from '../../esbuild.config.mjs';
+import { externalizePackages } from '../../esbuild.plugin.mjs';
 
 // ESM bundle
 esbuild
   .build({
     ...esmConfig,
     bundle: true,
-    external: peerDependencies.concat(mathDependencies),
+    packages: 'external',
   })
   .then(({ metafile }) => {
     writeFileSync('build-meta.json', JSON.stringify(metafile));
@@ -27,6 +20,6 @@ esbuild
   .build({
     ...cjsConfig,
     bundle: true,
-    external: peerDependencies.concat(mathDependencies),
+    plugins: [externalizePackages()],
   })
   .catch(() => process.exit(1));

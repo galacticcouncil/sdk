@@ -3,7 +3,6 @@
   "version": "7.0.0",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
-  "type": "module",
   "repository": {
     "directory": "packages/xcm-cfg",
     "type": "git",

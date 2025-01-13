@@ -1,8 +1,9 @@
-const esmOnlyPackages = ['@thi.ng/memoize', '@thi.ng/cache'];
+const esmOnlyPackages = [];
+const esmOnlyNamespaces = ['@thi.ng'];
 
 export function externalizePackages(except = []) {
-  const noExt = esmOnlyPackages.concat(except);
-  const noExtSet = new Set(noExt);
+  const esmOnly = esmOnlyPackages.concat(except);
+  const esmOnlySet = new Set(esmOnly);
   return {
     name: 'noExternal-plugin',
     setup(build) {
@@ -15,8 +16,16 @@ export function externalizePackages(except = []) {
           return;
         }
 
-        if (noExtSet.has(args.path)) {
-          console.log('ⓘ Bundle external:', args.path);
+        const esmNs = esmOnlyNamespaces.find((ns) => args.path.startsWith(ns));
+        if (esmNs) {
+          return;
+        }
+
+        if (esmOnlySet.has(args.path)) {
+          const namespace = args.importer
+            .replace(args.resolveDir, '')
+            .replace('/', '');
+          console.log('ⓘ Found external import', args.path, 'in', namespace);
           return;
         }
 
