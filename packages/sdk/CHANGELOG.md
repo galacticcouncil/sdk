@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.3.0
+
+### Minor Changes
+
+- Decrease the bundle size (exterrnal deps unless esm)
+
 ## 5.2.0
 
 ### Minor Changes
