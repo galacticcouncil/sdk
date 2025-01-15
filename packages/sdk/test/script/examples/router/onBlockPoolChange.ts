@@ -1,8 +1,14 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../../executor';
-import { PoolService } from '../../../../src/pool';
-import { TradeRouter, WalletCtx } from '../../../../src/api';
-import { HYDRADX_OMNIPOOL_ADDRESS } from '../../../../src/consts';
+import {
+  PoolService,
+  TradeRouter,
+  HYDRADX_OMNIPOOL_ADDRESS,
+} from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../../PjsExecutor';
+import { ApiUrl } from '../../types';
+
+import { WalletCtx } from '../../../../src/api';
 
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {

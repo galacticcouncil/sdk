@@ -1,8 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../../executor';
-import { PoolService } from '../../../../src/pool';
-import { TradeRouter } from '../../../../src/api';
-import { PoolType } from '../../../../src/types';
+import { PoolService, PoolType, TradeRouter } from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../../PjsExecutor';
+import { ApiUrl } from '../../types';
 
 class GetBestSpotPriceExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {

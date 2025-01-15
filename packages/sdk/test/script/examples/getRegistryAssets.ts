@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../executor';
-import { AssetClient } from '../../../src/client';
+import { AssetClient } from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../PjsExecutor';
+import { ApiUrl } from '../types';
 
 import externalDegen from '../config/external.degen.json';
 import external from '../config/external.degen.json';

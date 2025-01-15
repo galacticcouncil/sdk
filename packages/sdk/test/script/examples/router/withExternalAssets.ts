@@ -1,7 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../../executor';
-import { PoolService } from '../../../../src/pool';
-import { TradeRouter } from '../../../../src/api';
+import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../../PjsExecutor';
+import { ApiUrl } from '../../types';
 
 import externalDegen from '../../config/external.degen.json';
 import external from '../../config/external.degen.json';

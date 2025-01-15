@@ -1,8 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../../executor';
-import { PoolService } from '../../../../src/pool';
-import { TradeRouter } from '../../../../src/api';
-import { ZERO } from '../../../../src/utils/bignumber';
+import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../../PjsExecutor';
+import { ApiUrl } from '../../types';
 
 const HDX = '0';
 
@@ -24,12 +24,13 @@ class MultiCurrencyPaymentRoutes extends PolkadotExecutor {
               route,
             ]) => [[assetIn.toString(), assetOut.toString()], route]
           )
-          .filter(([[asset_in, asset_out]]) => asset_in === HDX || asset_out === HDX)
-          .map(
-            ([[asset_in, asset_out], route]) => ({
-              assets: [asset_in, asset_out],
-              route: route.toHuman(),
-            }))
+          .filter(
+            ([[asset_in, asset_out]]) => asset_in === HDX || asset_out === HDX
+          )
+          .map(([[asset_in, asset_out], route]) => ({
+            assets: [asset_in, asset_out],
+            route: route.toHuman(),
+          }))
       ),
     ]);
     const { amountOut: hdxAmount } = await router.getBestSell('10', HDX, 2000);
@@ -45,9 +46,16 @@ class MultiCurrencyPaymentRoutes extends PolkadotExecutor {
       .filter((i) => i)
       .map((route) => route.toTx(ZERO).get().toHuman().method)
       .filter(({ section }) => section === 'router')
-      .filter(({ asset_in, asset_out }) => [asset_in, asset_out].sort() )
+      .filter(({ asset_in, asset_out }) => [asset_in, asset_out].sort())
       .map(({ args }) => args)
-      .filter(({ asset_in, asset_out }) => !onchain.find(({ assets: [a, b] }) => (a === asset_in && b === asset_out) || (a === asset_out && b === asset_in)))
+      .filter(
+        ({ asset_in, asset_out }) =>
+          !onchain.find(
+            ({ assets: [a, b] }) =>
+              (a === asset_in && b === asset_out) ||
+              (a === asset_out && b === asset_in)
+          )
+      )
       .map(({ asset_in, asset_out, route }) =>
         api.tx.router.setRoute([asset_in, asset_out], route)
       );

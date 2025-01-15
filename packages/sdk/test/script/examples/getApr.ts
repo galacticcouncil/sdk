@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { ApiUrl, PolkadotExecutor } from '../executor';
-import { FarmClient } from '../../../src/client/FarmClient';
+import { FarmClient } from '@galacticcouncil/sdk';
+
+import { PolkadotExecutor } from '../PjsExecutor';
+import { ApiUrl } from '../types';
 
 class GetFarmAprExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
