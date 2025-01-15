@@ -2,6 +2,7 @@
 node_modules/
 
 # build folders
+packages/*/dist
 packages/*/build
 packages/*/build-meta.json
 

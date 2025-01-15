@@ -1,0 +1,14 @@
+{
+  "version": 0,
+  "descriptorPath": ".papi/descriptors",
+  "entries": {
+    "hydration": {
+      "wsUrl": "wss://rpc.hydradx.cloud",
+      "metadata": ".papi/metadata/hydration.scale"
+    },
+    "basilisk": {
+      "wsUrl": "wss://rpc.basilisk.cloud",
+      "metadata": ".papi/metadata/basilisk.scale"
+    }
+  }
+}
