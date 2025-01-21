@@ -1,4 +1,4 @@
-import { Hop, PoolType } from '../types';
+import { Hop, PoolType } from './types';
 
 export function buildRoute(route: Hop[]) {
   return route.map(({ assetIn, assetOut, pool, poolId }: Hop) => {

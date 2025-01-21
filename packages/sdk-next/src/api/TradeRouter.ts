@@ -1,31 +1,17 @@
 import { Router } from './Router';
-import {
-  Hop,
-  Pool,
-  PoolFees,
-  SellSwap,
-  BuySwap,
-  Trade,
-  TradeType,
-  Amount,
-  Transaction,
-  Swap,
-  PoolToken,
-} from '../types';
-import { BigNumber, bnum, scale } from '../utils/bignumber';
-import {
-  calculateSellFee,
-  calculateBuyFee,
-  calculateDiffToRef,
-} from '../utils/math';
-import { toHuman, toPct } from '../utils/mapper';
+
 import { RouteNotFound } from '../errors';
+import { Hop, Pool, PoolFees, PoolToken } from '../pool';
+import { fmt, math } from '../utils';
+import { Amount, Transaction } from '../types';
+
+import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
   /**
    * Check whether trade is direct or not
    *
-   * @param swaps - Trade route
+   * @param {Swap[]} swaps - trade route swaps
    * @returns true if direct trade, otherwise false
    */
   private isDirectTrade(swaps: Swap[]) {
@@ -33,16 +19,16 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Find best sell swap without errors, if there is none return first one found
+   * Find the best sell swap without errors
    *
-   * @param swaps - All possible sell routes
+   * @param {SellSwap[]} swaps - all possible sell routes
    * @returns best sell swap if exist, otherwise first one found
    */
   private findBestSellRoute(swaps: SellSwap[][]): SellSwap[] {
     const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[a.length - 1].amountOut;
       const swapBFinal = b[b.length - 1].amountOut;
-      return swapAFinal.isGreaterThan(swapBFinal) ? -1 : 1;
+      return swapAFinal > swapBFinal ? -1 : 1;
     });
 
     return (
@@ -53,10 +39,11 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Return route fee range [min,max] in case pool is using dynamic fees
+   * Route fee range [min,max] in case pool is using dynamic fees
    *
-   * @param swaps - Trade routes
-   * @returns min & max fee range if swap through the pool with dynamic fees support
+   * @param {Swap[]} swaps - trade routes
+   * @returns min & max fee range if swapping through the pool with
+   * dynamic fees support
    */
   private getRouteFeeRange(swaps: Swap[]): [number, number] | undefined {
     const hasDynFee = swaps.filter((s: Swap) => s.tradeFeeRange).length > 0;
@@ -72,14 +59,15 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Return pool fee range [min,max] in case pool is using dynamic fees
+   * Pool fee range [min,max] in case pool is using dynamic fees
    *
-   * @param fees - Pool fees
-   * @returns min & max fee range if swap through the pool with dynamic fees support
+   * @param {PoolFees} fees - pool fees
+   * @returns min & max fee range if swapping through the pool with
+   * dynamic fees support
    */
   private getPoolFeeRange(fees: PoolFees): [number, number] | undefined {
-    const feeMin = fees.min ? toPct(fees.min) : undefined;
-    const feeMax = fees.max ? toPct(fees.max) : undefined;
+    const feeMin = fees.min ? fmt.toPct(fees.min) : undefined;
+    const feeMax = fees.max ? fmt.toPct(fees.max) : undefined;
     if (feeMin && feeMax) {
       return [feeMin, feeMax];
     }
@@ -89,32 +77,57 @@ export class TradeRouter extends Router {
   /**
    * Calculate and return best possible sell trade for assetIn>assetOut
    *
-   * @param {string} assetIn - Storage key of assetIn
-   * @param {string} assetOut - Storage key of assetOut
-   * @param {BigNumber} amountIn - Amount of assetIn to sell for assetOut
-   * @returns Best possible sell trade of given token pair
+   * @param {string} assetIn - assetIn id
+   * @param {string} assetOut - assetOut id
+   * @param {bigint} amountIn - amount of assetIn to sell for assetOut
+   * @returns best possible sell trade of given token pair
    */
   async getBestSell(
-    assetIn: string,
-    assetOut: string,
-    amountIn: BigNumber | string | number
+    assetIn: number,
+    assetOut: number,
+    amountIn: bigint
   ): Promise<Trade> {
     return this.getSell(assetIn, assetOut, amountIn);
   }
 
   /**
+   * Calculate and return sell spot price for assetIn>assetOut
+   *
+   * @param route - best possible trade route (sell)
+   * @returns sell spot price
+   */
+  async getSellSpot(route: SellSwap[]): Promise<bigint> {
+    const lastSwap = route[route.length - 1];
+
+    if (route.length === 1) {
+      return lastSwap.spotPrice;
+    }
+
+    const cumulativeRouteDecimals = route
+      .map((s: SellSwap) => s.assetOutDecimals)
+      .reduce((a: number, b: number) => a + b);
+    const cumulativeSpotPrice = route
+      .map((s: SellSwap) => s.spotPrice)
+      .reduce((a: bigint, b: bigint) => a * b);
+
+    const spotAdjDecimals = cumulativeRouteDecimals - lastSwap.assetOutDecimals;
+    const spotScalingFactor = Math.pow(10, spotAdjDecimals);
+    return cumulativeSpotPrice / BigInt(spotScalingFactor);
+  }
+
+  /**
    * Calculate and return sell trade for assetIn>assetOut
    *
-   * @param {string} assetIn - Storage key of assetIn
-   * @param {string} assetOut - Storage key of assetOut
-   * @param {BigNumber} amountIn - Amount of assetIn to sell for assetOut
-   * @param {Hop[]} route - Explicit route to use for trade
-   * @returns Sell trade of given token pair
+   * @param {string} assetIn - assetIn id
+   * @param {string} assetOut - assetOut id
+   * @param {bigint} amountIn - amount of assetIn to sell for assetOut
+   * @param {Hop[]} route - explicit route to use for trade
+   * @returns sell trade of given token pair
    */
   async getSell(
-    assetIn: string,
-    assetOut: string,
-    amountIn: BigNumber | string | number,
+    assetIn: number,
+    assetOut: number,
+    amountIn: bigint,
     route?: Hop[]
   ): Promise<Trade> {
     const pools = await super.getPools();
@@ -131,46 +144,46 @@ export class TradeRouter extends Router {
     if (route) {
       swaps = await this.toSellSwaps(amountIn, route, poolsMap);
     } else {
-      const routesPromises = paths.map(
-        async (path) => await this.toSellSwaps(amountIn, path, poolsMap)
+      const routes = await Promise.all(
+        paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap))
       );
-      const routes = await Promise.all(routesPromises);
-      swaps = this.findBestSellRoute(routes);
+      swaps = this.findBestSellRoute([routes[1]]);
     }
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
     const isDirect = this.isDirectTrade(swaps);
 
-    const spotPrice = swaps
-      .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
+    const spotPrice = await this.getSellSpot(swaps);
 
-    const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetOutDecimals);
-
+    const deltaY = lastSwap.amountOut;
     const delta0Y = isDirect
       ? lastSwap.calculatedOut
       : this.calculateDelta0Y(firstSwap.amountIn, swaps, poolsMap);
-    const deltaY = lastSwap.amountOut;
 
+    const tradeFee = delta0Y - deltaY;
+    const tradeFeeRange = this.getRouteFeeRange(swaps);
     const tradeFeePct = isDirect
       ? lastSwap.tradeFeePct
-      : calculateSellFee(delta0Y, deltaY).toNumber();
-    const tradeFee = delta0Y.minus(deltaY);
-    const tradeFeeRange = this.getRouteFeeRange(swaps);
+      : math.calculateSellFee(delta0Y, deltaY);
 
-    const swapAmount = firstSwap.amountIn
-      .shiftedBy(-1 * firstSwap.assetInDecimals)
-      .multipliedBy(bestRouteSpotPrice);
+    const swapScalingFactor = Math.pow(10, firstSwap.assetInDecimals);
+    const swapAmount =
+      (firstSwap.amountIn * spotPrice) / BigInt(swapScalingFactor);
 
-    const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
+    const priceImpactPct = math.calculateDiffToRef(delta0Y, swapAmount);
 
-    const sellTx = (minAmountOut: BigNumber): Transaction => {
+    const sellTx = (slippagePct?: number): Transaction => {
+      const slippage = math.multiplyByFraction(
+        lastSwap.amountOut,
+        slippagePct || 1
+      );
+
       return this.poolService.buildSellTx(
         assetIn,
         assetOut,
         firstSwap.amountIn,
-        minAmountOut,
+        lastSwap.amountOut - slippage,
         swaps.map((swap: SellSwap) => {
           return swap as Hop;
         })
@@ -181,23 +194,23 @@ export class TradeRouter extends Router {
       type: TradeType.Sell,
       amountIn: firstSwap.amountIn,
       amountOut: lastSwap.amountOut,
-      spotPrice: bestRouteSpotPrice,
+      spotPrice: spotPrice,
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
-      priceImpactPct: bestRoutePriceImpact.toNumber(),
+      priceImpactPct: priceImpactPct,
       swaps: swaps,
       toTx: sellTx,
       toHuman() {
         return {
           type: TradeType.Sell,
-          amountIn: toHuman(firstSwap.amountIn, firstSwap.assetInDecimals),
-          amountOut: toHuman(lastSwap.amountOut, lastSwap.assetOutDecimals),
-          spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetOutDecimals),
-          tradeFee: toHuman(tradeFee, lastSwap.assetOutDecimals),
+          amountIn: fmt.toHuman(firstSwap.amountIn, firstSwap.assetInDecimals),
+          amountOut: fmt.toHuman(lastSwap.amountOut, lastSwap.assetOutDecimals),
+          spotPrice: fmt.toHuman(spotPrice, lastSwap.assetOutDecimals),
+          tradeFee: fmt.toHuman(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
-          priceImpactPct: bestRoutePriceImpact.toNumber(),
+          priceImpactPct: priceImpactPct,
           swaps: swaps.map((s: SellSwap) => s.toHuman()),
         };
       },
@@ -207,23 +220,23 @@ export class TradeRouter extends Router {
   /**
    * Calculate the amount out for best possible trade if fees are zero
    *
-   * @param amountIn - Amount of assetIn to sell for assetOut
-   * @param bestRoute - Best possible trade route (sell)
-   * @param poolsMap - Pools map
+   * @param amountIn - amount of assetIn to sell for assetOut
+   * @param route - best possible trade route (sell)
+   * @param poolsMap - pools map
    * @returns the amount out for best possible trade if fees are zero
    */
   private calculateDelta0Y(
-    amountIn: BigNumber,
-    bestRoute: SellSwap[],
+    amountIn: bigint,
+    route: SellSwap[],
     poolsMap: Map<string, Pool>
   ) {
-    const amounts: BigNumber[] = [];
-    for (let i = 0; i < bestRoute.length; i++) {
-      const swap = bestRoute[i];
+    const amounts: bigint[] = [];
+    for (let i = 0; i < route.length; i++) {
+      const swap = route[i];
       const pool = poolsMap.get(swap.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
       const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
-      let aIn: BigNumber;
+      let aIn: bigint;
       if (i > 0) {
         aIn = amounts[i - 1];
       } else {
@@ -239,13 +252,13 @@ export class TradeRouter extends Router {
    * Calculate and return sell swaps for given path
    * - final amount of previous swap is entry to next one
    *
-   * @param amountIn - Amount of assetIn to sell for assetOut
-   * @param path - Current path
-   * @param poolsMap - Pools map
-   * @returns Sell swaps for given path with corresponding pool pairs
+   * @param amountIn - amount of assetIn to sell for assetOut
+   * @param path - current path
+   * @param poolsMap - pools map
+   * @returns sell swaps for given path with corresponding pool pairs
    */
   private async toSellSwaps(
-    amountIn: BigNumber | string | number,
+    amountIn: bigint,
     path: Hop[],
     poolsMap: Map<string, Pool>
   ): Promise<SellSwap[]> {
@@ -257,16 +270,16 @@ export class TradeRouter extends Router {
 
       const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);
 
-      let aIn: BigNumber;
+      let aIn: bigint;
       if (i > 0) {
         aIn = swaps[i - 1].amountOut;
       } else {
-        aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
+        aIn = amountIn;
       }
 
       const poolFees = await this.poolService.getPoolFees(
-        poolPair.assetOut,
-        pool
+        pool,
+        poolPair.assetOut
       );
       const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(
         poolPair,
@@ -275,10 +288,11 @@ export class TradeRouter extends Router {
       );
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
-      const swapAmount = aIn
-        .shiftedBy(-1 * poolPair.decimalsIn)
-        .multipliedBy(spotPrice);
-      const priceImpactPct = calculateDiffToRef(calculatedOut, swapAmount);
+
+      const swapScalingFactor = Math.pow(10, poolPair.decimalsIn);
+      const swapAmount = (aIn * spotPrice) / BigInt(swapScalingFactor);
+
+      const priceImpactPct = math.calculateDiffToRef(calculatedOut, swapAmount);
 
       swaps.push({
         ...hop,
@@ -290,18 +304,18 @@ export class TradeRouter extends Router {
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
-        priceImpactPct: priceImpactPct.toNumber(),
+        priceImpactPct: priceImpactPct,
         errors: errors,
         toHuman() {
           return {
             ...hop,
-            amountIn: toHuman(aIn, poolPair.decimalsIn),
-            calculatedOut: toHuman(calculatedOut, poolPair.decimalsOut),
-            amountOut: toHuman(amountOut, poolPair.decimalsOut),
-            spotPrice: toHuman(spotPrice, poolPair.decimalsOut),
+            amountIn: fmt.toHuman(aIn, poolPair.decimalsIn),
+            calculatedOut: fmt.toHuman(calculatedOut, poolPair.decimalsOut),
+            amountOut: fmt.toHuman(amountOut, poolPair.decimalsOut),
+            spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
-            priceImpactPct: priceImpactPct.toNumber(),
+            priceImpactPct: priceImpactPct,
             errors: errors,
           };
         },
@@ -317,13 +331,14 @@ export class TradeRouter extends Router {
    * most liquid pool asset is used as reference value to determine ideal
    * route to calculate spot.
    *
-   * @param {string} assetIn - Storage key of tokenIn
-   * @param {string} assetOut - Storage key of tokenOut
-   * @return Best possible spot price of given token pair, or undefined if given pair trade not supported
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @return best possible spot price of given asset pair, or undefined
+   * if given pair swap is not supported
    */
   async getBestSpotPrice(
-    assetIn: string,
-    assetOut: string
+    assetIn: number,
+    assetOut: number
   ): Promise<Amount | undefined> {
     const pools = await super.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
@@ -343,34 +358,32 @@ export class TradeRouter extends Router {
       .sort((a, b) => Number(b.balance) - Number(a.balance));
 
     const { balance, decimals } = assetsByLiquidityDesc[0];
-    const liquidity = bnum(balance).shiftedBy(-1 * decimals);
-    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
-    const routesPromises = paths.map(
-      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
-    );
-    const routes = await Promise.all(routesPromises);
-    const route = this.findBestSellRoute(routes);
-    const swaps = await this.toSellSwaps('1', route, poolsMap);
+    const liquidityIn = math.multiplyByFraction(balance, 0.1);
 
-    const spotPrice = swaps
-      .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
+    const routes = await Promise.all(
+      paths.map((path) => this.toSellSwaps(liquidityIn, path, poolsMap))
+    );
+    const route = this.findBestSellRoute(routes);
+
+    const unit = Math.pow(10, decimals);
+    const swaps = await this.toSellSwaps(BigInt(unit), route, poolsMap);
+
+    const spotPrice = await this.getSellSpot(swaps);
     const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
-    const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
-    return { amount: spotPriceAmount, decimals: spotPriceDecimals };
+    return { amount: spotPrice, decimals: spotPriceDecimals };
   }
 
   /**
-   * Find best buy swap without errors, if there is none return first one found
+   * Find the best buy swap without errors, if there is none return first one found
    *
-   * @param swaps - All possible sell routes
-   * @returns best sell swap if exist, otherwise first one found
+   * @param {BuySwap[]} swaps - all possible buy routes
+   * @returns best buy swap if exist, otherwise first one found
    */
   private findBestBuyRoute(swaps: BuySwap[][]): BuySwap[] {
     const sortedResults = swaps.sort((a, b) => {
       const swapAFinal = a[0].amountIn;
       const swapBFinal = b[0].amountIn;
-      return swapAFinal.isGreaterThan(swapBFinal) ? 1 : -1;
+      return swapAFinal > swapBFinal ? 1 : -1;
     });
 
     return (
@@ -383,32 +396,49 @@ export class TradeRouter extends Router {
   /**
    * Calculate and return best possible buy trade for assetIn>assetOut
    *
-   * @param {string} assetIn - Storage key of assetIn
-   * @param {string} assetOut - Storage key of assetOut
-   * @param {BigNumber} amountOut - Amount of tokenOut to buy for tokenIn
-   * @returns Best possible buy trade of given token pair
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @param {bigint} amountOut - amount of tokenOut to buy for tokenIn
+   * @returns best possible buy trade of given token pair
    */
   async getBestBuy(
-    assetIn: string,
-    assetOut: string,
-    amountOut: BigNumber | string | number
+    assetIn: number,
+    assetOut: number,
+    amountOut: bigint
   ): Promise<Trade> {
     return this.getBuy(assetIn, assetOut, amountOut);
   }
 
   /**
+   * Calculate and return buy spot price for assetIn>assetOut
+   *
+   * @param route - best possible trade route (buy)
+   * @returns buy spot price
+   */
+  async getBuySpot(route: BuySwap[]): Promise<bigint> {
+    const totalRouteDecimals = route
+      .map((s: BuySwap) => s.assetInDecimals)
+      .reduce((a: number, b: number) => a + b);
+    const totalSpotPrice = route
+      .map((s: BuySwap) => s.spotPrice)
+      .reduce((a: bigint, b: bigint) => a * b);
+    const spotScalingFactor = Math.pow(10, totalRouteDecimals);
+    return totalSpotPrice / BigInt(spotScalingFactor);
+  }
+
+  /**
    * Calculate and return buy trade for assetIn>assetOut
    *
-   * @param {string} assetIn - Storage key of assetIn
-   * @param {string} assetOut - Storage key of assetOut
-   * @param {BigNumber} amountOut - Amount of tokenOut to buy for tokenIn
-   * @param {Hop[]} route - Explicit route to use for trade
-   * @returns Buy trade of given token pair
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @param {bigint} amountOut - amount of tokenOut to buy for tokenIn
+   * @param {Hop[]} route - explicit route to use for trade
+   * @returns buy trade of given token pair
    */
   async getBuy(
-    assetIn: string,
-    assetOut: string,
-    amountOut: BigNumber | string | number,
+    assetIn: number,
+    assetOut: number,
+    amountOut: bigint,
     route?: Hop[]
   ): Promise<Trade> {
     const pools = await super.getPools();
@@ -425,10 +455,9 @@ export class TradeRouter extends Router {
     if (route) {
       swaps = await this.toBuySwaps(amountOut, route, poolsMap);
     } else {
-      const routesPromises = paths.map(
-        async (path) => await this.toBuySwaps(amountOut, path, poolsMap)
+      const routes = await Promise.all(
+        paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap))
       );
-      const routes = await Promise.all(routesPromises);
       swaps = this.findBestBuyRoute(routes);
     }
 
@@ -436,40 +465,41 @@ export class TradeRouter extends Router {
     const lastSwap = swaps[0];
     const isDirect = this.isDirectTrade(swaps);
 
-    const spotPrice = swaps
-      .map((s: BuySwap) => s.spotPrice.shiftedBy(-1 * s.assetInDecimals))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
+    const spotPrice = await this.getBuySpot(swaps);
 
-    const bestRouteSpotPrice = scale(spotPrice, lastSwap.assetInDecimals);
-
+    const deltaX = lastSwap.amountIn;
     const delta0X = isDirect
       ? lastSwap.calculatedIn
       : this.calculateDelta0X(firstSwap.amountOut, swaps, poolsMap);
-    const deltaX = lastSwap.amountIn;
 
+    const tradeFee = deltaX - delta0X;
+    const tradeFeeRange = this.getRouteFeeRange(swaps);
     const tradeFeePct = isDirect
       ? lastSwap.tradeFeePct
-      : calculateBuyFee(delta0X, deltaX).toNumber();
-    const tradeFee = deltaX.minus(delta0X);
-    const tradeFeeRange = this.getRouteFeeRange(swaps);
+      : math.calculateBuyFee(delta0X, deltaX);
 
-    const swapAmount = firstSwap.amountOut
-      .shiftedBy(-1 * firstSwap.assetOutDecimals)
-      .multipliedBy(bestRouteSpotPrice);
+    const swapScalingFactor = Math.pow(10, firstSwap.assetOutDecimals);
+    const swapAmount =
+      (firstSwap.amountOut * spotPrice) / BigInt(swapScalingFactor);
 
-    let bestRoutePriceImpact: number;
-    if (delta0X.isZero()) {
-      bestRoutePriceImpact = -100;
+    let priceImpactPct: number;
+    if (delta0X === 0n) {
+      priceImpactPct = -100;
     } else {
-      bestRoutePriceImpact = calculateDiffToRef(swapAmount, delta0X).toNumber();
+      priceImpactPct = math.calculateDiffToRef(swapAmount, delta0X);
     }
 
-    const buyTx = (maxAmountIn: BigNumber): Transaction => {
+    const buyTx = (slippagePct?: number): Transaction => {
+      const slippage = math.multiplyByFraction(
+        firstSwap.amountOut,
+        slippagePct || 1
+      );
+
       return this.poolService.buildBuyTx(
         assetIn,
         assetOut,
         firstSwap.amountOut,
-        maxAmountIn,
+        firstSwap.amountOut + slippage,
         swaps.map((swap: BuySwap) => {
           return swap as Hop;
         })
@@ -480,23 +510,26 @@ export class TradeRouter extends Router {
       type: TradeType.Buy,
       amountOut: firstSwap.amountOut,
       amountIn: lastSwap.amountIn,
-      spotPrice: bestRouteSpotPrice,
+      spotPrice: spotPrice,
       tradeFee: tradeFee,
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
-      priceImpactPct: bestRoutePriceImpact,
+      priceImpactPct: priceImpactPct,
       swaps: swaps,
       toTx: buyTx,
       toHuman() {
         return {
           type: TradeType.Buy,
-          amountOut: toHuman(firstSwap.amountOut, firstSwap.assetOutDecimals),
-          amountIn: toHuman(lastSwap.amountIn, lastSwap.assetInDecimals),
-          spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetInDecimals),
-          tradeFee: toHuman(tradeFee, lastSwap.assetInDecimals),
+          amountOut: fmt.toHuman(
+            firstSwap.amountOut,
+            firstSwap.assetOutDecimals
+          ),
+          amountIn: fmt.toHuman(lastSwap.amountIn, lastSwap.assetInDecimals),
+          spotPrice: fmt.toHuman(spotPrice, lastSwap.assetInDecimals),
+          tradeFee: fmt.toHuman(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
-          priceImpactPct: bestRoutePriceImpact,
+          priceImpactPct: priceImpactPct,
           swaps: swaps.map((s: BuySwap) => s.toHuman()),
         };
       },
@@ -506,23 +539,23 @@ export class TradeRouter extends Router {
   /**
    * Calculate the amount in for best possible trade if fees are zero
    *
-   * @param amountOut - Amount of assetOut to buy for assetIn
-   * @param bestRoute - Best possible trade route (buy)
-   * @param poolsMap - Pools map
+   * @param amountOut - amount of assetOut to buy for assetIn
+   * @param bestRoute - best possible trade route (buy)
+   * @param poolsMap - pools map
    * @returns the amount in for best possible trade if fees are zero
    */
   private calculateDelta0X(
-    amountOut: BigNumber,
+    amountOut: bigint,
     bestRoute: BuySwap[],
     poolsMap: Map<string, Pool>
   ) {
-    const amounts: BigNumber[] = [];
+    const amounts: bigint[] = [];
     for (let i = bestRoute.length - 1; i >= 0; i--) {
       const swap = bestRoute[i];
       const pool = poolsMap.get(swap.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
       const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
-      let aOut: BigNumber;
+      let aOut: bigint;
       if (i == bestRoute.length - 1) {
         aOut = amountOut;
       } else {
@@ -539,13 +572,13 @@ export class TradeRouter extends Router {
    * - final amount of previous swap is entry to next one
    * - calculation is done backwards (swaps in reversed order)
    *
-   * @param amountOut - Amount of assetOut to buy for assetIn
-   * @param path - Current path
-   * @param poolsMap - Pools map
-   * @returns Buy swaps for given path
+   * @param amountOut - amount of assetOut to buy for assetIn
+   * @param path - current path
+   * @param poolsMap - pools map
+   * @returns buy swaps for given path
    */
   private async toBuySwaps(
-    amountOut: BigNumber | string | number,
+    amountOut: bigint,
     path: Hop[],
     poolsMap: Map<string, Pool>
   ): Promise<BuySwap[]> {
@@ -557,16 +590,16 @@ export class TradeRouter extends Router {
 
       const poolPair = pool.parsePair(hop.assetIn, hop.assetOut);
 
-      let aOut: BigNumber;
+      let aOut: bigint;
       if (i == path.length - 1) {
-        aOut = scale(bnum(amountOut), poolPair.decimalsOut).decimalPlaces(0, 1);
+        aOut = amountOut;
       } else {
         aOut = swaps[0].amountIn;
       }
 
       const poolFees = await this.poolService.getPoolFees(
-        poolPair.assetOut,
-        pool
+        pool,
+        poolPair.assetOut
       );
       const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(
         poolPair,
@@ -576,17 +609,14 @@ export class TradeRouter extends Router {
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
 
-      const swapAmount = aOut
-        .shiftedBy(-1 * poolPair.decimalsOut)
-        .multipliedBy(spotPrice);
+      const swapScalingFactor = Math.pow(10, poolPair.decimalsOut);
+      const swapAmount = (aOut * spotPrice) / BigInt(swapScalingFactor);
+
       let priceImpactPct: number;
-      if (calculatedIn.isZero()) {
+      if (calculatedIn === 0n) {
         priceImpactPct = -100;
       } else {
-        priceImpactPct = calculateDiffToRef(
-          swapAmount,
-          calculatedIn
-        ).toNumber();
+        priceImpactPct = math.calculateDiffToRef(swapAmount, calculatedIn);
       }
 
       swaps.unshift({
@@ -604,10 +634,10 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
-            amountOut: toHuman(aOut, poolPair.decimalsOut),
-            calculatedIn: toHuman(calculatedIn, poolPair.decimalsIn),
-            amountIn: toHuman(amountIn, poolPair.decimalsIn),
-            spotPrice: toHuman(spotPrice, poolPair.decimalsIn),
+            amountOut: fmt.toHuman(aOut, poolPair.decimalsOut),
+            calculatedIn: fmt.toHuman(calculatedIn, poolPair.decimalsIn),
+            amountIn: fmt.toHuman(amountIn, poolPair.decimalsIn),
+            spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,

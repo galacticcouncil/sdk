@@ -1,72 +1,60 @@
-import type { PalletOmnipoolAssetState } from '@polkadot/types/lookup';
-import { UnsubscribePromise } from '@polkadot/api-base/types';
-import { encodeAddress } from '@polkadot/util-crypto';
-import { stringToU8a } from '@polkadot/util';
-import { HYDRADX_SS58_PREFIX } from '../../consts';
-import { bnum } from '../../utils/bignumber';
-import { toPoolFee } from '../../utils/mapper';
-import {
-  PoolBase,
-  PoolType,
-  PoolFee,
-  PoolToken,
-  PoolLimits,
-  PoolFees,
-} from '../../types';
+import { CompatibilityLevel } from 'polkadot-api';
+
+import { type Observable, map } from 'rxjs';
+
+import { PoolBase, PoolType, PoolLimits, PoolFees } from '../types';
+import { PoolClient } from '../PoolClient';
+
+import { HYDRATION_OMNIPOOL_ADDRESS } from '../../consts';
+import { fmt } from '../../utils';
 
 import { OmniPoolFees, OmniPoolToken } from './OmniPool';
 
-import { PoolClient } from '../PoolClient';
-
 export class OmniPoolClient extends PoolClient {
-  isSupported(): boolean {
-    return this.api.query.omnipool !== undefined;
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.Omnipool.Assets;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
   }
 
   async loadPools(): Promise<PoolBase[]> {
-    const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
+    const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
+
     const poolAddress = this.getPoolId();
 
-    const [assets, hubAssetTradeability, hubAssetBalance] = await Promise.all([
-      this.api.query.omnipool.assets.entries(),
-      this.api.query.omnipool.hubAssetTradability(),
-      this.getBalance(poolAddress, hubAssetId),
-    ]);
+    const [entries, hubAssetTradeability, hubAssetBalance, limits] =
+      await Promise.all([
+        this.api.query.Omnipool.Assets.getEntries(),
+        this.api.query.Omnipool.HubAssetTradability.getValue(),
+        this.getBalance(poolAddress, hubAssetId),
+        this.getPoolLimits(),
+      ]);
 
-    const poolTokens = assets.map(
-      async ([
-        {
-          args: [id],
-        },
-        state,
-      ]) => {
-        const {
-          hubReserve,
-          shares,
-          tradable,
-          cap,
-          protocolShares,
-        }: PalletOmnipoolAssetState = state.unwrap();
-        const balance = await this.getBalance(poolAddress, id.toString());
-        return {
-          id: id.toString(),
-          hubReserves: bnum(hubReserve.toString()),
-          shares: bnum(shares.toString()),
-          tradeable: tradable.bits.toNumber(),
-          balance: balance.toString(),
-          cap: bnum(cap.toString()),
-          protocolShares: bnum(protocolShares.toString()),
-        } as OmniPoolToken;
-      }
-    );
+    const poolTokens = entries.map(async ({ keyArgs, value }) => {
+      const [id] = keyArgs;
+      const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
+      const balance = await this.getBalance(poolAddress, id);
+      return {
+        id: id,
+        hubReserves: hub_reserve,
+        shares: shares,
+        tradeable: tradable,
+        balance: balance,
+        cap: cap,
+        protocolShares: protocol_shares,
+      } as OmniPoolToken;
+    });
 
     const tokens = await Promise.all(poolTokens);
 
     // Adding LRNA info
     tokens.push({
       id: hubAssetId,
-      tradeable: hubAssetTradeability.bits.toNumber(),
-      balance: hubAssetBalance.toString(),
+      tradeable: hubAssetTradeability,
+      balance: hubAssetBalance,
     } as OmniPoolToken);
 
     return [
@@ -75,32 +63,35 @@ export class OmniPoolClient extends PoolClient {
         type: PoolType.Omni,
         hubAssetId: hubAssetId,
         tokens: tokens,
-        ...this.getPoolLimits(),
+        ...limits,
       } as PoolBase,
     ];
   }
 
-  async getPoolFees(feeAsset: string, _address: string): Promise<PoolFees> {
-    const dynamicFees = await this.api.query.dynamicFees.assetFee(feeAsset);
-    const afp = this.api.consts.dynamicFees.assetFeeParameters;
-    const pfp = this.api.consts.dynamicFees.protocolFeeParameters;
-    const min = afp.minFee.toNumber() + pfp.minFee.toNumber();
-    const max = afp.maxFee.toNumber() + pfp.maxFee.toNumber();
+  async getPoolFees(_address: string, feeAsset: number): Promise<PoolFees> {
+    const [afp, pfp, dynamicFees] = await Promise.all([
+      this.api.constants.DynamicFees.AssetFeeParameters(),
+      this.api.constants.DynamicFees.ProtocolFeeParameters(),
+      this.api.query.DynamicFees.AssetFee.getValue(feeAsset),
+    ]);
 
-    if (dynamicFees.isSome) {
-      const { assetFee, protocolFee } = dynamicFees.unwrap();
+    const min = afp.min_fee + pfp.min_fee;
+    const max = afp.max_fee + pfp.max_fee;
+
+    if (dynamicFees) {
+      const { asset_fee, protocol_fee } = dynamicFees;
       return {
-        assetFee: toPoolFee(assetFee.toNumber()),
-        protocolFee: toPoolFee(protocolFee.toNumber()),
-        min: toPoolFee(min),
-        max: toPoolFee(max),
+        assetFee: fmt.toPoolFee(asset_fee),
+        protocolFee: fmt.toPoolFee(protocol_fee),
+        min: fmt.toPoolFee(min),
+        max: fmt.toPoolFee(max),
       } as OmniPoolFees;
     } else {
       return {
-        assetFee: this.getAssetFee(),
-        protocolFee: this.getProtocolFee(),
-        min: toPoolFee(min),
-        max: toPoolFee(max),
+        assetFee: fmt.toPoolFee(afp.min_fee),
+        protocolFee: fmt.toPoolFee(pfp.min_fee),
+        min: fmt.toPoolFee(min),
+        max: fmt.toPoolFee(max),
       } as OmniPoolFees;
     }
   }
@@ -109,57 +100,42 @@ export class OmniPoolClient extends PoolClient {
     return PoolType.Omni;
   }
 
-  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
-    const assetsArgs = pool.tokens.map((t) => t.id);
-    return this.api.query.omnipool.assets.multi(assetsArgs, (states) => {
-      pool.tokens = states.map((state, i) => {
-        const token = pool.tokens[i];
-        if (state.isNone) return token;
-        const unwrapped: PalletOmnipoolAssetState = state.unwrap();
-        return this.updateTokenState(token, unwrapped);
-      });
-    });
-  }
+  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
+    const query = this.api.query.Omnipool.Assets;
+    return query.watchEntries().pipe(
+      map((assets) => {
+        assets.entries.forEach((e) => {
+          const [key] = e.args;
+          const { hub_reserve, shares, tradable, cap, protocol_shares } =
+            e.value;
 
-  private updateTokenState(
-    token: PoolToken,
-    tokenState: PalletOmnipoolAssetState
-  ) {
-    const { hubReserve, shares, tradable, cap, protocolShares } = tokenState;
-    return {
-      ...token,
-      hubReserves: bnum(hubReserve.toString()),
-      shares: bnum(shares.toString()),
-      cap: bnum(cap.toString()),
-      protocolShares: bnum(protocolShares.toString()),
-      tradeable: tradable.bits.toNumber(),
-    } as OmniPoolToken;
-  }
-
-  private getAssetFee(): PoolFee {
-    const assetFee = this.api.consts.dynamicFees.assetFeeParameters;
-    const assetFeeNo = assetFee.minFee.toNumber();
-    return toPoolFee(assetFeeNo);
-  }
-
-  private getProtocolFee(): PoolFee {
-    const protocolFee = this.api.consts.dynamicFees.protocolFeeParameters;
-    const protocolFeeNo: number = protocolFee.minFee.toNumber();
-    return toPoolFee(protocolFeeNo);
-  }
-
-  private getPoolId(): string {
-    return encodeAddress(
-      stringToU8a('modlomnipool'.padEnd(32, '\0')),
-      HYDRADX_SS58_PREFIX
+          const tokenIndex = pool.tokens.findIndex((t) => (t.id = key));
+          const token = pool.tokens[tokenIndex];
+          pool.tokens[tokenIndex] = {
+            ...token,
+            hubReserves: hub_reserve,
+            shares: shares,
+            tradeable: tradable,
+            cap: cap,
+            protocolShares: protocol_shares,
+          } as OmniPoolToken;
+        });
+        return pool;
+      })
     );
   }
 
-  private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
-    const minTradingLimit =
-      this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;
+  private getPoolId(): string {
+    return HYDRATION_OMNIPOOL_ADDRESS;
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.Omnipool.MaxInRatio(),
+      this.api.constants.Omnipool.MaxOutRatio(),
+      this.api.constants.Omnipool.MinimumTradingLimit(),
+    ]);
+
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,

@@ -1,9 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
-
-import { papi } from '@galacticcouncil/sdk';
-import { polkadot } from '@galacticcouncil/types';
+import { hydration } from '@polkadot-api/descriptors';
 
 import { ApiUrl } from './types';
+
+import { papi, json } from '../../src';
 
 export abstract class PapiExecutor {
   protected readonly apiUrl: ApiUrl;
@@ -17,8 +17,8 @@ export abstract class PapiExecutor {
   }
 
   async run() {
-    const client = await papi.getApi(this.apiUrl);
-    const api = client.getTypedApi(polkadot);
+    const client = await papi.getWs(this.apiUrl);
+    const api = client.getTypedApi(hydration);
     const { spec_name, spec_version } = await api.constants.System.Version();
     console.log(`Runtime ready ${spec_name}/${spec_version}`);
     console.log('Running script...');
@@ -28,7 +28,9 @@ export abstract class PapiExecutor {
     this.script(client)
       .then((output: any) => {
         if (this.pretty) {
-          console.log(output ? JSON.stringify(output, null, 2) : '');
+          console.log(
+            output ? JSON.stringify(output, json.jsonFormatter, 2) : ''
+          );
         } else {
           console.log(output);
         }

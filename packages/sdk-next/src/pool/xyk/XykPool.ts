@@ -1,5 +1,5 @@
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -8,10 +8,10 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
-import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toPct } from '../../utils/mapper';
+  SellCtx,
+} from '../types';
+import { RUNTIME_DECIMALS } from '../../consts';
+import { fmt } from '../../utils';
 
 import { XykMath } from './XykMath';
 
@@ -23,9 +23,9 @@ export class XykPool implements Pool {
   type: PoolType;
   address: string;
   tokens: PoolToken[];
-  maxInRatio: number;
-  maxOutRatio: number;
-  minTradingLimit: number;
+  maxInRatio: bigint;
+  maxOutRatio: bigint;
+  minTradingLimit: bigint;
 
   static fromPool(pool: PoolBase): XykPool {
     return new XykPool(
@@ -40,9 +40,9 @@ export class XykPool implements Pool {
   constructor(
     address: string,
     tokens: PoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number
+    maxInRation: bigint,
+    maxOutRatio: bigint,
+    minTradeLimit: bigint
   ) {
     this.type = PoolType.XYK;
     this.address = address;
@@ -52,11 +52,11 @@ export class XykPool implements Pool {
     this.minTradingLimit = minTradeLimit;
   }
 
-  validatePair(_tokenIn: string, _tokenOut: string): boolean {
+  validatePair(_tokenIn: number, _tokenOut: number): boolean {
     return true;
   }
 
-  parsePair(tokenIn: string, tokenOut: string): PoolPair {
+  parsePair(tokenIn: number, tokenOut: number): PoolPair {
     const tokensMap = new Map(this.tokens.map((token) => [token.id, token]));
     const tokenInMeta = tokensMap.get(tokenIn);
     const tokenOutMeta = tokensMap.get(tokenOut);
@@ -64,51 +64,42 @@ export class XykPool implements Pool {
     if (tokenInMeta == null) throw new Error('Pool does not contain tokenIn');
     if (tokenOutMeta == null) throw new Error('Pool does not contain tokenOut');
 
-    const balanceIn = bnum(tokenInMeta.balance);
-    const balanceOut = bnum(tokenOutMeta.balance);
-
-    const assetInED = bnum(tokenInMeta.existentialDeposit);
-    const assetOutED = bnum(tokenOutMeta.existentialDeposit);
-
     return {
       assetIn: tokenIn,
       assetOut: tokenOut,
       decimalsIn: tokenInMeta.decimals,
       decimalsOut: tokenOutMeta.decimals,
-      balanceIn: balanceIn,
-      balanceOut: balanceOut,
-      assetInED,
-      assetOutED,
+      balanceIn: tokenInMeta.balance,
+      balanceOut: tokenOutMeta.balance,
+      assetInEd: tokenInMeta.existentialDeposit,
+      assetOutEd: tokenOutMeta.existentialDeposit,
     } as PoolPair;
   }
 
   validateAndBuy(
     poolPair: PoolPair,
-    amountOut: BigNumber,
+    amountOut: bigint,
     fees: XykPoolFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
-    const feePct = toPct(fees.exchangeFee);
-    const amountIn = calculatedIn.plus(fee);
+    const feePct = fmt.toPct(fees.exchangeFee);
+    const amountIn = calculatedIn + fee;
 
     const errors: PoolError[] = [];
 
-    if (
-      amountOut.isLessThan(this.minTradingLimit) ||
-      calculatedIn.isLessThan(poolPair.assetInED)
-    ) {
+    if (amountOut < this.minTradingLimit || calculatedIn < poolPair.assetInEd) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 
-    const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
-    if (amountOut.isGreaterThan(poolOutReserve)) {
+    const poolOutReserve = poolPair.balanceOut / this.maxOutRatio;
+    if (amountOut > poolOutReserve) {
       errors.push(PoolError.MaxOutRatioExceeded);
     }
 
-    const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
-    if (amountIn.isGreaterThan(poolInReserve)) {
+    const poolInReserve = poolPair.balanceIn / this.maxInRatio;
+    if (amountIn > poolInReserve) {
       errors.push(PoolError.MaxInRatioExceeded);
     }
 
@@ -118,36 +109,36 @@ export class XykPool implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as BuyTransfer;
+    } as BuyCtx;
   }
 
   validateAndSell(
     poolPair: PoolPair,
-    amountIn: BigNumber,
+    amountIn: bigint,
     fees: XykPoolFees
-  ): SellTransfer {
+  ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
-    const feePct = toPct(fees.exchangeFee);
-    const amountOut = calculatedOut.minus(fee);
+    const feePct = fmt.toPct(fees.exchangeFee);
+    const amountOut = calculatedOut - fee;
 
     const errors: PoolError[] = [];
 
     if (
-      amountIn.isLessThan(this.minTradingLimit) ||
-      calculatedOut.isLessThan(poolPair.assetOutED)
+      amountIn < this.minTradingLimit ||
+      calculatedOut < poolPair.assetOutEd
     ) {
       errors.push(PoolError.InsufficientTradingAmount);
     }
 
-    const poolInReserve = poolPair.balanceIn.div(this.maxInRatio);
-    if (amountIn.isGreaterThan(poolInReserve)) {
+    const poolInReserve = poolPair.balanceIn / this.maxInRatio;
+    if (amountIn > poolInReserve) {
       errors.push(PoolError.MaxInRatioExceeded);
     }
 
-    const poolOutReserve = poolPair.balanceOut.div(this.maxOutRatio);
-    if (amountOut.isGreaterThan(poolOutReserve)) {
+    const poolOutReserve = poolPair.balanceOut / this.maxOutRatio;
+    if (amountOut > poolOutReserve) {
       errors.push(PoolError.MaxOutRatioExceeded);
     }
 
@@ -157,55 +148,53 @@ export class XykPool implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as SellTransfer;
+    } as SellCtx;
   }
 
-  calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
-    const price = XykMath.calculateInGivenOut(
+  calculateInGivenOut(poolPair: PoolPair, amountOut: bigint): bigint {
+    const result = XykMath.calculateInGivenOut(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      amountOut.toFixed(0)
+      amountOut.toString()
     );
-    const priceBN = bnum(price);
-    return priceBN.isNegative() ? ZERO : priceBN;
+    const price = BigInt(result);
+    return price < 0n ? 0n : price;
   }
 
-  calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber {
-    const price = XykMath.calculateOutGivenIn(
+  calculateOutGivenIn(poolPair: PoolPair, amountIn: bigint): bigint {
+    const result = XykMath.calculateOutGivenIn(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString(),
-      amountIn.toFixed(0)
+      amountIn.toString()
     );
-    const priceBN = bnum(price);
-    return priceBN.isNegative() ? ZERO : priceBN;
+    const price = BigInt(result);
+    return price < 0n ? 0n : price;
   }
 
-  spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
-    const price = XykMath.calculateSpotPrice(
+  spotPriceInGivenOut(poolPair: PoolPair): bigint {
+    const spot = XykMath.calculateSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.balanceIn.toString()
     );
-
-    const base = scale(ONE, 18 - poolPair.decimalsOut);
-    return bnum(price).div(base);
+    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
+    return BigInt(spot) / BigInt(base);
   }
 
-  spotPriceOutGivenIn(poolPair: PoolPair): BigNumber {
-    const price = XykMath.calculateSpotPrice(
+  spotPriceOutGivenIn(poolPair: PoolPair): bigint {
+    const spot = XykMath.calculateSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.balanceOut.toString()
     );
-
-    const base = scale(ONE, 18 - poolPair.decimalsIn);
-    return bnum(price).div(base);
+    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
+    return BigInt(spot) / BigInt(base);
   }
 
-  calculateTradeFee(amount: BigNumber, fees: XykPoolFees): BigNumber {
+  calculateTradeFee(amount: bigint, fees: XykPoolFees): bigint {
     const fee = XykMath.calculatePoolTradeFee(
       amount.toString(),
       fees.exchangeFee[0],
       fees.exchangeFee[1]
     );
-    return bnum(fee);
+    return BigInt(fee);
   }
 }

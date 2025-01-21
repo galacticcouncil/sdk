@@ -17,7 +17,7 @@ export class PoolConfigNotFound extends Error {
 }
 
 export class RouteNotFound extends Error {
-  constructor(assetIn: string, assetOut: string) {
+  constructor(assetIn: number, assetOut: number) {
     super();
     this.message = `Route from ${assetIn} to ${assetOut} not found in pool configuration`;
     this.name = 'RouteNotFound';

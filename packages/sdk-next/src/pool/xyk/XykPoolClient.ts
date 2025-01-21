@@ -1,6 +1,7 @@
-import type { u32 } from '@polkadot/types';
-import type { ITuple } from '@polkadot/types/types';
-import { UnsubscribePromise } from '@polkadot/api-base/types';
+import { CompatibilityLevel } from 'polkadot-api';
+
+import { type Observable } from 'rxjs';
+
 import {
   PoolBase,
   PoolType,
@@ -8,56 +9,61 @@ import {
   PoolLimits,
   PoolFees,
   PoolToken,
-} from '../../types';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { XykPoolFees } from './XykPool';
 
-import { PoolClient } from '../PoolClient';
-
 export class XykPoolClient extends PoolClient {
-  isSupported(): boolean {
-    return this.api.query.xyk !== undefined;
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.XYK.PoolAssets;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
   }
 
   async loadPools(): Promise<PoolBase[]> {
-    const poolAssets = await this.api.query.xyk.poolAssets.entries();
-    const pools = poolAssets.map(
-      async ([
-        {
-          args: [id],
-        },
-        state,
-      ]) => {
-        const poolAddress = id.toString();
-        const [assetA, assetB]: ITuple<[u32, u32]> = state.unwrap();
-        const [assetABalance, assetBBalance] = await Promise.all([
-          this.getBalance(poolAddress, assetA.toString()),
-          this.getBalance(poolAddress, assetB.toString()),
-        ]);
+    const query = this.api.query.XYK.PoolAssets;
 
-        return {
-          address: poolAddress,
-          type: PoolType.XYK,
-          tokens: [
-            {
-              id: assetA.toString(),
-              balance: assetABalance.toString(),
-            } as PoolToken,
-            {
-              id: assetB.toString(),
-              balance: assetBBalance.toString(),
-            } as PoolToken,
-          ],
-          ...this.getPoolLimits(),
-        } as PoolBase;
-      }
-    );
+    const [entries, limits] = await Promise.all([
+      query.getEntries(),
+      this.getPoolLimits(),
+    ]);
+
+    const pools = entries.map(async ({ keyArgs, value }) => {
+      const [id] = keyArgs;
+      const [x, y] = value;
+
+      const [xBalance, yBalance] = await Promise.all([
+        this.getBalance(id, x),
+        this.getBalance(id, y),
+      ]);
+
+      return {
+        address: id,
+        type: PoolType.XYK,
+        tokens: [
+          {
+            id: x,
+            balance: xBalance,
+          } as PoolToken,
+          {
+            id: y,
+            balance: yBalance,
+          } as PoolToken,
+        ],
+        ...limits,
+      } as PoolBase;
+    });
     return Promise.all(pools);
   }
 
-  async getPoolFees(_feeAsset: string, _address: string): Promise<PoolFees> {
+  async getPoolFees(_address: string): Promise<PoolFees> {
+    const exchangeFee = await this.getExchangeFee();
     return {
-      exchangeFee: this.getExchangeFee(),
+      exchangeFee: exchangeFee,
     } as XykPoolFees;
   }
 
@@ -65,20 +71,22 @@ export class XykPoolClient extends PoolClient {
     return PoolType.XYK;
   }
 
-  protected subscribePoolChange(_pool: PoolBase): UnsubscribePromise {
+  protected subscribePoolChange(_pool: PoolBase): Observable<PoolBase> {
     throw new Error('Pool change subscription not supported!');
   }
 
-  private getExchangeFee(): PoolFee {
-    const exFee = this.api.consts.xyk.getExchangeFee;
-    return exFee.toJSON() as PoolFee;
+  private async getExchangeFee(): Promise<PoolFee> {
+    const fee = await this.api.constants.XYK.GetExchangeFee();
+    return fee as PoolFee;
   }
 
-  private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
-    const minTradingLimit =
-      this.api.consts.xyk.minTradingLimit.toJSON() as number;
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.XYK.MaxInRatio(),
+      this.api.constants.XYK.MaxOutRatio(),
+      this.api.constants.XYK.MinTradingLimit(),
+    ]);
+
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,

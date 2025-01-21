@@ -1,10 +1,9 @@
-export { Router, TradeRouter } from './api';
-export * from './pool';
-export * from './client';
-export * from './providers';
+export * as api from './api';
+export * as client from './client';
+export * as const from './consts';
+export * as error from './errors';
+export * as papi from './provider';
+export * as pool from './pool';
+
 export * from './types';
-export * from './errors';
-export * from './consts';
-export * from './utils/bignumber';
-export * from './utils/math';
-export * from './utils/json';
+export * from './utils';

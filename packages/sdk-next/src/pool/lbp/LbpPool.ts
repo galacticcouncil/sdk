@@ -11,7 +11,7 @@ import {
   SellTransfer,
 } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toPct } from '../../utils/mapper';
+import { toPct } from '../../utils/format';
 
 import { LbpMath } from './LbpMath';
 

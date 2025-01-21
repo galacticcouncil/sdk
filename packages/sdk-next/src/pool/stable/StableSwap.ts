@@ -12,7 +12,7 @@ import {
   SellTransfer,
 } from '../../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toDecimals, toPct } from '../../utils/mapper';
+import { toDecimals, toPct } from '../../utils/format';
 
 import { StableMath } from './StableMath';
 import { OmniMath } from '../omni/OmniMath';

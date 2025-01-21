@@ -1,23 +1,25 @@
-import { ApiPromise } from '@polkadot/api';
-import { OrmlTokensAccountData } from '@polkadot/types/lookup';
-import { UnsubscribePromise } from '@polkadot/api-base/types';
+import { PolkadotClient } from 'polkadot-api';
+
+import { type Observable, combineLatest, map } from 'rxjs';
 
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset } from '../types';
-import { BigNumber } from '../utils/bignumber';
+import { Papi } from '../provider';
+import { AssetAmount } from '../types';
 
-import { PolkadotApiClient } from './PolkadotApi';
-
-export class BalanceClient extends PolkadotApiClient {
-  constructor(api: ApiPromise) {
-    super(api);
+export class BalanceClient extends Papi {
+  constructor(client: PolkadotClient) {
+    super(client);
   }
 
-  async getBalance(account: string, assetId: string): Promise<BigNumber> {
-    const asset = await this.api.query.assetRegistry.assets(assetId);
-    const { assetType } = asset.unwrap();
+  async getBalance(account: string, assetId: number): Promise<bigint> {
+    const query = this.api.query.AssetRegistry.Assets;
 
-    if (assetType.toString() === 'Erc20') {
+    const asset = await query.getValue(assetId);
+    if (!asset) {
+      throw Error('Fdf');
+    }
+
+    if (asset.asset_type.type === 'Erc20') {
       return this.getErc20Balance(account, assetId);
     }
 
@@ -26,99 +28,80 @@ export class BalanceClient extends PolkadotApiClient {
       : this.getTokenBalance(account, assetId);
   }
 
-  async getSystemBalance(account: string): Promise<BigNumber> {
-    const { data } = await this.api.query.system.account(account);
-    return this.calculateFreeBalance(data);
+  async getSystemBalance(account: string): Promise<bigint> {
+    const query = this.api.query.System.Account;
+    const {
+      data: { free, frozen },
+    } = await query.getValue(account);
+    return free - frozen;
   }
 
-  async getTokenBalance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+  async getTokenBalance(account: string, assetId: number): Promise<bigint> {
+    const query = this.api.query.Tokens.Accounts;
+    const { free, frozen } = await query.getValue(account, assetId);
+    return free - frozen;
   }
 
-  async getErc20Balance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.getTokenBalanceData(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+  async getErc20Balance(account: string, assetId: number): Promise<bigint> {
+    return this.getTokenBalanceData(account, assetId);
   }
 
-  async subscribeSystemBalance(
-    address: string,
-    onChange: (token: string, balance: BigNumber) => void
-  ): UnsubscribePromise {
-    return this.api.query.system.account(address, ({ data }) =>
-      onChange(SYSTEM_ASSET_ID, this.calculateFreeBalance(data))
+  subscribeBalance(address: string): Observable<AssetAmount[]> {
+    const systemOb = this.subscribeSystemBalance(address);
+    const tokensOb = this.subscribeTokenBalance(address);
+    return combineLatest([systemOb, tokensOb]).pipe(
+      map((balance) => balance.flat())
     );
   }
 
-  async subscribeTokenBalance(
-    address: string,
-    assets: Asset[],
-    onChange: (balances: [string, BigNumber][]) => void
-  ): UnsubscribePromise {
-    const supported = assets
-      .filter((a) => a.type !== 'Erc20')
-      .filter((a) => a.id !== SYSTEM_ASSET_ID);
+  subscribeSystemBalance(address: string): Observable<AssetAmount> {
+    const query = this.api.query.System.Account;
 
-    const callArgs = supported.map((a) => [address, a.id]);
-    return this.api.query.tokens.accounts.multi(callArgs, (balances) => {
-      const result: [string, BigNumber][] = [];
-      balances.forEach((data, i) => {
-        const freeBalance = this.calculateFreeBalance(data);
-        const token = callArgs[i][1];
-        result.push([token, freeBalance]);
-      });
-      onChange(result);
-    });
+    return query.watchValue(address).pipe(
+      map((balance) => {
+        const { free, frozen } = balance.data;
+        return {
+          id: SYSTEM_ASSET_ID,
+          amount: free - frozen,
+        } as AssetAmount;
+      })
+    );
   }
 
-  async subscribeErc20Balance(
-    address: string,
-    assets: Asset[],
-    onChange: (balances: [string, BigNumber][]) => void
-  ): UnsubscribePromise {
-    const supported = assets.filter((a) => a.type === 'Erc20');
+  subscribeTokenBalance(address: string): Observable<AssetAmount[]> {
+    const query = this.api.query.Tokens.Accounts;
 
-    const getErc20Balance = async () => {
-      const result: [string, BigNumber][] = [];
-      const balances: [string, BigNumber][] = await Promise.all(
-        supported.map(async (token: Asset) => [
-          token.id,
-          await this.getErc20Balance(address, token.id),
-        ])
-      );
-      balances.forEach(([token, balance]) => {
-        result.push([token, balance]);
-      });
-      onChange(result);
-    };
+    return query.watchEntries(address).pipe(
+      map((balance) => {
+        const result: AssetAmount[] = [];
 
-    await getErc20Balance();
-    return this.api.rpc.chain.subscribeNewHeads(async () => {
-      getErc20Balance();
-    });
+        balance.deltas?.deleted.forEach((u) => {
+          const [_, asset] = u.args;
+          result.push({
+            id: asset,
+            amount: 0n,
+          });
+        });
+
+        balance.deltas?.upserted.forEach((u) => {
+          const [_, asset] = u.args;
+          const { free, frozen } = u.value;
+          result.push({
+            id: asset,
+            amount: free - frozen,
+          });
+        });
+
+        return result;
+      })
+    );
   }
 
-  async getTokenBalanceData(account: string, assetId: string) {
-    return this.api.call.currenciesApi.account<OrmlTokensAccountData>(
+  async getTokenBalanceData(account: string, assetId: number): Promise<bigint> {
+    const { free, frozen } = await this.api.apis.CurrenciesApi.account(
       assetId,
       account
     );
-  }
-
-  protected calculateFreeBalance(data: any): BigNumber {
-    const { free, miscFrozen, feeFrozen, frozen } = data;
-    const freeBN = new BigNumber(free);
-    const miscFrozenBN = new BigNumber(miscFrozen || frozen);
-    const feeFrozenBN = new BigNumber(feeFrozen || 0n);
-    const maxFrozenBN = miscFrozenBN.gt(feeFrozenBN)
-      ? miscFrozenBN
-      : feeFrozenBN;
-    return freeBN.minus(maxFrozenBN);
+    return free - frozen;
   }
 }

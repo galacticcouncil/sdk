@@ -95,16 +95,14 @@ export class Bfs {
    */
   buildAndPopulateGraph(
     nodes: string[],
-    edges: [string, string, string][]
+    edges: [string, number, number][]
   ): Map<number, Path> {
     const graph = new Map<number, Path>();
     for (let node of nodes) {
       graph.set(parseInt(node), []);
     }
     for (const [address, from, to] of edges) {
-      const fromNumber = parseInt(from);
-      const toNumber = parseInt(to);
-      graph.get(fromNumber)?.push([toNumber, address]);
+      graph.get(from)?.push([to, address]);
     }
     return graph;
   }

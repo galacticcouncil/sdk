@@ -1,16 +1,17 @@
-import { ApiPromise } from '@polkadot/api';
-import { AssetClient } from '@galacticcouncil/sdk';
+import { PolkadotClient } from 'polkadot-api';
 
-import { PolkadotExecutor } from '../PjsExecutor';
+import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
 import externalDegen from '../config/external.degen.json';
-import external from '../config/external.degen.json';
+import external from '../config/external.json';
 
-class GetAssetsExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const assetClient = new AssetClient(api);
-    return assetClient.getOnChainAssets(true, external);
+import { client as c } from '../../../src';
+
+class GetAssetsExample extends PapiExecutor {
+  async script(client: PolkadotClient): Promise<any> {
+    const assetClient = new c.AssetClient(client);
+    return assetClient.getOnChainAssets(false, []);
   }
 }
 

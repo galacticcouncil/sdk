@@ -1,18 +1,20 @@
-import { ApiPromise } from '@polkadot/api';
-import { UnsubscribePromise } from '@polkadot/api-base/types';
+import { PolkadotClient } from 'polkadot-api';
 
 import { memoize1 } from '@thi.ng/memoize';
 
-import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
+import { type Observable, Subscription } from 'rxjs';
+
+import { SYSTEM_ASSET_ID } from '../consts';
 import { BalanceClient } from '../client';
-import { Asset, PoolBase, PoolFees, PoolType } from '../types';
-import { BigNumber } from '../utils/bignumber';
+import { Asset } from '../types';
+
+import { PoolBase, PoolFees, PoolType } from './types';
 
 export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];
-  protected subs: UnsubscribePromise[] = [];
+  protected subs: Subscription = Subscription.EMPTY;
 
-  private assets: Map<string, Asset> = new Map([]);
+  private assets: Map<number, Asset> = new Map([]);
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
@@ -20,15 +22,15 @@ export abstract class PoolClient extends BalanceClient {
     return this.getPools();
   });
 
-  constructor(api: ApiPromise) {
-    super(api);
+  constructor(client: PolkadotClient) {
+    super(client);
   }
 
-  abstract isSupported(): boolean;
+  abstract isSupported(): Promise<boolean>;
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(feeAsset: string, address: string): Promise<PoolFees>;
+  abstract getPoolFees(address: string, feeAsset: number): Promise<PoolFees>;
   protected abstract loadPools(): Promise<PoolBase[]>;
-  protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
+  protected abstract subscribePoolChange(pool: PoolBase): Observable<PoolBase>;
 
   get augmentedPools() {
     return this.pools
@@ -41,7 +43,7 @@ export abstract class PoolClient extends BalanceClient {
    *
    * @param assets - registry assets
    */
-  async withAssets(assets: Asset[]) {
+  withAssets(assets: Asset[]) {
     this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
     this.mem = this.mem + 1;
   }
@@ -51,48 +53,49 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   async getPools(): Promise<PoolBase[]> {
-    this.unsubscribe();
+    //this.unsubscribe();
     this.pools = await this.loadPools();
-    this.subs = this.subscribe();
+    //this.subs = this.subscribe();
     const type = this.getPoolType();
     console.log(type, `pools(${this.augmentedPools.length})`, '✅');
-    console.log(type, `subs(${this.subs.length})`, '✅');
+    //console.log(type, `subs(${this.subs.length})`, '✅');
+
     return this.augmentedPools;
   }
 
-  private subscribe() {
-    const subs = this.augmentedPools.map((pool: PoolBase) => {
-      const poolSubs = [this.subscribeTokensPoolBalance(pool)];
+  // private subscribe() {
+  //   const subs = this.augmentedPools.map((pool: PoolBase) => {
+  //     const poolSubs = [this.subscribeTokensPoolBalance(pool)];
 
-      try {
-        const subChange = this.subscribePoolChange(pool);
-        poolSubs.push(subChange);
-      } catch (e) {}
+  //     try {
+  //       const subChange = this.subscribePoolChange(pool);
+  //       poolSubs.push(subChange);
+  //     } catch (e) {}
 
-      if (this.hasSystemAsset(pool)) {
-        const subSystem = this.subscribeSystemPoolBalance(pool);
-        poolSubs.push(subSystem);
-      }
+  //     if (this.hasSystemAsset(pool)) {
+  //       const subSystem = this.subscribeSystemPoolBalance(pool);
+  //       poolSubs.push(subSystem);
+  //     }
 
-      if (this.hasErc20Asset(pool)) {
-        const subErc20 = this.subscribeErc20PoolBalance(pool);
-        poolSubs.push(subErc20);
-      }
+  //     if (this.hasErc20Asset(pool)) {
+  //       const subErc20 = this.subscribeErc20PoolBalance(pool);
+  //       poolSubs.push(subErc20);
+  //     }
 
-      if (this.hasShareAsset(pool)) {
-        const subShare = this.subscribeSharePoolBalance(pool);
-        poolSubs.push(subShare);
-      }
+  //     if (this.hasShareAsset(pool)) {
+  //       const subShare = this.subscribeSharePoolBalance(pool);
+  //       poolSubs.push(subShare);
+  //     }
 
-      this.subscribeLog(pool);
-      return poolSubs;
-    });
+  //     this.subscribeLog(pool);
+  //     return poolSubs;
+  //   });
 
-    return subs.flat();
-  }
+  //   return subs.flat();
+  // }
 
   private hasSystemAsset(pool: PoolBase) {
-    return pool.tokens.some((t) => t.id === '0');
+    return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
   }
 
   private hasShareAsset(pool: PoolBase) {
@@ -104,9 +107,7 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   unsubscribe() {
-    this.subs.forEach((unsub) => {
-      unsub.then((fn) => fn());
-    });
+    this.subs.unsubscribe();
   }
 
   private subscribeLog(pool: PoolBase) {
@@ -114,46 +115,48 @@ export abstract class PoolClient extends BalanceClient {
     console.log(`${pool.type} [${poolAddr}] balance subscribed`);
   }
 
-  private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
-    return this.subscribeSystemBalance(
-      pool.address,
-      this.updateBalanceCallback(pool)
-    );
-  }
+  // private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
+  //   return this.subscribeSystemBalance(
+  //     pool.address,
+  //     this.updateBalanceCallback(pool)
+  //   );
+  // }
 
-  private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
-    /**
-     * Skip balance update for shared token in stablepool as balance is
-     * stored in omnipool instead
-     *
-     * @param p - asset pool
-     * @param t - pool token
-     * @returns true if pool id different than token, otherwise false (shared token)
-     */
-    const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
-    return this.subscribeTokenBalance(
-      pool.address,
-      pool.tokens,
-      this.updateBalancesCallback(pool, isNotStableswap)
-    );
-  }
+  // private subscribeTokensPoolBalance(
+  //   pool: PoolBase
+  // ): Observable<AssetAmount[]> {
+  //   /**
+  //    * Skip balance update for shared token in stablepool as balance is
+  //    * stored in omnipool instead
+  //    *
+  //    * @param p - asset pool
+  //    * @param t - pool token
+  //    * @returns true if pool id different than token, otherwise false (shared token)
+  //    */
+  //   const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
+  //   return this.subscribeTokenBalance(
+  //     pool.address,
+  //     pool.tokens,
+  //     this.updateBalancesCallback(pool, isNotStableswap)
+  //   );
+  // }
 
-  private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
-    return this.subscribeErc20Balance(
-      pool.address,
-      pool.tokens,
-      this.updateBalancesCallback(pool, () => true)
-    );
-  }
+  // private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
+  //   return this.subscribeErc20Balance(
+  //     pool.address,
+  //     pool.tokens,
+  //     this.updateBalancesCallback(pool, () => true)
+  //   );
+  // }
 
-  private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
-    const sharedAsset = this.assets.get(pool.id!);
-    return this.subscribeTokenBalance(
-      HYDRADX_OMNIPOOL_ADDRESS,
-      [sharedAsset!],
-      this.updateBalancesCallback(pool, () => true)
-    );
-  }
+  // private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
+  //   const sharedAsset = this.assets.get(pool.id!);
+  //   return this.subscribeTokenBalance(
+  //     HYDRADX_OMNIPOOL_ADDRESS,
+  //     [sharedAsset!],
+  //     this.updateBalancesCallback(pool, () => true)
+  //   );
+  // }
 
   /**
    * Check if pool valid. Only XYK pools are being verified as those are
@@ -185,26 +188,26 @@ export abstract class PoolClient extends BalanceClient {
     return pool;
   }
 
-  private updateBalancesCallback(
-    pool: PoolBase,
-    canUpdate: (pool: PoolBase, token: string) => boolean
-  ) {
-    return function (balances: [string, BigNumber][]) {
-      balances.forEach(([token, balance]) => {
-        const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-        if (tokenIndex >= 0 && canUpdate(pool, token)) {
-          pool.tokens[tokenIndex].balance = balance.toString();
-        }
-      });
-    };
-  }
+  // private updateBalancesCallback(
+  //   pool: PoolBase,
+  //   canUpdate: (pool: PoolBase, token: string) => boolean
+  // ) {
+  //   return function (balances: [string, BigNumber][]) {
+  //     balances.forEach(([token, balance]) => {
+  //       const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+  //       if (tokenIndex >= 0 && canUpdate(pool, token)) {
+  //         pool.tokens[tokenIndex].balance = balance.toString();
+  //       }
+  //     });
+  //   };
+  // }
 
-  private updateBalanceCallback(pool: PoolBase) {
-    return function (token: string, balance: BigNumber) {
-      const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-      if (tokenIndex >= 0) {
-        pool.tokens[tokenIndex].balance = balance.toString();
-      }
-    };
-  }
+  // private updateBalanceCallback(pool: PoolBase) {
+  //   return function (token: string, balance: BigNumber) {
+  //     const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
+  //     if (tokenIndex >= 0) {
+  //       pool.tokens[tokenIndex].balance = balance.toString();
+  //     }
+  //   };
+  // }
 }

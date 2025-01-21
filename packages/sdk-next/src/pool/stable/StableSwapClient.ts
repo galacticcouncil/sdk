@@ -10,7 +10,7 @@ import {
   PoolFees,
   PoolToken,
 } from '../../types';
-import { toPoolFee } from '../../utils/mapper';
+import { toPoolFee } from '../../utils/format';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';

@@ -1,4 +1,4 @@
-export function findNestedKey(obj: any, keyToFind: any) {
+export const findNestedKey = (obj: any, keyToFind: any) => {
   const foundObj: any[] = [];
   JSON.stringify(obj, (_, nestedValue) => {
     if (nestedValue && nestedValue[keyToFind]) {
@@ -7,9 +7,9 @@ export function findNestedKey(obj: any, keyToFind: any) {
     return nestedValue;
   });
   return foundObj[0];
-}
+};
 
-export function findNestedObj(obj: any, keyToFind: any, valToFind: any) {
+export const findNestedObj = (obj: any, keyToFind: any, valToFind: any) => {
   let foundObj: any;
   JSON.stringify(obj, (_, nestedValue) => {
     if (nestedValue && nestedValue[keyToFind] === valToFind) {
@@ -18,4 +18,8 @@ export function findNestedObj(obj: any, keyToFind: any, valToFind: any) {
     return nestedValue;
   });
   return foundObj;
-}
+};
+
+export const jsonFormatter = (_: any, nestedValue: any) => {
+  return typeof nestedValue === 'bigint' ? nestedValue.toString() : nestedValue;
+};

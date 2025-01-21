@@ -2,11 +2,10 @@ export { CachingPoolService } from './CachingPoolService';
 export { PoolFactory } from './PoolFactory';
 export { PoolService } from './PoolService';
 export * from './PoolUtils';
-export { XykPool } from './xyk/XykPool';
-export { XykMath } from './xyk/XykMath';
-export { OmniPool } from './omni/OmniPool';
-export { OmniMath } from './omni/OmniMath';
-export { LbpPool } from './lbp/LbpPool';
-export { LbpMath } from './lbp/LbpMath';
-export { StableMath } from './stable/StableMath';
-export { StableSwap } from './stable/StableSwap';
+
+export * as xyk from './xyk';
+export * as omni from './omni';
+export * as lbp from './lbp';
+export * as stable from './stable';
+
+export * from './types';

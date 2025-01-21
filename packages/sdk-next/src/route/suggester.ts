@@ -1,7 +1,7 @@
 import { Bfs, Node, Path } from './bfs';
 import { getNodesAndEdges, Edge } from './graph';
 
-import { PoolBase } from '../types';
+import { PoolBase } from '../pool';
 
 export class RouteSuggester {
   /**
@@ -22,8 +22,8 @@ export class RouteSuggester {
    * @returns all possible path proposals
    */
   getProposals(
-    tokenIn: string,
-    tokenOut: string | null,
+    tokenIn: number,
+    tokenOut: number | null,
     pools: PoolBase[]
   ): Edge[][] {
     const nodeEdges = getNodesAndEdges(pools);
@@ -33,11 +33,7 @@ export class RouteSuggester {
       .flat();
     const bfs = new Bfs();
     const bfsGraph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);
-    const possiblePaths = bfs.findPaths(
-      bfsGraph,
-      parseInt(tokenIn),
-      tokenOut ? parseInt(tokenOut) : null
-    );
+    const possiblePaths = bfs.findPaths(bfsGraph, tokenIn, tokenOut);
     return this.parsePaths(possiblePaths);
   }
 
@@ -60,6 +56,6 @@ export class RouteSuggester {
   }
 
   private toEdge(from: Node, to: Node): Edge {
-    return [to[1], from[0].toString(), to[0].toString()] as Edge;
+    return [to[1], from[0], to[0]] as Edge;
   }
 }

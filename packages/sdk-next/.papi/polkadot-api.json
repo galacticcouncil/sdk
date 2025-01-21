@@ -9,6 +9,10 @@
     "basilisk": {
       "wsUrl": "wss://rpc.basilisk.cloud",
       "metadata": ".papi/metadata/basilisk.scale"
+    },
+    "polkadot": {
+      "chain": "polkadot",
+      "metadata": ".papi/metadata/polkadot.scale"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { BigNumber, ONE } from './bignumber';
+import { bnum, ONE } from './bignumber';
 
 /**
  * Percentage Difference Formula
@@ -15,9 +15,17 @@ import { BigNumber, ONE } from './bignumber';
  * @param v2 - 2nd value
  * @returns Difference between two values in relation to their average
  */
-export function calculateDiffToAvg(v1: BigNumber, v2: BigNumber): BigNumber {
-  const impact = v1.minus(v2).abs().div(v1.plus(v2).div(2)).multipliedBy(100);
-  return impact.decimalPlaces(2);
+export function calculateDiffToAvg(v1: bigint, v2: bigint): number {
+  const v1b = bnum(v1);
+  const v2b = bnum(v2);
+
+  return v1b
+    .minus(v2b)
+    .abs()
+    .div(v1b.plus(v2b).div(2))
+    .multipliedBy(100)
+    .decimalPlaces(2)
+    .toNumber();
 }
 
 /**
@@ -36,12 +44,16 @@ export function calculateDiffToAvg(v1: BigNumber, v2: BigNumber): BigNumber {
  * @param vRef - reference value
  * @returns Difference between a final value and a reference value in relation to the reference value
  */
-export function calculateDiffToRef(
-  vFin: BigNumber,
-  vRef: BigNumber
-): BigNumber {
-  const impact = vFin.minus(vRef).div(vRef).multipliedBy(100);
-  return impact.decimalPlaces(2);
+export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
+  const vFinb = bnum(vFin);
+  const vRefb = bnum(vRef);
+
+  return vFinb
+    .minus(vRefb)
+    .div(vRefb)
+    .multipliedBy(100)
+    .decimalPlaces(2)
+    .toNumber();
 }
 
 /**
@@ -53,9 +65,14 @@ export function calculateDiffToRef(
  * @param delta0Y - the amount out if fees are zero
  * @param deltaY - the amount out if the existing nonzero fees are included in the calculation
  */
-export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
-  const total = ONE.minus(deltaY.div(delta0Y));
-  return total.multipliedBy(100).decimalPlaces(2);
+export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
+  const delta0Yb = bnum(delta0Y);
+  const deltaYb = bnum(deltaY);
+
+  return ONE.minus(deltaYb.div(delta0Yb))
+    .multipliedBy(100)
+    .decimalPlaces(2)
+    .toNumber();
 }
 
 /**
@@ -67,7 +84,20 @@ export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
  * @param delta0X - the amount in if fees are zero
  * @param deltaX - the amount in, inclusive of fees
  */
-export function calculateBuyFee(delta0X: BigNumber, deltaX: BigNumber) {
-  const total = deltaX.div(delta0X).minus(ONE);
-  return total.multipliedBy(100).decimalPlaces(2);
+export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
+  const delta0Xb = bnum(delta0X);
+  const deltaXb = bnum(deltaX);
+
+  return deltaXb
+    .div(delta0Xb)
+    .minus(ONE)
+    .multipliedBy(100)
+    .decimalPlaces(2)
+    .toNumber();
+}
+
+export function multiplyByFraction(value: bigint, fraction: number): bigint {
+  const numerator = BigInt(fraction * 10);
+  const denominator = BigInt(10);
+  return (value * numerator) / denominator;
 }

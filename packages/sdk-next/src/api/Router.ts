@@ -1,6 +1,13 @@
-import { PoolFactory } from '../pool';
+import {
+  Hop,
+  IPoolService,
+  PoolFactory,
+  PoolBase,
+  Pool,
+  PoolType,
+} from '../pool';
 import { Edge, RouteSuggester } from '../route';
-import { Asset, IPoolService, PoolBase, Hop, Pool, PoolType } from '../types';
+import { Asset } from '../types';
 
 export type RouterOptions = {
   includeOnly?: PoolType[];
@@ -16,8 +23,8 @@ export class Router {
   };
 
   /**
-   * @param poolService - Fetch pool data from substrate based pools
-   * @param routerOptions - Optional router options
+   * @param poolService - pool data from substrate based pools
+   * @param routerOptions - optional router options
    */
   constructor(poolService: IPoolService, routerOptions?: RouterOptions) {
     this.poolService = poolService;
@@ -29,9 +36,9 @@ export class Router {
   }
 
   /**
-   * Return all pools
+   * List all pools
    *
-   * @returns {PoolBase[]} List of all substrate based pools
+   * @returns all pools
    */
   async getPools(): Promise<PoolBase[]> {
     const includeOnly = this.routerOptions.includeOnly;
@@ -39,9 +46,9 @@ export class Router {
   }
 
   /**
-   * Return list of all available assets from substrate based pools
+   * List all available assets from the configured pools
    *
-   * @returns {Asset[]} List of all available assets
+   * @returns all available assets
    */
   async getAllAssets(): Promise<Asset[]> {
     const pools = await this.getPools();
@@ -51,12 +58,12 @@ export class Router {
   }
 
   /**
-   * Calculate and return list of all assets, given token can be trade with
+   * List all assets given token can be trade with
    *
-   * @param {string} asset - Storage key of asset
-   * @returns {Asset[]} List of all available assets, given token can be trade with
+   * @param {number} asset - asset id
+   * @returns all available assets, given token can be trade with
    */
-  async getAssetPairs(asset: string): Promise<Asset[]> {
+  async getAssetPairs(asset: number): Promise<Asset[]> {
     const pools = await this.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { assets, poolsMap } = await this.validateToken(asset, pools);
@@ -66,13 +73,13 @@ export class Router {
   }
 
   /**
-   * Calculate and return all possible paths for best swap assetIn>assetOut
+   * List all possible paths for best swap assetIn>assetOut
    *
-   * @param {string} assetIn - Storage key of assetIn
-   * @param {string} assetOut - Storage key of assetOut
-   * @returns {<Hop[][]>} All possible paths containing route hops
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @returns all possible paths containing route hops
    */
-  async getAllPaths(assetIn: string, assetOut: string): Promise<Hop[][]> {
+  async getAllPaths(assetIn: number, assetOut: number): Promise<Hop[][]> {
     const pools = await this.getPools();
     if (pools.length === 0) throw new Error('No pools configured');
     const { poolsMap } = await this.validateTokenPair(assetIn, assetOut, pools);
@@ -80,12 +87,12 @@ export class Router {
   }
 
   /**
-   * Return map of all available assets from substrate based pools
+   * List all available assets from pools
    *
-   * @param pools - pools
-   * @returns Map of all available assets
+   * @param {PoolBase[]} pools - pools
+   * @returns map of all available assets
    */
-  protected async getAssets(pools: PoolBase[]): Promise<Map<string, Asset>> {
+  protected async getAssets(pools: PoolBase[]): Promise<Map<number, Asset>> {
     const assets = pools
       .map((pool: PoolBase) =>
         pool.tokens.map((t) => {
@@ -109,17 +116,17 @@ export class Router {
   }
 
   /**
-   * Calculate and return all possible paths for best swap assetIn>assetOut
+   * List all possible paths for best swap assetIn>assetOut
    *
-   * @param assetIn - Storage key of assetIn
-   * @param assetOut - Storage key of assetOut
-   * @param poolsMap - pools map
-   * @param pools - pools
-   * @returns All possible paths containing route hops
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @param {Map<string, Pool>} poolsMap - pools map
+   * @param {PoolBase[]} pools - pools
+   * @returns all possible paths containing route hops
    */
   protected getPaths(
-    assetIn: string,
-    assetOut: string | null,
+    assetIn: number,
+    assetOut: number | null,
     poolsMap: Map<string, Pool>,
     pools: PoolBase[]
   ): Hop[][] {
@@ -135,42 +142,46 @@ export class Router {
   }
 
   /**
-   * Ckeck if input asset pair is valid and throw expection if not
+   * Ckeck if input asset pair is valid
    *
-   * @param assetIn - Storage key of assetIn
-   * @param assetOut - Storage key of assetOut
-   * @returns Pool assets & map
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @param {PoolBase[]} pools - pools
+   * @returns pool assets & map
    */
   protected async validateTokenPair(
-    assetIn: string,
-    assetOut: string,
+    assetIn: number,
+    assetOut: number,
     pools: PoolBase[]
   ) {
     const assets = await this.getAssets(pools);
     if (assets.get(assetIn) == null)
-      throw new Error(assetIn + ' is not supported token');
+      throw new Error(assetIn + ' is not supported asset');
     if (assets.get(assetOut) == null)
-      throw new Error(assetOut + ' is not supported token');
+      throw new Error(assetOut + ' is not supported asset');
     const poolsMap = this.getPoolMap(pools);
     return { assets, poolsMap };
   }
 
   /**
-   * Ckeck if input asset is valid and throw exception if not
+   * Ckeck if input asset is valid
    *
-   * @param token - Storage key of token
-   * @returns Pool assets & map
+   * @param {number} asset - asset id
+   * @returns pool assets & map
    */
-  protected async validateToken(token: string, pools: PoolBase[]) {
+  protected async validateToken(asset: number, pools: PoolBase[]) {
     const assets = await this.getAssets(pools);
-    if (assets.get(token) == null)
-      throw new Error(token + ' is not supported token');
+    if (assets.get(asset) == null)
+      throw new Error(asset + ' is not supported asset');
     const poolsMap = this.getPoolMap(pools);
     return { assets, poolsMap };
   }
 
   /**
-   * Create pool map from substrate based pools
+   * Create pool map by address
+   *
+   * @param {PoolBase[]} pools - pools
+   * @returns pools map
    */
   private getPoolMap(pools: PoolBase[]): Map<string, Pool> {
     return new Map<string, Pool>(
@@ -179,7 +190,7 @@ export class Router {
   }
 
   /**
-   * Check if path is valid -> all edges are valid token pairs
+   * Check if path is valid -> all edges are valid asset pairs
    *
    * @param proposedPath - proposed path
    * @param poolsMap - pools map
@@ -198,11 +209,11 @@ export class Router {
   }
 
   /**
-   * Check if edge (token pair) of corresponding pool is valid combination
+   * Check if edge (asset pair) of corresponding pool is valid
    *
-   * @param edge - current edge (token pair)
+   * @param edge - current edge (asset pair)
    * @param poolsMap - pools map
-   * @returns true if edge (token pair) is valid, otherwise false
+   * @returns true if edge (asset pair) is valid, otherwise false
    */
   private validEdge(
     [address, from, to]: Edge,
@@ -224,7 +235,7 @@ export class Router {
     });
   }
 
-  private toAssets(tokens: string[], assets: Map<string, Asset>): Asset[] {
-    return tokens.map((token) => assets.get(token)!);
+  private toAssets(assets: number[], assetsMap: Map<number, Asset>): Asset[] {
+    return assets.map((asset) => assetsMap.get(asset)!);
   }
 }

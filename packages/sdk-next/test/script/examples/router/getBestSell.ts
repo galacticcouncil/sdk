@@ -1,27 +1,18 @@
-import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter, ZERO } from '@galacticcouncil/sdk';
+import { PolkadotClient } from 'polkadot-api';
 
-import { PolkadotExecutor } from '../../PjsExecutor';
+import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
-class GetBestSellPriceExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const external = [
-      {
-        decimals: 2,
-        id: '420',
-        name: 'BEEFY',
-        origin: 1000,
-        symbol: 'BEEFY',
-        internalId: '1000036',
-      },
-    ];
 
-    const poolService = new PoolService(api);
-    await poolService.syncRegistry(external);
-    const router = new TradeRouter(poolService);
-    const bestSell = await router.getBestSell('5', '0', 1);
-    const transaction = bestSell.toTx(ZERO);
-    console.log('Transaction hash: ' + transaction.hex);
+import { api as a, pool as p } from '../../../../src';
+
+class GetBestSellPriceExample extends PapiExecutor {
+  async script(client: PolkadotClient): Promise<any> {
+    const poolService = new p.PoolService(client);
+    const router = new a.TradeRouter(poolService);
+
+    const bestSell = await router.getBestSell(5, 0, 10_000_000_000n);
+    //const transaction = bestSell.toTx(ZERO);
+    //console.log('Transaction hash: ' + transaction.hex);
     return bestSell;
   }
 }
