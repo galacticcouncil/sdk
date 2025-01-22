@@ -1,7 +1,7 @@
 import {
   AssetAmount,
+  DexFactory,
   SwapCtx,
-  SwapFactory,
   TransferCtx,
 } from '@galacticcouncil/xcm-core';
 
@@ -22,13 +22,13 @@ export class SwapResolver {
     return transact ? transact.feeBalance : source.destinationFeeBalance;
   }
 
-  get swap() {
+  get dex() {
     const { source } = this.ctx;
-    return SwapFactory.getInstance().get(source.chain.key);
+    return DexFactory.getInstance().get(source.chain.key);
   }
 
   get isSupported() {
-    return !!this.swap;
+    return !!this.dex;
   }
 
   isSwapSupported(fee: AssetAmount): boolean {
@@ -41,7 +41,7 @@ export class SwapResolver {
   async calculateFeeSwap(fee: AssetAmount): Promise<SwapCtx> {
     const { source } = this.ctx;
 
-    const { amount, route } = await this.swap!.getQuote(
+    const { amount, route } = await this.dex!.getQuote(
       fee,
       this.effectiveFee,
       this.effectiveFee

@@ -3,9 +3,9 @@ import {
   Asset,
   AssetAmount,
   CallType,
+  DexFactory,
   ExtrinsicConfig,
   SubstrateQueryConfig,
-  SwapFactory,
 } from '@galacticcouncil/xcm-core';
 
 import { QueryableStorage } from '@polkadot/api/types';
@@ -102,7 +102,7 @@ export class SubstratePlatform
   /**
    * Display native fee in user preferred fee payment asset
    *
-   * Supported only if on-chain swap enabled
+   * Supported only if on-chain swap enabled (dex support)
    *
    * @param fee - native fee
    * @param feeBalance - user preferred payment asset balance
@@ -118,9 +118,9 @@ export class SubstratePlatform
       return fee;
     }
 
-    const swap = SwapFactory.getInstance().get(chain.key);
-    if (swap) {
-      const quote = await swap.getQuote(
+    const dex = DexFactory.getInstance().get(chain.key);
+    if (dex) {
+      const quote = await dex.getQuote(
         feeBalance,
         asset,
         AssetAmount.fromAsset(asset, { amount: fee, decimals })

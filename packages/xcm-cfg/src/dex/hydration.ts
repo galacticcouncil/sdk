@@ -2,8 +2,8 @@ import {
   AnyChain,
   Asset,
   AssetAmount,
+  Dex,
   Parachain,
-  Swap,
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 import {
@@ -15,7 +15,7 @@ import {
 
 import { memoize1 } from '@thi.ng/memoize';
 
-export class HydrationSwap implements Swap {
+export class HydrationDex implements Dex {
   readonly chain: Parachain;
   readonly poolService?: PoolService;
 

@@ -4,7 +4,7 @@ import {
   assetsMap,
   chainsMap,
   routesMap,
-  swaps,
+  dex,
   validations,
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
@@ -27,13 +27,13 @@ export const initWithCtx = async (ctx: SetupCtx): Promise<Wallet> => {
     transferValidations: validations,
   });
 
-  // Register chain swaps
+  // Register dex-es
   const hydration = configService.getChain('hydration');
   const assethub = configService.getChain('assethub');
 
-  wallet.registerSwaps(
-    new swaps.HydrationSwap(hydration, poolService),
-    new swaps.AssethubSwap(assethub)
+  wallet.registerDex(
+    new dex.HydrationDex(hydration, poolService),
+    new dex.AssethubDex(assethub)
   );
 
   return wallet;

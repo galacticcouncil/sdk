@@ -2,8 +2,8 @@ import {
   AnyChain,
   Asset,
   AssetAmount,
+  Dex,
   Parachain,
-  Swap,
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 
@@ -16,7 +16,7 @@ const getAssetLocation = (location: any) => {
   return registry.createType('MultiLocation', location);
 };
 
-export class AssethubSwap implements Swap {
+export class AssethubDex implements Dex {
   readonly chain: Parachain;
 
   constructor(chain: AnyChain) {

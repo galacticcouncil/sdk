@@ -6,12 +6,12 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
+  Dex,
+  DexFactory,
   TransferCtx,
   TransferValidator,
   TransferValidation,
   TransferValidationReport,
-  SwapFactory,
-  Swap,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 import { PlatformAdapter, Call } from './platforms';
@@ -41,8 +41,8 @@ export class Wallet {
     this.validations = transferValidations || [];
   }
 
-  registerSwaps(...swaps: Swap[]) {
-    swaps.forEach((s) => SwapFactory.getInstance().register(s));
+  registerDex(...dex: Dex[]) {
+    dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
   public async transfer(
