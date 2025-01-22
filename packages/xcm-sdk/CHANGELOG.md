@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.0.1
+
+### Patch Changes
+
+- Fix solana determine priority fee & budget calcs
+
 ## 8.0.0
 
 ### Major Changes
