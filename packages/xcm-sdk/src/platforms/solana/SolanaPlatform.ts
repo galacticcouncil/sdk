@@ -60,6 +60,15 @@ export class SolanaPlatform
   ): Promise<AssetAmount> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);
     const fee = await transfer.estimateFee(account, amount);
+    const mssgV0 = await transfer.getPriorityMessage(account);
+    const feeBalanceAfter = await transfer.simulateFeeBalance(account, mssgV0);
+
+    if (feeBalanceAfter) {
+      return feeBalance.copyWith({
+        amount: feeBalance.amount - BigInt(feeBalanceAfter) - amount,
+      });
+    }
+
     return feeBalance.copyWith({
       amount: fee,
     });

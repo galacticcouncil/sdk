@@ -105,3 +105,16 @@ export async function formatEvmAddress(
 export function formatAmount(decimals: number, amount?: number): bigint {
   return amount ? big.toBigInt(amount, decimals) : 0n;
 }
+
+/**
+ * Multiply amount by fraction
+ *
+ * @param amount - fee amount
+ * @param fraction - fraction
+ * @returns percentile amount
+ */
+export function multiplyByFraction(amount: bigint, fraction: number): bigint {
+  const numerator = BigInt(fraction * 10);
+  const denominator = BigInt(10);
+  return (amount * numerator) / denominator;
+}

@@ -13,7 +13,7 @@ import {
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { formatAmount, formatEvmAddress } from './utils';
+import { formatAmount, formatEvmAddress, multiplyByFraction } from './utils';
 import { PlatformAdapter, SubstrateService, Call } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
@@ -90,7 +90,7 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.estimateFee(
       address,
       amount,
-      source.fee ?? source.feeBalance,
+      source.feeBalance,
       transfer
     );
   }

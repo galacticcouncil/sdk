@@ -1,4 +1,4 @@
-import { ProgramConfig } from '@galacticcouncil/xcm-core';
+import { acc, ProgramConfig } from '@galacticcouncil/xcm-core';
 
 import {
   Connection,
@@ -8,17 +8,15 @@ import {
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
+  AddressLookupTableAccount,
 } from '@solana/web3.js';
-
-import {
-  determinePriorityFee,
-  determineComputeBudget,
-} from '@wormhole-foundation/sdk-solana';
 
 const DEFAULT_PRIORITY_FEE_PERCENTILE = 0.5;
 const DEFAULT_PERCENTILE_MULTIPLE = 2;
 const DEFAULT_MIN_PRIORITY_FEE = 1;
-const DEFAULT_MAX_PRIORITY_FEE = 1000;
+const DEFAULT_MAX_PRIORITY_FEE = 1e6;
+
+const DEFAULT_COMPUTE_BUDGET = 250_000;
 
 export class SolanaTransfer {
   readonly connection: Connection;
@@ -50,8 +48,7 @@ export class SolanaTransfer {
 
     const { instructions } = this.config;
     const message = await this.getV0Message(account, instructions);
-    const transaction = new VersionedTransaction(message);
-    const budget = await this.determineComputeBudget(transaction);
+    const budget = await this.determineComputeBudget(message);
     return BigInt(budget);
   }
 
@@ -75,17 +72,18 @@ export class SolanaTransfer {
     minPriorityFee: number = DEFAULT_MIN_PRIORITY_FEE,
     maxPriorityFee: number = DEFAULT_MAX_PRIORITY_FEE
   ): Promise<TransactionInstruction[]> {
-    const transaction = new VersionedTransaction(message);
     const [computeBudget, priorityFee] = await Promise.all([
-      this.determineComputeBudget(transaction),
+      this.determineComputeBudget(message),
       this.determinePriorityFee(
-        transaction,
+        message,
         feePercentile,
         multiple,
         minPriorityFee,
         maxPriorityFee
       ),
     ]);
+
+    //console.info('Solana priority tx CUL/CUP', computeBudget, priorityFee);
 
     return [
       ComputeBudgetProgram.setComputeUnitLimit({
@@ -95,6 +93,45 @@ export class SolanaTransfer {
         microLamports: priorityFee,
       }),
     ];
+  }
+
+  async simulateFeeBalance(
+    account: string,
+    message: MessageV0
+  ): Promise<number | undefined> {
+    const transaction = new VersionedTransaction(message);
+    const simulateResponse = await this.connection.simulateTransaction(
+      transaction,
+      {
+        accounts: {
+          encoding: 'base64',
+          addresses: [account],
+        },
+      }
+    );
+    const { accounts } = simulateResponse.value;
+    const acc = accounts && accounts[0];
+    return acc?.lamports;
+  }
+
+  /**
+   * Determine compute budget from simulated transaction
+   *
+   * @param transaction - versioned transaction
+   * @returns Compute budget to 120% of the units used in the
+   * simulated transaction or default
+   */
+  async determineComputeBudget(message: MessageV0): Promise<number> {
+    const transaction = new VersionedTransaction(message);
+    const simulateResponse =
+      await this.connection.simulateTransaction(transaction);
+
+    const { err, unitsConsumed } = simulateResponse.value;
+    if (unitsConsumed && !err) {
+      return Math.round(unitsConsumed * 1.2);
+    }
+
+    return DEFAULT_COMPUTE_BUDGET;
   }
 
   /**
@@ -107,32 +144,61 @@ export class SolanaTransfer {
    * @param maxPriorityFee - the maximum priority fee to use
    * @returns the priority fee to use according to the recent transactions and the given parameters
    */
-  private async determinePriorityFee(
-    transaction: VersionedTransaction,
+  async determinePriorityFee(
+    message: MessageV0,
     percentile: number = DEFAULT_PRIORITY_FEE_PERCENTILE,
     multiple: number = DEFAULT_PERCENTILE_MULTIPLE,
     minPriorityFee: number = DEFAULT_MIN_PRIORITY_FEE,
     maxPriorityFee: number = DEFAULT_MAX_PRIORITY_FEE
-  ) {
-    return determinePriorityFee(
-      this.connection,
-      transaction,
-      percentile,
-      multiple,
-      minPriorityFee,
-      maxPriorityFee
-    );
+  ): Promise<number> {
+    // Start with min fee
+    let fee = minPriorityFee;
+
+    // Figure out tx accounts that needs write lock
+    const lockedWritableAccounts = await this.getTxAccounts(message);
+    const recentFeesResponse =
+      await this.connection.getRecentPrioritizationFees({
+        lockedWritableAccounts,
+      });
+
+    if (recentFeesResponse) {
+      // Sort fees to find the percentile
+      const recentFees = recentFeesResponse
+        .map((dp) => dp.prioritizationFee)
+        .filter((f) => f > 0)
+        .sort((a, b) => a - b);
+
+      // Find the element in the distribution that matches the percentile
+      const idx = Math.ceil(recentFees.length * percentile);
+
+      if (recentFees.length > idx) {
+        const percentileFee = recentFees[idx];
+        const percentileFeeJuiced = percentileFee * multiple;
+        fee = Math.max(fee, percentileFeeJuiced);
+      }
+    }
+
+    return Math.min(Math.max(fee, minPriorityFee), maxPriorityFee);
   }
 
-  /**
-   * Determine compute budget from simulated transaction
-   *
-   * @param transaction - versioned transaction
-   * @returns Compute budget to 120% of the units used in the simulated transaction
-   */
-  private async determineComputeBudget(
-    transaction: VersionedTransaction
-  ): Promise<number> {
-    return determineComputeBudget(this.connection, transaction);
+  private async getTxAccounts(message: MessageV0): Promise<PublicKey[]> {
+    const luts = (
+      await Promise.all(
+        message.addressTableLookups.map((acc) =>
+          this.connection.getAddressLookupTable(acc.accountKey)
+        )
+      )
+    )
+      .map((lut) => lut.value)
+      .filter((val) => val !== null) as AddressLookupTableAccount[];
+
+    const keys = message.getAccountKeys({
+      addressLookupTableAccounts: luts ?? undefined,
+    });
+
+    return message.compiledInstructions
+      .flatMap((ix) => ix.accountKeyIndexes)
+      .map((k) => (message.isAccountWritable(k) ? keys.get(k) : null))
+      .filter((k) => k !== null) as PublicKey[];
   }
 }

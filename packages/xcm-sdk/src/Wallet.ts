@@ -19,6 +19,7 @@ import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
+  multiplyByFraction,
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
@@ -90,10 +91,12 @@ export class Wallet {
 
     // Normalize destination fee asset
     const dstFee = srcDestinationFee.copyWith(destination.fee.asset);
+    // Normalize amount entering the transaction (50% of bags)
+    const initAmount = multiplyByFraction(srcFeeBalance.amount, 0.5);
 
     const ctx: TransferCtx = {
       address: dstAddr,
-      amount: srcBalance.amount,
+      amount: initAmount,
       asset: source.asset,
       destination: {
         balance: dstBalance,
