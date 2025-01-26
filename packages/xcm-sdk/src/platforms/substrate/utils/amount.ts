@@ -1,6 +1,6 @@
 import { big, Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
 
-import { SubstrateService } from './SubstrateService';
+import { SubstrateService } from '../SubstrateService';
 
 /**
  * Normalize asset amount if chain uses solely chain decimals

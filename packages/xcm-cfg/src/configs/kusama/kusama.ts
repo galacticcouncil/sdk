@@ -4,8 +4,6 @@ import { ksm } from '../../assets';
 import { kusama, kusamaAssetHub, basilisk, karura } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
-const xcmDeliveryFee = 0.002;
-
 const toBasilisk: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -14,7 +12,6 @@ const toBasilisk: AssetRoute[] = [
       fee: {
         asset: ksm,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -40,7 +37,6 @@ const toKarura: AssetRoute[] = [
       fee: {
         asset: ksm,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -66,7 +62,6 @@ const toAssetHub: AssetRoute[] = [
       fee: {
         asset: ksm,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),

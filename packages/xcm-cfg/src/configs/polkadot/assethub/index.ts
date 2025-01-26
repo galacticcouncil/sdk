@@ -16,9 +16,9 @@ import {
 } from '../../../builders';
 
 import {
+  toParaStablesTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
-  xcmDeliveryFee,
 } from './templates';
 
 const toHydration: AssetRoute[] = [
@@ -29,7 +29,6 @@ const toHydration: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -46,54 +45,8 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: hydration,
-      asset: usdt,
-      fee: {
-        amount: 0.0022,
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: hydration,
-      asset: usdc,
-      fee: {
-        amount: 0.02,
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
+  toParaStablesTemplate(usdt, hydration, 0.0022),
+  toParaStablesTemplate(usdc, hydration, 0.02),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
   toHydrationExtTemplate(dota),
@@ -108,7 +61,6 @@ const toPolkadot: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -128,55 +80,14 @@ const toPolkadot: AssetRoute[] = [
 ];
 
 const toMoonbeam: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: moonbeam,
-      asset: usdt,
-      fee: {
-        amount: 0.25,
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: moonbeam,
-      asset: usdc,
-      fee: {
-        amount: 0.25,
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
+  toParaStablesTemplate(usdt, moonbeam, 0.25),
+  toParaStablesTemplate(usdc, moonbeam, 0.25),
   toMoonbeamExtTemplate(pink),
+];
+
+const toBifrost: AssetRoute[] = [
+  toParaStablesTemplate(usdt, bifrost, 0.03),
+  toParaStablesTemplate(usdc, bifrost, 0.03),
 ];
 
 const toMythos: AssetRoute[] = [
@@ -187,7 +98,6 @@ const toMythos: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().foreignAssets().account(),
@@ -205,64 +115,13 @@ const toMythos: AssetRoute[] = [
   }),
 ];
 
-const toBifrost: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: bifrost,
-      asset: usdt,
-      fee: {
-        amount: 0.03,
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: bifrost,
-      asset: usdc,
-      fee: {
-        amount: 0.03,
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-];
-
 export const assetHubConfig = new ChainRoutes({
   chain: assetHub,
   routes: [
     ...toHydration,
     ...toPolkadot,
     ...toMoonbeam,
-    ...toMythos,
     ...toBifrost,
+    ...toMythos,
   ],
 });

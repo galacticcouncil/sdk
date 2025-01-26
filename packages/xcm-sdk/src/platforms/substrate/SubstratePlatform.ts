@@ -3,6 +3,7 @@ import {
   Asset,
   AssetAmount,
   CallType,
+  Dex,
   DexFactory,
   ExtrinsicConfig,
   SubstrateQueryConfig,
@@ -29,9 +30,11 @@ export class SubstratePlatform
   implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
 {
   readonly #substrate: Promise<SubstrateService>;
+  readonly #dex: Dex | undefined;
 
   constructor(chain: AnyParachain) {
     this.#substrate = SubstrateService.create(chain);
+    this.#dex = DexFactory.getInstance().get(chain.key);
   }
 
   async calldata(
@@ -55,18 +58,9 @@ export class SubstratePlatform
     config: ExtrinsicConfig
   ): Promise<AssetAmount> {
     const substrate = await this.#substrate;
-    let fee: bigint;
-    try {
-      fee = await substrate.estimateFee(account, config);
-      fee = await this.exchangeFee(fee, feeBalance);
-    } catch (e) {
-      /**
-       * Transaction PaymentApi_query_info panic for V3 or higher
-       * multi-location versions if used for an extrinsic with empty
-       * account (of transferred asset).
-       */
-      fee = 0n;
-    }
+    const networkFee = await substrate.estimateNetworkFee(account, config);
+    const deliveryFee = await substrate.estimateDeliveryFee(account, config);
+    const fee = await this.exchangeFee(networkFee + deliveryFee, feeBalance);
     const params = normalizeAssetAmount(fee, feeBalance, substrate);
     return feeBalance.copyWith(params);
   }
@@ -112,15 +106,14 @@ export class SubstratePlatform
     fee: bigint,
     feeBalance: AssetAmount
   ): Promise<bigint> {
-    const { asset, decimals, chain } = await this.#substrate;
+    const { asset, decimals } = await this.#substrate;
 
     if (asset.isEqual(feeBalance)) {
       return fee;
     }
 
-    const dex = DexFactory.getInstance().get(chain.key);
-    if (dex) {
-      const quote = await dex.getQuote(
+    if (this.#dex) {
+      const quote = await this.#dex.getQuote(
         feeBalance,
         asset,
         AssetAmount.fromAsset(asset, { amount: fee, decimals })

@@ -13,7 +13,7 @@ import {
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { formatAmount, formatEvmAddress, multiplyByFraction } from './utils';
+import { formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService, Call } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
@@ -79,7 +79,7 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
-  async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
+  async getFee(ctx: TransferCtx): Promise<AssetAmount> {
     const { chain, route } = this.config;
     const { amount, sender, source } = ctx;
 
@@ -93,18 +93,6 @@ export class DataOriginProcessor extends DataProcessor {
       source.feeBalance,
       transfer
     );
-  }
-
-  async getFee(ctx: TransferCtx): Promise<AssetAmount> {
-    const { route } = this.config;
-    const { source } = route;
-
-    const fee = source.fee;
-
-    const networkFee = await this.getNetworkFee(ctx);
-    const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
-    const totalFee = networkFee.amount + extraFee;
-    return networkFee.copyWith({ amount: totalFee });
   }
 
   async getFeeBalance(address: string): Promise<AssetAmount> {

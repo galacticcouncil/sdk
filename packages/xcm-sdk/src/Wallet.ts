@@ -14,18 +14,18 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
+
 import { PlatformAdapter, Call } from './platforms';
 import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
-  multiplyByFraction,
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
-import { SwapResolver } from './SwapResolver';
+import { FeeSwap } from './FeeSwap';
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -91,12 +91,10 @@ export class Wallet {
 
     // Normalize destination fee asset
     const dstFee = srcDestinationFee.copyWith(destination.fee.asset);
-    // Normalize amount entering the transaction (50% of bags)
-    const initAmount = multiplyByFraction(srcFeeBalance.amount, 0.5);
 
     const ctx: TransferCtx = {
       address: dstAddr,
-      amount: initAmount,
+      amount: 1n, // Use 1 satoshi as init amount
       asset: source.asset,
       destination: {
         balance: dstBalance,
@@ -116,28 +114,40 @@ export class Wallet {
 
     ctx.transact = await src.getTransact(ctx);
 
-    const swap = new SwapResolver(ctx);
-
     const srcFee = await src.getFee(ctx);
-    const srcFeeSwap = swap.isSwapSupported(srcFee)
-      ? await swap.calculateFeeSwap(srcFee)
-      : undefined;
+
+    const swap = new FeeSwap(ctx);
+
+    let srcFeeSwap;
+    if (swap.isSwapSupported(srcFee)) {
+      srcFeeSwap = await swap.getSwap(srcFee);
+    }
+
+    let srcDestinationFeeSwap;
+    if (swap.isDestinationSwapSupported(srcFee)) {
+      srcDestinationFeeSwap = await swap.getDestinationSwap(srcFee);
+    }
 
     const dstEd = await dst.getEd();
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.getEd();
-    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
+    // In case of active fee swap use effective fee to calculate max
+    const srcEffectiveFee =
+      srcFeeSwap && srcFeeSwap.enabled ? srcFeeSwap.aIn : srcFee;
+    const max = calculateMax(srcBalance, srcEffectiveFee, srcMin, srcEd);
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
     ctx.source.feeSwap = srcFeeSwap;
+    ctx.source.destinationFeeSwap = srcDestinationFeeSwap;
 
     return {
       source: {
         balance: srcBalance,
         destinationFee: srcDestinationFee,
         destinationFeeBalance: srcDestinationFeeBalance,
+        destinationFeeSwap: srcDestinationFeeSwap,
         fee: srcFee,
         feeBalance: srcFeeBalance,
         feeSwap: srcFeeSwap,

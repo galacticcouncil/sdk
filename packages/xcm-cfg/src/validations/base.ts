@@ -7,10 +7,23 @@ import {
   TransferValidationError,
 } from '@galacticcouncil/xcm-core';
 
-import { HubClient } from '../clients';
+import { AssethubClient } from '../clients';
 
 export class FeeValidation extends TransferValidation {
+  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
+    const { source } = ctx;
+    const { enabled } = source.feeSwap || {};
+
+    const isFeeSwap = !!enabled;
+    return isFeeSwap;
+  }
+
   async validate(ctx: TransferCtx) {
+    const shouldSkip = await this.skipFor(ctx);
+    if (shouldSkip) {
+      return;
+    }
+
     const { source } = ctx;
     const { chain, fee, feeBalance } = source;
 
@@ -28,7 +41,7 @@ export class FeeValidation extends TransferValidation {
 export class DestFeeValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
     const { asset, source } = ctx;
-    const { enabled } = source.feeSwap || {};
+    const { enabled } = source.destinationFeeSwap || {};
 
     const isSufficientFeeAsset = asset.isEqual(source.destinationFee);
     const isFeeSwap = !!enabled;
@@ -61,7 +74,7 @@ export class DestFeeValidation extends TransferValidation {
 
   async getMin(chain: AnyChain, destFee: AssetAmount): Promise<bigint> {
     if (chain.key === 'assethub') {
-      const client = new HubClient(chain as Parachain);
+      const client = new AssethubClient(chain as Parachain);
       return client.getAssetMin(destFee);
     }
     const min = chain.getAssetMin(destFee);

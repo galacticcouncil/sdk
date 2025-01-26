@@ -1,2 +1,2 @@
-export * from './hub';
+export * from './assethub';
 export * from './hydration';

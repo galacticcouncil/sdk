@@ -59,7 +59,7 @@ export class HydrationEdValidation extends TransferValidation {
 export class HydrationMrlFeeValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
     const { source, transact } = ctx;
-    const { enabled } = source.feeSwap || {};
+    const { enabled } = source.destinationFeeSwap || {};
 
     const isMrl = !!transact && transact.chain.key === 'moonbeam';
     const isFeeSwap = !!enabled;

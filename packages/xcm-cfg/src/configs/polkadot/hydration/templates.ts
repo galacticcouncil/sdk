@@ -26,13 +26,17 @@ import { balance, fee } from './configs';
 export const MRL_EXECUTION_FEE = 0.9;
 export const MRL_XCM_FEE = 1;
 
-const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
+const isDestinationFeeSwapSupported = (
+  params: ExtrinsicConfigBuilderParams
+) => {
   const { source } = params;
-  const { enabled } = source.feeSwap || {};
+  const { enabled } = source.destinationFeeSwap || {};
   return !!enabled;
 };
 
-const swapExtrinsic = ExtrinsicBuilder().router().buy({ withSlippage: 30 });
+const getSwapExtrinsicBuilder = () => {
+  return ExtrinsicBuilder().router().buy({ withSlippage: 30 });
+};
 
 export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
@@ -52,9 +56,10 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiassets()
-    ),
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      getSwapExtrinsicBuilder()
+    ).prior(ExtrinsicBuilder().xTokens().transferMultiassets()),
   });
 }
 
@@ -76,9 +81,10 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      getSwapExtrinsicBuilder()
+    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
   });
 }
 
@@ -100,9 +106,10 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      getSwapExtrinsicBuilder()
+    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
   });
 }
 
@@ -131,7 +138,10 @@ export function toEthereumViaWormholeTemplate(
         asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      getSwapExtrinsicBuilder()
+    ).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
@@ -215,7 +225,10 @@ export function toSolanaViaWormholeTemplate(
         asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      getSwapExtrinsicBuilder()
+    ).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,

@@ -10,6 +10,7 @@ const pallet = 'assetConversion';
 
 type SwapOpts = {
   withSlippage: number;
+  key: 'feeSwap' | 'destinationFeeSwap';
 };
 
 const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
@@ -20,12 +21,12 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          const { chain, feeSwap } = source;
+          const { chain } = source;
 
-          const { aIn, aOut } = feeSwap!;
+          const { aIn, aOut } = source[opts.key]!;
 
           const ctx = chain as Parachain;
-          const aInLocation = ctx.getAssetXcmLocation(aIn); // DOT
+          const aInLocation = ctx.getAssetXcmLocation(aIn);
           const aOutLocation = ctx.getAssetXcmLocation(aOut);
 
           const maxAmountIn =

@@ -10,6 +10,9 @@ import {
 import { TypeRegistry } from '@polkadot/types';
 import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
+import { usdc, usdt } from '../assets';
+import { AssethubClient } from '../clients';
+
 const registry = new TypeRegistry();
 
 const getAssetLocation = (location: any) => {
@@ -18,9 +21,11 @@ const getAssetLocation = (location: any) => {
 
 export class AssethubDex implements Dex {
   readonly chain: Parachain;
+  readonly client: AssethubClient;
 
   constructor(chain: AnyChain) {
     this.chain = chain as Parachain;
+    this.client = new AssethubClient(this.chain);
   }
 
   async getQuote(
@@ -47,5 +52,9 @@ export class AssethubDex implements Dex {
     return {
       amount: amountIn.toBigInt(),
     } as SwapQuote;
+  }
+
+  isFeeSwapSupported(asset: Asset): boolean {
+    return [usdc, usdt].map((a) => a.key).includes(asset.key);
   }
 }
