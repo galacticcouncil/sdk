@@ -23,5 +23,6 @@ export const polkadot = new Parachain({
   name: 'Polkadot',
   parachainId: 0,
   ss58Format: 0,
+  trsry: '13UVJyLnbVp9RBZYFwFGyDvVd1y27Tt8tkntv6Q7JVPhFsTB',
   ws: 'wss://polkadot-rpc.dwellir.com',
 });

@@ -149,7 +149,8 @@ export const assetHub = new Parachain({
   key: 'assethub',
   name: 'AssetHub',
   parachainId: 1000,
-  ss58Format: 42,
+  trsry: '14xmwinmCEz6oRrFdczHKqHgWNMiCysE2KrA4jXXAAM1Eogk',
+  ss58Format: 0,
   ws: [
     'wss://polkadot-asset-hub-rpc.polkadot.io',
     'wss://statemint.api.onfinality.io/public-ws',

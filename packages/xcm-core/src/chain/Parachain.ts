@@ -30,6 +30,7 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   genesisHash: string;
   parachainId: number;
   ss58Format: number;
+  trsry?: string;
   usesH160Acc?: boolean;
   usesChainDecimals?: boolean;
   ws: string | string[];
@@ -42,6 +43,8 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   readonly ss58Format: number;
 
+  readonly trsry?: string;
+
   readonly usesChainDecimals: boolean;
 
   readonly usesH160Acc: boolean;
@@ -53,6 +56,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     parachainId,
     usesChainDecimals,
     usesH160Acc = false,
+    trsry,
     ss58Format,
     ws,
     ...others
@@ -61,6 +65,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
+    this.trsry = trsry;
     this.usesChainDecimals = !!usesChainDecimals;
     this.usesH160Acc = usesH160Acc;
     this.ws = ws;
