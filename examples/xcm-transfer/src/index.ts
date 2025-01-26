@@ -7,7 +7,7 @@ import {
   logSrcChains,
   logDestChains,
 } from './utils';
-import { evm, solana, substrate } from './signers';
+import { evm, solana, substrate, substrateV2 } from './signers';
 import { configService, wallet, whClient, whScan } from './setup';
 
 // Define transfer constraints
@@ -74,7 +74,18 @@ balanceSubscription.unsubscribe();
 /***************************/
 
 /**
- * Sign transaction
+ * Sign transaction with Papi
+ *
+ * @param address - signer address
+ */
+async function signV2(address: string) {
+  substrateV2.signAndSend(address, call, srcChain, (event) => {
+    console.log(event);
+  });
+}
+
+/**
+ * Sign transaction with Pjs
  *
  * @param address - signer address
  */
