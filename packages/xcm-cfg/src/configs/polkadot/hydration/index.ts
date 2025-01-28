@@ -770,6 +770,25 @@ const toMoonbeam: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: vdot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: moonbeam,
+      asset: vdot,
+      fee: {
+        amount: 0.05,
+        asset: vdot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
   toMoonbeamErc20Template(dai_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
