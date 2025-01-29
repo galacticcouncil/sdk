@@ -30,6 +30,7 @@ import {
   sol,
   sub,
   susde,
+  tbtc,
   unq,
   usdc,
   usdc_mwh,
@@ -775,6 +776,7 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamErc20Template(usdt_mwh),
   toMoonbeamErc20Template(wbtc_mwh),
   toMoonbeamErc20Template(weth_mwh),
+  toMoonbeamErc20Template(sol),
 ];
 
 const toPolkadot: AssetRoute[] = [
@@ -1073,6 +1075,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(weth, weth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
+  toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
