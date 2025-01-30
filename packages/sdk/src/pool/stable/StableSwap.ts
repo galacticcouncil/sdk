@@ -250,17 +250,27 @@ export class StableSwap implements Pool {
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber {
-    const one = scale(ONE, poolPair.decimalsOut);
+    const spot = StableMath.calculateSpotPriceWithFee(
+      this.id,
+      this.getReserves(),
+      this.amplification,
+      poolPair.assetIn,
+      poolPair.assetOut,
+      this.totalIssuance,
+      '0'
+    );
 
     if (poolPair.assetOut == this.id) {
-      return this.calculateAddOneAsset(poolPair, one);
+      return bnum(spot);
     }
 
     if (poolPair.assetIn == this.id) {
-      return this.calculateSharesForAmount(poolPair, one);
+      const base = scale(ONE, poolPair.decimalsIn - poolPair.decimalsOut);
+      return bnum(spot).div(base);
     }
 
-    return this.calculateIn(poolPair, one);
+    const base = scale(ONE, 18 - poolPair.decimalsIn);
+    return bnum(spot).div(base);
   }
 
   private calculateOut(
@@ -330,17 +340,27 @@ export class StableSwap implements Pool {
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): BigNumber {
-    const one = scale(ONE, poolPair.decimalsIn);
+    const spot = StableMath.calculateSpotPriceWithFee(
+      this.id,
+      this.getReserves(),
+      this.amplification,
+      poolPair.assetOut,
+      poolPair.assetIn,
+      this.totalIssuance,
+      '0'
+    );
 
     if (poolPair.assetIn == this.id) {
-      return this.calculateWithdrawOneAsset(poolPair, one);
+      return bnum(spot);
     }
 
     if (poolPair.assetOut == this.id) {
-      return this.calculateShares(poolPair, one);
+      const base = scale(ONE, poolPair.decimalsOut - poolPair.decimalsIn);
+      return bnum(spot).div(base);
     }
 
-    return this.calculateOut(poolPair, one);
+    const base = scale(ONE, 18 - poolPair.decimalsOut);
+    return bnum(spot).div(base);
   }
 
   calculateTradeFee(amount: BigNumber, fees: StableSwapFees): BigNumber {
