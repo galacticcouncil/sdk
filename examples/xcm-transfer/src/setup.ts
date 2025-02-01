@@ -34,8 +34,10 @@ configService.registerExternal(externals);
 // Register dex-es
 const hydration = configService.getChain('hydration');
 const assethub = configService.getChain('assethub');
+const assethubCex = configService.getChain('assethub_cex');
 
 wallet.registerDex(
   new dex.HydrationDex(hydration),
-  new dex.AssethubDex(assethub)
+  new dex.AssethubDex(assethub),
+  new dex.AssethubDex(assethubCex)
 );

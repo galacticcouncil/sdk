@@ -1,11 +1,11 @@
 import { Binary, TxEvent } from 'polkadot-api';
 
-import { AnyChain, AnyParachain } from '@galacticcouncil/xcm-core';
-import type { Call } from '@galacticcouncil/xcm-sdk';
-
 import { assethub } from '@polkadot-api/descriptors';
 
-import { getSignerBySource, getWs, asset } from './v2';
+import type { AnyChain, AnyParachain } from '@galacticcouncil/xcm-core';
+import type { Call, SubstrateCall } from '@galacticcouncil/xcm-sdk';
+
+import { getSignerBySource, getWs, getFeeAsset } from './v2';
 
 export async function signAndSend(
   address: string,
@@ -16,16 +16,21 @@ export async function signAndSend(
   const ctx = chain as AnyParachain;
   const signer = await getSignerBySource('polkadot-js', address);
 
+  const { data, txOptions } = call as SubstrateCall;
+
   const apiPjs = await ctx.api;
-  const extrinsic = apiPjs.tx(call.data);
+  const extrinsic = apiPjs.tx(data);
+
+  console.log(extrinsic.toHuman());
 
   const client = await getWs(ctx.ws);
   const api = client.getTypedApi(assethub);
 
   const callData = Binary.fromHex(extrinsic.inner.toHex());
+  const asset = getFeeAsset(txOptions?.asset);
 
   const tx = await api.txFromCallData(callData);
   tx.signSubmitAndWatch(signer, {
-    asset: asset.usdc,
+    asset: asset,
   }).subscribe(observer);
 }
