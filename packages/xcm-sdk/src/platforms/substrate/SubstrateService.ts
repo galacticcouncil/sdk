@@ -97,8 +97,8 @@ export class SubstrateService {
     account: string,
     config: ExtrinsicConfig
   ): Promise<bigint> {
-    if (this.chain.parachainId === 0 || this.chain.parachainId === 1000) {
-      const acc = this.chain.trsry || account;
+    if (this.chain.usesDeliveryFee) {
+      const acc = this.chain.treasury || account;
       const result = await this.dryRun(acc, config);
 
       const ok = result.Ok;
@@ -106,14 +106,21 @@ export class SubstrateService {
       if (isSuccess) {
         return getDeliveryFeeFromDryRun(ok);
       } else {
-        const { error, index } = ok.executionResult.Err.error.Module;
-        const errorIndex = Number(error.slice(0, 4));
-        const decoded = this.api.registry.findMetaError({
-          error: new BN(errorIndex),
-          index: new BN(index),
-        });
-        const reason = `${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`;
-        console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
+        const err = ok.executionResult.Err.error;
+        if (err.Module) {
+          const { error, index } = err.Module;
+
+          const errorIndex = Number(error.slice(0, 4));
+          const decoded = this.api.registry.findMetaError({
+            error: new BN(errorIndex),
+            index: new BN(index),
+          });
+          const reason = `${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`;
+          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
+        } else {
+          const reason = JSON.stringify(err);
+          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
+        }
       }
     }
     return 0n;
