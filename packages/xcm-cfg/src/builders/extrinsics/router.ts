@@ -7,7 +7,7 @@ import {
 const pallet = 'router';
 
 type SwapOpts = {
-  withSlippage: number;
+  slippage: number;
 };
 
 const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
@@ -18,9 +18,13 @@ const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          const { chain, feeSwap } = source;
+          const { chain, destinationFeeSwap } = source;
 
-          const { aIn, aOut, route } = feeSwap!;
+          if (!destinationFeeSwap) {
+            throw new Error('Swap context not found.');
+          }
+
+          const { aIn, aOut, route } = destinationFeeSwap;
 
           const ctx = chain as EvmParachain;
           const assetIn = ctx.getMetadataAssetId(aIn);
@@ -28,7 +32,7 @@ const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
 
           const amountOut = aOut.amount;
           const maxAmountIn =
-            aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
+            aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
 
           return [assetIn, assetOut, amountOut, maxAmountIn, route];
         },
