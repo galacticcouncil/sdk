@@ -54,6 +54,9 @@ const getPolkadotChains = () => {
     skipFor,
     bridge,
     chains,
+    // chains: Array.from(configService.chains.values()).filter((c) =>
+    //   ['polkadot', 'assethub_cex', 'hydration'].includes(c.key)
+    // ) as Parachain[],
   };
 };
 
