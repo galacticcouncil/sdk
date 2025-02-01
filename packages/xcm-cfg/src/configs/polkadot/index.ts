@@ -1,7 +1,7 @@
 import { ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { acalaConfig } from './acala';
-import { assetHubConfig } from './assethub';
+import { assetHubConfig, assetHubCexConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
 import { centrifugeConfig } from './centrifuge';
@@ -25,6 +25,7 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   acalaConfig,
   ajunaConfig,
   assetHubConfig,
+  assetHubCexConfig,
   astarConfig,
   bifrostConfig,
   centrifugeConfig,

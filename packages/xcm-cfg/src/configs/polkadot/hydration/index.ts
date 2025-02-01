@@ -78,6 +78,7 @@ import {
   toMoonbeamErc20Template,
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
+  toCexViaAssethubTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -1079,6 +1080,8 @@ const toSolanaViaWormhole: AssetRoute[] = [
   toSolanaViaWormholeTemplate(sol, sol),
 ];
 
+const toCex: AssetRoute[] = [toCexViaAssethubTemplate(usdt)];
+
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
@@ -1088,6 +1091,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toAstar,
     ...toBifrost,
     ...toCentrifuge,
+    ...toCex,
     ...toCrust,
     ...toDarwinia,
     ...toEthereumViaSnowbridge,

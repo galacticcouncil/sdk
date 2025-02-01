@@ -4,6 +4,8 @@ import { dot } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
+const xcmDeliveryFee = 0.047;
+
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -12,6 +14,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -37,6 +40,7 @@ const toBifrost: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -62,6 +66,7 @@ const toAssetHub: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),

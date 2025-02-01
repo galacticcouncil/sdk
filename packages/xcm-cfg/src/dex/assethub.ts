@@ -10,7 +10,6 @@ import {
 import { TypeRegistry } from '@polkadot/types';
 import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
-import { usdc, usdt } from '../assets';
 import { AssethubClient } from '../clients';
 
 const registry = new TypeRegistry();
@@ -54,7 +53,11 @@ export class AssethubDex implements Dex {
     } as SwapQuote;
   }
 
-  isFeeSwapSupported(asset: Asset): boolean {
-    return [usdc, usdt].map((a) => a.key).includes(asset.key);
+  getNativeAsset(): Asset {
+    const native = this.chain.getAsset('dot');
+    if (native) {
+      return native;
+    }
+    throw new Error('Native asset configuration not found');
   }
 }

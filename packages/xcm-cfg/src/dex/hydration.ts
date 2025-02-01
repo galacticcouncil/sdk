@@ -60,7 +60,11 @@ export class HydrationDex implements Dex {
     } as SwapQuote;
   }
 
-  isFeeSwapSupported(_asset: Asset): boolean {
-    return false;
+  getNativeAsset(): Asset {
+    const native = this.chain.getAsset('hdx');
+    if (native) {
+      return native;
+    }
+    throw new Error('Native asset configuration not found');
   }
 }
