@@ -30,9 +30,10 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   genesisHash: string;
   parachainId: number;
   ss58Format: number;
-  trsry?: string;
-  usesH160Acc?: boolean;
+  treasury?: string;
   usesChainDecimals?: boolean;
+  usesDeliveryFee?: boolean;
+  usesH160Acc?: boolean;
   ws: string | string[];
 }
 
@@ -43,9 +44,11 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   readonly ss58Format: number;
 
-  readonly trsry?: string;
+  readonly treasury: string | undefined;
 
   readonly usesChainDecimals: boolean;
+
+  readonly usesDeliveryFee: boolean;
 
   readonly usesH160Acc: boolean;
 
@@ -54,10 +57,11 @@ export class Parachain extends Chain<ParachainAssetData> {
   constructor({
     genesisHash,
     parachainId,
-    usesChainDecimals,
-    usesH160Acc = false,
-    trsry,
     ss58Format,
+    treasury,
+    usesChainDecimals = false,
+    usesDeliveryFee = false,
+    usesH160Acc = false,
     ws,
     ...others
   }: ParachainParams) {
@@ -65,8 +69,9 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
-    this.trsry = trsry;
-    this.usesChainDecimals = !!usesChainDecimals;
+    this.treasury = treasury;
+    this.usesChainDecimals = usesChainDecimals;
+    this.usesDeliveryFee = usesDeliveryFee;
     this.usesH160Acc = usesH160Acc;
     this.ws = ws;
   }
