@@ -79,7 +79,7 @@ export const toAsset = (assetLocation: object, amount: any) => {
   };
 };
 
-export const toParaXcmOnDest = (version: XcmVersion, account: any) => {
+export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
   return {
     [version]: [
       {
@@ -236,6 +236,54 @@ export const toTransactMessage = (
           requireWeightAtMost: transactWeight,
           call: {
             encoded: transactCall,
+          },
+        },
+      },
+      {
+        RefundSurplus: {},
+      },
+      {
+        DepositAsset: {
+          assets: { Wild: { AllCounted: 1 } },
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: getX1Junction(version, account),
+            },
+          },
+        },
+      },
+    ],
+  };
+};
+
+export const toTransferMessage = (
+  version: XcmVersion,
+  account: any,
+  transferAssetLocation: object,
+  transferAssetAmount: any,
+  transferFeeAmount: any,
+  receiver: any
+) => {
+  return {
+    [version]: [
+      {
+        WithdrawAsset: [toAsset(transferAssetLocation, transferFeeAmount)],
+      },
+      {
+        BuyExecution: {
+          fees: toAsset(transferAssetLocation, transferFeeAmount),
+          weightLimit: 'Unlimited',
+        },
+      },
+      {
+        TransferAsset: {
+          assets: [toAsset(transferAssetLocation, transferAssetAmount)],
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: getX1Junction(version, receiver),
+            },
           },
         },
       },

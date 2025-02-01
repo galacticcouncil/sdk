@@ -10,10 +10,11 @@ import {
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
-  toParaXcmOnDest,
+  toDepositXcmOnDest,
   toDest,
   toTransferType,
   toTransactMessage,
+  toTransferMessage,
 } from './polkadotXcm.utils';
 
 import {
@@ -158,10 +159,20 @@ const transferAssetsUsingTypeAndThen = (
       func: 'transferAssetsUsingTypeAndThen',
       getArgs: () => {
         const version = XcmVersion.v4;
-        const from = getExtrinsicAccount(sender);
-        const account = getExtrinsicAccount(address);
+
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const from = getExtrinsicAccount(sender);
+        const rcvAddress = rcv.key.endsWith('_cex')
+          ? acc.getMultilocationDerivatedAccount(
+              ctx.parachainId,
+              sender,
+              1,
+              rcv.usesH160Acc
+            )
+          : address;
+        const account = getExtrinsicAccount(rcvAddress);
 
         const { transferType } = opts;
 
@@ -211,7 +222,7 @@ const transferAssetsUsingTypeAndThen = (
         const customXcmOnDest =
           destination.chain.key === 'ethereum'
             ? toBridgeXcmOnDest(version, account, from, transferAssetLocation)
-            : toParaXcmOnDest(version, account);
+            : toDepositXcmOnDest(version, account);
 
         return [
           dest,
@@ -251,7 +262,8 @@ const send = () => {
             const mda = acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
-              1
+              1,
+              rcv.usesH160Acc
             );
             const account = getExtrinsicAccount(mda);
 
@@ -271,6 +283,53 @@ const send = () => {
                 transactFeeAmount,
                 transact.call,
                 transact.weight
+              ),
+            ];
+          },
+        });
+      },
+    }),
+    transferAsset: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
+      build: (params) => {
+        const { amount, address, asset, sender, source, destination } = params;
+
+        return new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v4;
+
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
+            const mda = acc.getMultilocationDerivatedAccount(
+              ctx.parachainId,
+              sender,
+              1,
+              rcv.usesH160Acc
+            );
+            const account = getExtrinsicAccount(mda);
+            const receiver = getExtrinsicAccount(address);
+
+            const transferAsset = getExtrinsicAssetLocation(
+              locationOrError(rcv, asset),
+              version
+            );
+
+            const { fee } = destination;
+
+            const transferAmount =
+              amount > fee.amount ? amount - fee.amount : amount;
+            const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
+
+            return [
+              toDest(version, rcv),
+              toTransferMessage(
+                version,
+                account,
+                transferAsset,
+                transferAmount,
+                transferFeeAmount,
+                receiver
               ),
             ];
           },
