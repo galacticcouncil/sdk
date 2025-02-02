@@ -38,18 +38,32 @@ export class SubstratePlatform
     this.#dex = DexFactory.getInstance().get(chain.key);
   }
 
+  private async useSignerFee(fee: Asset) {
+    const substrate = await this.#substrate;
+    return substrate.chain.usesSignerFee && !substrate.asset.isEqual(fee);
+  }
+
   async calldata(
     account: string,
     _amount: bigint,
+    feeBalance: AssetAmount,
     config: ExtrinsicConfig
   ): Promise<SubstrateCall> {
     const substrate = await this.#substrate;
+    const useSignerFee = await this.useSignerFee(feeBalance);
+
+    const txOptions = useSignerFee
+      ? {
+          asset: new Asset(feeBalance),
+        }
+      : undefined;
+
     const extrinsic = substrate.getExtrinsic(config);
     return {
       from: account,
       data: extrinsic.toHex(),
       type: CallType.Substrate,
-      txOptions: config.txOptions,
+      txOptions: txOptions,
     } as SubstrateCall;
   }
 

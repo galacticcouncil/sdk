@@ -24,9 +24,9 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {
-    const { amount, sender } = ctx;
+    const { amount, sender, source } = ctx;
     const transfer = await this.getTransfer(ctx);
-    return this.adapter.calldata(sender, amount, transfer);
+    return this.adapter.calldata(sender, amount, source.feeBalance, transfer);
   }
 
   async getDestinationFee(): Promise<AssetAmount> {

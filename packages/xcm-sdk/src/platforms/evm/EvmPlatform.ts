@@ -34,6 +34,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
   async calldata(
     account: string,
     amount: bigint,
+    _feeBalance: AssetAmount,
     config: ContractConfig
   ): Promise<EvmCall> {
     const { abi, asset, calldata } = EvmTransferFactory.get(
