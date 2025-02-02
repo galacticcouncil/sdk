@@ -16,7 +16,7 @@ import { mythos } from './mythos';
 import { nodle } from './nodle';
 import { pendulum } from './pendulum';
 import { phala } from './phala';
-import { polkadot } from './polkadot';
+import { polkadot, polkadotCex } from './polkadot';
 import { subsocial } from './subsocial';
 import { unique } from './unique';
 import { zeitgeist } from './zeitgeist';
@@ -40,6 +40,7 @@ export const polkadotChains: AnyChain[] = [
   pendulum,
   phala,
   polkadot,
+  polkadotCex,
   subsocial,
   unique,
   zeitgeist,
@@ -64,6 +65,7 @@ export {
   pendulum,
   phala,
   polkadot,
+  polkadotCex,
   subsocial,
   unique,
   zeitgeist,

@@ -32,7 +32,9 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   ss58Format: number;
   treasury?: string;
   usesChainDecimals?: boolean;
+  usesCexForwarding?: boolean;
   usesDeliveryFee?: boolean;
+  usesSignerFee?: boolean;
   usesH160Acc?: boolean;
   ws: string | string[];
 }
@@ -48,7 +50,11 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   readonly usesChainDecimals: boolean;
 
+  readonly usesCexForwarding: boolean;
+
   readonly usesDeliveryFee: boolean;
+
+  readonly usesSignerFee: boolean;
 
   readonly usesH160Acc: boolean;
 
@@ -60,7 +66,9 @@ export class Parachain extends Chain<ParachainAssetData> {
     ss58Format,
     treasury,
     usesChainDecimals = false,
+    usesCexForwarding = false,
     usesDeliveryFee = false,
+    usesSignerFee = false,
     usesH160Acc = false,
     ws,
     ...others
@@ -71,7 +79,9 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.ss58Format = ss58Format;
     this.treasury = treasury;
     this.usesChainDecimals = usesChainDecimals;
+    this.usesCexForwarding = usesCexForwarding;
     this.usesDeliveryFee = usesDeliveryFee;
+    this.usesSignerFee = usesSignerFee;
     this.usesH160Acc = usesH160Acc;
     this.ws = ws;
   }

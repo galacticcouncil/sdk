@@ -164,7 +164,7 @@ const transferAssetsUsingTypeAndThen = (
         const rcv = destination.chain as Parachain;
 
         const from = getExtrinsicAccount(sender);
-        const rcvAddress = rcv.key.endsWith('_cex')
+        const rcvAddress = rcv.usesCexForwarding
           ? acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
