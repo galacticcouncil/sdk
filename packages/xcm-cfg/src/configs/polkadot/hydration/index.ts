@@ -1080,7 +1080,10 @@ const toSolanaViaWormhole: AssetRoute[] = [
   toSolanaViaWormholeTemplate(sol, sol),
 ];
 
-const toCex: AssetRoute[] = [toCexViaAssethubTemplate(usdt)];
+const toCex: AssetRoute[] = [
+  toCexViaAssethubTemplate(usdt),
+  toCexViaAssethubTemplate(usdc),
+];
 
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,

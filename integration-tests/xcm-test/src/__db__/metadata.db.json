@@ -910,5 +910,21 @@
       "feeAsset": "PHA",
       "feeNative": "64296000000"
     }
+  },
+  "hydration-assethub_cex-usdt": {
+    "updated": 1738491505478,
+    "destination": {
+      "fee": "1.187183",
+      "feeAsset": "USDT",
+      "feeNative": "1187183"
+    }
+  },
+  "hydration-assethub_cex-usdc": {
+    "updated": 1738491725959,
+    "destination": {
+      "fee": "1.184141",
+      "feeAsset": "USDC",
+      "feeNative": "1184141"
+    }
   }
 }

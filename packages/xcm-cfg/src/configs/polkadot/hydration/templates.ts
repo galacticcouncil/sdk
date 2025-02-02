@@ -128,8 +128,8 @@ export function toCexViaAssethubTemplate(asset: Asset): AssetRoute {
       chain: assetHubCex,
       asset: asset,
       fee: {
-        amount: 1.2,
-        asset: usdt,
+        amount: FeeAmountBuilder().Assethub().destFeeIn(asset),
+        asset: asset,
       },
     },
     extrinsic: ExtrinsicBuilder()
