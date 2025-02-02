@@ -45,15 +45,14 @@ export class FeeSwap {
    * @returns source fee swap context
    */
   async getSwap(fee: AssetAmount): Promise<SwapCtx | undefined> {
-    const native = this.dex!.getNativeAsset();
-    const nativeCurrency = await this.dex!.chain.getCurrency();
+    const { asset, decimals } = await this.dex!.chain.getCurrency();
 
-    const { amount } = await this.dex!.getQuote(native, fee, fee);
+    const { amount } = await this.dex!.getQuote(asset, fee, fee);
     return {
       aIn: fee,
-      aOut: AssetAmount.fromAsset(native, {
+      aOut: AssetAmount.fromAsset(asset, {
         amount: amount,
-        decimals: nativeCurrency.decimals,
+        decimals: decimals,
       }),
       enabled: true,
     } as SwapCtx;

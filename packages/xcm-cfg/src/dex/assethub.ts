@@ -52,12 +52,4 @@ export class AssethubDex implements Dex {
       amount: amountIn.toBigInt(),
     } as SwapQuote;
   }
-
-  getNativeAsset(): Asset {
-    const native = this.chain.getAsset('dot');
-    if (native) {
-      return native;
-    }
-    throw new Error('Native asset configuration not found');
-  }
 }

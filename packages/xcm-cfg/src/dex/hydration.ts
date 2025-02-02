@@ -59,12 +59,4 @@ export class HydrationDex implements Dex {
       route: buildRoute(trade.swaps),
     } as SwapQuote;
   }
-
-  getNativeAsset(): Asset {
-    const native = this.chain.getAsset('hdx');
-    if (native) {
-      return native;
-    }
-    throw new Error('Native asset configuration not found');
-  }
 }
