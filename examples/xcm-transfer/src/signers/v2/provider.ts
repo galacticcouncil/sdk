@@ -1,8 +1,6 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 
-import { XcmV3Junctions } from '@polkadot-api/descriptors';
-
 export const getWs = async (
   wsUrl: string | string[]
 ): Promise<PolkadotClient> => {
@@ -14,9 +12,4 @@ export const getWs = async (
 
   const wsProvider = getWsProvider(endpoints);
   return createClient(withPolkadotSdkCompat(wsProvider));
-};
-
-export type XcmV3Multilocation = {
-  parents: number;
-  interior: XcmV3Junctions;
 };

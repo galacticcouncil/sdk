@@ -21,16 +21,20 @@ export async function signAndSend(
   const apiPjs = await ctx.api;
   const extrinsic = apiPjs.tx(data);
 
-  console.log(extrinsic.toHuman());
-
   const client = await getWs(ctx.ws);
   const api = client.getTypedApi(assethub);
 
   const callData = Binary.fromHex(extrinsic.inner.toHex());
-  const asset = getFeeAsset(txOptions?.asset);
+
+  let opts = {};
+  if (txOptions && txOptions.asset) {
+    const feeAsset = getFeeAsset(ctx, txOptions.asset);
+    opts = {
+      ...opts,
+      asset: feeAsset,
+    };
+  }
 
   const tx = await api.txFromCallData(callData);
-  tx.signSubmitAndWatch(signer, {
-    asset: asset,
-  }).subscribe(observer);
+  tx.signSubmitAndWatch(signer, opts).subscribe(observer);
 }
