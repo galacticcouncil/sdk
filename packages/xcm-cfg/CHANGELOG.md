@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.1.0
+
+### Minor Changes
+
+- CEX configurations for hub & relay
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.0
+
 ## 7.0.0
 
 ### Major Changes
