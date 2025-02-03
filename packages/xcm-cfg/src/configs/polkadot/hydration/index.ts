@@ -79,8 +79,7 @@ import {
   toMoonbeamErc20Template,
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
-  toCexViaAssethubTemplate,
-  toCexViaAssethubTemplate2,
+  toCexViaAssethubTxTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -1095,7 +1094,7 @@ const toCexViaRelay = new AssetRoute({
     chain: polkadotCex,
     asset: dot,
     fee: {
-      amount: 1.2,
+      amount: 1.1,
       asset: dot,
     },
   },
@@ -1104,7 +1103,7 @@ const toCexViaRelay = new AssetRoute({
     .batchAll([
       ExtrinsicBuilder().xTokens().transfer(),
       ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: 0.02,
+        fee: 0.01,
       }),
     ]),
   transact: {
@@ -1119,8 +1118,8 @@ const toCexViaRelay = new AssetRoute({
 });
 
 const toCex: AssetRoute[] = [
-  toCexViaAssethubTemplate2(usdt),
-  toCexViaAssethubTemplate(usdc),
+  toCexViaAssethubTxTemplate(usdt),
+  toCexViaAssethubTxTemplate(usdc),
   toCexViaRelay,
 ];
 

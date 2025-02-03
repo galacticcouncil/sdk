@@ -11,13 +11,13 @@ import { TypeRegistry } from '@polkadot/types';
  * Multilocation-derivative account - an account computed when executing remote calls
  * via XCM.
  *
- * @param parachainId parachain id
+ * @param parachainId parachain id or undefined in case of relay
  * @param address sender address
  * @param parents describe family
  * @returns multilocation derivated account address
  */
 export function getMultilocationDerivatedAccount(
-  parachainId: number,
+  parachainId: number | undefined,
   address: string,
   parents: number,
   isEthereumStyle = false

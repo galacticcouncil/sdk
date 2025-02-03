@@ -13,7 +13,7 @@ const ETHEREUM_BRIDGE_LOCATION = {
 const HUB_PARACHAIN_ID = 1000;
 
 export const toDest = (version: XcmVersion, destination: Parachain) => {
-  if (destination.key === 'polkadot' || destination.key === 'kusama') {
+  if (destination.parachainId === 0) {
     return {
       [version]: {
         parents: 1,

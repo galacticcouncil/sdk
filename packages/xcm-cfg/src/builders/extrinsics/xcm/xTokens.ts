@@ -32,7 +32,7 @@ const transfer = (): ExtrinsicConfigBuilder => ({
           ? acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
-              1,
+              rcv.parachainId === 0 ? 0 : 1,
               rcv.usesH160Acc
             )
           : address;
@@ -154,7 +154,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = acc.getMultilocationDerivatedAccount(
             ctx.parachainId,
             sender,
-            1,
+            rcv.parachainId === 0 ? 0 : 1,
             rcv.usesH160Acc
           );
         }

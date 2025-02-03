@@ -145,7 +145,7 @@ export function toCexViaAssethubTemplate(asset: Asset): AssetRoute {
   });
 }
 
-export function toCexViaAssethubTemplate2(asset: Asset): AssetRoute {
+export function toCexViaAssethubTxTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,

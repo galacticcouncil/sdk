@@ -204,7 +204,7 @@ export class DataOriginProcessor extends DataProcessor {
     const mda = acc.getMultilocationDerivatedAccount(
       fromChain.parachainId,
       fromAddr,
-      1,
+      chain.parachainId === 0 ? 0 : 1,
       chain.usesH160Acc
     );
 

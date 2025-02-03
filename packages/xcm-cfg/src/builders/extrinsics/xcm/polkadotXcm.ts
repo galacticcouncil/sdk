@@ -168,7 +168,7 @@ const transferAssetsUsingTypeAndThen = (
           ? acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
-              1,
+              rcv.parachainId === 0 ? 0 : 1,
               rcv.usesH160Acc
             )
           : address;
@@ -262,7 +262,7 @@ const send = () => {
             const mda = acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
-              1,
+              rcv.parachainId === 0 ? 0 : 1,
               rcv.usesH160Acc
             );
             const account = getExtrinsicAccount(mda);
@@ -304,7 +304,7 @@ const send = () => {
             const mda = acc.getMultilocationDerivatedAccount(
               ctx.parachainId,
               sender,
-              1,
+              rcv.parachainId === 0 ? 0 : 1,
               rcv.usesH160Acc
             );
             const account = getExtrinsicAccount(mda);

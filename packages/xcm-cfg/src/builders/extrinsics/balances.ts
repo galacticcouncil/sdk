@@ -13,7 +13,7 @@ const transferAll = (): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          return [address, true];
+          return [address, false];
         },
       }),
   };
