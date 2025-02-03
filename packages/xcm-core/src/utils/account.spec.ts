@@ -1,4 +1,7 @@
-import { getSovereignAccounts } from './account';
+import {
+  getSovereignAccounts,
+  getMultilocationDerivatedAccount,
+} from './account';
 
 describe('Account utils', () => {
   describe('getSovereignAccountAddresses', () => {
@@ -22,4 +25,36 @@ describe('Account utils', () => {
       });
     });
   });
+
+  // describe('getMultilocationDerivatedAccount', () => {
+  //   it('should get correct ChildChain addresses', async () => {
+  //     expect(
+  //       getMultilocationDerivatedAccount(
+  //         0,
+  //         '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+  //         0
+  //       )
+  //     ).toStrictEqual('5DbFqm1UFuYMDNoT9MJb3cT6YUVk814tbcegLrpxVFgS8T5r');
+  //   });
+
+  //   it('should get correct SiblingChain addresses', async () => {
+  //     expect(
+  //       getMultilocationDerivatedAccount(
+  //         0,
+  //         '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+  //         1
+  //       )
+  //     ).toStrictEqual('5FuA1PnyhuvePvbFxCAnYhrYCEg8QcWEXaajZhjMKMZpLsCJ');
+  //   });
+
+  //   it('should get correct ParentChain addresses', async () => {
+  //     expect(
+  //       getMultilocationDerivatedAccount(
+  //         0,
+  //         '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+  //         1
+  //       )
+  //     ).toStrictEqual('5FuA1PnyhuvePvbFxCAnYhrYCEg8QcWEXaajZhjMKMZpLsCJ');
+  //   });
+  // });
 });

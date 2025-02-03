@@ -644,6 +644,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Polkadot (CEX) DOT [dot] transfer 1`] = `
+[
+  "hydration-polkadot_cex-dot",
+  "0xfc0489000500000000e87648170000000000000000000000040102000001007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea1300",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Polkadot DOT [dot] transfer 1`] = `
 [
   "hydration-polkadot-dot",

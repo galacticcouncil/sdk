@@ -912,11 +912,11 @@
     }
   },
   "hydration-assethub_cex-usdt": {
-    "updated": 1738491505478,
+    "updated": 1738523661393,
     "destination": {
-      "fee": "1.187183",
+      "fee": "1.055453",
       "feeAsset": "USDT",
-      "feeNative": "1187183"
+      "feeNative": "1055453"
     }
   },
   "hydration-assethub_cex-usdc": {
@@ -925,6 +925,14 @@
       "fee": "1.184201",
       "feeAsset": "USDC",
       "feeNative": "1184201"
+    }
+  },
+  "hydration-polkadot_cex-dot": {
+    "updated": 1738579585913,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "DOT",
+      "feeNative": "100000000000"
     }
   }
 }

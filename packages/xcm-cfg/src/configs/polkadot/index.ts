@@ -10,7 +10,7 @@ import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { mythosConfig } from './mythos';
 import { nodleConfig } from './nodle';
-import { polkadotConfig } from './polkadot';
+import { polkadotConfig, polkadotCexConfig } from './polkadot';
 import { subsocialConfig } from './subsocial';
 import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
@@ -35,6 +35,7 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   mythosConfig,
   nodleConfig,
   polkadotConfig,
+  polkadotCexConfig,
   subsocialConfig,
   uniqueConfig,
   zeitgeistConfig,

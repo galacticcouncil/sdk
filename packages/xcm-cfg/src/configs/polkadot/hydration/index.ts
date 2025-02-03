@@ -67,6 +67,7 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  polkadotCex,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -79,6 +80,7 @@ import {
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
   toCexViaAssethubTemplate,
+  toCexViaAssethubTemplate2,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -1080,9 +1082,46 @@ const toSolanaViaWormhole: AssetRoute[] = [
   toSolanaViaWormholeTemplate(sol, sol),
 ];
 
+const toCexViaRelay = new AssetRoute({
+  source: {
+    asset: dot,
+    balance: balance(),
+    fee: fee(),
+    destinationFee: {
+      balance: balance(),
+    },
+  },
+  destination: {
+    chain: polkadotCex,
+    asset: dot,
+    fee: {
+      amount: 1.2,
+      asset: dot,
+    },
+  },
+  extrinsic: ExtrinsicBuilder()
+    .utility()
+    .batchAll([
+      ExtrinsicBuilder().xTokens().transfer(),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
+        fee: 0.02,
+      }),
+    ]),
+  transact: {
+    chain: polkadot,
+    fee: {
+      amount: 0,
+      asset: dot,
+      balance: balance(),
+    },
+    extrinsic: ExtrinsicBuilder().balances().transferAll(),
+  },
+});
+
 const toCex: AssetRoute[] = [
-  toCexViaAssethubTemplate(usdt),
+  toCexViaAssethubTemplate2(usdt),
   toCexViaAssethubTemplate(usdc),
+  toCexViaRelay,
 ];
 
 export const hydrationConfig = new ChainRoutes({

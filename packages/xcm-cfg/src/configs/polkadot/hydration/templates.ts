@@ -145,6 +145,46 @@ export function toCexViaAssethubTemplate(asset: Asset): AssetRoute {
   });
 }
 
+export function toCexViaAssethubTemplate2(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHubCex,
+      asset: asset,
+      fee: {
+        amount: FeeAmountBuilder().Assethub().destFeeIn(asset),
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+          transferType: XcmTransferType.DestinationReserve,
+        }),
+        ExtrinsicBuilder().polkadotXcm().send().transact({
+          fee: CEX_EXECUTION_FEE,
+        }),
+      ]),
+    transact: {
+      chain: assetHub,
+      fee: {
+        amount: 0,
+        asset: asset,
+        balance: balance(),
+      },
+      extrinsic: ExtrinsicBuilder().assets().transfer(),
+    },
+  });
+}
+
 export function toEthereumViaWormholeTemplate(
   assetIn: Asset,
   assetOut: Asset
