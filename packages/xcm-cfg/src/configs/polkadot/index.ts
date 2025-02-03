@@ -1,7 +1,7 @@
 import { ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { acalaConfig } from './acala';
-import { assetHubConfig } from './assethub';
+import { assetHubConfig, assetHubCexConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
 import { centrifugeConfig } from './centrifuge';
@@ -10,7 +10,7 @@ import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { mythosConfig } from './mythos';
 import { nodleConfig } from './nodle';
-import { polkadotConfig } from './polkadot';
+import { polkadotConfig, polkadotCexConfig } from './polkadot';
 import { subsocialConfig } from './subsocial';
 import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
@@ -25,6 +25,7 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   acalaConfig,
   ajunaConfig,
   assetHubConfig,
+  assetHubCexConfig,
   astarConfig,
   bifrostConfig,
   centrifugeConfig,
@@ -34,6 +35,7 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   mythosConfig,
   nodleConfig,
   polkadotConfig,
+  polkadotCexConfig,
   subsocialConfig,
   uniqueConfig,
   zeitgeistConfig,

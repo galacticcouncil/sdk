@@ -23,5 +23,6 @@ export const kusama = new Parachain({
   name: 'Kusama',
   parachainId: 0,
   ss58Format: 2,
+  usesDeliveryFee: true,
   ws: 'wss://kusama-rpc.dwellir.com',
 });

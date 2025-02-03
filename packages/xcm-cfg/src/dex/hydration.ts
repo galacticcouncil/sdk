@@ -2,8 +2,8 @@ import {
   AnyChain,
   Asset,
   AssetAmount,
+  Dex,
   Parachain,
-  Swap,
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 import {
@@ -15,8 +15,11 @@ import {
 
 import { memoize1 } from '@thi.ng/memoize';
 
-export class HydrationSwap implements Swap {
+import { HydrationClient } from '../clients';
+
+export class HydrationDex implements Dex {
   readonly chain: Parachain;
+  readonly client: HydrationClient;
   readonly poolService?: PoolService;
 
   readonly getRouter = memoize1(async (mem: number) => {
@@ -30,6 +33,7 @@ export class HydrationSwap implements Swap {
 
   constructor(chain: AnyChain, poolService?: PoolService) {
     this.chain = chain as Parachain;
+    this.client = new HydrationClient(this.chain);
     this.poolService = poolService;
   }
 

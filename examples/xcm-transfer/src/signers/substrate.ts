@@ -1,7 +1,20 @@
 import { AnyChain, AnyParachain } from '@galacticcouncil/xcm-core';
 import type { Call } from '@galacticcouncil/xcm-sdk';
+
+import type { ApiPromise } from '@polkadot/api';
 import type { ISubmittableResult } from '@polkadot/types/types';
 import { getWalletBySource } from '@talismn/connect-wallets';
+
+/**
+ * Doesn't work in 14.x pjs !!!
+ */
+const feeAsset = (api: ApiPromise, assetId: number) =>
+  api.createType('MultiLocation', {
+    parents: 0,
+    interior: {
+      x2: [{ palletInstance: 50 }, { generalIndex: assetId }],
+    },
+  });
 
 export async function signAndSend(
   address: string,

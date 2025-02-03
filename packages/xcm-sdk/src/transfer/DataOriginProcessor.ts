@@ -13,7 +13,7 @@ import {
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { formatAmount, formatEvmAddress, multiplyByFraction } from './utils';
+import { formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService, Call } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
@@ -24,9 +24,9 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {
-    const { amount, sender } = ctx;
+    const { amount, sender, source } = ctx;
     const transfer = await this.getTransfer(ctx);
-    return this.adapter.calldata(sender, amount, transfer);
+    return this.adapter.calldata(sender, amount, source.feeBalance, transfer);
   }
 
   async getDestinationFee(): Promise<AssetAmount> {
@@ -79,7 +79,7 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
-  async getNetworkFee(ctx: TransferCtx): Promise<AssetAmount> {
+  async getFee(ctx: TransferCtx): Promise<AssetAmount> {
     const { chain, route } = this.config;
     const { amount, sender, source } = ctx;
 
@@ -87,24 +87,13 @@ export class DataOriginProcessor extends DataProcessor {
     const address = route.contract
       ? await formatEvmAddress(sender, chain)
       : sender;
+
     return this.adapter.estimateFee(
       address,
       amount,
       source.feeBalance,
       transfer
     );
-  }
-
-  async getFee(ctx: TransferCtx): Promise<AssetAmount> {
-    const { route } = this.config;
-    const { source } = route;
-
-    const fee = source.fee;
-
-    const networkFee = await this.getNetworkFee(ctx);
-    const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
-    const totalFee = networkFee.amount + extraFee;
-    return networkFee.copyWith({ amount: totalFee });
   }
 
   async getFeeBalance(address: string): Promise<AssetAmount> {
@@ -184,16 +173,10 @@ export class DataOriginProcessor extends DataProcessor {
         ...ctxTransactBase,
       };
 
-      const [data, fee, feeBalance] = await Promise.all([
-        this.getTransactData(transact, context),
-        this.getTransactFee(transact),
-        this.getTransactFeeBalance(transact, context),
-      ]);
+      const data = await this.getTransactData(transact, context);
       return {
         ...data,
         chain: transact.chain,
-        fee: fee,
-        feeBalance: feeBalance,
       } as TransactCtx;
     }
     return undefined;
@@ -209,8 +192,8 @@ export class DataOriginProcessor extends DataProcessor {
   private async getTransactData(
     cfg: TransactConfig,
     ctx: TransferCtx
-  ): Promise<Partial<TransactCtx>> {
-    const { extrinsic, chain } = cfg;
+  ): Promise<TransactCtx> {
+    const { chain, extrinsic } = cfg;
     const config = extrinsic.build(ctx);
     const substrate = await SubstrateService.create(chain);
     const submittable = substrate.getExtrinsic(config);
@@ -221,18 +204,27 @@ export class DataOriginProcessor extends DataProcessor {
     const mda = acc.getMultilocationDerivatedAccount(
       fromChain.parachainId,
       fromAddr,
-      1
+      1,
+      chain.usesH160Acc
     );
 
     const { weight } = await submittable.paymentInfo(mda);
+
+    const [transactFee, transactFeeBalance] = await Promise.all([
+      this.getTransactFee(cfg),
+      this.getTransactFeeBalance(cfg, ctx),
+    ]);
+
     return {
       call: submittable.method.toHex(),
       chain: chain,
+      fee: transactFee,
+      feeBalance: transactFeeBalance,
       weight: {
         refTime: weight.refTime.toNumber(),
         proofSize: weight.proofSize.toString(),
       },
-    } as Partial<TransactCtx>;
+    } as TransactCtx;
   }
 
   /**
@@ -244,8 +236,9 @@ export class DataOriginProcessor extends DataProcessor {
   private async getTransactFee(cfg: TransactConfig): Promise<AssetAmount> {
     const { fee } = cfg;
     const decimals = await this.getDecimals(fee.asset);
+    const amount = big.toBigInt(fee.amount, decimals);
     return AssetAmount.fromAsset(fee.asset, {
-      amount: big.toBigInt(fee.amount, decimals),
+      amount: amount,
       decimals,
     });
   }

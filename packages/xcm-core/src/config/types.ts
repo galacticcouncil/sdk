@@ -19,6 +19,7 @@ export interface TransferCtx {
     chain: AnyChain;
     destinationFee: AssetAmount;
     destinationFeeBalance: AssetAmount;
+    destinationFeeSwap?: SwapCtx;
     fee: AssetAmount;
     feeBalance: AssetAmount;
     feeSwap?: SwapCtx;

@@ -53,7 +53,10 @@ const getPolkadotChains = () => {
   return {
     skipFor,
     bridge,
-    chains,
+    //chains,
+    chains: Array.from(configService.chains.values()).filter((c) =>
+      ['polkadot', 'moonbeam', 'hydration'].includes(c.key)
+    ) as Parachain[],
   };
 };
 

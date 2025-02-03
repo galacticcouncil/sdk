@@ -2,7 +2,7 @@ import {
   assetsMap,
   chainsMap,
   routesMap,
-  swaps,
+  dex,
   validations,
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
@@ -31,11 +31,13 @@ export const whClient = new WormholeClient();
 // Register external assets
 configService.registerExternal(externals);
 
-// Register chain swaps
+// Register dex-es
 const hydration = configService.getChain('hydration');
 const assethub = configService.getChain('assethub');
+const assethubCex = configService.getChain('assethub_cex');
 
-wallet.registerSwaps(
-  new swaps.HydrationSwap(hydration),
-  new swaps.AssethubSwap(assethub)
+wallet.registerDex(
+  new dex.HydrationDex(hydration),
+  new dex.AssethubDex(assethub),
+  new dex.AssethubDex(assethubCex)
 );

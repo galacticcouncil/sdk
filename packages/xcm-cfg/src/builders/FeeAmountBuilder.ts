@@ -1,5 +1,6 @@
 import {
   Abi,
+  Asset,
   EvmChain,
   FeeAmountConfigBuilder,
   Parachain,
@@ -7,7 +8,7 @@ import {
   Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
-import { HubClient } from '../clients';
+import { AssethubClient } from '../clients';
 
 function TokenRelayer() {
   return {
@@ -72,8 +73,21 @@ function Snowbridge() {
     }),
     getSendFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
       build: () => {
-        const client = new HubClient(opts.hub);
+        const client = new AssethubClient(opts.hub);
         const fee = client.getBridgeFee();
+        return fee as Promise<bigint>;
+      },
+    }),
+  };
+}
+
+function Assethub() {
+  return {
+    destFeeIn: (asset: Asset): FeeAmountConfigBuilder => ({
+      build: ({ destination }) => {
+        const rcv = destination as Parachain;
+        const client = new AssethubClient(rcv);
+        const fee = client.getDestinationFeeIn(asset);
         return fee as Promise<bigint>;
       },
     }),
@@ -82,6 +96,7 @@ function Snowbridge() {
 
 export function FeeAmountBuilder() {
   return {
+    Assethub,
     Snowbridge,
     Wormhole,
   };

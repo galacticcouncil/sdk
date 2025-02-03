@@ -6,8 +6,12 @@ import {
   AssetAmount,
   ExtrinsicConfig,
 } from '@galacticcouncil/xcm-core';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { BN, hexToU8a } from '@polkadot/util';
+
+import { getDeliveryFeeFromDryRun } from './utils';
 
 export class SubstrateService {
   readonly api: ApiPromise;
@@ -69,9 +73,69 @@ export class SubstrateService {
     return fn(...args);
   }
 
-  async estimateFee(account: string, config: ExtrinsicConfig): Promise<bigint> {
+  async estimateNetworkFee(
+    account: string,
+    config: ExtrinsicConfig
+  ): Promise<bigint> {
     const extrinsic = this.getExtrinsic(config);
-    const info = await extrinsic.paymentInfo(account, { nonce: -1 });
-    return info.partialFee.toBigInt();
+    try {
+      const info = await extrinsic.paymentInfo(account, {
+        nonce: -1,
+      });
+      return info.partialFee.toBigInt();
+    } catch (e) {
+      /**
+       * Tx panic for V3 or higher multi-location versions if used
+       * for an extrinsic with empty ammount (of transferred asset).
+       */
+      console.warn(`Can't estimate network fee.`);
+    }
+    return 0n;
+  }
+
+  async estimateDeliveryFee(
+    account: string,
+    config: ExtrinsicConfig
+  ): Promise<bigint> {
+    if (this.chain.usesDeliveryFee) {
+      const acc = this.chain.treasury || account;
+      const result = await this.dryRun(acc, config);
+
+      const ok = result.Ok;
+      const isSuccess = ok && ok.executionResult.Ok;
+      if (isSuccess) {
+        return getDeliveryFeeFromDryRun(ok);
+      } else {
+        const err = ok.executionResult.Err.error;
+        if (err.Module) {
+          const { error, index } = err.Module;
+
+          const errorIndex = Number(error.slice(0, 4));
+          const decoded = this.api.registry.findMetaError({
+            error: new BN(errorIndex),
+            index: new BN(index),
+          });
+          const reason = `${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`;
+          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
+        } else {
+          const reason = JSON.stringify(err);
+          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
+        }
+      }
+    }
+    return 0n;
+  }
+
+  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
+    const extrinsic = this.getExtrinsic(config);
+    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
+    const accountId = this.api.createType('AccountId32', account);
+    const result = await this.api.call.dryRunApi.dryRunCall(
+      {
+        system: { Signed: accountId },
+      },
+      callDataU8a
+    );
+    return result.toHuman() as any;
   }
 }
