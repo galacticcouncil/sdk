@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 6.1.1
+
+### Patch Changes
+
+- Fix mda account gen if dest relay
+
 ## 6.1.0
 
 ### Minor Changes

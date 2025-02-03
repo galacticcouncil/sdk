@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.1.1
+
+### Patch Changes
+
+- Fix mda account gen if dest relay
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.1
+
 ## 8.1.0
 
 ### Minor Changes
