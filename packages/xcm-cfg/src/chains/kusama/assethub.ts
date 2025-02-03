@@ -42,5 +42,6 @@ export const kusamaAssetHub = new Parachain({
   name: 'AssetHub',
   parachainId: 1000,
   ss58Format: 2,
+  usesDeliveryFee: true,
   ws: 'wss://kusama-asset-hub-rpc.polkadot.io',
 });

@@ -1,6 +1,7 @@
 const GLOBAL_CONSENSUS_KEY = 'GlobalConsensus';
 const PARACHAIN_KEY = 'Parachain';
 const GENERAL_INDEX_KEY = 'GeneralIndex';
+const PALLET_INSTANCE_KEY = 'PalletInstance';
 
 export const findNestedKey = (multilocation: object, keyToFind: any) => {
   const foundObj: any[] = [];
@@ -23,6 +24,11 @@ export const findGlobalConsensus = (multilocation: object) => {
 export const findParachain = (multilocation: object) => {
   const parachain = findNestedKey(multilocation, PARACHAIN_KEY);
   return parachain && parachain[PARACHAIN_KEY];
+};
+
+export const findPalletInstance = (multilocation: object) => {
+  const palletInstance = findNestedKey(multilocation, PALLET_INSTANCE_KEY);
+  return palletInstance && palletInstance[PALLET_INSTANCE_KEY];
 };
 
 export const findGeneralIndex = (multilocation: object) => {

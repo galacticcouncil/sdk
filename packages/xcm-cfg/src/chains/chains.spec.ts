@@ -21,7 +21,8 @@ const ss58AddressSpaceOnly = (chain: AnyChain): boolean => {
   return (
     chain instanceof Parachain &&
     chain.isParachain() &&
-    chain.usesH160Acc == false
+    chain.usesH160Acc == false &&
+    chain.usesCexForwarding == false
   );
 };
 

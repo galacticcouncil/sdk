@@ -10,20 +10,7 @@ import {
 import { AssethubClient } from '../clients';
 
 export class FeeValidation extends TransferValidation {
-  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
-    const { source } = ctx;
-    const { enabled } = source.feeSwap || {};
-
-    const isFeeSwap = !!enabled;
-    return isFeeSwap;
-  }
-
   async validate(ctx: TransferCtx) {
-    const shouldSkip = await this.skipFor(ctx);
-    if (shouldSkip) {
-      return;
-    }
-
     const { source } = ctx;
     const { chain, fee, feeBalance } = source;
 

@@ -1,6 +1,7 @@
 import {
   AssetAmount,
   DexFactory,
+  FeeConfig,
   SwapCtx,
   TransferCtx,
 } from '@galacticcouncil/xcm-core';
@@ -40,38 +41,34 @@ export class FeeSwap {
   /**
    * Fee swap context
    *
-   * Swap is enabled if following applies:
-   *  - account has enough transfer reserves (double the fee) to buy required asset
-   *
    * @param fee - source fee
    * @returns source fee swap context
    */
   async getSwap(fee: AssetAmount): Promise<SwapCtx | undefined> {
-    const { amount, route } = await this.dex!.getQuote(this.asset, fee, fee);
+    const { asset, decimals } = await this.dex!.chain.getCurrency();
 
-    const hasNotEnoughFee = this.feeBalance.amount < fee.amount;
-    const hasEnoughReservesToSwap = this.asset.amount > amount * 2n;
-
+    const { amount } = await this.dex!.getQuote(asset, fee, fee);
     return {
-      aIn: this.asset.copyWith({ amount: amount }),
-      aOut: fee,
-      enabled: hasNotEnoughFee && hasEnoughReservesToSwap,
-      route: route,
+      aIn: fee,
+      aOut: AssetAmount.fromAsset(asset, {
+        amount: amount,
+        decimals: decimals,
+      }),
+      enabled: true,
     } as SwapCtx;
   }
 
   /**
-   * Source fee swap is only allowed if:
-   *  - transfer asset is sufficient
-   *  - transfer asset is different than fee asset
+   * Fee swap is only allowed if explicitly enabled in
+   * route fee config
    *
-   * @param fee - source fee
+   * @param fee - source fee config
    * @returns true if supported, otherwise false
    */
-  isSwapSupported(fee: AssetAmount) {
-    const isSupported = !!this.dex && this.dex.isFeeSwapSupported(this.asset);
-    const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
-    return isSupported && isSufficientAssetTransfer && !this.asset.isEqual(fee);
+  isSwapSupported(cfg?: FeeConfig) {
+    const isSupported = !!this.dex;
+    const isConfigured = cfg && cfg.swap;
+    return isSupported && !!isConfigured;
   }
 
   /**
@@ -109,16 +106,15 @@ export class FeeSwap {
   /**
    * Destination fee swap is only allowed if:
    *  - transfer asset is insufficient
-   *  - destination fee asset is different than source fee
+   *  - destination fee asset is different than fee asset
    *
    * @param fee - route source fee
    * @returns true if supported, otherwise false
    */
   isDestinationSwapSupported(fee: AssetAmount): boolean {
     const isSupported = !!this.dex;
+    const isSwappable = !fee.isSame(this.destFee);
     const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
-    return (
-      isSupported && !isSufficientAssetTransfer && !fee.isSame(this.destFee)
-    );
+    return isSupported && isSwappable && !isSufficientAssetTransfer;
   }
 }

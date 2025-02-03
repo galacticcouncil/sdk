@@ -8,7 +8,12 @@ import {
 import { Observable } from 'rxjs';
 
 export interface Platform<T extends BaseConfig, B extends BaseConfig> {
-  calldata(account: string, amount: bigint, config: T): Promise<Call>;
+  calldata(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    config: T
+  ): Promise<Call>;
   estimateFee(
     account: string,
     amount: bigint,

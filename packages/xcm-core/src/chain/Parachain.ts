@@ -30,9 +30,12 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   genesisHash: string;
   parachainId: number;
   ss58Format: number;
-  trsry?: string;
-  usesH160Acc?: boolean;
+  treasury?: string;
   usesChainDecimals?: boolean;
+  usesCexForwarding?: boolean;
+  usesDeliveryFee?: boolean;
+  usesSignerFee?: boolean;
+  usesH160Acc?: boolean;
   ws: string | string[];
 }
 
@@ -43,9 +46,15 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   readonly ss58Format: number;
 
-  readonly trsry?: string;
+  readonly treasury: string | undefined;
 
   readonly usesChainDecimals: boolean;
+
+  readonly usesCexForwarding: boolean;
+
+  readonly usesDeliveryFee: boolean;
+
+  readonly usesSignerFee: boolean;
 
   readonly usesH160Acc: boolean;
 
@@ -54,10 +63,13 @@ export class Parachain extends Chain<ParachainAssetData> {
   constructor({
     genesisHash,
     parachainId,
-    usesChainDecimals,
-    usesH160Acc = false,
-    trsry,
     ss58Format,
+    treasury,
+    usesChainDecimals = false,
+    usesCexForwarding = false,
+    usesDeliveryFee = false,
+    usesSignerFee = false,
+    usesH160Acc = false,
     ws,
     ...others
   }: ParachainParams) {
@@ -65,8 +77,11 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
-    this.trsry = trsry;
-    this.usesChainDecimals = !!usesChainDecimals;
+    this.treasury = treasury;
+    this.usesChainDecimals = usesChainDecimals;
+    this.usesCexForwarding = usesCexForwarding;
+    this.usesDeliveryFee = usesDeliveryFee;
+    this.usesSignerFee = usesSignerFee;
     this.usesH160Acc = usesH160Acc;
     this.ws = ws;
   }
@@ -84,7 +99,12 @@ export class Parachain extends Chain<ParachainAssetData> {
     const api = await this.api;
     const symbol = api.registry.chainTokens[0];
     const decimals = api.registry.chainDecimals[0];
-    return { symbol, decimals } as ChainCurrency;
+
+    const asset = this.getAsset(symbol.toLowerCase());
+    if (asset) {
+      return { asset, decimals } as ChainCurrency;
+    }
+    throw Error('Chain currency configuration not found');
   }
 
   getAssetXcmLocation(asset: Asset): Record<string, AnyJson> | undefined {

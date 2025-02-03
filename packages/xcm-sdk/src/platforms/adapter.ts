@@ -57,9 +57,15 @@ export class PlatformAdapter {
   async calldata(
     account: string,
     amount: bigint,
+    feeBalance: AssetAmount,
     config: BaseConfig
   ): Promise<Call> {
-    return this.platform[config.type].calldata(account, amount, config);
+    return this.platform[config.type].calldata(
+      account,
+      amount,
+      feeBalance,
+      config
+    );
   }
 
   async estimateFee(

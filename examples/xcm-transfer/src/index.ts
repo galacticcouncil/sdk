@@ -1,5 +1,5 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { Call } from '@galacticcouncil/xcm-sdk';
+import { Call, SubstrateCall } from '@galacticcouncil/xcm-sdk';
 
 import {
   getWormholeChainById,
@@ -74,33 +74,31 @@ balanceSubscription.unsubscribe();
 /***************************/
 
 /**
- * Sign transaction with Papi
- *
- * @param address - signer address
- */
-async function signV2(address: string) {
-  substrateV2.signAndSend(address, call, srcChain, (event) => {
-    console.log(event);
-  });
-}
-
-/**
- * Sign transaction with Pjs
+ * Sign substrate transaction
  *
  * @param address - signer address
  */
 async function sign(address: string) {
-  substrate.signAndSend(
-    address,
-    call,
-    srcChain,
-    ({ status }) => {
-      console.log(status.toHuman());
-    },
-    (error) => {
-      console.error(error);
-    }
-  );
+  const { txOptions } = call as SubstrateCall;
+
+  // Using papi signer as txOptions not working in 14.x pjs
+  if (txOptions) {
+    substrateV2.signAndSend(address, call, srcChain, (event) => {
+      console.log(event);
+    });
+  } else {
+    substrate.signAndSend(
+      address,
+      call,
+      srcChain,
+      ({ status }) => {
+        console.log(status.toHuman());
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
 }
 
 /**

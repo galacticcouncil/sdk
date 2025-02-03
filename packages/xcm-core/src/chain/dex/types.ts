@@ -14,6 +14,4 @@ export interface Dex {
     assetOut: Asset,
     amountOut: AssetAmount
   ): Promise<SwapQuote>;
-
-  isFeeSwapSupported(asset: Asset): boolean;
 }

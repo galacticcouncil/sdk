@@ -9,8 +9,7 @@ import { getAssetLocation } from './assetConversion.utils';
 const pallet = 'assetConversion';
 
 type SwapOpts = {
-  withSlippage: number;
-  key: 'feeSwap' | 'destinationFeeSwap';
+  slippage: number;
 };
 
 const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
@@ -23,14 +22,19 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
         getArgs: () => {
           const { chain } = source;
 
-          const { aIn, aOut } = source[opts.key]!;
+          const swapCtx = source.destinationFeeSwap || source.feeSwap;
+          if (!swapCtx) {
+            throw new Error('Swap context not found.');
+          }
+
+          const { aIn, aOut } = swapCtx;
 
           const ctx = chain as Parachain;
           const aInLocation = ctx.getAssetXcmLocation(aIn);
           const aOutLocation = ctx.getAssetXcmLocation(aOut);
 
           const maxAmountIn =
-            aIn.amount + (aIn.amount * BigInt(opts.withSlippage)) / 100n;
+            aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
           const amountOut = aOut.amount;
 
           return [

@@ -54,6 +54,10 @@ export class EvmChain extends Chain<ChainAssetData> {
     const { nativeCurrency } = this.client.chain;
     const symbol = nativeCurrency.symbol;
     const decimals = nativeCurrency.decimals;
-    return { symbol, decimals } as ChainCurrency;
+    const asset = this.getAsset(symbol.toLowerCase());
+    if (asset) {
+      return { asset, decimals } as ChainCurrency;
+    }
+    throw Error('Chain currency configuration not found');
   }
 }

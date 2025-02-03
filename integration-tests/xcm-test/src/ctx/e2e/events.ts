@@ -11,9 +11,7 @@ import { findNestedKey } from '../../utils/json';
 
 export function checkIfFailed(api: ApiPromise, events: EventRecord[]): boolean {
   return events.some(({ event: { method, section, data } }) => {
-    const eventData = data.toHuman();
     if (section === 'system' && method === 'ExtrinsicFailed') {
-      logEvent(section, method, eventData);
       logError(api, data);
       return true;
     }
@@ -23,13 +21,10 @@ export function checkIfFailed(api: ApiPromise, events: EventRecord[]): boolean {
 
 export function checkIfSent(events: EventRecord[]): boolean {
   return events.some(({ event: { method, section, data } }) => {
-    const eventData = data.toHuman();
     switch (section) {
       case 'xcmpQueue':
-        logEvent(section, method, eventData);
         return method === 'XcmpMessageSent';
       case 'parachainSystem':
-        logEvent(section, method, eventData);
         return method === 'UpwardMessageSent';
       default:
         return false;
@@ -42,17 +37,21 @@ export function checkIfProcessed(events: EventRecord[]): boolean {
     const eventData = data.toHuman();
     switch (section) {
       case 'messageQueue':
-        logEvent(section, method, eventData);
         return method === 'Processed' && checkProcessedStatus(eventData);
       case 'xcmpQueue':
-        logEvent(section, method, eventData);
         return method === 'Success';
       case 'dmpQueue':
-        logEvent(section, method, eventData);
         return method === 'ExecutedDownward';
       default:
         return false;
     }
+  });
+}
+
+export function logEvents(events: EventRecord[]) {
+  return events.some(({ event: { method, section, data } }) => {
+    const eventData = data.toHuman();
+    logEvent(section, method, eventData);
   });
 }
 

@@ -14,10 +14,11 @@ import {
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
-const isFeeSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
+export const xcmDeliveryFee = 0.036;
+
+const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
   const { source } = params;
-  const { enabled } = source.feeSwap || {};
-  return !!enabled;
+  return !!source.feeSwap;
 };
 
 const isDestinationFeeSwapSupported = (
@@ -28,12 +29,11 @@ const isDestinationFeeSwapSupported = (
   return !!enabled;
 };
 
-const getSwapExtrinsicBuilder = (key: 'destinationFeeSwap' | 'feeSwap') => {
-  return ExtrinsicBuilder().assetConversion().swapTokensForExactTokens({
-    withSlippage: 30,
-    key: key,
+const swapExtrinsicBuilder = ExtrinsicBuilder()
+  .assetConversion()
+  .swapTokensForExactTokens({
+    slippage: 30,
   });
-};
 
 function toParachainExtTemplate(
   asset: Asset,
@@ -47,6 +47,7 @@ function toParachainExtTemplate(
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -63,8 +64,41 @@ function toParachainExtTemplate(
     },
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
-      getSwapExtrinsicBuilder('destinationFeeSwap')
+      swapExtrinsicBuilder
     ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
+  });
+}
+
+export function toParaStablesWithSwapTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: asset,
+        balance: BalanceBuilder().substrate().assets().account(),
+        swap: true,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+      min: AssetMinBuilder().assets().asset(),
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsicBuilder).prior(
+      ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()
+    ),
   });
 }
 
@@ -80,6 +114,7 @@ export function toParaStablesTemplate(
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -94,10 +129,7 @@ export function toParaStablesTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicDecorator(
-      isFeeSwapSupported,
-      getSwapExtrinsicBuilder('feeSwap')
-    ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   });
 }
 

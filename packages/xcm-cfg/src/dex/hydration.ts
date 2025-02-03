@@ -59,8 +59,4 @@ export class HydrationDex implements Dex {
       route: buildRoute(trade.swaps),
     } as SwapQuote;
   }
-
-  isFeeSwapSupported(_asset: Asset): boolean {
-    return false;
-  }
 }
