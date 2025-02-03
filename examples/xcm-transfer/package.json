@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@galacticcouncil/sdk": "^5.3.0",
-    "@galacticcouncil/xcm-cfg": "^7.1.0",
+    "@galacticcouncil/xcm-cfg": "^7.1.1",
     "@galacticcouncil/xcm-sdk": "^8.1.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@talismn/connect-wallets": "^1.2.8",

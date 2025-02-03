@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.1.1
+
+### Patch Changes
+
+- Fix xTokens.transferMulticurrencies mda derivative acc
+
 ## 7.1.0
 
 ### Minor Changes
