@@ -154,7 +154,8 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = acc.getMultilocationDerivatedAccount(
             ctx.parachainId,
             sender,
-            1
+            1,
+            rcv.usesH160Acc
           );
         }
 

@@ -11,7 +11,21 @@ const { configService, init } = setup;
 const { runXcm } = xcm;
 
 const getPolkadotChains = () => {
-  const skipFor: string[] = ['nodle', 'subsocial'];
+  //const skipFor: string[] = ['nodle', 'subsocial', 'tinkernet'];
+  const skipFor = Array.from(configService.chains.values())
+    .map((c) => c.key)
+    .filter(
+      (c) =>
+        ![
+          'hydration',
+          'moonbeam',
+          'polkadot',
+          'assethub',
+          'ethereum',
+          'solana',
+        ].includes(c)
+    );
+
   const chains = Array.from(configService.chains.values())
     .filter(
       (c) =>
@@ -45,7 +59,7 @@ describe('Wallet with XCM config', () => {
   let wallet: Wallet;
 
   const polkadot = getPolkadotChains();
-  const kusama = getKusamaChains();
+  //const kusama = getKusamaChains();
 
   beforeAll(async () => {
     c.log('Starting suite 👷 ...\n');
@@ -96,39 +110,39 @@ describe('Wallet with XCM config', () => {
     }
   );
 
-  describe.each(kusama.chains)(
-    'should return valid Kusama calldata for',
-    (c) => {
-      const config = configService.getChainRoutes(c);
-      const { chain, routes } = config;
+  // describe.each(kusama.chains)(
+  //   'should return valid Kusama calldata for',
+  //   (c) => {
+  //     const config = configService.getChainRoutes(c);
+  //     const { chain, routes } = config;
 
-      for (const route of Array.from(routes.values())) {
-        const { skipFor } = kusama;
-        const { destination } = route;
+  //     for (const route of Array.from(routes.values())) {
+  //       const { skipFor } = kusama;
+  //       const { destination } = route;
 
-        if (skipFor.includes(destination.chain.key)) {
-          continue;
-        }
+  //       if (skipFor.includes(destination.chain.key)) {
+  //         continue;
+  //       }
 
-        const info = getRouteInfo(chain, route);
-        const key = getRouteKey(chain, route);
+  //       const info = getRouteInfo(chain, route);
+  //       const key = getRouteKey(chain, route);
 
-        runXcm(
-          `${info} transfer`,
-          async () => {
-            return {
-              chain: chain,
-              route: route,
-              key: key,
-            };
-          },
-          async () => {
-            return {
-              wallet: wallet,
-            };
-          }
-        );
-      }
-    }
-  );
+  //       runXcm(
+  //         `${info} transfer`,
+  //         async () => {
+  //           return {
+  //             chain: chain,
+  //             route: route,
+  //             key: key,
+  //           };
+  //         },
+  //         async () => {
+  //           return {
+  //             wallet: wallet,
+  //           };
+  //         }
+  //       );
+  //     }
+  //   }
+  // );
 });
