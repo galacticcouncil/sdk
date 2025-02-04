@@ -8,6 +8,7 @@ export interface FeeConfig {
   asset: Asset | FeeAssetConfigBuilder;
   balance: BalanceConfigBuilder;
   extra?: number;
+  swap?: boolean;
 }
 
 export interface DestinationFeeConfig {

@@ -19,15 +19,26 @@ import {
 const pallet = 'xTokens';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) =>
+  build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
-        const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const rcvAddress = rcv.usesCexForwarding
+          ? acc.getMultilocationDerivatedAccount(
+              ctx.parachainId,
+              sender,
+              rcv.parachainId === 0 ? 0 : 1,
+              rcv.usesH160Acc
+            )
+          : address;
+
+        const account = getExtrinsicAccount(rcvAddress);
+
         const assetId = ctx.getAssetId(asset);
         return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
       },
@@ -143,7 +154,8 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = acc.getMultilocationDerivatedAccount(
             ctx.parachainId,
             sender,
-            1
+            rcv.parachainId === 0 ? 0 : 1,
+            rcv.usesH160Acc
           );
         }
 

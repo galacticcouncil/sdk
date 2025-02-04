@@ -315,6 +315,20 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> AssetHub (CEX) USDC [usdc] transfer 1`] = `
+[
+  "hydration-assethub_cex-usdc",
+  "0x5503040d02086b0d04010100a10f0404010300a10f043205e51400025a62020204010300a10f043205e5140204040d0100000101007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13006b0004010100a10f041400040002043205e5140082380100130002043205e51400823801000004040002043205e51400ce131a020001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee140d010204000101007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> AssetHub (CEX) USDT [usdt] transfer 1`] = `
+[
+  "hydration-assethub_cex-usdt",
+  "0x5503040d02086b0d04010100a10f0404010300a10f043205011f00025a62020204010300a10f043205011f0204040d0100000101007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13006b0004010100a10f041400040002043205011f0082380100130002043205011f00823801000004040002043205011f0046e419020001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee140d010204000101007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> AssetHub DED [ded] transfer 1`] = `
 [
   "hydration-assethub-ded",
@@ -627,6 +641,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 [
   "hydration-phala-pha",
   "0x01010489000800000000a0724e18090000000000000000000004010200cd1f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Polkadot (CEX) DOT [dot] transfer 1`] = `
+[
+  "hydration-polkadot_cex-dot",
+  "0xfc0489000500000000e87648170000000000000000000000040102000001007632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea1300",
 ]
 `;
 

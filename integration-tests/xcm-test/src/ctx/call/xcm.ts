@@ -6,12 +6,12 @@ import {
 } from '@galacticcouncil/xcm-core';
 import {
   PlatformAdapter,
-  SwapResolver,
+  FeeSwap,
   Transfer,
   Wallet,
 } from '@galacticcouncil/xcm-sdk';
 
-import { log } from 'console';
+import * as c from 'console';
 
 import { getAddress } from './account';
 import { getAmount } from './amount';
@@ -45,7 +45,7 @@ export const runXcm = (
         expect([key, data]).toMatchSnapshot();
       } catch (e) {
         const error = e as Error;
-        log('Ups, something went wrong...', error.message);
+        c.log('Ups, something went wrong...', error.message);
         return;
       }
     },
@@ -96,7 +96,11 @@ const getTransfer = async (
 
   // Mock source fee swap support to false (disabled)
   const isSwapSupportedMock = jest
-    .spyOn(SwapResolver.prototype, 'isSwapSupported')
+    .spyOn(FeeSwap.prototype, 'isSwapSupported')
+    .mockImplementation(() => false);
+
+  const isDestinationSwapSupportedMock = jest
+    .spyOn(FeeSwap.prototype, 'isDestinationSwapSupported')
     .mockImplementation(() => false);
 
   // Mock Erc20 spending cap to current balance (10 units)
@@ -120,6 +124,7 @@ const getTransfer = async (
   expect(readBalanceMock).toHaveBeenCalled();
   expect(estimateFeeMock).toHaveBeenCalled();
   expect(isSwapSupportedMock).toHaveBeenCalled();
+  expect(isDestinationSwapSupportedMock).toHaveBeenCalled();
 
   // Called only if contract bridge transfer from EVM chain, except native
   expect(allowanceMock).toBeDefined();

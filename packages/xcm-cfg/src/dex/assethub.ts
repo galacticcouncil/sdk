@@ -10,7 +10,6 @@ import {
 import { TypeRegistry } from '@polkadot/types';
 import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
-import { usdc, usdt } from '../assets';
 import { AssethubClient } from '../clients';
 
 const registry = new TypeRegistry();
@@ -52,9 +51,5 @@ export class AssethubDex implements Dex {
     return {
       amount: amountIn.toBigInt(),
     } as SwapQuote;
-  }
-
-  isFeeSwapSupported(asset: Asset): boolean {
-    return [usdc, usdt].map((a) => a.key).includes(asset.key);
   }
 }

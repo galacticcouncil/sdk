@@ -119,7 +119,7 @@ export class Wallet {
     const swap = new FeeSwap(ctx);
 
     let srcFeeSwap;
-    if (swap.isSwapSupported(srcFee)) {
+    if (swap.isSwapSupported(source.fee)) {
       srcFeeSwap = await swap.getSwap(srcFee);
     }
 
@@ -132,10 +132,7 @@ export class Wallet {
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.getEd();
-    // In case of active fee swap use effective fee to calculate max
-    const srcEffectiveFee =
-      srcFeeSwap && srcFeeSwap.enabled ? srcFeeSwap.aIn : srcFee;
-    const max = calculateMax(srcBalance, srcEffectiveFee, srcMin, srcEd);
+    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;

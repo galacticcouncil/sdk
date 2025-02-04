@@ -8,7 +8,7 @@ export const toDest = (
   destination: Parachain,
   account: any
 ) => {
-  if (destination.key === 'polkadot' || destination.key === 'kusama') {
+  if (destination.parachainId === 0) {
     return {
       [version]: {
         parents: 1,

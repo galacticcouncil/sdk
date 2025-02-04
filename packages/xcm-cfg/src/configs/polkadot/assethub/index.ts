@@ -3,6 +3,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 import { ded, dot, dota, myth, pink, usdc, usdt, wud } from '../../../assets';
 import {
   assetHub,
+  assetHubCex,
   bifrost,
   hydration,
   moonbeam,
@@ -17,8 +18,10 @@ import {
 
 import {
   toParaStablesTemplate,
+  toParaStablesWithSwapTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
+  xcmDeliveryFee,
 } from './templates';
 
 const toHydration: AssetRoute[] = [
@@ -29,6 +32,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -45,7 +49,7 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
-  toParaStablesTemplate(usdt, hydration, 0.0022),
+  toParaStablesTemplate(usdt, hydration, 0.02),
   toParaStablesTemplate(usdc, hydration, 0.02),
   toHydrationExtTemplate(pink),
   toHydrationExtTemplate(ded),
@@ -61,6 +65,7 @@ const toPolkadot: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -98,6 +103,7 @@ const toMythos: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
+        extra: xcmDeliveryFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().foreignAssets().account(),
@@ -123,5 +129,13 @@ export const assetHubConfig = new ChainRoutes({
     ...toMoonbeam,
     ...toBifrost,
     ...toMythos,
+  ],
+});
+
+export const assetHubCexConfig = new ChainRoutes({
+  chain: assetHubCex,
+  routes: [
+    toParaStablesWithSwapTemplate(usdt, hydration, 0.02),
+    toParaStablesWithSwapTemplate(usdc, hydration, 0.02),
   ],
 });

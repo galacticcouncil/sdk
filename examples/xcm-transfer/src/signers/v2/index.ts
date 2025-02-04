@@ -1,3 +1,4 @@
 export * from './extension';
 export * from './provider';
-export * as asset from './types';
+export * from './utils';
+export * from './types';

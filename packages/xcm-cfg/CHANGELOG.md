@@ -1,5 +1,30 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.1.2
+
+### Patch Changes
+
+- Fix mda account gen if dest relay
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.1
+
+## 7.1.1
+
+### Patch Changes
+
+- Fix xTokens.transferMulticurrencies mda derivative acc
+
+## 7.1.0
+
+### Minor Changes
+
+- CEX configurations for hub & relay
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.0
+
 ## 7.0.0
 
 ### Major Changes

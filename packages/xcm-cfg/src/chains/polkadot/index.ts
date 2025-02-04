@@ -2,7 +2,7 @@ import { AnyChain } from '@galacticcouncil/xcm-core';
 
 import { acala } from './acala';
 import { ajuna } from './ajuna';
-import { assetHub } from './assethub';
+import { assetHub, assetHubCex } from './assethub';
 import { astar } from './astar';
 import { bifrost } from './bifrost';
 import { centrifuge } from './centrifuge';
@@ -16,7 +16,7 @@ import { mythos } from './mythos';
 import { nodle } from './nodle';
 import { pendulum } from './pendulum';
 import { phala } from './phala';
-import { polkadot } from './polkadot';
+import { polkadot, polkadotCex } from './polkadot';
 import { subsocial } from './subsocial';
 import { unique } from './unique';
 import { zeitgeist } from './zeitgeist';
@@ -25,6 +25,7 @@ export const polkadotChains: AnyChain[] = [
   acala,
   ajuna,
   assetHub,
+  assetHubCex,
   astar,
   bifrost,
   centrifuge,
@@ -39,6 +40,7 @@ export const polkadotChains: AnyChain[] = [
   pendulum,
   phala,
   polkadot,
+  polkadotCex,
   subsocial,
   unique,
   zeitgeist,
@@ -48,6 +50,7 @@ export {
   acala,
   ajuna,
   assetHub,
+  assetHubCex,
   astar,
   bifrost,
   centrifuge,
@@ -62,6 +65,7 @@ export {
   pendulum,
   phala,
   polkadot,
+  polkadotCex,
   subsocial,
   unique,
   zeitgeist,

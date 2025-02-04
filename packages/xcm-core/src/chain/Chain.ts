@@ -7,7 +7,7 @@ export type ChainAssetId =
   | { [key: string]: ChainAssetId };
 
 export type ChainCurrency = {
-  symbol: string;
+  asset: Asset;
   decimals: number;
 };
 
