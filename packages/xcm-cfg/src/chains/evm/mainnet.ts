@@ -9,6 +9,7 @@ import {
   eth,
   susde,
   susds,
+  tbtc,
   usdc,
   usdt,
   wbtc,
@@ -51,6 +52,11 @@ export const ethereum = new EvmChain({
       asset: susds,
       decimals: 18,
       id: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+    },
+    {
+      asset: tbtc,
+      decimals: 18,
+      id: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
     },
     {
       asset: wbtc,

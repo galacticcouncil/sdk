@@ -49,6 +49,7 @@ import {
   susde,
   susds,
   sol,
+  tbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -626,6 +627,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: tbtc,
+      decimals: 18,
+      id: 1000765,
+      min: 0.00000023,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
               },
             },
           ],

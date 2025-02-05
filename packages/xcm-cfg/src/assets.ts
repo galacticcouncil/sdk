@@ -165,6 +165,11 @@ export const susds = new Asset({
   originSymbol: 'sUSDS',
 });
 
+export const tbtc = new Asset({
+  key: 'tbtc',
+  originSymbol: 'tBTC',
+});
+
 export const teer = new Asset({
   key: 'teer',
   originSymbol: 'TEER',
@@ -291,6 +296,7 @@ export const assets: Asset[] = [
   susds,
   teer,
   tnkr,
+  tbtc,
   unq,
   usdc,
   usdc_mwh,
