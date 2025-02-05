@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.3.0
+
+### Minor Changes
+
+- 2da6a6b: Add solana <-> moonbeam SOL transfer
+- 2da6a6b: Add ethereum <-> hydration tBTC transfer
+
 ## 7.2.0
 
 ### Minor Changes

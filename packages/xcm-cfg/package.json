@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-cfg",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "repository": {
