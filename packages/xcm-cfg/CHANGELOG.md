@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.2.0
+
+### Minor Changes
+
+- Use transfer multiasset for hydration assethub sufficient assets (cex)
+
 ## 7.1.2
 
 ### Patch Changes
