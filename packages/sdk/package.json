@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
   "repository": {

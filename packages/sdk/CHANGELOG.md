@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.4.0
+
+### Minor Changes
+
+- 6f46b18: Update stableswap spot price calculation (math)
+
 ## 5.3.0
 
 ### Minor Changes
