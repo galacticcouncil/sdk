@@ -1,5 +1,4 @@
 import {
-  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -18,6 +17,7 @@ import {
 } from './polkadotXcm.utils';
 
 import {
+  getDerivativeAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
@@ -164,15 +164,10 @@ const transferAssetsUsingTypeAndThen = (
         const rcv = destination.chain as Parachain;
 
         const from = getExtrinsicAccount(sender);
-        const rcvAddress = rcv.usesCexForwarding
-          ? acc.getMultilocationDerivatedAccount(
-              ctx.parachainId,
-              sender,
-              rcv.parachainId === 0 ? 0 : 1,
-              rcv.usesH160Acc
-            )
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
           : address;
-        const account = getExtrinsicAccount(rcvAddress);
+        const account = getExtrinsicAccount(receiver);
 
         const { transferType } = opts;
 
@@ -259,12 +254,7 @@ const send = () => {
 
             const ctx = source.chain as Parachain;
             const rcv = transact.chain as Parachain;
-            const mda = acc.getMultilocationDerivatedAccount(
-              ctx.parachainId,
-              sender,
-              rcv.parachainId === 0 ? 0 : 1,
-              rcv.usesH160Acc
-            );
+            const mda = getDerivativeAccount(ctx, sender, rcv);
             const account = getExtrinsicAccount(mda);
 
             const { fee } = transact;
@@ -301,13 +291,9 @@ const send = () => {
 
             const ctx = source.chain as Parachain;
             const rcv = destination.chain as Parachain;
-            const mda = acc.getMultilocationDerivatedAccount(
-              ctx.parachainId,
-              sender,
-              rcv.parachainId === 0 ? 0 : 1,
-              rcv.usesH160Acc
-            );
+            const mda = getDerivativeAccount(ctx, sender, rcv);
             const account = getExtrinsicAccount(mda);
+
             const receiver = getExtrinsicAccount(address);
 
             const transferAsset = getExtrinsicAssetLocation(

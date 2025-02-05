@@ -912,11 +912,11 @@
     }
   },
   "hydration-assethub_cex-usdt": {
-    "updated": 1738523661393,
+    "updated": 1738660359940,
     "destination": {
-      "fee": "1.055453",
+      "fee": "0.958138",
       "feeAsset": "USDT",
-      "feeNative": "1055453"
+      "feeNative": "958138"
     }
   },
   "hydration-assethub_cex-usdc": {

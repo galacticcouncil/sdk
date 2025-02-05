@@ -1,5 +1,4 @@
 import {
-  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -9,6 +8,7 @@ import {
 import { toAsset, toDest } from './xTokens.utils';
 
 import {
+  getDerivativeAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
@@ -28,16 +28,11 @@ const transfer = (): ExtrinsicConfigBuilder => ({
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
 
-        const rcvAddress = rcv.usesCexForwarding
-          ? acc.getMultilocationDerivatedAccount(
-              ctx.parachainId,
-              sender,
-              rcv.parachainId === 0 ? 0 : 1,
-              rcv.usesH160Acc
-            )
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
           : address;
 
-        const account = getExtrinsicAccount(rcvAddress);
+        const account = getExtrinsicAccount(receiver);
 
         const assetId = ctx.getAssetId(asset);
         return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
@@ -151,12 +146,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           rcv = transact.chain as Parachain;
           feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
           feeAssetId = ctx.getAssetId(transact.fee);
-          receiver = acc.getMultilocationDerivatedAccount(
-            ctx.parachainId,
-            sender,
-            rcv.parachainId === 0 ? 0 : 1,
-            rcv.usesH160Acc
-          );
+          receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
         const account = getExtrinsicAccount(receiver);

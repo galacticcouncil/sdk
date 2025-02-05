@@ -5,7 +5,7 @@ import {
 
 const pallet = 'balances';
 
-const transferAll = (): ExtrinsicConfigBuilder => {
+const transferAll = (keepAlive = false): ExtrinsicConfigBuilder => {
   const func = 'transferAll';
   return {
     build: ({ address }) =>
@@ -13,7 +13,7 @@ const transferAll = (): ExtrinsicConfigBuilder => {
         module: pallet,
         func,
         getArgs: () => {
-          return [address, false];
+          return [address, keepAlive];
         },
       }),
   };
