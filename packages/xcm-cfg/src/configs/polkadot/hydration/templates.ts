@@ -1,4 +1,5 @@
 import {
+  AnyChain,
   Asset,
   AssetRoute,
   ExtrinsicConfigBuilderParams,
@@ -39,6 +40,32 @@ const isDestinationFeeSwapSupported = (
 
 const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
 
+export function toTransferTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  });
+}
+
 export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
     source: {
@@ -64,7 +91,11 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
   });
 }
 
-export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
+export function toParaErc20Template(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
@@ -75,10 +106,10 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
       },
     },
     destination: {
-      chain: moonbeam,
+      chain: destination,
       asset: asset,
       fee: {
-        amount: 0.08,
+        amount: destinationFee,
         asset: glmr,
       },
     },
@@ -89,29 +120,12 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
   });
 }
 
+export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
+  return toParaErc20Template(asset, moonbeam, 0.08);
+}
+
 export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: zeitgeist,
-      asset: asset,
-      fee: {
-        amount: 0.1,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicDecorator(
-      isDestinationFeeSwapSupported,
-      swapExtrinsicBuilder
-    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
-  });
+  return toParaErc20Template(asset, zeitgeist, 0.1);
 }
 
 export function toCexViaAssethubTemplate(asset: Asset): AssetRoute {
