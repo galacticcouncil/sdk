@@ -169,4 +169,5 @@ export const assetHubCex = new Parachain({
   name: 'AssetHub (CEX)',
   usesCexForwarding: true,
   usesSignerFee: true,
+  isTestChain: true,
 });

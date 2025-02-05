@@ -91,6 +91,73 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
   });
 }
 
+export function toHubWithCexFwdTemplate(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHubCex,
+      asset: asset,
+      fee: {
+        amount: 0.1,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiasset(),
+        ExtrinsicBuilder().polkadotXcm().send().transferAsset({
+          fee: CEX_EXECUTION_FEE,
+        }),
+      ]),
+  });
+}
+
+export function toHubWithCexFwd2Template(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHubCex,
+      asset: asset,
+      fee: {
+        amount: 0.1,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiasset(),
+        ExtrinsicBuilder().polkadotXcm().send().transact({
+          fee: CEX_EXECUTION_FEE,
+        }),
+      ]),
+    transact: {
+      chain: assetHub,
+      fee: {
+        amount: 0,
+        asset: asset,
+        balance: balance(),
+      },
+      extrinsic: ExtrinsicBuilder().assets().transfer(),
+    },
+  });
+}
+
 export function toParaErc20Template(
   asset: Asset,
   destination: AnyChain,
@@ -126,77 +193,6 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
 
 export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
   return toParaErc20Template(asset, zeitgeist, 0.1);
-}
-
-export function toCexViaAssethubTemplate(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHubCex,
-      asset: asset,
-      fee: {
-        amount: FeeAmountBuilder().Assethub().destFeeIn(asset),
-        asset: asset,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-          transferType: XcmTransferType.DestinationReserve,
-        }),
-        ExtrinsicBuilder().polkadotXcm().send().transferAsset({
-          fee: CEX_EXECUTION_FEE,
-        }),
-      ]),
-  });
-}
-
-export function toCexViaAssethubTxTemplate(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHubCex,
-      asset: asset,
-      fee: {
-        amount: FeeAmountBuilder().Assethub().destFeeIn(asset),
-        asset: asset,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-          transferType: XcmTransferType.DestinationReserve,
-        }),
-        ExtrinsicBuilder().polkadotXcm().send().transact({
-          fee: CEX_EXECUTION_FEE,
-        }),
-      ]),
-    transact: {
-      chain: assetHub,
-      fee: {
-        amount: 0,
-        asset: asset,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder().assets().transfer(),
-    },
-  });
 }
 
 export function toEthereumViaWormholeTemplate(

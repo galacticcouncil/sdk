@@ -35,7 +35,7 @@ const swapExtrinsicBuilder = ExtrinsicBuilder()
     slippage: 30,
   });
 
-function toParachainExtTemplate(
+function toParaExtTemplate(
   asset: Asset,
   destination: AnyChain,
   destinationFee: number
@@ -134,9 +134,9 @@ export function toParaStablesTemplate(
 }
 
 export function toHydrationExtTemplate(asset: Asset): AssetRoute {
-  return toParachainExtTemplate(asset, hydration, 0.02);
+  return toParaExtTemplate(asset, hydration, 0.02);
 }
 
 export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
-  return toParachainExtTemplate(asset, moonbeam, 0.25);
+  return toParaExtTemplate(asset, moonbeam, 0.25);
 }

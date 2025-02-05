@@ -81,22 +81,8 @@ function Snowbridge() {
   };
 }
 
-function Assethub() {
-  return {
-    destFeeIn: (asset: Asset): FeeAmountConfigBuilder => ({
-      build: ({ destination }) => {
-        const rcv = destination as Parachain;
-        const client = new AssethubClient(rcv);
-        const fee = client.getDestinationFeeIn(asset);
-        return fee as Promise<bigint>;
-      },
-    }),
-  };
-}
-
 export function FeeAmountBuilder() {
   return {
-    Assethub,
     Snowbridge,
     Wormhole,
   };

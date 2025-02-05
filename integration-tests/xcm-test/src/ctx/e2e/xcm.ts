@@ -76,6 +76,8 @@ export const runXcm = (
         extrinsic = srcNetwork.api.tx(calldata.data);
       }
 
+      c.log('Extrinsic: ', extrinsic.toHex());
+
       const inputAsset = (assetId: number) =>
         srcNetwork.api.createType('MultiLocation', {
           parents: 0,

@@ -37,4 +37,5 @@ export const polkadotCex = new Parachain({
   key: 'polkadot_cex',
   name: 'Polkadot (CEX)',
   usesCexForwarding: true,
+  isTestChain: true,
 });

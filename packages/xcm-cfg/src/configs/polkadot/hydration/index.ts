@@ -74,12 +74,12 @@ import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 import { balance, fee } from './configs';
 import {
   toHubExtTemplate,
+  toHubWithCexFwd2Template,
   toEthereumViaSnowbridgeTemplate,
   toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
-  toCexViaAssethubTxTemplate,
   toTransferTemplate,
 } from './templates';
 
@@ -305,8 +305,8 @@ const toCexViaRelay = new AssetRoute({
 });
 
 const toCex: AssetRoute[] = [
-  toCexViaAssethubTxTemplate(usdt),
-  toCexViaAssethubTxTemplate(usdc),
+  toHubWithCexFwd2Template(usdt),
+  toHubWithCexFwd2Template(usdc),
   toCexViaRelay,
 ];
 

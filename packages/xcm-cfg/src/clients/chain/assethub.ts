@@ -3,7 +3,6 @@ import { Asset, Parachain } from '@galacticcouncil/xcm-core';
 import type {
   PalletAssetsAssetAccount,
   PalletAssetsAssetDetails,
-  StagingXcmV3MultiLocation,
 } from '@polkadot/types/lookup';
 import { Option } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
@@ -12,8 +11,6 @@ import { BN } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
 import { BalanceClient } from '../balance';
-
-import { dot } from '../../assets';
 
 export class AssethubClient extends BalanceClient {
   constructor(chain: Parachain) {
@@ -77,31 +74,5 @@ export class AssethubClient extends BalanceClient {
     );
     const bridgeFee = BigInt(leFee.toString());
     return bridgeFee + options.executionFee;
-  }
-
-  async getDestinationFeeIn(
-    asset: Asset,
-    options = {
-      edFee: 1_000_000_000n,
-      destFee: 1_000_000_000n,
-    }
-  ): Promise<bigint> {
-    const api = await this.chain.api;
-
-    const aIn = this.chain.getAssetXcmLocation(asset);
-    const aOut = this.chain.getAssetXcmLocation(dot);
-
-    const { edFee, destFee } = options;
-
-    const balance =
-      await api.call.assetConversionApi.quotePriceTokensForExactTokens(
-        aIn as unknown as StagingXcmV3MultiLocation,
-        aOut as unknown as StagingXcmV3MultiLocation,
-        edFee + destFee,
-        true
-      );
-
-    const amountIn = balance.unwrap();
-    return amountIn.toBigInt();
   }
 }

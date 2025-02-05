@@ -41,15 +41,20 @@ const transfer = (): ExtrinsicConfigBuilder => ({
 });
 
 const transferMultiasset = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) =>
+  build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMultiasset',
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 1);
-        const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
+          : address;
+
+        const account = getExtrinsicAccount(receiver);
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
