@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.3.1
+
+### Patch Changes
+
+- Bump sdk & core dependecies
+
 ## 7.3.0
 
 ### Minor Changes
