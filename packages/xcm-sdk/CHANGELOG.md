@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.2.0
+
+### Minor Changes
+
+- Re-estimate fee if fee swap enabled with margin
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.2.0
+
 ## 8.1.1
 
 ### Patch Changes

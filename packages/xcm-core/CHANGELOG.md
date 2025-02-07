@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 6.2.0
+
+### Minor Changes
+
+- AssetAmount increase by percentage helper
+
 ## 6.1.1
 
 ### Patch Changes
