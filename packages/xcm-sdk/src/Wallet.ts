@@ -114,18 +114,25 @@ export class Wallet {
 
     ctx.transact = await src.getTransact(ctx);
 
-    const srcFee = await src.getFee(ctx);
-
     const swap = new FeeSwap(ctx);
 
+    let srcFee = await src.getFee(ctx);
     let srcFeeSwap;
     if (swap.isSwapSupported(source.fee)) {
       srcFeeSwap = await swap.getSwap(srcFee);
+      ctx.source.feeSwap = srcFeeSwap;
     }
 
     let srcDestinationFeeSwap;
     if (swap.isDestinationSwapSupported(srcFee)) {
       srcDestinationFeeSwap = await swap.getDestinationSwap(srcFee);
+      ctx.source.destinationFeeSwap = srcDestinationFeeSwap;
+    }
+
+    if (srcFeeSwap || srcDestinationFeeSwap) {
+      // Re-estimate fee if fee swap & add 5% margin
+      srcFee = await src.getFee(ctx);
+      srcFee = srcFee.incByPct(5n);
     }
 
     const dstEd = await dst.getEd();
@@ -136,8 +143,6 @@ export class Wallet {
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
-    ctx.source.feeSwap = srcFeeSwap;
-    ctx.source.destinationFeeSwap = srcDestinationFeeSwap;
 
     return {
       source: {
