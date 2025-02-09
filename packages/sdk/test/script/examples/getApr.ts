@@ -10,11 +10,11 @@ class GetFarmAprExample extends PolkadotExecutor {
 
     const omnipool = await farmClient.getFarmApr('5', 'omnipool');
     const isolatedpool = await farmClient.getFarmApr(
-      '7JjS5KRKRGDvK9vHx6a1g1zEP81mDoisVPMabnECUPnCfMd8',
+      '7MveTu8GZxFc5953NYU85MGx6xti1KtaCiPyM6C9p9Ka2gnD',
       'isolatedpool'
     );
     return { omnipool, isolatedpool };
   }
 }
 
-new GetFarmAprExample(ApiUrl.Nice, 'Get farm apr').run();
+new GetFarmAprExample(ApiUrl.HydraDx, 'Get farm apr').run();
