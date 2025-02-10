@@ -2,15 +2,15 @@ import { CompatibilityLevel } from 'polkadot-api';
 
 import { type Observable, map } from 'rxjs';
 
-import { PoolBase, PoolType, PoolLimits, PoolFees } from '../types';
+import { PoolType, PoolLimits, PoolFees } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { HYDRATION_OMNIPOOL_ADDRESS } from '../../consts';
 import { fmt } from '../../utils';
 
-import { OmniPoolFees, OmniPoolToken } from './OmniPool';
+import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 
-export class OmniPoolClient extends PoolClient {
+export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   async isSupported(): Promise<boolean> {
     const query = this.api.query.Omnipool.Assets;
     const compatibilityToken = await this.api.compatibilityToken;
@@ -20,9 +20,8 @@ export class OmniPoolClient extends PoolClient {
     );
   }
 
-  async loadPools(): Promise<PoolBase[]> {
+  async loadPools(): Promise<OmniPoolBase[]> {
     const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
-
     const poolAddress = this.getPoolId();
 
     const [entries, hubAssetTradeability, hubAssetBalance, limits] =
@@ -64,7 +63,7 @@ export class OmniPoolClient extends PoolClient {
         hubAssetId: hubAssetId,
         tokens: tokens,
         ...limits,
-      } as PoolBase,
+      } as OmniPoolBase,
     ];
   }
 
@@ -100,7 +99,7 @@ export class OmniPoolClient extends PoolClient {
     return PoolType.Omni;
   }
 
-  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
+  subscribePoolChange(pool: OmniPoolBase): Observable<OmniPoolBase> {
     const query = this.api.query.Omnipool.Assets;
     return query.watchEntries().pipe(
       map((assets) => {

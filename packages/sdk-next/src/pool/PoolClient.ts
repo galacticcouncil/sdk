@@ -10,7 +10,7 @@ import { Asset } from '../types';
 
 import { PoolBase, PoolFees, PoolType } from './types';
 
-export abstract class PoolClient extends BalanceClient {
+export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   protected pools: PoolBase[] = [];
   protected subs: Subscription = Subscription.EMPTY;
 
@@ -29,8 +29,8 @@ export abstract class PoolClient extends BalanceClient {
   abstract isSupported(): Promise<boolean>;
   abstract getPoolType(): PoolType;
   abstract getPoolFees(address: string, feeAsset: number): Promise<PoolFees>;
-  protected abstract loadPools(): Promise<PoolBase[]>;
-  protected abstract subscribePoolChange(pool: PoolBase): Observable<PoolBase>;
+  abstract loadPools(): Promise<T[]>;
+  abstract subscribePoolChange(pool: T): Observable<T>;
 
   get augmentedPools() {
     return this.pools

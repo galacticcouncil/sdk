@@ -355,10 +355,11 @@ export class StableSwap implements Pool {
   }
 
   calculateTradeFee(amount: bigint, fees: StableSwapFees): bigint {
+    const [feeNumerator, feeDenominator] = fees.fee;
     const fee = StableMath.calculatePoolTradeFee(
       amount.toString(),
-      fees.fee[0],
-      fees.fee[1]
+      feeNumerator,
+      feeDenominator
     );
     return BigInt(fee);
   }
