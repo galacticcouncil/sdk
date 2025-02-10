@@ -6,7 +6,6 @@ import { LbpPoolClient } from './lbp';
 import { OmniPoolClient } from './omni';
 import { XykPoolClient } from './xyk';
 import { StableSwapClient } from './stable';
-import { buildRoute } from './PoolUtils';
 
 import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
@@ -22,8 +21,8 @@ export class PoolService extends Papi implements IPoolService {
 
   protected readonly xykClient: XykPoolClient;
   protected readonly omniClient: OmniPoolClient;
-  // protected readonly lbpClient: LbpPoolClient;
-  // protected readonly stableClient: StableSwapClient;
+  protected readonly lbpClient: LbpPoolClient;
+  protected readonly stableClient: StableSwapClient;
 
   protected readonly clients: PoolClient[] = [];
 
@@ -39,13 +38,13 @@ export class PoolService extends Papi implements IPoolService {
     this.assetClient = new AssetClient(client);
     this.xykClient = new XykPoolClient(client);
     this.omniClient = new OmniPoolClient(client);
-    // this.lbpClient = new LbpPoolClient(this.api);
-    // this.stableClient = new StableSwapClient(this.api);
+    this.lbpClient = new LbpPoolClient(client);
+    this.stableClient = new StableSwapClient(client);
     this.clients = [
       this.xykClient,
       this.omniClient,
-      // this.lbpClient,
-      // this.stableClient,
+      this.lbpClient,
+      this.stableClient,
     ];
   }
 
@@ -88,8 +87,8 @@ export class PoolService extends Papi implements IPoolService {
   unsubscribe() {
     this.xykClient.unsubscribe();
     this.omniClient.unsubscribe();
-    // this.lbpClient.unsubscribe();
-    // this.stableClient.unsubscribe();
+    this.lbpClient.unsubscribe();
+    this.stableClient.unsubscribe();
   }
 
   async getPoolFees(pool: Pool, feeAsset: number): Promise<PoolFees> {
@@ -98,10 +97,10 @@ export class PoolService extends Papi implements IPoolService {
         return this.xykClient.getPoolFees(pool.address);
       case PoolType.Omni:
         return this.omniClient.getPoolFees(pool.address, feeAsset);
-      // case PoolType.LBP:
-      //   return this.lbpClient.getPoolFees(feeAsset, pool.address);
-      // case PoolType.Stable:
-      //   return this.stableClient.getPoolFees(feeAsset, pool.address);
+      case PoolType.LBP:
+        return this.lbpClient.getPoolFees(pool.address, feeAsset);
+      case PoolType.Stable:
+        return this.stableClient.getPoolFees(pool.address, feeAsset);
       default:
         throw new PoolNotFound(pool.type);
     }
@@ -118,30 +117,7 @@ export class PoolService extends Papi implements IPoolService {
     maxAmountIn: bigint,
     route: Hop[]
   ): Transaction {
-    throw new Error('');
-
-    // In case of direct trade in omnipool we skip router (cheaper tx)
-    // if (this.isDirectOmnipoolTrade(route)) {
-    //   tx = this.api.tx.omnipool.buy(
-    //     assetOut,
-    //     assetIn,
-    //     amountOut.toFixed(),
-    //     maxAmountIn.toFixed()
-    //   );
-    // } else {
-    //   tx = this.api.tx.router.buy(
-    //     assetIn,
-    //     assetOut,
-    //     amountOut.toFixed(),
-    //     maxAmountIn.toFixed(),
-    //     buildRoute(route)
-    //   );
-    // }
-
-    // const getTx = (): SubmittableExtrinsic => {
-    //   return tx;
-    // };
-    // return { hex: tx.toHex(), name: 'RouterBuy', get: getTx } as Transaction;
+    throw new Error('Not supported yet');
   }
 
   buildSellTx(
@@ -151,29 +127,6 @@ export class PoolService extends Papi implements IPoolService {
     minAmountOut: bigint,
     route: Hop[]
   ): Transaction {
-    throw new Error('');
-
-    // In case of direct trade in omnipool we skip router (cheaper tx)
-    // if (this.isDirectOmnipoolTrade(route)) {
-    //   tx = this.api.tx.omnipool.sell(
-    //     assetIn,
-    //     assetOut,
-    //     amountIn.toFixed(),
-    //     minAmountOut.toFixed()
-    //   );
-    // } else {
-    //   tx = this.api.tx.router.sell(
-    //     assetIn,
-    //     assetOut,
-    //     amountIn.toFixed(),
-    //     minAmountOut.toFixed(),
-    //     buildRoute(route)
-    //   );
-    // }
-
-    // const getTx = (): SubmittableExtrinsic => {
-    //   return tx;
-    // };
-    // return { hex: tx.toHex(), name: 'RouterSell', get: getTx } as Transaction;
+    throw new Error('Noit supported yet');
   }
 }

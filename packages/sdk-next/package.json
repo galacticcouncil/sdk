@@ -30,7 +30,7 @@
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
     "@galacticcouncil/math-omnipool": "^1.0.0",
-    "@galacticcouncil/math-stableswap": "^1.0.0",
+    "@galacticcouncil/math-stableswap": "^1.1.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@thi.ng/cache": "^2.1.35",
@@ -38,6 +38,8 @@
     "bignumber.js": "^9.1.2"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.8.2"
+    "polkadot-api": "^1.8.2",
+    "@polkadot/util": "~13.1.1",
+    "@polkadot/util-crypto": "~13.1.1"
   }
 }

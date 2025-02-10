@@ -1,6 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { type Observable } from 'rxjs';
+import { type Observable, NEVER } from 'rxjs';
 
 import {
   PoolBase,
@@ -72,7 +72,7 @@ export class XykPoolClient extends PoolClient {
   }
 
   protected subscribePoolChange(_pool: PoolBase): Observable<PoolBase> {
-    throw new Error('Pool change subscription not supported!');
+    return NEVER;
   }
 
   private async getExchangeFee(): Promise<PoolFee> {

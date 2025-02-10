@@ -28,7 +28,7 @@ export interface PoolPair {
 
 export type PoolBase = {
   address: string;
-  id?: string;
+  id?: number;
   type: PoolType;
   tokens: PoolToken[];
   maxInRatio: bigint;
