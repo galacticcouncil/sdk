@@ -24,5 +24,5 @@ export const laos_chain = new EvmParachain({
   parachainId: 3370,
   ss58Format: 18,
   usesH160Acc: true,
-  ws: 'wss://laos.dwellir.com',
+  ws: 'wss://laos-rpc.dwellir.com',
 });
