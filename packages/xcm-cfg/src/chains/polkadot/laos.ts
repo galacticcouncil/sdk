@@ -7,7 +7,7 @@ import { laos as evmChain } from 'viem/chains';
 
 import { laos } from '../../assets';
 
-export const darwinia = new EvmParachain({
+export const laos_chain = new EvmParachain({
   assetsData: [
     {
       asset: laos,
