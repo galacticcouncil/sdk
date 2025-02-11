@@ -61,7 +61,8 @@ function checkProcessedStatus(data: AnyJson): boolean {
 }
 
 function logEvent(section: string, method: string, data: AnyJson) {
-  c.log('🥢 Event: ' + section + '.' + method, data);
+  process.env.LOG_LEVEL === 'info' &&
+    c.log('🥢 Event: ' + section + '.' + method, data);
 }
 
 function logError(api: ApiPromise, data: any) {

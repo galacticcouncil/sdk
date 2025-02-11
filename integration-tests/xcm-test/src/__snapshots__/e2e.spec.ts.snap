@@ -595,6 +595,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Moonbeam SOL [sol] transfer 1`] = `
+[
+  "hydration-moonbeam-sol",
+  "0x35010489040830450f0000e40b54020000000000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Moonbeam USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-usdc_mwh",

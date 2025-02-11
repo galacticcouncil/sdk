@@ -7,9 +7,14 @@ import * as c from 'console';
 import { initStorage } from './storage';
 import { SetupCtx } from './types';
 
+const wasms: Record<string, string> = {
+  hydration: 'hydradx_runtime.compact.compressed.wasm',
+};
+
 export async function createNetwork(chain: Parachain): Promise<SetupCtx> {
   const ctx = await setupContext({
     endpoint: chain.ws,
+    wasmOverride: wasms[chain.key],
   });
 
   const chainStorage = await initStorage(ctx.api, chain);
