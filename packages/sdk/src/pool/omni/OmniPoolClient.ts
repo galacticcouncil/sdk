@@ -227,8 +227,6 @@ export class OmniPoolClient extends PoolClient {
       decay.toString(),
       amplification.toString()
     );
-    console.log(assetFee.toHuman(), fee);
-
     return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
   }
 
