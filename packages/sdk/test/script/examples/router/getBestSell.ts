@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter, ZERO } from '@galacticcouncil/sdk';
+import { PoolService, PoolType, TradeRouter, ZERO } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
@@ -18,8 +18,10 @@ class GetBestSellPriceExample extends PolkadotExecutor {
 
     const poolService = new PoolService(api);
     await poolService.syncRegistry(external);
-    const router = new TradeRouter(poolService);
-    const bestSell = await router.getBestSell('5', '0', 1);
+    const router = new TradeRouter(poolService, {
+      includeOnly: [PoolType.Stable],
+    });
+    const bestSell = await router.getBestBuy('1', '10', '1');
     const transaction = bestSell.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
     return bestSell;
