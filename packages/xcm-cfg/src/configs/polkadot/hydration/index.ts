@@ -20,6 +20,7 @@ import {
   ibtc,
   intr,
   kilt,
+  laos,
   ldot,
   myth,
   nodl,
@@ -59,6 +60,7 @@ import {
   hydration,
   interlay,
   kilt_chain,
+  laos_chain,
   moonbeam,
   mythos,
   nodle,
@@ -246,6 +248,8 @@ const toCrust: AssetRoute[] = [toTransferTemplate(cru, crust, 0.04)];
 
 const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain, 0.02)];
 
+const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain, 0.1)];
+
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
@@ -329,6 +333,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,
+    ...toLaos,
     ...toMoonbeam,
     ...toMythos,
     ...toNodle,
