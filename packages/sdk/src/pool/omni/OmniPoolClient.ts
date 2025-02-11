@@ -139,8 +139,6 @@ export class OmniPoolClient extends PoolClient {
     const min = assetFeeMin + protocolFeeMin;
     const max = assetFeeMax + protocolFeeMax;
 
-    console.log(assetFee, protocolFee);
-
     return {
       assetFee: toPoolFee(assetFee),
       protocolFee: toPoolFee(protocolFee),
