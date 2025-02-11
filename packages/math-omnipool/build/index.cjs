@@ -234,9 +234,11 @@ module.exports.calculate_liquidity_lrna_out = function(asset_reserve, asset_hub_
 };
 
 /**
-* @param {string} asset_amount_in
-* @param {string} asset_amount_out
-* @param {string} asset_liquidity
+* @param {string} oracle_amount_in
+* @param {string} oracle_amount_out
+* @param {string} oracle_liquidity
+* @param {string} oracle_period
+* @param {string} current_asset_liquidity
 * @param {string} previous_fee
 * @param {string} block_difference
 * @param {string} min_fee
@@ -245,45 +247,51 @@ module.exports.calculate_liquidity_lrna_out = function(asset_reserve, asset_hub_
 * @param {string} amplification
 * @returns {string}
 */
-module.exports.recalculate_asset_fee = function(asset_amount_in, asset_amount_out, asset_liquidity, previous_fee, block_difference, min_fee, max_fee, decay, amplification) {
-    let deferred10_0;
-    let deferred10_1;
+module.exports.recalculate_asset_fee = function(oracle_amount_in, oracle_amount_out, oracle_liquidity, oracle_period, current_asset_liquidity, previous_fee, block_difference, min_fee, max_fee, decay, amplification) {
+    let deferred12_0;
+    let deferred12_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passStringToWasm0(asset_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr0 = passStringToWasm0(oracle_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(asset_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr1 = passStringToWasm0(oracle_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passStringToWasm0(asset_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr2 = passStringToWasm0(oracle_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passStringToWasm0(previous_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr3 = passStringToWasm0(oracle_period, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passStringToWasm0(block_difference, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr4 = passStringToWasm0(current_asset_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passStringToWasm0(min_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr5 = passStringToWasm0(previous_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len5 = WASM_VECTOR_LEN;
-        const ptr6 = passStringToWasm0(max_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr6 = passStringToWasm0(block_difference, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len6 = WASM_VECTOR_LEN;
-        const ptr7 = passStringToWasm0(decay, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr7 = passStringToWasm0(min_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len7 = WASM_VECTOR_LEN;
-        const ptr8 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr8 = passStringToWasm0(max_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len8 = WASM_VECTOR_LEN;
-        wasm.recalculate_asset_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
+        const ptr9 = passStringToWasm0(decay, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len9 = WASM_VECTOR_LEN;
+        const ptr10 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len10 = WASM_VECTOR_LEN;
+        wasm.recalculate_asset_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        deferred10_0 = r0;
-        deferred10_1 = r1;
+        deferred12_0 = r0;
+        deferred12_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
+        wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
 };
 
 /**
-* @param {string} asset_amount_in
-* @param {string} asset_amount_out
-* @param {string} asset_liquidity
+* @param {string} oracle_amount_in
+* @param {string} oracle_amount_out
+* @param {string} oracle_liquidity
+* @param {string} oracle_period
+* @param {string} current_asset_liquidity
 * @param {string} previous_fee
 * @param {string} block_difference
 * @param {string} min_fee
@@ -292,38 +300,42 @@ module.exports.recalculate_asset_fee = function(asset_amount_in, asset_amount_ou
 * @param {string} amplification
 * @returns {string}
 */
-module.exports.recalculate_protocol_fee = function(asset_amount_in, asset_amount_out, asset_liquidity, previous_fee, block_difference, min_fee, max_fee, decay, amplification) {
-    let deferred10_0;
-    let deferred10_1;
+module.exports.recalculate_protocol_fee = function(oracle_amount_in, oracle_amount_out, oracle_liquidity, oracle_period, current_asset_liquidity, previous_fee, block_difference, min_fee, max_fee, decay, amplification) {
+    let deferred12_0;
+    let deferred12_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passStringToWasm0(asset_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr0 = passStringToWasm0(oracle_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(asset_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr1 = passStringToWasm0(oracle_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passStringToWasm0(asset_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr2 = passStringToWasm0(oracle_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passStringToWasm0(previous_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr3 = passStringToWasm0(oracle_period, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passStringToWasm0(block_difference, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr4 = passStringToWasm0(current_asset_liquidity, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passStringToWasm0(min_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr5 = passStringToWasm0(previous_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len5 = WASM_VECTOR_LEN;
-        const ptr6 = passStringToWasm0(max_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr6 = passStringToWasm0(block_difference, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len6 = WASM_VECTOR_LEN;
-        const ptr7 = passStringToWasm0(decay, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr7 = passStringToWasm0(min_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len7 = WASM_VECTOR_LEN;
-        const ptr8 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr8 = passStringToWasm0(max_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len8 = WASM_VECTOR_LEN;
-        wasm.recalculate_protocol_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
+        const ptr9 = passStringToWasm0(decay, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len9 = WASM_VECTOR_LEN;
+        const ptr10 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len10 = WASM_VECTOR_LEN;
+        wasm.recalculate_protocol_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        deferred10_0 = r0;
-        deferred10_1 = r1;
+        deferred12_0 = r0;
+        deferred12_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
+        wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
 };
 
