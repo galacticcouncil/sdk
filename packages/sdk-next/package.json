@@ -29,8 +29,8 @@
   "dependencies": {
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
-    "@galacticcouncil/math-omnipool": "^1.0.0",
-    "@galacticcouncil/math-stableswap": "^1.1.0",
+    "@galacticcouncil/math-omnipool": "^1.1.0",
+    "@galacticcouncil/math-stableswap": "^1.2.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@thi.ng/cache": "^2.1.35",
