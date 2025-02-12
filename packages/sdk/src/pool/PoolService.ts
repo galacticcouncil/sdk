@@ -12,15 +12,16 @@ import { buildRoute } from './PoolUtils';
 import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
 import {
-  Hop,
-  PoolBase,
-  IPoolService,
-  PoolType,
-  Transaction,
-  PoolFees,
-  Pool,
   Asset,
   ExternalAsset,
+  Hop,
+  IPoolService,
+  Pool,
+  PoolBase,
+  PoolFees,
+  PoolPair,
+  PoolType,
+  Transaction,
 } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
@@ -103,16 +104,16 @@ export class PoolService implements IPoolService {
     this.stableClient.unsubscribe();
   }
 
-  async getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {
+  async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
     switch (pool.type) {
       case PoolType.XYK:
-        return this.xykClient.getPoolFees(feeAsset, pool.address);
+        return this.xykClient.getPoolFees(poolPair, pool.address);
       case PoolType.Omni:
-        return this.omniClient.getPoolFees(feeAsset, pool.address);
+        return this.omniClient.getPoolFees(poolPair, pool.address);
       case PoolType.LBP:
-        return this.lbpClient.getPoolFees(feeAsset, pool.address);
+        return this.lbpClient.getPoolFees(poolPair, pool.address);
       case PoolType.Stable:
-        return this.stableClient.getPoolFees(feeAsset, pool.address);
+        return this.stableClient.getPoolFees(poolPair, pool.address);
       default:
         throw new PoolNotFound(pool.type);
     }

@@ -264,10 +264,7 @@ export class TradeRouter extends Router {
         aIn = scale(bnum(amountIn), poolPair.decimalsIn).decimalPlaces(0, 1);
       }
 
-      const poolFees = await this.poolService.getPoolFees(
-        poolPair.assetOut,
-        pool
-      );
+      const poolFees = await this.poolService.getPoolFees(poolPair, pool);
       const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(
         poolPair,
         aIn,
@@ -564,10 +561,7 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const poolFees = await this.poolService.getPoolFees(
-        poolPair.assetOut,
-        pool
-      );
+      const poolFees = await this.poolService.getPoolFees(poolPair, pool);
       const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(
         poolPair,
         aOut,

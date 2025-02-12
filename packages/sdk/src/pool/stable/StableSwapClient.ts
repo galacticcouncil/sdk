@@ -9,6 +9,7 @@ import {
   PoolLimits,
   PoolFees,
   PoolToken,
+  PoolPair,
 } from '../../types';
 import { toPoolFee } from '../../utils/mapper';
 
@@ -62,7 +63,7 @@ export class StableSwapClient extends PoolClient {
     return Promise.all(stablePools);
   }
 
-  async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
+  async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
     const pool = this.pools.find(
       (pool) => pool.address === address
     ) as StableSwapBase;
