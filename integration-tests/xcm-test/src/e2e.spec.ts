@@ -44,19 +44,17 @@ const usage = outdent`
  */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum', 'solana'];
-  const skipFor: string[] = bridge.concat(['nodle', 'subsocial']);
+  const skipFor: string[] = bridge.concat(['nodle', 'subsocial', 'zeitgeist']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
+    .filter((c) => !c.isTestChain)
     .filter((c) => !skipFor.includes(c.key));
 
   return {
     skipFor,
     bridge,
-    //chains,
-    chains: Array.from(configService.chains.values()).filter((c) =>
-      ['polkadot', 'moonbeam', 'hydration'].includes(c.key)
-    ) as Parachain[],
+    chains,
   };
 };
 
@@ -115,6 +113,8 @@ describe('Wallet with XCM config', () => {
 
         const isContractTransfer = !!route.contract;
         const isAcalaErc20Transfer = asset.key.endsWith('_awh');
+        const isIBTCTransfer = asset.key === 'ibtc';
+        const isTestDestChain = destination.chain.isTestChain;
 
         runXcm(
           `${info} transfer`,
@@ -137,6 +137,8 @@ describe('Wallet with XCM config', () => {
               isKeyConstraint ||
               isChainConstraint ||
               isContractTransfer ||
+              isTestDestChain ||
+              isIBTCTransfer ||
               isAcalaErc20Transfer,
             sync: true,
             snapshot: true,
