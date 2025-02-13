@@ -5,7 +5,7 @@ import { type Observable, map } from 'rxjs';
 import { PoolType, PoolLimits, PoolFees } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import { HYDRATION_OMNIPOOL_ADDRESS } from '../../consts';
+import { HUB_ASSET_ID, HYDRATION_OMNIPOOL_ADDRESS } from '../../consts';
 import { fmt } from '../../utils';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
@@ -102,15 +102,15 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   subscribePoolChange(pool: OmniPoolBase): Observable<OmniPoolBase> {
     const query = this.api.query.Omnipool.Assets;
     return query.watchEntries().pipe(
-      map((assets) => {
-        assets.entries.forEach((e) => {
+      map((assets) =>
+        assets.entries.map((e) => {
           const [key] = e.args;
           const { hub_reserve, shares, tradable, cap, protocol_shares } =
             e.value;
 
-          const tokenIndex = pool.tokens.findIndex((t) => (t.id = key));
+          const tokenIndex = pool.tokens.findIndex((t) => t.id === key);
           const token = pool.tokens[tokenIndex];
-          pool.tokens[tokenIndex] = {
+          return {
             ...token,
             hubReserves: hub_reserve,
             shares: shares,
@@ -118,8 +118,14 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
             cap: cap,
             protocolShares: protocol_shares,
           } as OmniPoolToken;
-        });
-        return pool;
+        })
+      ),
+      map((tokens) => {
+        const lrna = pool.tokens.find((t) => t.id === HUB_ASSET_ID);
+        return {
+          ...pool,
+          tokens: [...tokens, lrna!],
+        };
       })
     );
   }

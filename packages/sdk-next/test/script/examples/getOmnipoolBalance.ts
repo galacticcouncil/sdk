@@ -8,7 +8,7 @@ import { ApiUrl } from '../types';
 import { client as c } from '../../../src';
 
 class GetOmnipoolBalance extends PapiExecutor {
-  async script(client: PolkadotClient): Promise<any> {
+  async script(client: PolkadotClient) {
     const balanceClient = new c.BalanceClient(client);
     const observable = balanceClient.subscribeBalance(
       '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1'
@@ -17,4 +17,4 @@ class GetOmnipoolBalance extends PapiExecutor {
   }
 }
 
-new GetOmnipoolBalance(ApiUrl.HydraDx, 'Get omnipool balance').run();
+new GetOmnipoolBalance(ApiUrl.Hydration, 'Get omnipool balance').run();

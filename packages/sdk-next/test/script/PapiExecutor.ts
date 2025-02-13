@@ -1,6 +1,8 @@
 import { PolkadotClient } from 'polkadot-api';
 import { hydration } from '@polkadot-api/descriptors';
 
+import { Subscription } from 'rxjs';
+
 import { ApiUrl } from './types';
 
 import { papi, json } from '../../src';
@@ -27,6 +29,11 @@ export abstract class PapiExecutor {
 
     this.script(client)
       .then((output: any) => {
+        if (output instanceof Subscription) {
+          console.log('Subscribed to ' + this.apiUrl);
+          return;
+        }
+
         if (this.pretty) {
           console.log(
             output ? JSON.stringify(output, json.jsonFormatter, 2) : ''
@@ -34,7 +41,7 @@ export abstract class PapiExecutor {
         } else {
           console.log(output);
         }
-        return null;
+        client.destroy();
       })
       .catch((e) => {
         console.log(e);
@@ -42,7 +49,6 @@ export abstract class PapiExecutor {
       })
       .finally(() => {
         console.timeEnd('Execution time:');
-        client.destroy();
       });
   }
 
