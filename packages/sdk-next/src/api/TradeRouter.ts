@@ -147,7 +147,7 @@ export class TradeRouter extends Router {
       const routes = await Promise.all(
         paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap))
       );
-      swaps = this.findBestSellRoute([routes[1]]);
+      swaps = this.findBestSellRoute(routes);
     }
 
     const firstSwap = swaps[0];

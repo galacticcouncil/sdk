@@ -1,7 +1,7 @@
 import { CompatibilityLevel } from 'polkadot-api';
 import { HydrationQueries } from '@polkadot-api/descriptors';
 
-import { type Observable, of, mergeMap, switchMap, NEVER } from 'rxjs';
+import { type Observable, map, switchMap, NEVER } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -92,10 +92,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         }
         return NEVER;
       }),
-      mergeMap((delta) => {
-        Object.assign(pool, delta);
-        return of(pool);
-      })
+      map((delta) => Object.assign({}, pool, delta))
     );
   }
 

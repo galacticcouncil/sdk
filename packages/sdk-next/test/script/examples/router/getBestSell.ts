@@ -10,7 +10,9 @@ class GetBestSellPriceExample extends PapiExecutor {
     const poolService = new p.PoolService(client);
     const router = new a.TradeRouter(poolService);
 
-    const bestSell = await router.getBestSell(5, 0, 10_000_000_000n);
+    //const bestSell = await router.getBestSell(5, 0, 10_000_000_000n);
+    const bestSell = await router.getBestSell(1, 10, 1_000_000_000_000n);
+
     //const transaction = bestSell.toTx(ZERO);
     //console.log('Transaction hash: ' + transaction.hex);
     return bestSell;

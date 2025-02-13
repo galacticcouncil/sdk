@@ -74,24 +74,14 @@ export class BalanceClient extends Papi {
     return query.watchEntries(address).pipe(
       map((balance) => {
         const result: AssetAmount[] = [];
-
-        balance.deltas?.deleted.forEach((u) => {
-          const [_, asset] = u.args;
-          result.push({
-            id: asset,
-            amount: 0n,
-          });
-        });
-
-        balance.deltas?.upserted.forEach((u) => {
-          const [_, asset] = u.args;
-          const { free, frozen } = u.value;
+        balance.entries.forEach((e) => {
+          const [_, asset] = e.args;
+          const { free, frozen } = e.value;
           result.push({
             id: asset,
             amount: free - frozen,
           });
         });
-
         return result;
       })
     );

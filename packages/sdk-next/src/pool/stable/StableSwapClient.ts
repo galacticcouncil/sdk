@@ -2,7 +2,7 @@ import { CompatibilityLevel } from 'polkadot-api';
 import { HydrationQueries } from '@polkadot-api/descriptors';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 
-import { type Observable, of, mergeMap, switchMap, NEVER } from 'rxjs';
+import { type Observable, map, switchMap, NEVER } from 'rxjs';
 
 import { PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -77,18 +77,15 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     const query = this.api.query.System.Number;
     const stablePool = this.stablePools.get(pool.address);
 
-    if (!stablePool) {
+    if (!stablePool || !pool.id) {
       return NEVER;
     }
 
     return query.watchValue().pipe(
       switchMap((parachainBlock) =>
-        this.getPoolDelta(pool.id!, stablePool, parachainBlock)
+        this.getPoolDelta(pool.id, stablePool, parachainBlock)
       ),
-      mergeMap((delta) => {
-        Object.assign(pool, delta);
-        return of(pool);
-      })
+      map((delta) => Object.assign({}, pool, delta))
     );
   }
 
