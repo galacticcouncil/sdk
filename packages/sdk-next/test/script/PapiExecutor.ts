@@ -1,11 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
 import { hydration } from '@polkadot-api/descriptors';
 
-import { Subscription } from 'rxjs';
-
 import { ApiUrl } from './types';
 
-import { papi, json } from '../../src';
+import { api, json } from '../../src';
 
 export abstract class PapiExecutor {
   protected readonly apiUrl: ApiUrl;
@@ -19,9 +17,9 @@ export abstract class PapiExecutor {
   }
 
   async run() {
-    const client = await papi.getWs(this.apiUrl);
-    const api = client.getTypedApi(hydration);
-    const { spec_name, spec_version } = await api.constants.System.Version();
+    const client = await api.getWs(this.apiUrl);
+    const papi = client.getTypedApi(hydration);
+    const { spec_name, spec_version } = await papi.constants.System.Version();
     console.log(`Runtime ready ${spec_name}/${spec_version}`);
     console.log('Running script...');
     console.log(this.desc);
@@ -29,8 +27,8 @@ export abstract class PapiExecutor {
 
     this.script(client)
       .then((output: any) => {
-        if (output instanceof Subscription) {
-          console.log('Subscribed to ' + this.apiUrl);
+        if (typeof output === 'function') {
+          setTimeout(output, 1000);
           return;
         }
 
@@ -53,4 +51,13 @@ export abstract class PapiExecutor {
   }
 
   abstract script(client: PolkadotClient): Promise<any>;
+
+  logTime() {
+    const time = [
+      '-----',
+      new Date().toISOString().replace('T', ' ').replace('Z', ''),
+      '-----',
+    ].join('');
+    console.log(time);
+  }
 }

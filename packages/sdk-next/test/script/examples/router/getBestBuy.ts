@@ -1,22 +1,27 @@
-import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter, ZERO } from '@galacticcouncil/sdk';
+import { PolkadotClient } from 'polkadot-api';
 
-import { PolkadotExecutor } from '../../PjsExecutor';
+import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-class GetBestBuyPriceExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
-    const bestBuy = await router.getBestBuy('1', '10', 10);
-    const transaction = bestBuy.toTx(ZERO);
-    console.log('Transaction hash: ' + transaction.hex);
-    return bestBuy;
+import { pool, sor } from '../../../../src';
+
+class GetBestBuy extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const ctx = new pool.PoolContextProvider(client)
+      .withOmnipool()
+      .withStableswap()
+      .withXyk();
+
+    const router = new sor.TradeRouter(ctx);
+
+    const buy = await router.getBestBuy(10, 5, 100_000_000_000n);
+    console.log(buy.toHuman());
+
+    return () => {
+      ctx.destroy();
+      client.destroy();
+    };
   }
 }
 
-new GetBestBuyPriceExample(
-  ApiUrl.HydraDx,
-  'Get best buy price HydraDX',
-  true
-).run();
+new GetBestBuy(ApiUrl.Hydration, 'Get best buy').run();

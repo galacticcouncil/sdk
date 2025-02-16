@@ -1,6 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { type Observable, map } from 'rxjs';
+import { type Observable, distinctUntilChanged, map } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -11,33 +11,36 @@ import { fmt } from '../../utils';
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.Omnipool.Assets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
-
-  async loadPools(): Promise<OmniPoolBase[]> {
+  protected async loadPools(): Promise<OmniPoolBase[]> {
     const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
-    const poolAddress = this.getPoolId();
+    const poolAddress = this.getPoolAddress();
 
-    const [entries, hubAssetTradeability, hubAssetBalance, limits] =
-      await Promise.all([
-        this.api.query.Omnipool.Assets.getEntries(),
-        this.api.query.Omnipool.HubAssetTradability.getValue(),
-        this.getBalance(poolAddress, hubAssetId),
-        this.getPoolLimits(),
-      ]);
+    const [
+      entries,
+      hubAssetTradeability,
+      hubAssetMeta,
+      hubAssetBalance,
+      limits,
+    ] = await Promise.all([
+      this.api.query.Omnipool.Assets.getEntries(),
+      this.api.query.Omnipool.HubAssetTradability.getValue(),
+      this.api.query.AssetRegistry.Assets.getValue(hubAssetId),
+      this.getBalance(poolAddress, hubAssetId),
+      this.getPoolLimits(),
+    ]);
 
     const poolTokens = entries.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
-      const balance = await this.getBalance(poolAddress, id);
+
+      const [meta, balance] = await Promise.all([
+        this.api.query.AssetRegistry.Assets.getValue(id),
+        this.getBalance(poolAddress, id),
+      ]);
+
       return {
         id: id,
+        decimals: meta?.decimals,
         hubReserves: hub_reserve,
         shares: shares,
         tradeable: tradable,
@@ -52,6 +55,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     // Adding LRNA info
     tokens.push({
       id: hubAssetId,
+      decimals: hubAssetMeta?.decimals,
+      existentialDeposit: hubAssetMeta?.existential_deposit,
       tradeable: hubAssetTradeability,
       balance: hubAssetBalance,
     } as OmniPoolToken);
@@ -67,7 +72,25 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     ];
   }
 
-  async getPoolFees(_address: string, feeAsset: number): Promise<PoolFees> {
+  private getPoolAddress() {
+    return HYDRATION_OMNIPOOL_ADDRESS;
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.Omnipool.MaxInRatio(),
+      this.api.constants.Omnipool.MaxOutRatio(),
+      this.api.constants.Omnipool.MinimumTradingLimit(),
+    ]);
+
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  async getPoolFees(_pool: OmniPoolBase, feeAsset: number): Promise<PoolFees> {
     const [afp, pfp, dynamicFees] = await Promise.all([
       this.api.constants.DynamicFees.AssetFeeParameters(),
       this.api.constants.DynamicFees.ProtocolFeeParameters(),
@@ -99,52 +122,50 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return PoolType.Omni;
   }
 
-  subscribePoolChange(pool: OmniPoolBase): Observable<OmniPoolBase> {
+  async isSupported(): Promise<boolean> {
     const query = this.api.query.Omnipool.Assets;
-    return query.watchEntries().pipe(
-      map((assets) =>
-        assets.entries.map((e) => {
-          const [key] = e.args;
-          const { hub_reserve, shares, tradable, cap, protocol_shares } =
-            e.value;
-
-          const tokenIndex = pool.tokens.findIndex((t) => t.id === key);
-          const token = pool.tokens[tokenIndex];
-          return {
-            ...token,
-            hubReserves: hub_reserve,
-            shares: shares,
-            tradeable: tradable,
-            cap: cap,
-            protocolShares: protocol_shares,
-          } as OmniPoolToken;
-        })
-      ),
-      map((tokens) => {
-        const lrna = pool.tokens.find((t) => t.id === HUB_ASSET_ID);
-        return {
-          ...pool,
-          tokens: [...tokens, lrna!],
-        };
-      })
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
     );
   }
 
-  private getPoolId(): string {
-    return HYDRATION_OMNIPOOL_ADDRESS;
-  }
+  subscribePoolChange(pool: OmniPoolBase): Observable<OmniPoolBase> {
+    const query = this.api.query.Omnipool.Assets;
+    return query
+      .watchEntries({
+        at: 'best',
+      })
+      .pipe(
+        distinctUntilChanged((_, current) => !current.deltas),
+        map(({ deltas, entries }) => {
+          const delta = deltas?.upserted.map((up) => up.args[0]).sort();
+          this.logSync(pool.address, 'pool assets', delta);
+          return entries.map((e) => {
+            const [key] = e.args;
+            const { hub_reserve, shares, tradable, cap, protocol_shares } =
+              e.value;
 
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.Omnipool.MaxInRatio(),
-      this.api.constants.Omnipool.MaxOutRatio(),
-      this.api.constants.Omnipool.MinimumTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
+            const tokenIndex = pool.tokens.findIndex((t) => t.id === key);
+            const token = pool.tokens[tokenIndex];
+            return {
+              ...token,
+              hubReserves: hub_reserve,
+              shares: shares,
+              tradeable: tradable,
+              cap: cap,
+              protocolShares: protocol_shares,
+            } as OmniPoolToken;
+          });
+        }),
+        map((tokens) => {
+          const lrna = pool.tokens.find((t) => t.id === HUB_ASSET_ID);
+          return {
+            ...pool,
+            tokens: [...tokens, lrna!],
+          };
+        })
+      );
   }
 }

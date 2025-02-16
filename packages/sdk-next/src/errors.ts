@@ -1,4 +1,4 @@
-import { PoolType } from './types';
+import { PoolType } from './pool';
 
 export class PoolNotFound extends Error {
   constructor(poolType: PoolType) {

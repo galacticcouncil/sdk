@@ -5,21 +5,23 @@ import { memoize1 } from '@thi.ng/memoize';
 import {
   type Observable,
   combineLatest,
+  combineLatestAll,
+  debounceTime,
   firstValueFrom,
   from,
   map,
+  mergeAll,
   switchMap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
-import { Asset, AssetAmount } from '../types';
+import { HYDRATION_OMNIPOOL_ADDRESS, SYSTEM_ASSET_ID } from '../consts';
+import { AssetAmount } from '../types';
 
-import { PoolBase, PoolFees, PoolType } from './types';
+import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
 
 export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
-  protected pools: T[] = [];
-
-  private assets: Map<number, Asset> = new Map([]);
+  private override: PoolTokenOverride[] = [];
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
@@ -31,54 +33,118 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     super(client);
   }
 
-  abstract getPoolType(): PoolType;
+  protected abstract loadPools(): Promise<T[]>;
 
-  abstract getPoolFees(address: string, feeAsset: number): Promise<PoolFees>;
+  abstract getPoolFees(pool: T, feeAsset: number): Promise<PoolFees>;
+
+  abstract getPoolType(): PoolType;
 
   abstract isSupported(): Promise<boolean>;
 
-  abstract loadPools(): Promise<T[]>;
-
   abstract subscribePoolChange(pool: T): Observable<T>;
+
+  async withOverride(override?: PoolTokenOverride[]) {
+    this.override = override || [];
+  }
 
   async getPoolsMem(): Promise<T[]> {
     return this.memPools(this.mem);
   }
 
   async getPools(): Promise<T[]> {
-    return firstValueFrom(this.getSubscriber());
+    const observers = from(this.getPoolsMem()).pipe(
+      switchMap((pools) => this.subscribe(pools)),
+      combineLatestAll()
+    );
+    return firstValueFrom(observers);
   }
 
-  getSubscriber(): Observable<T[]> {
+  getSubscriber(): Observable<T> {
     return from(this.getPoolsMem()).pipe(
-      switchMap((pools) =>
-        combineLatest(
-          pools.map((pool) =>
-            combineLatest([
-              this.subscribePoolChange(pool),
-              this.subscribeBalance(pool.address),
-            ]).pipe(map(([pool, balances]) => this.updatePools(pool, balances)))
-          )
+      switchMap((pools) => this.subscribe(pools)),
+      mergeAll()
+    );
+  }
+
+  private subscribe(pools: T[]): Observable<T>[] {
+    return pools
+      .filter((pool) => this.hasValidAssets(pool))
+      .map((pool) =>
+        combineLatest([
+          this.subscribePoolChange(pool),
+          this.subscribePoolBalance(pool),
+        ]).pipe(
+          debounceTime(250),
+          map(([pool, balances]) => this.updatePool(pool, balances))
         )
+      );
+  }
+
+  private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+    const subs: Observable<AssetAmount | AssetAmount[]>[] = [
+      this.subscribeTokensBalance(pool.address),
+    ];
+
+    if (this.hasSystemAsset(pool)) {
+      const sub = this.subscribeSystemBalance(pool.address);
+      subs.push(sub);
+    }
+
+    if (this.hasShareAsset(pool)) {
+      const sub = this.subscribeTokenBalance(
+        HYDRATION_OMNIPOOL_ADDRESS,
+        pool.id!
+      );
+      subs.push(sub);
+    }
+
+    return combineLatest(subs).pipe(
+      map((res) =>
+        res
+          .map((r) => {
+            return Array.isArray(r) ? r : [r];
+          })
+          .flat()
       )
     );
   }
 
-  private updatePools = (pool: T, balances: AssetAmount[]): T => {
+  private hasSystemAsset(pool: T): boolean {
+    return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
+  }
+
+  private hasShareAsset(pool: T): boolean {
+    return pool.type === PoolType.Stable && !!pool.id;
+  }
+
+  private hasValidAssets(pool: T): boolean {
+    return pool.tokens.every(({ id, decimals, balance }) => {
+      const override = this.override.find((o) => o.id === id);
+      const hasDecimals = !!decimals || !!override?.decimals;
+      return balance > 0n && hasDecimals;
+    });
+  }
+
+  private updatePool = (pool: PoolBase, balances: AssetAmount[]): T => {
     const tokens = pool.tokens.map((token) => {
       const balance = balances.find((balance) => balance.id === token.id);
+      const override = this.override.find((o) => o.id === token.id);
       if (balance) {
         return {
           ...token,
           balance: balance.amount,
+          decimals: token.decimals || override?.decimals,
         };
       }
-      return token;
+      return {
+        ...token,
+        decimals: token.decimals || override?.decimals,
+      };
     });
 
     return {
       ...pool,
       tokens: tokens,
-    };
+    } as T;
   };
 }

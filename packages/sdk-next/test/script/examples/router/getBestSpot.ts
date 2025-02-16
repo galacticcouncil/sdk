@@ -5,7 +5,7 @@ import { ApiUrl } from '../../types';
 
 import { pool, sor } from '../../../../src';
 
-class GetBestSell extends PapiExecutor {
+class GetBestSpot extends PapiExecutor {
   async script(client: PolkadotClient) {
     const ctx = new pool.PoolContextProvider(client)
       .withOmnipool()
@@ -14,14 +14,19 @@ class GetBestSell extends PapiExecutor {
 
     const router = new sor.TradeRouter(ctx);
 
-    const sell = await router.getBestSell(5, 0, 10_000_000_000n);
-    console.log(sell.toHuman());
+    const spot = await router.getBestSpotPrice(0, 10);
+    console.log(spot);
+
+    setInterval(async () => {
+      const spot = await router.getBestSpotPrice(0, 10);
+      console.log(spot);
+    }, 10000);
 
     return () => {
-      ctx.destroy();
-      client.destroy();
+      /*    ctx.destroy();
+      client.destroy(); */
     };
   }
 }
 
-new GetBestSell(ApiUrl.Hydration, 'Get best sell').run();
+new GetBestSpot(ApiUrl.Hydration, 'Get best spot').run();

@@ -1,33 +1,25 @@
-import { PoolType } from '../../src/types';
+import { pool } from '../../src';
+
+const { PoolType } = pool;
 
 export const xykPool = {
   address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',
   type: PoolType.XYK,
-  maxInRatio: 3000,
-  maxOutRatio: 3000,
-  minTradingLimit: 1000,
+  maxInRatio: 3000n,
+  maxOutRatio: 3000n,
+  minTradingLimit: 10_000_000n,
   tokens: [
     {
-      id: '1',
-      balance: '4000000000000',
+      id: 1,
+      balance: 4000000000000n,
       decimals: 12,
-      symbol: 'KSM',
-      icon: 'KSM',
-      name: 'Kusama',
-      type: 'Token',
-      isSufficient: true,
-      existentialDeposit: '1000',
+      existentialDeposit: 1000n,
     },
     {
-      id: '2',
-      balance: '175000000000000',
+      id: 2,
+      balance: 175000000000000n,
       decimals: 12,
-      symbol: 'AUSD',
-      icon: 'AUSD',
-      name: 'Acala Dollar',
-      type: 'Token',
-      isSufficient: true,
-      existentialDeposit: '1000',
+      existentialDeposit: 1000n,
     },
   ],
 };

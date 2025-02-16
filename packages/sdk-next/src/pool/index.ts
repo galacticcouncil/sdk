@@ -1,6 +1,6 @@
-export { CachingPoolService } from './CachingPoolService';
 export { PoolFactory } from './PoolFactory';
-export { PoolService } from './PoolService';
+export { PoolContextProvider } from './PoolContextProvider';
+
 export * from './PoolUtils';
 
 export * as xyk from './xyk';
