@@ -1,11 +1,7 @@
+import { XcmV3Junctions } from '@polkadot-api/descriptors';
+
 export interface Humanizer {
   toHuman(): any;
-}
-
-export interface Transaction {
-  hex: string;
-  name?: string;
-  get<T>(): T;
 }
 
 export type Amount = {
@@ -32,13 +28,13 @@ export interface Asset extends AssetMetadata {
   type: AssetType;
   existentialDeposit: bigint;
   isSufficient: boolean;
-  location?: any;
+  location?: XcmV3Multilocation;
   meta?: Record<string, string>;
   isWhiteListed?: boolean;
 }
 
 export interface Bond extends Asset {
-  underlyingAssetId: string;
+  underlyingAssetId: number;
   maturity: number;
 }
 
@@ -49,3 +45,8 @@ export interface ExternalAsset extends AssetMetadata {
   internalId: number;
   isWhiteListed?: boolean;
 }
+
+export type XcmV3Multilocation = {
+  parents: number;
+  interior: XcmV3Junctions;
+};

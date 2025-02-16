@@ -5,13 +5,13 @@ import { ApiUrl } from '../types';
 
 import { pool } from '../../../src';
 
-class SubscribeOmnipool extends PapiExecutor {
+class SubscribeStableswap extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const { OmniPoolClient } = pool.omni;
-    const subscription = new OmniPoolClient(client)
+    const { StableSwapClient } = pool.stable;
+    const subscription = new StableSwapClient(client)
       .getSubscriber()
       .subscribe((pool) => {
-        console.log(pool.address);
+        console.log(pool);
         this.logTime();
       });
 
@@ -22,4 +22,4 @@ class SubscribeOmnipool extends PapiExecutor {
   }
 }
 
-new SubscribeOmnipool(ApiUrl.Hydration, 'Subscribe omnipool').run();
+new SubscribeStableswap(ApiUrl.Hydration, 'Subscribe stableswap').run();
