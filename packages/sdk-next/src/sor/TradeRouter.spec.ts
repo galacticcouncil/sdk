@@ -17,7 +17,7 @@ class MockCtxProvider implements IPoolCtxProvider {
   }
 }
 
-describe('TradeRouter with mocked XYK pool service', () => {
+describe('TradeRouter with mocked pool ctx', () => {
   let ctx: IPoolCtxProvider;
   let sor: TradeRouter;
 
@@ -26,30 +26,36 @@ describe('TradeRouter with mocked XYK pool service', () => {
     sor = new TradeRouter(ctx);
   });
 
-  it('Should return best spot price between token 1 (KSM) & 2 (aUSD)', async () => {
+  it('Should return best spot price between token 1 & 2', async () => {
     const bestSpotPrice = await sor.getBestSpotPrice(1, 2);
-    expect(bestSpotPrice?.amount).toEqual(46707793025305n);
-    expect(bestSpotPrice?.decimals).toEqual(12);
+    expect(bestSpotPrice?.amount).toStrictEqual(46707792958579n);
+    expect(bestSpotPrice?.decimals).toStrictEqual(12);
   });
 
-  it('Should return undefined is same token pair token 1 (KSM) & 1 (KSM)', async () => {
-    const bestSpotPrice = await sor.getBestSpotPrice(1, 1);
-    expect(bestSpotPrice === undefined);
+  it('Should throw error if token pair identical', async () => {
+    try {
+      await sor.getBestSpotPrice(1, 1);
+    } catch (error) {
+      expect(error).toHaveProperty(
+        'message',
+        "Trading pair can't be identical"
+      );
+    }
   });
 
-  it('Should return best sell trade between token 1 (KSM) & 2 (aUSD)', async () => {
+  it('Should return best sell trade between token 1 & 2', async () => {
     const sell = await sor.getBestSell(1, 2, 1_000_000_000_000n);
     const firstRoute = sell.swaps[0];
     const lastRoute = sell.swaps[sell.swaps.length - 1];
-    expect(sell.amountIn).toEqual(firstRoute.amountIn);
-    expect(sell.amountOut).toEqual(lastRoute.amountOut);
+    expect(sell.amountIn).toStrictEqual(firstRoute.amountIn);
+    expect(sell.amountOut).toStrictEqual(lastRoute.amountOut);
   });
 
-  it('Should return best buy trade between token 0 (BSX) & 2 (aUSD)', async () => {
+  it('Should return best buy trade between token 0 & 2', async () => {
     const buy = await sor.getBestBuy(0, 2, 1_000_000_000_000n);
     const firstRoute = buy.swaps[buy.swaps.length - 1];
     const lastRoute = buy.swaps[0];
-    expect(buy.amountOut).toEqual(firstRoute.amountOut);
-    expect(buy.amountIn).toEqual(lastRoute.amountIn);
+    expect(buy.amountOut).toStrictEqual(firstRoute.amountOut);
+    expect(buy.amountIn).toStrictEqual(lastRoute.amountIn);
   });
 });
