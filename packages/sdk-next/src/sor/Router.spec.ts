@@ -13,7 +13,7 @@ class MockCtxProvider implements IPoolCtxProvider {
   }
 }
 
-describe('Router with mocked XYK pool service', () => {
+describe('Router with mocked pool ctx', () => {
   let ctx: IPoolCtxProvider;
   let sor: Router;
 
@@ -22,7 +22,7 @@ describe('Router with mocked XYK pool service', () => {
     sor = new Router(ctx);
   });
 
-  it('Should return suggested hops from token 1 (KSM) to 2 (aUSD)', async () => {
+  it('Should return suggested hops from token 1 to token 2', async () => {
     const result = await sor.getRoutes(1, 2);
     expect(result).toStrictEqual([
       [
@@ -53,7 +53,7 @@ describe('Router with mocked XYK pool service', () => {
     ]);
   });
 
-  it('Should return all assets in pool', async () => {
+  it('Should return all tradeable assets', async () => {
     const result = await sor.getTradeableAssets();
     expect(result).toStrictEqual([0, 1, 2]);
   });

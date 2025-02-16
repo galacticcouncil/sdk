@@ -13,12 +13,8 @@ describe('Xyk Pool', () => {
     expect(pool).toBeDefined();
     const result = pool.parsePair(1, 2);
     expect(result.assetIn).toStrictEqual(xykPool.tokens[0].id);
-    expect(result.balanceIn.toString()).toStrictEqual(
-      xykPool.tokens[0].balance
-    );
+    expect(result.balanceIn).toStrictEqual(xykPool.tokens[0].balance);
     expect(result.assetOut).toStrictEqual(xykPool.tokens[1].id);
-    expect(result.balanceOut.toString()).toStrictEqual(
-      xykPool.tokens[1].balance
-    );
+    expect(result.balanceOut).toStrictEqual(xykPool.tokens[1].balance);
   });
 });

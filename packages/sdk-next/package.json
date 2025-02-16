@@ -25,7 +25,9 @@
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
-  "scripts": {},
+  "scripts": {
+    "test": "NODE_NO_WARNINGS=1 jest"
+  },
   "dependencies": {
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
