@@ -42,7 +42,6 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
-  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -261,7 +260,6 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  toEthereumViaSnowbridgeTemplate(weth, weth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
