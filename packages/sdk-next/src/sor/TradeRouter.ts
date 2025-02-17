@@ -1,13 +1,11 @@
+import { Router } from './Router';
+import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
+
 import { SYSTEM_ASSET_DECIMALS } from '../consts';
 import { RouteNotFound } from '../errors';
 import { Hop, Pool, PoolFees, PoolToken } from '../pool';
 import { Amount } from '../types';
 import { fmt, math } from '../utils';
-
-import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
-
-import { Router } from './Router';
-import { TxUtils } from './TxUtils';
 
 export class TradeRouter extends Router {
   /**
