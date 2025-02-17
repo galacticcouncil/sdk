@@ -10,7 +10,7 @@ import {
 } from '../pool';
 
 export type RouterOptions = {
-  includeOnly: PoolType[];
+  useOnly: PoolType[];
 };
 
 export class Router {
@@ -20,7 +20,7 @@ export class Router {
   protected readonly ctx: IPoolCtxProvider;
 
   private readonly defaultRouterOptions: RouterOptions = {
-    includeOnly: [],
+    useOnly: [],
   };
 
   constructor(ctx: IPoolCtxProvider, routerOptions?: RouterOptions) {
@@ -37,11 +37,11 @@ export class Router {
    */
   async getPools(): Promise<PoolBase[]> {
     const pools = await this.ctx.getPools();
-    const includeOnly = this.routerOptions.includeOnly;
-    if (includeOnly.length === 0) {
+    const useOnly = this.routerOptions.useOnly;
+    if (useOnly.length === 0) {
       return pools;
     }
-    return pools.filter((p) => includeOnly.includes(p.type));
+    return pools.filter((p) => useOnly.includes(p.type));
   }
 
   /**
@@ -91,7 +91,7 @@ export class Router {
   }
 
   /**
-   * List tradeable assets
+   * List tradeable assets ASC
    *
    * @param {PoolBase[]} pools - trading pools
    */
@@ -104,7 +104,7 @@ export class Router {
   }
 
   /**
-   * List all possible routes for swap execution
+   * List all possible routes between assetIn & assetOut
    *
    * @param {number} assetIn - assetIn id
    * @param {number} assetOut - assetOut id

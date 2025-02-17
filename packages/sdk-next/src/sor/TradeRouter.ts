@@ -96,7 +96,7 @@ export class TradeRouter extends Router {
    * @param route - best possible trade route (sell)
    * @returns sell spot price
    */
-  async getSellSpot(route: SellSwap[]): Promise<bigint> {
+  private async getSellSpot(route: SellSwap[]): Promise<bigint> {
     const lastSwap = route[route.length - 1];
 
     if (route.length === 1) {
@@ -233,7 +233,7 @@ export class TradeRouter extends Router {
    * @param amountIn - amount of assetIn to sell for assetOut
    * @param path - current path
    * @param poolsMap - pools map
-   * @returns sell swaps for given path with corresponding pool pairs
+   * @returns sell swaps for given path
    */
   private async toSellSwaps(
     amountIn: bigint,
@@ -379,7 +379,7 @@ export class TradeRouter extends Router {
    * @param route - best possible trade route (buy)
    * @returns buy spot price
    */
-  async getBuySpot(route: BuySwap[]): Promise<bigint> {
+  private async getBuySpot(route: BuySwap[]): Promise<bigint> {
     const lastSwap = route[0];
 
     if (route.length === 1) {
