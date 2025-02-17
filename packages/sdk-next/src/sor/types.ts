@@ -32,5 +32,3 @@ export interface Trade extends Humanizer {
   priceImpactPct: number;
   swaps: Swap[];
 }
-
-//toTx(slippagePct?: number): Promise<string>;

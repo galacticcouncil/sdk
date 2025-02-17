@@ -14,17 +14,12 @@ class GetBestSpot extends PapiExecutor {
 
     const router = new sor.TradeRouter(ctx);
 
-    const spot = await router.getBestSpotPrice(0, 10);
+    const spot = await router.getSpotPrice(5, 0);
     console.log(spot);
 
-    setInterval(async () => {
-      const spot = await router.getBestSpotPrice(0, 10);
-      console.log(spot);
-    }, 10000);
-
     return () => {
-      /*    ctx.destroy();
-      client.destroy(); */
+      ctx.destroy();
+      client.destroy();
     };
   }
 }

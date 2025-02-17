@@ -96,8 +96,20 @@ export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
     .toNumber();
 }
 
-export function multiplyByFraction(value: bigint, fraction: number): bigint {
-  const numerator = BigInt(fraction * 10);
-  const denominator = BigInt(10);
-  return (value * numerator) / denominator;
+/**
+ * Get % fraction from value
+ *
+ * @param value - native amount (bigint)
+ * @param fraction - percentage value e.g. (0.1% => 0.1)
+ * @param dp - safe decimals margin (0.001%)
+ * @returns fraction of given amount
+ */
+export function multiplyByFraction(
+  value: bigint,
+  fraction: number,
+  dp = 3
+): bigint {
+  const denominator = Math.pow(10, dp);
+  const percentage = BigInt(fraction * denominator);
+  return (value * percentage) / BigInt(100 * denominator);
 }

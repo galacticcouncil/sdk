@@ -169,19 +169,6 @@ export class TradeRouter extends Router {
 
     const priceImpactPct = math.calculateDiffToRef(delta0Y, swapAmount);
 
-    /*     const sellTx = (slippagePct = 1): Promise<string> => {
-      const slippage = math.multiplyByFraction(lastSwap.amountOut, slippagePct);
-      return new TxUtils(this.ctx.getClient()).buildSellTx(
-        assetIn,
-        assetOut,
-        firstSwap.amountIn,
-        lastSwap.amountOut - slippage,
-        swaps.map((swap: SellSwap) => {
-          return swap as Hop;
-        })
-      );
-    }; */
-
     return {
       type: TradeType.Sell,
       amountIn: firstSwap.amountIn,
@@ -287,8 +274,8 @@ export class TradeRouter extends Router {
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
         amountIn: aIn,
-        calculatedOut: calculatedOut,
         amountOut: amountOut,
+        calculatedOut: calculatedOut,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -298,8 +285,8 @@ export class TradeRouter extends Router {
           return {
             ...hop,
             amountIn: fmt.toHuman(aIn, poolPair.decimalsIn),
-            calculatedOut: fmt.toHuman(calculatedOut, poolPair.decimalsOut),
             amountOut: fmt.toHuman(amountOut, poolPair.decimalsOut),
+            calculatedOut: fmt.toHuman(calculatedOut, poolPair.decimalsOut),
             spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
@@ -313,7 +300,7 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible spot price for tokenIn>tokenOut
+   * Calculate and return spot price for tokenIn>tokenOut
    *
    * To avoid routing through the pools with low liquidity, 0.1% from the
    * most liquid pool asset is used as reference value to determine ideal
@@ -324,24 +311,17 @@ export class TradeRouter extends Router {
    * @return best possible spot price of given asset pair, or undefined
    * if given pair swap is not supported
    */
-  async getBestSpotPrice(
-    assetIn: number,
-    assetOut: number
-  ): Promise<Amount | undefined> {
+  async getSpotPrice(assetIn: number, assetOut: number): Promise<Amount> {
     const pools = await super.getPools();
     const poolsMap = super.validateInput(assetIn, assetOut, pools);
-
     const paths = super.getPaths(assetIn, assetOut, pools);
-    if (paths.length === 0) {
-      return Promise.resolve(undefined);
-    }
 
-    const assetsByLiquidityDesc = pools
+    const [mostLiquidAsset] = pools
       .map((pool) => pool.tokens.find((t) => t.id === assetIn))
       .filter((a): a is PoolToken => !!a)
       .sort((a, b) => Number(b.balance) - Number(a.balance));
 
-    const { balance, decimals } = assetsByLiquidityDesc[0];
+    const { balance, decimals } = mostLiquidAsset;
     const liquidityIn = math.multiplyByFraction(balance, 0.1);
 
     const routes = await Promise.all(
@@ -477,19 +457,6 @@ export class TradeRouter extends Router {
       priceImpactPct = math.calculateDiffToRef(swapAmount, delta0X);
     }
 
-    /*     const buyTx = (slippagePct = 1): Promise<string> => {
-      const slippage = math.multiplyByFraction(lastSwap.amountIn, slippagePct);
-      return new TxUtils(this.ctx.getClient()).buildBuyTx(
-        assetIn,
-        assetOut,
-        firstSwap.amountOut,
-        lastSwap.amountIn + slippage,
-        swaps.map((swap: BuySwap) => {
-          return swap as Hop;
-        })
-      );
-    }; */
-
     return {
       type: TradeType.Buy,
       amountOut: firstSwap.amountOut,
@@ -604,8 +571,8 @@ export class TradeRouter extends Router {
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
         amountOut: aOut,
-        calculatedIn: calculatedIn,
         amountIn: amountIn,
+        calculatedIn: calculatedIn,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -615,8 +582,8 @@ export class TradeRouter extends Router {
           return {
             ...hop,
             amountOut: fmt.toHuman(aOut, poolPair.decimalsOut),
-            calculatedIn: fmt.toHuman(calculatedIn, poolPair.decimalsIn),
             amountIn: fmt.toHuman(amountIn, poolPair.decimalsIn),
+            calculatedIn: fmt.toHuman(calculatedIn, poolPair.decimalsIn),
             spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,

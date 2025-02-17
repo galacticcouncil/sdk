@@ -1,4 +1,8 @@
-import { calculateDiffToAvg, calculateDiffToRef } from './math';
+import {
+  calculateDiffToAvg,
+  calculateDiffToRef,
+  multiplyByFraction,
+} from './math';
 
 describe('Calculate Percentage Difference', () => {
   beforeEach(() => {});
@@ -31,5 +35,10 @@ describe('Calculate Percentage Difference', () => {
   it('Calculate difference (ref) should be -90%', () => {
     const result = calculateDiffToRef(100n, 1000n);
     expect(result).toStrictEqual(-90);
+  });
+
+  it('Calculate 0.1% from given amount', () => {
+    const result = multiplyByFraction(1000000000n, 0.1);
+    expect(result).toStrictEqual(1000000n);
   });
 });
