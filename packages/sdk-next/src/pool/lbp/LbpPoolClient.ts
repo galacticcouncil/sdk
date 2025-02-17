@@ -3,7 +3,7 @@ import { HydrationQueries } from '@polkadot-api/descriptors';
 
 import { type Observable, of, mergeMap, switchMap, NEVER } from 'rxjs';
 
-import { PoolBase, PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
+import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { LbpMath } from './LbpMath';
@@ -11,7 +11,7 @@ import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
 type TLbpPoolData = HydrationQueries['LBP']['PoolData']['Value'];
 
-export class LbpPoolClient extends PoolClient {
+export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   readonly MAX_FINAL_WEIGHT = 100_000_000n;
 
   private poolsData: Map<string, TLbpPoolData> = new Map([]);
@@ -25,15 +25,19 @@ export class LbpPoolClient extends PoolClient {
     );
   }
 
-  async loadPools(): Promise<PoolBase[]> {
-    const [entries, validationData] = await Promise.all([
+  async loadPools(): Promise<LbpPoolBase[]> {
+    const [entries, validationData, limits] = await Promise.all([
       this.api.query.LBP.PoolData.getEntries(),
       this.api.query.ParachainSystem.ValidationData.getValue(),
+      this.getPoolLimits(),
     ]);
 
     const relayParentNumber = validationData?.relay_parent_number || 0;
     const pools = entries
-      .filter(({ value }) => this.isActivePool(value, relayParentNumber))
+      .filter(
+        ({ value }) =>
+          validationData && this.isActivePool(value, relayParentNumber)
+      )
       .map(async ({ keyArgs, value }) => {
         const [id] = keyArgs;
         const poolAddress = id.toString();
@@ -48,8 +52,8 @@ export class LbpPoolClient extends PoolClient {
           type: PoolType.LBP,
           fee: value.fee as PoolFee,
           ...poolDelta,
-          ...this.getPoolLimits(),
-        } as PoolBase;
+          ...limits,
+        } as LbpPoolBase;
       });
     return Promise.all(pools);
   }
@@ -69,7 +73,7 @@ export class LbpPoolClient extends PoolClient {
     return PoolType.LBP;
   }
 
-  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
+  subscribePoolChange(pool: LbpPoolBase): Observable<LbpPoolBase> {
     const query = this.api.query.ParachainSystem.ValidationData;
     const poolData = this.poolsData.get(pool.address);
 

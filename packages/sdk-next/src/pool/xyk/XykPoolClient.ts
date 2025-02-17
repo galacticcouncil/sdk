@@ -14,7 +14,7 @@ import { PoolClient } from '../PoolClient';
 
 import { XykPoolFees } from './XykPool';
 
-export class XykPoolClient extends PoolClient {
+export class XykPoolClient extends PoolClient<PoolBase> {
   async isSupported(): Promise<boolean> {
     const query = this.api.query.XYK.PoolAssets;
     const compatibilityToken = await this.api.compatibilityToken;
@@ -71,7 +71,7 @@ export class XykPoolClient extends PoolClient {
     return PoolType.XYK;
   }
 
-  protected subscribePoolChange(_pool: PoolBase): Observable<PoolBase> {
+  subscribePoolChange(_pool: PoolBase): Observable<PoolBase> {
     return NEVER;
   }
 

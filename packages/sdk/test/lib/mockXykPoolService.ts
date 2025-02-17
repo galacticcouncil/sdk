@@ -1,5 +1,15 @@
 import { XykPoolFees } from '../../src/pool/xyk/XykPool';
-import { Hop, PoolBase, IPoolService, Transaction, PoolFees, PoolType, Pool, PoolFee } from '../../src/types';
+import {
+  Hop,
+  PoolBase,
+  IPoolService,
+  Transaction,
+  PoolFees,
+  PoolType,
+  Pool,
+  PoolFee,
+  PoolPair,
+} from '../../src/types';
 import { BigNumber } from '../../src/utils/bignumber';
 import { xykPools } from '../data/xykPools';
 
@@ -12,7 +22,7 @@ export class MockXykPoolService implements IPoolService {
     return Promise.resolve(xykPools);
   }
 
-  getPoolFees(feeAsset: string, pool: Pool): Promise<PoolFees> {
+  getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
     return Promise.resolve(fees);
   }
 

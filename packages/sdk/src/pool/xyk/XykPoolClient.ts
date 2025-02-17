@@ -8,6 +8,7 @@ import {
   PoolLimits,
   PoolFees,
   PoolToken,
+  PoolPair,
 } from '../../types';
 
 import { XykPoolFees } from './XykPool';
@@ -55,7 +56,7 @@ export class XykPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  async getPoolFees(_feeAsset: string, _address: string): Promise<PoolFees> {
+  async getPoolFees(_poolPair: PoolPair, _address: string): Promise<PoolFees> {
     return {
       exchangeFee: this.getExchangeFee(),
     } as XykPoolFees;

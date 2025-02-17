@@ -254,8 +254,8 @@ export class StableSwap implements Pool {
       this.id,
       this.getReserves(),
       this.amplification,
-      poolPair.assetIn,
       poolPair.assetOut,
+      poolPair.assetIn,
       this.totalIssuance,
       '0'
     );
@@ -344,8 +344,8 @@ export class StableSwap implements Pool {
       this.id,
       this.getReserves(),
       this.amplification,
-      poolPair.assetOut,
       poolPair.assetIn,
+      poolPair.assetOut,
       this.totalIssuance,
       '0'
     );

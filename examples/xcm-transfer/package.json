@@ -8,11 +8,11 @@
   },
   "keywords": [],
   "devDependencies": {
-    "esbuild": "^0.17.11",
+    "esbuild": "^0.25.0",
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^5.4.0",
+    "@galacticcouncil/sdk": "^5.5.0",
     "@galacticcouncil/xcm-cfg": "^7.3.1",
     "@galacticcouncil/xcm-sdk": "^8.2.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",

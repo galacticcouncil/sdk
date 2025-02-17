@@ -4,14 +4,8 @@ import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 
 import { type Observable, of, mergeMap, switchMap, NEVER } from 'rxjs';
 
-import {
-  PoolBase,
-  PoolType,
-  PoolFee,
-  PoolLimits,
-  PoolFees,
-  PoolToken,
-} from '../types';
+import { PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../types';
+import { PoolClient } from '../PoolClient';
 
 import {
   HYDRATION_OMNIPOOL_ADDRESS,
@@ -22,11 +16,9 @@ import { fmt } from '../../utils';
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 
-import { PoolClient } from '../PoolClient';
-
 type TStableswapPool = HydrationQueries['Stableswap']['Pools']['Value'];
 
-export class StableSwapClient extends PoolClient {
+export class StableSwapClient extends PoolClient<StableSwapBase> {
   private stablePools: Map<string, TStableswapPool> = new Map([]);
 
   async isSupported(): Promise<boolean> {
@@ -38,10 +30,11 @@ export class StableSwapClient extends PoolClient {
     );
   }
 
-  async loadPools(): Promise<PoolBase[]> {
-    const [entries, parachainBlock] = await Promise.all([
+  async loadPools(): Promise<StableSwapBase[]> {
+    const [entries, parachainBlock, limits] = await Promise.all([
       this.api.query.Stableswap.Pools.getEntries(),
       this.api.query.System.Number.getValue(),
+      this.getPoolLimits(),
     ]);
 
     const pools = entries.map(async ({ keyArgs, value }) => {
@@ -60,8 +53,8 @@ export class StableSwapClient extends PoolClient {
         fee: fmt.toPoolFee(value.fee),
         tokens: poolTokens,
         ...poolDelta,
-        ...this.getPoolLimits(),
-      } as PoolBase;
+        ...limits,
+      } as StableSwapBase;
     });
     return Promise.all(pools);
   }
@@ -80,7 +73,7 @@ export class StableSwapClient extends PoolClient {
     return PoolType.Stable;
   }
 
-  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
+  subscribePoolChange(pool: StableSwapBase): Observable<StableSwapBase> {
     const query = this.api.query.System.Number;
     const stablePool = this.stablePools.get(pool.address);
 
@@ -119,8 +112,8 @@ export class StableSwapClient extends PoolClient {
       blockNumber.toString()
     );
 
-    const query = this.api.query.Tokens.TotalIssuance;
-    const totalIssuance = await query.getValue(poolId);
+    const totalIssuance =
+      await this.api.query.Tokens.TotalIssuance.getValue(poolId);
     return {
       amplification: BigInt(amplification),
       totalIssuance: totalIssuance,

@@ -1,5 +1,11 @@
 # @galacticcouncil/math-omnipool
 
+## 1.1.0
+
+### Minor Changes
+
+- Re-calculate asset & protocol fee v2 wasm support
+
 ## 1.0.0
 
 ### Major Changes
