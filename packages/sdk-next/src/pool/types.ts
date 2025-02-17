@@ -1,5 +1,3 @@
-import { PolkadotClient } from 'polkadot-api';
-
 export enum PoolType {
   XYK = 'XYK',
   LBP = 'LBP',

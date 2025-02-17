@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
+import { PoolService, TradeRouter } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
@@ -36,7 +36,7 @@ class GetBestSpotPriceExample extends PolkadotExecutor {
     const poolService = new PoolService(api);
     await poolService.syncRegistry(external);
     const router = new TradeRouter(poolService);
-    return router.getBestSpotPrice('1000036', '5');
+    return router.getBestSpotPrice('5', '0');
   }
 }
 

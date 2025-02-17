@@ -13,9 +13,12 @@ class GetBestSell extends PapiExecutor {
       .withXyk();
 
     const router = new sor.TradeRouter(ctx);
+    const utils = new sor.TradeUtils(client);
 
-    const sell = await router.getBestSell(5, 0, 10_000_000_000n);
+    const sell = await router.getBestSell(5, 10, 10_000_000_000n);
+    const tx = await utils.buildTx(sell);
     console.log(sell.toHuman());
+    console.log('Transaction hash: ' + tx.asHex());
 
     return () => {
       ctx.destroy();
