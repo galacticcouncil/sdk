@@ -8,9 +8,9 @@
   },
   "keywords": [],
   "devDependencies": {
-    "esbuild": "^0.17.11"
+    "esbuild": "^0.25.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^5.4.0"
+    "@galacticcouncil/sdk": "^5.5.0"
   }
 }

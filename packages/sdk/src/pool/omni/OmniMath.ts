@@ -9,15 +9,17 @@ import {
   calculate_shares,
   calculate_liquidity_out,
   calculate_liquidity_lrna_out,
-  verify_asset_cap,
   calculate_liquidity_hub_in,
   is_sell_allowed,
   is_buy_allowed,
   is_add_liquidity_allowed,
   is_remove_liquidity_allowed,
+  recalculate_asset_fee,
+  recalculate_protocol_fee,
+  verify_asset_cap,
 } from '@galacticcouncil/math-omnipool';
 
-import { BigNumber } from '../../utils/bignumber'
+import { BigNumber } from '../../utils/bignumber';
 
 export class OmniMath {
   static calculateSpotPrice(
@@ -26,10 +28,18 @@ export class OmniMath {
     assetOutBalance: string,
     assetOutHubReserve: string
   ): string {
-    return calculate_spot_price(assetInBalance, assetInHubReserve, assetOutBalance, assetOutHubReserve);
+    return calculate_spot_price(
+      assetInBalance,
+      assetInHubReserve,
+      assetOutBalance,
+      assetOutHubReserve
+    );
   }
 
-  static calculateLrnaSpotPrice(assetBalance: string, assetHubReserve: string): string {
+  static calculateLrnaSpotPrice(
+    assetBalance: string,
+    assetHubReserve: string
+  ): string {
     return calculate_lrna_spot_price(assetBalance, assetHubReserve);
   }
 
@@ -64,7 +74,13 @@ export class OmniMath {
     amountOut: string,
     assetFee: string
   ): string {
-    return calculate_lrna_in_given_out(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
+    return calculate_lrna_in_given_out(
+      assetOutBalance,
+      assetOutHubReserve,
+      assetOutShares,
+      amountOut,
+      assetFee
+    );
   }
 
   static calculateOutGivenIn(
@@ -98,15 +114,35 @@ export class OmniMath {
     amountOut: string,
     assetFee: string
   ): string {
-    return calculate_out_given_lrna_in(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
+    return calculate_out_given_lrna_in(
+      assetOutBalance,
+      assetOutHubReserve,
+      assetOutShares,
+      amountOut,
+      assetFee
+    );
   }
 
-  static calculatePoolTradeFee(amount: string, feeNumerator: number, feeDenominator: number): string {
+  static calculatePoolTradeFee(
+    amount: string,
+    feeNumerator: number,
+    feeDenominator: number
+  ): string {
     return calculate_pool_trade_fee(amount, feeNumerator, feeDenominator);
   }
 
-  static calculateShares(assetReserve: string, assetHubReserve: string, assetShares: string, amountIn: string): string {
-    return calculate_shares(assetReserve, assetHubReserve, assetShares, amountIn);
+  static calculateShares(
+    assetReserve: string,
+    assetHubReserve: string,
+    assetShares: string,
+    amountIn: string
+  ): string {
+    return calculate_shares(
+      assetReserve,
+      assetHubReserve,
+      assetShares,
+      amountIn
+    );
   }
 
   static calculateLiquidityOut(
@@ -165,7 +201,7 @@ export class OmniMath {
     const omegaI = BigNumber(assetCap);
 
     const percentage = omegaI.shiftedBy(-18);
-    const isUnderWeightCap = qi.div(q).lt(percentage)
+    const isUnderWeightCap = qi.div(q).lt(percentage);
 
     if (isUnderWeightCap) {
       const numerator = percentage.times(q).minus(qi).times(ri);
@@ -176,17 +212,18 @@ export class OmniMath {
     }
   }
 
-  static verifyAssetCap(assetReserve: string, assetCap: string, hubAdded: string, totalHubReserve: string): boolean {
-    return verify_asset_cap(assetReserve, assetCap, hubAdded, totalHubReserve);
-  }
-
   static calculateLimitHubIn(
     assetReserve: string,
     assetHubReserve: string,
     assetShares: string,
     amountIn: string
   ): string {
-    return calculate_liquidity_hub_in(assetReserve, assetHubReserve, assetShares, amountIn);
+    return calculate_liquidity_hub_in(
+      assetReserve,
+      assetHubReserve,
+      assetShares,
+      amountIn
+    );
   }
 
   static isSellAllowed(bits: number): boolean {
@@ -203,5 +240,70 @@ export class OmniMath {
 
   static isRemoveLiquidityAllowed(bits: number): boolean {
     return is_remove_liquidity_allowed(bits);
+  }
+
+  static recalculateAssetFee(
+    oracleAmountIn: string,
+    oracleAmountOut: string,
+    oracleLiquidity: string,
+    oraclePeriod: string,
+    currentAssetLiquidity: string,
+    previousFee: string,
+    blocDifference: string,
+    minFee: string,
+    maxFee: string,
+    decay: string,
+    amplification: string
+  ): string {
+    return recalculate_asset_fee(
+      oracleAmountIn,
+      oracleAmountOut,
+      oracleLiquidity,
+      oraclePeriod,
+      currentAssetLiquidity,
+      previousFee,
+      blocDifference,
+      minFee,
+      maxFee,
+      decay,
+      amplification
+    );
+  }
+
+  static recalculateProtocolFee(
+    oracleAmountIn: string,
+    oracleAmountOut: string,
+    oracleLiquidity: string,
+    oraclePeriod: string,
+    currentAssetLiquidity: string,
+    previousFee: string,
+    blocDifference: string,
+    minFee: string,
+    maxFee: string,
+    decay: string,
+    amplification: string
+  ): string {
+    return recalculate_protocol_fee(
+      oracleAmountIn,
+      oracleAmountOut,
+      oracleLiquidity,
+      oraclePeriod,
+      currentAssetLiquidity,
+      previousFee,
+      blocDifference,
+      minFee,
+      maxFee,
+      decay,
+      amplification
+    );
+  }
+
+  static verifyAssetCap(
+    assetReserve: string,
+    assetCap: string,
+    hubAdded: string,
+    totalHubReserve: string
+  ): boolean {
+    return verify_asset_cap(assetReserve, assetCap, hubAdded, totalHubReserve);
   }
 }

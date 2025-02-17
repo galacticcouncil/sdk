@@ -10,18 +10,18 @@ export function createProxyServer(localServer, proxyPort = 3001) {
   console.log(
     '\x1b[1m\x1b[92m',
     '> Open this 🦙  \x1b[4mhttp://' +
-      localServer.host +
+      localServer.hosts[0] +
       ':' +
       proxyPort +
       '/\x1b[0m\n'
   );
 }
 
-function requestListener({ host, port }) {
+function requestListener({ hosts, port }) {
   return function (req, res) {
     const forwardRequest = (path) => {
       const options = {
-        hostname: host,
+        hostname: hosts[0],
         port: port,
         path,
         method: req.method,

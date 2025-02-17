@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 1.2.0
+
+### Minor Changes
+
+- Flip stable pool spot price math args order to follow new wasm
+
 ## 1.1.0
 
 ### Minor Changes
