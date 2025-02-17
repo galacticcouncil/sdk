@@ -57,7 +57,7 @@ export class SolanaTransfer {
     instructions: TransactionInstruction[]
   ): Promise<MessageV0> {
     const payerKey = new PublicKey(account);
-    const { blockhash } = await this.connection.getLatestBlockhash();
+    const { blockhash } = await this.connection.getLatestBlockhash('finalized');
     return new TransactionMessage({
       payerKey: payerKey,
       recentBlockhash: blockhash,
