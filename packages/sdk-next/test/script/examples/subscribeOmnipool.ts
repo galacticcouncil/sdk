@@ -11,7 +11,7 @@ class SubscribeOmnipool extends PapiExecutor {
     const subscription = new OmniPoolClient(client)
       .getSubscriber()
       .subscribe((pool) => {
-        console.log(pool.address);
+        console.log(pool);
         this.logTime();
       });
 

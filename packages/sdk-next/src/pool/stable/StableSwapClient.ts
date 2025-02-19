@@ -1,6 +1,7 @@
-import { CompatibilityLevel } from 'polkadot-api';
+import { AccountId, CompatibilityLevel } from 'polkadot-api';
 import { HydrationQueries } from '@polkadot-api/descriptors';
-import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
+import { toHex } from '@polkadot-api/utils';
+import { blake2b } from '@noble/hashes/blake2b';
 
 import { type Observable, map, of, switchMap } from 'rxjs';
 
@@ -122,7 +123,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   private getPoolAddress(poolId: number) {
     const name = StableMath.getPoolAddress(poolId);
-    return encodeAddress(blake2AsHex(name), HYDRATION_SS58_PREFIX);
+
+    const blake2 = blake2b(name, { dkLen: 32 });
+    const blake2Hex = toHex(blake2);
+
+    return AccountId(HYDRATION_SS58_PREFIX).dec(blake2Hex);
   }
 
   private async getPoolLimits(): Promise<PoolLimits> {

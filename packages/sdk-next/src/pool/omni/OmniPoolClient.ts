@@ -1,11 +1,12 @@
-import { CompatibilityLevel } from 'polkadot-api';
+import { AccountId, CompatibilityLevel } from 'polkadot-api';
+import { toHex } from '@polkadot-api/utils';
 
 import { type Observable, distinctUntilChanged, map } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import { HUB_ASSET_ID, HYDRATION_OMNIPOOL_ADDRESS } from '../../consts';
+import { HUB_ASSET_ID, HYDRATION_SS58_PREFIX } from '../../consts';
 import { fmt } from '../../utils';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
@@ -73,7 +74,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   private getPoolAddress() {
-    return HYDRATION_OMNIPOOL_ADDRESS;
+    const name = 'modlomnipool'.padEnd(32, '\0');
+
+    const nameU8a = new TextEncoder().encode(name);
+    const nameHex = toHex(nameU8a);
+
+    return AccountId(HYDRATION_SS58_PREFIX).dec(nameHex);
   }
 
   private async getPoolLimits(): Promise<PoolLimits> {
