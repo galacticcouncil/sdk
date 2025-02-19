@@ -103,17 +103,17 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     if (dynamicFees) {
       const { asset_fee, protocol_fee } = dynamicFees;
       return {
-        assetFee: fmt.toPoolFee(asset_fee),
-        protocolFee: fmt.toPoolFee(protocol_fee),
-        min: fmt.toPoolFee(min),
-        max: fmt.toPoolFee(max),
+        assetFee: fmt.fromPermill(asset_fee),
+        protocolFee: fmt.fromPermill(protocol_fee),
+        min: fmt.fromPermill(min),
+        max: fmt.fromPermill(max),
       } as OmniPoolFees;
     } else {
       return {
-        assetFee: fmt.toPoolFee(afp.min_fee),
-        protocolFee: fmt.toPoolFee(pfp.min_fee),
-        min: fmt.toPoolFee(min),
-        max: fmt.toPoolFee(max),
+        assetFee: fmt.fromPermill(afp.min_fee),
+        protocolFee: fmt.fromPermill(pfp.min_fee),
+        min: fmt.fromPermill(min),
+        max: fmt.fromPermill(max),
       } as OmniPoolFees;
     }
   }

@@ -5,7 +5,7 @@ import { SYSTEM_ASSET_DECIMALS } from '../consts';
 import { RouteNotFound } from '../errors';
 import { Hop, Pool, PoolFees, PoolToken } from '../pool';
 import { Amount } from '../types';
-import { fmt, math } from '../utils';
+import { big, fmt, math } from '../utils';
 
 export class TradeRouter extends Router {
   /**
@@ -182,10 +182,16 @@ export class TradeRouter extends Router {
       toHuman() {
         return {
           type: TradeType.Sell,
-          amountIn: fmt.toHuman(firstSwap.amountIn, firstSwap.assetInDecimals),
-          amountOut: fmt.toHuman(lastSwap.amountOut, lastSwap.assetOutDecimals),
-          spotPrice: fmt.toHuman(spotPrice, lastSwap.assetOutDecimals),
-          tradeFee: fmt.toHuman(tradeFee, lastSwap.assetOutDecimals),
+          amountIn: big.toDecimal(
+            firstSwap.amountIn,
+            firstSwap.assetInDecimals
+          ),
+          amountOut: big.toDecimal(
+            lastSwap.amountOut,
+            lastSwap.assetOutDecimals
+          ),
+          spotPrice: big.toDecimal(spotPrice, lastSwap.assetOutDecimals),
+          tradeFee: big.toDecimal(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: priceImpactPct,
@@ -284,10 +290,10 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
-            amountIn: fmt.toHuman(aIn, poolPair.decimalsIn),
-            amountOut: fmt.toHuman(amountOut, poolPair.decimalsOut),
-            calculatedOut: fmt.toHuman(calculatedOut, poolPair.decimalsOut),
-            spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsOut),
+            amountIn: big.toDecimal(aIn, poolPair.decimalsIn),
+            amountOut: big.toDecimal(amountOut, poolPair.decimalsOut),
+            calculatedOut: big.toDecimal(calculatedOut, poolPair.decimalsOut),
+            spotPrice: big.toDecimal(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,
@@ -322,7 +328,7 @@ export class TradeRouter extends Router {
       .sort((a, b) => Number(b.balance) - Number(a.balance));
 
     const { balance, decimals } = mostLiquidAsset;
-    const liquidityIn = math.multiplyByFraction(balance, 0.1);
+    const liquidityIn = math.getFraction(balance, 0.1);
 
     const routes = await Promise.all(
       paths.map((path) => this.toSellSwaps(liquidityIn, path, poolsMap))
@@ -470,13 +476,13 @@ export class TradeRouter extends Router {
       toHuman() {
         return {
           type: TradeType.Buy,
-          amountOut: fmt.toHuman(
+          amountOut: big.toDecimal(
             firstSwap.amountOut,
             firstSwap.assetOutDecimals
           ),
-          amountIn: fmt.toHuman(lastSwap.amountIn, lastSwap.assetInDecimals),
-          spotPrice: fmt.toHuman(spotPrice, lastSwap.assetInDecimals),
-          tradeFee: fmt.toHuman(tradeFee, lastSwap.assetInDecimals),
+          amountIn: big.toDecimal(lastSwap.amountIn, lastSwap.assetInDecimals),
+          spotPrice: big.toDecimal(spotPrice, lastSwap.assetInDecimals),
+          tradeFee: big.toDecimal(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: priceImpactPct,
@@ -581,10 +587,10 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
-            amountOut: fmt.toHuman(aOut, poolPair.decimalsOut),
-            amountIn: fmt.toHuman(amountIn, poolPair.decimalsIn),
-            calculatedIn: fmt.toHuman(calculatedIn, poolPair.decimalsIn),
-            spotPrice: fmt.toHuman(spotPrice, poolPair.decimalsIn),
+            amountOut: big.toDecimal(aOut, poolPair.decimalsOut),
+            amountIn: big.toDecimal(amountIn, poolPair.decimalsIn),
+            calculatedIn: big.toDecimal(calculatedIn, poolPair.decimalsIn),
+            spotPrice: big.toDecimal(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,

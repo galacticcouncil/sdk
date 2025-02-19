@@ -1,9 +1,5 @@
 import { XcmV3Junctions } from '@polkadot-api/descriptors';
 
-export interface Humanizer {
-  toHuman(): any;
-}
-
 export type Amount = {
   amount: bigint;
   decimals: number;

@@ -41,7 +41,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         address: poolAddress,
         id: id,
         type: PoolType.Stable,
-        fee: fmt.toPoolFee(value.fee),
+        fee: fmt.fromPermill(value.fee),
         tokens: poolTokens,
         ...poolDelta,
         ...limits,

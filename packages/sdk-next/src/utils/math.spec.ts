@@ -1,7 +1,9 @@
 import {
+  calculateBuyFee,
   calculateDiffToAvg,
   calculateDiffToRef,
-  multiplyByFraction,
+  calculateSellFee,
+  getFraction,
 } from './math';
 
 describe('Calculate Percentage Difference', () => {
@@ -33,12 +35,22 @@ describe('Calculate Percentage Difference', () => {
   });
 
   it('Calculate difference (ref) should be -90%', () => {
-    const result = calculateDiffToRef(100n, 1000n);
+    const result = calculateDiffToRef(100n, 1_000n);
     expect(result).toStrictEqual(-90);
   });
 
-  it('Calculate 0.1% from given amount', () => {
-    const result = multiplyByFraction(1000000000n, 0.1);
-    expect(result).toStrictEqual(1000000n);
+  it('Calculate sell fee should be -10%', () => {
+    const result = calculateSellFee(1_000n, 1_100n);
+    expect(result).toStrictEqual(-10);
+  });
+
+  it('Calculate buy fee should be 10%', () => {
+    const result = calculateBuyFee(1_000n, 1_100n);
+    expect(result).toStrictEqual(10);
+  });
+
+  it('Calculate 0.1% from given amount should be 1000000n', () => {
+    const result = getFraction(1_000_000_000n, 0.1);
+    expect(result).toStrictEqual(1_000_000n);
   });
 });

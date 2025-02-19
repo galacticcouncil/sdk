@@ -5,9 +5,6 @@ export const RUNTIME_DECIMALS = 18;
 export const SYSTEM_ASSET_ID = 0;
 export const SYSTEM_ASSET_DECIMALS = 12;
 
-// Math
-export const DENOMINATOR = 1000;
-
 // Chain
 export const HYDRATION_PARACHAIN_ID = 2034;
 export const HYDRATION_SS58_PREFIX = 63;

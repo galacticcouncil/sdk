@@ -31,7 +31,7 @@ export class TradeUtils extends Papi {
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
-    const slippage = math.multiplyByFraction(amountIn, slippagePct);
+    const slippage = math.getFraction(amountIn, slippagePct);
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;
@@ -61,7 +61,7 @@ export class TradeUtils extends Papi {
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
-    const slippage = math.multiplyByFraction(amountOut, slippagePct);
+    const slippage = math.getFraction(amountOut, slippagePct);
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;

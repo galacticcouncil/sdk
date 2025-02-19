@@ -1,4 +1,4 @@
-import { bnum, ONE } from './bignumber';
+import Big from 'big.js';
 
 /**
  * Percentage Difference Formula
@@ -15,16 +15,17 @@ import { bnum, ONE } from './bignumber';
  * @param v2 - 2nd value
  * @returns Difference between two values in relation to their average
  */
+
 export function calculateDiffToAvg(v1: bigint, v2: bigint): number {
-  const v1b = bnum(v1);
-  const v2b = bnum(v2);
+  const v1b = Big(v1.toString());
+  const v2b = Big(v2.toString());
 
   return v1b
     .minus(v2b)
     .abs()
     .div(v1b.plus(v2b).div(2))
-    .multipliedBy(100)
-    .decimalPlaces(2)
+    .mul(100)
+    .round(2)
     .toNumber();
 }
 
@@ -44,16 +45,12 @@ export function calculateDiffToAvg(v1: bigint, v2: bigint): number {
  * @param vRef - reference value
  * @returns Difference between a final value and a reference value in relation to the reference value
  */
-export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
-  const vFinb = bnum(vFin);
-  const vRefb = bnum(vRef);
 
-  return vFinb
-    .minus(vRefb)
-    .div(vRefb)
-    .multipliedBy(100)
-    .decimalPlaces(2)
-    .toNumber();
+export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
+  const vFinb = Big(vFin.toString());
+  const vRefb = Big(vRef.toString());
+
+  return vFinb.minus(vRefb).div(vRefb).mul(100).round(2).toNumber();
 }
 
 /**
@@ -66,13 +63,10 @@ export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
  * @param deltaY - the amount out if the existing nonzero fees are included in the calculation
  */
 export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
-  const delta0Yb = bnum(delta0Y);
-  const deltaYb = bnum(deltaY);
+  const delta0Yb = Big(delta0Y.toString());
+  const deltaYb = Big(deltaY.toString());
 
-  return ONE.minus(deltaYb.div(delta0Yb))
-    .multipliedBy(100)
-    .decimalPlaces(2)
-    .toNumber();
+  return Big(1).minus(deltaYb.div(delta0Yb)).mul(100).round(2).toNumber();
 }
 
 /**
@@ -85,31 +79,25 @@ export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
  * @param deltaX - the amount in, inclusive of fees
  */
 export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
-  const delta0Xb = bnum(delta0X);
-  const deltaXb = bnum(deltaX);
+  const delta0Xb = Big(delta0X.toString());
+  const deltaXb = Big(deltaX.toString());
 
-  return deltaXb
-    .div(delta0Xb)
-    .minus(ONE)
-    .multipliedBy(100)
-    .decimalPlaces(2)
-    .toNumber();
+  return deltaXb.div(delta0Xb).minus(1).mul(100).round(2).toNumber();
 }
 
 /**
- * Get % fraction from value
+ * Get % fraction from native value
  *
- * @param value - native amount (bigint)
- * @param fraction - percentage value e.g. (0.1% => 0.1)
- * @param dp - safe decimals margin (0.001%)
+ * @param value - native amount
+ * @param pct - percentage value
+ * @param dp - safe decimals margin (2dp = 0.01%)
  * @returns fraction of given amount
  */
-export function multiplyByFraction(
-  value: bigint,
-  fraction: number,
-  dp = 3
-): bigint {
+export function getFraction(value: bigint, pct: number, dp = 2): bigint {
+  if (pct < 0.01 || pct > 100) {
+    new Error('Supported range is from 0.01% - 100%');
+  }
   const denominator = Math.pow(10, dp);
-  const percentage = BigInt(fraction * denominator);
+  const percentage = BigInt(pct * denominator);
   return (value * percentage) / BigInt(100 * denominator);
 }
