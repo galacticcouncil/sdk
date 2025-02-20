@@ -12,10 +12,10 @@ export type ChainCurrency = {
 };
 
 export enum ChainEcosystem {
-  Ethereum = 'ethereum',
-  Polkadot = 'polkadot',
-  Kusama = 'kusama',
-  Solana = 'solana',
+  Ethereum = 'Ethereum',
+  Polkadot = 'Polkadot',
+  Kusama = 'Kusama',
+  Solana = 'Solana',
 }
 
 export type ChainRpcs = {
