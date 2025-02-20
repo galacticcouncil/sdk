@@ -20,6 +20,7 @@ import {
   ibtc,
   intr,
   kilt,
+  ksm,
   ldot,
   myth,
   nodl,
@@ -107,6 +108,27 @@ const toAssetHub: AssetRoute[] = [
       fee: {
         amount: 0.19,
         asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: ksm,
+      fee: {
+        amount: 0.05,
+        asset: ksm,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
