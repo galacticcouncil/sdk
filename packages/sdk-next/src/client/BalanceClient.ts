@@ -10,6 +10,7 @@ import {
 
 import { Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
+import { AssetNotFound } from '../errors';
 import { AssetAmount } from '../types';
 
 export class BalanceClient extends Papi {
@@ -19,11 +20,9 @@ export class BalanceClient extends Papi {
 
   async getBalance(account: string, assetId: number): Promise<bigint> {
     const query = this.api.query.AssetRegistry.Assets;
-
     const asset = await query.getValue(assetId);
-    if (!asset) {
-      throw Error('Fdf');
-    }
+
+    if (!asset) throw new AssetNotFound(assetId);
 
     if (asset.asset_type.type === 'Erc20') {
       return this.getErc20Balance(account, assetId);
@@ -59,6 +58,17 @@ export class BalanceClient extends Papi {
     return combineLatest([systemOb, tokensOb]).pipe(
       debounceTime(250),
       map((balance) => balance.flat())
+    );
+  }
+
+  // TODO: Impl proper balance check
+  subscribeErc20Balance(address: string): Observable<string> {
+    return this.api.event.EVM.Log.watch().pipe(
+      map(({ meta, payload }) => {
+        console.log(meta);
+        console.log(payload);
+        return 'yes';
+      })
     );
   }
 
@@ -117,7 +127,10 @@ export class BalanceClient extends Papi {
     );
   }
 
-  async getTokenBalanceData(account: string, assetId: number): Promise<bigint> {
+  private async getTokenBalanceData(
+    account: string,
+    assetId: number
+  ): Promise<bigint> {
     const { free, frozen } = await this.api.apis.CurrenciesApi.account(
       assetId,
       account

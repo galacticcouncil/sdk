@@ -7,8 +7,6 @@ import {
 } from './math';
 
 describe('Calculate Percentage Difference', () => {
-  beforeEach(() => {});
-
   it('Calculate difference (avg) should be 0%', () => {
     const result = calculateDiffToAvg(200n, 200n);
     expect(result).toStrictEqual(0);
