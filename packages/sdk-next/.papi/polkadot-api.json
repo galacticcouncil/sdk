@@ -3,16 +3,8 @@
   "descriptorPath": ".papi/descriptors",
   "entries": {
     "hydration": {
-      "wsUrl": "wss://rpc.hydradx.cloud",
+      "wsUrl": "wss://hydration-rpc.n.dwellir.com",
       "metadata": ".papi/metadata/hydration.scale"
-    },
-    "basilisk": {
-      "wsUrl": "wss://rpc.basilisk.cloud",
-      "metadata": ".papi/metadata/basilisk.scale"
-    },
-    "polkadot": {
-      "chain": "polkadot",
-      "metadata": ".papi/metadata/polkadot.scale"
     }
   }
 }
