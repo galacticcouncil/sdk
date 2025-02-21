@@ -78,7 +78,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ksm,
       fee: {
-        amount: 0.33,
+        amount: 0.0001,
         asset: ksm,
       },
     },
