@@ -39,7 +39,7 @@ export const kusamaAssetHub = new Parachain({
   explorer: 'https://assethub-kusama.subscan.io',
   genesisHash:
     '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
-  key: 'kusama-assethub',
+  key: 'assethub_kusama',
   name: 'AssetHub Kusama',
   parachainId: 1000,
   ss58Format: 2,

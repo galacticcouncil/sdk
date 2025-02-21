@@ -42,6 +42,7 @@ export const runXcm = (
       try {
         const transfer = await getTransfer(wallet, chain, route);
         const { data } = await transfer.buildCall(TRANSFER_AMOUNT);
+        c.log('☑ ' + name + ' complete.');
         expect([key, data]).toMatchSnapshot();
       } catch (e) {
         const error = e as Error;
