@@ -934,5 +934,21 @@
       "feeAsset": "DOT",
       "feeNative": "100000000000"
     }
+  },
+  "hydration-assethub-ksm": {
+    "updated": 1740134645296,
+    "destination": {
+      "fee": "0.039466289084",
+      "feeAsset": "KSM",
+      "feeNative": "39466289084"
+    }
+  },
+  "assethub-hydration-ksm": {
+    "updated": 1740134106406,
+    "destination": {
+      "fee": "0.000032623305",
+      "feeAsset": "KSM",
+      "feeNative": "32623305"
+    }
   }
 }

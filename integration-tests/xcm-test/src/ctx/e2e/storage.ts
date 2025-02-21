@@ -1,10 +1,14 @@
 import {
-  Asset,
+  acc,
+  addr,
   big,
+  Asset,
   Parachain,
   ParachainAssetData,
 } from '@galacticcouncil/xcm-core';
 import { ApiPromise } from '@polkadot/api';
+
+import * as c from 'console';
 
 import { getAccount } from './account';
 import { findNestedKey } from '../../utils/json';
@@ -49,10 +53,31 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
   }
 
   if (useForeignAssetsPallet(api)) {
+    const foreignAssets = populateForeignAssets(
+      chain,
+      chainAssets,
+      chainDecimals
+    );
+
+    // Add 1000 KSM to AssetHub Hydration SA reserve
+    const ksm = chain.getAsset('ksm');
+    if (ksm && chain.key === 'assethub') {
+      const hydrationSaPub = acc.getSovereignAccounts(2034);
+      const hydrationSa = addr.encodePubKey(
+        hydrationSaPub.generic,
+        chain.ss58Format
+      );
+
+      foreignAssets.push([
+        [chain.getAssetXcmLocation(ksm), hydrationSa],
+        { balance: 1_000_000_000_000_000n },
+      ]);
+    }
+
     storage = Object.assign(
       {
         ForeignAssets: {
-          Account: populateForeignAssets(chain, chainAssets, chainDecimals),
+          Account: foreignAssets,
         },
       },
       storage
@@ -160,7 +185,11 @@ const populateForeignAssets = (
   const acc = getAccount(chain);
   return assets
     .filter((a) => !!a.xcmLocation)
-    .filter((a) => findNestedKey(a.xcmLocation, 'Parachain'))
+    .filter(
+      (a) =>
+        findNestedKey(a.xcmLocation, 'Parachain') ||
+        findNestedKey(a.xcmLocation, 'GlobalConsensus')
+    )
     .map((a) => {
       const assetLocation = chain.getAssetXcmLocation(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);

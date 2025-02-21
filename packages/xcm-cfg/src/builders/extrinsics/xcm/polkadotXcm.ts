@@ -56,7 +56,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
 
         if (asset.key === destination.fee.key) {
           return [
-            toDest(version, rcv),
+            toDest(version, ctx, rcv),
             toBeneficiary(version, account),
             {
               [version]: [transferAsset],
@@ -69,7 +69,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         // Flip asset order if general index of asset greater than fee asset
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
           return [
-            toDest(version, rcv),
+            toDest(version, ctx, rcv),
             toBeneficiary(version, account),
             {
               [version]: [transferFee, transferAsset],
@@ -80,7 +80,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         }
 
         return [
-          toDest(version, rcv),
+          toDest(version, ctx, rcv),
           toBeneficiary(version, account),
           {
             [version]: [transferAsset, transferFee],
@@ -109,7 +109,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
           [version]: [transferAsset],
@@ -136,12 +136,39 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
           [version]: [transferAsset],
         };
         return [dest, beneficiary, assets, 0];
+      },
+    }),
+});
+
+const transferAssets = (): ExtrinsicConfigBuilder => ({
+  build: ({ address, amount, asset, destination, source }) =>
+    new ExtrinsicConfig({
+      module: pallet,
+      func: 'transferAssets',
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
+        const account = getExtrinsicAccount(address);
+        const ctx = source.chain as Parachain;
+        const rcv = destination.chain as Parachain;
+
+        const transferAssetLocation = getExtrinsicAssetLocation(
+          locationOrError(ctx, asset),
+          version
+        );
+        const transferAsset = toAsset(transferAssetLocation, amount);
+
+        const dest = toDest(version, ctx, rcv);
+        const beneficiary = toBeneficiary(version, account);
+        const assets = {
+          [version]: [transferAsset],
+        };
+        return [dest, beneficiary, assets, 0, 'Unlimited'];
       },
     }),
 });
@@ -188,7 +215,7 @@ const transferAssetsUsingTypeAndThen = (
 
         const isSufficientPaymentAsset = asset.isEqual(destination.fee);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
 
         const assets = {
           [version]: asset.isEqual(destination.fee)
@@ -265,7 +292,7 @@ const send = () => {
             const transactFeeAmount = big.toBigInt(opts.fee, fee.decimals);
 
             return [
-              toDest(version, rcv),
+              toDest(version, ctx, rcv),
               toTransactMessage(
                 version,
                 account,
@@ -308,7 +335,7 @@ const send = () => {
             const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
 
             return [
-              toDest(version, rcv),
+              toDest(version, ctx, rcv),
               toTransferMessage(
                 version,
                 account,
@@ -330,6 +357,7 @@ export const polkadotXcm = () => {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
     reserveTransferAssets,
+    transferAssets,
     transferAssetsUsingTypeAndThen,
     send,
   };

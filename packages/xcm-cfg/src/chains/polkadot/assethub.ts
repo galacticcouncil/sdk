@@ -4,7 +4,7 @@ import {
   ParachainParams,
 } from '@galacticcouncil/xcm-core';
 
-import { ded, dot, dota, myth, pink, usdc, usdt, wud } from '../../assets';
+import { ded, dot, dota, ksm, myth, pink, usdc, usdt, wud } from '../../assets';
 
 const config = {
   assetsData: [
@@ -142,6 +142,20 @@ const config = {
         },
       },
     },
+    {
+      asset: ksm,
+      decimals: 12,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: [
+            {
+              GlobalConsensus: 'Kusama',
+            },
+          ],
+        },
+      },
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://assethub-polkadot.subscan.io',
@@ -161,6 +175,7 @@ const config = {
 export const assetHub = new Parachain({
   ...config,
   key: 'assethub',
+  name: 'AssetHub Polkadot',
 });
 
 export const assetHubCex = new Parachain({
