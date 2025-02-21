@@ -1,6 +1,8 @@
 import {
-  Asset,
+  acc,
+  addr,
   big,
+  Asset,
   Parachain,
   ParachainAssetData,
 } from '@galacticcouncil/xcm-core';
@@ -9,7 +11,7 @@ import { ApiPromise } from '@polkadot/api';
 import * as c from 'console';
 
 import { getAccount } from './account';
-import { findNestedKey, jsonFormatter } from '../../utils/json';
+import { findNestedKey } from '../../utils/json';
 
 const BALANCE = 1000n;
 
@@ -59,12 +61,15 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
 
     // Add 1000 KSM to AssetHub Hydration SA reserve
     const ksm = chain.getAsset('ksm');
-    if (ksm) {
+    if (ksm && chain.key === 'assethub') {
+      const hydrationSaPub = acc.getSovereignAccounts(2034);
+      const hydrationSa = addr.encodePubKey(
+        hydrationSaPub.generic,
+        chain.ss58Format
+      );
+
       foreignAssets.push([
-        [
-          chain.getAssetXcmLocation(ksm),
-          '13cKp89Uh2yWgTG28JA1QEvPUMjEPKejqkjHKf9zqLiFKjH6',
-        ],
+        [chain.getAssetXcmLocation(ksm), hydrationSa],
         { balance: 1_000_000_000_000_000n },
       ]);
     }

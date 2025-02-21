@@ -936,7 +936,7 @@
     }
   },
   "hydration-assethub-ksm": {
-    "updated": 1740062478514,
+    "updated": 1740134645296,
     "destination": {
       "fee": "0.039466289084",
       "feeAsset": "KSM",
@@ -944,7 +944,7 @@
     }
   },
   "assethub-hydration-ksm": {
-    "updated": 1740063220595,
+    "updated": 1740134106406,
     "destination": {
       "fee": "0.000032623305",
       "feeAsset": "KSM",
