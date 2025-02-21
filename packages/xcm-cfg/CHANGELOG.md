@@ -1,5 +1,24 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.4.1
+
+### Patch Changes
+
+- Fix ah -> hydration KSM dest fee
+
+## 7.4.0
+
+### Minor Changes
+
+- Add pah <-> hydration KSM transfer
+- Add pah <-> kah KSM transfer
+- Support polkadotXcm.transferAssets
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.3.0
+
 ## 7.3.2
 
 ### Patch Changes
