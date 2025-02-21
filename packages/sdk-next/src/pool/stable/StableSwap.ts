@@ -13,7 +13,7 @@ import {
 import { OmniMath } from '../omni';
 
 import { RUNTIME_DECIMALS, TRADEABLE_DEFAULT } from '../../consts';
-import { fmt } from '../../utils';
+import { fmt, json } from '../../utils';
 
 import { StableMath } from './StableMath';
 
@@ -374,7 +374,7 @@ export class StableSwap implements Pool {
           decimals: decimals,
         };
       });
-    return JSON.stringify(reserves);
+    return JSON.stringify(reserves, json.jsonFormatter);
   }
 
   private getAssets(assetId: number, amount: bigint): string {
@@ -382,6 +382,6 @@ export class StableSwap implements Pool {
       asset_id: Number(assetId),
       amount: amount.toString(),
     };
-    return JSON.stringify([asset]);
+    return JSON.stringify([asset], json.jsonFormatter);
   }
 }

@@ -17,7 +17,7 @@ import {
   is_remove_liquidity_allowed,
 } from '@galacticcouncil/math-omnipool';
 
-import { BigNumber } from '../../utils/bignumber';
+import Big from 'big.js';
 
 export class OmniMath {
   static calculateSpotPrice(
@@ -193,17 +193,18 @@ export class OmniMath {
     assetCap: string,
     totalHubReserve: string
   ): string {
-    const qi = BigNumber(assetHubReserve);
-    const ri = BigNumber(assetReserve);
-    const q = BigNumber(totalHubReserve);
-    const omegaI = BigNumber(assetCap);
+    const qi = Big(assetHubReserve);
+    const ri = Big(assetReserve);
+    const q = Big(totalHubReserve);
+    const omegaI = Big(assetCap);
 
-    const percentage = omegaI.shiftedBy(-18);
+    const divisor = Big(10).pow(18);
+    const percentage = omegaI.div(divisor);
     const isUnderWeightCap = qi.div(q).lt(percentage);
 
     if (isUnderWeightCap) {
       const numerator = percentage.times(q).minus(qi).times(ri);
-      const denominator = qi.times(BigNumber(1).minus(percentage));
+      const denominator = qi.times(Big(1).minus(percentage));
       return numerator.div(denominator).toFixed(0);
     } else {
       return '0';

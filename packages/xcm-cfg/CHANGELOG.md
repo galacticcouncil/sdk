@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.3.2
+
+### Patch Changes
+
+- cccd9cd: Remove snowbridge weth config
+
 ## 7.3.1
 
 ### Patch Changes
