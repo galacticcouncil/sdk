@@ -33,6 +33,6 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-core": "^6.2.0"
+    "@galacticcouncil/xcm-core": "^6.3.0"
   }
 }
