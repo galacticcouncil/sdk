@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.5.0
+
+### Minor Changes
+
+- Support hydration dex XYK routing
+- Update KSM min deposit on pah
+
 ## 7.4.1
 
 ### Patch Changes
