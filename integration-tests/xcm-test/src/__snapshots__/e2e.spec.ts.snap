@@ -126,6 +126,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Polkadot DOT [dot] transfer 1`] = `
+[
+  "assethub-polkadot-dot",
+  "0xec041f09040100040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040100000700e87648170000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Astar -> Hydration ASTR [astr] transfer 1`] = `
 [
   "astar-hydration-astr",
