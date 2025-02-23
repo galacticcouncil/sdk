@@ -23,7 +23,7 @@ const toAssetHub: AssetRoute = new AssetRoute({
     chain: kusamaAssetHub,
     asset: ksm,
     fee: {
-      amount: 0.000034368318,
+      amount: 0.0002,
       asset: ksm,
     },
   },
@@ -34,7 +34,7 @@ export const kusamaConfig = new ChainRoutes({
   chain: kusama,
   routes: [
     toAssetHub,
-    toParaTemplate(basilisk, 0.00004416361),
-    toParaTemplate(karura, 0.00004416361),
+    toParaTemplate(basilisk, 0.000045),
+    toParaTemplate(karura, 0.000045),
   ],
 });

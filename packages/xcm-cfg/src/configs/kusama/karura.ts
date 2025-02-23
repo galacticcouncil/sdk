@@ -21,7 +21,7 @@ const toAssetHub: AssetRoute[] = [
       chain: kusamaAssetHub,
       asset: usdt,
       fee: {
-        amount: 0.001183,
+        amount: 0.0012,
         asset: usdt,
       },
     },
