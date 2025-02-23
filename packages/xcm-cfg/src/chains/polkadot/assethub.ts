@@ -131,6 +131,7 @@ const config = {
     {
       asset: myth,
       decimals: 18,
+      min: 0.00000003,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -145,6 +146,7 @@ const config = {
     {
       asset: ksm,
       decimals: 12,
+      min: 0.0001,
       xcmLocation: {
         parents: 2,
         interior: {
