@@ -950,5 +950,21 @@
       "feeAsset": "KSM",
       "feeNative": "32623305"
     }
+  },
+  "kusama-assethub_kusama-ksm": {
+    "updated": 1740305498800,
+    "destination": {
+      "fee": "0.000119766667",
+      "feeAsset": "KSM",
+      "feeNative": "119766667"
+    }
+  },
+  "assethub_kusama-kusama-ksm": {
+    "updated": 1740305660251,
+    "destination": {
+      "fee": "0.000085566586",
+      "feeAsset": "KSM",
+      "feeNative": "85566586"
+    }
   }
 }

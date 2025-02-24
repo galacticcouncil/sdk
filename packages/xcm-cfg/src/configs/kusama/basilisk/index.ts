@@ -29,7 +29,7 @@ const toAssetHub: AssetRoute[] = [
       chain: kusamaAssetHub,
       asset: usdt,
       fee: {
-        amount: 0.001183,
+        amount: 0.0012,
         asset: usdt,
       },
     },
@@ -41,10 +41,10 @@ export const basiliskConfig = new ChainRoutes({
   chain: basilisk,
   routes: [
     ...toAssetHub,
-    toTransferTemplate(bsx, karura, 0.09324),
-    toTransferTemplate(ksm, kusama, 0.00010457164),
+    toTransferTemplate(bsx, karura, 0.0933),
+    toTransferTemplate(ksm, kusama, 0.00012),
     toTransferTemplate(teer, integritee, 0.000004),
-    toTransferTemplate(xrt, robonomics, 0.000004632),
-    toTransferTemplate(tnkr, tinkernet, 0.00927020324),
+    toTransferTemplate(xrt, robonomics, 0.00000464),
+    toTransferTemplate(tnkr, tinkernet, 0.0095),
   ],
 });

@@ -29,7 +29,7 @@ const toKusama = new AssetRoute({
     chain: kusama,
     asset: ksm,
     fee: {
-      amount: 0.000090049287,
+      amount: 0.0001,
       asset: ksm,
     },
   },
@@ -65,7 +65,7 @@ export const assetHubConfig = new ChainRoutes({
   routes: [
     toKusama,
     toPolkadotAssethub,
-    toParaStablesTemplate(usdt, basilisk, 0.000808),
-    toParaStablesTemplate(usdt, karura, 0.000808),
+    toParaStablesTemplate(usdt, basilisk, 0.001),
+    toParaStablesTemplate(usdt, karura, 0.001),
   ],
 });

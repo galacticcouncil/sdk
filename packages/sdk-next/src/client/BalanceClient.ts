@@ -78,7 +78,6 @@ export class BalanceClient extends Papi {
     return query.watchValue(address, 'best').pipe(
       map((balance) => {
         const { free, frozen } = balance.data;
-        this.logSync(address, 'system balance', free - frozen);
         return {
           id: SYSTEM_ASSET_ID,
           amount: free - frozen,
@@ -96,7 +95,6 @@ export class BalanceClient extends Papi {
     return query.watchValue(address, assetId, 'best').pipe(
       map((balance) => {
         const { free, frozen } = balance;
-        this.logSync(address, 'token balance', free - frozen);
         return {
           id: assetId,
           amount: free - frozen,
@@ -110,18 +108,26 @@ export class BalanceClient extends Papi {
 
     return query.watchEntries(address, { at: 'best' }).pipe(
       distinctUntilChanged((_, current) => !current.deltas),
-      map(({ entries, deltas }) => {
-        const delta = deltas?.upserted.map((up) => up.args[1]).sort();
-        this.logSync(address, 'tokens balance', delta);
+      map(({ deltas }) => {
         const result: AssetAmount[] = [];
-        entries.forEach((e) => {
-          const [_, asset] = e.args;
-          const { free, frozen } = e.value;
+
+        deltas?.deleted.forEach((u) => {
+          const [_, asset] = u.args;
+          result.push({
+            id: asset,
+            amount: 0n,
+          });
+        });
+
+        deltas?.upserted.forEach((u) => {
+          const [_, asset] = u.args;
+          const { free, frozen } = u.value;
           result.push({
             id: asset,
             amount: free - frozen,
           });
         });
+
         return result;
       })
     );
