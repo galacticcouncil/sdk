@@ -1,6 +1,9 @@
 import '@polkadot/api-augment';
 
 import {
+  acc,
+  addr,
+  multiloc,
   AnyParachain,
   Asset,
   AssetAmount,
@@ -9,9 +12,9 @@ import {
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { BN, hexToU8a } from '@polkadot/util';
+import { hexToU8a } from '@polkadot/util';
 
-import { getDeliveryFeeFromDryRun } from './utils';
+import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
 
 export class SubstrateService {
   readonly api: ApiPromise;
@@ -98,7 +101,7 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<bigint> {
     if (this.chain.usesDeliveryFee) {
-      const acc = this.chain.treasury || account;
+      const acc = this.estimateDeliveryFeeWith(account, config);
       const result = await this.dryRun(acc, config);
 
       const ok = result.Ok;
@@ -106,21 +109,8 @@ export class SubstrateService {
       if (isSuccess) {
         return getDeliveryFeeFromDryRun(ok);
       } else {
-        const err = ok.executionResult.Err.error;
-        if (err.Module) {
-          const { error, index } = err.Module;
-
-          const errorIndex = Number(error.slice(0, 4));
-          const decoded = this.api.registry.findMetaError({
-            error: new BN(errorIndex),
-            index: new BN(index),
-          });
-          const reason = `${decoded.section}.${decoded.method}: ${decoded.docs.join(' ')}`;
-          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
-        } else {
-          const reason = JSON.stringify(err);
-          console.warn(`Can't estimate delivery fee. Reason:\n ${reason}`);
-        }
+        const error = getErrorFromDryRun(this.api, ok);
+        console.warn(`Can't estimate delivery fee. Reason:\n ${error}`);
       }
     }
     return 0n;
@@ -137,5 +127,37 @@ export class SubstrateService {
       callDataU8a
     );
     return result.toHuman() as any;
+  }
+
+  private estimateDeliveryFeeWith(
+    account: string,
+    config: ExtrinsicConfig
+  ): string {
+    if (['xcmPallet', 'polkadotXcm'].includes(config.module)) {
+      const fn = this.api.tx[config.module][config.func];
+      const [dest] = config.getArgs(fn);
+      const interior = multiloc.findNestedKey(dest, 'interior');
+      const parachain = multiloc.findParachain(dest);
+      const consensus = multiloc.findGlobalConsensus(dest);
+
+      // Cross consensus (use user account)
+      if (consensus) {
+        return account;
+      }
+
+      // Downward (use chain sovereign account)
+      if (parachain) {
+        const saPub = acc.getSovereignAccounts(parachain);
+        return this.chain.parachainId === 0
+          ? addr.encodePubKey(saPub.relay, 0)
+          : addr.encodePubKey(saPub.generic, 0);
+      }
+
+      // Upward (use chain treasury account if any)
+      if (interior && interior['interior'] === 'Here') {
+        return this.chain.treasury || account;
+      }
+    }
+    return account;
   }
 }

@@ -1,13 +1,6 @@
-import { bnum } from './bignumber';
-
-import { DENOMINATOR } from '../consts';
 import { PoolFee } from '../pool';
 
-export function toHuman(amount: bigint, decimals: number): string {
-  return bnum(amount)
-    .shiftedBy(-1 * decimals)
-    .toString();
-}
+const DENOMINATOR = 1000;
 
 export function toPct(fee: PoolFee): number {
   const [numerator, denominator] = fee;
@@ -19,6 +12,6 @@ export function toDecimals(fee: PoolFee): number {
   return numerator / denominator;
 }
 
-export function toPoolFee(permill: number): PoolFee {
+export function fromPermill(permill: number): PoolFee {
   return [permill / DENOMINATOR, DENOMINATOR] as PoolFee;
 }

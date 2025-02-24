@@ -1,8 +1,6 @@
-import type { Asset, Transaction } from '../types';
-
 export enum PoolType {
-  XYK = 'Xyk',
-  LBP = 'Lbp',
+  XYK = 'XYK',
+  LBP = 'LBP',
   Stable = 'Stableswap',
   Omni = 'Omnipool',
 }
@@ -36,11 +34,15 @@ export type PoolBase = {
   minTradingLimit: bigint;
 };
 
-export interface PoolToken extends Asset {
+export interface PoolToken {
   id: number;
   balance: bigint;
+  existentialDeposit: bigint;
+  decimals?: number;
   tradeable?: number;
 }
+
+export type PoolTokenOverride = Pick<PoolToken, 'id' | 'decimals'>;
 
 export type PoolLimits = Pick<
   PoolBase,
@@ -92,29 +94,15 @@ export interface Pool extends PoolBase {
   spotPriceOutGivenIn(poolPair: PoolPair): bigint;
 }
 
-export interface IPoolService {
-  getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
-  getPoolFees(pool: Pool, feeAsset?: number): Promise<PoolFees>;
-  buildBuyTx(
-    assetIn: number,
-    assetOut: number,
-    amountOut: bigint,
-    maxAmountIn: bigint,
-    route: Hop[]
-  ): Transaction;
-  buildSellTx(
-    assetIn: number,
-    assetOut: number,
-    amountIn: bigint,
-    minAmountOut: bigint,
-    route: Hop[]
-  ): Transaction;
+export interface IPoolCtxProvider {
+  getPools(): Promise<PoolBase[]>;
+  getPoolFees(pool: PoolBase, feeAsset: number): Promise<PoolFees>;
 }
 
 export type Hop = {
   pool: PoolType;
   poolAddress: string;
-  poolId?: string;
+  poolId?: number;
   assetIn: number;
   assetOut: number;
 };

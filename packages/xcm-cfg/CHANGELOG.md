@@ -1,5 +1,43 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.5.1
+
+### Patch Changes
+
+- Bump kusama ecosystem fees
+
+## 7.5.0
+
+### Minor Changes
+
+- Support hydration dex XYK routing
+- Update KSM min deposit on pah
+
+## 7.4.1
+
+### Patch Changes
+
+- Fix ah -> hydration KSM dest fee
+
+## 7.4.0
+
+### Minor Changes
+
+- Add pah <-> hydration KSM transfer
+- Add pah <-> kah KSM transfer
+- Support polkadotXcm.transferAssets
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.3.0
+
+## 7.3.2
+
+### Patch Changes
+
+- cccd9cd: Remove snowbridge weth config
+
 ## 7.3.1
 
 ### Patch Changes

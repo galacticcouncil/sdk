@@ -2,212 +2,149 @@ import { PolkadotClient } from 'polkadot-api';
 
 import { memoize1 } from '@thi.ng/memoize';
 
-import { type Observable, Subscription } from 'rxjs';
+import {
+  type Observable,
+  combineLatest,
+  combineLatestAll,
+  debounceTime,
+  firstValueFrom,
+  from,
+  map,
+  mergeAll,
+  switchMap,
+} from 'rxjs';
 
-import { SYSTEM_ASSET_ID } from '../consts';
 import { BalanceClient } from '../client';
-import { Asset } from '../types';
+import { HYDRATION_OMNIPOOL_ADDRESS, SYSTEM_ASSET_ID } from '../consts';
+import { AssetAmount } from '../types';
 
-import { PoolBase, PoolFees, PoolType } from './types';
+import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
 
 export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
-  protected pools: PoolBase[] = [];
-  protected subs: Subscription = Subscription.EMPTY;
-
-  private assets: Map<number, Asset> = new Map([]);
+  private override: PoolTokenOverride[] = [];
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
     console.log(this.getPoolType(), 'mem pools', mem, '✅');
-    return this.getPools();
+    return this.loadPools();
   });
 
   constructor(client: PolkadotClient) {
     super(client);
   }
 
-  abstract isSupported(): Promise<boolean>;
+  protected abstract loadPools(): Promise<T[]>;
+
+  abstract getPoolFees(pool: T, feeAsset: number): Promise<PoolFees>;
+
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(address: string, feeAsset: number): Promise<PoolFees>;
-  abstract loadPools(): Promise<T[]>;
+
+  abstract isSupported(): Promise<boolean>;
+
   abstract subscribePoolChange(pool: T): Observable<T>;
 
-  get augmentedPools() {
-    return this.pools
-      .filter((p) => this.isValidPool(p))
-      .map((p) => this.withMetadata(p));
+  async withOverride(override?: PoolTokenOverride[]) {
+    this.override = override || [];
   }
 
-  /**
-   * Update registry assets, evict mempool
-   *
-   * @param assets - registry assets
-   */
-  withAssets(assets: Asset[]) {
-    this.assets = new Map(assets.map((asset: Asset) => [asset.id, asset]));
-    this.mem = this.mem + 1;
-  }
-
-  async getPoolsMem(): Promise<PoolBase[]> {
+  async getPoolsMem(): Promise<T[]> {
     return this.memPools(this.mem);
   }
 
-  async getPools(): Promise<PoolBase[]> {
-    //this.unsubscribe();
-    this.pools = await this.loadPools();
-    //this.subs = this.subscribe();
-    const type = this.getPoolType();
-    console.log(type, `pools(${this.augmentedPools.length})`, '✅');
-    //console.log(type, `subs(${this.subs.length})`, '✅');
-
-    return this.augmentedPools;
+  async getPools(): Promise<T[]> {
+    const observers = from(this.getPoolsMem()).pipe(
+      switchMap((pools) => this.subscribe(pools)),
+      combineLatestAll()
+    );
+    return firstValueFrom(observers);
   }
 
-  // private subscribe() {
-  //   const subs = this.augmentedPools.map((pool: PoolBase) => {
-  //     const poolSubs = [this.subscribeTokensPoolBalance(pool)];
+  getSubscriber(): Observable<T> {
+    return from(this.getPoolsMem()).pipe(
+      switchMap((pools) => this.subscribe(pools)),
+      mergeAll()
+    );
+  }
 
-  //     try {
-  //       const subChange = this.subscribePoolChange(pool);
-  //       poolSubs.push(subChange);
-  //     } catch (e) {}
+  private subscribe(pools: T[]): Observable<T>[] {
+    return pools
+      .filter((pool) => this.hasValidAssets(pool))
+      .map((pool) =>
+        combineLatest([
+          this.subscribePoolChange(pool),
+          this.subscribePoolBalance(pool),
+        ]).pipe(
+          debounceTime(250),
+          map(([pool, balances]) => this.updatePool(pool, balances))
+        )
+      );
+  }
 
-  //     if (this.hasSystemAsset(pool)) {
-  //       const subSystem = this.subscribeSystemPoolBalance(pool);
-  //       poolSubs.push(subSystem);
-  //     }
+  private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+    const subs: Observable<AssetAmount | AssetAmount[]>[] = [
+      this.subscribeTokensBalance(pool.address),
+    ];
 
-  //     if (this.hasErc20Asset(pool)) {
-  //       const subErc20 = this.subscribeErc20PoolBalance(pool);
-  //       poolSubs.push(subErc20);
-  //     }
+    if (this.hasSystemAsset(pool)) {
+      const sub = this.subscribeSystemBalance(pool.address);
+      subs.push(sub);
+    }
 
-  //     if (this.hasShareAsset(pool)) {
-  //       const subShare = this.subscribeSharePoolBalance(pool);
-  //       poolSubs.push(subShare);
-  //     }
+    if (this.hasShareAsset(pool)) {
+      const sub = this.subscribeTokenBalance(
+        HYDRATION_OMNIPOOL_ADDRESS,
+        pool.id!
+      );
+      subs.push(sub);
+    }
 
-  //     this.subscribeLog(pool);
-  //     return poolSubs;
-  //   });
+    return combineLatest(subs).pipe(
+      map((res) =>
+        res
+          .map((r) => {
+            return Array.isArray(r) ? r : [r];
+          })
+          .flat()
+      )
+    );
+  }
 
-  //   return subs.flat();
-  // }
-
-  private hasSystemAsset(pool: PoolBase) {
+  private hasSystemAsset(pool: T): boolean {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
   }
 
-  private hasShareAsset(pool: PoolBase) {
-    return pool.type === PoolType.Stable && pool.id;
+  private hasShareAsset(pool: T): boolean {
+    return pool.type === PoolType.Stable && !!pool.id;
   }
 
-  private hasErc20Asset(pool: PoolBase) {
-    return pool.tokens.some((t) => t.type === 'Erc20');
+  private hasValidAssets(pool: T): boolean {
+    return pool.tokens.every(({ id, decimals, balance }) => {
+      const override = this.override.find((o) => o.id === id);
+      const hasDecimals = !!decimals || !!override?.decimals;
+      return balance > 0n && hasDecimals;
+    });
   }
 
-  unsubscribe() {
-    this.subs.unsubscribe();
-  }
-
-  private subscribeLog(pool: PoolBase) {
-    const poolAddr = pool.address.substring(0, 10).concat('...');
-    console.log(`${pool.type} [${poolAddr}] balance subscribed`);
-  }
-
-  // private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
-  //   return this.subscribeSystemBalance(
-  //     pool.address,
-  //     this.updateBalanceCallback(pool)
-  //   );
-  // }
-
-  // private subscribeTokensPoolBalance(
-  //   pool: PoolBase
-  // ): Observable<AssetAmount[]> {
-  //   /**
-  //    * Skip balance update for shared token in stablepool as balance is
-  //    * stored in omnipool instead
-  //    *
-  //    * @param p - asset pool
-  //    * @param t - pool token
-  //    * @returns true if pool id different than token, otherwise false (shared token)
-  //    */
-  //   const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
-  //   return this.subscribeTokenBalance(
-  //     pool.address,
-  //     pool.tokens,
-  //     this.updateBalancesCallback(pool, isNotStableswap)
-  //   );
-  // }
-
-  // private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
-  //   return this.subscribeErc20Balance(
-  //     pool.address,
-  //     pool.tokens,
-  //     this.updateBalancesCallback(pool, () => true)
-  //   );
-  // }
-
-  // private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
-  //   const sharedAsset = this.assets.get(pool.id!);
-  //   return this.subscribeTokenBalance(
-  //     HYDRADX_OMNIPOOL_ADDRESS,
-  //     [sharedAsset!],
-  //     this.updateBalancesCallback(pool, () => true)
-  //   );
-  // }
-
-  /**
-   * Check if pool valid. Only XYK pools are being verified as those are
-   * considered permissionless.
-   *
-   * @param pool - asset pool
-   * @returns true if pool valid & assets known by registry, otherwise false
-   */
-  private isValidPool(pool: PoolBase): boolean {
-    return pool.type === PoolType.XYK
-      ? pool.tokens.every((t) => this.assets.get(t.id))
-      : true;
-  }
-
-  /**
-   * Augment pool tokens with asset metadata
-   *
-   * @param pool - asset pool
-   * @returns asset pool with augmented tokens
-   */
-  private withMetadata(pool: PoolBase) {
-    pool.tokens = pool.tokens.map((t) => {
-      const asset = this.assets.get(t.id);
+  private updatePool = (pool: PoolBase, balances: AssetAmount[]): T => {
+    const tokens = pool.tokens.map((token) => {
+      const balance = balances.find((balance) => balance.id === token.id);
+      const override = this.override.find((o) => o.id === token.id);
+      if (balance) {
+        return {
+          ...token,
+          balance: balance.amount,
+          decimals: token.decimals || override?.decimals,
+        };
+      }
       return {
-        ...t,
-        ...asset,
+        ...token,
+        decimals: token.decimals || override?.decimals,
       };
     });
-    return pool;
-  }
 
-  // private updateBalancesCallback(
-  //   pool: PoolBase,
-  //   canUpdate: (pool: PoolBase, token: string) => boolean
-  // ) {
-  //   return function (balances: [string, BigNumber][]) {
-  //     balances.forEach(([token, balance]) => {
-  //       const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-  //       if (tokenIndex >= 0 && canUpdate(pool, token)) {
-  //         pool.tokens[tokenIndex].balance = balance.toString();
-  //       }
-  //     });
-  //   };
-  // }
-
-  // private updateBalanceCallback(pool: PoolBase) {
-  //   return function (token: string, balance: BigNumber) {
-  //     const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-  //     if (tokenIndex >= 0) {
-  //       pool.tokens[tokenIndex].balance = balance.toString();
-  //     }
-  //   };
-  // }
+    return {
+      ...pool,
+      tokens: tokens,
+    } as T;
+  };
 }

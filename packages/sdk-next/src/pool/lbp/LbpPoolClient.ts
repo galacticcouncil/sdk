@@ -1,7 +1,7 @@
 import { CompatibilityLevel } from 'polkadot-api';
 import { HydrationQueries } from '@polkadot-api/descriptors';
 
-import { type Observable, of, mergeMap, switchMap, NEVER } from 'rxjs';
+import { type Observable, map, of, switchMap } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -12,20 +12,10 @@ import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 type TLbpPoolData = HydrationQueries['LBP']['PoolData']['Value'];
 
 export class LbpPoolClient extends PoolClient<LbpPoolBase> {
-  readonly MAX_FINAL_WEIGHT = 100_000_000n;
-
+  private readonly MAX_FINAL_WEIGHT = 100_000_000n;
   private poolsData: Map<string, TLbpPoolData> = new Map([]);
 
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.LBP.PoolData;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
-
-  async loadPools(): Promise<LbpPoolBase[]> {
+  protected async loadPools(): Promise<LbpPoolBase[]> {
     const [entries, validationData, limits] = await Promise.all([
       this.api.query.LBP.PoolData.getEntries(),
       this.api.query.ParachainSystem.ValidationData.getValue(),
@@ -56,47 +46,6 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         } as LbpPoolBase;
       });
     return Promise.all(pools);
-  }
-
-  async getPoolFees(address: string, _feeAsset: number): Promise<PoolFees> {
-    const pool = this.pools.find(
-      (pool) => pool.address === address
-    ) as LbpPoolBase;
-    const repayFee = await this.getRepayFee();
-    return {
-      repayFee: repayFee,
-      exchangeFee: pool.fee as PoolFee,
-    } as LbpPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.LBP;
-  }
-
-  subscribePoolChange(pool: LbpPoolBase): Observable<LbpPoolBase> {
-    const query = this.api.query.ParachainSystem.ValidationData;
-    const poolData = this.poolsData.get(pool.address);
-
-    if (!poolData) {
-      return NEVER;
-    }
-
-    return query.watchValue().pipe(
-      switchMap((data) => {
-        if (data) {
-          return this.getPoolDelta(
-            pool.address,
-            poolData,
-            data.relay_parent_number
-          );
-        }
-        return NEVER;
-      }),
-      mergeMap((delta) => {
-        Object.assign(pool, delta);
-        return of(pool);
-      })
-    );
   }
 
   private async getPoolDelta(
@@ -203,5 +152,49 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
       maxOutRatio: maxOutRatio,
       minTradingLimit: minTradingLimit,
     } as PoolLimits;
+  }
+
+  async getPoolFees(pool: LbpPoolBase): Promise<PoolFees> {
+    const repayFee = await this.getRepayFee();
+    return {
+      repayFee: repayFee,
+      exchangeFee: pool.fee as PoolFee,
+    } as LbpPoolFees;
+  }
+
+  getPoolType(): PoolType {
+    return PoolType.LBP;
+  }
+
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.LBP.PoolData;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
+
+  subscribePoolChange(pool: LbpPoolBase): Observable<LbpPoolBase> {
+    const query = this.api.query.ParachainSystem.ValidationData;
+    const poolData = this.poolsData.get(pool.address);
+
+    if (!poolData) {
+      return of(pool);
+    }
+
+    return query.watchValue('best').pipe(
+      switchMap((data) => {
+        if (data) {
+          return this.getPoolDelta(
+            pool.address,
+            poolData,
+            data.relay_parent_number
+          );
+        }
+        return of(pool);
+      }),
+      map((delta) => Object.assign({}, pool, delta))
+    );
   }
 }

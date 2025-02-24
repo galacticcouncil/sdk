@@ -41,13 +41,13 @@ export class FeeSwap {
   /**
    * Fee swap context
    *
-   * @param fee - source fee
+   * @param fee - source chain fee
    * @returns source fee swap context
    */
   async getSwap(fee: AssetAmount): Promise<SwapCtx | undefined> {
     const { asset, decimals } = await this.dex!.chain.getCurrency();
-
     const { amount } = await this.dex!.getQuote(asset, fee, fee);
+
     return {
       aIn: fee,
       aOut: AssetAmount.fromAsset(asset, {
@@ -59,16 +59,16 @@ export class FeeSwap {
   }
 
   /**
-   * Fee swap is only allowed if explicitly enabled in
-   * route fee config
+   * Swap source fee only if explicitly enabled in route
+   * fee config
    *
-   * @param fee - source fee config
+   * @param fee - source chain fee config
    * @returns true if supported, otherwise false
    */
   isSwapSupported(cfg?: FeeConfig) {
-    const isSupported = !!this.dex;
-    const isConfigured = cfg && cfg.swap;
-    return isSupported && !!isConfigured;
+    const isDex = !!this.dex;
+    const isSwapEnabled = cfg && cfg.swap;
+    return isDex && !!isSwapEnabled;
   }
 
   /**
@@ -80,7 +80,7 @@ export class FeeSwap {
    *
    * Note: Slippage can be set up to 100% in builder config (see maxAmountIn)
    *
-   * @param fee - source fee
+   * @param fee - source chain fee
    * @returns destination fee swap context
    */
   async getDestinationSwap(fee: AssetAmount): Promise<SwapCtx | undefined> {
@@ -104,17 +104,17 @@ export class FeeSwap {
   }
 
   /**
-   * Destination fee swap is only allowed if:
-   *  - transfer asset is insufficient
+   * Swap destination fee only if:
+   *  - transfer asset insufficient
    *  - destination fee asset is different than fee asset
    *
-   * @param fee - route source fee
+   * @param fee - source chain fee
    * @returns true if supported, otherwise false
    */
   isDestinationSwapSupported(fee: AssetAmount): boolean {
-    const isSupported = !!this.dex;
+    const isDex = !!this.dex;
     const isSwappable = !fee.isSame(this.destFee);
     const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
-    return isSupported && isSwappable && !isSufficientAssetTransfer;
+    return isDex && isSwappable && !isSufficientAssetTransfer;
   }
 }

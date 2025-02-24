@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 6.3.0
+
+### Minor Changes
+
+- 14d9147: Sync ecosystem & consensus names
+
 ## 6.2.0
 
 ### Minor Changes

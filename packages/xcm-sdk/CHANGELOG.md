@@ -1,5 +1,22 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.4.0
+
+### Minor Changes
+
+- 081e6ee: Rework XCM delivery fee est
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.3.0
+
+## 8.3.0
+
+### Minor Changes
+
+- c4e8b70: Use finalized block hash when creating Solana v0 message
+
 ## 8.2.0
 
 ### Minor Changes
