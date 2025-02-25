@@ -5,6 +5,7 @@ export const whitelist: string[] = [
   'const.Omnipool.*',
   'const.Stableswap.*',
   'const.XYK.*',
+  'const.System.*',
   'event.EVM.Log',
   'query.AssetRegistry.Assets',
   'query.AssetRegistry.AssetLocations',

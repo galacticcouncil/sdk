@@ -32,7 +32,6 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",
-    "papi:update": "papi update",
     "papi": "papi --whitelist ./src/api/whitelist.ts",
     "test": "NODE_NO_WARNINGS=1 jest"
   },
