@@ -17,6 +17,6 @@
     "@galacticcouncil/xcm-sdk": "^8.4.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@talismn/connect-wallets": "^1.2.8",
-    "polkadot-api": "^1.8.2"
+    "polkadot-api": "^1.9.1"
   }
 }

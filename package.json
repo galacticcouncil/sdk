@@ -42,7 +42,7 @@
     "ts-node": "^10.9.1",
     "tsx": "^3.8.2",
     "turbo": "^2.0.3",
-    "typescript": "^5.0.4"
+    "typescript": "^5.7.2"
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.25.0"
