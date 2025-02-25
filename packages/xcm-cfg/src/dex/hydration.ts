@@ -27,7 +27,7 @@ export class HydrationDex implements Dex {
     const api = await this.chain.api;
     const pool = this.poolService ? this.poolService : new PoolService(api);
     return new TradeRouter(pool, {
-      includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
+      includeOnly: [PoolType.Omni, PoolType.Stable],
     });
   });
 
