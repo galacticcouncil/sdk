@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.5.2
+
+### Patch Changes
+
+- Remove temp XYK from DEX hydration routing
+
 ## 7.5.1
 
 ### Patch Changes
