@@ -3,9 +3,37 @@ import {
   EvmParachain,
 } from '@galacticcouncil/xcm-core';
 
-import { laos as evmChain } from 'viem/chains';
+import { defineChain, Chain } from 'viem';
 
 import { laos } from '../../assets';
+
+const evmChain: Chain = defineChain({
+  id: 6283,
+  name: 'Laos',
+  network: 'laos',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'LAOS',
+    symbol: 'LAOS',
+  },
+  rpcUrls: {
+    public: {
+      http: ['https://laos-rpc.dwellir.com'],
+      webSocket: ['wss://laos-rpc.dwellir.com'],
+    },
+    default: {
+      http: ['https://laos-rpc.dwellir.com'],
+      webSocket: ['wss://laos-rpc.dwellir.com'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Laos Explorer',
+      url: 'https://blockscout.laos.laosfoundation.io/',
+    },
+  },
+  testnet: false,
+});
 
 export const laos_chain = new EvmParachain({
   assetsData: [
