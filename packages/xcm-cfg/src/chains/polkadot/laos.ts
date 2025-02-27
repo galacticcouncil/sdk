@@ -29,7 +29,7 @@ const evmChain: Chain = defineChain({
   blockExplorers: {
     default: {
       name: 'Laos Explorer',
-      url: 'https://blockscout.laos.laosfoundation.io/',
+      url: 'https://explorer.laosnetwork.io/',
     },
   },
   testnet: false,
