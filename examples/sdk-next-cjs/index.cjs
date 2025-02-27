@@ -1,9 +1,13 @@
-const { api, pool } = require('@galacticcouncil/sdk-next');
+const {
+  api: { getWs },
+  pool,
+} = require('@galacticcouncil/sdk-next');
 
 const main = async () => {
-  const client = await api.getWs('wss://rpc.hydradx.cloud');
+  const client = await getWs('wss://rpc.hydradx.cloud');
+  const api = client.getUnsafeApi();
 
-  await client.getUnsafeApi().constants.System.Version();
+  await api.constants.System.Version(); // Removal is fatal
 
   const ctx = new pool.PoolContextProvider(client)
     .withOmnipool()
