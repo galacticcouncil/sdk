@@ -1,4 +1,4 @@
-import { XcmV3Junctions } from '@polkadot-api/descriptors';
+import { XcmV3Junctions } from '@galacticcouncil/descriptors';
 
 export type Amount = {
   amount: bigint;

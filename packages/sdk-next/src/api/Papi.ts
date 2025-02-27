@@ -1,5 +1,5 @@
 import { PolkadotClient } from 'polkadot-api';
-import { hydration } from '@polkadot-api/descriptors';
+import { hydration } from '@galacticcouncil/descriptors';
 
 export abstract class Papi {
   readonly client: PolkadotClient;

@@ -1,5 +1,5 @@
 import { PolkadotClient } from 'polkadot-api';
-import { HydrationQueries } from '@polkadot-api/descriptors';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { Papi } from '../api';
 import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
