@@ -27,7 +27,7 @@ export class HydrationDex implements Dex {
     const api = await this.chain.api;
     const pool = this.poolService ? this.poolService : new PoolService(api);
     return new TradeRouter(pool, {
-      includeOnly: [PoolType.Omni, PoolType.Stable],
+      includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
   });
 
@@ -47,10 +47,17 @@ export class HydrationDex implements Dex {
     const amount = amountOut.toDecimal(amountOut.decimals);
 
     const router = await this.getRouter(1);
-    const trade = await router.getBestBuy(
+
+    const mostLiquidRoute = await router.getMostLiquidRoute(
+      aIn.toString(),
+      aOut.toString()
+    );
+
+    const trade = await router.getBuy(
       aIn.toString(),
       aOut.toString(),
-      amount
+      amount,
+      mostLiquidRoute
     );
 
     const amountIn = BigInt(trade.amountIn.toNumber());
