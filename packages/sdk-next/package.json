@@ -26,25 +26,23 @@
   "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
   "scripts": {
-    "prebuild": "npm run papi",
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",
-    "papi": "papi --whitelist ./src/api/whitelist.ts",
     "test": "NODE_NO_WARNINGS=1 jest"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
+    "@galacticcouncil/descriptors": "^1.0.0",
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
     "@galacticcouncil/math-omnipool": "^1.1.0",
     "@galacticcouncil/math-stableswap": "^1.2.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
-    "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@noble/hashes": "^1.6.1",
     "@thi.ng/cache": "^2.1.35",
     "@thi.ng/memoize": "^4.0.2",

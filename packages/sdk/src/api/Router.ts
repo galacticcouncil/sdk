@@ -1,6 +1,5 @@
-import { Asset, IPoolService, PoolBase, Hop, Pool, PoolType } from '../types';
-import { RouteSuggester } from '../route';
-import { Edge } from '../route';
+import { Asset, Hop, IPoolService, PoolBase, Pool, PoolType } from '../types';
+import { Edge, RouteSuggester } from '../route';
 import { PoolFactory } from '../pool';
 
 export type RouterOptions = {

@@ -1,5 +1,5 @@
 import { AccountId, CompatibilityLevel } from 'polkadot-api';
-import { HydrationQueries } from '@polkadot-api/descriptors';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { toHex } from '@polkadot-api/utils';
 import { blake2b } from '@noble/hashes/blake2b';
 

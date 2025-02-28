@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.6.0
+
+### Minor Changes
+
+- Expose most liquid route api
+
 ## 5.5.0
 
 ### Minor Changes

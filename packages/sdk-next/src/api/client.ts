@@ -9,7 +9,6 @@ export const getWs = async (
   const getWsProvider = isNodeJs
     ? (await import('polkadot-api/ws-provider/node')).getWsProvider
     : (await import('polkadot-api/ws-provider/web')).getWsProvider;
-
   const wsProvider = getWsProvider(endpoints);
   return createClient(withPolkadotSdkCompat(wsProvider));
 };

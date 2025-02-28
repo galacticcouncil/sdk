@@ -11,6 +11,7 @@ packages/*/build-meta.json
 
 # compile folders
 examples/*/out
+examples/*/build-meta.json
 
 # jest test results
 integration-tests/*/output.json

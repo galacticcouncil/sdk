@@ -1,0 +1,15 @@
+{
+  "name": "sdk-next-cjs",
+  "private": true,
+  "main": "index.cjs",
+  "scripts": {
+    "start": "node index.cjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "node": "^21.6.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^1.0.0"
+  }
+}

@@ -1,5 +1,5 @@
 import { CompatibilityLevel } from 'polkadot-api';
-import { HydrationQueries } from '@polkadot-api/descriptors';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { type Observable, map, of, switchMap } from 'rxjs';
 
