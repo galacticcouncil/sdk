@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.6.0
+
+### Minor Changes
+
+- Use most liquid route in hydration DEX to prevent fee swaps in low liquid pools
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@5.6.0
+
 ## 7.5.2
 
 ### Patch Changes
