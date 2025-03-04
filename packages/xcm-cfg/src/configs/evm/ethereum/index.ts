@@ -9,8 +9,10 @@ import {
   weth_mwh,
   usdc,
   usdc_mwh,
+  usdc_snow,
   usdt,
   usdt_mwh,
+  usdt_snow,
   aave,
   susde,
   tbtc,
@@ -68,6 +70,8 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(link, link),
   toHydrationViaSnowbridgeTemplate(sky, sky),
   toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
+  toHydrationViaSnowbridgeTemplate(usdc_snow, usdc_snow),
+  toHydrationViaSnowbridgeTemplate(usdt_snow, usdt_snow),
 ];
 
 const toMoonbeamViaWormhole: AssetRoute[] = [

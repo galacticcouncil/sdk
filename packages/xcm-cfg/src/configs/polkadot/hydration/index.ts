@@ -50,6 +50,8 @@ import {
   link,
   sky,
   wsteth,
+  usdt_snow,
+  usdc_snow,
 } from '../../../assets';
 import {
   acala,
@@ -294,6 +296,8 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(link, link),
   toEthereumViaSnowbridgeTemplate(sky, sky),
   toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
+  toEthereumViaSnowbridgeTemplate(usdt_snow, usdt_snow),
+  toEthereumViaSnowbridgeTemplate(usdc_snow, usdc_snow),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
