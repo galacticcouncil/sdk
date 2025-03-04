@@ -211,8 +211,8 @@ export const usdt_mwh = new Asset({
 });
 
 export const usdt_snow = new Asset({
+  ...usdt,
   key: 'usdt_snow',
-  originSymbol: 'USDT',
 });
 
 export const usdc = new Asset({
@@ -226,8 +226,8 @@ export const usdc_mwh = new Asset({
 });
 
 export const usdc_snow = new Asset({
+  ...usdc,
   key: 'usdc_snow',
-  originSymbol: 'USDC',
 });
 
 export const vastr = new Asset({

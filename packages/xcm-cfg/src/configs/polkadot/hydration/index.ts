@@ -296,8 +296,8 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(link, link),
   toEthereumViaSnowbridgeTemplate(sky, sky),
   toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
-  toEthereumViaSnowbridgeTemplate(usdt_snow, usdt_snow),
-  toEthereumViaSnowbridgeTemplate(usdc_snow, usdc_snow),
+  toEthereumViaSnowbridgeTemplate(usdt_snow, usdt),
+  toEthereumViaSnowbridgeTemplate(usdc_snow, usdc),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [

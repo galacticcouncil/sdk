@@ -70,8 +70,8 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(link, link),
   toHydrationViaSnowbridgeTemplate(sky, sky),
   toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
-  toHydrationViaSnowbridgeTemplate(usdc_snow, usdc_snow),
-  toHydrationViaSnowbridgeTemplate(usdt_snow, usdt_snow),
+  toHydrationViaSnowbridgeTemplate(usdc, usdc_snow),
+  toHydrationViaSnowbridgeTemplate(usdt, usdt_snow),
 ];
 
 const toMoonbeamViaWormhole: AssetRoute[] = [
