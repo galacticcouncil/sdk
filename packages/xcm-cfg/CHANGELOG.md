@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.6.1
+
+### Patch Changes
+
+- 80e5e70: Upgrade solana rpc's
+
 ## 7.6.0
 
 ### Minor Changes
