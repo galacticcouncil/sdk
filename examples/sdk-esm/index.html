@@ -1,16 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>XCM Transfer Example</title>
+    <title>SDK Pjs Example</title>
   </head>
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <script>
-      new EventSource('/esbuild').addEventListener('change', () => location.reload());
+      new EventSource('/esbuild').addEventListener('change', () =>
+        location.reload()
+      );
     </script>
     <script type="module" src="./out/index.js"></script>
   </body>

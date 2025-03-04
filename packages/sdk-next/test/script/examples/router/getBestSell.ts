@@ -3,18 +3,28 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { api as a, pool as p } from '../../../../src';
+import { pool, sor } from '../../../../src';
 
-class GetBestSellPriceExample extends PapiExecutor {
-  async script(client: PolkadotClient): Promise<any> {
-    const poolService = new p.PoolService(client);
-    const router = new a.TradeRouter(poolService);
+class GetBestSell extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const ctx = new pool.PoolContextProvider(client)
+      .withOmnipool()
+      .withStableswap()
+      .withXyk();
 
-    const bestSell = await router.getBestSell(5, 0, 10_000_000_000n);
-    //const transaction = bestSell.toTx(ZERO);
-    //console.log('Transaction hash: ' + transaction.hex);
-    return bestSell;
+    const router = new sor.TradeRouter(ctx);
+    const utils = new sor.TradeUtils(client);
+
+    const sell = await router.getBestSell(5, 10, 10_000_000_000n);
+    const tx = await utils.buildTx(sell);
+    console.log(sell.toHuman());
+    console.log('Transaction hash: ' + tx.asHex());
+
+    return () => {
+      ctx.destroy();
+      client.destroy();
+    };
   }
 }
 
-new GetBestSellPriceExample(ApiUrl.HydraDx, 'Get best sell price', true).run();
+new GetBestSell(ApiUrl.Hydration, 'Get best sell').run();

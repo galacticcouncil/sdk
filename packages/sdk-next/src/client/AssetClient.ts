@@ -1,8 +1,7 @@
 import { PolkadotClient } from 'polkadot-api';
-import { HydrationQueries } from '@polkadot-api/descriptors';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { SYSTEM_ASSET_ID } from '../consts';
-import { Papi } from '../provider';
+import { Papi } from '../api';
 import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
 
 type TStableswapPool = HydrationQueries['Stableswap']['Pools']['Value'];
@@ -44,7 +43,6 @@ export class AssetClient extends Papi {
         return [id, value];
       })
     );
-    return new Map([]);
   }
 
   async queryAssets(): Promise<Map<number, TAssetDetails>> {
@@ -80,23 +78,6 @@ export class AssetClient extends Papi {
     metadata: Map<number, AssetMetadata>,
     location?: TAssetLocation
   ): Promise<Asset> {
-    if (key === SYSTEM_ASSET_ID) {
-      const { name, properties } = await this.client.getChainSpecData();
-      const ed = await this.api.constants.Balances.ExistentialDeposit();
-
-      const { tokenDecimals, tokenSymbol } = properties;
-      return {
-        id: SYSTEM_ASSET_ID,
-        name: name,
-        symbol: tokenSymbol,
-        decimals: tokenDecimals,
-        icon: tokenSymbol,
-        type: 'Token',
-        isSufficient: true,
-        existentialDeposit: ed,
-      } as Asset;
-    }
-
     const { name, asset_type, is_sufficient, existential_deposit } = details;
     const { symbol, decimals } = metadata.get(key) ?? {};
     return {
@@ -139,7 +120,7 @@ export class AssetClient extends Papi {
       type: asset_type.type,
       isSufficient: is_sufficient,
       existentialDeposit: existential_deposit,
-      underlyingAssetId: underlyingAsset.toString(),
+      underlyingAssetId: underlyingAsset,
       maturity: bondMaturity,
     } as Bond;
   }

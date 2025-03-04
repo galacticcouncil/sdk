@@ -1,16 +1,17 @@
 import { Router } from './Router';
+import { RouteNotFound } from '../errors';
 import {
+  Amount,
+  BuySwap,
   Hop,
   Pool,
   PoolFees,
+  PoolToken,
   SellSwap,
-  BuySwap,
+  Swap,
   Trade,
   TradeType,
-  Amount,
   Transaction,
-  Swap,
-  PoolToken,
 } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
 import {
@@ -19,7 +20,6 @@ import {
   calculateDiffToRef,
 } from '../utils/math';
 import { toHuman, toPct } from '../utils/mapper';
-import { RouteNotFound } from '../errors';
 
 export class TradeRouter extends Router {
   /**
@@ -308,11 +308,54 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible spot price for tokenIn>tokenOut
+   * Calculate and return most liquid route for tokenIn>tokenOut
    *
    * To avoid routing through the pools with low liquidity, 0.1% from the
-   * most liquid pool asset is used as reference value to determine ideal
-   * route to calculate spot.
+   * most liquid pool asset is used as reference value to determine the
+   * sweet spot.
+   *
+   * @param {string} assetIn - Storage key of tokenIn
+   * @param {string} assetOut - Storage key of tokenOut
+   * @return Most liquid route of given token pair
+   */
+  async getMostLiquidRoute(assetIn: string, assetOut: string): Promise<Hop[]> {
+    const pools = await super.getPools();
+    const { poolsMap } = await super.validateTokenPair(
+      assetIn,
+      assetOut,
+      pools
+    );
+    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
+    if (paths.length === 0) {
+      throw new RouteNotFound(assetIn, assetOut);
+    }
+
+    const assetsByLiquidityDesc = pools
+      .map((pool) => pool.tokens.find((t) => t.id === assetIn))
+      .filter((a): a is PoolToken => !!a)
+      .sort((a, b) => Number(b.balance) - Number(a.balance));
+
+    const { balance, decimals } = assetsByLiquidityDesc[0];
+    const liquidity = bnum(balance).shiftedBy(-1 * decimals);
+    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
+    const routesPromises = paths.map(
+      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
+    );
+    const routes = await Promise.all(routesPromises);
+    const route = this.findBestSellRoute(routes);
+    return route.map((r) => {
+      return {
+        poolAddress: r.poolAddress,
+        poolId: r?.poolId,
+        pool: r.pool,
+        assetIn: r.assetIn,
+        assetOut: r.assetOut,
+      } as Hop;
+    });
+  }
+
+  /**
+   * Calculate and return best possible spot price for tokenIn>tokenOut
    *
    * @param {string} assetIn - Storage key of tokenIn
    * @param {string} assetOut - Storage key of tokenOut
@@ -334,19 +377,7 @@ export class TradeRouter extends Router {
       return Promise.resolve(undefined);
     }
 
-    const assetsByLiquidityDesc = pools
-      .map((pool) => pool.tokens.find((t) => t.id === assetIn))
-      .filter((a): a is PoolToken => !!a)
-      .sort((a, b) => Number(b.balance) - Number(a.balance));
-
-    const { balance, decimals } = assetsByLiquidityDesc[0];
-    const liquidity = bnum(balance).shiftedBy(-1 * decimals);
-    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
-    const routesPromises = paths.map(
-      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
-    );
-    const routes = await Promise.all(routesPromises);
-    const route = this.findBestSellRoute(routes);
+    const route = await this.getMostLiquidRoute(assetIn, assetOut);
     const swaps = await this.toSellSwaps('1', route, poolsMap);
 
     const spotPrice = swaps

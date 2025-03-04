@@ -1,6 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { type Observable, NEVER } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 
 import {
   PoolBase,
@@ -15,16 +15,7 @@ import { PoolClient } from '../PoolClient';
 import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient<PoolBase> {
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.XYK.PoolAssets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
-
-  async loadPools(): Promise<PoolBase[]> {
+  protected async loadPools(): Promise<PoolBase[]> {
     const query = this.api.query.XYK.PoolAssets;
 
     const [entries, limits] = await Promise.all([
@@ -36,9 +27,11 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       const [id] = keyArgs;
       const [x, y] = value;
 
-      const [xBalance, yBalance] = await Promise.all([
+      const [xBalance, xMeta, yBalance, yMeta] = await Promise.all([
         this.getBalance(id, x),
+        this.api.query.AssetRegistry.Assets.getValue(x),
         this.getBalance(id, y),
+        this.api.query.AssetRegistry.Assets.getValue(y),
       ]);
 
       return {
@@ -47,10 +40,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         tokens: [
           {
             id: x,
+            decimals: xMeta?.decimals,
+            existentialDeposit: xMeta?.existential_deposit,
             balance: xBalance,
           } as PoolToken,
           {
             id: y,
+            decimals: yMeta?.decimals,
+            existentialDeposit: yMeta?.existential_deposit,
             balance: yBalance,
           } as PoolToken,
         ],
@@ -58,21 +55,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       } as PoolBase;
     });
     return Promise.all(pools);
-  }
-
-  async getPoolFees(_address: string): Promise<PoolFees> {
-    const exchangeFee = await this.getExchangeFee();
-    return {
-      exchangeFee: exchangeFee,
-    } as XykPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.XYK;
-  }
-
-  subscribePoolChange(_pool: PoolBase): Observable<PoolBase> {
-    return NEVER;
   }
 
   private async getExchangeFee(): Promise<PoolFee> {
@@ -92,5 +74,29 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       maxOutRatio: maxOutRatio,
       minTradingLimit: minTradingLimit,
     } as PoolLimits;
+  }
+
+  async getPoolFees(): Promise<PoolFees> {
+    const exchangeFee = await this.getExchangeFee();
+    return {
+      exchangeFee: exchangeFee,
+    } as XykPoolFees;
+  }
+
+  getPoolType(): PoolType {
+    return PoolType.XYK;
+  }
+
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.XYK.PoolAssets;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
+
+  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
+    return of(pool);
   }
 }

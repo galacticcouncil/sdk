@@ -119,6 +119,27 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Kusama -> Kusama KSM [ksm] transfer 1`] = `
+[
+  "assethub_kusama-kusama-ksm",
+  "0xf0041f09040100040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040100000b00a0724e18090000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Hydration KSM [ksm] transfer 1`] = `
+[
+  "assethub-hydration-ksm",
+  "0x2101041f0d04010100c91f040402010903000b00a0724e18090104020109030104040d01000001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Polkadot DOT [dot] transfer 1`] = `
+[
+  "assethub-polkadot-dot",
+  "0xec041f09040100040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040100000700e87648170000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Astar -> Hydration ASTR [astr] transfer 1`] = `
 [
   "astar-hydration-astr",
@@ -354,6 +375,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 [
   "hydration-assethub-pink",
   "0x45010489050408010300a10f0432055c000700e8764817010300a10f043205011f0082fc0a000100000004010200a10f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> AssetHub Polkadot KSM [ksm] transfer 1`] = `
+[
+  "hydration-assethub-ksm",
+  "0x2101046b0d04010100a10f040402010903000b00a0724e18090204020109030204040d01000001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 
@@ -725,6 +753,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Kil
 [
   "kilt-hydration-kilt",
   "0x010104530804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040000000f0000c16ff286230000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Kusama -> AssetHub Kusama KSM [ksm] transfer 1`] = `
+[
+  "kusama-assethub_kusama-ksm",
+  "0xfc04630904000100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040000000b00a0724e18090000000000",
 ]
 `;
 

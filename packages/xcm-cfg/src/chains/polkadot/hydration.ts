@@ -54,6 +54,7 @@ import {
   link,
   sky,
   wsteth,
+  ksm,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -438,6 +439,20 @@ export const hydration = new EvmParachain({
               },
             },
           ],
+        },
+      },
+    },
+    {
+      asset: ksm,
+      decimals: 12,
+      id: 1000771,
+      min: 0.00035,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: {
+            GlobalConsensus: 'Kusama',
+          },
         },
       },
     },

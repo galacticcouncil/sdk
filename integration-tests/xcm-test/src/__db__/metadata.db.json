@@ -72,7 +72,7 @@
     }
   },
   "assethub-polkadot-dot": {
-    "updated": 1733849728034,
+    "updated": 1740148288967,
     "destination": {
       "fee": "0.0021267087",
       "feeAsset": "DOT",
@@ -933,6 +933,38 @@
       "fee": "10",
       "feeAsset": "DOT",
       "feeNative": "100000000000"
+    }
+  },
+  "hydration-assethub-ksm": {
+    "updated": 1740134645296,
+    "destination": {
+      "fee": "0.039466289084",
+      "feeAsset": "KSM",
+      "feeNative": "39466289084"
+    }
+  },
+  "assethub-hydration-ksm": {
+    "updated": 1740134106406,
+    "destination": {
+      "fee": "0.000032623305",
+      "feeAsset": "KSM",
+      "feeNative": "32623305"
+    }
+  },
+  "kusama-assethub_kusama-ksm": {
+    "updated": 1740305498800,
+    "destination": {
+      "fee": "0.000119766667",
+      "feeAsset": "KSM",
+      "feeNative": "119766667"
+    }
+  },
+  "assethub_kusama-kusama-ksm": {
+    "updated": 1740305660251,
+    "destination": {
+      "fee": "0.000085566586",
+      "feeAsset": "KSM",
+      "feeNative": "85566586"
     }
   }
 }

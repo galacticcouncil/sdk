@@ -20,6 +20,7 @@ import {
   ibtc,
   intr,
   kilt,
+  ksm,
   ldot,
   myth,
   nodl,
@@ -42,7 +43,6 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
-  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -112,6 +112,27 @@ const toAssetHub: AssetRoute[] = [
       fee: {
         amount: 0.19,
         asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: ksm,
+      fee: {
+        amount: 0.05,
+        asset: ksm,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
@@ -265,7 +286,6 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  toEthereumViaSnowbridgeTemplate(weth, weth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
