@@ -1,5 +1,116 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.6.2
+
+### Patch Changes
+
+- Bump mythos fees
+
+## 7.6.1
+
+### Patch Changes
+
+- 80e5e70: Upgrade solana rpc's
+
+## 7.6.0
+
+### Minor Changes
+
+- Use most liquid route in hydration DEX to prevent fee swaps in low liquid pools
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@5.6.0
+
+## 7.5.2
+
+### Patch Changes
+
+- Remove temp XYK from DEX hydration routing
+
+## 7.5.1
+
+### Patch Changes
+
+- Bump kusama ecosystem fees
+
+## 7.5.0
+
+### Minor Changes
+
+- Support hydration dex XYK routing
+- Update KSM min deposit on pah
+
+## 7.4.1
+
+### Patch Changes
+
+- Fix ah -> hydration KSM dest fee
+
+## 7.4.0
+
+### Minor Changes
+
+- Add pah <-> hydration KSM transfer
+- Add pah <-> kah KSM transfer
+- Support polkadotXcm.transferAssets
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.3.0
+
+## 7.3.2
+
+### Patch Changes
+
+- cccd9cd: Remove snowbridge weth config
+
+## 7.3.1
+
+### Patch Changes
+
+- Bump sdk & core dependecies
+
+## 7.3.0
+
+### Minor Changes
+
+- 2da6a6b: Add solana <-> moonbeam SOL transfer
+- 2da6a6b: Add ethereum <-> hydration tBTC transfer
+
+## 7.2.0
+
+### Minor Changes
+
+- Use transfer multiasset for hydration assethub sufficient assets (cex)
+
+## 7.1.2
+
+### Patch Changes
+
+- Fix mda account gen if dest relay
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.1
+
+## 7.1.1
+
+### Patch Changes
+
+- Fix xTokens.transferMulticurrencies mda derivative acc
+
+## 7.1.0
+
+### Minor Changes
+
+- CEX configurations for hub & relay
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.0
+
 ## 7.0.0
 
 ### Major Changes

@@ -2,7 +2,14 @@ import type { u32 } from '@polkadot/types-codec';
 import type { PalletLbpPool } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { bnum, scale } from '../../utils/bignumber';
-import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
+import {
+  PoolBase,
+  PoolFee,
+  PoolFees,
+  PoolLimits,
+  PoolPair,
+  PoolType,
+} from '../../types';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
@@ -56,7 +63,7 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
+  async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
     const pool = this.pools.find(
       (pool) => pool.address === address
     ) as LbpPoolBase;

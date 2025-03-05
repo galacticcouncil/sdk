@@ -1,5 +1,4 @@
 import {
-  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -10,13 +9,15 @@ import {
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
-  toParaXcmOnDest,
+  toDepositXcmOnDest,
   toDest,
   toTransferType,
   toTransactMessage,
+  toTransferMessage,
 } from './polkadotXcm.utils';
 
 import {
+  getDerivativeAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
@@ -55,7 +56,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
 
         if (asset.key === destination.fee.key) {
           return [
-            toDest(version, rcv),
+            toDest(version, ctx, rcv),
             toBeneficiary(version, account),
             {
               [version]: [transferAsset],
@@ -68,7 +69,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         // Flip asset order if general index of asset greater than fee asset
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
           return [
-            toDest(version, rcv),
+            toDest(version, ctx, rcv),
             toBeneficiary(version, account),
             {
               [version]: [transferFee, transferAsset],
@@ -79,7 +80,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         }
 
         return [
-          toDest(version, rcv),
+          toDest(version, ctx, rcv),
           toBeneficiary(version, account),
           {
             [version]: [transferAsset, transferFee],
@@ -108,7 +109,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
           [version]: [transferAsset],
@@ -135,12 +136,39 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
           [version]: [transferAsset],
         };
         return [dest, beneficiary, assets, 0];
+      },
+    }),
+});
+
+const transferAssets = (): ExtrinsicConfigBuilder => ({
+  build: ({ address, amount, asset, destination, source }) =>
+    new ExtrinsicConfig({
+      module: pallet,
+      func: 'transferAssets',
+      getArgs: (func) => {
+        const version = getExtrinsicArgumentVersion(func, 2);
+        const account = getExtrinsicAccount(address);
+        const ctx = source.chain as Parachain;
+        const rcv = destination.chain as Parachain;
+
+        const transferAssetLocation = getExtrinsicAssetLocation(
+          locationOrError(ctx, asset),
+          version
+        );
+        const transferAsset = toAsset(transferAssetLocation, amount);
+
+        const dest = toDest(version, ctx, rcv);
+        const beneficiary = toBeneficiary(version, account);
+        const assets = {
+          [version]: [transferAsset],
+        };
+        return [dest, beneficiary, assets, 0, 'Unlimited'];
       },
     }),
 });
@@ -158,10 +186,15 @@ const transferAssetsUsingTypeAndThen = (
       func: 'transferAssetsUsingTypeAndThen',
       getArgs: () => {
         const version = XcmVersion.v4;
-        const from = getExtrinsicAccount(sender);
-        const account = getExtrinsicAccount(address);
+
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const from = getExtrinsicAccount(sender);
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
+          : address;
+        const account = getExtrinsicAccount(receiver);
 
         const { transferType } = opts;
 
@@ -182,7 +215,7 @@ const transferAssetsUsingTypeAndThen = (
 
         const isSufficientPaymentAsset = asset.isEqual(destination.fee);
 
-        const dest = toDest(version, rcv);
+        const dest = toDest(version, ctx, rcv);
 
         const assets = {
           [version]: asset.isEqual(destination.fee)
@@ -211,7 +244,7 @@ const transferAssetsUsingTypeAndThen = (
         const customXcmOnDest =
           destination.chain.key === 'ethereum'
             ? toBridgeXcmOnDest(version, account, from, transferAssetLocation)
-            : toParaXcmOnDest(version, account);
+            : toDepositXcmOnDest(version, account);
 
         return [
           dest,
@@ -248,11 +281,7 @@ const send = () => {
 
             const ctx = source.chain as Parachain;
             const rcv = transact.chain as Parachain;
-            const mda = acc.getMultilocationDerivatedAccount(
-              ctx.parachainId,
-              sender,
-              1
-            );
+            const mda = getDerivativeAccount(ctx, sender, rcv);
             const account = getExtrinsicAccount(mda);
 
             const { fee } = transact;
@@ -263,7 +292,7 @@ const send = () => {
             const transactFeeAmount = big.toBigInt(opts.fee, fee.decimals);
 
             return [
-              toDest(version, rcv),
+              toDest(version, ctx, rcv),
               toTransactMessage(
                 version,
                 account,
@@ -271,6 +300,49 @@ const send = () => {
                 transactFeeAmount,
                 transact.call,
                 transact.weight
+              ),
+            ];
+          },
+        });
+      },
+    }),
+    transferAsset: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
+      build: (params) => {
+        const { amount, address, asset, sender, source, destination } = params;
+
+        return new ExtrinsicConfig({
+          module: pallet,
+          func,
+          getArgs: () => {
+            const version = XcmVersion.v4;
+
+            const ctx = source.chain as Parachain;
+            const rcv = destination.chain as Parachain;
+            const mda = getDerivativeAccount(ctx, sender, rcv);
+            const account = getExtrinsicAccount(mda);
+
+            const receiver = getExtrinsicAccount(address);
+
+            const transferAsset = getExtrinsicAssetLocation(
+              locationOrError(rcv, asset),
+              version
+            );
+
+            const { fee } = destination;
+
+            const transferAmount =
+              amount > fee.amount ? amount - fee.amount : amount;
+            const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
+
+            return [
+              toDest(version, ctx, rcv),
+              toTransferMessage(
+                version,
+                account,
+                transferAsset,
+                transferAmount,
+                transferFeeAmount,
+                receiver
               ),
             ];
           },
@@ -285,6 +357,7 @@ export const polkadotXcm = () => {
     limitedReserveTransferAssets,
     limitedTeleportAssets,
     reserveTransferAssets,
+    transferAssets,
     transferAssetsUsingTypeAndThen,
     send,
   };

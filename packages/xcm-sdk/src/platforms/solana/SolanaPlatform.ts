@@ -37,6 +37,7 @@ export class SolanaPlatform
   async calldata(
     account: string,
     _amount: bigint,
+    _feeBalance: AssetAmount,
     config: ProgramConfig
   ): Promise<SolanaCall> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);

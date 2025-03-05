@@ -37,7 +37,7 @@ import {
   assetsMap,
   chainsMap,
   routesMap,
-  swaps,
+  dex,
   validations,
 } from '@galacticcouncil/xcm-cfg';
 import { ConfigService, EvmParachain } from '@galacticcouncil/xcm-core';
@@ -56,13 +56,13 @@ const wallet = new Wallet({
   transferValidations: validations,
 });
 
-// Register chain swaps
+// Register dex-es
 const hydration = configService.getChain('hydration');
 const assethub = configService.getChain('assethub');
 
-wallet.registerSwaps(
-  new swaps.HydrationSwap(hydration),
-  new swaps.AssethubSwap(assethub)
+wallet.registerDex(
+  new dex.HydrationDex(hydration),
+  new dex.AssethubDex(assethub)
 );
 
 // Define transfer

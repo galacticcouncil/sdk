@@ -1,67 +1,163 @@
-import type { u32 } from '@polkadot/types-codec';
-import type { PalletLbpPool } from '@polkadot/types/lookup';
-import { UnsubscribePromise } from '@polkadot/api-base/types';
-import { bnum, scale } from '../../utils/bignumber';
-import { PoolBase, PoolFee, PoolFees, PoolLimits, PoolType } from '../../types';
+import { CompatibilityLevel } from 'polkadot-api';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
+
+import { type Observable, map, of, switchMap } from 'rxjs';
+
+import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
-import { PoolClient } from '../PoolClient';
+type TLbpPoolData = HydrationQueries['LBP']['PoolData']['Value'];
 
-export class LbpPoolClient extends PoolClient {
-  private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
-  private poolsData: Map<string, PalletLbpPool> = new Map([]);
+export class LbpPoolClient extends PoolClient<LbpPoolBase> {
+  private readonly MAX_FINAL_WEIGHT = 100_000_000n;
+  private poolsData: Map<string, TLbpPoolData> = new Map([]);
 
-  isSupported(): boolean {
-    return this.api.query.lbp !== undefined;
-  }
-
-  async loadPools(): Promise<PoolBase[]> {
-    const [poolData, validationData] = await Promise.all([
-      this.api.query.lbp.poolData.entries(),
-      this.api.query.parachainSystem.validationData(),
+  protected async loadPools(): Promise<LbpPoolBase[]> {
+    const [entries, validationData, limits] = await Promise.all([
+      this.api.query.LBP.PoolData.getEntries(),
+      this.api.query.ParachainSystem.ValidationData.getValue(),
+      this.getPoolLimits(),
     ]);
 
-    const { relayParentNumber } = validationData.unwrap();
-    const pools = poolData
-      .filter(([_, state]) =>
-        this.isActivePool(state.unwrap(), relayParentNumber)
+    const relayParentNumber = validationData?.relay_parent_number || 0;
+    const pools = entries
+      .filter(
+        ({ value }) =>
+          validationData && this.isActivePool(value, relayParentNumber)
       )
-      .map(
-        async ([
-          {
-            args: [id],
-          },
-          state,
-        ]) => {
-          const poolData: PalletLbpPool = state.unwrap();
-          const poolAddress = id.toString();
-          const poolDelta = await this.getPoolDelta(
-            poolAddress,
-            poolData,
-            relayParentNumber.toString()
-          );
+      .map(async ({ keyArgs, value }) => {
+        const [id] = keyArgs;
+        const poolAddress = id.toString();
+        const poolDelta = await this.getPoolDelta(
+          poolAddress,
+          value,
+          relayParentNumber
+        );
 
-          this.poolsData.set(id.toString(), poolData);
-          return {
-            address: poolAddress,
-            type: PoolType.LBP,
-            fee: poolData.fee.toJSON() as PoolFee,
-            ...poolDelta,
-            ...this.getPoolLimits(),
-          } as PoolBase;
-        }
-      );
+        return {
+          address: poolAddress,
+          type: PoolType.LBP,
+          fee: value.fee as PoolFee,
+          ...poolDelta,
+          ...limits,
+        } as LbpPoolBase;
+      });
     return Promise.all(pools);
   }
 
-  async getPoolFees(_feeAsset: string, address: string): Promise<PoolFees> {
-    const pool = this.pools.find(
-      (pool) => pool.address === address
-    ) as LbpPoolBase;
+  private async getPoolDelta(
+    poolAddress: string,
+    poolEntry: TLbpPoolData,
+    relayBlockNumber: number
+  ): Promise<Partial<LbpPoolBase>> {
+    const {
+      start,
+      end,
+      assets,
+      initial_weight,
+      final_weight,
+      repay_target,
+      fee_collector,
+    } = poolEntry;
+
+    const linearWeight = LbpMath.calculateLinearWeights(
+      start ? start.toString() : '0',
+      end ? end.toString() : '0',
+      initial_weight.toString(),
+      final_weight.toString(),
+      relayBlockNumber.toString()
+    );
+
+    const [accumulated, distributed] = assets;
+    const accumulatedWeight = BigInt(linearWeight);
+    const distributedWeight = this.MAX_FINAL_WEIGHT - BigInt(accumulatedWeight);
+
+    const [repayFeeApplied, accumulatedBalance, distributedBalance] =
+      await Promise.all([
+        this.isRepayFeeApplied(
+          accumulated,
+          repay_target,
+          fee_collector.toString()
+        ),
+        this.getBalance(poolAddress, accumulated),
+        this.getBalance(poolAddress, distributed),
+      ]);
+
     return {
-      repayFee: this.getRepayFee(),
+      repayFeeApply: repayFeeApplied,
+      tokens: [
+        {
+          id: accumulated,
+          weight: accumulatedWeight,
+          balance: accumulatedBalance,
+        } as WeightedPoolToken,
+        {
+          id: distributed,
+          weight: distributedWeight,
+          balance: distributedBalance,
+        } as WeightedPoolToken,
+      ],
+    } as Partial<LbpPoolBase>;
+  }
+
+  private isActivePool(
+    poolEntry: TLbpPoolData,
+    relayBlockNumber: number
+  ): boolean {
+    const { start, end } = poolEntry;
+    if (start && end) {
+      return relayBlockNumber >= start && relayBlockNumber < end;
+    }
+    return false;
+  }
+
+  private async isRepayFeeApplied(
+    accumulatedAsset: number,
+    repayTarget: bigint,
+    feeCollector: string
+  ): Promise<boolean> {
+    if (repayTarget === 0n) {
+      return false;
+    }
+
+    try {
+      const repayFeeCurrent = await this.getBalance(
+        feeCollector,
+        accumulatedAsset
+      );
+      return repayFeeCurrent < repayTarget;
+    } catch (err) {
+      // Collector account is empty (No trade has been executed yet)
+      return true;
+    }
+  }
+
+  private async getRepayFee(): Promise<PoolFee> {
+    const repayFee = await this.api.constants.LBP.repay_fee();
+    return repayFee as PoolFee;
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.LBP.MaxInRatio(),
+      this.api.constants.LBP.MaxOutRatio(),
+      this.api.constants.LBP.MinTradingLimit(),
+    ]);
+
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  async getPoolFees(pool: LbpPoolBase): Promise<PoolFees> {
+    const repayFee = await this.getRepayFee();
+    return {
+      repayFee: repayFee,
       exchangeFee: pool.fee as PoolFee,
     } as LbpPoolFees;
   }
@@ -70,137 +166,35 @@ export class LbpPoolClient extends PoolClient {
     return PoolType.LBP;
   }
 
-  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
-    return this.api.query.parachainSystem.validationData(
-      async (validationData) => {
-        const { relayParentNumber } = validationData.unwrap();
-        const poolData = this.poolsData.get(pool.address);
-        const isActive = this.isActivePool(poolData!, relayParentNumber);
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.LBP.PoolData;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
 
-        if (isActive) {
-          const poolDelta = await this.getPoolDelta(
+  subscribePoolChange(pool: LbpPoolBase): Observable<LbpPoolBase> {
+    const query = this.api.query.ParachainSystem.ValidationData;
+    const poolData = this.poolsData.get(pool.address);
+
+    if (!poolData) {
+      return of(pool);
+    }
+
+    return query.watchValue('best').pipe(
+      switchMap((data) => {
+        if (data) {
+          return this.getPoolDelta(
             pool.address,
-            poolData!,
-            relayParentNumber.toString()
+            poolData,
+            data.relay_parent_number
           );
-          Object.assign(pool, poolDelta);
-        } else {
-          const inactivePoolIndex = this.pools.findIndex(
-            (p) => p.address == pool.address
-          );
-          this.pools.splice(inactivePoolIndex, 1);
         }
-      }
+        return of(pool);
+      }),
+      map((delta) => Object.assign({}, pool, delta))
     );
-  }
-
-  private async getPoolDelta(
-    poolAddress: string,
-    poolEntry: PalletLbpPool,
-    relayBlockNumber: string
-  ): Promise<Partial<LbpPoolBase>> {
-    const {
-      start,
-      end,
-      assets,
-      initialWeight,
-      finalWeight,
-      repayTarget,
-      feeCollector,
-    } = poolEntry;
-
-    const linearWeight = LbpMath.calculateLinearWeights(
-      start.toString(),
-      end.toString(),
-      initialWeight.toString(),
-      finalWeight.toString(),
-      relayBlockNumber
-    );
-
-    const [accumulated, distributed] = assets;
-    const accumulatedAsset = accumulated.toString();
-    const accumulatedWeight = bnum(linearWeight);
-    const distributedAsset = distributed.toString();
-    const distributedWeight = this.MAX_FINAL_WEIGHT.minus(
-      bnum(accumulatedWeight)
-    );
-
-    const [repayFeeApplied, accumulatedBalance, distributedBalance] =
-      await Promise.all([
-        this.isRepayFeeApplied(
-          accumulatedAsset,
-          repayTarget.toString(),
-          feeCollector.toString()
-        ),
-        this.getBalance(poolAddress, accumulatedAsset),
-        this.getBalance(poolAddress, distributedAsset),
-      ]);
-
-    return {
-      repayFeeApply: repayFeeApplied,
-      tokens: [
-        {
-          id: accumulatedAsset,
-          weight: accumulatedWeight,
-          balance: accumulatedBalance.toString(),
-        } as WeightedPoolToken,
-        {
-          id: distributedAsset,
-          weight: distributedWeight,
-          balance: distributedBalance.toString(),
-        } as WeightedPoolToken,
-      ],
-    } as Partial<LbpPoolBase>;
-  }
-
-  private isActivePool(
-    poolEntry: PalletLbpPool,
-    relayBlockNumber: u32
-  ): boolean {
-    if (poolEntry.start.isEmpty || poolEntry.end.isEmpty) {
-      return false;
-    }
-
-    const start = poolEntry.start.unwrap().toNumber();
-    const end = poolEntry.end.unwrap().toNumber();
-    return (
-      relayBlockNumber.toNumber() >= start && relayBlockNumber.toNumber() < end
-    );
-  }
-
-  private async isRepayFeeApplied(
-    assetKey: string,
-    repayTarget: string,
-    feeCollector: string
-  ): Promise<boolean> {
-    const repayFeeTarget = bnum(repayTarget);
-    if (repayFeeTarget.isZero()) {
-      return false;
-    }
-
-    try {
-      const repayFeeCurrent = await this.getBalance(assetKey, feeCollector);
-      return repayFeeCurrent.isLessThan(repayFeeTarget);
-    } catch (err) {
-      // Collector account is empty (No trade has been executed yet)
-      return true;
-    }
-  }
-
-  private getRepayFee(): PoolFee {
-    const repayFee = this.api.consts.lbp.repayFee;
-    return repayFee.toJSON() as PoolFee;
-  }
-
-  private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
-    const minTradingLimit =
-      this.api.consts.lbp.minTradingLimit.toJSON() as number;
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
   }
 }

@@ -7,9 +7,8 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 import {
-  EvmCall,
+  FeeSwap,
   PlatformAdapter,
-  SwapResolver,
   Transfer,
   Wallet,
 } from '@galacticcouncil/xcm-sdk';
@@ -18,14 +17,14 @@ import * as c from 'console';
 
 import { getAccount } from './account';
 import { getAmount } from './amount';
-import { checkIfFailed, checkIfProcessed, checkIfSent } from './events';
-import { moonbeam } from './hooks';
+import { checkIfFailed, checkIfProcessed, logEvents } from './events';
 import {
   getSourceBalanceDiff,
   getDestinationBalanceDiff,
   getDestinationFee,
 } from './xcm.utils';
 import { SetupCtx } from './types';
+import { printHrmp, printUmp } from './log';
 
 const TRANSFER_AMOUNT = '10';
 
@@ -72,23 +71,28 @@ export const runXcm = (
 
       let extrinsic;
       if (calldata.type === CallType.Evm && chain.key === 'moonbeam') {
-        return;
-        // Skipped for now
-        extrinsic = moonbeam.toTransferExtrinsic(
-          srcNetwork.api,
-          calldata as EvmCall
-        );
+        throw Error('Evm is not supported yet');
       } else {
         extrinsic = srcNetwork.api.tx(calldata.data);
       }
+
+      c.log('Extrinsic: ', extrinsic.toHex());
+
+      const inputAsset = (assetId: number) =>
+        srcNetwork.api.createType('MultiLocation', {
+          parents: 0,
+          interior: {
+            x2: [{ palletInstance: 50 }, { generalIndex: assetId }], // On Polkadot Asset Hub, the palletInstance is 50, the generalIndex is the assetId.
+          },
+        });
 
       const srcAccount = getAccount(srcChain);
       await sendTransaction(extrinsic.signAsync(srcAccount));
 
       await srcNetwork.chain.newBlock();
       const srcEvents = await srcNetwork.api.query.system.events();
+      logEvents(srcEvents);
       expect(checkIfFailed(srcNetwork.api, srcEvents)).toBeFalsy();
-      checkIfSent(srcEvents);
 
       const assetReserve = getAssetReserve(srcChain, route);
       if (Number.isFinite(assetReserve)) {
@@ -98,12 +102,13 @@ export const runXcm = (
         if (isViaReserve(srcChain, destChain, reserveNetwork.config)) {
           await reserveNetwork.chain.newBlock();
           const reserveEvents = await reserveNetwork.api.query.system.events();
-          checkIfProcessed(reserveEvents);
+          logEvents(reserveEvents);
         }
       }
 
       await destNetwork.chain.newBlock();
       const destEvents = await destNetwork.api.query.system.events();
+      logEvents(destEvents);
       expect(checkIfProcessed(destEvents)).toBeTruthy();
 
       shouldSnapshot && expect([key, calldata.data]).toMatchSnapshot();
@@ -205,7 +210,11 @@ const getTransfer = async (
   }
 
   const isSwapSupportedMock = jest
-    .spyOn(SwapResolver.prototype, 'isSwapSupported')
+    .spyOn(FeeSwap.prototype, 'isSwapSupported')
+    .mockImplementation(() => false);
+
+  const isDestinationSwapSupportedMock = jest
+    .spyOn(FeeSwap.prototype, 'isDestinationSwapSupported')
     .mockImplementation(() => false);
 
   const xTransfer = await wallet.transfer(
@@ -219,6 +228,7 @@ const getTransfer = async (
   expect(srcApiMock).toHaveBeenCalled();
   expect(destApiMock).toHaveBeenCalled();
   expect(isSwapSupportedMock).toHaveBeenCalled();
+  expect(isDestinationSwapSupportedMock).toHaveBeenCalled();
 
   return xTransfer;
 };

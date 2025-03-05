@@ -17,7 +17,7 @@ const toBasilisk: AssetRoute[] = [
       chain: basilisk,
       asset: tnkr,
       fee: {
-        amount: 0.01355438643,
+        amount: 0.014,
         asset: tnkr,
       },
     },

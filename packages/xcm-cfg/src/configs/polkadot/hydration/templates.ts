@@ -1,4 +1,5 @@
 import {
+  AnyChain,
   Asset,
   AssetRoute,
   ExtrinsicConfigBuilderParams,
@@ -14,6 +15,7 @@ import {
 } from '../../../builders';
 import {
   assetHub,
+  assetHubCex,
   ethereum,
   moonbeam,
   solana,
@@ -23,16 +25,46 @@ import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
 
-export const MRL_EXECUTION_FEE = 0.9;
-export const MRL_XCM_FEE = 1;
+export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
+export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
-const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
+export const CEX_EXECUTION_FEE = 0.02; // Remote execution fee (< 0.02)
+
+const isDestinationFeeSwapSupported = (
+  params: ExtrinsicConfigBuilderParams
+) => {
   const { source } = params;
-  const { enabled } = source.feeSwap || {};
+  const { enabled } = source.destinationFeeSwap || {};
   return !!enabled;
 };
 
-const swapExtrinsic = ExtrinsicBuilder().router().buy({ withSlippage: 30 });
+const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
+
+export function toTransferTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  });
+}
 
 export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
@@ -52,58 +84,115 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiassets()
-    ),
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(ExtrinsicBuilder().xTokens().transferMultiassets()),
+  });
+}
+
+export function toHubWithCexFwdTemplate(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHubCex,
+      asset: asset,
+      fee: {
+        amount: 0.1,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiasset(),
+        ExtrinsicBuilder().polkadotXcm().send().transferAsset({
+          fee: CEX_EXECUTION_FEE,
+        }),
+      ]),
+  });
+}
+
+export function toHubWithCexFwd2Template(asset: Asset): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHubCex,
+      asset: asset,
+      fee: {
+        amount: 0.1,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder()
+      .utility()
+      .batchAll([
+        ExtrinsicBuilder().xTokens().transferMultiasset(),
+        ExtrinsicBuilder().polkadotXcm().send().transact({
+          fee: CEX_EXECUTION_FEE,
+        }),
+      ]),
+    transact: {
+      chain: assetHub,
+      fee: {
+        amount: 0,
+        asset: asset,
+        balance: balance(),
+      },
+      extrinsic: ExtrinsicBuilder().assets().transfer(),
+    },
+  });
+}
+
+export function toParaErc20Template(
+  asset: Asset,
+  destination: AnyChain,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: glmr,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
   });
 }
 
 export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: asset,
-      fee: {
-        amount: 0.08,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
-  });
+  return toParaErc20Template(asset, moonbeam, 0.08);
 }
 
 export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: zeitgeist,
-      asset: asset,
-      fee: {
-        amount: 0.1,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).prior(
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies()
-    ),
-  });
+  return toParaErc20Template(asset, zeitgeist, 0.1);
 }
 
 export function toEthereumViaWormholeTemplate(
@@ -131,7 +220,10 @@ export function toEthereumViaWormholeTemplate(
         asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
@@ -215,7 +307,10 @@ export function toSolanaViaWormholeTemplate(
         asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsic).priorMulti([
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).priorMulti([
       ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,

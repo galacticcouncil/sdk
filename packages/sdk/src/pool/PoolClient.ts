@@ -5,7 +5,7 @@ import { memoize1 } from '@thi.ng/memoize';
 
 import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
-import { Asset, PoolBase, PoolFees, PoolType } from '../types';
+import { Asset, PoolBase, PoolFees, PoolPair, PoolType } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 export abstract class PoolClient extends BalanceClient {
@@ -26,7 +26,7 @@ export abstract class PoolClient extends BalanceClient {
 
   abstract isSupported(): boolean;
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(feeAsset: string, address: string): Promise<PoolFees>;
+  abstract getPoolFees(poolPair: PoolPair, address: string): Promise<PoolFees>;
   protected abstract loadPools(): Promise<PoolBase[]>;
   protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
 

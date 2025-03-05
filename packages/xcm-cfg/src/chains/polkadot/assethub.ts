@@ -1,11 +1,12 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  ParachainParams,
 } from '@galacticcouncil/xcm-core';
 
-import { ded, dot, dota, myth, pink, usdc, usdt, wud } from '../../assets';
+import { ded, dot, dota, ksm, myth, pink, usdc, usdt, wud } from '../../assets';
 
-export const assetHub = new Parachain({
+const config = {
   assetsData: [
     {
       asset: dot,
@@ -130,6 +131,7 @@ export const assetHub = new Parachain({
     {
       asset: myth,
       decimals: 18,
+      min: 0.00000003,
       xcmLocation: {
         parents: 1,
         interior: {
@@ -141,17 +143,48 @@ export const assetHub = new Parachain({
         },
       },
     },
+    {
+      asset: ksm,
+      decimals: 12,
+      min: 0.0001,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: [
+            {
+              GlobalConsensus: 'Kusama',
+            },
+          ],
+        },
+      },
+    },
   ],
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://assethub-polkadot.subscan.io',
   genesisHash:
     '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
-  key: 'assethub',
   name: 'AssetHub',
   parachainId: 1000,
-  ss58Format: 42,
+  ss58Format: 0,
+  treasury: '14xmwinmCEz6oRrFdczHKqHgWNMiCysE2KrA4jXXAAM1Eogk',
+  usesDeliveryFee: true,
   ws: [
     'wss://polkadot-asset-hub-rpc.polkadot.io',
-    'wss://statemint.api.onfinality.io/public-ws',
+    'wss://asset-hub-polkadot-rpc.dwellir.com',
   ],
+} as Omit<ParachainParams, 'key'>;
+
+export const assetHub = new Parachain({
+  ...config,
+  key: 'assethub',
+  name: 'AssetHub Polkadot',
+});
+
+export const assetHubCex = new Parachain({
+  ...config,
+  key: 'assethub_cex',
+  name: 'AssetHub (CEX)',
+  usesCexForwarding: true,
+  usesSignerFee: true,
+  isTestChain: true,
 });

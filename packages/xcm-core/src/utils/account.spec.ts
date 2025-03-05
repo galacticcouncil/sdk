@@ -1,4 +1,7 @@
-import { getSovereignAccounts } from './account';
+import {
+  getSovereignAccounts,
+  getMultilocationDerivatedAccount,
+} from './account';
 
 describe('Account utils', () => {
   describe('getSovereignAccountAddresses', () => {
@@ -20,6 +23,49 @@ describe('Account utils', () => {
         relay:
           '0x70617261f2070000000000000000000000000000000000000000000000000000',
       });
+    });
+  });
+
+  describe('getMultilocationDerivatedAccount', () => {
+    it('should get correct ChildChain addresses for hydration (to Relay)', async () => {
+      expect(
+        getMultilocationDerivatedAccount(
+          2034,
+          '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+          0
+        )
+      ).toStrictEqual('5FhDbKUGUp7xofuc5NaJ93ytaJM1kDs7ZafaLtkTXFnB5FFQ');
+    });
+
+    it('should get correct SiblingChain addresses for hydration (to Para)', async () => {
+      expect(
+        getMultilocationDerivatedAccount(
+          2034,
+          '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+          1
+        )
+      ).toStrictEqual('5EjgcaN2F3J3vH5wR52Gitzu3HimYbKU81SaRLWDMs58FrQJ');
+    });
+
+    it('should get correct SiblingChain addresses for hydration (to Para), h160 style', async () => {
+      expect(
+        getMultilocationDerivatedAccount(
+          2034,
+          '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+          1,
+          true
+        )
+      ).toStrictEqual('0x7632da7afff71e425b32cd610f55c7fdd45a90c3');
+    });
+
+    it('should get correct ParentChain addresses', async () => {
+      expect(
+        getMultilocationDerivatedAccount(
+          undefined,
+          '7Lh1DEaxk8TNVU7snC3UkSv7N7NHb7BUuEkYZBwrzfrPNQE3',
+          1
+        )
+      ).toStrictEqual('5FuA1PnyhuvePvbFxCAnYhrYCEg8QcWEXaajZhjMKMZpLsCJ');
     });
   });
 });

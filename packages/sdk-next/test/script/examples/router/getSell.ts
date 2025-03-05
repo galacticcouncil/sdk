@@ -1,24 +1,34 @@
-import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter, ZERO } from '@galacticcouncil/sdk';
+import { PolkadotClient } from 'polkadot-api';
 
-import { PolkadotExecutor } from '../../PjsExecutor';
+import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-class GetSellPriceExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
-    const paths = await router.getAllPaths('0', '5');
-    const sortByHopsDesc = paths.sort((a, b) => {
+import { pool, sor } from '../../../../src';
+
+class GetSell extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const ctx = new pool.PoolContextProvider(client)
+      .withOmnipool()
+      .withStableswap()
+      .withXyk();
+
+    const router = new sor.TradeRouter(ctx);
+
+    const routes = await router.getRoutes(10, 5);
+    const sortByHopsAsc = routes.sort((a, b) => {
       const swapsA = a.length;
       const swapsB = b.length;
-      return swapsA < swapsB ? 1 : -1;
+      return swapsA < swapsB ? -1 : 1;
     });
-    const sell = await router.getSell('0', '5', 1, sortByHopsDesc[0]);
-    const transaction = sell.toTx(ZERO);
-    console.log('Transaction hash: ' + transaction.hex);
-    return sell;
+
+    const sell = await router.getSell(10, 5, 10_000_000n, sortByHopsAsc[0]);
+    console.log(sell.toHuman());
+
+    return () => {
+      ctx.destroy();
+      client.destroy();
+    };
   }
 }
 
-new GetSellPriceExample(ApiUrl.HydraDx, 'Get sell price', true).run();
+new GetSell(ApiUrl.Hydration, 'Get sell').run();

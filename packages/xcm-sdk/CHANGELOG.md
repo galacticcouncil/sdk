@@ -1,5 +1,54 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.4.0
+
+### Minor Changes
+
+- 081e6ee: Rework XCM delivery fee est
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.3.0
+
+## 8.3.0
+
+### Minor Changes
+
+- c4e8b70: Use finalized block hash when creating Solana v0 message
+
+## 8.2.0
+
+### Minor Changes
+
+- Re-estimate fee if fee swap enabled with margin
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.2.0
+
+## 8.1.1
+
+### Patch Changes
+
+- Fix mda account gen if dest relay
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.1
+
+## 8.1.0
+
+### Minor Changes
+
+- Substrate signer fee opts support
+- Swap re-work (fee swaps)
+- Automatic delivery fee calculation (based on treasury acc)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.1.0
+
 ## 8.0.1
 
 ### Patch Changes

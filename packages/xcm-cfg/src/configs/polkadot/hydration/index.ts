@@ -20,6 +20,7 @@ import {
   ibtc,
   intr,
   kilt,
+  ksm,
   ldot,
   myth,
   nodl,
@@ -30,6 +31,7 @@ import {
   sol,
   sub,
   susde,
+  tbtc,
   unq,
   usdc,
   usdc_mwh,
@@ -41,7 +43,6 @@ import {
   wbtc,
   wbtc_awh,
   wbtc_mwh,
-  weth,
   weth_awh,
   weth_mwh,
   wud,
@@ -67,115 +68,28 @@ import {
   subsocial,
   unique,
   zeitgeist,
+  polkadotCex,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
   toHubExtTemplate,
+  toHubWithCexFwd2Template,
   toEthereumViaSnowbridgeTemplate,
   toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
+  toTransferTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dai_awh,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: dai_awh,
-      fee: {
-        amount: 0.00092696,
-        asset: dai_awh,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: wbtc_awh,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: wbtc_awh,
-      fee: {
-        amount: 0.00000004,
-        asset: wbtc_awh,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: weth_awh,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: weth_awh,
-      fee: {
-        amount: 0.000000687004,
-        asset: weth_awh,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: aca,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: aca,
-      fee: {
-        amount: 1,
-        asset: aca,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ldot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: acala,
-      asset: ldot,
-      fee: {
-        amount: 0.06,
-        asset: ldot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(dai_awh, acala, 0.00092696),
+  toTransferTemplate(wbtc_awh, acala, 0.00000004),
+  toTransferTemplate(weth_awh, acala, 0.000000687004),
+  toTransferTemplate(aca, acala, 1),
+  toTransferTemplate(ldot, acala, 0.06),
 ];
 
 const toAssetHub: AssetRoute[] = [
@@ -194,6 +108,27 @@ const toAssetHub: AssetRoute[] = [
       fee: {
         amount: 0.19,
         asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: ksm,
+      fee: {
+        amount: 0.05,
+        asset: ksm,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
@@ -245,452 +180,38 @@ const toAssetHub: AssetRoute[] = [
 ];
 
 const toAstar: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: astr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: astr,
-      fee: {
-        amount: 0.00404146544,
-        asset: astr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: bnc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: bnc,
-      fee: {
-        amount: 0.75,
-        asset: bnc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: glmr,
-      fee: {
-        amount: 0.025,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ibtc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: ibtc,
-      fee: {
-        amount: 0.000002,
-        asset: ibtc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: intr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: intr,
-      fee: {
-        amount: 0.01,
-        asset: intr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: pha,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: pha,
-      fee: {
-        amount: 0.3,
-        asset: pha,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: vdot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: vdot,
-      fee: {
-        amount: 0.0004,
-        asset: vdot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: vastr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: astar,
-      asset: vastr,
-      fee: {
-        amount: 0.005,
-        asset: vastr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(astr, astar, 0.00404146544),
+  toTransferTemplate(dot, astar, 0.1),
+  toTransferTemplate(bnc, astar, 0.75),
+  toTransferTemplate(glmr, astar, 0.025),
+  toTransferTemplate(ibtc, astar, 0.000002),
+  toTransferTemplate(intr, astar, 0.01),
+  toTransferTemplate(pha, astar, 0.3),
+  toTransferTemplate(vdot, astar, 0.0004),
+  toTransferTemplate(vastr, astar, 0.005),
 ];
 
 const toBifrost: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: bnc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: bnc,
-      fee: {
-        amount: 0.000563136,
-        asset: bnc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: vdot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: vdot,
-      fee: {
-        amount: 0.0000000703,
-        asset: vdot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: vastr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: vastr,
-      fee: {
-        amount: 0.000000643,
-        asset: vastr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: astr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: astr,
-      fee: {
-        amount: 0.5,
-        asset: astr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: glmr,
-      fee: {
-        amount: 0.1,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ibtc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: bifrost,
-      asset: ibtc,
-      fee: {
-        amount: 0.000005,
-        asset: ibtc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(bnc, bifrost, 0.000563136),
+  toTransferTemplate(vdot, bifrost, 0.0000000703),
+  toTransferTemplate(vastr, bifrost, 0.000000643),
+  toTransferTemplate(dot, bifrost, 0.1),
+  toTransferTemplate(astr, bifrost, 0.5),
+  toTransferTemplate(glmr, bifrost, 0.1),
+  toTransferTemplate(ibtc, bifrost, 0.000005),
 ];
 
 const toCentrifuge: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: cfg,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: centrifuge,
-      asset: cfg,
-      fee: {
-        amount: 0.0092696,
-        asset: cfg,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: centrifuge,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: centrifuge,
-      asset: glmr,
-      fee: {
-        amount: 0.05,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(cfg, centrifuge, 0.0092696),
+  toTransferTemplate(dot, centrifuge, 0.1),
+  toTransferTemplate(glmr, centrifuge, 0.05),
 ];
 
 const toInterlay: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ibtc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: ibtc,
-      fee: {
-        amount: 0.00000062,
-        asset: ibtc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: intr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: intr,
-      fee: {
-        amount: 0.0019213457,
-        asset: intr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: hdx,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: hdx,
-      fee: {
-        amount: 0.5,
-        asset: hdx,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(ibtc, interlay, 0.00000062),
+  toTransferTemplate(intr, interlay, 0.0019213457),
+  toTransferTemplate(dot, interlay, 0.1),
+  toTransferTemplate(hdx, interlay, 0.5),
   new AssetRoute({
     source: {
       asset: vdot,
@@ -713,353 +234,44 @@ const toInterlay: AssetRoute[] = [
 ];
 
 const toMoonbeam: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: hdx,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: hdx,
-      fee: {
-        amount: 5,
-        asset: hdx,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: glmr,
-      fee: {
-        amount: 0.01,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(hdx, moonbeam, 5),
+  toTransferTemplate(glmr, moonbeam, 0.01),
+  toTransferTemplate(dot, moonbeam, 0.1),
   toMoonbeamErc20Template(dai_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
   toMoonbeamErc20Template(wbtc_mwh),
   toMoonbeamErc20Template(weth_mwh),
+  toMoonbeamErc20Template(sol),
 ];
 
-const toPolkadot: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: polkadot,
-      asset: dot,
-      fee: {
-        amount: 0.003,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toPolkadot: AssetRoute[] = [toTransferTemplate(dot, polkadot, 0.003)];
 
-const toSubsocial: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: sub,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: subsocial,
-      asset: sub,
-      fee: {
-        amount: 0.064,
-        asset: sub,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toSubsocial: AssetRoute[] = [toTransferTemplate(sub, subsocial, 0.064)];
 
 const toZeitgeist: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ztg,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: zeitgeist,
-      asset: ztg,
-      fee: {
-        amount: 0.0093,
-        asset: ztg,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: zeitgeist,
-      asset: glmr,
-      fee: {
-        amount: 0.002,
-        asset: glmr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  toTransferTemplate(ztg, zeitgeist, 0.0093),
+  toTransferTemplate(glmr, zeitgeist, 0.002),
   toZeitgeistErc20Template(usdc_mwh),
 ];
 
-const toPhala: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: pha,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: phala,
-      asset: pha,
-      fee: {
-        amount: 0.064296,
-        asset: pha,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toPhala: AssetRoute[] = [toTransferTemplate(pha, phala, 0.064296)];
 
-const toMythos: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: myth,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: mythos,
-      asset: myth,
-      fee: {
-        amount: 0.3,
-        asset: myth,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toMythos: AssetRoute[] = [toTransferTemplate(myth, mythos, 2.5)];
 
-const toNodle: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: nodl,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: nodle,
-      asset: nodl,
-      fee: {
-        amount: 0.0012,
-        asset: nodl,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toNodle: AssetRoute[] = [toTransferTemplate(nodl, nodle, 0.0012)];
 
-const toUnique: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: unq,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: unique,
-      asset: unq,
-      fee: {
-        amount: 0,
-        asset: unq,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique, 0)];
 
-const toCrust: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: cru,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: crust,
-      asset: cru,
-      fee: {
-        amount: 0.04,
-        asset: cru,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toCrust: AssetRoute[] = [toTransferTemplate(cru, crust, 0.04)];
 
-const toKilt: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: kilt,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: kilt_chain,
-      asset: kilt,
-      fee: {
-        amount: 0.02,
-        asset: kilt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain, 0.02)];
 
-const toPendulum: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: pen,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: pendulum,
-      asset: pen,
-      fee: {
-        amount: 1.1,
-        asset: pen,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
-const toDarwinia: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ring,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: darwinia,
-      asset: ring,
-      fee: {
-        amount: 4,
-        asset: ring,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
-const toAjuna: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ajun,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: ajuna,
-      asset: ajun,
-      fee: {
-        amount: 0.001,
-        asset: ajun,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
+const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumViaWormholeTemplate(dai_mwh, dai),
@@ -1070,13 +282,55 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  toEthereumViaSnowbridgeTemplate(weth, weth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
+  toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
   toSolanaViaWormholeTemplate(sol, sol),
+];
+
+const toCexViaRelay = new AssetRoute({
+  source: {
+    asset: dot,
+    balance: balance(),
+    fee: fee(),
+    destinationFee: {
+      balance: balance(),
+    },
+  },
+  destination: {
+    chain: polkadotCex,
+    asset: dot,
+    fee: {
+      amount: 1.1,
+      asset: dot,
+    },
+  },
+  extrinsic: ExtrinsicBuilder()
+    .utility()
+    .batchAll([
+      ExtrinsicBuilder().xTokens().transfer(),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
+        fee: 0.01,
+      }),
+    ]),
+  transact: {
+    chain: polkadot,
+    fee: {
+      amount: 0,
+      asset: dot,
+      balance: balance(),
+    },
+    extrinsic: ExtrinsicBuilder().balances().transferAll(),
+  },
+});
+
+const toCex: AssetRoute[] = [
+  toHubWithCexFwd2Template(usdt),
+  toHubWithCexFwd2Template(usdc),
+  toCexViaRelay,
 ];
 
 export const hydrationConfig = new ChainRoutes({
@@ -1088,6 +342,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toAstar,
     ...toBifrost,
     ...toCentrifuge,
+    ...toCex,
     ...toCrust,
     ...toDarwinia,
     ...toEthereumViaSnowbridge,

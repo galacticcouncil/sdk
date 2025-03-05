@@ -1,5 +1,23 @@
 # @galacticcouncil/sdk
 
+## 5.6.0
+
+### Minor Changes
+
+- Expose most liquid route api
+
+## 5.5.0
+
+### Minor Changes
+
+- 8e154fd: Upgrade stableswap math, rework omnipool dyn fees
+
+## 5.4.0
+
+### Minor Changes
+
+- 6f46b18: Update stableswap spot price calculation (math)
+
 ## 5.3.0
 
 ### Minor Changes

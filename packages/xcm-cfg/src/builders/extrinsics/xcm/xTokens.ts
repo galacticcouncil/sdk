@@ -1,5 +1,4 @@
 import {
-  acc,
   big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -9,6 +8,7 @@ import {
 import { toAsset, toDest } from './xTokens.utils';
 
 import {
+  getDerivativeAccount,
   getExtrinsicAccount,
   getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
@@ -19,15 +19,21 @@ import {
 const pallet = 'xTokens';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) =>
+  build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
-        const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
+          : address;
+
+        const account = getExtrinsicAccount(receiver);
+
         const assetId = ctx.getAssetId(asset);
         return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
       },
@@ -35,15 +41,20 @@ const transfer = (): ExtrinsicConfigBuilder => ({
 });
 
 const transferMultiasset = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) =>
+  build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMultiasset',
       getArgs: (func) => {
         const version = getExtrinsicArgumentVersion(func, 1);
-        const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+
+        const receiver = rcv.usesCexForwarding
+          ? getDerivativeAccount(ctx, sender, rcv)
+          : address;
+
+        const account = getExtrinsicAccount(receiver);
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -140,11 +151,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           rcv = transact.chain as Parachain;
           feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
           feeAssetId = ctx.getAssetId(transact.fee);
-          receiver = acc.getMultilocationDerivatedAccount(
-            ctx.parachainId,
-            sender,
-            1
-          );
+          receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
         const account = getExtrinsicAccount(receiver);

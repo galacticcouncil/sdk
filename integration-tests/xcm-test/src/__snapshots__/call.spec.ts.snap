@@ -1,1147 +1,1210 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Wallet with XCM config should return valid Kusama calldata for AssetHub -> Basilisk USDT [usdt] transfer 1`] = `
-[
-  "kusama-assethub-basilisk-usdt",
-  "0x0501041f0804010100a9200400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040102043205011f0002093d000000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for AssetHub -> Karura USDT [usdt] transfer 1`] = `
-[
-  "kusama-assethub-karura-usdt",
-  "0x0501041f0804010100411f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040102043205011f0002093d000000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for AssetHub -> Kusama KSM [ksm] transfer 1`] = `
-[
-  "kusama-assethub-kusama-ksm",
-  "0xec041f090401000400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404010000070010a5d4e80000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> AssetHub USDT [usdt] transfer 1`] = `
-[
-  "basilisk-kusama-assethub-usdt",
-  "0xf0049a0104010300a10f043205011f0002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> Integritee TEER [teer] transfer 1`] = `
-[
-  "basilisk-integritee-teer",
-  "0x0101049a00110000000010a5d4e80000000000000000000000040102007d1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> Karura BSX [bsx] transfer 1`] = `
-[
-  "basilisk-karura-bsx",
-  "0x0101049a00000000000010a5d4e8000000000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> Kusama KSM [ksm] transfer 1`] = `
-[
-  "basilisk-kusama-ksm",
-  "0xf4049a00010000000010a5d4e800000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> Robonomics XRT [xrt] transfer 1`] = `
-[
-  "basilisk-robonomics-xrt",
-  "0x0101049a001000000000ca9a3b0000000000000000000000000401020001200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Basilisk -> Tinkernet TNKR [tnkr] transfer 1`] = `
-[
-  "basilisk-tinkernet-tnkr",
-  "0x0101049a00060000000010a5d4e800000000000000000000000401020035210100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Integritee -> Basilisk TEER [teer] transfer 1`] = `
-[
-  "integritee-basilisk-teer",
-  "0xf4042200000010a5d4e8000000000000000000000004010200a9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Karura -> AssetHub USDT [usdt] transfer 1`] = `
-[
-  "karura-kusama-assethub-usdt",
-  "0xf004360104010300a10f043205011f0002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Karura -> Basilisk BSX [bsx] transfer 1`] = `
-[
-  "karura-basilisk-bsx",
-  "0xfc043600050b000010a5d4e8000000000000000000000004010200a9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Karura -> Kusama KSM [ksm] transfer 1`] = `
-[
-  "karura-kusama-ksm",
-  "0xec04360000820010a5d4e800000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Kusama -> AssetHub KSM [ksm] transfer 1`] = `
-[
-  "kusama-kusama-assethub-ksm",
-  "0xf804630904000100a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Kusama -> Basilisk KSM [ksm] transfer 1`] = `
-[
-  "kusama-basilisk-ksm",
-  "0xf804630804000100a9200400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Kusama -> Karura KSM [ksm] transfer 1`] = `
-[
-  "kusama-karura-ksm",
-  "0xf804630804000100411f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Robonomics -> Basilisk XRT [xrt] transfer 1`] = `
-[
-  "robonomics-basilisk-xrt",
-  "0xf404470803010100a9200300010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d03040000000002286bee0000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Kusama calldata for Tinkernet -> Basilisk TNKR [tnkr] transfer 1`] = `
-[
-  "tinkernet-basilisk-tnkr",
-  "0x0101045c00000000000010a5d4e8000000000000000000000003010200a9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Polkadot calldata for Acala -> Hydration ACA [aca] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Acala -> Hydration ACA [aca] transfer 1`] = `
 [
   "acala-hydration-aca",
   "0xf804360000000010a5d4e8000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Acala -> Hydration DAI [dai_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Acala -> Hydration DAI [dai_awh] transfer 1`] = `
 [
   "acala-hydration-dai_awh",
   "0x45010436000254a37a01cd75b616d63e0ab665bffdb0143c52ae000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Acala -> Hydration LDOT [ldot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Acala -> Hydration LDOT [ldot] transfer 1`] = `
 [
   "acala-hydration-ldot",
   "0xf8043600000300e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Acala -> Hydration WBTC [wbtc_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Acala -> Hydration WBTC [wbtc_awh] transfer 1`] = `
 [
   "acala-hydration-wbtc_awh",
   "0x450104360002c80084af223c8b598536178d9361dc55bfda681800e1f50500000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Acala -> Hydration WETH [weth_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Acala -> Hydration WETH [weth_awh] transfer 1`] = `
 [
   "acala-hydration-weth_awh",
   "0x4501043600025a4d6acdc4e3e5ab15717f407afe957f7a242578000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ajuna -> Hydration AJUN [ajun] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ajuna -> Hydration AJUN [ajun] transfer 1`] = `
 [
   "ajuna-hydration-ajun",
   "0xf4042300000010a5d4e8000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Bifrost USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub (CEX) -> Hydration USDC [usdc] transfer 1`] = `
+[
+  "assethub_cex-hydration-usdc",
+  "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205e5140002093d000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub (CEX) -> Hydration USDT [usdt] transfer 1`] = `
+[
+  "assethub_cex-hydration-usdt",
+  "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205011f0002093d000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Kusama -> AssetHub Polkadot KSM [ksm] transfer 1`] = `
+[
+  "assethub_kusama-assethub-ksm",
+  "0x0101041f08040202090200a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404010000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Kusama -> Basilisk USDT [usdt] transfer 1`] = `
+[
+  "assethub_kusama-basilisk-usdt",
+  "0x0501041f0804010100a9200400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040102043205011f0002093d000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Kusama -> Karura USDT [usdt] transfer 1`] = `
+[
+  "assethub_kusama-karura-usdt",
+  "0x0501041f0804010100411f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040102043205011f0002093d000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Kusama -> Kusama KSM [ksm] transfer 1`] = `
+[
+  "assethub_kusama-kusama-ksm",
+  "0xec041f090401000400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404010000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> AssetHub Kusama KSM [ksm] transfer 1`] = `
+[
+  "assethub-assethub_kusama-ksm",
+  "0x0901041f0b040202090300a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040201090300070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Bifrost USDC [usdc] transfer 1`] = `
 [
   "assethub-bifrost-usdc",
   "0x0501041f0804010100b91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205e5140002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Bifrost USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Bifrost USDT [usdt] transfer 1`] = `
 [
   "assethub-bifrost-usdt",
   "0x0501041f0804010100b91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205011f0002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration DED [ded] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration DED [ded] transfer 1`] = `
 [
   "assethub-hydration-ded",
   "0x3901041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0408000204320578000700e40b54020002043205011f00823801000100000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration DOT [dot] transfer 1`] = `
 [
   "assethub-hydration-dot",
   "0xf8041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040100000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration DOTA [dota] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration DOTA [dota] transfer 1`] = `
 [
   "assethub-hydration-dota",
   "0x2901041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040800020432054800419c0002043205011f00823801000100000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration PINK [pink] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration KSM [ksm] transfer 1`] = `
+[
+  "assethub-hydration-ksm",
+  "0x1d01041f0d04010100c91f04040201090300070010a5d4e80104020109030104040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration PINK [pink] transfer 1`] = `
 [
   "assethub-hydration-pink",
   "0x3901041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040800020432055c000700e40b54020002043205011f00823801000100000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration USDC [usdc] transfer 1`] = `
 [
   "assethub-hydration-usdc",
   "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205e5140002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration USDT [usdt] transfer 1`] = `
 [
   "assethub-hydration-usdt",
   "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040002043205011f0002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Hydration WUD [wud] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Hydration WUD [wud] transfer 1`] = `
 [
   "assethub-hydration-wud",
   "0x4501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04080002043205011f00823801000002043205a6e90100000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Moonbeam PINK [pink] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Moonbeam PINK [pink] transfer 1`] = `
 [
   "assethub-moonbeam-pink",
   "0x0901041f0804010100511f04000103000000000000000000000000000000000000000000040800020432055c000700e40b54020002043205011f0042420f000100000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Moonbeam USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Moonbeam USDC [usdc] transfer 1`] = `
 [
   "assethub-moonbeam-usdc",
   "0xd4041f0804010100511f0400010300000000000000000000000000000000000000000004040002043205e5140002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Moonbeam USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Moonbeam USDT [usdt] transfer 1`] = `
 [
   "assethub-moonbeam-usdt",
   "0xd4041f0804010100511f0400010300000000000000000000000000000000000000000004040002043205011f0002093d000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Mythos MYTH [myth] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Mythos MYTH [myth] transfer 1`] = `
 [
   "assethub-mythos-myth",
   "0xe0041f0904010100a534040001030000000000000000000000000000000000000000000404010100a5340013000064a7b3b6e00d0000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for AssetHub -> Polkadot DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for AssetHub Polkadot -> Polkadot DOT [dot] transfer 1`] = `
 [
   "assethub-polkadot-dot",
   "0xec041f090401000400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040100000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration ASTR [astr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration ASTR [astr] transfer 1`] = `
 [
   "astar-hydration-astr",
   "0x010104330204010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040400000013000064a7b3b6e00d00000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration BNC [bnc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration BNC [bnc] transfer 1`] = `
 [
   "astar-hydration-bnc",
   "0x3101043700070000000000000001000000000000000010a5d4e8000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration DOT [dot] transfer 1`] = `
 [
   "astar-hydration-dot",
   "0x3101043700ffffffffffffffffffffffffffffffff00e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration GLMR [glmr] transfer 1`] = `
 [
   "astar-hydration-glmr",
   "0x310104370003000000000000000100000000000000000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration IBTC [ibtc] transfer 1`] = `
 [
   "astar-hydration-ibtc",
   "0x31010437000400000000000000010000000000000000e1f50500000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration INTR [intr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration INTR [intr] transfer 1`] = `
 [
   "astar-hydration-intr",
   "0x31010437000500000000000000010000000000000000e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration PHA [pha] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration PHA [pha] transfer 1`] = `
 [
   "astar-hydration-pha",
   "0x3101043700060000000000000001000000000000000010a5d4e8000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration vASTR [vastr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration vASTR [vastr] transfer 1`] = `
 [
   "astar-hydration-vastr",
   "0x310104370010000000000000000100000000000000000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Astar -> Hydration vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Astar -> Hydration vDOT [vdot] transfer 1`] = `
 [
   "astar-hydration-vdot",
   "0x31010437000800000000000000010000000000000000e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> AssetHub USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Basilisk -> AssetHub Kusama USDT [usdt] transfer 1`] = `
+[
+  "basilisk-assethub_kusama-usdt",
+  "0xf0049a0104010300a10f043205011f0002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Basilisk -> Integritee TEER [teer] transfer 1`] = `
+[
+  "basilisk-integritee-teer",
+  "0x0101049a00110000000010a5d4e80000000000000000000000040102007d1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Basilisk -> Karura BSX [bsx] transfer 1`] = `
+[
+  "basilisk-karura-bsx",
+  "0x0101049a00000000000010a5d4e8000000000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Basilisk -> Kusama KSM [ksm] transfer 1`] = `
+[
+  "basilisk-kusama-ksm",
+  "0xf4049a00010000000010a5d4e800000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Basilisk -> Robonomics XRT [xrt] transfer 1`] = `
+[
+  "basilisk-robonomics-xrt",
+  "0x0101049a001000000000ca9a3b0000000000000000000000000401020001200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> AssetHub Polkadot USDC [usdc] transfer 1`] = `
 [
   "bifrost-assethub-usdc",
   "0x05010446050404010300a10f043205e5140002093d000000000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> AssetHub USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> AssetHub Polkadot USDT [usdt] transfer 1`] = `
 [
   "bifrost-assethub-usdt",
   "0x05010446050404010300a10f043205011f0002093d000000000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration ASTR [astr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration ASTR [astr] transfer 1`] = `
 [
   "bifrost-hydration-astr",
   "0xf80446000803000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration BNC [bnc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration BNC [bnc] transfer 1`] = `
 [
   "bifrost-hydration-bnc",
   "0xf804460000010010a5d4e8000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration DOT [dot] transfer 1`] = `
 [
   "bifrost-hydration-dot",
   "0xf8044600080000e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration GLMR [glmr] transfer 1`] = `
 [
   "bifrost-hydration-glmr",
   "0xf80446000801000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration IBTC [ibtc] transfer 1`] = `
 [
   "bifrost-hydration-ibtc",
   "0xf8044600080600e1f50500000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration vASTR [vastr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration vASTR [vastr] transfer 1`] = `
 [
   "bifrost-hydration-vastr",
   "0xf80446000903000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Hydration vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Hydration vDOT [vdot] transfer 1`] = `
 [
   "bifrost-hydration-vdot",
   "0xf8044600090000e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Bifrost -> Polkadot DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Bifrost -> Polkadot DOT [dot] transfer 1`] = `
 [
   "bifrost-polkadot-dot",
   "0xec044600080000e40b540200000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Centrifuge -> Hydration CFG [cfg] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Centrifuge -> Hydration CFG [cfg] transfer 1`] = `
 [
   "centrifuge-hydration-cfg",
   "0xf4047c0000000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Centrifuge -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Centrifuge -> Hydration DOT [dot] transfer 1`] = `
 [
   "centrifuge-hydration-dot",
   "0x0501047c00040500000000e40b5402000000000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Centrifuge -> Hydration GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Centrifuge -> Hydration GLMR [glmr] transfer 1`] = `
 [
   "centrifuge-hydration-glmr",
   "0x0501047c000404000000000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Crust network -> Hydration CRU [cru] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Crust network -> Hydration CRU [cru] transfer 1`] = `
 [
   "crust-hydration-cru",
   "0xf4047d00000010a5d4e8000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Darwinia -> Hydration RING [ring] transfer 1`] = `
-[
-  "darwinia-hydration-ring",
-  "0xf4042e0000000064a7b3b6e00d000000000000000004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration AAVE [aave] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration AAVE [aave] transfer 1`] = `
 [
   "ethereum-hydration-aave",
   "0x520548340000000000000000000000007fc66500c84a76ad7e9c93437bfc5ac33e2ddae900000000000000000000000000000000000000000000000000000000000007f200000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration DAI [dai] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration DAI [dai] transfer 1`] = `
 [
   "ethereum-hydration-dai",
   "0xc5a5ebda0000000000000000000000006b175474e89094c44da98b954eedeac495271d0f0000000000000000000000000000000000000000000000000de0b6b3a764000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000816000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000290001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration ETH [eth] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration ETH [eth] transfer 1`] = `
 [
   "ethereum-hydration-eth",
   "0xbee9cdfc000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000290001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration USDC [usdc] transfer 1`] = `
 [
   "ethereum-hydration-usdc",
   "0xc5a5ebda000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f424000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000816000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000290001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration USDT [usdt] transfer 1`] = `
 [
   "ethereum-hydration-usdt",
   "0xc5a5ebda000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec700000000000000000000000000000000000000000000000000000000000f424000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000816000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000290001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration WBTC [wbtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration WBTC [wbtc] transfer 1`] = `
 [
   "ethereum-hydration-wbtc",
   "0xc5a5ebda0000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c5990000000000000000000000000000000000000000000000000000000005f5e10000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000816000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000290001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration WETH [weth] transfer 1`] = `
-[
-  "ethereum-hydration-weth",
-  "0x52054834000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000007f200000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Polkadot calldata for Ethereum -> Hydration sUSDe [susde] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration sUSDe [susde] transfer 1`] = `
 [
   "ethereum-hydration-susde",
   "0x520548340000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a349700000000000000000000000000000000000000000000000000000000000007f200000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Acala ACA [aca] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration tBTC [tbtc] transfer 1`] = `
+[
+  "ethereum-hydration-tbtc",
+  "0x5205483400000000000000000000000018084fba666a33d37592fa2633fd49a74dd93a8800000000000000000000000000000000000000000000000000000000000007f200000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Acala ACA [aca] transfer 1`] = `
 [
   "hydration-acala-aca",
   "0x0101048900a3420f000010a5d4e8000000000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Acala DAI [dai_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Acala DAI [dai_awh] transfer 1`] = `
 [
   "hydration-acala-dai_awh",
   "0x010104890002000000000064a7b3b6e00d000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Acala LDOT [ldot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Acala LDOT [ldot] transfer 1`] = `
 [
   "hydration-acala-ldot",
   "0x0101048900a4420f0000e40b5402000000000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Acala WBTC [wbtc_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Acala WBTC [wbtc_awh] transfer 1`] = `
 [
   "hydration-acala-wbtc_awh",
   "0x01010489000300000000e1f50500000000000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Acala WETH [weth_awh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Acala WETH [weth_awh] transfer 1`] = `
 [
   "hydration-acala-weth_awh",
   "0x010104890004000000000064a7b3b6e00d000000000000000004010200411f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ajuna AJUN [ajun] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ajuna AJUN [ajun] transfer 1`] = `
 [
   "hydration-ajuna-ajun",
   "0x0101048900200000000010a5d4e80000000000000000000000040102000d200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub DED [ded] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub (CEX) USDC [usdc] transfer 1`] = `
+[
+  "hydration-assethub_cex-usdc",
+  "0x0103040d0208890104010300a10f043205e5140002093d0004010200a10f0100f959d131179b0264f98ac96d2c9c13c403129f5de93e52f3a611ccd4294d1741006b0004010100a10f041400040002043205e5140082380100130002043205e5140082380100000601c2e6e0810161a43208e51400d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d82ee3600140d01020400010100f959d131179b0264f98ac96d2c9c13c403129f5de93e52f3a611ccd4294d1741",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub (CEX) USDT [usdt] transfer 1`] = `
+[
+  "hydration-assethub_cex-usdt",
+  "0x0103040d0208890104010300a10f043205011f0002093d0004010200a10f0100f959d131179b0264f98ac96d2c9c13c403129f5de93e52f3a611ccd4294d1741006b0004010100a10f041400040002043205011f0082380100130002043205011f0082380100000601c2e6e0810161a43208011f00d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d82ee3600140d01020400010100f959d131179b0264f98ac96d2c9c13c403129f5de93e52f3a611ccd4294d1741",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot DED [ded] transfer 1`] = `
 [
   "hydration-assethub-ded",
   "0x45010489050408010300a10f04320578000700e40b5402010300a10f043205011f0082fc0a000100000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot DOT [dot] transfer 1`] = `
 [
   "hydration-assethub-dot",
   "0x0d01046b0d04010100a10f04040100000700e40b5402020401000204040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub DOTA [dota] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot DOTA [dota] transfer 1`] = `
 [
   "hydration-assethub-dota",
   "0x35010489050408010300a10f0432054800419c010300a10f043205011f0082fc0a000100000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub PINK [pink] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot KSM [ksm] transfer 1`] = `
+[
+  "hydration-assethub-ksm",
+  "0x1d01046b0d04010100a10f04040201090300070010a5d4e80204020109030204040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot PINK [pink] transfer 1`] = `
 [
   "hydration-assethub-pink",
   "0x45010489050408010300a10f0432055c000700e40b5402010300a10f043205011f0082fc0a000100000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot USDC [usdc] transfer 1`] = `
 [
   "hydration-assethub-usdc",
   "0xf004890104010300a10f043205e5140002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot USDT [usdt] transfer 1`] = `
 [
   "hydration-assethub-usdt",
   "0xf004890104010300a10f043205011f0002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> AssetHub WUD [wud] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> AssetHub Polkadot WUD [wud] transfer 1`] = `
 [
   "hydration-assethub-wud",
   "0x51010489050408010300a10f043205011f0082fc0a00010300a10f043205a6e90100000700e40b54020000000004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar ASTR [astr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar ASTR [astr] transfer 1`] = `
 [
   "hydration-astar-astr",
   "0x010104890009000000000064a7b3b6e00d000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar BNC [bnc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar BNC [bnc] transfer 1`] = `
 [
   "hydration-astar-bnc",
   "0x01010489000e0000000010a5d4e8000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar DOT [dot] transfer 1`] = `
 [
   "hydration-astar-dot",
   "0x01010489000500000000e40b5402000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar GLMR [glmr] transfer 1`] = `
 [
   "hydration-astar-glmr",
   "0x010104890010000000000064a7b3b6e00d000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar IBTC [ibtc] transfer 1`] = `
 [
   "hydration-astar-ibtc",
   "0x01010489000b00000000e1f50500000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar INTR [intr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar INTR [intr] transfer 1`] = `
 [
   "hydration-astar-intr",
   "0x01010489001100000000e40b5402000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar PHA [pha] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar PHA [pha] transfer 1`] = `
 [
   "hydration-astar-pha",
   "0x0101048900080000000010a5d4e8000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar vASTR [vastr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar vASTR [vastr] transfer 1`] = `
 [
   "hydration-astar-vastr",
   "0x010104890021000000000064a7b3b6e00d000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Astar vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Astar vDOT [vdot] transfer 1`] = `
 [
   "hydration-astar-vdot",
   "0x01010489000f00000000e40b5402000000000000000000000004010200591f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost ASTR [astr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost ASTR [astr] transfer 1`] = `
 [
   "hydration-bifrost-astr",
   "0x010104890009000000000064a7b3b6e00d000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost BNC [bnc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost BNC [bnc] transfer 1`] = `
 [
   "hydration-bifrost-bnc",
   "0x01010489000e0000000010a5d4e8000000000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost DOT [dot] transfer 1`] = `
 [
   "hydration-bifrost-dot",
   "0x01010489000500000000e40b5402000000000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost GLMR [glmr] transfer 1`] = `
 [
   "hydration-bifrost-glmr",
   "0x010104890010000000000064a7b3b6e00d000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost IBTC [ibtc] transfer 1`] = `
 [
   "hydration-bifrost-ibtc",
   "0x01010489000b00000000e1f50500000000000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost vASTR [vastr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost vASTR [vastr] transfer 1`] = `
 [
   "hydration-bifrost-vastr",
   "0x010104890021000000000064a7b3b6e00d000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Bifrost vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Bifrost vDOT [vdot] transfer 1`] = `
 [
   "hydration-bifrost-vdot",
   "0x01010489000f00000000e40b5402000000000000000000000004010200b91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Centrifuge CFG [cfg] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Centrifuge CFG [cfg] transfer 1`] = `
 [
   "hydration-centrifuge-cfg",
   "0x01010489000d000000000064a7b3b6e00d000000000000000004010200bd1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Centrifuge DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Centrifuge DOT [dot] transfer 1`] = `
 [
   "hydration-centrifuge-dot",
   "0x01010489000500000000e40b5402000000000000000000000004010200bd1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Centrifuge GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Centrifuge GLMR [glmr] transfer 1`] = `
 [
   "hydration-centrifuge-glmr",
   "0x010104890010000000000064a7b3b6e00d000000000000000004010200bd1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Crust network CRU [cru] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Crust network CRU [cru] transfer 1`] = `
 [
   "hydration-crust-cru",
   "0x01010489001b0000000010a5d4e8000000000000000000000004010200611f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Darwinia RING [ring] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Darwinia RING [ring] transfer 1`] = `
 [
   "hydration-darwinia-ring",
   "0xd00489001f000000000064a7b3b6e00d000000000000000004010200f91f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum AAVE [aave] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum AAVE [aave] transfer 1`] = `
 [
   "hydration-ethereum-aave",
-  "0x1d03046b0d04010100a10f040801000007641212150f020209070403007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d100101020209070403007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90002010907040813000103007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90004000d01020400010300000000000000000000000000000000000000000000",
+  "0x1d03046b0d04010100a10f040801000007867a7c4a04020209070403007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d100101020209070403007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90002010907040813000103007fc66500c84a76ad7e9c93437bfc5ac33e2ddae90004000d01020400010300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum DAI [dai_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum DAI [dai_mwh] transfer 1`] = `
 [
   "hydration-ethereum-dai_mwh",
   "0x1511040d020889040812000000000064a7b3b6e00d000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000000000200000000000000000000000006e605775296e851ff43b4daa541bb0984e9d6fd000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d65400000000000000000000000006e605775296e851ff43b4daa541bb0984e9d6fd0000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum USDC [usdc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-ethereum-usdc_mwh",
   "0x1511040d02088904081500000040420f0000000000000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000003200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000931715fee2d06333043d11f658c8ce934ac61d0c000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d654000000000000000000000000931715fee2d06333043d11f658c8ce934ac61d0c00000000000000000000000000000000000000000000000000000000000f4240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum USDT [usdt_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum USDT [usdt_mwh] transfer 1`] = `
 [
   "hydration-ethereum-usdt_mwh",
   "0x1511040d02088904081700000040420f0000000000000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000003200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c30e9ca94cf52f3bf5692aacf81353a27052c46f000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d654000000000000000000000000c30e9ca94cf52f3bf5692aacf81353a27052c46f00000000000000000000000000000000000000000000000000000000000f4240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum WBTC [wbtc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum WBTC [wbtc_mwh] transfer 1`] = `
 [
   "hydration-ethereum-wbtc_mwh",
   "0x1511040d02088904081300000000e1f50500000000000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000003200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000e57ebd2d67b462e9926e04a8e33f01cd0d64346d000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d654000000000000000000000000e57ebd2d67b462e9926e04a8e33f01cd0d64346d0000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum WETH [weth] transfer 1`] = `
-[
-  "hydration-ethereum-weth",
-  "0x1d03046b0d04010100a10f040801000007641212150f02020907040300c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d10010102020907040300c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000201090704081300010300c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20004000d01020400010300000000000000000000000000000000000000000000",
-]
-`;
-
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum WETH [weth_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum WETH [weth_mwh] transfer 1`] = `
 [
   "hydration-ethereum-weth_mwh",
   "0x1511040d020889040814000000000064a7b3b6e00d000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000003200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000ab3f0245b83feb11d15aaffefd7ad465a59817ed000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d654000000000000000000000000ab3f0245b83feb11d15aaffefd7ad465a59817ed0000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Ethereum sUSDe [susde] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum sUSDe [susde] transfer 1`] = `
 [
   "hydration-ethereum-susde",
-  "0x1d03046b0d04010100a10f040801000007641212150f020209070403009d39a5de30e57443bff2a8307a4256c8797a34970013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d100101020209070403009d39a5de30e57443bff2a8307a4256c8797a34970002010907040813000103009d39a5de30e57443bff2a8307a4256c8797a34970004000d01020400010300000000000000000000000000000000000000000000",
+  "0x1d03046b0d04010100a10f040801000007867a7c4a04020209070403009d39a5de30e57443bff2a8307a4256c8797a34970013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d100101020209070403009d39a5de30e57443bff2a8307a4256c8797a34970002010907040813000103009d39a5de30e57443bff2a8307a4256c8797a34970004000d01020400010300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Interlay DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum tBTC [tbtc] transfer 1`] = `
+[
+  "hydration-ethereum-tbtc",
+  "0x1d03046b0d04010100a10f040801000007867a7c4a040202090704030018084fba666a33d37592fa2633fd49a74dd93a880013000064a7b3b6e00d0204010002040816040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d1001010202090704030018084fba666a33d37592fa2633fd49a74dd93a8800020109070408130001030018084fba666a33d37592fa2633fd49a74dd93a880004000d01020400010300000000000000000000000000000000000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Interlay DOT [dot] transfer 1`] = `
 [
   "hydration-interlay-dot",
   "0x01010489000500000000e40b5402000000000000000000000004010200c11f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Interlay HDX [hdx] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Interlay HDX [hdx] transfer 1`] = `
 [
   "hydration-interlay-hdx",
   "0x0101048900000000000010a5d4e8000000000000000000000004010200c11f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Interlay IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Interlay IBTC [ibtc] transfer 1`] = `
 [
   "hydration-interlay-ibtc",
   "0x01010489000b00000000e1f50500000000000000000000000004010200c11f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Interlay INTR [intr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Interlay INTR [intr] transfer 1`] = `
 [
   "hydration-interlay-intr",
   "0x01010489001100000000e40b5402000000000000000000000004010200c11f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Interlay vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Interlay vDOT [vdot] transfer 1`] = `
 [
   "hydration-interlay-vdot",
   "0x01010489000f00000000e40b5402000000000000000000000004010200c11f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Kilt KILT [kilt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Kilt KILT [kilt] transfer 1`] = `
 [
   "hydration-kilt-kilt",
   "0x01010489001c0000000080c6a47e8d030000000000000000000401020099200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam DAI [dai_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam DAI [dai_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-dai_mwh",
   "0x35010489040812000000000064a7b3b6e00d0000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam DOT [dot] transfer 1`] = `
 [
   "hydration-moonbeam-dot",
   "0xd00489000500000000e40b5402000000000000000000000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam GLMR [glmr] transfer 1`] = `
 [
   "hydration-moonbeam-glmr",
   "0xd004890010000000000064a7b3b6e00d000000000000000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam HDX [hdx] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam HDX [hdx] transfer 1`] = `
 [
   "hydration-moonbeam-hdx",
   "0xd0048900000000000010a5d4e8000000000000000000000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam USDC [usdc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam SOL [sol] transfer 1`] = `
+[
+  "hydration-moonbeam-sol",
+  "0x35010489040830450f0000ca9a3b000000000000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-usdc_mwh",
   "0x3501048904081500000040420f00000000000000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam USDT [usdt_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam USDT [usdt_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-usdt_mwh",
   "0x3501048904081700000040420f00000000000000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam WBTC [wbtc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam WBTC [wbtc_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-wbtc_mwh",
   "0x3501048904081300000000e1f505000000000000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Moonbeam WETH [weth_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Moonbeam WETH [weth_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-weth_mwh",
   "0x35010489040814000000000064a7b3b6e00d0000000000000000100000000000087e93371c0100000000000000000100000004010200511f0300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Mythos MYTH [myth] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Mythos MYTH [myth] transfer 1`] = `
 [
   "hydration-mythos-myth",
   "0xd00489001e000000000064a7b3b6e00d000000000000000004010200a5340300000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Pendulum PEN [pen] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Pendulum PEN [pen] transfer 1`] = `
 [
   "hydration-pendulum-pen",
   "0x010104890091420f000010a5d4e8000000000000000000000004010200b9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Phala PHA [pha] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Phala PHA [pha] transfer 1`] = `
 [
   "hydration-phala-pha",
   "0x0101048900080000000010a5d4e8000000000000000000000004010200cd1f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Polkadot DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Polkadot (CEX) DOT [dot] transfer 1`] = `
+[
+  "hydration-polkadot_cex-dot",
+  "0xbd02040d020889000500000000e40b540200000000000000000000000401010100eb6bf039e8b7dd3d3d825a8299c0336d6012a07df2584ed02008ddf2ad45f21b006b00040100041400040000000284d717130000000284d717000601027c3125253890050400d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00140d01020400010100eb6bf039e8b7dd3d3d825a8299c0336d6012a07df2584ed02008ddf2ad45f21b",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Polkadot DOT [dot] transfer 1`] = `
 [
   "hydration-polkadot-dot",
   "0xf40489000500000000e40b540200000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Solana SOL [sol] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Solana SOL [sol] transfer 1`] = `
 [
   "hydration-solana-sol",
   "0x1511040d020889040830450f0000ca9a3b00000000000000000000000010000000000064a7b3b6e00d00000000000000000100000004010200511f0300f959d131179b0264f98ac96d2c9c13c403129f5d006b0004010100511f041400040001040a00130000da493b717d0c130001040a00130000da493b717d0c00060107b090111d1dd2121300810e6d0000404b4c0000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000008080000000000000000000000000000000000000000000000000000000000000000110d96e292b8000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000000000200000000000000000000000099fec54a5ad36d50a4bba3a41cab983a5bb86a7d000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000cafd2f0a35a4459fa40c0517e17e6fa2939441ca000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c41019d65400000000000000000000000099fec54a5ad36d50a4bba3a41cab983a5bb86a7d000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c804da2c41e272cb3d9ed73049ef5d86ab5ddcaccb13c26afcbc71837bab9e9a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000140d01020400010300f959d131179b0264f98ac96d2c9c13c403129f5d",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Unique network UNQ [unq] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Unique network UNQ [unq] transfer 1`] = `
 [
   "hydration-unique-unq",
   "0x010104890019000000000064a7b3b6e00d000000000000000004010200d51f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Zeitgeist GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Zeitgeist GLMR [glmr] transfer 1`] = `
 [
   "hydration-zeitgeist-glmr",
   "0x010104890010000000000064a7b3b6e00d000000000000000004010200b1200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Zeitgeist USDC [usdc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Zeitgeist USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-zeitgeist-usdc_mwh",
   "0x6501048904081500000040420f000000000000000000000000001000000000008a5d7845630100000000000000000100000004010200b1200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Hydration -> Zeitgeist ZTG [ztg] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Zeitgeist ZTG [ztg] transfer 1`] = `
 [
   "hydration-zeitgeist-ztg",
   "0x01010489000c00000000e40b5402000000000000000000000004010200b1200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Interlay -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Integritee -> Basilisk TEER [teer] transfer 1`] = `
+[
+  "integritee-basilisk-teer",
+  "0xf4042200000010a5d4e8000000000000000000000004010200a9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Interlay -> Hydration DOT [dot] transfer 1`] = `
 [
   "interlay-hydration-dot",
   "0xf8045e00000000e40b5402000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Interlay -> Hydration HDX [hdx] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Interlay -> Hydration HDX [hdx] transfer 1`] = `
 [
   "interlay-hydration-hdx",
   "0x0501045e00010d0000000010a5d4e8000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Interlay -> Hydration IBTC [ibtc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Interlay -> Hydration IBTC [ibtc] transfer 1`] = `
 [
   "interlay-hydration-ibtc",
   "0xf8045e00000100e1f50500000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Interlay -> Hydration INTR [intr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Interlay -> Hydration INTR [intr] transfer 1`] = `
 [
   "interlay-hydration-intr",
   "0xf8045e00000200e40b5402000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Interlay -> Hydration vDOT [vdot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Interlay -> Hydration vDOT [vdot] transfer 1`] = `
 [
   "interlay-hydration-vdot",
   "0x0501045e00010300000000e40b5402000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Kilt -> Hydration KILT [kilt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Karura -> AssetHub Kusama USDT [usdt] transfer 1`] = `
+[
+  "karura-assethub_kusama-usdt",
+  "0xf004360104010300a10f043205011f0002093d0004010200a10f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Karura -> Basilisk BSX [bsx] transfer 1`] = `
+[
+  "karura-basilisk-bsx",
+  "0xfc043600050b000010a5d4e8000000000000000000000004010200a9200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Karura -> Kusama KSM [ksm] transfer 1`] = `
+[
+  "karura-kusama-ksm",
+  "0xec04360000820010a5d4e800000000000000000000000401010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Kilt -> Hydration KILT [kilt] transfer 1`] = `
 [
   "kilt-hydration-kilt",
   "0x010104530804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040000000f0080c6a47e8d030000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> AssetHub PINK [pink] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Kusama -> AssetHub Kusama KSM [ksm] transfer 1`] = `
+[
+  "kusama-assethub_kusama-ksm",
+  "0xf804630904000100a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Kusama -> Basilisk KSM [ksm] transfer 1`] = `
+[
+  "kusama-basilisk-ksm",
+  "0xf804630804000100a9200400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Kusama -> Karura KSM [ksm] transfer 1`] = `
+[
+  "kusama-karura-ksm",
+  "0xf804630804000100411f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> AssetHub Polkadot PINK [pink] transfer 1`] = `
 [
   "moonbeam-assethub-pink",
   "0xab946323000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000ffffffff30478fafbe935e466da114e14fb3563d00000000000000000000000000000000000000000000000000000002540be400000000000000000000000000ffffffffea09fb06d082fd1275cd48b191cbcd1d000000000000000000000000000000000000000000000000000000000002bf2000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000003e8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> AssetHub USDC [usdc] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> AssetHub Polkadot USDC [usdc] transfer 1`] = `
 [
   "moonbeam-assethub-usdc",
   "0xb9f813ff000000000000000000000000ffffffff7d2b0b761af01ca8e25242976ac0ad7d00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000003e8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> AssetHub USDT [usdt] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> AssetHub Polkadot USDT [usdt] transfer 1`] = `
 [
   "moonbeam-assethub-usdt",
   "0xb9f813ff000000000000000000000000ffffffffea09fb06d082fd1275cd48b191cbcd1d00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000003e8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration DAI [dai_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration DAI [dai_mwh] transfer 1`] = `
 [
   "moonbeam-hydration-dai_mwh",
   "0xb9f813ff00000000000000000000000006e605775296e851ff43b4daa541bb0984e9d6fd0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration DOT [dot] transfer 1`] = `
 [
   "moonbeam-hydration-dot",
   "0xb9f813ff000000000000000000000000ffffffff1fcacbd218edc0eba20fc2308c77808000000000000000000000000000000000000000000000000000000002540be4000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration GLMR [glmr] transfer 1`] = `
 [
   "moonbeam-hydration-glmr",
   "0xb9f813ff00000000000000000000000000000000000000000000000000000000000008020000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration HDX [hdx] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration HDX [hdx] transfer 1`] = `
 [
   "moonbeam-hydration-hdx",
   "0xb9f813ff000000000000000000000000ffffffff345dc44ddae98df024eb494321e73fcc000000000000000000000000000000000000000000000000000000e8d4a510000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration USDC [usdc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration SOL [sol] transfer 1`] = `
+[
+  "moonbeam-hydration-sol",
+  "0xb9f813ff00000000000000000000000099fec54a5ad36d50a4bba3a41cab983a5bb86a7d000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration USDC [usdc_mwh] transfer 1`] = `
 [
   "moonbeam-hydration-usdc_mwh",
   "0xb9f813ff000000000000000000000000931715fee2d06333043d11f658c8ce934ac61d0c00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration USDT [usdt_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration USDT [usdt_mwh] transfer 1`] = `
 [
   "moonbeam-hydration-usdt_mwh",
   "0xb9f813ff000000000000000000000000c30e9ca94cf52f3bf5692aacf81353a27052c46f00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration WBTC [wbtc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration WBTC [wbtc_mwh] transfer 1`] = `
 [
   "moonbeam-hydration-wbtc_mwh",
   "0xb9f813ff000000000000000000000000e57ebd2d67b462e9926e04a8e33f01cd0d64346d0000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Moonbeam -> Hydration WETH [weth_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Moonbeam -> Hydration WETH [weth_mwh] transfer 1`] = `
 [
   "moonbeam-hydration-weth_mwh",
   "0xb9f813ff000000000000000000000000ab3f0245b83feb11d15aaffefd7ad465a59817ed0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000007f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002201d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00000000000000000000000000000000000000000000000000000000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Mythos -> AssetHub MYTH [myth] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Mythos -> AssetHub Polkadot MYTH [myth] transfer 1`] = `
 [
   "mythos-assethub-myth",
   "0x0501041f0904010100a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040400000013000064a7b3b6e00d0000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Mythos -> Hydration MYTH [myth] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Mythos -> Hydration MYTH [myth] transfer 1`] = `
 [
   "mythos-hydration-myth",
   "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040400000013000064a7b3b6e00d0000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Pendulum -> Hydration PEN [pen] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Pendulum -> Hydration PEN [pen] transfer 1`] = `
 [
   "pendulum-hydration-pen",
   "0xf4043600000010a5d4e8000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Phala -> Hydration PHA [pha] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Phala -> Hydration PHA [pha] transfer 1`] = `
 [
   "phala-hydration-pha",
   "0xf004520000000000070010a5d4e8010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d010700f2052a0100",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Polkadot -> AssetHub DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Polkadot (CEX) -> Hydration DOT [dot] transfer 1`] = `
+[
+  "polkadot_cex-hydration-dot",
+  "0xf804630804000100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040000000700e40b54020000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Polkadot -> AssetHub Polkadot DOT [dot] transfer 1`] = `
 [
   "polkadot-assethub-dot",
   "0xf804630904000100a10f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040000000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Polkadot -> Bifrost DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Polkadot -> Bifrost DOT [dot] transfer 1`] = `
 [
   "polkadot-bifrost-dot",
   "0xf804630804000100b91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040000000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Polkadot -> Hydration DOT [dot] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Polkadot -> Hydration DOT [dot] transfer 1`] = `
 [
   "polkadot-hydration-dot",
   "0xf804630804000100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d04040000000700e40b54020000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Solana -> Hydration SOL [sol] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Robonomics -> Basilisk XRT [xrt] transfer 1`] = `
 [
-  "solana-hydration-sol",
-  "8003000b13c804da2c41e272cb3d9ed73049ef5d86ab5ddcaccb13c26afcbc71837bab9e9aeea77a0c3647762904b983467b87daa0df2170f39d08851764888001be7633e331a315816cf187c8d362762efa138808b8b5aded6625abb7e0814cff5f12d5b0069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f000000000011a7d3e605e4f4bb8a6d9081f3ce43d1c373ad9c11cafeeae23fdf826f6491e3f1d54b555a044e63a0a960c2862ad19fa3d700c6ca50549cec1c29f6b30ce15a3e2775705510c36f11c6e32980e454f71e2706aaa3dacd0797d2293a2de916f387fa37fb1e77c720097bee5055b85c7033051c4cc8282c137e9bbaeb10690b97c000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000065085ba94312f5e5434dbba0f29868ef36fffb21d633a0616d72b45e6e6fced80e0a589e6488147a94dcfa592b90fdd41152bb2ca77bf6016758a6f4df9d21b4baf65c2eb34be93ae3c93333034f36547dd365f45dc6e8db542f3739bd19a32bec5e214c1b838fb77d38634531798e11fd817095aa8adb9b5362d174f0e96f26ec7372995d5cc8732397fb0ad35c0121e0eaa90d26f828a534cab54391b3a4f506a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000e0a589a41a55fbd66c52a475f2d92a6d3dc9b4747114cb9af825a98b545d3ce0306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000032f31fafaedf342b6c8621ada5d34ffb82dd22b3e365f3f3ea190747edd733f608080200013400000000f01d1f0000000000a50000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9080200010c0200000000ca9a3b0000000009040103000a01010903010b00090400ca9a3b000000000c12000d0103040b0e05020f060710000a0809115d0c0000000000ca9a3b0000000000000000000000000000000000000000000000000000000000000000000008161000290000000001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00090301000001091200050290d0030012000903e80300000000000000",
+  "robonomics-basilisk-xrt",
+  "0xf404470803010100a9200300010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d03040000000002286bee0000000000",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Unique network -> Hydration UNQ [unq] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Solana -> Hydration SOL [sol] transfer 1`] = `
+[
+  "solana-hydration-sol",
+  "8003000b13c804da2c41e272cb3d9ed73049ef5d86ab5ddcaccb13c26afcbc71837bab9e9a56ce8f20468d524fbdefcd578354328f9acca32e2523d93078bcc29b2f1a42729b6a9ebe5d85cac433ed8c764d2897bcdae43686ffd722fc44a8ad81ab04d78a069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f000000000011a7d3e605e4f4bb8a6d9081f3ce43d1c373ad9c11cafeeae23fdf826f6491e3f1d54b555a044e63a0a960c2862ad19fa3d700c6ca50549cec1c29f6b30ce15a3e2775705510c36f11c6e32980e454f71e2706aaa3dacd0797d2293a2de916f387fa37fb1e77c720097bee5055b85c7033051c4cc8282c137e9bbaeb10690b97c000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000065085ba94312f5e5434dbba0f29868ef36fffb21d633a0616d72b45e6e6fced80e0a589e6488147a94dcfa592b90fdd41152bb2ca77bf6016758a6f4df9d21b4baf65c2eb34be93ae3c93333034f36547dd365f45dc6e8db542f3739bd19a32bec5e214c1b838fb77d38634531798e11fd817095aa8adb9b5362d174f0e96f26ec7372995d5cc8732397fb0ad35c0121e0eaa90d26f828a534cab54391b3a4f506a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000e0a589a41a55fbd66c52a475f2d92a6d3dc9b4747114cb9af825a98b545d3ce0306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000094b80c86641af0a89cd60a43178ced311b739b0f2f4d0d18348295d473accf1908080200013400000000f01d1f0000000000a50000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9080200010c0200000000ca9a3b0000000009040103000a01010903010b00090400ca9a3b000000000c12000d0103040b0e05020f060710000a0809115d0c0000000000ca9a3b0000000000000000000000000000000000000000000000000000000000000000000008161000290000000001010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00090301000001091200050290d0030012000903244e00000000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Unique network -> Hydration UNQ [unq] transfer 1`] = `
 [
   "unique-hydration-unq",
   "0x010104260000000000000064a7b3b6e00d000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Zeitgeist -> Hydration GLMR [glmr] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Zeitgeist -> Hydration GLMR [glmr] transfer 1`] = `
 [
   "zeitgeist-hydration-glmr",
   "0x0501047e000503000000000064a7b3b6e00d000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Zeitgeist -> Hydration USDC [usdc_mwh] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Zeitgeist -> Hydration USDC [usdc_mwh] transfer 1`] = `
 [
   "zeitgeist-hydration-usdc_mwh",
   "0x6d01047e0408050100000040420f00000000000000000000000000050300000000008a5d7845630100000000000000000100000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
 ]
 `;
 
-exports[`Wallet with XCM config should return valid Polkadot calldata for Zeitgeist -> Hydration ZTG [ztg] transfer 1`] = `
+exports[`Wallet with XCM config should return valid calldata for Zeitgeist -> Hydration ZTG [ztg] transfer 1`] = `
 [
   "zeitgeist-hydration-ztg",
   "0xf4047e000400e40b5402000000000000000000000003010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",

@@ -4,7 +4,6 @@ import {
   dai,
   dai_mwh,
   eth,
-  weth,
   wbtc,
   wbtc_mwh,
   weth_mwh,
@@ -14,6 +13,7 @@ import {
   usdt_mwh,
   aave,
   susde,
+  tbtc,
 } from '../../../assets';
 import { ethereum, hydration, moonbeam } from '../../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../../builders';
@@ -56,9 +56,9 @@ const toHydrationViaWormhole: AssetRoute[] = [
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
-  toHydrationViaSnowbridgeTemplate(weth, weth),
   toHydrationViaSnowbridgeTemplate(aave, aave),
   toHydrationViaSnowbridgeTemplate(susde, susde),
+  toHydrationViaSnowbridgeTemplate(tbtc, tbtc),
 ];
 
 const toMoonbeamViaWormhole: AssetRoute[] = [

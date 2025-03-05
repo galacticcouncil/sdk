@@ -6,26 +6,26 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
+  Dex,
+  DexFactory,
   TransferCtx,
   TransferValidator,
   TransferValidation,
   TransferValidationReport,
-  SwapFactory,
-  Swap,
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
+
 import { PlatformAdapter, Call } from './platforms';
 import {
   calculateMax,
   calculateMin,
   formatEvmAddress,
-  multiplyByFraction,
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
-import { SwapResolver } from './SwapResolver';
+import { FeeSwap } from './FeeSwap';
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -41,8 +41,8 @@ export class Wallet {
     this.validations = transferValidations || [];
   }
 
-  registerSwaps(...swaps: Swap[]) {
-    swaps.forEach((s) => SwapFactory.getInstance().register(s));
+  registerDex(...dex: Dex[]) {
+    dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
   public async transfer(
@@ -91,12 +91,10 @@ export class Wallet {
 
     // Normalize destination fee asset
     const dstFee = srcDestinationFee.copyWith(destination.fee.asset);
-    // Normalize amount entering the transaction (50% of bags)
-    const initAmount = multiplyByFraction(srcFeeBalance.amount, 0.5);
 
     const ctx: TransferCtx = {
       address: dstAddr,
-      amount: initAmount,
+      amount: 1n, // Use 1 satoshi as init amount
       asset: source.asset,
       destination: {
         balance: dstBalance,
@@ -116,12 +114,26 @@ export class Wallet {
 
     ctx.transact = await src.getTransact(ctx);
 
-    const swap = new SwapResolver(ctx);
+    const swap = new FeeSwap(ctx);
 
-    const srcFee = await src.getFee(ctx);
-    const srcFeeSwap = swap.isSwapSupported(srcFee)
-      ? await swap.calculateFeeSwap(srcFee)
-      : undefined;
+    let srcFee = await src.getFee(ctx);
+    let srcFeeSwap;
+    if (swap.isSwapSupported(source.fee)) {
+      srcFeeSwap = await swap.getSwap(srcFee);
+      ctx.source.feeSwap = srcFeeSwap;
+    }
+
+    let srcDestinationFeeSwap;
+    if (swap.isDestinationSwapSupported(srcFee)) {
+      srcDestinationFeeSwap = await swap.getDestinationSwap(srcFee);
+      ctx.source.destinationFeeSwap = srcDestinationFeeSwap;
+    }
+
+    if (srcFeeSwap || srcDestinationFeeSwap) {
+      // Re-estimate fee if fee swap & add 5% margin
+      srcFee = await src.getFee(ctx);
+      srcFee = srcFee.incByPct(5n);
+    }
 
     const dstEd = await dst.getEd();
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
@@ -131,13 +143,13 @@ export class Wallet {
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
-    ctx.source.feeSwap = srcFeeSwap;
 
     return {
       source: {
         balance: srcBalance,
         destinationFee: srcDestinationFee,
         destinationFeeBalance: srcDestinationFeeBalance,
+        destinationFeeSwap: srcDestinationFeeSwap,
         fee: srcFee,
         feeBalance: srcFeeBalance,
         feeSwap: srcFeeSwap,

@@ -4,6 +4,8 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { assetConversion } from './extrinsics/assetConversion';
+import { assets } from './extrinsics/assets';
+import { balances } from './extrinsics/balances';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
@@ -18,6 +20,8 @@ import {
 export function ExtrinsicBuilder() {
   return {
     assetConversion,
+    assets,
+    balances,
     ethereumXcm,
     polkadotXcm,
     router,

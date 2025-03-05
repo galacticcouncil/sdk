@@ -3,9 +3,10 @@ import {
   Asset,
   AssetAmount,
   CallType,
+  Dex,
+  DexFactory,
   ExtrinsicConfig,
   SubstrateQueryConfig,
-  SwapFactory,
 } from '@galacticcouncil/xcm-core';
 
 import { QueryableStorage } from '@polkadot/api/types';
@@ -22,30 +23,48 @@ import {
 
 import { SubstrateService } from './SubstrateService';
 import { normalizeAssetAmount } from './utils';
+import { SubstrateCall } from './types';
 
-import { Platform, Call } from '../types';
+import { Platform } from '../types';
 
 export class SubstratePlatform
   implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
 {
   readonly #substrate: Promise<SubstrateService>;
+  readonly #dex: Dex | undefined;
 
   constructor(chain: AnyParachain) {
     this.#substrate = SubstrateService.create(chain);
+    this.#dex = DexFactory.getInstance().get(chain.key);
+  }
+
+  private async useSignerFee(fee: Asset) {
+    const substrate = await this.#substrate;
+    return substrate.chain.usesSignerFee && !substrate.asset.isEqual(fee);
   }
 
   async calldata(
     account: string,
     _amount: bigint,
+    feeBalance: AssetAmount,
     config: ExtrinsicConfig
-  ): Promise<Call> {
+  ): Promise<SubstrateCall> {
     const substrate = await this.#substrate;
+    const useSignerFee = await this.useSignerFee(feeBalance);
+
+    const txOptions = useSignerFee
+      ? {
+          asset: new Asset(feeBalance),
+        }
+      : undefined;
+
     const extrinsic = substrate.getExtrinsic(config);
     return {
       from: account,
       data: extrinsic.toHex(),
       type: CallType.Substrate,
-    } as Call;
+      txOptions: txOptions,
+    } as SubstrateCall;
   }
 
   async estimateFee(
@@ -55,18 +74,9 @@ export class SubstratePlatform
     config: ExtrinsicConfig
   ): Promise<AssetAmount> {
     const substrate = await this.#substrate;
-    let fee: bigint;
-    try {
-      fee = await substrate.estimateFee(account, config);
-      fee = await this.exchangeFee(fee, feeBalance);
-    } catch (e) {
-      /**
-       * Transaction PaymentApi_query_info panic for V3 or higher
-       * multi-location versions if used for an extrinsic with empty
-       * account (of transferred asset).
-       */
-      fee = 0n;
-    }
+    const networkFee = await substrate.estimateNetworkFee(account, config);
+    const deliveryFee = await substrate.estimateDeliveryFee(account, config);
+    const fee = await this.exchangeFee(networkFee + deliveryFee, feeBalance);
     const params = normalizeAssetAmount(fee, feeBalance, substrate);
     return feeBalance.copyWith(params);
   }
@@ -102,7 +112,7 @@ export class SubstratePlatform
   /**
    * Display native fee in user preferred fee payment asset
    *
-   * Supported only if on-chain swap enabled
+   * Supported only if on-chain swap enabled (dex support)
    *
    * @param fee - native fee
    * @param feeBalance - user preferred payment asset balance
@@ -112,15 +122,14 @@ export class SubstratePlatform
     fee: bigint,
     feeBalance: AssetAmount
   ): Promise<bigint> {
-    const { asset, decimals, chain } = await this.#substrate;
+    const { asset, decimals } = await this.#substrate;
 
     if (asset.isEqual(feeBalance)) {
       return fee;
     }
 
-    const swap = SwapFactory.getInstance().get(chain.key);
-    if (swap) {
-      const quote = await swap.getQuote(
+    if (this.#dex) {
+      const quote = await this.#dex.getQuote(
         feeBalance,
         asset,
         AssetAmount.fromAsset(asset, { amount: fee, decimals })

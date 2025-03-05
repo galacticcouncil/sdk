@@ -1,21 +1,26 @@
 import { bnToU8a, hexToU8a, stringToU8a, u8aToHex } from '@polkadot/util';
 
-import { decodeAddress, blake2AsU8a } from '@polkadot/util-crypto';
+import {
+  blake2AsU8a,
+  decodeAddress,
+  encodeAddress,
+} from '@polkadot/util-crypto';
 import { TypeRegistry } from '@polkadot/types';
 
 /**
  * Multilocation-derivative account - an account computed when executing remote calls
  * via XCM.
  *
- * @param parachainId parachain id
+ * @param parachainId parachain id or undefined in case of relay
  * @param address sender address
  * @param parents describe family
  * @returns multilocation derivated account address
  */
 export function getMultilocationDerivatedAccount(
-  parachainId: number,
+  parachainId: number | undefined,
   address: string,
-  parents: number
+  parents: number,
+  isEthereumStyle = false
 ) {
   // Check ethereum address
   const ethAddress = address.length === 42;
@@ -48,7 +53,10 @@ export function getMultilocationDerivatedAccount(
     ...decodedAddress,
   ]);
 
-  return u8aToHex(blake2AsU8a(toHash).slice(0, 20));
+  if (isEthereumStyle) {
+    return u8aToHex(blake2AsU8a(toHash).slice(0, 20));
+  }
+  return encodeAddress(blake2AsU8a(toHash));
 }
 
 /**

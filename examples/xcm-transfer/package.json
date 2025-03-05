@@ -8,13 +8,15 @@
   },
   "keywords": [],
   "devDependencies": {
-    "esbuild": "^0.17.11",
+    "esbuild": "^0.25.0",
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^5.3.0",
-    "@galacticcouncil/xcm-cfg": "^7.0.0",
-    "@galacticcouncil/xcm-sdk": "^8.0.1",
-    "@talismn/connect-wallets": "^1.2.5"
+    "@galacticcouncil/sdk": "^5.6.0",
+    "@galacticcouncil/xcm-cfg": "^7.6.2",
+    "@galacticcouncil/xcm-sdk": "^8.4.0",
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "@talismn/connect-wallets": "^1.2.8",
+    "polkadot-api": "^1.9.1"
   }
 }

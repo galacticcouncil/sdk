@@ -11,6 +11,9 @@ import {
 
 import { Wormhole, WormholeDef } from '../bridge';
 
+const SOLANA_NATIVE = 'SOL';
+const SOLANA_DECIMALS = 9;
+
 export interface SolanaChainParams extends ChainParams<ChainAssetData> {
   id: number;
   rpcUrls: ChainRpcs;
@@ -43,6 +46,10 @@ export class SolanaChain extends Chain<ChainAssetData> {
   }
 
   async getCurrency(): Promise<ChainCurrency> {
-    return { symbol: 'SOL', decimals: 9 } as ChainCurrency;
+    const asset = this.getAsset(SOLANA_NATIVE.toLowerCase());
+    if (asset) {
+      return { asset, decimals: SOLANA_DECIMALS } as ChainCurrency;
+    }
+    throw Error('Chain currency configuration not found');
   }
 }

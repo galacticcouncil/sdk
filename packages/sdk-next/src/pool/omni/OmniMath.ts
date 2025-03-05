@@ -17,7 +17,7 @@ import {
   is_remove_liquidity_allowed,
 } from '@galacticcouncil/math-omnipool';
 
-import { BigNumber } from '../../utils/bignumber'
+import Big from 'big.js';
 
 export class OmniMath {
   static calculateSpotPrice(
@@ -26,10 +26,18 @@ export class OmniMath {
     assetOutBalance: string,
     assetOutHubReserve: string
   ): string {
-    return calculate_spot_price(assetInBalance, assetInHubReserve, assetOutBalance, assetOutHubReserve);
+    return calculate_spot_price(
+      assetInBalance,
+      assetInHubReserve,
+      assetOutBalance,
+      assetOutHubReserve
+    );
   }
 
-  static calculateLrnaSpotPrice(assetBalance: string, assetHubReserve: string): string {
+  static calculateLrnaSpotPrice(
+    assetBalance: string,
+    assetHubReserve: string
+  ): string {
     return calculate_lrna_spot_price(assetBalance, assetHubReserve);
   }
 
@@ -64,7 +72,13 @@ export class OmniMath {
     amountOut: string,
     assetFee: string
   ): string {
-    return calculate_lrna_in_given_out(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
+    return calculate_lrna_in_given_out(
+      assetOutBalance,
+      assetOutHubReserve,
+      assetOutShares,
+      amountOut,
+      assetFee
+    );
   }
 
   static calculateOutGivenIn(
@@ -98,15 +112,35 @@ export class OmniMath {
     amountOut: string,
     assetFee: string
   ): string {
-    return calculate_out_given_lrna_in(assetOutBalance, assetOutHubReserve, assetOutShares, amountOut, assetFee);
+    return calculate_out_given_lrna_in(
+      assetOutBalance,
+      assetOutHubReserve,
+      assetOutShares,
+      amountOut,
+      assetFee
+    );
   }
 
-  static calculatePoolTradeFee(amount: string, feeNumerator: number, feeDenominator: number): string {
+  static calculatePoolTradeFee(
+    amount: string,
+    feeNumerator: number,
+    feeDenominator: number
+  ): string {
     return calculate_pool_trade_fee(amount, feeNumerator, feeDenominator);
   }
 
-  static calculateShares(assetReserve: string, assetHubReserve: string, assetShares: string, amountIn: string): string {
-    return calculate_shares(assetReserve, assetHubReserve, assetShares, amountIn);
+  static calculateShares(
+    assetReserve: string,
+    assetHubReserve: string,
+    assetShares: string,
+    amountIn: string
+  ): string {
+    return calculate_shares(
+      assetReserve,
+      assetHubReserve,
+      assetShares,
+      amountIn
+    );
   }
 
   static calculateLiquidityOut(
@@ -159,24 +193,30 @@ export class OmniMath {
     assetCap: string,
     totalHubReserve: string
   ): string {
-    const qi = BigNumber(assetHubReserve);
-    const ri = BigNumber(assetReserve);
-    const q = BigNumber(totalHubReserve);
-    const omegaI = BigNumber(assetCap);
+    const qi = Big(assetHubReserve);
+    const ri = Big(assetReserve);
+    const q = Big(totalHubReserve);
+    const omegaI = Big(assetCap);
 
-    const percentage = omegaI.shiftedBy(-18);
-    const isUnderWeightCap = qi.div(q).lt(percentage)
+    const divisor = Big(10).pow(18);
+    const percentage = omegaI.div(divisor);
+    const isUnderWeightCap = qi.div(q).lt(percentage);
 
     if (isUnderWeightCap) {
       const numerator = percentage.times(q).minus(qi).times(ri);
-      const denominator = qi.times(BigNumber(1).minus(percentage));
+      const denominator = qi.times(Big(1).minus(percentage));
       return numerator.div(denominator).toFixed(0);
     } else {
       return '0';
     }
   }
 
-  static verifyAssetCap(assetReserve: string, assetCap: string, hubAdded: string, totalHubReserve: string): boolean {
+  static verifyAssetCap(
+    assetReserve: string,
+    assetCap: string,
+    hubAdded: string,
+    totalHubReserve: string
+  ): boolean {
     return verify_asset_cap(assetReserve, assetCap, hubAdded, totalHubReserve);
   }
 
@@ -186,7 +226,12 @@ export class OmniMath {
     assetShares: string,
     amountIn: string
   ): string {
-    return calculate_liquidity_hub_in(assetReserve, assetHubReserve, assetShares, amountIn);
+    return calculate_liquidity_hub_in(
+      assetReserve,
+      assetHubReserve,
+      assetShares,
+      amountIn
+    );
   }
 
   static isSellAllowed(bits: number): boolean {

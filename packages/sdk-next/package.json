@@ -25,19 +25,30 @@
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
   "types": "./build/types/index.d.ts",
-  "scripts": {},
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
+    "clean": "rimraf build",
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 jest"
+  },
+  "devDependencies": {
+    "@types/big.js": "^6.2.2"
+  },
   "dependencies": {
+    "@galacticcouncil/descriptors": "^1.0.0",
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
-    "@galacticcouncil/math-omnipool": "^1.0.0",
-    "@galacticcouncil/math-stableswap": "^1.0.0",
+    "@galacticcouncil/math-omnipool": "^1.1.0",
+    "@galacticcouncil/math-stableswap": "^1.2.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
-    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "@noble/hashes": "^1.6.1",
     "@thi.ng/cache": "^2.1.35",
     "@thi.ng/memoize": "^4.0.2",
-    "bignumber.js": "^9.1.2"
+    "big.js": "^6.2.1"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.8.2"
+    "polkadot-api": "^1.9.1"
   }
 }

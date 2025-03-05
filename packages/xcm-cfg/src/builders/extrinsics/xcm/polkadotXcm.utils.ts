@@ -1,4 +1,9 @@
-import { multiloc, Parachain, TxWeight } from '@galacticcouncil/xcm-core';
+import {
+  ChainEcosystem,
+  multiloc,
+  Parachain,
+  TxWeight,
+} from '@galacticcouncil/xcm-core';
 
 import { getX1Junction } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
@@ -12,8 +17,46 @@ const ETHEREUM_BRIDGE_LOCATION = {
 };
 const HUB_PARACHAIN_ID = 1000;
 
-export const toDest = (version: XcmVersion, destination: Parachain) => {
-  if (destination.key === 'polkadot' || destination.key === 'kusama') {
+const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
+
+const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
+  const isUnknownConsensus = !source.ecosystem || !destination.ecosystem;
+  if (isUnknownConsensus) {
+    return false;
+  }
+
+  return (
+    BRIDGE_CONSENSUS.includes(source.ecosystem) &&
+    BRIDGE_CONSENSUS.includes(destination.ecosystem) &&
+    source.ecosystem !== destination.ecosystem
+  );
+};
+
+export const toDest = (
+  version: XcmVersion,
+  source: Parachain,
+  destination: Parachain
+) => {
+  if (isBridgeHubTransfer(source, destination)) {
+    return {
+      [version]: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: destination.ecosystem,
+            },
+            {
+              Parachain: destination.parachainId,
+            },
+          ],
+        },
+      },
+    };
+  }
+
+  // Relay transfer
+  if (destination.parachainId === 0) {
     return {
       [version]: {
         parents: 1,
@@ -22,17 +65,17 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
     };
   }
 
-  const toParachain = {
-    Parachain:
-      destination.key === 'ethereum'
-        ? HUB_PARACHAIN_ID
-        : destination.parachainId,
-  };
+  // Ethereum snowbridge transfers are routed via hub
+  const parachain =
+    destination.key === 'ethereum' ? HUB_PARACHAIN_ID : destination.parachainId;
+
   return {
     [version]: {
       parents: 1,
       interior: {
-        X1: getX1Junction(version, toParachain),
+        X1: getX1Junction(version, {
+          Parachain: parachain,
+        }),
       },
     },
   };
@@ -79,7 +122,7 @@ export const toAsset = (assetLocation: object, amount: any) => {
   };
 };
 
-export const toParaXcmOnDest = (version: XcmVersion, account: any) => {
+export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
   return {
     [version]: [
       {
@@ -236,6 +279,54 @@ export const toTransactMessage = (
           requireWeightAtMost: transactWeight,
           call: {
             encoded: transactCall,
+          },
+        },
+      },
+      {
+        RefundSurplus: {},
+      },
+      {
+        DepositAsset: {
+          assets: { Wild: { AllCounted: 1 } },
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: getX1Junction(version, account),
+            },
+          },
+        },
+      },
+    ],
+  };
+};
+
+export const toTransferMessage = (
+  version: XcmVersion,
+  account: any,
+  transferAssetLocation: object,
+  transferAssetAmount: any,
+  transferFeeAmount: any,
+  receiver: any
+) => {
+  return {
+    [version]: [
+      {
+        WithdrawAsset: [toAsset(transferAssetLocation, transferFeeAmount)],
+      },
+      {
+        BuyExecution: {
+          fees: toAsset(transferAssetLocation, transferFeeAmount),
+          weightLimit: 'Unlimited',
+        },
+      },
+      {
+        TransferAsset: {
+          assets: [toAsset(transferAssetLocation, transferAssetAmount)],
+          beneficiary: {
+            parents: 0,
+            interior: {
+              X1: getX1Junction(version, receiver),
+            },
           },
         },
       },

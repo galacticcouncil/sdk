@@ -5,7 +5,7 @@ import {
   TransferValidationError,
 } from '@galacticcouncil/xcm-core';
 
-import { HubClient } from '../../clients';
+import { AssethubClient } from '../../clients';
 
 export class HubEdValidation extends TransferValidation {
   protected async skipFor(data: TransferCtx): Promise<boolean> {
@@ -24,7 +24,7 @@ export class HubEdValidation extends TransferValidation {
     const { address, destination } = ctx;
 
     const chain = destination.chain as Parachain;
-    const client = new HubClient(chain);
+    const client = new AssethubClient(chain);
 
     const balance = await client.getSystemAccountBalance(address);
     if (balance === 0n) {
@@ -43,7 +43,7 @@ export class HubFrozenValidation extends TransferValidation {
     const { asset, sender, source } = ctx;
 
     const chain = source.chain as Parachain;
-    const client = new HubClient(chain);
+    const client = new AssethubClient(chain);
 
     const isFrozen = await client.checkIfFrozen(sender, asset);
     if (isFrozen) {

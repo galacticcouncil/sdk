@@ -8,6 +8,7 @@ import {
   glmr,
   hdx,
   pink,
+  sol,
   usdc,
   usdc_mwh,
   usdt,
@@ -51,6 +52,7 @@ const toHydration: AssetRoute[] = [
   toHydrationErc20Template(usdt_mwh, 0.004),
   toHydrationErc20Template(wbtc_mwh, 0.0000001),
   toHydrationErc20Template(weth_mwh, 0.000002),
+  toHydrationErc20Template(sol, 0.00002),
 ];
 
 const toAssetHub: AssetRoute[] = [

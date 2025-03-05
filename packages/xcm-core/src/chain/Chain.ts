@@ -7,15 +7,15 @@ export type ChainAssetId =
   | { [key: string]: ChainAssetId };
 
 export type ChainCurrency = {
-  symbol: string;
+  asset: Asset;
   decimals: number;
 };
 
 export enum ChainEcosystem {
-  Ethereum = 'ethereum',
-  Polkadot = 'polkadot',
-  Kusama = 'kusama',
-  Solana = 'solana',
+  Ethereum = 'Ethereum',
+  Polkadot = 'Polkadot',
+  Kusama = 'Kusama',
+  Solana = 'Solana',
 }
 
 export type ChainRpcs = {
