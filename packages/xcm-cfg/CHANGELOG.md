@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.6.2
+
+### Patch Changes
+
+- Bump mythos fees
+
 ## 7.6.1
 
 ### Patch Changes
