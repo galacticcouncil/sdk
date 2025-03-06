@@ -17,7 +17,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: myth,
       fee: {
-        amount: 0.003023,
+        amount: 0.01,
         asset: myth,
       },
     },
@@ -38,7 +38,7 @@ const toAssethub: AssetRoute[] = [
       chain: assetHub,
       asset: myth,
       fee: {
-        amount: 0.035,
+        amount: 0.1,
         asset: myth,
       },
     },

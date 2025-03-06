@@ -176,7 +176,7 @@ const toMythos: AssetRoute[] = [
       chain: mythos,
       asset: myth,
       fee: {
-        amount: 0.33,
+        amount: 2.5,
         asset: myth,
       },
     },
