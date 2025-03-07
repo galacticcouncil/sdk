@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.7.0
+
+### Minor Changes
+
+- 3e4ae6b: Add LAOS parachain
+
 ## 7.6.2
 
 ### Patch Changes
