@@ -288,6 +288,7 @@ export const assets: Asset[] = [
   kar,
   kilt,
   ksm,
+  laos,
   ldot,
   myth,
   nodl,

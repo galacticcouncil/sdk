@@ -40,6 +40,10 @@ export const laos_chain = new EvmParachain({
     {
       asset: laos,
       id: 'Native',
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,

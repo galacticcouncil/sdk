@@ -51,6 +51,7 @@ import {
   sol,
   tbtc,
   ksm,
+  laos,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -422,6 +423,19 @@ export const hydration = new EvmParachain({
         interior: {
           X1: {
             GlobalConsensus: 'Kusama',
+          },
+        },
+      },
+    },
+    {
+      asset: laos,
+      decimals: 18,
+      id: 3370,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3370,
           },
         },
       },
