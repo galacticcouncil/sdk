@@ -46,6 +46,12 @@ import {
   weth_awh,
   weth_mwh,
   wud,
+  ldo,
+  link,
+  sky,
+  wsteth,
+  usdt_snow,
+  usdc_snow,
 } from '../../../assets';
 import {
   acala,
@@ -285,6 +291,13 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
+  // Waiting for Snowbridge V2
+  //toEthereumViaSnowbridgeTemplate(ldo, ldo),
+  toEthereumViaSnowbridgeTemplate(link, link),
+  toEthereumViaSnowbridgeTemplate(sky, sky),
+  toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
+  toEthereumViaSnowbridgeTemplate(usdt_snow, usdt),
+  toEthereumViaSnowbridgeTemplate(usdc_snow, usdc),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [

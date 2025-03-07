@@ -9,11 +9,17 @@ import {
   weth_mwh,
   usdc,
   usdc_mwh,
+  usdc_snow,
   usdt,
   usdt_mwh,
+  usdt_snow,
   aave,
   susde,
   tbtc,
+  ldo,
+  link,
+  sky,
+  wsteth,
 } from '../../../assets';
 import { ethereum, hydration, moonbeam } from '../../../chains';
 import { BalanceBuilder, ContractBuilder } from '../../../builders';
@@ -59,6 +65,13 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(aave, aave),
   toHydrationViaSnowbridgeTemplate(susde, susde),
   toHydrationViaSnowbridgeTemplate(tbtc, tbtc),
+  // Waiting for Snowbridge V2
+  //toHydrationViaSnowbridgeTemplate(ldo, ldo),
+  toHydrationViaSnowbridgeTemplate(link, link),
+  toHydrationViaSnowbridgeTemplate(sky, sky),
+  toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
+  toHydrationViaSnowbridgeTemplate(usdc, usdc_snow),
+  toHydrationViaSnowbridgeTemplate(usdt, usdt_snow),
 ];
 
 const toMoonbeamViaWormhole: AssetRoute[] = [

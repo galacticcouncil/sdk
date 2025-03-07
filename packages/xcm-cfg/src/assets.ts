@@ -110,9 +110,19 @@ export const ksm = new Asset({
   originSymbol: 'KSM',
 });
 
+export const ldo = new Asset({
+  key: 'ldo',
+  originSymbol: 'LDO',
+});
+
 export const ldot = new Asset({
   key: 'ldot',
   originSymbol: 'LDOT',
+});
+
+export const link = new Asset({
+  key: 'link',
+  originSymbol: 'LINK',
 });
 
 export const myth = new Asset({
@@ -143,6 +153,11 @@ export const pink = new Asset({
 export const ring = new Asset({
   key: 'ring',
   originSymbol: 'RING',
+});
+
+export const sky = new Asset({
+  key: 'sky',
+  originSymbol: 'SKY',
 });
 
 export const sol = new Asset({
@@ -195,6 +210,11 @@ export const usdt_mwh = new Asset({
   key: 'usdt_mwh',
 });
 
+export const usdt_snow = new Asset({
+  ...usdt,
+  key: 'usdt_snow',
+});
+
 export const usdc = new Asset({
   key: 'usdc',
   originSymbol: 'USDC',
@@ -203,6 +223,11 @@ export const usdc = new Asset({
 export const usdc_mwh = new Asset({
   ...usdc,
   key: 'usdc_mwh',
+});
+
+export const usdc_snow = new Asset({
+  ...usdc,
+  key: 'usdc_snow',
 });
 
 export const vastr = new Asset({
@@ -245,6 +270,11 @@ export const wbtc_mwh = new Asset({
   key: 'wbtc_mwh',
 });
 
+export const wsteth = new Asset({
+  key: 'wsteth',
+  originSymbol: 'wstETH',
+});
+
 export const wud = new Asset({
   key: 'wud',
   originSymbol: 'WUD',
@@ -283,13 +313,16 @@ export const assets: Asset[] = [
   kar,
   kilt,
   ksm,
+  ldo,
   ldot,
+  link,
   myth,
   nodl,
   pha,
   pen,
   pink,
   ring,
+  sky,
   sol,
   sub,
   susde,
@@ -300,8 +333,10 @@ export const assets: Asset[] = [
   unq,
   usdc,
   usdc_mwh,
+  usdc_snow,
   usdt,
   usdt_mwh,
+  usdt_snow,
   vastr,
   vdot,
   wbtc,
@@ -310,6 +345,7 @@ export const assets: Asset[] = [
   weth,
   weth_awh,
   weth_mwh,
+  wsteth,
   wud,
   xrt,
   ztg,
