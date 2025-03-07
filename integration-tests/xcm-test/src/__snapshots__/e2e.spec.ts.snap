@@ -602,6 +602,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Laos LAOS [laos] transfer 1`] = `
+[
+  "hydration-laos-laos",
+  "0xd00489002a0d00000000e8890423c78a000000000000000004010200a9340300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Moonbeam DAI [dai_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-dai_mwh",
@@ -767,6 +774,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Kus
 [
   "kusama-assethub_kusama-ksm",
   "0xfc04630904000100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040000000b00a0724e18090000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Laos -> Hydration LAOS [laos] transfer 1`] = `
+[
+  "laos-hydration-laos",
+  "0x0501041f0804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000000130000e8890423c78a0000000000",
 ]
 `;
 
