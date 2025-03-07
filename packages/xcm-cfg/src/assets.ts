@@ -110,6 +110,11 @@ export const ksm = new Asset({
   originSymbol: 'KSM',
 });
 
+export const ewt = new Asset({
+  key: 'ewt',
+  originSymbol: 'EWT',
+});
+
 export const ldot = new Asset({
   key: 'ldot',
   originSymbol: 'LDOT',
