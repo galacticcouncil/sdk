@@ -20,7 +20,7 @@ import {
 import { EvmBalanceFactory } from './balance';
 import { EvmTransferFactory } from './transfer';
 import { isNativeEthBridge, isPrecompile } from './transfer/utils';
-import { EvmCall } from './types';
+import { EvmCall, EvmDryRunResult } from './types';
 
 import { Platform } from '../types';
 
@@ -31,24 +31,29 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
     this.#client = chain.client;
   }
 
-  async calldata(
+  async buildCall(
     account: string,
     amount: bigint,
     _feeBalance: AssetAmount,
     config: ContractConfig
   ): Promise<EvmCall> {
-    const { abi, asset, calldata } = EvmTransferFactory.get(
-      this.#client,
-      config
-    );
-
+    const contract = EvmTransferFactory.get(this.#client, config);
+    const { abi, asset, calldata } = contract;
     const transferCall = {
       abi: JSON.stringify(abi),
       data: calldata as `0x${string}`,
       from: account as `0x${string}`,
       to: config.address as `0x${string}`,
-      value: config.value,
       type: CallType.Evm,
+      value: config.value,
+      dryRun: async () => {
+        const { error, logs } = await contract.simulateCall(account);
+        const decodedEvents = contract.decodeEvents(logs);
+        return {
+          error: error?.shortMessage,
+          events: decodedEvents,
+        } as EvmDryRunResult;
+      },
     } as EvmCall;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
@@ -69,6 +74,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       from: account as `0x${string}`,
       to: asset as `0x${string}`,
       type: CallType.Evm,
+      dryRun: () => {},
     } as EvmCall;
   }
 

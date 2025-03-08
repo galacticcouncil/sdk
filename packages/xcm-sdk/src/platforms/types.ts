@@ -8,7 +8,7 @@ import {
 import { Observable } from 'rxjs';
 
 export interface Platform<T extends BaseConfig, B extends BaseConfig> {
-  calldata(
+  buildCall(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
@@ -31,4 +31,13 @@ export interface Call {
   data: string;
   /** Calltype. */
   type: CallType;
+  /**
+   * Simulate call execution
+   */
+  dryRun(): Promise<DryRunResult | undefined>;
+}
+
+export interface DryRunResult {
+  error: any | undefined;
+  events: any | undefined;
 }

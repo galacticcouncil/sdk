@@ -96,6 +96,23 @@ export class SubstrateService {
     return 0n;
   }
 
+  isDryRunSupported(): boolean {
+    return this.api.call.dryRunApi !== undefined;
+  }
+
+  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
+    const extrinsic = this.getExtrinsic(config);
+    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
+    const accountId = this.api.createType('AccountId32', account);
+    const result = await this.api.call.dryRunApi.dryRunCall(
+      {
+        system: { Signed: accountId },
+      },
+      callDataU8a
+    );
+    return result.toHuman() as any;
+  }
+
   async estimateDeliveryFee(
     account: string,
     config: ExtrinsicConfig
@@ -114,19 +131,6 @@ export class SubstrateService {
       }
     }
     return 0n;
-  }
-
-  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
-    const extrinsic = this.getExtrinsic(config);
-    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
-    const accountId = this.api.createType('AccountId32', account);
-    const result = await this.api.call.dryRunApi.dryRunCall(
-      {
-        system: { Signed: accountId },
-      },
-      callDataU8a
-    );
-    return result.toHuman() as any;
   }
 
   private estimateDeliveryFeeWith(

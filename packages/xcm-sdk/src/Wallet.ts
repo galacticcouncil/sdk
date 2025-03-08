@@ -15,7 +15,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 
-import { PlatformAdapter, Call } from './platforms';
+import { Call, PlatformAdapter } from './platforms';
 import {
   calculateMax,
   calculateMin,

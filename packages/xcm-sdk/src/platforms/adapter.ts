@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { EvmPlatform } from './evm';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
-import { Platform, Call } from './types';
+import { Call, Platform } from './types';
 
 export class PlatformAdapter {
   readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
@@ -54,13 +54,13 @@ export class PlatformAdapter {
     this.platform.Substrate = new SubstratePlatform(parachain);
   }
 
-  async calldata(
+  async buildCall(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
     config: BaseConfig
   ): Promise<Call> {
-    return this.platform[config.type].calldata(
+    return this.platform[config.type].buildCall(
       account,
       amount,
       feeBalance,

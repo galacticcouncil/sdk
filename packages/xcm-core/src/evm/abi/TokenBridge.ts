@@ -53,6 +53,42 @@ export const TOKEN_BRIDGE = [
   {
     anonymous: false,
     inputs: [
+      { indexed: true, name: 'dst', type: 'address' },
+      { indexed: false, name: 'wad', type: 'uint256' },
+    ],
+    name: 'Deposit',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'sequence',
+        type: 'uint64',
+      },
+      { indexed: false, internalType: 'uint32', name: 'nonce', type: 'uint32' },
+      { indexed: false, internalType: 'bytes', name: 'payload', type: 'bytes' },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'consistencyLevel',
+        type: 'uint8',
+      },
+    ],
+    name: 'LogMessagePublished',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
       {
         indexed: true,
         internalType: 'uint16',
