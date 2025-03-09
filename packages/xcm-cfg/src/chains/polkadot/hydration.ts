@@ -70,8 +70,6 @@ const rpcHttpList = [
   'https://rpc.zipp.hydration.cloud',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
-  'https://3.rpc.hydration.cloud',
-  'https://5.rpc.hydration.cloud',
 ];
 
 const rpcWebsocketList = [
@@ -86,8 +84,6 @@ const rpcWebsocketList = [
   'wss://rpc.zipp.hydration.cloud',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',
-  'wss://3.rpc.hydration.cloud',
-  'wss://5.rpc.hydration.cloud',
 ];
 
 const evmChain: Chain = defineChain({
