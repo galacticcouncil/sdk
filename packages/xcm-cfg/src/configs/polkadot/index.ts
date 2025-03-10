@@ -20,6 +20,7 @@ import { kiltConfig } from './kilt';
 import { pendulumConfig } from './pendulum';
 import { darwiniaConfig } from './darwinia';
 import { ajunaConfig } from './ajuna';
+import { laosConfig } from './laos';
 import { energywebxConfig } from './energywebx';
 
 export const polkadotChainsConfig: ChainRoutes[] = [
@@ -45,5 +46,6 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   kiltConfig,
   pendulumConfig,
   darwiniaConfig,
+  laosConfig,
   energywebxConfig,
 ];

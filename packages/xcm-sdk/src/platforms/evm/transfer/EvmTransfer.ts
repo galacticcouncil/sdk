@@ -1,5 +1,12 @@
 import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
-import { Abi, BaseError } from 'viem';
+import { Abi, BaseError, Log, decodeEventLog } from 'viem';
+
+import { EvmEventLog } from '../types';
+
+type SimulateCallResult = {
+  error: BaseError | undefined;
+  logs: Log[] | undefined;
+};
 
 export class EvmTransfer {
   protected readonly client: EvmClient;
@@ -44,10 +51,6 @@ export class EvmTransfer {
     });
   }
 
-  async getGasPrice(): Promise<bigint> {
-    return this.client.getProvider().getGasPrice();
-  }
-
   async estimateFee(account: string, balance: bigint): Promise<bigint> {
     if (balance === 0n) {
       return 0n;
@@ -59,8 +62,72 @@ export class EvmTransfer {
       return estimatedGas * gasPrice;
     } catch (error) {
       const err = error as BaseError;
-      console.log("Can't estimate fees.", err.shortMessage);
+      console.log("Can't estimate fees!\n", err.details);
       return 0n;
     }
+  }
+
+  async getGasPrice(): Promise<bigint> {
+    return this.client.getProvider().getGasPrice();
+  }
+
+  async getNonce(account: string): Promise<number> {
+    return this.client.getProvider().getTransactionCount({
+      address: account as `0x${string}`,
+    });
+  }
+
+  async simulateCall(account: string): Promise<SimulateCallResult> {
+    const { address, args, value, func } = this.config;
+    const provider = this.client.getProvider();
+    const nonce = await this.getNonce(account);
+    try {
+      const { results } = await provider.simulateCalls({
+        account: account as `0x${string}`,
+        calls: [
+          {
+            to: address as `0x${string}`,
+            abi: this.abi,
+            functionName: func,
+            args: args,
+            value: value,
+          },
+        ],
+        stateOverrides: [
+          {
+            address: account as `0x${string}`,
+            nonce: nonce,
+          },
+        ],
+      });
+      const [result] = results;
+      return result as SimulateCallResult;
+    } catch (error) {
+      const err = error as BaseError;
+      console.log("Can't simulate call!\n", err.details);
+      return {
+        error: error,
+      } as SimulateCallResult;
+    }
+  }
+
+  decodeEvents(logs: Log[] | undefined): EvmEventLog[] {
+    const decodedLogs: EvmEventLog[] = [];
+    if (logs) {
+      logs.forEach((l) => {
+        try {
+          const { eventName, args } = decodeEventLog({
+            abi: this.abi,
+            data: l.data,
+            topics: l.topics,
+          });
+          decodedLogs.push({
+            eventName: eventName,
+            args: args,
+          } as unknown as EvmEventLog);
+        } catch (e) {}
+      });
+    }
+    return decodedLogs;
   }
 }

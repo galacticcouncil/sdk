@@ -1,5 +1,5 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { Call, SubstrateCall } from '@galacticcouncil/xcm-sdk';
+import { Call, DryRunResult, SubstrateCall } from '@galacticcouncil/xcm-sdk';
 
 import {
   getWormholeChainById,
@@ -52,19 +52,22 @@ const transfer = await wallet.transfer(
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const fee: AssetAmount = await transfer.estimateFee('0.1');
-const feeInfo = [
-  'Estimated fee:',
-  fee.toDecimal(fee.decimals),
-  fee.originSymbol,
-].join(' ');
-const call: Call = await transfer.buildCall('0.1');
+const transferAmount = '0.1';
+
+const [call, fee] = await Promise.all([
+  transfer.buildCall(transferAmount),
+  transfer.estimateFee(transferAmount),
+]);
 
 // Dump transfer info
 console.log(transfer);
 console.log(status);
-console.log(feeInfo);
+console.log(
+  'Estimated fee:',
+  [fee.toDecimal(fee.decimals), fee.originSymbol].join(' ')
+);
 console.log(call);
+console.log('Dry run:', await call.dryRun());
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();

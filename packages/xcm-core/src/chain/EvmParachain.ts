@@ -10,28 +10,32 @@ import { addr } from '../utils';
 export interface EvmParachainParams extends ParachainParams {
   evmChain: EvmChainDef;
   evmResolver?: EvmResolver;
+  rpcs?: string[];
   wormhole?: WormholeDef;
 }
 
 export class EvmParachain extends Parachain {
   readonly evmChain: EvmChainDef;
   readonly evmResolver?: EvmResolver;
+  readonly rpcs?: string[];
   readonly wormhole?: Wormhole;
 
   constructor({
     evmChain,
     evmResolver,
+    rpcs,
     wormhole,
     ...others
   }: EvmParachainParams) {
     super({ ...others });
     this.evmChain = evmChain;
     this.evmResolver = evmResolver;
+    this.rpcs = rpcs;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
   get client(): EvmClient {
-    return new EvmClient(this.evmChain);
+    return new EvmClient(this.evmChain, this.rpcs);
   }
 
   getType(): ChainType {

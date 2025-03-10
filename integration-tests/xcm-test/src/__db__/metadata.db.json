@@ -966,5 +966,21 @@
       "feeAsset": "KSM",
       "feeNative": "85566586"
     }
+  },
+  "hydration-laos-laos": {
+    "updated": 1741362288855,
+    "destination": {
+      "fee": "0.025",
+      "feeAsset": "LAOS",
+      "feeNative": "25000000000000000"
+    }
+  },
+  "laos-hydration-laos": {
+    "updated": 1741362789663,
+    "destination": {
+      "fee": "0.000000009878251406",
+      "feeAsset": "LAOS",
+      "feeNative": "9878251406"
+    }
   }
 }
