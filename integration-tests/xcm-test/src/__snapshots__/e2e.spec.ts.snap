@@ -133,6 +133,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Mythos MYTH [myth] transfer 1`] = `
+[
+  "assethub-mythos-myth",
+  "0xe0041f0904010100a5340400010300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac0404010100a53400130000e8890423c78a0000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Polkadot DOT [dot] transfer 1`] = `
 [
   "assethub-polkadot-dot",
@@ -595,6 +602,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Laos LAOS [laos] transfer 1`] = `
+[
+  "hydration-laos-laos",
+  "0xd00489002a0d00000000e8890423c78a000000000000000004010200a9340300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Moonbeam DAI [dai_mwh] transfer 1`] = `
 [
   "hydration-moonbeam-dai_mwh",
@@ -763,7 +777,21 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Kus
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Laos -> Hydration LAOS [laos] transfer 1`] = `
+[
+  "laos-hydration-laos",
+  "0x0501041f0804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000000130000e8890423c78a0000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Mythos -> AssetHub MYTH [myth] transfer 1`] = `
+[
+  "mythos-assethub-myth",
+  "0x0501041f0904010100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000000130000e8890423c78a0000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Mythos -> AssetHub Polkadot MYTH [myth] transfer 1`] = `
 [
   "mythos-assethub-myth",
   "0x0501041f0904010100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000000130000e8890423c78a0000000000",

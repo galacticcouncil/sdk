@@ -1,5 +1,23 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.7.0
+
+### Minor Changes
+
+- 3e4ae6b: Add LAOS parachain
+
+## 7.6.2
+
+### Patch Changes
+
+- Bump mythos fees
+
+## 7.6.1
+
+### Patch Changes
+
+- 80e5e70: Upgrade solana rpc's
+
 ## 7.6.0
 
 ### Minor Changes

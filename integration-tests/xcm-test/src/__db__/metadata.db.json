@@ -472,11 +472,11 @@
     }
   },
   "hydration-mythos-myth": {
-    "updated": 1735736038455,
+    "updated": 1741207904426,
     "destination": {
-      "fee": "0.262144",
+      "fee": "2.29376",
       "feeAsset": "MYTH",
-      "feeNative": "262144000000000000"
+      "feeNative": "2293760000000000000"
     }
   },
   "hydration-polkadot-dot": {
@@ -576,19 +576,19 @@
     }
   },
   "mythos-hydration-myth": {
-    "updated": 1733930606827,
+    "updated": 1741207537158,
     "destination": {
-      "fee": "0.003594757960787905",
+      "fee": "0.006661766054093833",
       "feeAsset": "MYTH",
-      "feeNative": "3594757960787905"
+      "feeNative": "6661766054093833"
     }
   },
   "mythos-assethub-myth": {
-    "updated": 1733930617858,
+    "updated": 1741208163740,
     "destination": {
-      "fee": "0.058155721604356138",
+      "fee": "0.070700759454523597",
       "feeAsset": "MYTH",
-      "feeNative": "58155721604356138"
+      "feeNative": "70700759454523597"
     }
   },
   "pendulum-hydration-pen": {
@@ -672,11 +672,11 @@
     }
   },
   "assethub-mythos-myth": {
-    "updated": 1733849776247,
+    "updated": 1741208284930,
     "destination": {
-      "fee": "0.32768",
+      "fee": "2.29376",
       "feeAsset": "MYTH",
-      "feeNative": "327680000000000000"
+      "feeNative": "2293760000000000000"
     }
   },
   "assethub-moonbeam-pink": {
@@ -965,6 +965,22 @@
       "fee": "0.000085566586",
       "feeAsset": "KSM",
       "feeNative": "85566586"
+    }
+  },
+  "hydration-laos-laos": {
+    "updated": 1741362288855,
+    "destination": {
+      "fee": "0.025",
+      "feeAsset": "LAOS",
+      "feeNative": "25000000000000000"
+    }
+  },
+  "laos-hydration-laos": {
+    "updated": 1741362789663,
+    "destination": {
+      "fee": "0.000000009878251406",
+      "feeAsset": "LAOS",
+      "feeNative": "9878251406"
     }
   }
 }

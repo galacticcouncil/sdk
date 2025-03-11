@@ -14,7 +14,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { formatEvmAddress } from './utils';
-import { PlatformAdapter, SubstrateService, Call } from '../platforms';
+import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
 
@@ -26,7 +26,7 @@ export class DataOriginProcessor extends DataProcessor {
   async getCall(ctx: TransferCtx): Promise<Call> {
     const { amount, sender, source } = ctx;
     const transfer = await this.getTransfer(ctx);
-    return this.adapter.calldata(sender, amount, source.feeBalance, transfer);
+    return this.adapter.buildCall(sender, amount, source.feeBalance, transfer);
   }
 
   async getDestinationFee(): Promise<AssetAmount> {

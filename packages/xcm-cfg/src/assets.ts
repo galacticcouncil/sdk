@@ -115,6 +115,11 @@ export const ldo = new Asset({
   originSymbol: 'LDO',
 });
 
+export const laos = new Asset({
+  key: 'laos',
+  originSymbol: 'LAOS',
+});
+
 export const ldot = new Asset({
   key: 'ldot',
   originSymbol: 'LDOT',
@@ -304,6 +309,7 @@ export const assets: Asset[] = [
   kilt,
   ksm,
   ldo,
+  laos,
   ldot,
   link,
   myth,

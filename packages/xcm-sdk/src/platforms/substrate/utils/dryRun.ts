@@ -20,8 +20,16 @@ export const getDeliveryFeeFromDryRun = (ok: any): bigint => {
   return deliveryFees.reduce((acc, df) => acc + df, 0n);
 };
 
-export const getErrorFromDryRun = (api: ApiPromise, ok: any): string => {
-  const err = ok.executionResult.Err.error;
+export const getErrorFromDryRun = (
+  api: ApiPromise,
+  ok: any
+): string | undefined => {
+  const executionError = ok.executionResult.Err;
+  if (!executionError) {
+    return undefined;
+  }
+
+  const err = executionError.error;
   if (err.Module) {
     const { error, index } = err.Module;
 

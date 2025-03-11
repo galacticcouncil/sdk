@@ -11,6 +11,7 @@ import { darwinia } from './darwinia';
 import { hydration } from './hydration';
 import { interlay } from './interlay';
 import { kilt_chain } from './kilt';
+import { laos_chain } from './laos';
 import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { nodle } from './nodle';
@@ -33,6 +34,7 @@ export const polkadotChains: AnyChain[] = [
   darwinia,
   hydration,
   kilt_chain,
+  laos_chain,
   interlay,
   moonbeam,
   mythos,
@@ -58,6 +60,7 @@ export {
   darwinia,
   hydration,
   kilt_chain,
+  laos_chain,
   interlay,
   moonbeam,
   mythos,

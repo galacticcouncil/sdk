@@ -21,6 +21,7 @@ import {
   intr,
   kilt,
   ksm,
+  laos,
   ldot,
   myth,
   nodl,
@@ -63,6 +64,7 @@ import {
   hydration,
   interlay,
   kilt_chain,
+  laos_chain,
   moonbeam,
   mythos,
   nodle,
@@ -261,7 +263,7 @@ const toZeitgeist: AssetRoute[] = [
 
 const toPhala: AssetRoute[] = [toTransferTemplate(pha, phala, 0.064296)];
 
-const toMythos: AssetRoute[] = [toTransferTemplate(myth, mythos, 0.3)];
+const toMythos: AssetRoute[] = [toTransferTemplate(myth, mythos, 2.5)];
 
 const toNodle: AssetRoute[] = [toTransferTemplate(nodl, nodle, 0.0012)];
 
@@ -270,6 +272,8 @@ const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique, 0)];
 const toCrust: AssetRoute[] = [toTransferTemplate(cru, crust, 0.04)];
 
 const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain, 0.02)];
+
+const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain, 0.1)];
 
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
@@ -358,6 +362,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,
+    ...toLaos,
     ...toMoonbeam,
     ...toMythos,
     ...toNodle,
