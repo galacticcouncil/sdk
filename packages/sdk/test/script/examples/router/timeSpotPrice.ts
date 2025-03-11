@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, PoolType, TradeRouter } from '@galacticcouncil/sdk';
+import { PoolService, PoolType, TradeRouter } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
