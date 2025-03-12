@@ -52,6 +52,7 @@ import {
   tbtc,
   ksm,
   laos,
+  ewt,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -441,6 +442,20 @@ export const hydration = new EvmParachain({
         interior: {
           X1: {
             Parachain: 2086,
+          },
+        },
+      },
+    },
+    {
+      asset: ewt,
+      decimals: 18,
+      id: 252525,
+      min: 0.022,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3345,
           },
         },
       },
