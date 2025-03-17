@@ -47,6 +47,7 @@ import {
   weth_awh,
   weth_mwh,
   wud,
+  ewt,
 } from '../../../assets';
 import {
   acala,
@@ -71,6 +72,7 @@ import {
   unique,
   zeitgeist,
   polkadotCex,
+  energywebx,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -271,6 +273,8 @@ const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain, 0.02)];
 
 const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain, 0.1)];
 
+const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
+
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
@@ -354,6 +358,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toInterlay,
     ...toKilt,
     ...toLaos,
+    ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
     ...toNodle,

@@ -67,6 +67,7 @@ describe('chains config', () => {
           'subsocial',
           'unique',
           'zeitgeist',
+          'energywebx',
         ].sort()
       );
     });
