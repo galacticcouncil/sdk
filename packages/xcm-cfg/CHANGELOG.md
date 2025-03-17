@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.8.0
+
+### Minor Changes
+
+- 460bcdd: Integrate Energy Web X parachain
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.4.0
+
 ## 7.7.0
 
 ### Minor Changes

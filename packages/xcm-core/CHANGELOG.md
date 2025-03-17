@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-core
 
+## 6.4.0
+
+### Minor Changes
+
+- Update ABI's
+- EvmClient fallback ranking alg
+
 ## 6.3.0
 
 ### Minor Changes
