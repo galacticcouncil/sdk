@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-core",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",

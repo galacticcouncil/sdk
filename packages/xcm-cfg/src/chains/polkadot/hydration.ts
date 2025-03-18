@@ -52,6 +52,7 @@ import {
   tbtc,
   ksm,
   laos,
+  ewt,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -69,8 +70,6 @@ const rpcHttpList = [
   'https://rpc.zipp.hydration.cloud',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
-  'https://3.rpc.hydration.cloud',
-  'https://5.rpc.hydration.cloud',
 ];
 
 const rpcWebsocketList = [
@@ -85,8 +84,6 @@ const rpcWebsocketList = [
   'wss://rpc.zipp.hydration.cloud',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',
-  'wss://3.rpc.hydration.cloud',
-  'wss://5.rpc.hydration.cloud',
 ];
 
 const evmChain: Chain = defineChain({
@@ -441,6 +438,20 @@ export const hydration = new EvmParachain({
         interior: {
           X1: {
             Parachain: 2086,
+          },
+        },
+      },
+    },
+    {
+      asset: ewt,
+      decimals: 18,
+      id: 252525,
+      min: 0.022,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3345,
           },
         },
       },
