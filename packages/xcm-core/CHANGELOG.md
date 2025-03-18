@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-core
 
+## 6.5.0
+
+### Minor Changes
+
+- Support opt metadata in SubstrateApis
+- 0d5426a: Support api metadata
+
 ## 6.4.0
 
 ### Minor Changes
