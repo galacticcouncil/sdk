@@ -6,7 +6,9 @@ import {
 import { defineChain, Chain } from 'viem';
 
 import {
+  aave,
   aca,
+  ajun,
   astr,
   bnc,
   cfg,
@@ -16,11 +18,15 @@ import {
   ded,
   dot,
   dota,
+  eth,
+  ewt,
   glmr,
   hdx,
   ibtc,
   intr,
   kilt,
+  ksm,
+  laos,
   ldot,
   myth,
   pen,
@@ -44,17 +50,42 @@ import {
   weth_mwh,
   wud,
   ztg,
-  ajun,
-  aave,
   susde,
   susds,
   sol,
   tbtc,
-  ksm,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
 const evmResolver = new HydrationEvmResolver();
+
+const rpcHttpList = [
+  'https://rpc.hydradx.cloud',
+  'https://hydration-rpc.n.dwellir.com',
+  'https://hydration.dotters.network',
+  'https://rpc.helikon.io/hydradx',
+  'https://hydration.ibp.network',
+  'https://rpc.cay.hydration.cloud',
+  'https://rpc.parm.hydration.cloud',
+  'https://rpc.roach.hydration.cloud',
+  'https://rpc.zipp.hydration.cloud',
+  'https://rpc.sin.hydration.cloud',
+  'https://rpc.coke.hydration.cloud',
+];
+
+const rpcWebsocketList = [
+  'wss://rpc.hydradx.cloud',
+  'wss://hydration-rpc.n.dwellir.com',
+  'wss://hydration.dotters.network',
+  'wss://rpc.helikon.io/hydradx',
+  'wss://hydration.ibp.network',
+  'wss://rpc.cay.hydration.cloud',
+  'wss://rpc.parm.hydration.cloud',
+  'wss://rpc.roach.hydration.cloud',
+  'wss://rpc.zipp.hydration.cloud',
+  'wss://rpc.sin.hydration.cloud',
+  'wss://rpc.coke.hydration.cloud',
+];
 
 const evmChain: Chain = defineChain({
   id: 222222,
@@ -67,12 +98,12 @@ const evmChain: Chain = defineChain({
   },
   rpcUrls: {
     public: {
-      http: ['https://rpc.hydradx.cloud'],
-      webSocket: ['wss://rpc.hydradx.cloud'],
+      http: rpcHttpList,
+      webSocket: rpcWebsocketList,
     },
     default: {
-      http: ['https://rpc.hydradx.cloud'],
-      webSocket: ['wss://rpc.hydradx.cloud'],
+      http: rpcHttpList,
+      webSocket: rpcWebsocketList,
     },
   },
   blockExplorers: {
@@ -336,6 +367,24 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: eth,
+      decimals: 18,
+      id: 34,
+      min: 0.0000055,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: {
+            GlobalConsensus: {
+              Ethereum: {
+                chainId: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+    {
       asset: glmr,
       decimals: 18,
       id: 16,
@@ -413,6 +462,20 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: ewt,
+      decimals: 18,
+      id: 252525,
+      min: 0.022,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3345,
+          },
+        },
+      },
+    },
+    {
       asset: ksm,
       decimals: 12,
       id: 1000771,
@@ -422,6 +485,19 @@ export const hydration = new EvmParachain({
         interior: {
           X1: {
             GlobalConsensus: 'Kusama',
+          },
+        },
+      },
+    },
+    {
+      asset: laos,
+      decimals: 18,
+      id: 3370,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3370,
           },
         },
       },
@@ -1027,10 +1103,6 @@ export const hydration = new EvmParachain({
   name: 'Hydration',
   parachainId: 2034,
   ss58Format: 63,
-  ws: [
-    'wss://rpc.hydradx.cloud',
-    'wss://hydradx-rpc.dwellir.com',
-    'wss://rpc.helikon.io/hydradx',
-    'wss://hydradx.paras.dotters.network',
-  ],
+  ws: rpcWebsocketList,
+  rpcs: rpcHttpList,
 });

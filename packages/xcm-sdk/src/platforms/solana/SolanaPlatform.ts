@@ -20,7 +20,7 @@ import {
 
 import { SolanaBalanceFactory } from './balance';
 import { SolanaTransferFactory } from './transfer';
-import { SolanaCall } from './types';
+import { SolanaCall, SolanaDryRunResult } from './types';
 
 import { Platform } from '../types';
 import { ixToHuman } from './utils';
@@ -34,7 +34,7 @@ export class SolanaPlatform
     this.#connection = chain.connection;
   }
 
-  async calldata(
+  async buildCall(
     account: string,
     _amount: bigint,
     _feeBalance: AssetAmount,
@@ -42,6 +42,7 @@ export class SolanaPlatform
   ): Promise<SolanaCall> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);
     const mssgV0 = await transfer.getPriorityMessage(account);
+
     const mssgArray = mssgV0.serialize();
     const mssgHex = Buffer.from(mssgArray).toString('hex');
     return {
@@ -50,6 +51,17 @@ export class SolanaPlatform
       ix: ixToHuman(config.instructions),
       signers: config.signers,
       type: CallType.Solana,
+      dryRun: async () => {
+        const { err, logs } = await transfer.simulateTransaction(
+          account,
+          mssgV0
+        );
+
+        return {
+          error: err,
+          events: logs,
+        } as SolanaDryRunResult;
+      },
     } as SolanaCall;
   }
 
@@ -62,11 +74,14 @@ export class SolanaPlatform
     const transfer = SolanaTransferFactory.get(this.#connection, config);
     const fee = await transfer.estimateFee(account, amount);
     const mssgV0 = await transfer.getPriorityMessage(account);
-    const feeBalanceAfter = await transfer.simulateFeeBalance(account, mssgV0);
+    const { accounts } = await transfer.simulateTransaction(account, mssgV0);
 
-    if (feeBalanceAfter) {
+    const sender = accounts && accounts[0];
+    const senderFinalBalance = sender?.lamports;
+
+    if (senderFinalBalance) {
       return feeBalance.copyWith({
-        amount: feeBalance.amount - BigInt(feeBalanceAfter) - amount,
+        amount: feeBalance.amount - BigInt(senderFinalBalance) - amount,
       });
     }
 

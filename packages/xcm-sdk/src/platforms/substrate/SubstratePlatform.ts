@@ -22,8 +22,8 @@ import {
 } from 'rxjs';
 
 import { SubstrateService } from './SubstrateService';
-import { normalizeAssetAmount } from './utils';
-import { SubstrateCall } from './types';
+import { getErrorFromDryRun, normalizeAssetAmount } from './utils';
+import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
 
@@ -43,7 +43,7 @@ export class SubstratePlatform
     return substrate.chain.usesSignerFee && !substrate.asset.isEqual(fee);
   }
 
-  async calldata(
+  async buildCall(
     account: string,
     _amount: bigint,
     feeBalance: AssetAmount,
@@ -64,6 +64,16 @@ export class SubstratePlatform
       data: extrinsic.toHex(),
       type: CallType.Substrate,
       txOptions: txOptions,
+      dryRun: substrate.isDryRunSupported()
+        ? async () => {
+            const { Ok } = await substrate.dryRun(account, config);
+            const err = getErrorFromDryRun(substrate.api, Ok);
+            return {
+              error: err,
+              events: Ok.emittedEvents,
+            } as SubstrateDryRunResult;
+          }
+        : () => {},
     } as SubstrateCall;
   }
 
@@ -129,11 +139,8 @@ export class SubstratePlatform
     }
 
     if (this.#dex) {
-      const quote = await this.#dex.getQuote(
-        feeBalance,
-        asset,
-        AssetAmount.fromAsset(asset, { amount: fee, decimals })
-      );
+      const amount = AssetAmount.fromAsset(asset, { amount: fee, decimals });
+      const quote = await this.#dex.getQuote(feeBalance, asset, amount, true);
       return quote.amount;
     }
     return fee;

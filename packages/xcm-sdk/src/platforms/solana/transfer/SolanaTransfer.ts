@@ -1,14 +1,15 @@
-import { acc, ProgramConfig } from '@galacticcouncil/xcm-core';
+import { ProgramConfig } from '@galacticcouncil/xcm-core';
 
 import {
+  AddressLookupTableAccount,
   Connection,
   ComputeBudgetProgram,
   MessageV0,
   PublicKey,
+  SimulatedTransactionResponse,
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
-  AddressLookupTableAccount,
 } from '@solana/web3.js';
 
 const DEFAULT_PRIORITY_FEE_PERCENTILE = 0.5;
@@ -83,8 +84,6 @@ export class SolanaTransfer {
       ),
     ]);
 
-    //console.info('Solana priority tx CUL/CUP', computeBudget, priorityFee);
-
     return [
       ComputeBudgetProgram.setComputeUnitLimit({
         units: computeBudget,
@@ -95,10 +94,10 @@ export class SolanaTransfer {
     ];
   }
 
-  async simulateFeeBalance(
+  async simulateTransaction(
     account: string,
     message: MessageV0
-  ): Promise<number | undefined> {
+  ): Promise<SimulatedTransactionResponse> {
     const transaction = new VersionedTransaction(message);
     const simulateResponse = await this.connection.simulateTransaction(
       transaction,
@@ -109,9 +108,7 @@ export class SolanaTransfer {
         },
       }
     );
-    const { accounts } = simulateResponse.value;
-    const acc = accounts && accounts[0];
-    return acc?.lamports;
+    return simulateResponse.value;
   }
 
   /**

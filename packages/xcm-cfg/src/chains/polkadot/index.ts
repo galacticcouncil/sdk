@@ -11,6 +11,7 @@ import { darwinia } from './darwinia';
 import { hydration } from './hydration';
 import { interlay } from './interlay';
 import { kilt_chain } from './kilt';
+import { laos_chain } from './laos';
 import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { nodle } from './nodle';
@@ -20,6 +21,7 @@ import { polkadot, polkadotCex } from './polkadot';
 import { subsocial } from './subsocial';
 import { unique } from './unique';
 import { zeitgeist } from './zeitgeist';
+import { energywebx } from './energywebx';
 
 export const polkadotChains: AnyChain[] = [
   acala,
@@ -33,6 +35,7 @@ export const polkadotChains: AnyChain[] = [
   darwinia,
   hydration,
   kilt_chain,
+  laos_chain,
   interlay,
   moonbeam,
   mythos,
@@ -44,6 +47,7 @@ export const polkadotChains: AnyChain[] = [
   subsocial,
   unique,
   zeitgeist,
+  energywebx,
 ];
 
 export {
@@ -58,6 +62,7 @@ export {
   darwinia,
   hydration,
   kilt_chain,
+  laos_chain,
   interlay,
   moonbeam,
   mythos,
@@ -69,4 +74,5 @@ export {
   subsocial,
   unique,
   zeitgeist,
+  energywebx,
 };

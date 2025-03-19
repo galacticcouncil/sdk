@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-core",
-  "version": "6.3.0",
+  "version": "6.6.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -53,6 +53,6 @@
     "@polkadot/api-augment": "~14.0.1",
     "@polkadot/types": "~14.0.1",
     "@polkadot/util-crypto": "~13.1.1",
-    "viem": "^2.21.60"
+    "viem": "^2.23.7"
   }
 }

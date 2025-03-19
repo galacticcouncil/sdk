@@ -1,9 +1,15 @@
 import { ContractConfig, Precompile } from '@galacticcouncil/xcm-core';
 
 export function isNativeEthBridge(config: ContractConfig): boolean {
+  const isSnowbridgeNative =
+    config.module === 'Snowbridge' &&
+    config.func === 'sendToken' &&
+    config.args[0] === '0x0000000000000000000000000000000000000000';
+
   return (
     config.func === 'wrapAndTransferETHWithPayload' ||
-    config.func === 'wrapAndTransferETH'
+    config.func === 'wrapAndTransferETH' ||
+    isSnowbridgeNative
   );
 }
 

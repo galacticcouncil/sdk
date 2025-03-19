@@ -79,8 +79,7 @@ export const ethereum = new EvmChain({
   explorer: 'https://etherscan.io/',
   rpcs: [
     'https://ethereum-rpc.publicnode.com',
-    'https://eth.llamarpc.com',
-    'https://1rpc.io/eth',
+    'https://cosmopolitan-dimensional-diagram.quiknode.pro',
   ],
   snowbridge: {
     id: 1,

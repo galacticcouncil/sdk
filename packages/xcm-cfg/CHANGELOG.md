@@ -1,5 +1,34 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.9.0
+
+### Minor Changes
+
+- Support getQuote fallback price for hydration DEX
+- Add native ETH token config
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.6.0
+
+## 7.8.0
+
+### Minor Changes
+
+- 460bcdd: Integrate Energy Web X parachain
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.4.0
+
+## 7.7.0
+
+### Minor Changes
+
+- 3e4ae6b: Add LAOS parachain
+
 ## 7.6.2
 
 ### Patch Changes

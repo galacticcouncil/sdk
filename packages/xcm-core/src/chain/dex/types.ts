@@ -12,6 +12,7 @@ export interface Dex {
   getQuote(
     assetIn: Asset,
     assetOut: Asset,
-    amountOut: AssetAmount
+    amountOut: AssetAmount,
+    fallbackPrice?: boolean
   ): Promise<SwapQuote>;
 }

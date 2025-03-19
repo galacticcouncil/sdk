@@ -1,5 +1,27 @@
 # @galacticcouncil/xcm-sdk
 
+## 8.6.0
+
+### Minor Changes
+
+- Support getQuote fallback price
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.6.0
+
+## 8.5.0
+
+### Minor Changes
+
+- Dry run support (alpha)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.4.0
+
 ## 8.4.0
 
 ### Minor Changes

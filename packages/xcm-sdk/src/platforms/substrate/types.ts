@@ -1,6 +1,7 @@
 import { Asset } from '@galacticcouncil/xcm-core';
+import { AnyJson } from '@polkadot/types/types';
 
-import { Call } from '../types';
+import { Call, DryRunResult } from '../types';
 
 export interface SubstrateCall extends Call {
   txOptions:
@@ -8,4 +9,9 @@ export interface SubstrateCall extends Call {
         asset: Asset | undefined;
       }
     | undefined;
+}
+
+export interface SubstrateDryRunResult extends DryRunResult {
+  error: string | undefined;
+  events: Record<string, AnyJson> | undefined;
 }
