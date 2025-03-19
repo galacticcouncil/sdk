@@ -6,7 +6,9 @@ import {
 import { defineChain, Chain } from 'viem';
 
 import {
+  aave,
   aca,
+  ajun,
   astr,
   bnc,
   cfg,
@@ -16,11 +18,15 @@ import {
   ded,
   dot,
   dota,
+  eth,
+  ewt,
   glmr,
   hdx,
   ibtc,
   intr,
   kilt,
+  ksm,
+  laos,
   ldot,
   myth,
   pen,
@@ -44,15 +50,10 @@ import {
   weth_mwh,
   wud,
   ztg,
-  ajun,
-  aave,
   susde,
   susds,
   sol,
   tbtc,
-  ksm,
-  laos,
-  ewt,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -362,6 +363,24 @@ export const hydration = new EvmParachain({
               },
             },
           ],
+        },
+      },
+    },
+    {
+      asset: eth,
+      decimals: 18,
+      id: 34,
+      min: 0.0000055,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: {
+            GlobalConsensus: {
+              Ethereum: {
+                chainId: 1,
+              },
+            },
+          },
         },
       },
     },
