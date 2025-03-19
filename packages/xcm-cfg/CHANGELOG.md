@@ -1,5 +1,17 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.9.0
+
+### Minor Changes
+
+- Support getQuote fallback price for hydration DEX
+- Add native ETH token config
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.6.0
+
 ## 7.8.0
 
 ### Minor Changes

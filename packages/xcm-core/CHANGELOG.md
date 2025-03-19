@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-core
 
+## 6.6.0
+
+### Minor Changes
+
+- Support getQuote fallback price
+- Disable rank ping in EvmClient
+
 ## 6.5.0
 
 ### Minor Changes
