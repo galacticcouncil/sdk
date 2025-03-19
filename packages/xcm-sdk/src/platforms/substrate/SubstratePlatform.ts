@@ -139,11 +139,8 @@ export class SubstratePlatform
     }
 
     if (this.#dex) {
-      const quote = await this.#dex.getQuote(
-        feeBalance,
-        asset,
-        AssetAmount.fromAsset(asset, { amount: fee, decimals })
-      );
+      const amount = AssetAmount.fromAsset(asset, { amount: fee, decimals });
+      const quote = await this.#dex.getQuote(feeBalance, asset, amount, true);
       return quote.amount;
     }
     return fee;
