@@ -173,5 +173,5 @@ export const bifrost = new Parachain({
   name: 'Bifrost',
   parachainId: 2030,
   ss58Format: 6,
-  ws: 'wss://bifrost-polkadot-rpc.dwellir.com',
+  ws: 'wss://bifrost-polkadot.ibp.network',
 });
