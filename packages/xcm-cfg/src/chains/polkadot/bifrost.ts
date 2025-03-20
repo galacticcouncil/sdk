@@ -16,6 +16,13 @@ import {
   vdot,
 } from '../../assets';
 
+const rpcWebsocketList = [
+  'wss://bifrost-polkadot.ibp.network',
+  'wss://eu.bifrost-polkadot-rpc.liebi.com/ws',
+  'wss://hk.p.bifrost-rpc.liebi.com/ws',
+  'wss://bifrost-polkadot.dotters.network',
+];
+
 export const bifrost = new Parachain({
   assetsData: [
     {
@@ -173,5 +180,5 @@ export const bifrost = new Parachain({
   name: 'Bifrost',
   parachainId: 2030,
   ss58Format: 6,
-  ws: 'wss://bifrost-polkadot.ibp.network',
+  ws: rpcWebsocketList,
 });
