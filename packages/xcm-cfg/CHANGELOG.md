@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 7.10.0
+
+### Minor Changes
+
+- 331ac1f: rpc
+
 ## 7.9.0
 
 ### Minor Changes
