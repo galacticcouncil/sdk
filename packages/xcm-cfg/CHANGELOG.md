@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- 331ac1f: rpc
+- 331ac1f: Update bifrost RPC list
 
 ## 7.9.0
 
