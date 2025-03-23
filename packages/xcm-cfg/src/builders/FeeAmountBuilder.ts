@@ -128,7 +128,7 @@ function Snowbridge() {
           amount: bridgeFeeInDot,
           breakdown: {
             bridgeDeliveryFee: bridgeDeliveryFee,
-            bridgeHubDeliveryFee: bridgeFeeInDot,
+            bridgeHubDeliveryFee: bridgeHubDeliveryFee,
             assetHubDestinationFee: assetHubDestinationFee,
             returnToSenderDeliveryFee: returnToSenderDeliveryFee,
             returnToSenderDestinationFee: returnToSenderDestinationFee,
