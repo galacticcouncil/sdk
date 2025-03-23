@@ -3,9 +3,9 @@ import { Asset, Parachain } from '@galacticcouncil/xcm-core';
 import type { PalletAssetRegistryAssetDetails } from '@polkadot/types/lookup';
 import { Option } from '@polkadot/types';
 
-import { BalanceClient } from '../balance';
+import { BaseClient } from '../base';
 
-export class HydrationClient extends BalanceClient {
+export class HydrationClient extends BaseClient {
   constructor(chain: Parachain) {
     super(chain);
   }

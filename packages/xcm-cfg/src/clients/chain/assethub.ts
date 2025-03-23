@@ -3,16 +3,17 @@ import { Asset, Parachain } from '@galacticcouncil/xcm-core';
 import type {
   PalletAssetsAssetAccount,
   PalletAssetsAssetDetails,
+  XcmVersionedAssets,
 } from '@polkadot/types/lookup';
-import { Option } from '@polkadot/types';
+import { Option, Result } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
 
 import { BN } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
-import { BalanceClient } from '../balance';
+import { BaseClient } from '../base';
 
-export class AssethubClient extends BalanceClient {
+export class AssethubClient extends BaseClient {
   constructor(chain: Parachain) {
     super(chain);
   }
@@ -59,9 +60,9 @@ export class AssethubClient extends BalanceClient {
     return details.minBalance.toBigInt();
   }
 
-  async getBridgeFee(
+  async getBridgeDeliveryFee(
     options = {
-      executionFee: 3_500_000_000n,
+      defaultFee: 2_750_872_500_000n,
     }
   ): Promise<bigint> {
     const api = await this.chain.api;
@@ -72,7 +73,36 @@ export class AssethubClient extends BalanceClient {
       'hex',
       'le'
     );
-    const bridgeFee = BigInt(leFee.toString());
-    return bridgeFee + options.executionFee;
+
+    if (leFee.eqn(0)) {
+      return options.defaultFee;
+    }
+    return BigInt(leFee.toString());
+  }
+
+  async calculateDeliveryFee(xcm: any, destParachainId: number) {
+    const api = await this.chain.api;
+    const result = await api.call.xcmPaymentApi.queryDeliveryFees<
+      Result<XcmVersionedAssets, any>
+    >(
+      {
+        V4: {
+          parents: 1,
+          interior: { X1: [{ parachain: destParachainId }] },
+        },
+      },
+      xcm
+    );
+
+    if (!result.isOk) {
+      throw Error(`Can't query XCM delivery fee.`);
+    }
+
+    for (const asset of result.asOk.asV4) {
+      if (asset.id.parents.toNumber() === 1 && asset.id.interior.isHere) {
+        return asset.fun.asFungible.toBigInt();
+      }
+    }
+    throw Error(`Can't find XCM delivery fee in DOT.`);
   }
 }
