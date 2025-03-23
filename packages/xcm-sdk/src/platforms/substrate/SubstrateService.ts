@@ -12,7 +12,8 @@ import {
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { hexToU8a } from '@polkadot/util';
+import { hexToU8a, stringToU8a } from '@polkadot/util';
+import { blake2AsHex } from '@polkadot/util-crypto';
 
 import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
 
@@ -57,6 +58,10 @@ export class SubstrateService {
     });
   }
 
+  isDryRunSupported(): boolean {
+    return this.api.call.dryRunApi !== undefined;
+  }
+
   getDecimals(asset: Asset): number {
     return this.chain.getAssetDecimals(asset) ?? this.decimals;
   }
@@ -74,6 +79,37 @@ export class SubstrateService {
       return fn(calls);
     }
     return fn(...args);
+  }
+
+  async buildMessageId(
+    account: string,
+    amount: bigint,
+    asset: string,
+    beneficiary: string
+  ): Promise<string> {
+    const accountNextId = await this.api.rpc.system.accountNextIndex(account);
+    const entropy = new Uint8Array([
+      ...stringToU8a(this.chain.parachainId.toString()),
+      ...hexToU8a(account),
+      ...accountNextId.toU8a(),
+      ...hexToU8a(asset),
+      ...stringToU8a(beneficiary),
+      ...stringToU8a(amount.toString()),
+    ]);
+    return blake2AsHex(entropy);
+  }
+
+  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
+    const extrinsic = this.getExtrinsic(config);
+    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
+    const accountId = this.api.createType('AccountId32', account);
+    const result = await this.api.call.dryRunApi.dryRunCall(
+      {
+        system: { Signed: accountId },
+      },
+      callDataU8a
+    );
+    return result.toHuman() as any;
   }
 
   async estimateNetworkFee(
@@ -94,23 +130,6 @@ export class SubstrateService {
       console.warn(`Can't estimate network fee.`);
     }
     return 0n;
-  }
-
-  isDryRunSupported(): boolean {
-    return this.api.call.dryRunApi !== undefined;
-  }
-
-  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
-    const extrinsic = this.getExtrinsic(config);
-    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
-    const accountId = this.api.createType('AccountId32', account);
-    const result = await this.api.call.dryRunApi.dryRunCall(
-      {
-        system: { Signed: accountId },
-      },
-      callDataU8a
-    );
-    return result.toHuman() as any;
   }
 
   async estimateDeliveryFee(
