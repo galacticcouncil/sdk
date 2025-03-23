@@ -1,21 +1,13 @@
 import {
-  ChainEcosystem,
   multiloc,
+  ChainEcosystem,
   Parachain,
   TxWeight,
 } from '@galacticcouncil/xcm-core';
 
-import { getX1Junction } from './utils';
+import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID } from './builder';
+import { getX1Junction, instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
-
-const ETHEREUM_CHAIN_ID = 1;
-const ETHEREUM_BRIDGE_LOCATION = {
-  parents: 2,
-  interior: {
-    X1: [{ GlobalConsensus: { Ethereum: { chain_id: ETHEREUM_CHAIN_ID } } }],
-  },
-};
-const HUB_PARACHAIN_ID = 1000;
 
 const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
 
@@ -65,9 +57,9 @@ export const toDest = (
     };
   }
 
-  // Ethereum snowbridge transfers are routed via hub
+  // Snowbridge transfers are routed via assethub
   const parachain =
-    destination.key === 'ethereum' ? HUB_PARACHAIN_ID : destination.parachainId;
+    destination.key === 'ethereum' ? ASSET_HUB_ID : destination.parachainId;
 
   return {
     [version]: {
@@ -156,7 +148,8 @@ export const toBridgeXcmOnDest = (
   version: XcmVersion,
   account: any,
   sender: any,
-  transferAssetLocation: object
+  transferAssetLocation: object,
+  messageId: string | undefined
 ) => {
   return {
     [version]: [
@@ -185,7 +178,7 @@ export const toBridgeXcmOnDest = (
               },
             },
           },
-          reserve: ETHEREUM_BRIDGE_LOCATION,
+          reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
           xcm: [
             {
               BuyExecution: {
@@ -211,9 +204,11 @@ export const toBridgeXcmOnDest = (
                 },
               },
             },
+            { SetTopic: messageId },
           ],
         },
       },
+      { SetTopic: messageId },
     ],
   };
 };
@@ -228,11 +223,18 @@ export const toBridgeXcmOnDest = (
  */
 const reanchorLocation = (version: XcmVersion, assetLocation: object) => {
   const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
+
+  if (erc20Key) {
+    return {
+      parents: 0,
+      interior: {
+        X1: getX1Junction(version, { AccountKey20: erc20Key }),
+      },
+    };
+  }
   return {
     parents: 0,
-    interior: {
-      X1: getX1Junction(version, { AccountKey20: erc20Key }),
-    },
+    interior: { Here: null },
   };
 };
 

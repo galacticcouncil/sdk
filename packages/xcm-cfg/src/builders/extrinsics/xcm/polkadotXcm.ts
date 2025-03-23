@@ -180,7 +180,7 @@ type TransferOpts = {
 const transferAssetsUsingTypeAndThen = (
   opts: TransferOpts
 ): ExtrinsicConfigBuilder => ({
-  build: ({ address, asset, amount, destination, sender, source }) =>
+  build: ({ address, asset, amount, destination, messageId, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssetsUsingTypeAndThen',
@@ -243,7 +243,13 @@ const transferAssetsUsingTypeAndThen = (
 
         const customXcmOnDest =
           destination.chain.key === 'ethereum'
-            ? toBridgeXcmOnDest(version, account, from, transferAssetLocation)
+            ? toBridgeXcmOnDest(
+                version,
+                account,
+                from,
+                transferAssetLocation,
+                messageId
+              )
             : toDepositXcmOnDest(version, account);
 
         return [
