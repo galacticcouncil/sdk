@@ -290,6 +290,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
+  toEthereumViaSnowbridgeTemplate(eth, eth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),

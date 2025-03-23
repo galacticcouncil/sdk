@@ -15,8 +15,12 @@ import {
   susde,
   tbtc,
 } from '../../../assets';
-import { ethereum, hydration, moonbeam } from '../../../chains';
-import { BalanceBuilder, ContractBuilder } from '../../../builders';
+import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../../builders';
 import { Tag } from '../../../tags';
 
 import {
@@ -56,6 +60,31 @@ const toHydrationViaWormhole: AssetRoute[] = [
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().native(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: eth,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateInboundFee({ hub: assetHub }),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
+    tags: [Tag.Snowbridge],
+  }),
   toHydrationViaSnowbridgeTemplate(aave, aave),
   toHydrationViaSnowbridgeTemplate(susde, susde),
   toHydrationViaSnowbridgeTemplate(tbtc, tbtc),

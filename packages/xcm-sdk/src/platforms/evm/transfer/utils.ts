@@ -6,11 +6,13 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
     config.func === 'sendToken' &&
     config.args[0] === '0x0000000000000000000000000000000000000000';
 
-  return (
-    config.func === 'wrapAndTransferETHWithPayload' ||
-    config.func === 'wrapAndTransferETH' ||
-    isSnowbridgeNative
-  );
+  const isWormholeNative =
+    config.module === 'Wormhole' &&
+    ['wrapAndTransferETHWithPayload', 'wrapAndTransferETH'].includes(
+      config.func
+    );
+
+  return isWormholeNative || isSnowbridgeNative;
 }
 
 export function isPrecompile(config: ContractConfig): boolean {

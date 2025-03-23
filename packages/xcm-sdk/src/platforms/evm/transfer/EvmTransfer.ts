@@ -1,5 +1,11 @@
 import { ContractConfig, EvmClient } from '@galacticcouncil/xcm-core';
-import { Abi, BaseError, Log, decodeEventLog } from 'viem';
+import {
+  Abi,
+  BaseError,
+  ContractFunctionExecutionError,
+  Log,
+  decodeEventLog,
+} from 'viem';
 
 import { EvmEventLog } from '../types';
 
@@ -60,9 +66,13 @@ export class EvmTransfer {
       const estimatedGas = await this.estimateGas(account);
       const gasPrice = await this.getGasPrice();
       return estimatedGas * gasPrice;
-    } catch (error) {
-      const err = error as BaseError;
-      console.log("Can't estimate fees!\n", err.details);
+    } catch (e) {
+      if (e instanceof ContractFunctionExecutionError) {
+        const err = e as ContractFunctionExecutionError;
+        console.log("Can't estimate fees!\n", err.message);
+      } else {
+        console.log(e);
+      }
       return 0n;
     }
   }
