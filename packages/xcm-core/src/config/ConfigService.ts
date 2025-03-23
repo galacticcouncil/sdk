@@ -83,13 +83,13 @@ export class ConfigService {
     return routes.getAssetDestinations(asset);
   }
 
-  getAssetRoute(
+  getAssetRoutes(
     asset: Asset,
     source: AnyChain,
     destination: AnyChain
-  ): AssetRoute {
+  ): AssetRoute[] {
     const routes = this.getChainRoutes(source);
-    return routes.getAssetRoute(asset, destination);
+    return routes.getAssetDestinationRoutes(asset, destination);
   }
 
   updateAsset(asset: Asset): void {
