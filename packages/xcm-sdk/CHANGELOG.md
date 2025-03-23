@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-sdk
 
+## 9.0.0
+
+### Major Changes
+
+- 781f8fb: SubstrateService messageId api
+- 7c077e6: Support fee breakdown in ctx
+- 32a6662: Wallet buildTransfer fluent api
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@7.0.0
+
 ## 8.6.0
 
 ### Minor Changes

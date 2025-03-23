@@ -1,5 +1,5 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { Call, DryRunResult, SubstrateCall } from '@galacticcouncil/xcm-sdk';
+import { SubstrateCall } from '@galacticcouncil/xcm-sdk';
 
 import {
   getWormholeChainById,

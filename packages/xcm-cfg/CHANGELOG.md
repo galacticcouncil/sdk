@@ -1,5 +1,19 @@
 # @galacticcouncil/xcm-cfg
 
+## 8.0.0
+
+### Major Changes
+
+- ee2fd63: Xcm builder instructions (fee est)
+- 0beee5c: Set topics for erc20/native snowbridge outbound transfers
+- 11b8565: Dynamic snowbridge fee estimations
+- d6084e7: Native eth transfer config (Hydration <-> Ethereum)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@7.0.0
+
 ## 7.10.0
 
 ### Minor Changes

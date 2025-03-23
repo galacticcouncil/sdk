@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-core
 
+## 7.0.0
+
+### Major Changes
+
+- 7c077e6: Fee breakdown & messageId ctx support
+- 6700565: ConfigBuilder: Support multiple asset routes
+
 ## 6.6.0
 
 ### Minor Changes
