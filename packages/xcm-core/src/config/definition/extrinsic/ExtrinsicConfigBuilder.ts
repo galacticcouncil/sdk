@@ -19,6 +19,7 @@ export interface TransactCtx {
 }
 
 export interface ExtrinsicConfigBuilderParams extends TransferCtx {
+  messageId?: string;
   transact?: TransactCtx;
 }
 
