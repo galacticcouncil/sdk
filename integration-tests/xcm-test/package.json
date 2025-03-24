@@ -11,6 +11,7 @@
     "test"
   ],
   "scripts": {
+    "node": "npx tsx ./src/runNode.ts",
     "test:call": "jest --silent call.spec.ts",
     "test:e2e": "jest --silent --forceExit e2e.spec.ts"
   },
