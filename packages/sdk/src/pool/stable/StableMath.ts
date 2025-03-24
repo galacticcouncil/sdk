@@ -9,11 +9,20 @@ import {
   calculate_shares_for_amount,
   calculate_spot_price_with_fee,
   pool_account_name,
+  recalculate_peg,
 } from '@galacticcouncil/math-stableswap';
 
 export class StableMath {
   static getPoolAddress(assetId: number): Uint8Array {
     return pool_account_name(assetId);
+  }
+
+  static defaultPegs(size: number) {
+    const pegs = [];
+    for (let i = 0; i < size; i++) {
+      pegs.push([1, 1]);
+    }
+    return pegs;
   }
 
   static calculateAmplification(
@@ -38,7 +47,8 @@ export class StableMath {
     assetOut: number,
     amountOut: string,
     amplification: string,
-    fee: string
+    fee: string,
+    pegs: string
   ): string {
     return calculate_in_given_out(
       reserves,
@@ -46,7 +56,8 @@ export class StableMath {
       assetOut,
       amountOut,
       amplification,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -56,7 +67,8 @@ export class StableMath {
     assetIn: number,
     amplification: string,
     shareIssuance: string,
-    fee: string
+    fee: string,
+    pegs: string
   ) {
     return calculate_add_one_asset(
       reserves,
@@ -64,7 +76,8 @@ export class StableMath {
       assetIn,
       amplification,
       shareIssuance,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -74,7 +87,8 @@ export class StableMath {
     amount: string,
     amplification: string,
     shareIssuance: string,
-    fee: string
+    fee: string,
+    pegs: string
   ) {
     return calculate_shares_for_amount(
       reserves,
@@ -82,7 +96,8 @@ export class StableMath {
       amount,
       amplification,
       shareIssuance,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -92,7 +107,8 @@ export class StableMath {
     assetOut: number,
     amountIn: string,
     amplification: string,
-    fee: string
+    fee: string,
+    pegs: string
   ): string {
     return calculate_out_given_in(
       reserves,
@@ -100,7 +116,8 @@ export class StableMath {
       assetOut,
       amountIn,
       amplification,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -110,7 +127,8 @@ export class StableMath {
     assetOut: number,
     amplification: string,
     shareIssuance: string,
-    withdrawFee: string
+    withdrawFee: string,
+    pegs: string
   ) {
     return calculate_liquidity_out_one_asset(
       reserves,
@@ -118,7 +136,8 @@ export class StableMath {
       assetOut,
       amplification,
       shareIssuance,
-      withdrawFee
+      withdrawFee,
+      pegs
     );
   }
 
@@ -127,14 +146,16 @@ export class StableMath {
     assets: string,
     amplification: string,
     shareIssuance: string,
-    fee: string
+    fee: string,
+    pegs: string
   ) {
     return calculate_shares(
       reserves,
       assets,
       amplification,
       shareIssuance,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -145,7 +166,8 @@ export class StableMath {
     assetIn: string,
     assetOut: string,
     shareIssuance: string,
-    fee: string
+    fee: string,
+    pegs: string
   ): string {
     return calculate_spot_price_with_fee(
       poolId,
@@ -154,7 +176,8 @@ export class StableMath {
       assetIn,
       assetOut,
       shareIssuance,
-      fee
+      fee,
+      pegs
     );
   }
 
@@ -164,5 +187,21 @@ export class StableMath {
     feeDenominator: number
   ): string {
     return calculate_pool_trade_fee(amount, feeNumerator, feeDenominator);
+  }
+
+  static recalculatePegs(
+    currentPegs: string,
+    targetPegs: string,
+    currentBlock: string,
+    maxPegUpdate: string,
+    poolFee: string
+  ) {
+    return recalculate_peg(
+      currentPegs,
+      targetPegs,
+      currentBlock,
+      maxPegUpdate,
+      poolFee
+    );
   }
 }
