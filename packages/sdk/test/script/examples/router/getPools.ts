@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
+import { PoolService, TradeRouter, PoolType } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
@@ -7,7 +7,9 @@ import { ApiUrl } from '../../types';
 class GetPoolsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
+    const router = new TradeRouter(poolService, {
+      includeOnly: [PoolType.Omni],
+    });
     return router.getPools();
   }
 }

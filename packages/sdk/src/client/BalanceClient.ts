@@ -58,19 +58,27 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeTokenBalance(
     address: string,
-    assets: Asset[],
+    assetId: string,
+    onChange: (token: string, balance: BigNumber) => void
+  ): UnsubscribePromise {
+    return this.api.query.tokens.accounts(address, assetId, (data) => {
+      onChange(assetId, this.calculateFreeBalance(data));
+    });
+  }
+
+  async subscribeTokensBalance(
+    address: string,
     onChange: (balances: [string, BigNumber][]) => void
   ): UnsubscribePromise {
-    const supported = assets
-      .filter((a) => a.type !== 'Erc20')
-      .filter((a) => a.id !== SYSTEM_ASSET_ID);
+    const keys = await this.api.query.tokens.accounts.keys(address);
+    const queries = keys.map((key) => [address, key.args[1]]);
 
-    const callArgs = supported.map((a) => [address, a.id]);
-    return this.api.query.tokens.accounts.multi(callArgs, (balances) => {
+    return this.api.query.tokens.accounts.multi(queries, (balances) => {
       const result: [string, BigNumber][] = [];
       balances.forEach((data, i) => {
+        const token = queries[i][1].toString();
         const freeBalance = this.calculateFreeBalance(data);
-        const token = callArgs[i][1];
+        console.log(token, ' => ', freeBalance.toString());
         result.push([token, freeBalance]);
       });
       onChange(result);

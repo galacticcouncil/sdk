@@ -3,7 +3,7 @@ import {
   PoolService,
   TradeRouter,
   HYDRADX_OMNIPOOL_ADDRESS,
-} from '@galacticcouncil/sdk';
+} from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';

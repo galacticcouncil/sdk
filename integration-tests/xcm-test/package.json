@@ -15,7 +15,7 @@
     "test:e2e": "jest --silent --forceExit e2e.spec.ts"
   },
   "devDependencies": {
-    "@acala-network/chopsticks-testing": "1.0.1"
+    "@acala-network/chopsticks-testing": "1.0.2"
   },
   "dependencies": {
     "@galacticcouncil/xcm-cfg": "^8.0.0",
