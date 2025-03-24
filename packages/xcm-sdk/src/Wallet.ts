@@ -46,50 +46,6 @@ export class Wallet {
     dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
-  buildTransfer() {
-    const assets = ConfigBuilder(this.config).assets();
-    const getTransferData = (
-      configs: TransferConfigs,
-      srcAddress: string,
-      dstAddress: string
-    ) => {
-      return this.getTransferData(configs, srcAddress, dstAddress);
-    };
-    return {
-      assets,
-      setAsset(asset: string | Asset) {
-        const sources = assets.asset(asset);
-        return {
-          sources,
-          setSource(srcChain: string | AnyChain) {
-            const destinations = sources.source(srcChain);
-            return {
-              destinations,
-              setDestination(dstChain: string | AnyChain) {
-                const { routes, build } = destinations.destination(dstChain);
-                return {
-                  routes,
-                  build({
-                    srcAddress,
-                    dstAddress,
-                    dstAsset,
-                  }: {
-                    srcAddress: string;
-                    dstAddress: string;
-                    dstAsset?: string | Asset;
-                  }): Promise<Transfer> {
-                    const configs = build(dstAsset);
-                    return getTransferData(configs, srcAddress, dstAddress);
-                  },
-                };
-              },
-            };
-          },
-        };
-      },
-    };
-  }
-
   async transfer(
     asset: string | Asset,
     srcAddress: string,
