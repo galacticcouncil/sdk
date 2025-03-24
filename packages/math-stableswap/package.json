@@ -24,7 +24,7 @@
   "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
   "scripts": {
-    "build": "node ../../scripts/build-math.mjs --name stableswap",
+    "build": "node ../../scripts/build-math.mjs --name stableswap-drift",
     "clean": "rimraf build",
     "link": "npm ln"
   }
