@@ -2,7 +2,7 @@ import { setupContext } from '@acala-network/chopsticks-testing';
 
 import * as c from 'console';
 
-const wasmOverride = 'hydradx_runtime.compact.compressed.wasm';
+const wasmOverride = 'hydradx_runtime.pegs.wasm';
 
 const main = async () => {
   const ctx = await setupContext({
