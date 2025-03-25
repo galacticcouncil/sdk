@@ -110,6 +110,11 @@ export const ksm = new Asset({
   originSymbol: 'KSM',
 });
 
+export const ldo = new Asset({
+  key: 'ldo',
+  originSymbol: 'LDO',
+});
+
 export const laos = new Asset({
   key: 'laos',
   originSymbol: 'LAOS',
@@ -123,6 +128,11 @@ export const ewt = new Asset({
 export const ldot = new Asset({
   key: 'ldot',
   originSymbol: 'LDOT',
+});
+
+export const link = new Asset({
+  key: 'link',
+  originSymbol: 'LINK',
 });
 
 export const myth = new Asset({
@@ -153,6 +163,11 @@ export const pink = new Asset({
 export const ring = new Asset({
   key: 'ring',
   originSymbol: 'RING',
+});
+
+export const sky = new Asset({
+  key: 'sky',
+  originSymbol: 'SKY',
 });
 
 export const sol = new Asset({
@@ -255,6 +270,11 @@ export const wbtc_mwh = new Asset({
   key: 'wbtc_mwh',
 });
 
+export const wsteth = new Asset({
+  key: 'wsteth',
+  originSymbol: 'wstETH',
+});
+
 export const wud = new Asset({
   key: 'wud',
   originSymbol: 'WUD',
@@ -293,15 +313,18 @@ export const assets: Asset[] = [
   kar,
   kilt,
   ksm,
+  ldo,
   laos,
   ewt,
   ldot,
+  link,
   myth,
   nodl,
   pha,
   pen,
   pink,
   ring,
+  sky,
   sol,
   sub,
   susde,
@@ -322,6 +345,7 @@ export const assets: Asset[] = [
   weth,
   weth_awh,
   weth_mwh,
+  wsteth,
   wud,
   xrt,
   ztg,

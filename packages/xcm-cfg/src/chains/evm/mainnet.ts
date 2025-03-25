@@ -7,6 +7,9 @@ import {
   aave,
   dai,
   eth,
+  ldo,
+  link,
+  sky,
   susde,
   susds,
   tbtc,
@@ -14,6 +17,7 @@ import {
   usdt,
   wbtc,
   weth,
+  wsteth,
 } from '../../assets';
 
 import { mainnet as evmChain } from 'viem/chains';
@@ -72,6 +76,26 @@ export const ethereum = new EvmChain({
       asset: usdt,
       decimals: 6,
       id: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    },
+    {
+      asset: ldo,
+      decimals: 18,
+      id: '0x5a98fcbea516cf06857215779fd812ca3bef1b32',
+    },
+    {
+      asset: link,
+      decimals: 18,
+      id: '0x514910771af9ca656af840dff83e8264ecf986ca',
+    },
+    {
+      asset: sky,
+      decimals: 18,
+      id: '0x56072c95faa701256059aa122697b133aded9279',
+    },
+    {
+      asset: wsteth,
+      decimals: 18,
+      id: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
     },
   ],
   ecosystem: Ecosystem.Ethereum,
