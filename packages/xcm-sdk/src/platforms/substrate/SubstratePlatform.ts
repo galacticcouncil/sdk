@@ -66,12 +66,25 @@ export class SubstratePlatform
       txOptions: txOptions,
       dryRun: substrate.isDryRunSupported()
         ? async () => {
-            const { Ok } = await substrate.dryRun(account, config);
-            const err = getErrorFromDryRun(substrate.api, Ok);
-            return {
-              error: err,
-              events: Ok.emittedEvents,
-            } as SubstrateDryRunResult;
+            try {
+              const { executionResult, emittedEvents } = await substrate.dryRun(
+                account,
+                config
+              );
+
+              const error = executionResult.isErr
+                ? getErrorFromDryRun(substrate.api, executionResult.asErr)
+                : undefined;
+
+              return {
+                error: error,
+                events: emittedEvents.toHuman(),
+              } as SubstrateDryRunResult;
+            } catch (e) {
+              return {
+                error: e,
+              } as SubstrateDryRunResult;
+            }
           }
         : () => {},
     } as SubstrateCall;

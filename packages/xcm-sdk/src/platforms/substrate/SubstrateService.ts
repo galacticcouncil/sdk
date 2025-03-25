@@ -1,4 +1,4 @@
-import '@polkadot/api-augment';
+import '@galacticcouncil/api-augment/hydradx';
 
 import {
   acc,
@@ -12,6 +12,8 @@ import {
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { CallDryRunEffects } from '@polkadot/types/interfaces';
+
 import { hexToU8a, stringToU8a } from '@polkadot/util';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
@@ -99,17 +101,24 @@ export class SubstrateService {
     return blake2AsHex(entropy);
   }
 
-  async dryRun(account: string, config: ExtrinsicConfig): Promise<any> {
+  async dryRun(
+    account: string,
+    config: ExtrinsicConfig
+  ): Promise<CallDryRunEffects> {
     const extrinsic = this.getExtrinsic(config);
     const callDataU8a = hexToU8a(extrinsic.inner.toHex());
     const accountId = this.api.createType('AccountId32', account);
     const result = await this.api.call.dryRunApi.dryRunCall(
       {
-        system: { Signed: accountId },
+        System: { Signed: accountId },
       },
       callDataU8a
     );
-    return result.toHuman() as any;
+    if (result.isOk) {
+      return result.asOk;
+    }
+    console.log(result.asErr.toHuman());
+    throw new Error('Dry run execution failed!');
   }
 
   async estimateNetworkFee(
@@ -138,16 +147,15 @@ export class SubstrateService {
   ): Promise<bigint> {
     if (this.chain.usesDeliveryFee) {
       const acc = this.estimateDeliveryFeeWith(account, config);
-      const result = await this.dryRun(acc, config);
-
-      const ok = result.Ok;
-      const isSuccess = ok && ok.executionResult.Ok;
-      if (isSuccess) {
-        return getDeliveryFeeFromDryRun(ok);
+      const { executionResult, emittedEvents } = await this.dryRun(acc, config);
+      if (executionResult.isOk) {
+        return getDeliveryFeeFromDryRun(emittedEvents);
       } else {
-        const error = getErrorFromDryRun(this.api, ok);
+        const error = getErrorFromDryRun(this.api, executionResult.asErr);
         console.warn(`Can't estimate delivery fee. Reason:\n ${error}`);
       }
+      try {
+      } catch (e) {}
     }
     return 0n;
   }
