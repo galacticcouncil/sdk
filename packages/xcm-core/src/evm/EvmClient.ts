@@ -40,7 +40,11 @@ export class EvmClient {
     return createPublicClient({
       chain: this.chain,
       transport:
-        this.rpcs.length > 0 ? fallback(withFallback, { rank: true }) : http(),
+        this.rpcs.length > 0
+          ? fallback(withFallback, {
+              rank: false,
+            })
+          : http(),
     });
   }
 

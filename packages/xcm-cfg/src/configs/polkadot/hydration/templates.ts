@@ -271,7 +271,9 @@ export function toEthereumViaSnowbridgeTemplate(
       chain: ethereum,
       asset: assetOut,
       fee: {
-        amount: FeeAmountBuilder().Snowbridge().getSendFee({ hub: assetHub }),
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateOutboundFee({ hub: assetHub }),
         asset: dot,
       },
     },

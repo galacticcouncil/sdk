@@ -8,6 +8,7 @@ import {
   ConfigService,
   Dex,
   DexFactory,
+  TransferConfigs,
   TransferCtx,
   TransferValidator,
   TransferValidation,
@@ -45,11 +46,11 @@ export class Wallet {
     dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
-  public async transfer(
+  async transfer(
     asset: string | Asset,
-    srcAddr: string,
+    srcAddress: string,
     srcChain: string | AnyChain,
-    dstAddr: string,
+    dstAddress: string,
     dstChain: string | AnyChain
   ): Promise<Transfer> {
     const transfer = ConfigBuilder(this.config)
@@ -58,9 +59,16 @@ export class Wallet {
       .source(srcChain)
       .destination(dstChain)
       .build();
+    return this.getTransferData(transfer, srcAddress, dstAddress);
+  }
 
-    const srcConf = transfer.origin;
-    const dstConf = transfer.reverse;
+  async getTransferData(
+    configs: TransferConfigs,
+    srcAddress: string,
+    dstAddress: string
+  ): Promise<Transfer> {
+    const srcConf = configs.origin;
+    const dstConf = configs.reverse;
 
     const srcAdapter = new PlatformAdapter(srcConf.chain);
     const dstAdapter = new PlatformAdapter(dstConf.chain);
@@ -78,36 +86,38 @@ export class Wallet {
       dstBalance,
       dstMin,
     ] = await Promise.all([
-      src.getBalance(srcAddr),
-      src.getFeeBalance(srcAddr),
+      src.getBalance(srcAddress),
+      src.getFeeBalance(srcAddress),
       src.getDestinationFee(),
-      src.getDestinationFeeBalance(srcAddr),
+      src.getDestinationFeeBalance(srcAddress),
       src.getMin(),
-      dst.getBalance(dstAddr),
+      dst.getBalance(dstAddress),
       dst.getMin(),
     ]);
 
     const { source, destination } = srcConf.route;
 
     // Normalize destination fee asset
-    const dstFee = srcDestinationFee.copyWith(destination.fee.asset);
+    const dstFee = srcDestinationFee.fee.copyWith(destination.fee.asset);
+    const dstFeeBreakdown = srcDestinationFee.feeBreakdown;
 
     const ctx: TransferCtx = {
-      address: dstAddr,
+      address: dstAddress,
       amount: 1n, // Use 1 satoshi as init amount
       asset: source.asset,
       destination: {
         balance: dstBalance,
         chain: dstConf.chain,
         fee: dstFee,
+        feeBreakdown: dstFeeBreakdown,
       },
-      sender: srcAddr,
+      sender: srcAddress,
       source: {
         balance: srcBalance,
         chain: srcConf.chain,
         fee: srcFeeBalance.copyWith({ amount: 0n }),
         feeBalance: srcFeeBalance,
-        destinationFee: srcDestinationFee,
+        destinationFee: srcDestinationFee.fee,
         destinationFeeBalance: srcDestinationFeeBalance,
       },
     };
@@ -132,7 +142,7 @@ export class Wallet {
     if (srcFeeSwap || srcDestinationFeeSwap) {
       // Re-estimate fee if fee swap & add 5% margin
       srcFee = await src.getFee(ctx);
-      srcFee = srcFee.incByPct(5n);
+      srcFee = srcFee.padByPct(5n);
     }
 
     const dstEd = await dst.getEd();
@@ -147,7 +157,7 @@ export class Wallet {
     return {
       source: {
         balance: srcBalance,
-        destinationFee: srcDestinationFee,
+        destinationFee: srcDestinationFee.fee,
         destinationFeeBalance: srcDestinationFeeBalance,
         destinationFeeSwap: srcDestinationFeeSwap,
         fee: srcFee,
@@ -181,7 +191,7 @@ export class Wallet {
     } as Transfer;
   }
 
-  public async subscribeBalance(
+  async subscribeBalance(
     address: string,
     chain: string | AnyChain,
     observer: (balances: AssetAmount[]) => void

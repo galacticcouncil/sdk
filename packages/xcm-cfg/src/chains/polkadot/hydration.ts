@@ -6,7 +6,9 @@ import {
 import { defineChain, Chain } from 'viem';
 
 import {
+  aave,
   aca,
+  ajun,
   astr,
   bnc,
   cfg,
@@ -16,12 +18,18 @@ import {
   ded,
   dot,
   dota,
+  eth,
+  ewt,
   glmr,
   hdx,
   ibtc,
   intr,
   kilt,
+  ksm,
+  laos,
+  ldo,
   ldot,
+  link,
   myth,
   pen,
   pha,
@@ -42,20 +50,14 @@ import {
   weth,
   weth_awh,
   weth_mwh,
+  wsteth,
   wud,
   ztg,
-  ajun,
-  aave,
   susde,
   susds,
   sol,
-  tbtc,
-  ldo,
-  link,
   sky,
-  wsteth,
-  ksm,
-  laos,
+  tbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -73,8 +75,6 @@ const rpcHttpList = [
   'https://rpc.zipp.hydration.cloud',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
-  'https://3.rpc.hydration.cloud',
-  'https://5.rpc.hydration.cloud',
 ];
 
 const rpcWebsocketList = [
@@ -89,8 +89,6 @@ const rpcWebsocketList = [
   'wss://rpc.zipp.hydration.cloud',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',
-  'wss://3.rpc.hydration.cloud',
-  'wss://5.rpc.hydration.cloud',
 ];
 
 const evmChain: Chain = defineChain({
@@ -373,6 +371,24 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: eth,
+      decimals: 18,
+      id: 34,
+      min: 0.0000055,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: {
+            GlobalConsensus: {
+              Ethereum: {
+                chainId: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+    {
       asset: glmr,
       decimals: 18,
       id: 16,
@@ -450,6 +466,20 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: ewt,
+      decimals: 18,
+      id: 252525,
+      min: 0.022,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 3345,
+          },
+        },
+      },
+    },
+    {
       asset: ldo,
       decimals: 18,
       id: 1000796,
@@ -472,8 +502,8 @@ export const hydration = new EvmParachain({
               },
             },
           ],
-        },
-      },
+        }
+      }
     },
     {
       asset: ksm,

@@ -28,6 +28,7 @@ export interface TransferCtx {
     balance: AssetAmount;
     chain: AnyChain;
     fee: AssetAmount;
+    feeBreakdown: { [key: string]: bigint };
   };
   transact?: TransactCtx;
 }

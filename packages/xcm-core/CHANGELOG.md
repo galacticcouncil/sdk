@@ -1,5 +1,33 @@
 # @galacticcouncil/xcm-core
 
+## 7.0.0
+
+### Major Changes
+
+- 7c077e6: Fee breakdown & messageId ctx support
+- 6700565: ConfigBuilder: Support multiple asset routes
+
+## 6.6.0
+
+### Minor Changes
+
+- Support getQuote fallback price
+- Disable rank ping in EvmClient
+
+## 6.5.0
+
+### Minor Changes
+
+- Support opt metadata in SubstrateApis
+- 0d5426a: Support api metadata
+
+## 6.4.0
+
+### Minor Changes
+
+- Update ABI's
+- EvmClient fallback ranking alg
+
 ## 6.3.0
 
 ### Minor Changes

@@ -10,6 +10,7 @@ import {
   buildRoute,
   PoolService,
   PoolType,
+  RUNTIME_DECIMALS,
   TradeRouter,
 } from '@galacticcouncil/sdk';
 
@@ -40,7 +41,8 @@ export class HydrationDex implements Dex {
   async getQuote(
     assetIn: Asset,
     assetOut: Asset,
-    amountOut: AssetAmount
+    amountOut: AssetAmount,
+    fallbackPrice?: boolean
   ): Promise<SwapQuote> {
     const aIn = this.chain.getMetadataAssetId(assetIn);
     const aOut = this.chain.getMetadataAssetId(assetOut);
@@ -48,22 +50,48 @@ export class HydrationDex implements Dex {
 
     const router = await this.getRouter(1);
 
-    const mostLiquidRoute = await router.getMostLiquidRoute(
-      aIn.toString(),
-      aOut.toString()
-    );
+    try {
+      const mostLiquidRoute = await router.getMostLiquidRoute(
+        aIn.toString(),
+        aOut.toString()
+      );
 
-    const trade = await router.getBuy(
-      aIn.toString(),
-      aOut.toString(),
-      amount,
-      mostLiquidRoute
-    );
+      const trade = await router.getBuy(
+        aIn.toString(),
+        aOut.toString(),
+        amount,
+        mostLiquidRoute
+      );
 
-    const amountIn = BigInt(trade.amountIn.toNumber());
-    return {
-      amount: amountIn,
-      route: buildRoute(trade.swaps),
-    } as SwapQuote;
+      const amountIn = BigInt(trade.amountIn.toNumber());
+      return {
+        amount: amountIn,
+        route: buildRoute(trade.swaps),
+      } as SwapQuote;
+    } catch (e) {
+      if (fallbackPrice) {
+        const fallbackPrice = await this.getFallbackPrice(
+          assetIn,
+          amountOut.amount
+        );
+        return {
+          amount: fallbackPrice,
+        } as SwapQuote;
+      }
+      throw e;
+    }
+  }
+
+  private async getFallbackPrice(
+    asset: Asset,
+    amount: bigint
+  ): Promise<bigint> {
+    const api = await this.chain.api;
+    const id = this.chain.getAssetId(asset);
+    const systemToAssetPrice =
+      await api.query.multiTransactionPayment.acceptedCurrencies(id);
+    const fallbackPrice = BigInt(systemToAssetPrice.toString()) * amount;
+    const base = Math.pow(10, RUNTIME_DECIMALS);
+    return fallbackPrice / BigInt(base);
   }
 }

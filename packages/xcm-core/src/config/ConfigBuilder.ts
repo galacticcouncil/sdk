@@ -30,28 +30,48 @@ export function ConfigBuilder(service: ConfigService) {
                 destinationChains,
                 destination: (keyOrChain: string | AnyChain) => {
                   const destination = config.getChain(keyOrChain);
-                  const origin = config.getAssetRoute(
+                  const routes = config.getAssetRoutes(
                     asset,
                     source,
                     destination
                   );
-                  const reverse = config.getAssetRoute(
-                    origin.destination.asset,
-                    destination,
-                    source
-                  );
 
                   return {
-                    build: (): TransferConfigs => ({
-                      origin: {
-                        chain: source,
-                        route: origin,
-                      },
-                      reverse: {
-                        chain: destination,
-                        route: reverse,
-                      },
-                    }),
+                    routes,
+                    build: (assetOnDest?: string | Asset): TransferConfigs => {
+                      const sameAssetRoute = routes.find(
+                        (r) =>
+                          r.destination.asset.originSymbol ===
+                          r.source.asset.originSymbol
+                      );
+
+                      const defaultRoute = sameAssetRoute || routes[0];
+
+                      const assetToReceive = assetOnDest
+                        ? config.getAsset(assetOnDest)
+                        : defaultRoute.destination.asset;
+
+                      const [reverse] = config.getAssetRoutes(
+                        assetToReceive,
+                        destination,
+                        source
+                      );
+
+                      const origin = routes.find(
+                        (r) => r.destination.asset === assetToReceive
+                      );
+
+                      return {
+                        origin: {
+                          chain: source,
+                          route: origin!,
+                        },
+                        reverse: {
+                          chain: destination,
+                          route: reverse,
+                        },
+                      };
+                    },
                   };
                 },
               };

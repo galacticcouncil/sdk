@@ -15,6 +15,7 @@ import {
   dot,
   dota,
   eth,
+  ewt,
   glmr,
   hdx,
   ibtc,
@@ -22,7 +23,9 @@ import {
   kilt,
   ksm,
   laos,
+  ldo,
   ldot,
+  link,
   myth,
   nodl,
   pen,
@@ -30,6 +33,7 @@ import {
   pink,
   ring,
   sol,
+  sky,
   sub,
   susde,
   tbtc,
@@ -46,11 +50,8 @@ import {
   wbtc_mwh,
   weth_awh,
   weth_mwh,
-  wud,
-  ldo,
-  link,
-  sky,
   wsteth,
+  wud,
 } from '../../../assets';
 import {
   acala,
@@ -75,6 +76,7 @@ import {
   unique,
   zeitgeist,
   polkadotCex,
+  energywebx,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -275,6 +277,8 @@ const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain, 0.02)];
 
 const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain, 0.1)];
 
+const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
+
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
@@ -290,6 +294,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
+  toEthereumViaSnowbridgeTemplate(eth, eth),
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
@@ -363,6 +368,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toInterlay,
     ...toKilt,
     ...toLaos,
+    ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
     ...toNodle,

@@ -30,7 +30,7 @@ export const ethereum = new EvmChain({
     {
       asset: eth,
       decimals: 18,
-      id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      id: '0x0000000000000000000000000000000000000000',
     },
     {
       asset: aave,
@@ -103,13 +103,11 @@ export const ethereum = new EvmChain({
   explorer: 'https://etherscan.io/',
   rpcs: [
     'https://ethereum-rpc.publicnode.com',
-    'https://eth.llamarpc.com',
-    'https://1rpc.io/eth',
+    'https://cosmopolitan-dimensional-diagram.quiknode.pro',
   ],
   snowbridge: {
     id: 1,
     gateway: '0x27ca963c279c93801941e1eb8799c23f407d68e7',
-    bridgeFee: 100_000_000n,
   },
   wormhole: {
     id: 2,

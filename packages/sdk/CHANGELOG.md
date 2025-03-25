@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 5.6.1
+
+### Patch Changes
+
+- Fix APR api
+
 ## 5.6.0
 
 ### Minor Changes

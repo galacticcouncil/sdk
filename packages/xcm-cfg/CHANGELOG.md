@@ -1,5 +1,48 @@
 # @galacticcouncil/xcm-cfg
 
+## 8.0.0
+
+### Major Changes
+
+- ee2fd63: Xcm builder instructions (fee est)
+- 0beee5c: Set topics for erc20/native snowbridge outbound transfers
+- 11b8565: Dynamic snowbridge fee estimations
+- d6084e7: Native eth transfer config (Hydration <-> Ethereum)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@7.0.0
+
+## 7.10.0
+
+### Minor Changes
+
+- 331ac1f: Update bifrost RPC list
+
+## 7.9.0
+
+### Minor Changes
+
+- Support getQuote fallback price for hydration DEX
+- Add native ETH token config
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.6.0
+
+## 7.8.0
+
+### Minor Changes
+
+- 460bcdd: Integrate Energy Web X parachain
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@6.4.0
+
 ## 7.7.0
 
 ### Minor Changes

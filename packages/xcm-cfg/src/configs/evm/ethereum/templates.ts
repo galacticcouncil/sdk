@@ -6,7 +6,7 @@ import {
   ContractBuilder,
   FeeAmountBuilder,
 } from '../../../builders';
-import { hydration, moonbeam } from '../../../chains';
+import { hydration, moonbeam, assetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
 export function toHydrationViaWormholeTemplate(
@@ -63,7 +63,9 @@ export function toHydrationViaSnowbridgeTemplate(
       chain: hydration,
       asset: assetOut,
       fee: {
-        amount: FeeAmountBuilder().Snowbridge().quoteSendTokenFee(),
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateInboundFee({ hub: assetHub }),
         asset: eth,
       },
     },

@@ -1,4 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { HexString } from '@polkadot/util/types';
 import { LRUCache } from 'lru-cache';
 
 export class SubstrateApis {
@@ -48,16 +49,17 @@ export class SubstrateApis {
 
   public async getPromise(
     endpoints: string[],
-    maxRetries?: number
+    maxRetries?: number,
+    metadata?: Record<string, HexString>
   ): Promise<ApiPromise> {
     let currentRetry = 0;
-
     return new Promise((resolve) => {
       const provider = new WsProvider(endpoints);
       provider.on('connected', async () => {
         const promise = ApiPromise.create({
           provider,
           noInitWarn: true,
+          metadata,
         });
 
         console.log(`Connected to ${provider.endpoint}.`);
@@ -77,7 +79,8 @@ export class SubstrateApis {
 
   public async api(
     ws: string | string[],
-    maxRetries?: number
+    maxRetries?: number,
+    metadata?: Record<string, HexString>
   ): Promise<ApiPromise> {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
@@ -87,7 +90,7 @@ export class SubstrateApis {
     if (cacheKey) {
       promise = this._cache.get(cacheKey)!;
     } else {
-      promise = this.getPromise(endpoints, maxRetries);
+      promise = this.getPromise(endpoints, maxRetries, metadata);
       this._cache.set(this.createCacheKey(endpoints), promise, {
         noDisposeOnSet: true,
       });

@@ -3,18 +3,15 @@ import { AnyChain } from 'chain';
 export type SnowbridgeDef = {
   id: number;
   gateway: string;
-  bridgeFee: bigint;
 };
 
 export class Snowbridge {
   readonly id: number;
   readonly gateway: string;
-  readonly bridgeFee: bigint;
 
-  constructor({ id, gateway, bridgeFee }: SnowbridgeDef) {
+  constructor({ id, gateway }: SnowbridgeDef) {
     this.id = id;
     this.gateway = gateway;
-    this.bridgeFee = bridgeFee;
   }
 
   static fromChain(chain: AnyChain): Snowbridge {
@@ -34,9 +31,5 @@ export class Snowbridge {
 
   getGateway(): string {
     return this.gateway;
-  }
-
-  getBridgeFee(): bigint {
-    return this.bridgeFee;
   }
 }

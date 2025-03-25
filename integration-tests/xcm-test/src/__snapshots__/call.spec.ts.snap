@@ -413,6 +413,13 @@ exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration ETH [eth] transfer 2`] = `
+[
+  "ethereum-hydration-eth",
+  "0x52054834000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007f200000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000001274ff700000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
+]
+`;
+
 exports[`Wallet with XCM config should return valid calldata for Ethereum -> Hydration USDC [usdc] transfer 1`] = `
 [
   "ethereum-hydration-usdc",
@@ -721,6 +728,13 @@ exports[`Wallet with XCM config should return valid calldata for Hydration -> Et
 ]
 `;
 
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum ETH [eth] transfer 1`] = `
+[
+  "hydration-ethereum-eth",
+  "0x1d03046b0d04010100a10f0408010000074e063d2c0402010907040013000064a7b3b6e00d0204010002040c16040d010000010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d10010102010907040002010907040c1300000004000d0102040001030000000000000000000000000000000000000000002cfdc741002debac6d3fb93851d98ce851bc4d8fadcbbadcd0c4088004d674e5112cfdc741002debac6d3fb93851d98ce851bc4d8fadcbbadcd0c4088004d674e51100",
+]
+`;
+
 exports[`Wallet with XCM config should return valid calldata for Hydration -> Ethereum USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-ethereum-usdc_mwh",
@@ -802,6 +816,13 @@ exports[`Wallet with XCM config should return valid calldata for Hydration -> Ki
 [
   "hydration-kilt-kilt",
   "0x01010489001c0000000080c6a47e8d030000000000000000000401020099200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Laos LAOS [laos] transfer 1`] = `
+[
+  "hydration-laos-laos",
+  "0xd00489002a0d0000000064a7b3b6e00d000000000000000004010200a9340300000000000000000000000000000000000000000000",
 ]
 `;
 
@@ -924,6 +945,13 @@ exports[`Wallet with XCM config should return valid calldata for Hydration -> Ze
 ]
 `;
 
+exports[`Wallet with XCM config should return valid calldata for Hydration -> Zeitgeist GLMR [glmr] transfer 2`] = `
+[
+  "hydration-zeitgeist-glmr",
+  "0x010104890010000000000064a7b3b6e00d000000000000000004010200b1200100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d00",
+]
+`;
+
 exports[`Wallet with XCM config should return valid calldata for Hydration -> Zeitgeist USDC [usdc_mwh] transfer 1`] = `
 [
   "hydration-zeitgeist-usdc_mwh",
@@ -1026,6 +1054,13 @@ exports[`Wallet with XCM config should return valid calldata for Kusama -> Karur
 [
   "kusama-karura-ksm",
   "0xf804630804000100411f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0404000000070010a5d4e80000000000",
+]
+`;
+
+exports[`Wallet with XCM config should return valid calldata for Laos -> Hydration LAOS [laos] transfer 1`] = `
+[
+  "laos-hydration-laos",
+  "0x0501041f0804010100c91f0400010100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d040400000013000064a7b3b6e00d0000000000",
 ]
 `;
 

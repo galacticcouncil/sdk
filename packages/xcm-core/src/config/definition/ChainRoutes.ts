@@ -26,7 +26,7 @@ export class ChainRoutes {
           transact,
           tags,
         }) => [
-          `${source.asset.key}-${destination.chain.key}`,
+          `${source.asset.key}-${destination.chain.key}-${destination.asset.key}`,
           new AssetRoute({
             source,
             destination,
@@ -62,13 +62,15 @@ export class ChainRoutes {
     return this.getAssetRoutes(asset).map((route) => route.destination.chain);
   }
 
-  getAssetRoute(asset: Asset, destination: AnyChain): AssetRoute {
-    const route = this.routes.get(`${asset.key}-${destination.key}`);
-    if (!route) {
+  getAssetDestinationRoutes(asset: Asset, destination: AnyChain): AssetRoute[] {
+    const routes = Array.from(this.routes.values()).filter(
+      (r) => r.source.asset === asset && r.destination.chain === destination
+    );
+    if (routes.length === 0) {
       throw new Error(
         `AssetRoute for asset ${asset.key} and destination ${destination.key} not found`
       );
     }
-    return route;
+    return routes;
   }
 }

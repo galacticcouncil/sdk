@@ -19,17 +19,24 @@ const sendToken = (): ContractConfigBuilder => ({
     const ctxSb = Sb.fromChain(ctx);
 
     const assetId = ctx.getAssetId(asset);
+    const parsedAssetId = parseAssetId(assetId);
+
+    const isNativeTransfer = asset.originSymbol === 'ETH';
+
+    const bridgeFeeInDot = destination.feeBreakdown['bridgeFeeInDot'];
+    const bridgeFeeInWei = destination.fee.amount;
+
     return new ContractConfig({
       abi: Abi.Snowbridge,
       address: ctxSb.getGateway(),
       args: [
-        parseAssetId(assetId),
+        parsedAssetId,
         rcv.parachainId,
         [1, addr.getPubKey(address) as `0x${string}`],
-        ctxSb.getBridgeFee(),
+        bridgeFeeInDot,
         amount,
       ],
-      value: destination.fee.amount,
+      value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
       func: 'sendToken',
       module: 'Snowbridge',
     });

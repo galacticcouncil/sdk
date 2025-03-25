@@ -29,7 +29,10 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.buildCall(sender, amount, source.feeBalance, transfer);
   }
 
-  async getDestinationFee(): Promise<AssetAmount> {
+  async getDestinationFee(): Promise<{
+    fee: AssetAmount;
+    feeBreakdown: { [key: string]: bigint };
+  }> {
     const { chain, route } = this.config;
     const { source, destination, transact } = route;
 
@@ -38,22 +41,33 @@ export class DataOriginProcessor extends DataProcessor {
     const feeDecimals = await this.getDecimals(feeAsset);
 
     if (Number.isFinite(feeAmount)) {
-      return AssetAmount.fromAsset(feeAsset, {
+      const destinationFee = AssetAmount.fromAsset(feeAsset, {
         amount: big.toBigInt(feeAmount as number, feeDecimals),
         decimals: feeDecimals,
       });
+      return {
+        fee: destinationFee,
+        feeBreakdown: {},
+      };
     }
 
     const feeConfigBuilder = feeAmount as FeeAmountConfigBuilder;
-    const fee = await feeConfigBuilder.build({
-      asset: feeAsset,
+    const { amount, breakdown } = await feeConfigBuilder.build({
+      feeAsset: feeAsset,
+      transferAsset: source.asset,
       source: transact ? transact.chain : chain,
       destination: destination.chain,
     });
-    return AssetAmount.fromAsset(feeAsset, {
-      amount: fee,
+
+    const fee = AssetAmount.fromAsset(feeAsset, {
+      amount: amount,
       decimals: feeDecimals,
     });
+
+    return {
+      fee: fee,
+      feeBreakdown: breakdown,
+    };
   }
 
   async getDestinationFeeBalance(address: string): Promise<AssetAmount> {
@@ -141,10 +155,25 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   private async getTransfer(ctx: TransferCtx) {
-    const { route } = this.config;
+    const { chain, route } = this.config;
     const { contract, extrinsic, program } = route;
 
-    const callable = contract || extrinsic || program;
+    if (extrinsic) {
+      const { address, amount, asset, sender } = ctx;
+      const substrate = await SubstrateService.create(chain as Parachain);
+      const messageId = await substrate.buildMessageId(
+        sender,
+        amount,
+        asset.originSymbol,
+        address
+      );
+      return extrinsic.build({
+        ...ctx,
+        messageId: messageId,
+      });
+    }
+
+    const callable = contract || program;
     if (callable) {
       return callable.build({
         ...ctx,

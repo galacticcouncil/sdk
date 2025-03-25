@@ -1,5 +1,5 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { Call, DryRunResult, SubstrateCall } from '@galacticcouncil/xcm-sdk';
+import { SubstrateCall, TransferBuilder } from '@galacticcouncil/xcm-sdk';
 
 import {
   getWormholeChainById,
@@ -39,14 +39,12 @@ const balanceSubscription = await wallet.subscribeBalance(
   balanceObserver
 );
 
-// Get transfer input data (dialog)
-const transfer = await wallet.transfer(
-  asset,
-  srcAddr,
-  srcChain,
-  destAddr,
-  destChain
-);
+// Build transfer input data
+const transfer = await TransferBuilder(wallet)
+  .withAsset(asset)
+  .withSource(srcChain)
+  .withDestination(destChain)
+  .build({ srcAddress: srcAddr, dstAddress: destAddr });
 
 // Validate transfer
 const status = await transfer.validate();

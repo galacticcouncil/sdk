@@ -56,7 +56,7 @@ export class AssetAmount extends Asset {
     });
   }
 
-  incByPct(pct: bigint) {
+  padByPct(pct: bigint) {
     return new AssetAmount({
       ...this,
       amount: this.amount + (this.amount * pct) / 100n,

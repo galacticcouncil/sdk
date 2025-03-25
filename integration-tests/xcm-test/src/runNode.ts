@@ -10,6 +10,12 @@ const main = async () => {
     port: 17777,
     wasmOverride: ['wasm', wasmOverride].join('/'),
   });
+  const block = await ctx.chain.getBlock();
+  if (block) {
+    console.log('Setting HEAD at', block.number);
+    ctx.dev.setHead(block.number);
+  }
+  console.log(ctx.api.runtimeVersion.toHuman());
 };
 
 main()
