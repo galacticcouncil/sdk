@@ -1,10 +1,11 @@
 import { BigNumber } from './utils/bignumber';
 
 export enum PoolType {
-  XYK = 'Xyk',
+  Aave = 'Aave',
   LBP = 'Lbp',
-  Stable = 'Stableswap',
   Omni = 'Omnipool',
+  Stable = 'Stableswap',
+  XYK = 'Xyk',
 }
 
 export enum PoolError {

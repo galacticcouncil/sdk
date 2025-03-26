@@ -2,6 +2,7 @@ export { CachingPoolService } from './CachingPoolService';
 export { PoolFactory } from './PoolFactory';
 export { PoolService } from './PoolService';
 export * from './PoolUtils';
+export { AavePool } from './aave/AavePool';
 export { XykPool } from './xyk/XykPool';
 export { XykMath } from './xyk/XykMath';
 export { OmniPool } from './omni/OmniPool';

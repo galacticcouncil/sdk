@@ -2,12 +2,15 @@ import { LbpPool, LbpPoolBase } from './lbp/LbpPool';
 import { OmniPool, OmniPoolBase } from './omni/OmniPool';
 import { StableSwap, StableSwapBase } from './stable/StableSwap';
 import { XykPool } from './xyk/XykPool';
+import { AavePool } from './aave/AavePool';
 
 import { Pool, PoolBase, PoolType } from '../types';
 
 export class PoolFactory {
   static get(pool: PoolBase): Pool {
     switch (pool.type) {
+      case PoolType.Aave:
+        return AavePool.fromPool(pool);
       case PoolType.XYK:
         return XykPool.fromPool(pool);
       case PoolType.Omni:
