@@ -15,6 +15,7 @@ import {
   dot,
   dota,
   eth,
+  ewt,
   glmr,
   hdx,
   ibtc,
@@ -22,7 +23,9 @@ import {
   kilt,
   ksm,
   laos,
+  ldo,
   ldot,
+  link,
   myth,
   nodl,
   pen,
@@ -30,6 +33,7 @@ import {
   pink,
   ring,
   sol,
+  sky,
   sub,
   susde,
   tbtc,
@@ -46,8 +50,8 @@ import {
   wbtc_mwh,
   weth_awh,
   weth_mwh,
+  wsteth,
   wud,
-  ewt,
 } from '../../../assets';
 import {
   acala,
@@ -294,6 +298,11 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
+  // Waiting for Snowbridge V2
+  //toEthereumViaSnowbridgeTemplate(ldo, ldo),
+  toEthereumViaSnowbridgeTemplate(link, link),
+  toEthereumViaSnowbridgeTemplate(sky, sky),
+  toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [

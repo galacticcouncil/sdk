@@ -11,6 +11,7 @@
     "test"
   ],
   "scripts": {
+    "node": "npx tsx ./src/runNode.ts",
     "test:call": "jest --silent call.spec.ts",
     "test:e2e": "jest --silent --forceExit e2e.spec.ts"
   },
@@ -18,7 +19,7 @@
     "@acala-network/chopsticks-testing": "1.0.1"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-cfg": "^8.0.0",
-    "@galacticcouncil/xcm-sdk": "^9.1.0"
+    "@galacticcouncil/xcm-cfg": "^8.1.0",
+    "@galacticcouncil/xcm-sdk": "^9.1.1"
   }
 }

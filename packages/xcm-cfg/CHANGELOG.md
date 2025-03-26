@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 8.1.0
+
+### Minor Changes
+
+- Add LINK, SKY, wstETH support
+
 ## 8.0.0
 
 ### Major Changes

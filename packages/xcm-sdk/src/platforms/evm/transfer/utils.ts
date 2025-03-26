@@ -7,7 +7,7 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
     config.args[0] === '0x0000000000000000000000000000000000000000';
 
   const isWormholeNative =
-    config.module === 'Wormhole' &&
+    config.module === 'TokenBridge' &&
     ['wrapAndTransferETHWithPayload', 'wrapAndTransferETH'].includes(
       config.func
     );
