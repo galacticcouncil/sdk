@@ -68,8 +68,7 @@ export class AavePoolClient extends PoolClient {
   }
 
   protected subscribePoolChange(pool: PoolBase): UnsubscribePromise {
-    const tokens = pool.tokens.map((t) => t.id);
-    const [reserve] = pool.tokens;
+    const [reserve, atoken] = pool.tokens;
 
     const reserveId = this.getReserveH160Id(reserve);
 
@@ -83,8 +82,8 @@ export class AavePoolClient extends PoolClient {
           const aIn = assetIn.replace(/,/g, '');
           const aOut = assetOut.replace(/,/g, '');
 
-          if (tokens.includes(aIn) && tokens.includes(aOut)) {
-            this.log('Sync AAVE [router:Executed]', tokens);
+          if (aIn === atoken.id || aOut === atoken.id) {
+            this.log(`Sync AAVE [router:Executed] :: ${aIn}:${aOut}`);
             this.updatePoolState(pool);
           }
         }
