@@ -16,7 +16,7 @@ export abstract class PoolClient extends BalanceClient {
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
-    console.log(this.getPoolType(), 'mem pools', mem, '✅');
+    this.log(this.getPoolType(), 'mem pools', mem, '✅');
     return this.getPools();
   });
 
@@ -55,19 +55,26 @@ export abstract class PoolClient extends BalanceClient {
     this.pools = await this.loadPools();
     this.subs = this.subscribe();
     const type = this.getPoolType();
-    console.log(type, `pools(${this.augmentedPools.length})`, '✅');
-    console.log(type, `subs(${this.subs.length})`, '✅');
+    this.log(type, `pools(${this.augmentedPools.length})`, '✅');
+    this.log(type, `subs(${this.subs.length})`, '✅');
     return this.augmentedPools;
   }
 
   private subscribe() {
     const subs = this.augmentedPools.map((pool: PoolBase) => {
-      const poolSubs = [this.subscribeTokensPoolBalance(pool)];
+      const poolSubs = [];
 
       try {
         const subChange = this.subscribePoolChange(pool);
         poolSubs.push(subChange);
       } catch (e) {}
+
+      if (pool.type === PoolType.Aave) {
+        return poolSubs;
+      }
+
+      const tokenSub = this.subscribeTokensPoolBalance(pool);
+      poolSubs.push(tokenSub);
 
       if (this.hasSystemAsset(pool)) {
         const subSystem = this.subscribeSystemPoolBalance(pool);
@@ -111,7 +118,7 @@ export abstract class PoolClient extends BalanceClient {
 
   private subscribeLog(pool: PoolBase) {
     const poolAddr = pool.address.substring(0, 10).concat('...');
-    console.log(`${pool.type} [${poolAddr}] balance subscribed`);
+    this.log(`${pool.type} [${poolAddr}] balance subscribed`);
   }
 
   private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {

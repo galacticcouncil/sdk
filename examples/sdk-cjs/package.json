@@ -3,8 +3,8 @@
   "private": true,
   "main": "index.cjs",
   "scripts": {
-    "start": "node index.cjs",
-    "start:xcm": "node xcm.cjs"
+    "start": "GC_DEBUG=true node index.cjs",
+    "start:xcm": "GC_DEBUG=true node xcm.cjs"
   },
   "keywords": [],
   "devDependencies": {

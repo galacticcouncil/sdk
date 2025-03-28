@@ -3,13 +3,14 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { memoize1 } from '@thi.ng/memoize';
 
+import { AavePoolClient } from './aave/AavePoolClient';
 import { LbpPoolClient } from './lbp/LbpPoolClient';
 import { OmniPoolClient } from './omni/OmniPoolClient';
 import { XykPoolClient } from './xyk/XykPoolClient';
 import { StableSwapClient } from './stable/StableSwapClient';
 import { buildRoute } from './PoolUtils';
 
-import { AssetClient } from '../client';
+import { AssetClient, PolkadotApiClient } from '../client';
 import { PoolNotFound } from '../errors';
 import {
   Asset,
@@ -27,11 +28,12 @@ import { BigNumber } from '../utils/bignumber';
 
 import { PoolClient } from './PoolClient';
 
-export class PoolService implements IPoolService {
+export class PoolService extends PolkadotApiClient implements IPoolService {
   protected readonly api: ApiPromise;
 
   protected readonly assetClient: AssetClient;
 
+  protected readonly aaveClient: AavePoolClient;
   protected readonly xykClient: XykPoolClient;
   protected readonly omniClient: OmniPoolClient;
   protected readonly lbpClient: LbpPoolClient;
@@ -42,18 +44,21 @@ export class PoolService implements IPoolService {
   protected onChainAssets: Asset[] = [];
 
   private memRegistry = memoize1((x: number) => {
-    console.log('Registry mem sync', x, '✅');
+    this.log('Registry mem sync', x, '✅');
     return this.syncRegistry();
   });
 
   constructor(api: ApiPromise) {
+    super(api);
     this.api = api;
     this.assetClient = new AssetClient(this.api);
+    this.aaveClient = new AavePoolClient(this.api);
     this.xykClient = new XykPoolClient(this.api);
     this.omniClient = new OmniPoolClient(this.api);
     this.lbpClient = new LbpPoolClient(this.api);
     this.stableClient = new StableSwapClient(this.api);
     this.clients = [
+      this.aaveClient,
       this.xykClient,
       this.omniClient,
       this.lbpClient,
@@ -98,6 +103,7 @@ export class PoolService implements IPoolService {
   }
 
   unsubscribe() {
+    this.aaveClient.unsubscribe();
     this.xykClient.unsubscribe();
     this.omniClient.unsubscribe();
     this.lbpClient.unsubscribe();
@@ -106,6 +112,8 @@ export class PoolService implements IPoolService {
 
   async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
     switch (pool.type) {
+      case PoolType.Aave:
+        return this.aaveClient.getPoolFees(poolPair, pool.address);
       case PoolType.XYK:
         return this.xykClient.getPoolFees(poolPair, pool.address);
       case PoolType.Omni:

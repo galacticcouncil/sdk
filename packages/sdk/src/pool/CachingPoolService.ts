@@ -34,7 +34,7 @@ export class CachingPoolService extends PoolService {
   }
 
   async destroy(): Promise<void> {
-    console.log(`Destroying pool cache! \nItems: [${this.feeCache.length}]`);
+    this.log(`Destroying pool cache! \nItems: [${this.feeCache.length}]`);
     this.feeCache.release();
     this.disconnectSubscribeNewHeads?.();
   }
