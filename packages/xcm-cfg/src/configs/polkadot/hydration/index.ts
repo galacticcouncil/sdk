@@ -197,6 +197,8 @@ const toAstar: AssetRoute[] = [
   toTransferTemplate(pha, astar, 0.3),
   toTransferTemplate(vdot, astar, 0.0004),
   toTransferTemplate(vastr, astar, 0.005),
+  toTransferTemplate(usdt, astar, 0.3),
+  toTransferTemplate(usdc, astar, 0.3),
 ];
 
 const toBifrost: AssetRoute[] = [
@@ -207,6 +209,8 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(astr, bifrost, 0.5),
   toTransferTemplate(glmr, bifrost, 0.1),
   toTransferTemplate(ibtc, bifrost, 0.000005),
+  toTransferTemplate(usdt, bifrost, 0.3),
+  toTransferTemplate(usdc, bifrost, 0.3),
 ];
 
 const toCentrifuge: AssetRoute[] = [
@@ -220,6 +224,8 @@ const toInterlay: AssetRoute[] = [
   toTransferTemplate(intr, interlay, 0.0019213457),
   toTransferTemplate(dot, interlay, 0.1),
   toTransferTemplate(hdx, interlay, 0.5),
+  toTransferTemplate(usdt, interlay, 0.3),
+  toTransferTemplate(usdc, interlay, 0.3),
   new AssetRoute({
     source: {
       asset: vdot,
@@ -245,6 +251,8 @@ const toMoonbeam: AssetRoute[] = [
   toTransferTemplate(hdx, moonbeam, 5),
   toTransferTemplate(glmr, moonbeam, 0.01),
   toTransferTemplate(dot, moonbeam, 0.1),
+  toTransferTemplate(usdt, moonbeam, 0.3),
+  toTransferTemplate(usdc, moonbeam, 0.3),
   toMoonbeamErc20Template(dai_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
