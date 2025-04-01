@@ -1,5 +1,18 @@
 # @galacticcouncil/sdk
 
+## 6.0.0
+
+### Major Changes
+
+- [[#411](https://github.com/galacticcouncil/sdk/issues/143)] Drifting peg stableswap support
+- [[#130](https://github.com/galacticcouncil/sdk/issues/145)] Aave trader AMM
+- [[#130](https://github.com/galacticcouncil/sdk/issues/148)] Pool TLRU ctx cache
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-stableswap@2.0.0
+
 ## 5.6.1
 
 ### Patch Changes

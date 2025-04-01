@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk",
-  "version": "5.6.1",
+  "version": "6.0.0",
   "description": "Galactic off-chain routing & optimization of orders across pools for best price execution",
   "author": "GalacticCouncil",
   "repository": {
@@ -35,7 +35,7 @@
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
     "@galacticcouncil/math-omnipool": "^1.1.0",
-    "@galacticcouncil/math-stableswap": "^1.2.0",
+    "@galacticcouncil/math-stableswap": "^2.0.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@thi.ng/cache": "^2.1.35",
     "@thi.ng/memoize": "^4.0.2",

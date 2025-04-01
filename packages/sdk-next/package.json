@@ -41,7 +41,7 @@
     "@galacticcouncil/math-lbp": "^1.0.0",
     "@galacticcouncil/math-liquidity-mining": "^1.0.0",
     "@galacticcouncil/math-omnipool": "^1.1.0",
-    "@galacticcouncil/math-stableswap": "^1.2.0",
+    "@galacticcouncil/math-stableswap": "^2.0.0",
     "@galacticcouncil/math-xyk": "^1.0.0",
     "@noble/hashes": "^1.6.1",
     "@thi.ng/cache": "^2.1.35",
