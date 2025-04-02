@@ -43,8 +43,8 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
 
   protected onChainAssets: Asset[] = [];
 
-  private memRegistry = memoize1((x: number) => {
-    this.log('Registry mem sync', x, '✅');
+  private memRegistry = memoize1((mem: number) => {
+    this.log(`Registry mem ${mem} sync`);
     return this.syncRegistry();
   });
 

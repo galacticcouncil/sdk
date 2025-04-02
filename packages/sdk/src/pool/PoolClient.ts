@@ -2,6 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
 import { memoize1 } from '@thi.ng/memoize';
+import { TLRUCache } from '@thi.ng/cache';
 
 import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
@@ -15,10 +16,20 @@ export abstract class PoolClient extends BalanceClient {
   private assets: Map<string, Asset> = new Map([]);
   private mem: number = 0;
 
-  private memPools = memoize1((mem: number) => {
-    this.log(this.getPoolType(), 'mem pools', mem, '✅');
-    return this.getPools();
+  private memPoolsCache = new TLRUCache<number, Promise<PoolBase[]>>(null, {
+    maxlen: 1,
+    ttl: 60 * 60 * 1000,
+    release: (mem) => {
+      if (this.mem > mem) {
+        this.log(this.getPoolType(), `mem ${mem} released at`, new Date());
+      }
+    },
   });
+
+  private memPools = memoize1((mem: number) => {
+    this.log(this.getPoolType(), `mem ${mem} sync`);
+    return this.getPools();
+  }, this.memPoolsCache);
 
   constructor(api: ApiPromise) {
     super(api);
@@ -47,7 +58,7 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   async getPoolsMem(): Promise<PoolBase[]> {
-    return this.memPools(this.mem);
+    return await this.memPools(this.mem);
   }
 
   async getPools(): Promise<PoolBase[]> {
@@ -55,8 +66,8 @@ export abstract class PoolClient extends BalanceClient {
     this.pools = await this.loadPools();
     this.subs = this.subscribe();
     const type = this.getPoolType();
-    this.log(type, `pools(${this.augmentedPools.length})`, '✅');
-    this.log(type, `subs(${this.subs.length})`, '✅');
+    this.log(type, `mem ${this.mem} pools(${this.augmentedPools.length})`);
+    this.log(type, `mem ${this.mem} subs(${this.subs.length})`);
     return this.augmentedPools;
   }
 
@@ -118,7 +129,7 @@ export abstract class PoolClient extends BalanceClient {
 
   private subscribeLog(pool: PoolBase) {
     const poolAddr = pool.address.substring(0, 10).concat('...');
-    this.log(`${pool.type} [${poolAddr}] balance subscribed`);
+    this.log(`${pool.type} mem ${this.mem} [${poolAddr}] balance subscribed`);
   }
 
   private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {

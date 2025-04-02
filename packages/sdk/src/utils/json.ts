@@ -19,3 +19,7 @@ export function findNestedObj(obj: any, keyToFind: any, valToFind: any) {
   });
   return foundObj;
 }
+
+export const bnFormatter = (_: any, nestedValue: any) => {
+  return typeof nestedValue === 'bigint' ? nestedValue.toString() : nestedValue;
+};
