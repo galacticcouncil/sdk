@@ -1,29 +1,22 @@
 import { ApiPromise } from '@polkadot/api';
-import {
-  PoolService,
-  TradeRouter,
-  HYDRADX_OMNIPOOL_ADDRESS,
-} from '@galacticcouncil/sdk';
+import { PoolService, TradeRouter } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
-
-import { WalletCtx } from '../../../../src/api';
 
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
     const router = new TradeRouter(poolService);
-    const walletCtx = new WalletCtx(api);
 
-    const result = await Promise.all([
-      router.getBestSpotPrice('5', '0'),
-      router.getBestSpotPrice('5', '0'),
-      router.getBestSpotPrice('5', '0'),
-      router.getBestSpotPrice('5', '0'),
-      router.getBestSpotPrice('5', '0'),
+    await Promise.all([
+      router.getPools(),
+      router.getPools(),
+      router.getPools(),
+      router.getPools(),
+      router.getPools(),
+      router.getPools(),
     ]);
-    console.log('Call spot 5x simultaneously', result);
 
     api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
       const block = lastHeader.number.toString();
@@ -38,10 +31,17 @@ class GetOnBlockPoolChangeExample extends PolkadotExecutor {
           });
         });
       });
-
-      const balance = await walletCtx.getBalancesMem(HYDRADX_OMNIPOOL_ADDRESS);
-      console.log('balance', balance);
     });
+
+    setTimeout(() => {
+      console.log('Sync reg 1 ');
+      poolService.syncRegistry();
+    }, 45 * 1000);
+
+    setTimeout(() => {
+      console.log('Sync reg 2');
+      poolService.syncRegistry();
+    }, 90 * 1000);
 
     return [];
   }

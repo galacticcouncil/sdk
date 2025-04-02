@@ -184,7 +184,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountOut.toString(),
       this.amplification.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -201,7 +202,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetIn),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -218,7 +220,8 @@ export class StableSwap implements Pool {
       amountOut.toString(),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -248,7 +251,8 @@ export class StableSwap implements Pool {
       poolPair.assetOut.toString(),
       poolPair.assetIn.toString(),
       this.totalIssuance.toString(),
-      '0'
+      '0',
+      this.getPegs()
     );
 
     if (poolPair.assetOut == this.id) {
@@ -275,7 +279,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountIn.toString(),
       this.amplification.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -292,7 +297,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -308,7 +314,8 @@ export class StableSwap implements Pool {
       this.getAssets(poolPair.assetIn, amountIn),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0'
+      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      this.getPegs()
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -338,7 +345,8 @@ export class StableSwap implements Pool {
       poolPair.assetIn.toString(),
       poolPair.assetOut.toString(),
       this.totalIssuance.toString(),
-      '0'
+      '0',
+      this.getPegs()
     );
 
     if (poolPair.assetIn == this.id) {
@@ -362,6 +370,11 @@ export class StableSwap implements Pool {
       feeDenominator
     );
     return BigInt(fee);
+  }
+
+  private getPegs(): string {
+    const pegs = StableMath.defaultPegs(this.tokens.length - 1);
+    return JSON.stringify(pegs);
   }
 
   private getReserves(): string {

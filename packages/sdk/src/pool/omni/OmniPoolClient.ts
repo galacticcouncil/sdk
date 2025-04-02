@@ -98,7 +98,7 @@ export class OmniPoolClient extends PoolClient {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
 
-    const oraclePool = 'omnipool';
+    const oracleName = 'omnipool';
     const oraclePeriod = 'Short';
 
     const oracleKey = (asset: string) => {
@@ -113,10 +113,10 @@ export class OmniPoolClient extends PoolClient {
         this.api.query.dynamicFees.assetFee(feeAsset),
         this.api.query.emaOracle.oracles<
           Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-        >(oraclePool, oracleKey(feeAsset), oraclePeriod),
+        >(oracleName, oracleKey(feeAsset), oraclePeriod),
         this.api.query.emaOracle.oracles<
           Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-        >(oraclePool, oracleKey(protocolAsset), oraclePeriod),
+        >(oracleName, oracleKey(protocolAsset), oraclePeriod),
       ]);
 
     const [assetFeeMin, assetFee, assetFeeMax] = this.getAssetFee(

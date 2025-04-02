@@ -31,6 +31,8 @@ export type StableSwapBase = PoolBase & {
   id: string;
   fee: PoolFee;
   totalIssuance: string;
+  pegs: string[][];
+  pegsFee: PoolFee;
 };
 
 export class StableSwap implements Pool {
@@ -44,6 +46,8 @@ export class StableSwap implements Pool {
   id: string;
   fee: PoolFee;
   totalIssuance: string;
+  pegs: string[][];
+  pegsFee: PoolFee;
 
   static fromPool(pool: StableSwapBase): StableSwap {
     return new StableSwap(
@@ -55,7 +59,9 @@ export class StableSwap implements Pool {
       pool.amplification,
       pool.id,
       pool.fee,
-      pool.totalIssuance
+      pool.totalIssuance,
+      pool.pegs,
+      pool.pegsFee
     );
   }
 
@@ -68,7 +74,9 @@ export class StableSwap implements Pool {
     amplification: string,
     id: string,
     fee: PoolFee,
-    totalIssuance: string
+    totalIssuance: string,
+    pegs: string[][],
+    pegsFee: PoolFee
   ) {
     this.type = PoolType.Stable;
     this.address = address;
@@ -80,6 +88,8 @@ export class StableSwap implements Pool {
     this.id = id;
     this.fee = fee;
     this.totalIssuance = totalIssuance;
+    this.pegs = pegs;
+    this.pegsFee = pegsFee;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {
@@ -193,7 +203,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountOut.toFixed(0),
       this.amplification,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -210,7 +221,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetIn),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -227,7 +239,8 @@ export class StableSwap implements Pool {
       amountOut.toFixed(0),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -257,7 +270,8 @@ export class StableSwap implements Pool {
       poolPair.assetOut,
       poolPair.assetIn,
       this.totalIssuance,
-      '0'
+      '0',
+      this.getPegs()
     );
 
     if (poolPair.assetOut == this.id) {
@@ -284,7 +298,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountIn.toFixed(0),
       this.amplification,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -301,7 +316,8 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -317,7 +333,8 @@ export class StableSwap implements Pool {
       this.getAssets(poolPair.assetIn, amountIn),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString()
+      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      this.getPegs()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -347,7 +364,9 @@ export class StableSwap implements Pool {
       poolPair.assetIn,
       poolPair.assetOut,
       this.totalIssuance,
-      '0'
+      '0',
+
+      this.getPegs()
     );
 
     if (poolPair.assetIn == this.id) {
@@ -370,6 +389,10 @@ export class StableSwap implements Pool {
       fees.fee[1]
     );
     return bnum(fee);
+  }
+
+  private getPegs(): string {
+    return JSON.stringify(this.pegs);
   }
 
   private getReserves(): string {
