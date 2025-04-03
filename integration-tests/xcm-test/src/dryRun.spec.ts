@@ -5,46 +5,39 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
-import * as c from 'console';
-import outdent from 'outdent';
+import { setup, network, xcmDryRun, SetupCtx } from './spec/e2e';
 
-import { setup, network, xcm, SetupCtx } from './spec/e2e';
-
-import { parseArgs } from './utils/cmd';
 import { getRouteInfo, getRouteKey } from './utils/route';
 import { write, loadExisting } from './utils/file';
 
-const DB = 'metadata.db.json';
+const DB = 'instructions/test.db.json';
 
 const { configService, initWithCtx } = setup;
 const { createNetworks } = network;
-const { runXcm } = xcm;
-
-const usage = outdent`
-  Usage:
-    npm run test:e2e
-
-  Options: 
-    -key      Execute transfer for given key
-    -chain    Execute transfers from given chain
-
-  Examples:
-    npm run test:e2e -- -key hydration-moonbeam-glmr
-    npm run test:e2e -- -chain hydration
-`;
+const { runXcmDryRun } = xcmDryRun;
 
 /**
  * Supported polkadot consensus ctx.
  *
  * Constraints:
  * 1) Bridge transfers are not executed.
- * 2) Nodle is skipped (unstable rpc's).
+ * 2) Kusama transfers are skipped.
+ * 3) Unstable polkadot chains are skipped (e.g. slow rpc's).
  *
  * @returns chains execution ctx
  */
 const getPolkadotChains = () => {
   const bridge: string[] = ['ethereum', 'solana'];
-  const skipFor: string[] = bridge.concat(['nodle', 'subsocial']);
+  const kusamaIgnore: string[] = ['kusama', 'assethub_kusama'];
+  const polkadotIgnore: string[] = [
+    'nodle',
+    'subsocial',
+    'zeitgeist',
+    'energywebx',
+    'darwinia',
+  ];
+
+  const skipFor: string[] = [...bridge, ...kusamaIgnore, ...polkadotIgnore];
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
@@ -53,22 +46,12 @@ const getPolkadotChains = () => {
   return {
     skipFor,
     bridge,
-    //chains,
-    chains: Array.from(configService.chains.values()).filter((c) =>
-      ['polkadot', 'assethub', 'hydration'].includes(c.key)
-    ) as Parachain[],
+    chains,
   };
 };
 
 describe('Wallet with XCM config', () => {
   jest.setTimeout(3 * 60 * 1000); // Execution time <= 3 min
-  c.log(usage + '\n');
-
-  const args = process.argv.slice(2);
-  const params = parseArgs(args);
-
-  const keyParam = params['key'];
-  const chainParam = params['chain'];
 
   let wallet: Wallet;
   let networks: SetupCtx[] = [];
@@ -85,7 +68,9 @@ describe('Wallet with XCM config', () => {
   afterAll(async () => {
     await SubstrateApis.getInstance().release();
     await Promise.all(networks.map((network) => network.teardown()));
-    write(reportCtx, DB);
+    reportCtx.forEach((v, k) => {
+      write(v, 'instructions/' + k + '.json', false);
+    });
   });
 
   it('is defined', () => {
@@ -110,14 +95,11 @@ describe('Wallet with XCM config', () => {
         const info = getRouteInfo(chain, route);
         const key = getRouteKey(chain, route);
 
-        const isKeyConstraint = keyParam ? keyParam !== key : false;
-        const isChainConstraint = chainParam ? chainParam !== chain.key : false;
-
         const isContractTransfer = !!route.contract;
         const isAcalaErc20Transfer = asset.key.endsWith('_awh');
 
-        runXcm(
-          `${info} transfer`,
+        runXcmDryRun(
+          `${info} dryRun`,
           async () => {
             return {
               chain: chain,
@@ -133,11 +115,7 @@ describe('Wallet with XCM config', () => {
             };
           },
           {
-            skip:
-              isKeyConstraint ||
-              isChainConstraint ||
-              isContractTransfer ||
-              isAcalaErc20Transfer,
+            skip: isContractTransfer || isAcalaErc20Transfer,
             sync: true,
             snapshot: true,
           }

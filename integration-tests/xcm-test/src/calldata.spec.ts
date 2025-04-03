@@ -3,7 +3,7 @@ import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import * as c from 'console';
 
-import { setup, xcm } from './ctx/call';
+import { setup, xcm } from './spec/calldata';
 
 import { getRouteInfo, getRouteKey } from './utils/route';
 
