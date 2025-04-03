@@ -12,8 +12,9 @@
   ],
   "scripts": {
     "node": "npx tsx ./src/runNode.ts",
-    "test:call": "jest --silent call.spec.ts",
-    "test:e2e": "jest --silent --forceExit e2e.spec.ts"
+    "spec:calldata": "jest --silent calldata.spec.ts",
+    "spec:dryRun": "jest --silent dryRun.spec.ts",
+    "spec:e2e": "jest --silent --forceExit e2e.spec.ts"
   },
   "devDependencies": {
     "@acala-network/chopsticks-testing": "1.0.1"

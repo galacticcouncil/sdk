@@ -1,0 +1,109 @@
+{
+  "call": "xTokens.transfer",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": "Here"
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "50,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositReserveAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "dest": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "Parachain": "2,004"
+                    }
+                  }
+                },
+                "xcm": [
+                  {
+                    "BuyExecution": {
+                      "fees": {
+                        "id": {
+                          "Concrete": {
+                            "parents": "1",
+                            "interior": "Here"
+                          }
+                        },
+                        "fun": {
+                          "Fungible": "50,000,000,000"
+                        }
+                      },
+                      "weightLimit": "Unlimited"
+                    }
+                  },
+                  {
+                    "DepositAsset": {
+                      "assets": {
+                        "Wild": {
+                          "AllCounted": "1"
+                        }
+                      },
+                      "beneficiary": {
+                        "parents": "0",
+                        "interior": {
+                          "X1": {
+                            "AccountKey20": {
+                              "network": null,
+                              "key": "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "SetTopic": "0x6237644e6c3957f064ec7df1d9cebab86933968017f2c9fcd9706069ed17d02e"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

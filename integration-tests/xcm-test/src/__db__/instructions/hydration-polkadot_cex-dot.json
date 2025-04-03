@@ -1,0 +1,155 @@
+{
+  "call": "utility.batchAll",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": "Here"
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0xa08da20edeb06d63ddbd0551c63f784ca363bdb5c7fc8df1f32f16abb9797d4f"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xb016dcf9524d233f229ce602ef49e7b547ecc5a52e5b32ed1fca72265adb7649"
+            }
+          ]
+        },
+        {
+          "V3": [
+            {
+              "DescendOrigin": {
+                "X1": {
+                  "AccountId32": {
+                    "network": "Polkadot",
+                    "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                  }
+                }
+              }
+            },
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000"
+                  }
+                }
+              ]
+            },
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "Transact": {
+                "originKind": "SovereignAccount",
+                "requireWeightAtMost": {
+                  "refTime": "163,100,000",
+                  "proofSize": "3,593"
+                },
+                "call": {
+                  "encoded": "0x05040088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00"
+                }
+              }
+            },
+            "RefundSurplus",
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0xa08da20edeb06d63ddbd0551c63f784ca363bdb5c7fc8df1f32f16abb9797d4f"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0x6743263f6e6d3643e155bdc17cc193a6c35e73a53e8d4bd2f6510bf164b5cac7"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}
