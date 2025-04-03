@@ -1,0 +1,104 @@
+{
+  "call": "xTokens.transfer",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": {
+            "X1": [
+              {
+                "Parachain": "2,034"
+              }
+            ]
+          }
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "ReserveAssetDeposited": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "1",
+                      "interior": {
+                        "X2": [
+                          {
+                            "Parachain": "2,030"
+                          },
+                          {
+                            "GeneralKey": {
+                              "length": "2",
+                              "data": "0x0900000000000000000000000000000000000000000000000000000000000000"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "1",
+                      "interior": {
+                        "X2": [
+                          {
+                            "Parachain": "2,030"
+                          },
+                          {
+                            "GeneralKey": {
+                              "length": "2",
+                              "data": "0x0900000000000000000000000000000000000000000000000000000000000000"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0x5c0335154d069e573a48ad23351661324bee6a8535687e96e5d790eea669190c"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

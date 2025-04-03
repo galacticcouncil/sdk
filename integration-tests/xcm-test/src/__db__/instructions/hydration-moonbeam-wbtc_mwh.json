@@ -1,0 +1,111 @@
+{
+  "call": "xTokens.transferMulticurrencies",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": {
+            "X1": [
+              {
+                "Parachain": "2,004"
+              }
+            ]
+          }
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X1": {
+                          "PalletInstance": "10"
+                        }
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "80,000,000,000,000,000"
+                  }
+                },
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X2": [
+                          {
+                            "PalletInstance": "110"
+                          },
+                          {
+                            "AccountKey20": {
+                              "network": null,
+                              "key": "0xe57ebd2d67b462e9926e04a8e33f01cd0d64346d"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "1,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X1": {
+                          "PalletInstance": "10"
+                        }
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "80,000,000,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "2"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountKey20": {
+                        "network": null,
+                        "key": "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xcd9e056a976a7ce0a9ce286dd854e82d87c3ee76f64e01cc22b8bdfad9efacca"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

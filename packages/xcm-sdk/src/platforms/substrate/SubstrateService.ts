@@ -106,19 +106,24 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<CallDryRunEffects> {
     const extrinsic = this.getExtrinsic(config);
-    const callDataU8a = hexToU8a(extrinsic.inner.toHex());
-    const accountId = this.api.createType('AccountId32', account);
-    const result = await this.api.call.dryRunApi.dryRunCall(
-      {
-        System: { Signed: accountId },
-      },
-      callDataU8a
-    );
+    let result;
+    try {
+      result = await this.api.call.dryRunApi.dryRunCall(
+        {
+          System: { Signed: account },
+        },
+        extrinsic.inner.toHex()
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error('Dry run execution failed!');
+    }
+
     if (result.isOk) {
       return result.asOk;
     }
     console.log(result.asErr.toHuman());
-    throw new Error('Dry run execution failed!');
+    throw new Error('Dry run execution error!');
   }
 
   async estimateNetworkFee(

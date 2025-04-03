@@ -1,0 +1,107 @@
+{
+  "call": "xTokens.transfer",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": "Here"
+        }
+      },
+      [
+        {
+          "V4": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "parents": "0",
+                    "interior": "Here"
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "parents": "0",
+                    "interior": "Here"
+                  },
+                  "fun": {
+                    "Fungible": "50,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositReserveAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "dest": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": [
+                      {
+                        "Parachain": "2,034"
+                      }
+                    ]
+                  }
+                },
+                "xcm": [
+                  {
+                    "BuyExecution": {
+                      "fees": {
+                        "id": {
+                          "parents": "1",
+                          "interior": "Here"
+                        },
+                        "fun": {
+                          "Fungible": "50,000,000,000"
+                        }
+                      },
+                      "weightLimit": "Unlimited"
+                    }
+                  },
+                  {
+                    "DepositAsset": {
+                      "assets": {
+                        "Wild": {
+                          "AllCounted": "1"
+                        }
+                      },
+                      "beneficiary": {
+                        "parents": "0",
+                        "interior": {
+                          "X1": [
+                            {
+                              "AccountId32": {
+                                "network": null,
+                                "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "SetTopic": "0xdfcb6c6eb15a58f1e9b530043b04b6ba8837461176bd8a02c999bd4af2b25b9c"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

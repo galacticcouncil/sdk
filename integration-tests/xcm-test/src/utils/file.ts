@@ -4,8 +4,12 @@ import { jsonFormatter } from './json';
 
 const DB_PATH = './src/__db__/';
 
-export const write = (data: any, db: string) => {
-  const json = JSON.stringify(Object.fromEntries(data), jsonFormatter, 2);
+export const write = (data: any, db: string, toObject = true) => {
+  const json = JSON.stringify(
+    toObject ? Object.fromEntries(data) : data,
+    jsonFormatter,
+    2
+  );
   const file = [DB_PATH + db].join('');
   writeFileSync(file, json);
 };

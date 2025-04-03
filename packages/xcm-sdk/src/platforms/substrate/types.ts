@@ -14,4 +14,5 @@ export interface SubstrateCall extends Call {
 export interface SubstrateDryRunResult extends DryRunResult {
   error: string | undefined;
   events: AnyJson | undefined;
+  xcm: AnyJson | undefined;
 }

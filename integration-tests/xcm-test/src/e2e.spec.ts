@@ -8,7 +8,7 @@ import { Wallet } from '@galacticcouncil/xcm-sdk';
 import * as c from 'console';
 import outdent from 'outdent';
 
-import { setup, network, xcm, SetupCtx } from './ctx/e2e';
+import { setup, network, xcm, SetupCtx } from './spec/e2e';
 
 import { parseArgs } from './utils/cmd';
 import { getRouteInfo, getRouteKey } from './utils/route';

@@ -1,0 +1,72 @@
+{
+  "call": "polkadotXcm.limitedTeleportAssets",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": "Here"
+        }
+      },
+      [
+        {
+          "V4": [
+            {
+              "ReceiveTeleportedAsset": [
+                {
+                  "id": {
+                    "parents": "0",
+                    "interior": "Here"
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "parents": "0",
+                    "interior": "Here"
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": [
+                      {
+                        "AccountId32": {
+                          "network": null,
+                          "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xd84942d2d9d7838dfd8bfb2796b824b5d6ce34bb8c742087a6c91044d4fd8396"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

@@ -58,9 +58,10 @@ export const runXcm = (
  * Construct chain route calldata.
  *
  * For the sake of simplicity following contraints are in place:
- *  - asset & fee balance is 10 units
+ *  - asset & fee balance are 10 units
  *  - source fee is 0.1 unit
  *  - source fee swap is disabled
+ *  - source destination fee swap is disabled
  *  - erc20 spending cap is same as balance
  *
  * @param wallet - Wallet instance with latest Hydration XCM config
@@ -95,7 +96,7 @@ const getTransfer = async (
       return getAmount(FEE, source.asset, chain);
     });
 
-  // Mock source fee swap support to false (disabled)
+  // Mock source & destination fee swap support to false (disabled)
   const isSwapSupportedMock = jest
     .spyOn(FeeSwap.prototype, 'isSwapSupported')
     .mockImplementation(() => false);

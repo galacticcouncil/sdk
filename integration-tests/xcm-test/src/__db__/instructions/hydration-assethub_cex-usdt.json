@@ -1,0 +1,197 @@
+{
+  "call": "utility.batchAll",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": {
+            "X1": [
+              {
+                "Parachain": "1,000"
+              }
+            ]
+          }
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X2": [
+                          {
+                            "PalletInstance": "50"
+                          },
+                          {
+                            "GeneralIndex": "1,984"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "10,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X2": [
+                          {
+                            "PalletInstance": "50"
+                          },
+                          {
+                            "GeneralIndex": "1,984"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "10,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0x7632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xee3bb3c74b4c8948c5cbe613210cf8094ce55d6a059427ef2c25ce4faa62cb8d"
+            }
+          ]
+        },
+        {
+          "V3": [
+            {
+              "DescendOrigin": {
+                "X1": {
+                  "AccountId32": {
+                    "network": "Polkadot",
+                    "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                  }
+                }
+              }
+            },
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X2": [
+                          {
+                            "PalletInstance": "50"
+                          },
+                          {
+                            "GeneralIndex": "1,984"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "20,000"
+                  }
+                }
+              ]
+            },
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": {
+                        "X2": [
+                          {
+                            "PalletInstance": "50"
+                          },
+                          {
+                            "GeneralIndex": "1,984"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "20,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "Transact": {
+                "originKind": "SovereignAccount",
+                "requireWeightAtMost": {
+                  "refTime": "552,360,000",
+                  "proofSize": "6,208"
+                },
+                "call": {
+                  "encoded": "0x3208011f0088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee823f5c02"
+                }
+              }
+            },
+            "RefundSurplus",
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0x7632da7afff71e425b32cd610f55c7fdd45a90c3bcbd1679e825c3139bdbea13"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xc718276107b5a9f57c4af0995e0428fa7367bdadf83c7ec3a52d79f5474483f9"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

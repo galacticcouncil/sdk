@@ -1,0 +1,80 @@
+{
+  "call": "xcmPallet.limitedTeleportAssets",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "0",
+          "interior": {
+            "X1": [
+              {
+                "Parachain": "1,000"
+              }
+            ]
+          }
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "ReceiveTeleportedAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "1",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "1",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "100,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0xf9a1008da6aaf7d422d161e24e5250d394622b97280e1c8cbab711ae0d22e0c7"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}

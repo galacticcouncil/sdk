@@ -1,0 +1,80 @@
+{
+  "call": "xTokens.transfer",
+  "xcm": [
+    [
+      {
+        "V4": {
+          "parents": "1",
+          "interior": {
+            "X1": [
+              {
+                "Parachain": "2,008"
+              }
+            ]
+          }
+        }
+      },
+      [
+        {
+          "V3": [
+            {
+              "WithdrawAsset": [
+                {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "10,000,000,000,000"
+                  }
+                }
+              ]
+            },
+            "ClearOrigin",
+            {
+              "BuyExecution": {
+                "fees": {
+                  "id": {
+                    "Concrete": {
+                      "parents": "0",
+                      "interior": "Here"
+                    }
+                  },
+                  "fun": {
+                    "Fungible": "10,000,000,000,000"
+                  }
+                },
+                "weightLimit": "Unlimited"
+              }
+            },
+            {
+              "DepositAsset": {
+                "assets": {
+                  "Wild": {
+                    "AllCounted": "1"
+                  }
+                },
+                "beneficiary": {
+                  "parents": "0",
+                  "interior": {
+                    "X1": {
+                      "AccountId32": {
+                        "network": null,
+                        "id": "0x88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "SetTopic": "0x63cbfc08c65afd6032f8f4a64e924453ba6df973e51343e272dd609cd2a1976a"
+            }
+          ]
+        }
+      ]
+    ]
+  ]
+}
