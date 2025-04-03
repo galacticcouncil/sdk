@@ -59,6 +59,7 @@ export class SubstratePlatform
       : undefined;
 
     const extrinsic = substrate.getExtrinsic(config);
+    const extrinsicCall = config.module + '.' + config.func;
     return {
       from: account,
       data: extrinsic.toHex(),
@@ -67,22 +68,23 @@ export class SubstratePlatform
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
-              const { executionResult, emittedEvents } = await substrate.dryRun(
-                account,
-                config
-              );
+              const { executionResult, emittedEvents, forwardedXcms } =
+                await substrate.dryRun(account, config);
 
               const error = executionResult.isErr
                 ? getErrorFromDryRun(substrate.api, executionResult.asErr)
                 : undefined;
 
               return {
+                call: extrinsicCall,
                 error: error,
                 events: emittedEvents.toHuman(),
+                xcm: forwardedXcms.toHuman(),
               } as SubstrateDryRunResult;
             } catch (e) {
               return {
-                error: e,
+                call: extrinsicCall,
+                error: e instanceof Error ? e.message : 'unknown',
               } as SubstrateDryRunResult;
             }
           }

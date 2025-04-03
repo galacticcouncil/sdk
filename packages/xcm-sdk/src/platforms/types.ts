@@ -38,6 +38,7 @@ export interface Call {
 }
 
 export interface DryRunResult {
+  call: string;
   error: any | undefined;
   events: any | undefined;
 }

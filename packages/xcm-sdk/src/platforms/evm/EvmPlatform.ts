@@ -50,6 +50,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
         const { error, logs } = await contract.simulateCall(account);
         const decodedEvents = contract.decodeEvents(logs);
         return {
+          call: config.module + '.' + config.func,
           error: error?.shortMessage,
           events: decodedEvents,
         } as EvmDryRunResult;

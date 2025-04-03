@@ -58,6 +58,7 @@ export class SolanaPlatform
         );
 
         return {
+          call: config.module + '.' + config.func,
           error: err,
           events: logs,
         } as SolanaDryRunResult;
