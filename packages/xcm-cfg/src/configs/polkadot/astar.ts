@@ -8,6 +8,8 @@ import {
   ibtc,
   intr,
   pha,
+  usdc,
+  usdt,
   vastr,
   vdot,
 } from '../../assets';
@@ -205,6 +207,50 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: 0.025,
         asset: vastr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: usdt,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: usdt,
+      fee: {
+        amount: 0.3,
+        asset: usdt,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: usdc,
+      balance: BalanceBuilder().substrate().assets().account(),
+      fee: {
+        asset: astr,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().assets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: usdc,
+      fee: {
+        amount: 0.3,
+        asset: usdc,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),

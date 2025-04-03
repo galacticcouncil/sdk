@@ -11,6 +11,7 @@ import {
   ibtc,
   intr,
   pha,
+  usdc,
   usdt,
   vastr,
   vdot,
@@ -51,6 +52,27 @@ export const astar = new Parachain({
             },
             {
               GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: usdc,
+      id: '4294969281',
+      decimals: 6,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1337,
             },
           ],
         },

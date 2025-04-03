@@ -3,7 +3,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { dot, hdx, ibtc, intr, usdt, vdot } from '../../assets';
+import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
 
 export const interlay = new Parachain({
   assetsData: [
@@ -42,6 +42,27 @@ export const interlay = new Parachain({
             },
             {
               GeneralIndex: 1984,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: usdc,
+      decimals: 6,
+      id: { ForeignAsset: 12 },
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 1000,
+            },
+            {
+              PalletInstance: 50,
+            },
+            {
+              GeneralIndex: 1337,
             },
           ],
         },

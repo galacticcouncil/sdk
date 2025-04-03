@@ -165,6 +165,50 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: usdt,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: bnc,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: usdt,
+      fee: {
+        amount: 0.3,
+        asset: usdt,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: usdc,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: bnc,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: usdc,
+      fee: {
+        amount: 0.3,
+        asset: usdc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
 ];
 
 const toPolkadot: AssetRoute[] = [
