@@ -12,6 +12,10 @@ export const darwinia = new EvmParachain({
     {
       asset: ring,
       id: 'SelfReserve',
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,
