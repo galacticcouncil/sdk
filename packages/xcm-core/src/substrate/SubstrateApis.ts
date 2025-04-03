@@ -59,6 +59,28 @@ export class SubstrateApis {
         const promise = ApiPromise.create({
           provider,
           noInitWarn: true,
+          types: {
+            VersionedMultiLocation: {
+              _enum: {
+                V0: 'MultiLocationV0',
+                V1: 'MultiLocationV1',
+                V2: 'MultiLocationV2',
+                V3: 'MultiLocationV3',
+                V4: 'MultiLocationV4',
+                V5: 'MultiLocationV4',
+              },
+            },
+            VersionedXcm: {
+              _enum: {
+                V0: 'XcmV0',
+                V1: 'XcmV1',
+                V2: 'XcmV2',
+                V3: 'XcmV3',
+                V4: 'XcmV4',
+                V5: 'XcmV4',
+              },
+            },
+          },
           metadata,
         });
 
