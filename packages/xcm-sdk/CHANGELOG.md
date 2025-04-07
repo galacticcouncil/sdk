@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 9.2.0
+
+### Minor Changes
+
+- 9592191: Dry run call args (module/func)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@7.1.0
+
 ## 9.1.1
 
 ### Patch Changes

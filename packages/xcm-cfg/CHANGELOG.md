@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-cfg
 
+## 9.1.0
+
+### Minor Changes
+
+- 050161d: Add direct para stables routes
+  Assets: USDT & USDC
+  Routes: Hydration <> Astar, Bifrost, Interlay, Moonbeam
+
+- 4aaa1d5: Switch Laos chain from EvmParachain to Parachain type
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@7.1.0
+
 ## 9.0.0
 
 ### Patch Changes

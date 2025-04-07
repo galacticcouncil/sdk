@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 7.1.0
+
+### Minor Changes
+
+- 92b3b99: Fallback V5 -> V4 (fix augment)
+
 ## 7.0.0
 
 ### Major Changes
