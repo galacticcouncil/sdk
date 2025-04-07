@@ -8,7 +8,7 @@ import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { Option, u32 } from '@polkadot/types-codec';
 import { ITuple } from '@polkadot/types-codec/types';
 
-import { HYDRADX_OMNIPOOL_ADDRESS, HYDRADX_SS58_PREFIX } from '../../consts';
+import { HYDRADX_SS58_PREFIX, TRADEABLE_DEFAULT } from '../../consts';
 import {
   PoolBase,
   PoolType,
@@ -24,6 +24,8 @@ import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 
 import { PoolClient } from '../PoolClient';
+
+export const AMOUNT_MAX = 340282366920938463463374607431768211455n;
 
 export class StableSwapClient extends PoolClient {
   private stablePools: Map<string, PalletStableswapPoolInfo> = new Map([]);
@@ -151,17 +153,12 @@ export class StableSwapClient extends PoolClient {
     });
 
     const tokens = await Promise.all(poolTokens);
+    tokens.push({
+      id: poolId,
+      tradeable: TRADEABLE_DEFAULT,
+      balance: AMOUNT_MAX.toString(),
+    } as PoolToken);
 
-    const sharedAsset = await this.api.query.omnipool.assets(poolId);
-    if (sharedAsset.isSome) {
-      const { tradable } = sharedAsset.unwrap();
-      const balance = await this.getBalance(HYDRADX_OMNIPOOL_ADDRESS, poolId);
-      tokens.push({
-        id: poolId,
-        tradeable: tradable.bits.toNumber(),
-        balance: balance.toString(),
-      } as PoolToken);
-    }
     return tokens;
   }
 
