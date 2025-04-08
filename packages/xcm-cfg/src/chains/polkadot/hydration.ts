@@ -58,6 +58,7 @@ import {
   sol,
   sky,
   tbtc,
+  lbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -529,6 +530,32 @@ export const hydration = new EvmParachain({
           X1: {
             Parachain: 3370,
           },
+        },
+      },
+    },
+    {
+      asset: lbtc,
+      decimals: 8,
+      id: 1000851,
+      min: 0.00000023,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x8236a87084f8b84306f72007f36f2618a5634494',
+              },
+            },
+          ],
         },
       },
     },

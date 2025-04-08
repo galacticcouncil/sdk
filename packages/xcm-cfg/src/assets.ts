@@ -120,6 +120,11 @@ export const laos = new Asset({
   originSymbol: 'LAOS',
 });
 
+export const lbtc = new Asset({
+  key: 'lbtc',
+  originSymbol: 'LBTC',
+});
+
 export const ewt = new Asset({
   key: 'ewt',
   originSymbol: 'EWT',
@@ -315,6 +320,7 @@ export const assets: Asset[] = [
   ksm,
   ldo,
   laos,
+  lbtc,
   ewt,
   ldot,
   link,
