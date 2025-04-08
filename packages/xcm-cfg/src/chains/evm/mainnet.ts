@@ -7,6 +7,7 @@ import {
   aave,
   dai,
   eth,
+  lbtc,
   ldo,
   link,
   sky,
@@ -66,6 +67,11 @@ export const ethereum = new EvmChain({
       asset: wbtc,
       decimals: 8,
       id: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    },
+    {
+      asset: lbtc,
+      decimals: 8,
+      id: '0x8236a87084f8b84306f72007f36f2618a5634494',
     },
     {
       asset: usdc,
