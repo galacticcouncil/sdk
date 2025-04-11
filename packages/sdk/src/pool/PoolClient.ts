@@ -4,7 +4,6 @@ import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
-import { HYDRADX_OMNIPOOL_ADDRESS } from '../consts';
 import { BalanceClient } from '../client';
 import { Asset, PoolBase, PoolFees, PoolPair, PoolType } from '../types';
 import { BigNumber } from '../utils/bignumber';
@@ -97,11 +96,6 @@ export abstract class PoolClient extends BalanceClient {
         poolSubs.push(subErc20);
       }
 
-      if (this.hasShareAsset(pool)) {
-        const subShare = this.subscribeSharePoolBalance(pool);
-        poolSubs.push(subShare);
-      }
-
       this.subscribeLog(pool);
       return poolSubs;
     });
@@ -111,10 +105,6 @@ export abstract class PoolClient extends BalanceClient {
 
   private hasSystemAsset(pool: PoolBase) {
     return pool.tokens.some((t) => t.id === '0');
-  }
-
-  private hasShareAsset(pool: PoolBase) {
-    return pool.type === PoolType.Stable && pool.id;
   }
 
   private hasErc20Asset(pool: PoolBase) {
@@ -141,8 +131,7 @@ export abstract class PoolClient extends BalanceClient {
 
   private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
     /**
-     * Skip balance update for shared token in stablepool as balance is
-     * stored in omnipool instead
+     * Skip balance update for shared token in stablepool
      *
      * @param p - asset pool
      * @param t - pool token
@@ -160,15 +149,6 @@ export abstract class PoolClient extends BalanceClient {
     return this.subscribeErc20Balance(
       pool.address,
       pool.tokens,
-      this.updateBalancesCallback(pool, () => true)
-    );
-  }
-
-  private subscribeSharePoolBalance(pool: PoolBase): UnsubscribePromise {
-    const sharedAsset = this.assets.get(pool.id!);
-    return this.subscribeTokenBalance(
-      HYDRADX_OMNIPOOL_ADDRESS,
-      [sharedAsset!],
       this.updateBalancesCallback(pool, () => true)
     );
   }
