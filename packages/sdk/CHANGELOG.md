@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- e51f09d: Generic share asset routing support
+
 ## 6.0.0
 
 ### Major Changes
