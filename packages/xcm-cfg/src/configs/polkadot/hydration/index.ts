@@ -12,6 +12,7 @@ import {
   dai_awh,
   dai_mwh,
   ded,
+  don,
   dot,
   dota,
   eth,
@@ -26,6 +27,7 @@ import {
   ldo,
   ldot,
   link,
+  mpc,
   myth,
   nodl,
   pen,
@@ -185,6 +187,8 @@ const toAssetHub: AssetRoute[] = [
   toHubExtTemplate(ded),
   toHubExtTemplate(dota),
   toHubExtTemplate(wud),
+  toHubExtTemplate(don),
+  toHubExtTemplate(mpc),
 ];
 
 const toAstar: AssetRoute[] = [

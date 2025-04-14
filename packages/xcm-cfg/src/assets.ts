@@ -290,6 +290,16 @@ export const ztg = new Asset({
   originSymbol: 'ZTG',
 });
 
+export const don = new Asset({
+  key: 'don',
+  originSymbol: 'DON',
+});
+
+export const mpc = new Asset({
+  key: 'mpc',
+  originSymbol: 'MPC',
+});
+
 export const assets: Asset[] = [
   aave,
   aca,
@@ -303,6 +313,7 @@ export const assets: Asset[] = [
   dai_awh,
   dai_mwh,
   ded,
+  don,
   dot,
   dota,
   eth,
@@ -318,6 +329,7 @@ export const assets: Asset[] = [
   ewt,
   ldot,
   link,
+  mpc,
   myth,
   nodl,
   pha,
