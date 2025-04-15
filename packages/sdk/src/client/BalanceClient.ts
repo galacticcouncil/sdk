@@ -44,7 +44,7 @@ export class BalanceClient extends PolkadotApiClient {
       account,
       assetId
     );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+    return this.calculateFreeBalance({ free, feeFrozen: 0n, frozen });
   }
 
   async subscribeSystemBalance(
