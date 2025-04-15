@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 6.1.1
+
+### Patch Changes
+
+- Update aave amm error messages
+- Fix erc20 free balance calc
+
 ## 6.1.0
 
 ### Minor Changes
