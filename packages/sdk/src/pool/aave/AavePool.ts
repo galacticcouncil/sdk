@@ -82,12 +82,12 @@ export class AavePool implements Pool {
 
     const poolOutReserve = poolPair.balanceOut;
     if (amountOut.isGreaterThan(poolOutReserve)) {
-      errors.push(PoolError.MaxOutRatioExceeded);
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     const poolInReserve = poolPair.balanceIn;
     if (calculatedIn.isGreaterThan(poolInReserve)) {
-      errors.push(PoolError.MaxInRatioExceeded);
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     return {
@@ -109,12 +109,12 @@ export class AavePool implements Pool {
 
     const poolInReserve = poolPair.balanceIn;
     if (amountIn.isGreaterThan(poolInReserve)) {
-      errors.push(PoolError.MaxInRatioExceeded);
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     const poolOutReserve = poolPair.balanceOut;
     if (calculatedOut.isGreaterThan(poolOutReserve)) {
-      errors.push(PoolError.MaxOutRatioExceeded);
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     return {
