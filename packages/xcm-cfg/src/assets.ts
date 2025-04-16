@@ -120,6 +120,11 @@ export const laos = new Asset({
   originSymbol: 'LAOS',
 });
 
+export const eurc = new Asset({
+  key: 'eurc',
+  originSymbol: 'EURC',
+});
+
 export const ewt = new Asset({
   key: 'ewt',
   originSymbol: 'EWT',
@@ -280,6 +285,11 @@ export const wud = new Asset({
   originSymbol: 'WUD',
 });
 
+export const xlm = new Asset({
+  key: 'xlm',
+  originSymbol: 'XLM',
+});
+
 export const xrt = new Asset({
   key: 'xrt',
   originSymbol: 'XRT',
@@ -305,6 +315,7 @@ export const assets: Asset[] = [
   ded,
   dot,
   dota,
+  eurc,
   eth,
   glmr,
   hdx,
@@ -347,6 +358,7 @@ export const assets: Asset[] = [
   weth_mwh,
   wsteth,
   wud,
+  xlm,
   xrt,
   ztg,
 ];
