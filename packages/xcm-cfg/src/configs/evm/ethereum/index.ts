@@ -18,6 +18,7 @@ import {
   link,
   sky,
   wsteth,
+  lbtc,
 } from '../../../assets';
 import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
 import {
@@ -92,6 +93,7 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(aave, aave),
   toHydrationViaSnowbridgeTemplate(susde, susde),
   toHydrationViaSnowbridgeTemplate(tbtc, tbtc),
+  toHydrationViaSnowbridgeTemplate(lbtc, lbtc),
   // Waiting for Snowbridge V2
   //toHydrationViaSnowbridgeTemplate(ldo, ldo),
   toHydrationViaSnowbridgeTemplate(link, link),
