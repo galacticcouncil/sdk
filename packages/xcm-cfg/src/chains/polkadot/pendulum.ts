@@ -16,37 +16,38 @@ export const pendulum = new Parachain({
       id: {
         Stellar: {
           AlphaNum4: {
-            code: 'EURC',
-            issuer: '0xcf4f5a26e2090bb3adcf02c7a9d73dbfe6659cc690461475b86437fa49c71136'
-          }
-       }
+            code: '0x45555243',
+            issuer:
+              '0xcf4f5a26e2090bb3adcf02c7a9d73dbfe6659cc690461475b86437fa49c71136',
+          },
+        },
       },
       decimals: 12,
       xcmLocation: {
         parents: 1,
         interior: {
-          X4: [
+          X5: [
             {
               Parachain: 2094,
             },
             {
-              PalletInstance: 53
+              PalletInstance: 53,
             },
             {
-              GeneralIndex: 2
+              GeneralIndex: 2,
             },
             {
               GeneralKey: {
                 length: 4,
-                data: '0x4555524300000000000000000000000000000000000000000000000000000000'
-              }
+                data: '0x4555524300000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
               GeneralKey: {
                 length: 32,
-                data: '0xcf4f5a26e2090bb3adcf02c7a9d73dbfe6659cc690461475b86437fa49c71136'
-              }
-            }
+                data: '0xcf4f5a26e2090bb3adcf02c7a9d73dbfe6659cc690461475b86437fa49c71136',
+              },
+            },
           ],
         },
       },
@@ -54,22 +55,22 @@ export const pendulum = new Parachain({
     {
       asset: xlm,
       id: {
-        Stellar: 'StellarNative'
+        Stellar: 'StellarNative',
       },
       decimals: 12,
       xcmLocation: {
         parents: 1,
         interior: {
-          X4: [
+          X3: [
             {
               Parachain: 2094,
             },
             {
-              PalletInstance: 53
+              PalletInstance: 53,
             },
             {
-              GeneralIndex: 2
-            }
+              GeneralIndex: 2,
+            },
           ],
         },
       },

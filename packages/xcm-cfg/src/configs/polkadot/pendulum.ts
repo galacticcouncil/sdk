@@ -35,12 +35,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: eurc,
       fee: {
-        amount: 0.2,
+        amount: 0.0008,
         asset: eurc,
       },
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+
   new AssetRoute({
     source: {
       asset: xlm,
@@ -53,7 +54,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: xlm,
       fee: {
-        amount: 0.2,
+        amount: 0.09,
         asset: xlm,
       },
     },

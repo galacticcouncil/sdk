@@ -122,7 +122,7 @@ export const laos = new Asset({
 
 export const eurc = new Asset({
   key: 'eurc',
-  originSymbol: 'EURC',
+  originSymbol: 'EURC.s',
 });
 
 export const ewt = new Asset({
@@ -287,7 +287,7 @@ export const wud = new Asset({
 
 export const xlm = new Asset({
   key: 'xlm',
-  originSymbol: 'XLM',
+  originSymbol: 'XLM.s',
 });
 
 export const xrt = new Asset({

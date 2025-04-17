@@ -291,8 +291,8 @@ const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
 const toPendulum: AssetRoute[] = [
   toTransferTemplate(pen, pendulum, 1.1),
-  toTransferTemplate(eurc, pendulum, 1.1), 
-  toTransferTemplate(xlm, pendulum, 1.1)
+  toTransferTemplate(eurc, pendulum, 0.09),
+  toTransferTemplate(xlm, pendulum, 0.73),
 ];
 
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
