@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 6.1.2
+
+### Patch Changes
+
+- Fix: Filter out virtual shares from most liquid route calc
+
 ## 6.1.1
 
 ### Patch Changes
