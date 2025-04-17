@@ -330,8 +330,11 @@ export class TradeRouter extends Router {
       throw new RouteNotFound(assetIn, assetOut);
     }
 
+    // Filter out virtual shares (stablepools)
     const assetsByLiquidityDesc = pools
-      .map((pool) => pool.tokens.find((t) => t.id === assetIn))
+      .map((pool) =>
+        pool.tokens.find((t) => t.id === assetIn && t.id !== pool.id)
+      )
       .filter((a): a is PoolToken => !!a)
       .sort((a, b) => Number(b.balance) - Number(a.balance));
 
