@@ -79,7 +79,7 @@ export class AavePool implements Pool {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const errors: PoolError[] = [];
 
-    if (amountOut.isGreaterThan(poolPair.balanceIn)) {
+    if (amountOut.isGreaterThan(poolPair.balanceOut)) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
@@ -100,7 +100,7 @@ export class AavePool implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const errors: PoolError[] = [];
 
-    if (amountIn.isGreaterThan(poolPair.balanceOut)) {
+    if (calculatedOut.isGreaterThan(poolPair.balanceOut)) {
       errors.push(PoolError.TradeNotAllowed);
     }
 
