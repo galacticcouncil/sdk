@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 6.1.3
+
+### Patch Changes
+
+- Fix aave wrap & unwrap pool validations
+
 ## 6.1.2
 
 ### Patch Changes
