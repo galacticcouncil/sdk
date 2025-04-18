@@ -19,12 +19,10 @@ class GetBestSellPriceExample extends PolkadotExecutor {
     const poolService = new PoolService(api);
     await poolService.syncRegistry(external);
     const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Stable],
+      includeOnly: [PoolType.Aave],
     });
-    //const bestSell = await router.getBestSell('15', '1000037', '1');
-    //const bestSell = await router.getBestSell('1', '10', '1');
 
-    const bestSell = await router.getBestSell('15', '1000037', '10');
+    const bestSell = await router.getBestSell('1005', '15', '10');
 
     const transaction = bestSell.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
@@ -32,4 +30,4 @@ class GetBestSellPriceExample extends PolkadotExecutor {
   }
 }
 
-new GetBestSellPriceExample(ApiUrl.Nice, 'Get best sell price', true).run();
+new GetBestSellPriceExample(ApiUrl.HydraDx, 'Get best sell price', true).run();
