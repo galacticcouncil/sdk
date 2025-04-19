@@ -7,6 +7,7 @@ import {
   Pool,
   PoolFees,
   PoolToken,
+  PoolType,
   SellSwap,
   Swap,
   Trade,
@@ -330,16 +331,26 @@ export class TradeRouter extends Router {
       throw new RouteNotFound(assetIn, assetOut);
     }
 
-    // Filter out virtual shares (stablepools)
-    const assetsByLiquidityDesc = pools
-      .map((pool) =>
-        pool.tokens.find((t) => t.id === assetIn && t.id !== pool.id)
-      )
-      .filter((a): a is PoolToken => !!a)
-      .sort((a, b) => Number(b.balance) - Number(a.balance));
+    // Get pools with assetIn (except virtual shares)
+    const assetInPools = pools.filter((pool) =>
+      pool.tokens.some((t) => t.id === assetIn && t.id !== pool.id)
+    );
 
-    const { balance, decimals } = assetsByLiquidityDesc[0];
-    const liquidity = bnum(balance).shiftedBy(-1 * decimals);
+    // Get liquidity of assetIn sorted by DESC
+    const assetInLiquidityDesc = assetInPools
+      .map((p) => {
+        return p.type === PoolType.Aave
+          ? p.tokens
+          : p.tokens.filter((t) => t.id === assetIn);
+      })
+      .map((t) => {
+        return t
+          .map((t) => bnum(t.balance).shiftedBy(-1 * t.decimals))
+          .reduce((a, b) => a.plus(b));
+      })
+      .sort((a, b) => (b.isLessThan(a) ? -1 : 1));
+
+    const liquidity = assetInLiquidityDesc[0];
     const liquidityIn = liquidity.div(100).multipliedBy(0.1);
     const routesPromises = paths.map(
       async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
