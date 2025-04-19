@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 6.1.4
+
+### Patch Changes
+
+- Fix most liquid route calc for aave
+- Fix aave buy (flip)
+
 ## 6.1.3
 
 ### Patch Changes
