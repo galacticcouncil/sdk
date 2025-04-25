@@ -1,0 +1,19 @@
+{
+  "name": "wormhole",
+  "private": true,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-wasm": "^1.0.0"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@wormhole-foundation/sdk": "^1.16.1",
+    "micro-key-producer": "^0.7.2"
+  }
+}
