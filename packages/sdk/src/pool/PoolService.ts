@@ -1,4 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
+import { CallDryRunEffects } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { memoize1 } from '@thi.ng/memoize';
@@ -131,6 +132,30 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     return route.length == 1 && route[0].pool == PoolType.Omni;
   }
 
+  private async dryRun(
+    account: string,
+    extrinsic: SubmittableExtrinsic
+  ): Promise<CallDryRunEffects> {
+    let result;
+    try {
+      result = await this.api.call.dryRunApi.dryRunCall(
+        {
+          System: { Signed: account },
+        },
+        extrinsic.inner.toHex()
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error('Dry run execution failed!');
+    }
+
+    if (result.isOk) {
+      return result.asOk;
+    }
+    console.log(result.asErr.toHuman());
+    throw new Error('Dry run execution error!');
+  }
+
   buildBuyTx(
     assetIn: string,
     assetOut: string,
@@ -158,10 +183,12 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       );
     }
 
-    const getTx = (): SubmittableExtrinsic => {
-      return tx;
-    };
-    return { hex: tx.toHex(), name: 'RouterBuy', get: getTx } as Transaction;
+    return {
+      hex: tx.toHex(),
+      name: 'RouterBuy',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as Transaction;
   }
 
   buildSellTx(
@@ -191,9 +218,32 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       );
     }
 
-    const getTx = (): SubmittableExtrinsic => {
-      return tx;
-    };
-    return { hex: tx.toHex(), name: 'RouterSell', get: getTx } as Transaction;
+    return {
+      hex: tx.toHex(),
+      name: 'RouterSell',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as Transaction;
+  }
+
+  buildSellAllTx(
+    assetIn: string,
+    assetOut: string,
+    minAmountOut: BigNumber,
+    route: Hop[]
+  ): Transaction {
+    const tx: SubmittableExtrinsic = this.api.tx.router.sellAll(
+      assetIn,
+      assetOut,
+      minAmountOut.toFixed(),
+      buildRoute(route)
+    );
+
+    return {
+      hex: tx.toHex(),
+      name: 'RouterSellAll',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as Transaction;
   }
 }

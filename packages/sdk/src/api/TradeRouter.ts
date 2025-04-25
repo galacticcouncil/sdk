@@ -166,15 +166,26 @@ export class TradeRouter extends Router {
 
     const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
 
-    const sellTx = (minAmountOut: BigNumber): Transaction => {
+    const sellTx = (minAmountOut: BigNumber, sellAll = false): Transaction => {
+      const route = swaps.map((swap: SellSwap) => {
+        return swap as Hop;
+      });
+
+      if (sellAll) {
+        return this.poolService.buildSellAllTx(
+          assetIn,
+          assetOut,
+          minAmountOut,
+          route
+        );
+      }
+
       return this.poolService.buildSellTx(
         assetIn,
         assetOut,
         firstSwap.amountIn,
         minAmountOut,
-        swaps.map((swap: SellSwap) => {
-          return swap as Hop;
-        })
+        route
       );
     };
 
@@ -507,14 +518,16 @@ export class TradeRouter extends Router {
     }
 
     const buyTx = (maxAmountIn: BigNumber): Transaction => {
+      const route = swaps.map((swap: BuySwap) => {
+        return swap as Hop;
+      });
+
       return this.poolService.buildBuyTx(
         assetIn,
         assetOut,
         firstSwap.amountOut,
         maxAmountIn,
-        swaps.map((swap: BuySwap) => {
-          return swap as Hop;
-        })
+        route
       );
     };
 
