@@ -44,6 +44,6 @@
     "@polkadot-api/descriptors": "file:.papi/descriptors"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.9.1"
+    "polkadot-api": "^1.10.0"
   }
 }
