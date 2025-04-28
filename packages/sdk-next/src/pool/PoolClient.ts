@@ -15,7 +15,7 @@ import {
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
-import { HYDRATION_OMNIPOOL_ADDRESS, SYSTEM_ASSET_ID } from '../consts';
+import { SYSTEM_ASSET_ID } from '../consts';
 import { AssetAmount } from '../types';
 
 import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
@@ -90,14 +90,6 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
       subs.push(sub);
     }
 
-    if (this.hasShareAsset(pool)) {
-      const sub = this.subscribeTokenBalance(
-        HYDRATION_OMNIPOOL_ADDRESS,
-        pool.id!
-      );
-      subs.push(sub);
-    }
-
     return combineLatest(subs).pipe(
       map((res) =>
         res
@@ -111,10 +103,6 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
   private hasSystemAsset(pool: T): boolean {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
-  }
-
-  private hasShareAsset(pool: T): boolean {
-    return pool.type === PoolType.Stable && !!pool.id;
   }
 
   private hasValidAssets(pool: T): boolean {

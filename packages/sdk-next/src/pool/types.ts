@@ -1,8 +1,9 @@
 export enum PoolType {
-  XYK = 'XYK',
+  Aave = 'Aave',
   LBP = 'LBP',
-  Stable = 'Stableswap',
   Omni = 'Omnipool',
+  Stable = 'Stableswap',
+  XYK = 'XYK',
 }
 
 export enum PoolError {
