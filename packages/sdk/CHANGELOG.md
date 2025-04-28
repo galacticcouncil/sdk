@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 6.2.0
+
+### Minor Changes
+
+- Transaction dryRun support
+- PoolService buildSellAllTx support
+
 ## 6.1.4
 
 ### Patch Changes
