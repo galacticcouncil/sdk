@@ -45,4 +45,13 @@ export class MockXykPoolService implements IPoolService {
   ): Transaction {
     throw new Error('Method not implemented.');
   }
+
+  buildSellAllTx(
+    _assetIn: string,
+    _assetOut: string,
+    _minAmountOut: BigNumber,
+    _route: Hop[]
+  ): Transaction {
+    throw new Error('Method not implemented.');
+  }
 }
