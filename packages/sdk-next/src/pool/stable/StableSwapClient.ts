@@ -100,8 +100,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     });
 
     const tokens = await Promise.all(poolTokens);
+    const share = await this.api.query.AssetRegistry.Assets.getValue(poolId);
     tokens.push({
       id: poolId,
+      decimals: share?.decimals,
+      existentialDeposit: share?.existential_deposit,
       tradeable: TRADEABLE_DEFAULT,
       balance: AMOUNT_MAX,
     } as PoolToken);
