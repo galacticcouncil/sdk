@@ -19,10 +19,10 @@ class GetBestSellPriceExample extends PolkadotExecutor {
     const poolService = new PoolService(api);
     await poolService.syncRegistry(external);
     const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Aave],
+      includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
 
-    const bestSell = await router.getBestSell('1005', '15', '10');
+    const bestSell = await router.getBestSell('5', '10', '1');
 
     const transaction = bestSell.toTx(ZERO);
     console.log('Transaction hash: ' + transaction.hex);
