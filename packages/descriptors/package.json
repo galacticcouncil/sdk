@@ -33,12 +33,13 @@
   "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
   "scripts": {
-    "prebuild": "npm run papi",
+    "prebuild": "npm run papi:whitelist",
     "build": "npm run clean && npm run copy:dist",
     "clean": "rimraf build",
     "copy:dist": "cp -r .papi/descriptors/dist ./build",
     "link": "npm ln",
-    "papi": "papi --whitelist ./src/whitelist.ts"
+    "papi": "papi",
+    "papi:whitelist": "papi --whitelist ./src/whitelist.ts"
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors"
