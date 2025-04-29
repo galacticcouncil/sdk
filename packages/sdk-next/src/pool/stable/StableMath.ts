@@ -20,7 +20,7 @@ export class StableMath {
   static defaultPegs(size: number) {
     const pegs = [];
     for (let i = 0; i < size; i++) {
-      pegs.push([1, 1]);
+      pegs.push(['1', '1']);
     }
     return pegs;
   }

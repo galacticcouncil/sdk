@@ -15,18 +15,15 @@ export class TradeUtils extends Papi {
     return swaps.length === 1 && swaps[0].pool === PoolType.Omni;
   }
 
-  async buildTx(trade: Trade, slippage = 1): Promise<Binary> {
-    switch (trade.type) {
-      case TradeType.Sell:
-        return this.buildSellTx(trade, slippage);
-      case TradeType.Buy:
-        return this.buildBuyTx(trade, slippage);
-      default:
-        throw Error('Unsupported trade type', trade.type);
+  private tradeCheck(trade: Trade, tradeType: TradeType) {
+    if (tradeType !== trade.type) {
+      throw new Error('Not permitted');
     }
   }
 
-  private async buildBuyTx(trade: Trade, slippagePct = 1): Promise<Binary> {
+  async buildBuyTx(trade: Trade, slippagePct = 1): Promise<Binary> {
+    this.tradeCheck(trade, TradeType.Buy);
+
     const { amountIn, amountOut, swaps } = trade;
 
     const firstSwap = swaps[0];
@@ -56,7 +53,9 @@ export class TradeUtils extends Papi {
     return tx.getEncodedData();
   }
 
-  private async buildSellTx(trade: Trade, slippagePct = 1): Promise<Binary> {
+  async buildSellTx(trade: Trade, slippagePct = 1): Promise<Binary> {
+    this.tradeCheck(trade, TradeType.Sell);
+
     const { amountIn, amountOut, swaps } = trade;
 
     const firstSwap = swaps[0];
@@ -81,6 +80,28 @@ export class TradeUtils extends Papi {
       asset_in: assetIn,
       asset_out: assetOut,
       amount_in: amountIn,
+      min_amount_out: minAmountOut,
+      route: this.buildRoute(swaps),
+    });
+    return tx.getEncodedData();
+  }
+
+  async buildSellAllTx(trade: Trade, slippagePct = 1): Promise<Binary> {
+    this.tradeCheck(trade, TradeType.Sell);
+
+    const { amountOut, swaps } = trade;
+
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+    const slippage = math.getFraction(amountOut, slippagePct);
+
+    const assetIn = firstSwap.assetIn;
+    const assetOut = lastSwap.assetOut;
+    const minAmountOut = amountOut - slippage;
+
+    const tx = this.api.tx.Router.sell_all({
+      asset_in: assetIn,
+      asset_out: assetOut,
       min_amount_out: minAmountOut,
       route: this.buildRoute(swaps),
     });

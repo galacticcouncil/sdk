@@ -8,14 +8,13 @@ import { type Observable, map, of, switchMap } from 'rxjs';
 import { PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import {
-  HYDRATION_OMNIPOOL_ADDRESS,
-  HYDRATION_SS58_PREFIX,
-} from '../../consts';
+import { HYDRATION_SS58_PREFIX, TRADEABLE_DEFAULT } from '../../consts';
 import { fmt } from '../../utils';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
+
+const AMOUNT_MAX = 340282366920938463463374607431768211455n;
 
 type TStableswapPool = HydrationQueries['Stableswap']['Pools']['Value'];
 
@@ -101,23 +100,15 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     });
 
     const tokens = await Promise.all(poolTokens);
+    const share = await this.api.query.AssetRegistry.Assets.getValue(poolId);
+    tokens.push({
+      id: poolId,
+      decimals: share?.decimals,
+      existentialDeposit: share?.existential_deposit,
+      tradeable: TRADEABLE_DEFAULT,
+      balance: AMOUNT_MAX,
+    } as PoolToken);
 
-    const sharedAsset = await this.api.query.Omnipool.Assets.getValue(poolId);
-    if (sharedAsset) {
-      const { tradable } = sharedAsset;
-      const [meta, balance] = await Promise.all([
-        this.api.query.AssetRegistry.Assets.getValue(poolId),
-        this.getBalance(HYDRATION_OMNIPOOL_ADDRESS, poolId),
-      ]);
-
-      tokens.push({
-        id: poolId,
-        decimals: meta?.decimals,
-        existentialDeposit: meta?.existential_deposit,
-        tradeable: tradable,
-        balance: balance,
-      } as PoolToken);
-    }
     return tokens;
   }
 

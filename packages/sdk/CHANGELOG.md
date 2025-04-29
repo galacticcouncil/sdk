@@ -1,5 +1,38 @@
 # @galacticcouncil/sdk
 
+## 6.2.0
+
+### Minor Changes
+
+- Transaction dryRun support
+- PoolService buildSellAllTx support
+
+## 6.1.4
+
+### Patch Changes
+
+- Fix most liquid route calc for aave
+- Fix aave buy (flip)
+
+## 6.1.3
+
+### Patch Changes
+
+- Fix aave wrap & unwrap pool validations
+
+## 6.1.2
+
+### Patch Changes
+
+- Fix: Filter out virtual shares from most liquid route calc
+
+## 6.1.1
+
+### Patch Changes
+
+- Update aave amm error messages
+- Fix erc20 free balance calc
+
 ## 6.1.0
 
 ### Minor Changes

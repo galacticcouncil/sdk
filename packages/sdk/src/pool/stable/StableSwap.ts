@@ -365,7 +365,6 @@ export class StableSwap implements Pool {
       poolPair.assetOut,
       this.totalIssuance,
       '0',
-
       this.getPegs()
     );
 

@@ -110,12 +110,19 @@ export interface IPoolService {
     minAmountOut: BigNumber,
     route: Hop[]
   ): Transaction;
+  buildSellAllTx(
+    assetIn: string,
+    assetOut: string,
+    minAmountOut: BigNumber,
+    route: Hop[]
+  ): Transaction;
 }
 
 export interface Transaction {
   hex: string;
   name?: string;
   get<T>(): T;
+  dryRun<R>(account: string): Promise<R>;
 }
 
 export type Hop = {
@@ -156,7 +163,7 @@ export interface Trade extends Humanizer {
   tradeFeePct: number;
   priceImpactPct: number;
   swaps: Swap[];
-  toTx(tradeLimit: BigNumber): Transaction;
+  toTx(tradeLimit: BigNumber, tradeAll?: boolean): Transaction;
 }
 
 export interface Humanizer {

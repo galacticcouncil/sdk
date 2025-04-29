@@ -77,17 +77,10 @@ export class AavePool implements Pool {
     _fees: PoolFees
   ): BuyTransfer {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
-
     const errors: PoolError[] = [];
 
-    const poolOutReserve = poolPair.balanceOut;
-    if (amountOut.isGreaterThan(poolOutReserve)) {
-      errors.push(PoolError.MaxOutRatioExceeded);
-    }
-
-    const poolInReserve = poolPair.balanceIn;
-    if (calculatedIn.isGreaterThan(poolInReserve)) {
-      errors.push(PoolError.MaxInRatioExceeded);
+    if (amountOut.isGreaterThan(poolPair.balanceOut)) {
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     return {
@@ -107,14 +100,8 @@ export class AavePool implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const errors: PoolError[] = [];
 
-    const poolInReserve = poolPair.balanceIn;
-    if (amountIn.isGreaterThan(poolInReserve)) {
-      errors.push(PoolError.MaxInRatioExceeded);
-    }
-
-    const poolOutReserve = poolPair.balanceOut;
-    if (calculatedOut.isGreaterThan(poolOutReserve)) {
-      errors.push(PoolError.MaxOutRatioExceeded);
+    if (calculatedOut.isGreaterThan(poolPair.balanceOut)) {
+      errors.push(PoolError.TradeNotAllowed);
     }
 
     return {

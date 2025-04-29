@@ -1,6 +1,6 @@
 export const whitelist: string[] = [
+  'api.AaveTradeExecutor.*',
   'api.CurrenciesApi.*',
-  'api.DryRunApi.*',
   'const.DynamicFees.*',
   'const.LBP.*',
   'const.Omnipool.*',
@@ -27,4 +27,5 @@ export const whitelist: string[] = [
   'tx.Omnipool.sell',
   'tx.Router.buy',
   'tx.Router.sell',
+  'tx.Router.sell_all',
 ];
