@@ -84,7 +84,7 @@ Off-chain optimization of orders across pools for best price execution. TradeRou
 
 Calculate sell of 1 DOT for HDX. For convenience, the router amount can be specified either as a native bigint or as a human-readable string.
 
-For example, "1" DOT (string) is equivalent to 10_000_000_000n (bigint), as DOT has 10 decimals.
+For example, `"1"` DOT (string) is equivalent to `10_000_000_000n` (bigint), as DOT has 10 decimals.
 
 ```typescript
 import { api, pool, sor } from '@galacticcouncil/sdk-next';
