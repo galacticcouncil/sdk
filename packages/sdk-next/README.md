@@ -2,10 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk-next.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk-next)
 
-Next gen sdk build on top of Polkadot API (Papi).
+Next gen hydration sdk build on top of [Polkadot API (Papi)](https://papi.how/).
 
-<br />
-<br />
 Table of content:
 
 - [Installation](#installation)
