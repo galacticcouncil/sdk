@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 9.1.2
+
+### Patch Changes
+
+- Update unique rpc
+
 ## 9.1.1
 
 ### Patch Changes
