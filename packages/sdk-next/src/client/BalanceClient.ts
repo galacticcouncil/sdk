@@ -2,10 +2,13 @@ import { PolkadotClient } from 'polkadot-api';
 
 import {
   type Observable,
+  Subject,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  finalize,
   map,
+  shareReplay,
 } from 'rxjs';
 
 import { Papi } from '../api';
@@ -58,17 +61,6 @@ export class BalanceClient extends Papi {
     return combineLatest([systemOb, tokensOb]).pipe(
       debounceTime(250),
       map((balance) => balance.flat())
-    );
-  }
-
-  // TODO: Impl proper balance check
-  subscribeErc20Balance(address: string): Observable<string> {
-    return this.api.event.EVM.Log.watch().pipe(
-      map(({ meta, payload }) => {
-        console.log(meta);
-        console.log(payload);
-        return 'yes';
-      })
     );
   }
 
@@ -131,6 +123,60 @@ export class BalanceClient extends Papi {
         return result;
       })
     );
+  }
+
+  subscribeErc20Balance(
+    address: string,
+    includeOnly?: number[]
+  ): Observable<AssetAmount[]> {
+    const subject = new Subject<AssetAmount[]>();
+    const observable = subject.pipe(shareReplay(1));
+
+    const getErc20s = async () => {
+      const assets = await this.api.query.AssetRegistry.Assets.getEntries();
+      return assets
+        .filter(({ value }) => {
+          const { asset_type } = value;
+          return asset_type.type === 'Erc20';
+        })
+        .map(({ keyArgs }) => {
+          const [id] = keyArgs;
+          return id;
+        });
+    };
+
+    const run = async () => {
+      const ids = includeOnly ? includeOnly : await getErc20s();
+      const updateBalance = async () => {
+        const balances: [number, bigint][] = await Promise.all(
+          ids.map(async (id) => {
+            const balance = await this.getTokenBalanceData(address, id);
+            return [id, balance];
+          })
+        );
+        const balance = balances.map(([id, balance]) => {
+          return {
+            id: id,
+            amount: balance,
+          } as AssetAmount;
+        });
+        subject.next(balance);
+      };
+
+      await updateBalance();
+      const sub =
+        this.api.query.System.Number.watchValue('best').subscribe(
+          updateBalance
+        );
+      return () => sub.unsubscribe();
+    };
+
+    let disconnect: () => void;
+    run().then((unsub) => (disconnect = unsub));
+
+    return observable.pipe(finalize(() => disconnect?.())) as Observable<
+      AssetAmount[]
+    >;
   }
 
   private async getTokenBalanceData(

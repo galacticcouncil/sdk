@@ -17,6 +17,7 @@ export abstract class PapiExecutor {
   }
 
   async run() {
+    console.log('Connecting to:', this.apiUrl);
     const client = await api.getWs(this.apiUrl);
     const papi = client.getTypedApi(hydration);
     const { spec_name, spec_version } = await papi.constants.System.Version();
@@ -39,6 +40,7 @@ export abstract class PapiExecutor {
         } else {
           console.log(output);
         }
+        console.log('Destroying...');
         client.destroy();
       })
       .catch((e) => {
