@@ -1,0 +1,16 @@
+{
+  "name": "sdk-swapp",
+  "private": true,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^1.0.0"
+  }
+}
