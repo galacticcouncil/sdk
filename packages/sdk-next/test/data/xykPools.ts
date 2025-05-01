@@ -1,6 +1,8 @@
-import { pool } from '../../src';
+import { AssetType, pool } from '../../src';
 
 const { PoolType } = pool;
+
+const token: AssetType = 'Token';
 
 export const xykPools = [
   {
@@ -15,14 +17,14 @@ export const xykPools = [
         balance: 235000000000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
       {
         id: 2,
         balance: 35000000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
     ],
   },
@@ -38,14 +40,14 @@ export const xykPools = [
         balance: 4000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
       {
         id: 2,
         balance: 175000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
     ],
   },
@@ -61,14 +63,14 @@ export const xykPools = [
         balance: 265000000000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
       {
         id: 1,
         balance: 845000000000000n,
         decimals: 12,
         existentialDeposit: 1000n,
-        type: 'Token',
+        type: token,
       },
     ],
   },

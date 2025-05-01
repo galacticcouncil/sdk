@@ -1,6 +1,8 @@
-import { pool } from '../../src';
+import { AssetType, pool } from '../../src';
 
 const { PoolType } = pool;
+
+const token: AssetType = 'Token';
 
 export const stablePools = [
   {
@@ -16,7 +18,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
       {
         id: 1,
@@ -24,7 +26,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
       {
         id: 2,
@@ -32,7 +34,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
       {
         id: 3,
@@ -40,7 +42,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
     ],
   },
@@ -57,7 +59,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
       {
         id: 1,
@@ -65,7 +67,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
-        type: 'Token',
+        type: token,
       },
     ],
   },
