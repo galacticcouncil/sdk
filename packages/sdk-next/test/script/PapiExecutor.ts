@@ -29,7 +29,7 @@ export abstract class PapiExecutor {
     this.script(client)
       .then((output: any) => {
         if (typeof output === 'function') {
-          setTimeout(output, 10_000);
+          //setTimeout(output, 10_000);
           return;
         }
 

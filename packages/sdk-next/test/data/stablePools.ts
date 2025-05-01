@@ -16,6 +16,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
       {
         id: 1,
@@ -23,6 +24,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
       {
         id: 2,
@@ -30,6 +32,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
       {
         id: 3,
@@ -37,6 +40,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
     ],
   },
@@ -53,6 +57,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
       {
         id: 1,
@@ -60,6 +65,7 @@ export const stablePools = [
         decimals: 12,
         existentialDeposit: 1000n,
         tradeable: 15,
+        type: 'Token',
       },
     ],
   },

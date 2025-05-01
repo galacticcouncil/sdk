@@ -14,12 +14,14 @@ export const xykPool = {
       balance: 4000000000000n,
       decimals: 12,
       existentialDeposit: 1000n,
+      type: 'Token',
     },
     {
       id: 2,
       balance: 175000000000000n,
       decimals: 12,
       existentialDeposit: 1000n,
+      type: 'Token',
     },
   ],
 };
