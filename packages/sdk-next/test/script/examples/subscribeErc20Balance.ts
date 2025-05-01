@@ -5,12 +5,14 @@ import { ApiUrl } from '../types';
 
 import { client as c } from '../../../src';
 
-class SubscribeErc20 extends PapiExecutor {
+const G_POOL_ADDRESS = '7Ni2vDQ41AMCzx8pBpNvL3CtrkprAaAB73NzyJy6T17PaGHo';
+const G_POOL_ERC20 = [1001];
+
+class SubscribeErc20Balance extends PapiExecutor {
   async script(client: PolkadotClient) {
     const balanceClient = new c.BalanceClient(client);
-    const gigaPoolAddr = '7Ni2vDQ41AMCzx8pBpNvL3CtrkprAaAB73NzyJy6T17PaGHo';
     const subscription = balanceClient
-      .subscribeErc20Balance(gigaPoolAddr, [1001])
+      .subscribeErc20Balance(G_POOL_ADDRESS, G_POOL_ERC20)
       .subscribe((balances) => {
         console.log(balances);
         this.logTime();
@@ -23,4 +25,4 @@ class SubscribeErc20 extends PapiExecutor {
   }
 }
 
-new SubscribeErc20(ApiUrl.Hydration, 'Subscribe erc20 balance').run();
+new SubscribeErc20Balance(ApiUrl.Hydration, 'Subscribe erc20 balance').run();

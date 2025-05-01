@@ -58,8 +58,9 @@ export class BalanceClient extends Papi {
   subscribeBalance(address: string): Observable<AssetAmount[]> {
     const systemOb = this.subscribeSystemBalance(address);
     const tokensOb = this.subscribeTokensBalance(address);
+    const erc20Ob = this.subscribeErc20Balance(address);
 
-    return combineLatest([systemOb, tokensOb]).pipe(
+    return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
       debounceTime(250),
       map((balance) => balance.flat())
     );
