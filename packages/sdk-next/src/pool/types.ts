@@ -39,6 +39,7 @@ export interface PoolToken {
   id: number;
   balance: bigint;
   existentialDeposit: bigint;
+  type: 'Bond' | 'Erc20' | 'External' | 'StableSwap' | 'Token';
   decimals?: number;
   tradeable?: number;
 }
