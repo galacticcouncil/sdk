@@ -8,6 +8,7 @@ import {
   distinctUntilChanged,
   finalize,
   map,
+  pairwise,
   shareReplay,
 } from 'rxjs';
 
@@ -174,9 +175,20 @@ export class BalanceClient extends Papi {
     let disconnect: () => void;
     run().then((unsub) => (disconnect = unsub));
 
-    return observable.pipe(finalize(() => disconnect?.())) as Observable<
-      AssetAmount[]
-    >;
+    return observable.pipe(
+      finalize(() => disconnect?.()),
+      pairwise(),
+      map(([prev, curr], i) => {
+        if (i === 0) return curr;
+        const m = prev.reduce((acc, o) => {
+          acc.set(o.id, o.amount);
+          return acc;
+        }, new Map<number, bigint>());
+        const delta = curr.filter((a) => a.amount !== m.get(a.id));
+        return delta;
+      }),
+      distinctUntilChanged((_prev, curr) => curr.length === 0)
+    ) as Observable<AssetAmount[]>;
   }
 
   private async getTokenBalanceData(
