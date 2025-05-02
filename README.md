@@ -1,6 +1,7 @@
 # Galactic SDK
 
 [![Build SDK](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml/badge.svg)](https://github.com/galacticcouncil/sdk/actions/workflows/main.yml)
+[![License](https://img.shields.io/github/license/galacticcouncil/sdk)](https://github.com/galacticcouncil/sdk/blob/master/LICENSE.md)
 
 Collection of SDK(s) crafted to ease Hydration & Basilisk chains integration.
 
