@@ -30,7 +30,7 @@ Build and subscribe to the given AMM types, supplying data for the Router API.
 
 #### API Reference (internal)
 
-| Method | Description |
+| Method | Description  |
 | :----- | :----------- |
 | `getPools(): Promise<PoolBase[]>` | Returns list of available pools. |
 | `getPoolFees(pool: PoolBase, feeAsset: number): Promise<PoolFees>` | Returns current pool fees |
@@ -62,7 +62,7 @@ Off-chain routing, build to find the most suitable routes across the pools. Buil
 
 #### API Reference
 
-| Method | Description |
+| Method | Description  |
 | :----- | :----------- |
 | `getPools(): PoolBase[]` | Returns the current list of available pools. |
 | `getRoutes(assetIn: number, assetOut: number): Hop[][]` | Computes possible routes between two assets. |
@@ -101,7 +101,7 @@ Off-chain optimization of orders across pools for best price execution. TradeRou
 
 #### Api Reference
 
-| Method | Description |
+| Method | Description  |
 | :----- | :----------- |
 | `getBestSell(tokenIn: number, tokenOut: number, amountIn: bigint \| string): Trade` | Find the best sell trade for given input amount. |
 | `getBestBuy(tokenIn: number, tokenOut: number, amountOut: bigint \| string): Trade` | Find the best buy trade for given output amount. |
@@ -153,7 +153,7 @@ Helper class supporting the following standards:
 
 #### API Reference
 
-| Method | Description |
+| Method | Description  |
 | :----- | :----------- |
 | `subscribeSystemBalance(address: string): Observable<AssetAmount>` | Subscribe native account balance. |
 | `subscribeTokenBalance(address: string, assetId: number): Observable<AssetAmount>` | Subscribe token account balance. |
@@ -191,7 +191,7 @@ Helper class to fetch registry metadata.
 
 #### API Reference
 
-| Method | Description |
+| Method | Description  |
 | :----- | :----------- |
 | `getOnChainAssets(includeInvalid?: boolean, external?: ExternalAsset[]): Promise<Asset[]>` | Returns assets with metadata from registry. |
 
