@@ -1,7 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "private": true,
-  "version": "1.0.0",
+  "version": "1.0.0-beta.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
