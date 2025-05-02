@@ -12,7 +12,6 @@ export const getSignerBySource = async (
   address: string
 ): Promise<PolkadotSigner> => {
   const extensions: string[] = getInjectedExtensions();
-  console.log(source, extensions);
   const extension = extensions.find((e) => e === source);
 
   if (!extension) {
