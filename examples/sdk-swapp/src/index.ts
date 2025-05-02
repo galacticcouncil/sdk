@@ -1,22 +1,8 @@
-import { api as papi, pool } from '@galacticcouncil/sdk-next';
+import './root';
 
-const client = await papi.getWs('wss://hydradx-rpc.dwellir.com');
-const api = client.getUnsafeApi();
+const outlet = document.getElementById('app');
 
-await api.constants.System.Version(); // Removal is fatal
-
-//api.event.Omnipool.SellExecuted.watch().subscribe((a) => console.log(a));
-
-const ctx = new pool.PoolContextProvider(client)
-  .withOmnipool()
-  .withStableswap()
-  .withXyk();
-
-const pools = await ctx.getPools();
-
-console.log(pools);
-
-setTimeout(() => {
-  ctx.destroy();
-  console.log('Unsubscribed');
-}, 60000);
+if (outlet) {
+  const root = document.createElement('gc-root');
+  outlet.appendChild(root);
+}

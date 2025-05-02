@@ -163,7 +163,6 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
     return query.watchValue('best').pipe(
       switchMap((parachainBlock) => {
-        console.log('sync stables ' + parachainBlock);
         return this.getPoolDelta(pool.id, poolData, parachainBlock);
       }),
       map((delta) => Object.assign({}, pool, delta))

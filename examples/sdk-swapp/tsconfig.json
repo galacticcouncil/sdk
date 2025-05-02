@@ -2,7 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "src",
-    "noImplicitAny": false
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "strictNullChecks": false
   },
   "include": ["src/**/*.ts"]
 }

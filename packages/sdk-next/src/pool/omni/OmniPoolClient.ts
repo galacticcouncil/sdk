@@ -148,9 +148,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        map(({ deltas, entries }) => {
-          const delta = deltas?.upserted.map((up) => up.args).sort();
-          this.logSync(pool.address, 'pool assets', delta);
+        map(({ entries }) => {
           return entries.map((e) => {
             const [key] = e.args;
             const { hub_reserve, shares, tradable, cap, protocol_shares } =

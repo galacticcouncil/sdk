@@ -10,14 +10,13 @@ const options = {
   bundle: true,
   format: 'esm',
   platform: 'browser',
-  target: 'esnext',
   preserveSymlinks: true,
   treeShaking: true,
   metafile: true,
   minify: true,
   splitting: true,
   sourcemap: true,
-  outdir: 'out/',
+  outdir: 'public/',
   logLevel: 'info',
 };
 
@@ -25,5 +24,8 @@ const ctx = await esbuild.context({ ...options, plugins });
 const opts = await ctx.rebuild();
 writeFileSync('build-meta.json', JSON.stringify(opts.metafile));
 await ctx.watch();
-const localServer = await ctx.serve({ servedir: './', host: '127.0.0.1' });
+const localServer = await ctx.serve({
+  servedir: './public',
+  host: '127.0.0.1',
+});
 createProxyServer(localServer);

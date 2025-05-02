@@ -4,6 +4,7 @@
   "type": "module",
   "main": "out/index.js",
   "scripts": {
+    "clean": "rimraf public/**/*.js && rimraf public/**/*.map && rimraf dist",
     "dev": "node ./esbuild.dev.mjs"
   },
   "keywords": [],
@@ -11,6 +12,7 @@
     "esbuild": "^0.25.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^1.0.0"
+    "@galacticcouncil/sdk-next": "^1.0.0",
+    "@galacticcouncil/ui": "^5.5.0"
   }
 }
