@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { FarmClient } from '@galacticcouncil/sdk';
+import { FarmClient } from '../../../src';
 
 import { PolkadotExecutor } from '../PjsExecutor';
 import { ApiUrl } from '../types';

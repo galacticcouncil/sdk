@@ -16,6 +16,7 @@ import {
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
 import { toPct, toPoolFee } from '../../utils/mapper';
+
 import {
   PoolBase,
   PoolType,
@@ -23,12 +24,11 @@ import {
   PoolLimits,
   PoolFees,
   PoolPair,
-} from '../../types';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { OmniMath } from './OmniMath';
 import { OmniPoolFees, OmniPoolToken } from './OmniPool';
-
-import { PoolClient } from '../PoolClient';
 
 type OmniPoolFeeRange = [number, number, number];
 

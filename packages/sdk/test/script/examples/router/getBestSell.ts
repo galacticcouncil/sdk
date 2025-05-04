@@ -1,9 +1,14 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, PoolType, TradeRouter, ZERO } from '../../../../src';
+import {
+  PoolService,
+  PoolType,
+  TradeRouter,
+  TradeUtils,
+} from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
-class GetBestSellPriceExample extends PolkadotExecutor {
+class GetBestSellExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const external = [
       {
@@ -17,17 +22,19 @@ class GetBestSellPriceExample extends PolkadotExecutor {
     ];
 
     const poolService = new PoolService(api);
+    const txUtils = new TradeUtils(api);
+
     await poolService.syncRegistry(external);
+
     const router = new TradeRouter(poolService, {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
 
-    const bestSell = await router.getBestSell('5', '10', '1');
-
-    const transaction = bestSell.toTx(ZERO);
+    const trade = await router.getBestSell('5', '10', '1');
+    const transaction = txUtils.buildSellTx(trade);
     console.log('Transaction hash: ' + transaction.hex);
-    return bestSell;
+    return trade;
   }
 }
 
-new GetBestSellPriceExample(ApiUrl.HydraDx, 'Get best sell price', true).run();
+new GetBestSellExample(ApiUrl.HydraDx, 'Get best sell price', true).run();

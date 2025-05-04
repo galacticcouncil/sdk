@@ -1,5 +1,5 @@
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -7,8 +7,8 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
+  SellCtx,
+} from '../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 
 export class AavePool implements Pool {
@@ -75,7 +75,7 @@ export class AavePool implements Pool {
     poolPair: PoolPair,
     amountOut: BigNumber,
     _fees: PoolFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const errors: PoolError[] = [];
 
@@ -89,14 +89,14 @@ export class AavePool implements Pool {
       amountOut: amountOut,
       feePct: 0,
       errors: errors,
-    } as BuyTransfer;
+    } as BuyCtx;
   }
 
   validateAndSell(
     poolPair: PoolPair,
     amountIn: BigNumber,
     _fees: PoolFees
-  ): SellTransfer {
+  ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const errors: PoolError[] = [];
 
@@ -110,7 +110,7 @@ export class AavePool implements Pool {
       amountOut: calculatedOut,
       feePct: 0,
       errors: errors,
-    } as SellTransfer;
+    } as SellCtx;
   }
 
   calculateInGivenOut(_poolPair: PoolPair, amountOut: BigNumber): BigNumber {

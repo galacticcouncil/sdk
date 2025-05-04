@@ -1,6 +1,14 @@
-import { Asset, Hop, IPoolService, PoolBase, Pool, PoolType } from '../types';
-import { Edge, RouteSuggester } from '../route';
-import { PoolFactory } from '../pool';
+import { Edge, RouteSuggester } from './route';
+
+import {
+  Hop,
+  IPoolService,
+  Pool,
+  PoolBase,
+  PoolFactory,
+  PoolType,
+} from '../pool';
+import { Asset } from '../types';
 
 export type RouterOptions = {
   includeOnly?: PoolType[];

@@ -5,8 +5,10 @@ import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
 import { BalanceClient } from '../client';
-import { Asset, PoolBase, PoolFees, PoolPair, PoolType } from '../types';
+import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
+
+import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 
 export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];

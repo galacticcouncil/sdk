@@ -1,4 +1,4 @@
-import { Queue } from '../utils/Queue';
+import { Queue } from '../../utils/Queue';
 
 export type Path = Node[];
 export type Node = [id: number, from: string];

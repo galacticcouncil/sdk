@@ -1,6 +1,5 @@
-import { RUNTIME_DECIMALS } from '../../consts';
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -9,8 +8,9 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
+  SellCtx,
+} from '../types';
+import { RUNTIME_DECIMALS } from '../../consts';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { toDecimals } from '../../utils/mapper';
 
@@ -122,7 +122,7 @@ export class OmniPool implements Pool {
     poolPair: OmniPoolPair,
     amountOut: BigNumber,
     fees: OmniPoolFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
 
@@ -163,14 +163,14 @@ export class OmniPool implements Pool {
       amountOut: amountOut,
       feePct: feePct.toNumber(),
       errors: errors,
-    } as BuyTransfer;
+    } as BuyCtx;
   }
 
   validateAndSell(
     poolPair: OmniPoolPair,
     amountIn: BigNumber,
     fees: OmniPoolFees
-  ): SellTransfer {
+  ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 
@@ -208,7 +208,7 @@ export class OmniPool implements Pool {
       amountOut: amountOut,
       feePct: feePct.toNumber(),
       errors: errors,
-    } as SellTransfer;
+    } as SellCtx;
   }
 
   calculateInGivenOut(

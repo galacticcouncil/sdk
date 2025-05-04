@@ -9,6 +9,8 @@ import { Option, u32 } from '@polkadot/types-codec';
 import { ITuple } from '@polkadot/types-codec/types';
 
 import { HYDRADX_SS58_PREFIX, TRADEABLE_DEFAULT } from '../../consts';
+import { toPoolFee } from '../../utils/mapper';
+
 import {
   PoolBase,
   PoolType,
@@ -17,13 +19,11 @@ import {
   PoolFees,
   PoolToken,
   PoolPair,
-} from '../../types';
-import { toPoolFee } from '../../utils/mapper';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
-
-import { PoolClient } from '../PoolClient';
 
 export const AMOUNT_MAX = 340282366920938463463374607431768211455n;
 

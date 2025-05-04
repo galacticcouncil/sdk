@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { AssetClient } from '@galacticcouncil/sdk';
+import { AssetClient } from '../../../src';
 
 import { PolkadotExecutor } from '../PjsExecutor';
 import { ApiUrl } from '../types';

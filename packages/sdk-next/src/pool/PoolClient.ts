@@ -13,7 +13,6 @@ import {
   mergeAll,
   of,
   switchMap,
-  tap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';

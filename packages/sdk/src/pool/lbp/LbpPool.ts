@@ -1,5 +1,5 @@
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -8,8 +8,8 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
+  SellCtx,
+} from '../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 
@@ -112,7 +112,7 @@ export class LbpPool implements Pool {
     poolPair: WeightedPoolPair,
     amountOut: BigNumber,
     fees: LbpPoolFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const feeAsset = this.tokens[0].id;
 
     const errors: PoolError[] = [];
@@ -145,7 +145,7 @@ export class LbpPool implements Pool {
         amountOut: amountOut,
         feePct: feePct,
         errors: errors,
-      } as BuyTransfer;
+      } as BuyCtx;
     } else {
       const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
@@ -160,7 +160,7 @@ export class LbpPool implements Pool {
         amountOut: amountOut,
         feePct: 0,
         errors: errors,
-      } as BuyTransfer;
+      } as BuyCtx;
     }
   }
 
@@ -174,7 +174,7 @@ export class LbpPool implements Pool {
     poolPair: WeightedPoolPair,
     amountIn: BigNumber,
     fees: LbpPoolFees
-  ): SellTransfer {
+  ): SellCtx {
     const feeAsset = this.tokens[0].id;
 
     const errors: PoolError[] = [];
@@ -202,7 +202,7 @@ export class LbpPool implements Pool {
         amountOut: calculatedOut,
         feePct: 0,
         errors: errors,
-      } as SellTransfer;
+      } as SellCtx;
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut, fees);
@@ -222,7 +222,7 @@ export class LbpPool implements Pool {
         amountOut: amountOut,
         feePct: feePct,
         errors: errors,
-      } as SellTransfer;
+      } as SellCtx;
     }
   }
 

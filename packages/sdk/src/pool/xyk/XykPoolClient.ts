@@ -1,6 +1,7 @@
 import type { u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
+
 import {
   PoolBase,
   PoolType,
@@ -9,11 +10,10 @@ import {
   PoolFees,
   PoolToken,
   PoolPair,
-} from '../../types';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { XykPoolFees } from './XykPool';
-
-import { PoolClient } from '../PoolClient';
 
 export class XykPoolClient extends PoolClient {
   isSupported(): boolean {

@@ -1,26 +1,17 @@
 import { Router } from './Router';
+
 import { RouteNotFound } from '../errors';
-import {
-  Amount,
-  BuySwap,
-  Hop,
-  Pool,
-  PoolFees,
-  PoolToken,
-  PoolType,
-  SellSwap,
-  Swap,
-  Trade,
-  TradeType,
-  Transaction,
-} from '../types';
+import { Hop, Pool, PoolFees, PoolType } from '../pool';
+import { Amount } from '../types';
 import { BigNumber, bnum, scale } from '../utils/bignumber';
+import { toHuman, toPct } from '../utils/mapper';
 import {
   calculateSellFee,
   calculateBuyFee,
   calculateDiffToRef,
 } from '../utils/math';
-import { toHuman, toPct } from '../utils/mapper';
+
+import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
   /**
@@ -166,29 +157,6 @@ export class TradeRouter extends Router {
 
     const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
 
-    const sellTx = (minAmountOut: BigNumber, sellAll = false): Transaction => {
-      const route = swaps.map((swap: SellSwap) => {
-        return swap as Hop;
-      });
-
-      if (sellAll) {
-        return this.poolService.buildSellAllTx(
-          assetIn,
-          assetOut,
-          minAmountOut,
-          route
-        );
-      }
-
-      return this.poolService.buildSellTx(
-        assetIn,
-        assetOut,
-        firstSwap.amountIn,
-        minAmountOut,
-        route
-      );
-    };
-
     return {
       type: TradeType.Sell,
       amountIn: firstSwap.amountIn,
@@ -199,7 +167,6 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact.toNumber(),
       swaps: swaps,
-      toTx: sellTx,
       toHuman() {
         return {
           type: TradeType.Sell,
@@ -517,20 +484,6 @@ export class TradeRouter extends Router {
       bestRoutePriceImpact = calculateDiffToRef(swapAmount, delta0X).toNumber();
     }
 
-    const buyTx = (maxAmountIn: BigNumber): Transaction => {
-      const route = swaps.map((swap: BuySwap) => {
-        return swap as Hop;
-      });
-
-      return this.poolService.buildBuyTx(
-        assetIn,
-        assetOut,
-        firstSwap.amountOut,
-        maxAmountIn,
-        route
-      );
-    };
-
     return {
       type: TradeType.Buy,
       amountOut: firstSwap.amountOut,
@@ -541,7 +494,6 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact,
       swaps: swaps,
-      toTx: buyTx,
       toHuman() {
         return {
           type: TradeType.Buy,

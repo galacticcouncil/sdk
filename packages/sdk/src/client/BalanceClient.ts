@@ -2,11 +2,10 @@ import { ApiPromise } from '@polkadot/api';
 import { OrmlTokensAccountData } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
+import { PolkadotApiClient } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
-
-import { PolkadotApiClient } from './PolkadotApi';
 
 export class BalanceClient extends PolkadotApiClient {
   constructor(api: ApiPromise) {

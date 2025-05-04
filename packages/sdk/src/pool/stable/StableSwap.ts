@@ -1,6 +1,5 @@
-import { TRADEABLE_DEFAULT } from '../../consts';
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -9,8 +8,9 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
+  SellCtx,
+} from '../types';
+import { TRADEABLE_DEFAULT } from '../../consts';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toDecimals, toPct } from '../../utils/mapper';
 
@@ -130,7 +130,7 @@ export class StableSwap implements Pool {
     poolPair: StableSwapPair,
     amountOut: BigNumber,
     fees: StableSwapFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
     const feePct = toPct(fees.fee);
@@ -156,14 +156,14 @@ export class StableSwap implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as BuyTransfer;
+    } as BuyCtx;
   }
 
   validateAndSell(
     poolPair: StableSwapPair,
     amountIn: BigNumber,
     fees: StableSwapFees
-  ): SellTransfer {
+  ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
     const feePct = toPct(fees.fee);
@@ -189,7 +189,7 @@ export class StableSwap implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as SellTransfer;
+    } as SellCtx;
   }
 
   private calculateIn(
