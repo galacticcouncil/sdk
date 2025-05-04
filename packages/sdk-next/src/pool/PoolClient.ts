@@ -11,7 +11,9 @@ import {
   from,
   map,
   mergeAll,
+  of,
   switchMap,
+  tap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
@@ -81,6 +83,10 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   }
 
   private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+    if (pool.type === PoolType.Aave) {
+      return of([]);
+    }
+
     const subs: Observable<AssetAmount | AssetAmount[]>[] = [
       this.subscribeTokensBalance(pool.address),
     ];

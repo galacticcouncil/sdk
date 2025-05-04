@@ -5,6 +5,7 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { Papi } from '../api';
 import { PoolNotFound } from '../errors';
 
+import { AavePoolClient } from './aave';
 import { LbpPoolClient } from './lbp';
 import { OmniPoolClient } from './omni';
 import { XykPoolClient } from './xyk';
@@ -24,6 +25,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private readonly omniClient: OmniPoolClient;
   private readonly stableClient: StableSwapClient;
   private readonly xykClient: XykPoolClient;
+  private readonly aaveClient: AavePoolClient;
 
   private readonly active: Set<PoolType> = new Set([]);
   private readonly clients: PoolClient<PoolBase>[] = [];
@@ -33,6 +35,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private omniSub: Subscription = Subscription.EMPTY;
   private stableSub: Subscription = Subscription.EMPTY;
   private xykSub: Subscription = Subscription.EMPTY;
+  private aaveSub: Subscription = Subscription.EMPTY;
 
   private isReady: boolean = false;
   private isDestroyed = new Subject<boolean>();
@@ -43,59 +46,57 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.omniClient = new OmniPoolClient(client);
     this.stableClient = new StableSwapClient(client);
     this.xykClient = new XykPoolClient(client);
+    this.aaveClient = new AavePoolClient(client);
     this.clients = [
       this.lbpClient,
       this.omniClient,
       this.stableClient,
       this.xykClient,
+      this.aaveClient,
     ];
   }
 
-  public withOmnipool(): this {
-    this.omniSub.unsubscribe();
-    this.omniSub = this.omniClient
+  private subscribe(client: PoolClient<PoolBase>) {
+    return client
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
       .subscribe((pool) => {
         this.pools.set(pool.address, pool);
       });
+  }
+
+  public withOmnipool(): this {
+    this.omniSub.unsubscribe();
+    this.omniSub = this.subscribe(this.omniClient);
     this.active.add(PoolType.Omni);
     return this;
   }
 
   public withStableswap(): this {
     this.stableSub.unsubscribe();
-    this.stableSub = this.stableClient
-      .getSubscriber()
-      .pipe(takeUntil(this.isDestroyed))
-      .subscribe((pool) => {
-        this.pools.set(pool.address, pool);
-      });
+    this.stableSub = this.subscribe(this.stableClient);
     this.active.add(PoolType.Stable);
     return this;
   }
 
   public withLbp(): this {
     this.lbpSub.unsubscribe();
-    this.lbpSub = this.lbpClient
-      .getSubscriber()
-      .pipe(takeUntil(this.isDestroyed))
-      .subscribe((pool) => {
-        this.pools.set(pool.address, pool);
-      });
+    this.lbpSub = this.subscribe(this.lbpClient);
     this.active.add(PoolType.LBP);
+    return this;
+  }
+
+  public withAave(): this {
+    this.aaveSub.unsubscribe();
+    this.aaveSub = this.subscribe(this.aaveClient);
+    this.active.add(PoolType.Aave);
     return this;
   }
 
   public withXyk(override?: PoolTokenOverride[]): this {
     this.xykClient.withOverride(override);
     this.xykSub.unsubscribe();
-    this.xykSub = this.xykClient
-      .getSubscriber()
-      .pipe(takeUntil(this.isDestroyed))
-      .subscribe((pool) => {
-        this.pools.set(pool.address, pool);
-      });
+    this.xykSub = this.subscribe(this.xykClient);
     this.active.add(PoolType.XYK);
     return this;
   }

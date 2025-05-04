@@ -10,10 +10,9 @@
   },
   "keywords": [
     "hydration",
-    "basilisk",
-    "sdk",
-    "definitions",
-    "types"
+    "api",
+    "router",
+    "sdk"
   ],
   "bugs": {
     "url": "https://github.com/galacticcouncil/sdk/issues"
@@ -48,6 +47,7 @@
     "big.js": "^6.2.1"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.10.0"
+    "polkadot-api": "^1.10.0",
+    "viem": "^2.23.7"
   }
 }
