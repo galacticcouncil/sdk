@@ -3,6 +3,7 @@ import { PolkadotClient } from 'polkadot-api';
 import {
   type Observable,
   Subject,
+  bufferCount,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
@@ -10,6 +11,7 @@ import {
   map,
   pairwise,
   shareReplay,
+  startWith,
 } from 'rxjs';
 
 import { Papi } from '../api';
@@ -62,7 +64,18 @@ export class BalanceClient extends Papi {
 
     return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
       debounceTime(250),
-      map((balance) => balance.flat())
+      map((balance) => balance.flat()),
+      startWith([]), // trigger synthetic empty "previous"
+      bufferCount(2, 1), // like pairwise, but includes the first
+      map(([prev, curr], i) => {
+        if (i === 0) return curr;
+        const m = prev.reduce((acc, o) => {
+          acc.set(o.id, o.amount);
+          return acc;
+        }, new Map<number, bigint>());
+        const delta = curr.filter((a) => a.amount !== m.get(a.id));
+        return delta;
+      })
     );
   }
 
