@@ -1,6 +1,7 @@
-import { Bfs, Path, Edge } from '../../src/route';
-import { getNodesAndEdges } from '../../src/route';
-import { stablePools } from '../data/stablePools';
+import { Bfs, Path } from './bfs';
+import { Edge, getNodesAndEdges } from './graph';
+
+import { stablePools } from '../../../test/data';
 
 describe('Bfs graph', () => {
   const g: Map<number, Path> = new Map();

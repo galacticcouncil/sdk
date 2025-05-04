@@ -1,4 +1,4 @@
-import { PoolType } from '../../src/types';
+import { PoolType } from '../../src';
 
 export const xykPool = {
   address: 'bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3',

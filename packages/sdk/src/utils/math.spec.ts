@@ -1,5 +1,5 @@
-import { calculateDiffToAvg, calculateDiffToRef } from '../../src/utils/math';
-import { BigNumber, ZERO, bnum } from '../../src/utils/bignumber';
+import { calculateDiffToAvg, calculateDiffToRef } from './math';
+import { BigNumber, ZERO, bnum } from './bignumber';
 
 describe('Calculate Percentage Difference', () => {
   beforeEach(() => {});

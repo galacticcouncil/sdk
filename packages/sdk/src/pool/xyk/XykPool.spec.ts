@@ -1,5 +1,6 @@
-import { XykPool } from '../../../src/pool/xyk/XykPool';
-import { xykPool } from '../../data/xykPool';
+import { XykPool } from './XykPool';
+
+import { xykPool } from '../../../test/data';
 
 describe('Xyk Pool', () => {
   let pool: XykPool;
@@ -12,8 +13,12 @@ describe('Xyk Pool', () => {
     expect(pool).toBeDefined();
     const result = pool.parsePair('1', '2');
     expect(result.assetIn).toStrictEqual(xykPool.tokens[0].id);
-    expect(result.balanceIn.toString()).toStrictEqual(xykPool.tokens[0].balance);
+    expect(result.balanceIn.toString()).toStrictEqual(
+      xykPool.tokens[0].balance
+    );
     expect(result.assetOut).toStrictEqual(xykPool.tokens[1].id);
-    expect(result.balanceOut.toString()).toStrictEqual(xykPool.tokens[1].balance);
+    expect(result.balanceOut.toString()).toStrictEqual(
+      xykPool.tokens[1].balance
+    );
   });
 });

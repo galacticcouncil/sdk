@@ -1,6 +1,28 @@
-import { TradeRouter } from '../../src/api';
-import { IPoolService, SellSwap, BuySwap } from '../../src/types';
-import { MockXykPoolService } from '../lib/mockXykPoolService';
+import { TradeRouter } from './TradeRouter';
+import { SellSwap, BuySwap } from './types';
+
+import {
+  IPoolService,
+  PoolBase,
+  PoolFee,
+  PoolFees,
+  XykPoolFees,
+} from '../pool';
+import { xykPools } from '../../test/data';
+
+const fees: XykPoolFees = {
+  exchangeFee: [3, 1000] as PoolFee,
+};
+
+class MockXykPoolService implements IPoolService {
+  getPools(): Promise<PoolBase[]> {
+    return Promise.resolve(xykPools);
+  }
+
+  getPoolFees(): Promise<PoolFees> {
+    return Promise.resolve(fees);
+  }
+}
 
 describe('TradeRouter with mocked XYK pool service', () => {
   let poolService: IPoolService;

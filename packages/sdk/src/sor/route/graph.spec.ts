@@ -1,8 +1,7 @@
-import { getNodesAndEdges } from '../../src/route';
-import { PoolBase } from '../../src/types';
-import { xykPools } from '../data/xykPools';
-import { xykPools as xykPoolsDev } from '../data/xykPoolsDev';
-import { stablePools } from '../data/stablePools';
+import { getNodesAndEdges } from './graph';
+
+import { PoolBase } from '../../pool';
+import { stablePools, xykPools, xykPoolsDev } from '../../../test/data';
 
 describe('Suggester graph for XYK pool', () => {
   let pools: PoolBase[];

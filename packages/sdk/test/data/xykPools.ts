@@ -1,4 +1,4 @@
-import { PoolType } from '../../src/types';
+import { PoolType } from '../../src';
 
 export const xykPools = [
   {

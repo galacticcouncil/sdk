@@ -1,4 +1,4 @@
-import { Bfs } from '../../../src/utils/traversal/bfs';
+import { Bfs } from './bfs';
 
 describe('Breadth First Search', () => {
   const g: number[][] = [];

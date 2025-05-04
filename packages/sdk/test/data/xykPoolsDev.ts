@@ -1,6 +1,6 @@
-import { PoolType } from '../../src/types';
+import { PoolType } from '../../src';
 
-export const xykPools = [
+export const xykPoolsDev = [
   {
     address: 'bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq',
     type: PoolType.XYK,

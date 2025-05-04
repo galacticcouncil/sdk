@@ -1,6 +1,7 @@
-import { RouteSuggester } from '../../src/route';
-import { PoolBase } from '../../src/types';
-import { xykPools } from '../data/xykPools';
+import { RouteSuggester } from './suggester';
+
+import { PoolBase } from '../../pool';
+import { xykPools } from '../../../test/data';
 
 describe('Suggester proposals for XYK pool', () => {
   let pools: PoolBase[];

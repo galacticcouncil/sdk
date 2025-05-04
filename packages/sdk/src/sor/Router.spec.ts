@@ -1,6 +1,18 @@
-import { Router } from '../../src/api';
-import { IPoolService, PoolType } from '../../src/types';
-import { MockXykPoolService } from '../lib/mockXykPoolService';
+import { Router } from './Router';
+
+import { IPoolService, PoolBase, PoolFees, PoolType } from '../pool';
+
+import { xykPools } from '../../test/data';
+
+class MockXykPoolService implements IPoolService {
+  getPools(): Promise<PoolBase[]> {
+    return Promise.resolve(xykPools);
+  }
+
+  getPoolFees(): Promise<PoolFees> {
+    throw new Error('Method not implemented.');
+  }
+}
 
 describe('Router with mocked XYK pool service', () => {
   let poolService: IPoolService;
