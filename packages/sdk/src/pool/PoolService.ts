@@ -98,7 +98,7 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     return pools.flat();
   }
 
-  unsubscribe() {
+  destroy() {
     this.aaveClient.unsubscribe();
     this.xykClient.unsubscribe();
     this.omniClient.unsubscribe();
