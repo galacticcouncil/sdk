@@ -1,9 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { PapiExecutor } from '../PapiExecutor';
-import { ApiUrl } from '../types';
+import { PapiExecutor } from '../../PapiExecutor';
+import { ApiUrl } from '../../types';
 
-import { pool } from '../../../src';
+import { pool } from '../../../../src';
 
 class SubscribeStableswap extends PapiExecutor {
   async script(client: PolkadotClient) {

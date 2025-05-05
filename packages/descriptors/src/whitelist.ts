@@ -8,6 +8,7 @@ export const whitelist: string[] = [
   'const.XYK.*',
   'const.System.*',
   'event.EVM.Log',
+  'event.Router.Executed',
   'query.AssetRegistry.Assets',
   'query.AssetRegistry.AssetLocations',
   'query.Bonds.Bonds',

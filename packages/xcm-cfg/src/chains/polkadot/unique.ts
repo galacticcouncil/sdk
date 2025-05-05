@@ -20,5 +20,5 @@ export const unique = new Parachain({
   name: 'Unique network',
   parachainId: 2037,
   ss58Format: 7391,
-  ws: 'wss://unique-rpc.dwellir.com',
+  ws: 'wss://ws.unique.network',
 });

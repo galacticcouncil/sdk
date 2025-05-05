@@ -76,8 +76,8 @@ export class TradeRouter extends Router {
   /**
    * Calculate and return best possible sell trade for assetIn>assetOut
    *
-   * @param {string} assetIn - assetIn id
-   * @param {string} assetOut - assetOut id
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
    * @param {bigint} amountIn - amount of assetIn to sell for assetOut
    * @returns best possible sell trade of given token pair
    */
@@ -117,8 +117,8 @@ export class TradeRouter extends Router {
   /**
    * Calculate and return sell trade for assetIn>assetOut
    *
-   * @param {string} assetIn - assetIn id
-   * @param {string} assetOut - assetOut id
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
    * @param {bigint} amountIn - amount of assetIn to sell for assetOut
    * @param {Hop[]} route - explicit route to use for trade
    * @returns sell trade of given token pair
@@ -444,7 +444,7 @@ export class TradeRouter extends Router {
    *
    * @param {number} assetIn - assetIn id
    * @param {number} assetOut - assetOut id
-   * @param {bigint} amountOut - amount of tokenOut to buy for tokenIn
+   * @param {bigint} amountOut - amount of assetOut to buy for assetIn
    * @param {Hop[]} route - explicit route to use for trade
    * @returns buy trade of given token pair
    */

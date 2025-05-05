@@ -75,29 +75,42 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     const accumulatedWeight = BigInt(linearWeight);
     const distributedWeight = this.MAX_FINAL_WEIGHT - BigInt(accumulatedWeight);
 
-    const [repayFeeApplied, accumulatedBalance, distributedBalance] =
-      await Promise.all([
-        this.isRepayFeeApplied(
-          accumulated,
-          repay_target,
-          fee_collector.toString()
-        ),
-        this.getBalance(poolAddress, accumulated),
-        this.getBalance(poolAddress, distributed),
-      ]);
+    const [
+      repayFeeApplied,
+      accumulatedBalance,
+      accumulatedMeta,
+      distributedBalance,
+      distributedMeta,
+    ] = await Promise.all([
+      this.isRepayFeeApplied(
+        accumulated,
+        repay_target,
+        fee_collector.toString()
+      ),
+      this.getBalance(poolAddress, accumulated),
+      this.api.query.AssetRegistry.Assets.getValue(accumulated),
+      this.getBalance(poolAddress, distributed),
+      this.api.query.AssetRegistry.Assets.getValue(distributed),
+    ]);
 
     return {
       repayFeeApply: repayFeeApplied,
       tokens: [
         {
           id: accumulated,
-          weight: accumulatedWeight,
+          decimals: accumulatedMeta?.decimals,
+          existentialDeposit: accumulatedMeta?.existential_deposit,
           balance: accumulatedBalance,
+          weight: accumulatedWeight,
+          type: accumulatedMeta?.asset_type.type,
         } as WeightedPoolToken,
         {
           id: distributed,
-          weight: distributedWeight,
+          decimals: distributedMeta?.decimals,
+          existentialDeposit: distributedMeta?.existential_deposit,
           balance: distributedBalance,
+          weight: distributedWeight,
+          type: distributedMeta?.asset_type.type,
         } as WeightedPoolToken,
       ],
     } as Partial<LbpPoolBase>;

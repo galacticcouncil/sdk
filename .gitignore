@@ -9,9 +9,14 @@ packages/*/build-meta.json
 # except math build folders
 !packages/math-*/build
 
-# compile folders
+# examples compile folders
 examples/*/out
 examples/*/build-meta.json
+
+# examples public folders (js|wasm)
+examples/*/public/**/*.js
+examples/*/public/**/*.js.map
+examples/*/public/**/*.wasm
 
 # jest test results
 integration-tests/*/output.json

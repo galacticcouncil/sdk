@@ -1,7 +1,5 @@
 import type { Hop, PoolBuy, PoolError, PoolSell } from '../pool';
 
-type Override<T1, T2> = Omit<T1, keyof T2> & T2;
-
 export interface Humanizer {
   toHuman(): any;
 }
@@ -37,10 +35,3 @@ export interface Trade extends Humanizer {
   priceImpactPct: number;
   swaps: Swap[];
 }
-
-/* export interface TradeHuman
-  extends Override<
-    Trade,
-    { amountIn: string; amountOut: string; spotPrice: string; tradeFee: string }
-  > {}
- */

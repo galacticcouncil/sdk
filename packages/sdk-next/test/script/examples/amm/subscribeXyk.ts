@@ -1,11 +1,11 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { PapiExecutor } from '../PapiExecutor';
-import { ApiUrl } from '../types';
+import { PapiExecutor } from '../../PapiExecutor';
+import { ApiUrl } from '../../types';
 
-import { pool } from '../../../src';
+import { pool } from '../../../../src';
 
-import external from '../config/external.json';
+import external from '../../config/external.json';
 
 class SubscribeXyk extends PapiExecutor {
   async script(client: PolkadotClient) {

@@ -94,8 +94,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         id: id,
         decimals: meta?.decimals,
         existentialDeposit: meta?.existential_deposit,
-        tradeable: tradeability,
         balance: balance,
+        tradeable: tradeability,
+        type: meta?.asset_type.type,
       } as PoolToken;
     });
 
@@ -105,8 +106,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       id: poolId,
       decimals: share?.decimals,
       existentialDeposit: share?.existential_deposit,
-      tradeable: TRADEABLE_DEFAULT,
       balance: AMOUNT_MAX,
+      tradeable: TRADEABLE_DEFAULT,
+      type: share?.asset_type.type,
     } as PoolToken);
 
     return tokens;
@@ -161,7 +163,6 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
     return query.watchValue('best').pipe(
       switchMap((parachainBlock) => {
-        console.log('sync stables ' + parachainBlock);
         return this.getPoolDelta(pool.id, poolData, parachainBlock);
       }),
       map((delta) => Object.assign({}, pool, delta))

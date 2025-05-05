@@ -11,7 +11,9 @@ import {
   from,
   map,
   mergeAll,
+  of,
   switchMap,
+  tap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
@@ -81,12 +83,24 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   }
 
   private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+    if (pool.type === PoolType.Aave) {
+      return of([]);
+    }
+
     const subs: Observable<AssetAmount | AssetAmount[]>[] = [
       this.subscribeTokensBalance(pool.address),
     ];
 
     if (this.hasSystemAsset(pool)) {
       const sub = this.subscribeSystemBalance(pool.address);
+      subs.push(sub);
+    }
+
+    if (this.hasErc20Asset(pool)) {
+      const ids = pool.tokens
+        .filter((t) => t.type === 'Erc20')
+        .map((t) => t.id);
+      const sub = this.subscribeErc20Balance(pool.address, ids);
       subs.push(sub);
     }
 
@@ -103,6 +117,10 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
   private hasSystemAsset(pool: T): boolean {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
+  }
+
+  private hasErc20Asset(pool: PoolBase) {
+    return pool.tokens.some((t) => t.type === 'Erc20');
   }
 
   private hasValidAssets(pool: T): boolean {

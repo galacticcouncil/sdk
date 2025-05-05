@@ -1,3 +1,5 @@
+import type { AssetType } from '../types';
+
 export enum PoolType {
   Aave = 'Aave',
   LBP = 'LBP',
@@ -38,9 +40,10 @@ export type PoolBase = {
 export interface PoolToken {
   id: number;
   balance: bigint;
-  existentialDeposit: bigint;
   decimals?: number;
+  existentialDeposit: bigint;
   tradeable?: number;
+  type: AssetType;
 }
 
 export type PoolTokenOverride = Pick<PoolToken, 'id' | 'decimals'>;
