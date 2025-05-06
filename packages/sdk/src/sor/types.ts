@@ -5,13 +5,6 @@ export interface Humanizer {
   toHuman(): any;
 }
 
-export interface Transaction {
-  hex: string;
-  name?: string;
-  get<T>(): T;
-  dryRun<R>(account: string): Promise<R>;
-}
-
 export type Swap = Hop &
   Humanizer & {
     assetInDecimals: number;
@@ -23,6 +16,8 @@ export type Swap = Hop &
     tradeFeeRange?: [number, number];
     priceImpactPct: number;
     errors: PoolError[];
+    isSupply(): boolean;
+    isWithdraw(): boolean;
   };
 
 export type SellSwap = Swap & PoolSell;
