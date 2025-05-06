@@ -1,5 +1,5 @@
-export class ERC20Mapping {
-  static encodeEvmAddress(assetId: string) {
+export class ERC20 {
+  static fromAssetId(assetId: string) {
     const id = Number(assetId);
     const evmAddressBuffer = Buffer.alloc(20, 0);
     evmAddressBuffer[15] = 1;
@@ -8,9 +8,9 @@ export class ERC20Mapping {
     return '0x' + evmAddressBuffer.toString('hex');
   }
 
-  static decodeEvmAddress(evmAddress: string) {
-    const addressBuffer = Buffer.from(evmAddress.replace('0x', ''), 'hex');
-    if (addressBuffer.length !== 20 || !this.isAssetAddress(evmAddress)) {
+  static toAssetId(address: string) {
+    const addressBuffer = Buffer.from(address.replace('0x', ''), 'hex');
+    if (addressBuffer.length !== 20 || !this.isAssetAddress(address)) {
       return null;
     }
     return addressBuffer.readUInt32BE(16);
