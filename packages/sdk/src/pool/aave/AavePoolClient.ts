@@ -6,7 +6,9 @@ import { stringToU8a } from '@polkadot/util';
 import { decodeEventLog } from 'viem';
 
 import { HYDRADX_SS58_PREFIX } from '../../consts';
-import { ERC20Mapping } from '../../utils/erc20';
+import { AAVE_ABI } from '../../evm';
+
+import { ERC20 } from '../../utils/erc20';
 import { findNestedKey } from '../../utils/json';
 
 import {
@@ -19,7 +21,6 @@ import {
 } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import { AAVE_ABI } from './AaveAbi';
 import { AaveTradeExecutorPoolData } from './types';
 
 const SYNC_MM_EVENTS = ['Supply', 'Withdraw', 'Repay', 'Borrow'];
@@ -135,7 +136,7 @@ export class AavePoolClient extends PoolClient {
       const accountKey20 = findNestedKey(reserve.location, 'accountKey20');
       return accountKey20['accountKey20'].key;
     }
-    return ERC20Mapping.encodeEvmAddress(reserve.id);
+    return ERC20.fromAssetId(reserve.id);
   }
 
   private getPoolLimits(): PoolLimits {

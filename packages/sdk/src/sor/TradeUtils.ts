@@ -1,16 +1,33 @@
 import { ApiPromise } from '@polkadot/api';
-import { CallDryRunEffects } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-import { PolkadotApiClient } from '../api';
+import { encodeFunctionData } from 'viem';
+
+import { PolkadotApiClient, Transaction } from '../api';
+import { BalanceClient } from '../client';
+import { AAVE_ABI, EvmClient, evmMarketProxy } from '../evm';
 import { Hop, PoolType } from '../pool';
+
+import { ERC20 } from '../utils/erc20';
+import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
 
-import { Trade, TradeType, Transaction } from './types';
+import { Swap, Trade, TradeType } from './types';
+
+const AAVE_GAS_LIMIT = 1_000_000n;
+const AAVE_ROUNDING_THRESHOLD = 5;
+const AAVE_UINT_256_MAX = BigInt(
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+);
 
 export class TradeUtils extends PolkadotApiClient {
+  private balanceClient: BalanceClient;
+  private evmClient: EvmClient;
+
   constructor(api: ApiPromise) {
     super(api);
+    this.balanceClient = new BalanceClient(api);
+    this.evmClient = new EvmClient();
   }
 
   buildBuyTx(trade: Trade, slippagePct = 1): Transaction {
@@ -29,7 +46,7 @@ export class TradeUtils extends PolkadotApiClient {
 
     let tx: SubmittableExtrinsic;
 
-    if (this.isDirectOmnipoolTrade(trade)) {
+    if (this.isDirectOmnipoolTrade(swaps)) {
       tx = this.api.tx.omnipool.buy(
         assetOut,
         assetIn,
@@ -42,7 +59,7 @@ export class TradeUtils extends PolkadotApiClient {
         assetOut,
         amountOut.toFixed(),
         maxAmountIn.toFixed(),
-        this.buildRoute(trade)
+        this.buildRoute(swaps)
       );
     }
 
@@ -70,7 +87,7 @@ export class TradeUtils extends PolkadotApiClient {
 
     let tx: SubmittableExtrinsic;
 
-    if (this.isDirectOmnipoolTrade(trade)) {
+    if (this.isDirectOmnipoolTrade(swaps)) {
       tx = this.api.tx.omnipool.sell(
         assetIn,
         assetOut,
@@ -83,7 +100,7 @@ export class TradeUtils extends PolkadotApiClient {
         assetOut,
         amountIn.toFixed(),
         minAmountOut.toFixed(),
-        this.buildRoute(trade)
+        this.buildRoute(swaps)
       );
     }
 
@@ -113,7 +130,7 @@ export class TradeUtils extends PolkadotApiClient {
       assetIn,
       assetOut,
       minAmountOut.toFixed(),
-      this.buildRoute(trade)
+      this.buildRoute(swaps)
     );
 
     return {
@@ -124,33 +141,83 @@ export class TradeUtils extends PolkadotApiClient {
     } as Transaction;
   }
 
-  async dryRun(
-    account: string,
-    extrinsic: SubmittableExtrinsic
-  ): Promise<CallDryRunEffects> {
-    let result;
-    try {
-      result = await this.api.call.dryRunApi.dryRunCall(
-        {
-          System: { Signed: account },
-        },
-        extrinsic.inner.toHex()
-      );
-    } catch (e) {
-      console.error(e);
-      throw new Error('Dry run execution failed!');
-    }
+  async buildWithdrawAndSellReserveTx(
+    beneficiary: string,
+    trade: Trade,
+    slippagePct = 1
+  ): Promise<Transaction> {
+    const { amountIn, amountOut, swaps } = trade;
 
-    if (result.isOk) {
-      return result.asOk;
-    }
-    console.log(result.asErr.toHuman());
-    throw new Error('Dry run execution error!');
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+
+    if (!firstSwap.isWithdraw()) throw new Error('Not permitted');
+
+    const aToken = firstSwap.assetIn;
+    const reserve = firstSwap.assetOut;
+
+    const [gasPrice, aTokenBalance] = await Promise.all([
+      this.evmClient.getProvider().getGasPrice(),
+      this.balanceClient.getBalance(beneficiary, aToken),
+    ]);
+
+    const isMax = amountIn.isGreaterThanOrEqualTo(
+      aTokenBalance.minus(AAVE_ROUNDING_THRESHOLD)
+    );
+
+    const gasPriceMargin = (gasPrice * 10n) / 100n;
+
+    const evmReserve = ERC20.fromAssetId(firstSwap.assetOut);
+    const evmAccount = H160.fromAny(beneficiary);
+
+    const withdrawAmount = isMax
+      ? AAVE_UINT_256_MAX
+      : BigInt(amountIn.toFixed());
+    const withdrawCalldata = encodeFunctionData({
+      abi: AAVE_ABI,
+      functionName: 'withdraw',
+      args: [
+        evmReserve as `0x${string}`,
+        withdrawAmount,
+        evmAccount as `0x${string}`,
+      ],
+    });
+
+    const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
+      evmAccount,
+      evmMarketProxy,
+      withdrawCalldata,
+      0n,
+      AAVE_GAS_LIMIT,
+      gasPrice + gasPriceMargin,
+      gasPrice + gasPriceMargin,
+      null,
+      []
+    );
+
+    const slippage = getFraction(amountOut, slippagePct);
+    const assetIn = reserve;
+    const assetOut = lastSwap.assetOut;
+    const minAmountOut = amountOut.minus(slippage);
+
+    const sellTx: SubmittableExtrinsic = this.api.tx.router.sell(
+      assetIn,
+      assetOut,
+      amountIn.minus(AAVE_ROUNDING_THRESHOLD).toFixed(),
+      minAmountOut.toFixed(),
+      this.buildRoute(swaps.slice(1))
+    );
+
+    const tx = this.api.tx.utility.batchAll([withdrawTx, sellTx]);
+    return {
+      hex: tx.toHex(),
+      name: 'WithdrawAndRouterReserveSell',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as Transaction;
   }
 
-  buildRoute(trade: Trade) {
-    const { swaps } = trade;
-
+  buildRoute(swaps: Swap[]) {
     return swaps.map(({ assetIn, assetOut, pool, poolId }: Hop) => {
       if (pool === PoolType.Stable) {
         return {
@@ -169,8 +236,7 @@ export class TradeUtils extends PolkadotApiClient {
     });
   }
 
-  isDirectOmnipoolTrade(trade: Trade): boolean {
-    const { swaps } = trade;
+  isDirectOmnipoolTrade(swaps: Swap[]): boolean {
     return swaps.length === 1 && swaps[0].pool === PoolType.Omni;
   }
 }
