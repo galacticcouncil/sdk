@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 7.0.1
+
+### Patch Changes
+
+- Fix export api module
+
 ## 7.0.0
 
 ### Major Changes
