@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 9.2.0
+
+### Minor Changes
+
+- d85b4ba: Add LBTC
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@7.0.0
+
 ## 9.1.2
 
 ### Patch Changes

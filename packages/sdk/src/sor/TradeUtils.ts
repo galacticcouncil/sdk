@@ -195,7 +195,7 @@ export class TradeUtils extends PolkadotApiClient {
     const assetOut = lastSwap.assetOut;
     const minAmountOut = amountOut.minus(slippage);
 
-    const sellTx: SubmittableExtrinsic = this.api.tx.router.sell(
+    const reserveSellTx: SubmittableExtrinsic = this.api.tx.router.sell(
       assetIn,
       assetOut,
       amountIn.minus(AAVE_ROUNDING_THRESHOLD).toFixed(),
@@ -203,7 +203,7 @@ export class TradeUtils extends PolkadotApiClient {
       this.buildRoute(swaps.slice(1))
     );
 
-    const tx = this.api.tx.utility.batchAll([withdrawTx, sellTx]);
+    const tx = this.api.tx.utility.batchAll([withdrawTx, reserveSellTx]);
     return {
       hex: tx.toHex(),
       name: 'WithdrawAndRouterReserveSell',

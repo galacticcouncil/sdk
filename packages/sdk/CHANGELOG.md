@@ -1,5 +1,21 @@
 # @galacticcouncil/sdk
 
+## 7.0.0
+
+### Major Changes
+
+[b08ff34]: https://github.com/galacticcouncil/sdk/commit/b08ff34968ae4a804da3457791365537bb685d45
+[e387a5d]: https://github.com/galacticcouncil/sdk/commit/e387a5d10ee7751c304066ab665a5c42013da932
+[b83864c]: https://github.com/galacticcouncil/sdk/commit/b83864ccecd265c4acf42034daec80e0098eb4dd
+[8aa1a4e]: https://github.com/galacticcouncil/sdk/commit/8aa1a4e76a673d7a08cbdd69430fe31eac3591b0
+[cf57cc3]: https://github.com/galacticcouncil/sdk/commit/cf57cc37ca8c3e1bf29849337683dfbd261f16ab
+
+- [[#b08ff34][b08ff34]] sdk: 7.x refactor & namespaces cleanup
+- [[#e387a5d][e387a5d]] sdk: 7.x spec cleanup
+- [[#b83864c][e387a5d]] sdk: h160 & erc20 utils
+- [[#8aa1a4e][8aa1a4e]] sdk: evm client support
+- [[#cf57cc3][cf57cc3]] sdk: buildWithdrawAndSellReserveTx support
+
 ## 6.2.0
 
 ### Minor Changes
