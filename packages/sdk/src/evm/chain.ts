@@ -55,5 +55,3 @@ export const evmMainnet: Chain = defineChain({
   },
   testnet: false,
 });
-
-export const evmMarketProxy = '0x1b02E051683b5cfaC5929C25E84adb26ECf87B38';

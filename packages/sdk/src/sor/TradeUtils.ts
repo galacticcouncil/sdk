@@ -5,7 +5,14 @@ import { encodeFunctionData } from 'viem';
 
 import { PolkadotApiClient, Transaction } from '../api';
 import { BalanceClient } from '../client';
-import { AAVE_ABI, EvmClient, evmMarketProxy } from '../evm';
+import {
+  AAVE_ABI,
+  AAVE_GAS_LIMIT,
+  AAVE_PROXY,
+  AAVE_ROUNDING_THRESHOLD,
+  AAVE_UINT_256_MAX,
+  EvmClient,
+} from '../evm';
 import { Hop, PoolType } from '../pool';
 
 import { ERC20 } from '../utils/erc20';
@@ -13,12 +20,6 @@ import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
 
 import { Swap, Trade, TradeType } from './types';
-
-const AAVE_GAS_LIMIT = 1_000_000n;
-const AAVE_ROUNDING_THRESHOLD = 5;
-const AAVE_UINT_256_MAX = BigInt(
-  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-);
 
 export class TradeUtils extends PolkadotApiClient {
   private balanceClient: BalanceClient;
@@ -167,25 +168,19 @@ export class TradeUtils extends PolkadotApiClient {
 
     const gasPriceMargin = (gasPrice * 10n) / 100n;
 
-    const evmReserve = ERC20.fromAssetId(firstSwap.assetOut);
-    const evmAccount = H160.fromAny(beneficiary);
+    const to = H160.fromAny(beneficiary);
+    const amount = isMax ? AAVE_UINT_256_MAX : BigInt(amountIn.toFixed());
+    const asset = ERC20.fromAssetId(reserve);
 
-    const withdrawAmount = isMax
-      ? AAVE_UINT_256_MAX
-      : BigInt(amountIn.toFixed());
     const withdrawCalldata = encodeFunctionData({
       abi: AAVE_ABI,
       functionName: 'withdraw',
-      args: [
-        evmReserve as `0x${string}`,
-        withdrawAmount,
-        evmAccount as `0x${string}`,
-      ],
+      args: [asset as `0x${string}`, amount, to as `0x${string}`],
     });
 
     const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
-      evmAccount,
-      evmMarketProxy,
+      to,
+      AAVE_PROXY,
       withdrawCalldata,
       0n,
       AAVE_GAS_LIMIT,
