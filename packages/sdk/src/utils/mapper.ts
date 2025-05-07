@@ -1,5 +1,6 @@
 import { DENOMINATOR } from '../consts';
-import { PoolFee } from '../types';
+import { PoolFee } from '../pool';
+
 import { BigNumber } from './bignumber';
 
 export function toHuman(amount: BigNumber, decimals: number): string {

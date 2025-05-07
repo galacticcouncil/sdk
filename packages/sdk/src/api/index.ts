@@ -1,3 +1,3 @@
-export { Router } from './Router';
-export { TradeRouter } from './TradeRouter';
-export { WalletCtx } from './WalletCtx';
+export * from './PolkadotApi';
+
+export * from './types';

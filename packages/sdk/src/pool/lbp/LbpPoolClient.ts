@@ -1,7 +1,9 @@
 import type { u32 } from '@polkadot/types-codec';
 import type { PalletLbpPool } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
+
 import { bnum, scale } from '../../utils/bignumber';
+
 import {
   PoolBase,
   PoolFee,
@@ -9,12 +11,11 @@ import {
   PoolLimits,
   PoolPair,
   PoolType,
-} from '../../types';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
-
-import { PoolClient } from '../PoolClient';
 
 export class LbpPoolClient extends PoolClient {
   private readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);

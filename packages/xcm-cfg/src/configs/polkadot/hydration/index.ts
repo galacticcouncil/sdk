@@ -54,6 +54,7 @@ import {
   wud,
   eurc,
   xlm,
+  lbtc,
 } from '../../../assets';
 import {
   acala,
@@ -312,6 +313,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
+  toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
   // Waiting for Snowbridge V2
   //toEthereumViaSnowbridgeTemplate(ldo, ldo),
   toEthereumViaSnowbridgeTemplate(link, link),

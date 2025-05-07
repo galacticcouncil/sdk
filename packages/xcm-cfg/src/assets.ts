@@ -75,6 +75,11 @@ export const eth = new Asset({
   originSymbol: 'ETH',
 });
 
+export const eurc = new Asset({
+  key: 'eurc',
+  originSymbol: 'EURC.s',
+});
+
 export const glmr = new Asset({
   key: 'glmr',
   originSymbol: 'GLMR',
@@ -120,9 +125,9 @@ export const laos = new Asset({
   originSymbol: 'LAOS',
 });
 
-export const eurc = new Asset({
-  key: 'eurc',
-  originSymbol: 'EURC.s',
+export const lbtc = new Asset({
+  key: 'lbtc',
+  originSymbol: 'LBTC',
 });
 
 export const ewt = new Asset({
@@ -326,6 +331,7 @@ export const assets: Asset[] = [
   ksm,
   ldo,
   laos,
+  lbtc,
   ewt,
   ldot,
   link,

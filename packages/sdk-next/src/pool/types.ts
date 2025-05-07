@@ -1,8 +1,11 @@
+import type { AssetType } from '../types';
+
 export enum PoolType {
-  XYK = 'XYK',
+  Aave = 'Aave',
   LBP = 'LBP',
-  Stable = 'Stableswap',
   Omni = 'Omnipool',
+  Stable = 'Stableswap',
+  XYK = 'XYK',
 }
 
 export enum PoolError {
@@ -37,9 +40,10 @@ export type PoolBase = {
 export interface PoolToken {
   id: number;
   balance: bigint;
-  existentialDeposit: bigint;
   decimals?: number;
+  existentialDeposit: bigint;
   tradeable?: number;
+  type: AssetType;
 }
 
 export type PoolTokenOverride = Pick<PoolToken, 'id' | 'decimals'>;

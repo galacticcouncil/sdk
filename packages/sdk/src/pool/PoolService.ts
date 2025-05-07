@@ -1,30 +1,26 @@
 import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { memoize1 } from '@thi.ng/memoize';
 
-import { AavePoolClient } from './aave/AavePoolClient';
-import { LbpPoolClient } from './lbp/LbpPoolClient';
-import { OmniPoolClient } from './omni/OmniPoolClient';
-import { XykPoolClient } from './xyk/XykPoolClient';
-import { StableSwapClient } from './stable/StableSwapClient';
-import { buildRoute } from './PoolUtils';
-
-import { AssetClient, PolkadotApiClient } from '../client';
+import { PolkadotApiClient } from '../api';
+import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
+import { Asset, ExternalAsset } from '../types';
+
+import { AavePoolClient } from './aave';
+import { LbpPoolClient } from './lbp';
+import { OmniPoolClient } from './omni';
+import { XykPoolClient } from './xyk';
+import { StableSwapClient } from './stable';
+
 import {
-  Asset,
-  ExternalAsset,
-  Hop,
   IPoolService,
   Pool,
   PoolBase,
   PoolFees,
   PoolPair,
   PoolType,
-  Transaction,
-} from '../types';
-import { BigNumber } from '../utils/bignumber';
+} from './types';
 
 import { PoolClient } from './PoolClient';
 
@@ -102,7 +98,7 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     return pools.flat();
   }
 
-  unsubscribe() {
+  destroy() {
     this.aaveClient.unsubscribe();
     this.xykClient.unsubscribe();
     this.omniClient.unsubscribe();
@@ -125,75 +121,5 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       default:
         throw new PoolNotFound(pool.type);
     }
-  }
-
-  private isDirectOmnipoolTrade(route: Hop[]) {
-    return route.length == 1 && route[0].pool == PoolType.Omni;
-  }
-
-  buildBuyTx(
-    assetIn: string,
-    assetOut: string,
-    amountOut: BigNumber,
-    maxAmountIn: BigNumber,
-    route: Hop[]
-  ): Transaction {
-    let tx: SubmittableExtrinsic;
-
-    // In case of direct trade in omnipool we skip router (cheaper tx)
-    if (this.isDirectOmnipoolTrade(route)) {
-      tx = this.api.tx.omnipool.buy(
-        assetOut,
-        assetIn,
-        amountOut.toFixed(),
-        maxAmountIn.toFixed()
-      );
-    } else {
-      tx = this.api.tx.router.buy(
-        assetIn,
-        assetOut,
-        amountOut.toFixed(),
-        maxAmountIn.toFixed(),
-        buildRoute(route)
-      );
-    }
-
-    const getTx = (): SubmittableExtrinsic => {
-      return tx;
-    };
-    return { hex: tx.toHex(), name: 'RouterBuy', get: getTx } as Transaction;
-  }
-
-  buildSellTx(
-    assetIn: string,
-    assetOut: string,
-    amountIn: BigNumber,
-    minAmountOut: BigNumber,
-    route: Hop[]
-  ): Transaction {
-    let tx: SubmittableExtrinsic;
-
-    // In case of direct trade in omnipool we skip router (cheaper tx)
-    if (this.isDirectOmnipoolTrade(route)) {
-      tx = this.api.tx.omnipool.sell(
-        assetIn,
-        assetOut,
-        amountIn.toFixed(),
-        minAmountOut.toFixed()
-      );
-    } else {
-      tx = this.api.tx.router.sell(
-        assetIn,
-        assetOut,
-        amountIn.toFixed(),
-        minAmountOut.toFixed(),
-        buildRoute(route)
-      );
-    }
-
-    const getTx = (): SubmittableExtrinsic => {
-      return tx;
-    };
-    return { hex: tx.toHex(), name: 'RouterSell', get: getTx } as Transaction;
   }
 }

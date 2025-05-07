@@ -2,18 +2,16 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 
-</p>
-Hydration trade router & pool utilities.
-<br />
-<br />
+Hydration sdk build on top of [@polkadot{.js} (Pjs)](https://polkadot.js.org/).
+
 Table of content:
 
 - [Installation](#installation)
-- [Components](#components)
+- [Troubleshooting](#troubleshooting)
+- [Usage](#usage)
+  - [PoolService](#poolservice)
   - [Router](#router)
   - [TradeRouter](#traderouter)
-- [Examples](#examples)
-- [Roadmap](#roadmap)
 
 ## Installation
 
@@ -21,7 +19,7 @@ Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/sdk`
 
-### Troubleshooting
+## Troubleshooting
 
 As of **v2.x** .wasm files are no longer embedded in bundle
 but rather deferred to improve load performance & decrease
@@ -29,70 +27,129 @@ module size (esm only).
 
 For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
-## Components
+## Usage
+
+### PoolService
+
+Build and subscribe to the given AMM types, supplying data for the Router API.
+
+⚠️ **Note:** Make sure to keep only single instance of service per session.
+
+#### API Reference (internal)
+
+| Method | Description  |
+| :----- | :----------- |
+| `getPools(): Promise<PoolBase[]>` | Returns list of available pools. |
+| `getPoolFees(pool: PoolBase, feeAsset: string): Promise<PoolFees>` | Returns current pool fees |
+
+➡️ For type definitions visit [types.ts](src/pool/types.ts)<br />
+
+#### Example
+
+Initialize pool context and sync registry.
+
+```typescript
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
+
+const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const api = await ApiPromise.create({ provider: wsProvider });
+
+const poolService = new PoolService(api);
+await poolService.syncRegistry();
+
+// Don't forget to cleanup the resources
+poolService.destroy();
+api.disconnect();
+```
 
 ### Router
 
-Off-chain routing, build to find the most suitable routes across the pools. Building block for TradeRouter.
+Off-chain routing, build to find the most suitable routes across the pools. Building block for `TradeRouter`.
 
-#### API
+#### API Reference
+
+| Method | Description  |
+| :----- | :----------- |
+| `getPools(): PoolBase[]` | Returns the current list of available pools. |
+| `getAllPaths(tokenIn: string, tokenOut: string): Hop[][]` | Computes possible routes between two assets. |
+| `getAllAssets(): PoolBase[]` | Lists all assets that are tradeable through the router. |
+| `getAssetPairs(token: string): Asset[]` | Lists all assets given token is tradeable with. |
+
+➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />
+
+#### Example
+
+List all tradable assets available in the current pool context.
 
 ```typescript
-getPools(): PoolBase[]
-getAllAssets(): Asset[]
-getAssetPairs(token: string): Asset[]
-getAllPaths(tokenIn: string, tokenOut: string): Hop[][]
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
+
+const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const api = await ApiPromise.create({ provider: wsProvider });
+
+const poolService = new PoolService(api);
+const router = new Router(poolService);
+
+const assets = await router.getAllAssets();
+console.log(assets);
+
+// Don't forget to cleanup the resources
+poolService.destroy();
+api.disconnect();
 ```
 
 ### TradeRouter
 
 Off-chain optimization of orders across pools for best price execution. TradeRouter does not perform any on-chain transations.
 
-#### API
+#### Api Reference
+
+| Method | Description  |
+| :----- | :----------- |
+| `getBestSell(tokenIn: string, tokenOut: string, amountIn: bigint \| string): Trade` | Find the best sell trade for given input amount. |
+| `getBestBuy(tokenIn: string, tokenOut: string, amountOut: bigint \| string): Trade` | Find the best buy trade for given output amount. |
+| `getBuy(tokenIn: string, tokenOut: string, amountOut: bigint \| string, route?: Hop[]): Trade` | Calculate a buy using a specific route (optional). |
+| `getSell(tokenIn: string, tokenOut: string, amountIn: bigint \| string, route?: Hop[]): Trade` | Calculate a sell using a specific route (optional). |
+| `getSpotPrice(tokenIn: string, tokenOut: string): Amount` | Get the current spot price between two tokens. |
+| `getMostLiquidRoute(tokenIn: string, tokenOut: string): Hop[]` | Find the route with the highest liquidity between two tokens. |
+
+➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />
+
+#### Example
+
+Calculate sell of 1 DOT for HDX & build tx with 5% slippage (default to 1% if not specified)
 
 ```typescript
-getBestSpotPrice(tokenIn: string, tokenOut: string): Amount
-getBestSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string): Trade
-getBestBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string): Trade
-getBuy(tokenIn: string, tokenOut: string, amountOut: BigNumber | number | string, route?: Hop[]): Trade
-getSell(tokenIn: string, tokenOut: string, amountIn: BigNumber | number | string, route?: Hop[]): Trade
-```
-
-For type signature visit [types.ts](src/types.ts)<br />
-
-#### Usage
-
-```typescript
-// Import
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
-// Initialize Polkadot API
 const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
 const api = await ApiPromise.create({ provider: wsProvider });
 
-// Initialize Trade Router
 const poolService = new PoolService(api);
-await poolService.syncRegistry(); // Wait until pools initialized (optional), fallback to lazy init
-const tradeRouter = new TradeRouter(poolService);
+const txUtils = new TradeUtils(api);
 
-// Sell 5 USDT(10) for HDX(0)
-const trade = await tradeRouter.getBestSell('10', '0', '5');
-// Human readable output
-console.log(trade.toHuman());
-// Build tx given the slippage amount
-console.log(trade.toTx(amount));
+const router = new TradeRouter(poolService);
+
+const sell = await router.getBestSell("5", "0", "1");
+const tx = await utils.buildSellTx(sell, 5);
+console.log(sell.toHuman());
+console.log('Transaction hash: ' + transaction.hex);
+
+// Don't forget to cleanup the resources
+poolService.destroy();
+api.disconnect();
 ```
 
 ## Examples
 
-SDK Examples and testing helpers.
+To demonstrate more full working examples on real chain see [script](test/script/examples) section.
 
-### Run
+### Execution
 
 Run: `$ npx tsx ./test/script/examples/<examplePackage>/<exampleName>.ts` with valid example package & name.
-
-To demonstrate full working examples on real chain see [script](test/script/examples) section.
 
 ## Roadmap
 
@@ -116,3 +173,4 @@ Component list and current status ⬇️
 | Stable      | Pool |  🧪 |
 | XYK         | Math |  🧪 |
 | XYK         | Pool |  🧪 |
+| Aave        | Pool |  🧪 |

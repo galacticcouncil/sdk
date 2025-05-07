@@ -1,0 +1,18 @@
+{
+  "name": "sdk-swapp",
+  "private": true,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "clean": "rimraf public/**/*.js && rimraf public/**/*.map && rimraf dist",
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^1.0.0-beta.0",
+    "@galacticcouncil/ui": "^5.5.0"
+  }
+}

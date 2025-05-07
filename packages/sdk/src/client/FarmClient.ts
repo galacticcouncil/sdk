@@ -1,16 +1,20 @@
-import { ApiPromise } from '@polkadot/api';
-import { PalletLiquidityMiningGlobalFarmData } from '@polkadot/types/lookup';
-import { isAddress } from '@polkadot/util-crypto';
 import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
-import { PolkadotApiClient } from './PolkadotApi';
-import { BigNumber, ZERO } from '../utils/bignumber';
-import { BalanceClient } from './BalanceClient';
-import { Registry } from '@polkadot/types-codec/types';
-import { u32 } from '@polkadot/types-codec';
+
+import { ApiPromise } from '@polkadot/api';
 import { GenericAccountId32 } from '@polkadot/types';
 import { AccountId32 } from '@polkadot/types/interfaces';
+import { PalletLiquidityMiningGlobalFarmData } from '@polkadot/types/lookup';
+import { u32 } from '@polkadot/types-codec';
+import { Registry } from '@polkadot/types-codec/types';
+
 import { u8aConcat } from '@polkadot/util';
 import { U8aLike } from '@polkadot/util/types';
+import { isAddress } from '@polkadot/util-crypto';
+
+import { PolkadotApiClient } from '../api';
+import { BigNumber, ZERO } from '../utils/bignumber';
+
+import { BalanceClient } from './BalanceClient';
 
 export class FarmClient extends PolkadotApiClient {
   protected readonly balanceClient: BalanceClient;

@@ -25,10 +25,10 @@ export type OmniPoolPair = PoolPair & {
 };
 
 export type OmniPoolToken = PoolToken & {
-  hubReserves: bigint;
-  shares: bigint;
   cap: bigint;
+  hubReserves: bigint;
   protocolShares: bigint;
+  shares: bigint;
 };
 
 export type OmniPoolFees = PoolFees & {

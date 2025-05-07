@@ -1,9 +1,9 @@
-import { PoolService } from './PoolService';
-
-import { Pool, PoolFees, PoolPair } from '../types';
-
 import { ApiPromise } from '@polkadot/api';
 import { LRUCache } from '@thi.ng/cache';
+
+import { Pool, PoolFees, PoolPair } from './types';
+
+import { PoolService } from './PoolService';
 
 export class CachingPoolService extends PoolService {
   private feeCache: LRUCache<string, PoolFees>;

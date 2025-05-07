@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html theme="hdx">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SDK Swap Example (Papi)</title>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <header>
+      <style>
+        html {
+          background: var(--uigc-app-background);
+        }
+
+        html[theme='hdx'] {
+          height: 474px;
+          background-repeat: no-repeat;
+          background-color: var(--uigc-app-background-color);
+        }
+
+        body {
+          margin: 0;
+        }
+
+        main {
+          width: 100%;
+          margin-top: var(--toolbar-height);
+          min-height: calc(100vh - var(--toolbar-height));
+        }
+
+        @media (min-width: 768px) {
+          main > div#app {
+            padding: 44px 0px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          main > div#app {
+            height: 100%;
+          }
+        }
+      </style>
+    </header>
+    <main>
+      <div id="app"></div>
+    </main>
+    <script>
+      new EventSource('/esbuild').addEventListener('change', () =>
+        location.reload()
+      );
+    </script>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

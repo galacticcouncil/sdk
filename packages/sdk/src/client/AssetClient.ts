@@ -4,14 +4,14 @@ import type {
   PalletAssetRegistryAssetMetadata,
   PalletStableswapPoolInfo,
 } from '@polkadot/types/lookup';
+import { ApiPromise } from '@polkadot/api';
+import { Option, StorageKey } from '@polkadot/types';
 import { ITuple } from '@polkadot/types-codec/types';
 import { u32, u64 } from '@polkadot/types-codec';
-import { Option, StorageKey } from '@polkadot/types';
-import { ApiPromise } from '@polkadot/api';
+
+import { PolkadotApiClient } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { Asset, AssetMetadata, Bond, ExternalAsset } from '../types';
-
-import { PolkadotApiClient } from './PolkadotApi';
 
 export class AssetClient extends PolkadotApiClient {
   private SUPPORTED_TYPES = [

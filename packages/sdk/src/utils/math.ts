@@ -1,4 +1,6 @@
-import { BigNumber, ONE } from './bignumber';
+import { BigNumber, bnum, ONE } from './bignumber';
+
+const PCT_100 = bnum('100');
 
 /**
  * Percentage Difference Formula
@@ -70,4 +72,19 @@ export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
 export function calculateBuyFee(delta0X: BigNumber, deltaX: BigNumber) {
   const total = deltaX.div(delta0X).minus(ONE);
   return total.multipliedBy(100).decimalPlaces(2);
+}
+
+/**
+ * Get % fraction from amount
+ *
+ * @param value - amount
+ * @param pct - percentage value
+ * @returns fraction of given amount
+ */
+export function getFraction(value: BigNumber, pct: number): BigNumber {
+  if (pct < 0.01 || pct > 100) {
+    new Error('Supported range is from 0.01% - 100%');
+  }
+  const fraction = value.div(PCT_100).multipliedBy(pct);
+  return fraction.decimalPlaces(0, 1);
 }

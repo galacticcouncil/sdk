@@ -11,11 +11,12 @@ import {
   from,
   map,
   mergeAll,
+  of,
   switchMap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
-import { HYDRATION_OMNIPOOL_ADDRESS, SYSTEM_ASSET_ID } from '../consts';
+import { SYSTEM_ASSET_ID } from '../consts';
 import { AssetAmount } from '../types';
 
 import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
@@ -81,6 +82,10 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   }
 
   private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+    if (pool.type === PoolType.Aave) {
+      return of([]);
+    }
+
     const subs: Observable<AssetAmount | AssetAmount[]>[] = [
       this.subscribeTokensBalance(pool.address),
     ];
@@ -90,11 +95,11 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
       subs.push(sub);
     }
 
-    if (this.hasShareAsset(pool)) {
-      const sub = this.subscribeTokenBalance(
-        HYDRATION_OMNIPOOL_ADDRESS,
-        pool.id!
-      );
+    if (this.hasErc20Asset(pool)) {
+      const ids = pool.tokens
+        .filter((t) => t.type === 'Erc20')
+        .map((t) => t.id);
+      const sub = this.subscribeErc20Balance(pool.address, ids);
       subs.push(sub);
     }
 
@@ -113,8 +118,8 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
   }
 
-  private hasShareAsset(pool: T): boolean {
-    return pool.type === PoolType.Stable && !!pool.id;
+  private hasErc20Asset(pool: PoolBase) {
+    return pool.tokens.some((t) => t.type === 'Erc20');
   }
 
   private hasValidAssets(pool: T): boolean {

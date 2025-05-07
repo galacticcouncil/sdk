@@ -1,5 +1,5 @@
 import {
-  BuyTransfer,
+  BuyCtx,
   Pool,
   PoolBase,
   PoolError,
@@ -8,8 +8,8 @@ import {
   PoolPair,
   PoolToken,
   PoolType,
-  SellTransfer,
-} from '../../types';
+  SellCtx,
+} from '../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { toPct } from '../../utils/mapper';
 
@@ -86,7 +86,7 @@ export class XykPool implements Pool {
     poolPair: PoolPair,
     amountOut: BigNumber,
     fees: XykPoolFees
-  ): BuyTransfer {
+  ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
@@ -118,14 +118,14 @@ export class XykPool implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as BuyTransfer;
+    } as BuyCtx;
   }
 
   validateAndSell(
     poolPair: PoolPair,
     amountIn: BigNumber,
     fees: XykPoolFees
-  ): SellTransfer {
+  ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
@@ -157,7 +157,7 @@ export class XykPool implements Pool {
       amountOut: amountOut,
       feePct: feePct,
       errors: errors,
-    } as SellTransfer;
+    } as SellCtx;
   }
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
