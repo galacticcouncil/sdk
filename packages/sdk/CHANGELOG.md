@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 7.0.2
+
+### Patch Changes
+
+- Generic Transaction & SubstrateTransaction def
+
 ## 7.0.1
 
 ### Patch Changes
