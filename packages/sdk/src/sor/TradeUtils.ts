@@ -1,9 +1,9 @@
 import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { type SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 import { encodeFunctionData } from 'viem';
 
-import { PolkadotApiClient, Transaction } from '../api';
+import { PolkadotApiClient, SubstrateTransaction } from '../api';
 import { BalanceClient } from '../client';
 import {
   AAVE_ABI,
@@ -31,7 +31,7 @@ export class TradeUtils extends PolkadotApiClient {
     this.evmClient = new EvmClient();
   }
 
-  buildBuyTx(trade: Trade, slippagePct = 1): Transaction {
+  buildBuyTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
     if (trade.type !== TradeType.Buy) throw new Error('Not permitted');
 
     const { amountIn, amountOut, swaps } = trade;
@@ -69,10 +69,10 @@ export class TradeUtils extends PolkadotApiClient {
       name: 'RouterBuy',
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
-    } as Transaction;
+    } as SubstrateTransaction;
   }
 
-  buildSellTx(trade: Trade, slippagePct = 1): Transaction {
+  buildSellTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
     if (trade.type !== TradeType.Sell) throw new Error('Not permitted');
 
     const { amountIn, amountOut, swaps } = trade;
@@ -110,10 +110,10 @@ export class TradeUtils extends PolkadotApiClient {
       name: 'RouterSell',
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
-    } as Transaction;
+    } as SubstrateTransaction;
   }
 
-  buildSellAllTx(trade: Trade, slippagePct = 1): Transaction {
+  buildSellAllTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
     if (trade.type !== TradeType.Sell) throw new Error('Not permitted');
 
     const { amountOut, swaps } = trade;
@@ -139,14 +139,14 @@ export class TradeUtils extends PolkadotApiClient {
       name: 'RouterSellAll',
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
-    } as Transaction;
+    } as SubstrateTransaction;
   }
 
   async buildWithdrawAndSellReserveTx(
     beneficiary: string,
     trade: Trade,
     slippagePct = 1
-  ): Promise<Transaction> {
+  ): Promise<SubstrateTransaction> {
     const { amountIn, amountOut, swaps } = trade;
 
     const firstSwap = swaps[0];
@@ -209,7 +209,7 @@ export class TradeUtils extends PolkadotApiClient {
       name: 'WithdrawAndRouterReserveSell',
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
-    } as Transaction;
+    } as SubstrateTransaction;
   }
 
   buildRoute(swaps: Swap[]) {

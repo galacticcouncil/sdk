@@ -16,7 +16,6 @@ import {
 
 import { Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { AssetNotFound } from '../errors';
 import { AssetAmount } from '../types';
 
 export class BalanceClient extends Papi {
@@ -25,18 +24,9 @@ export class BalanceClient extends Papi {
   }
 
   async getBalance(account: string, assetId: number): Promise<bigint> {
-    const query = this.api.query.AssetRegistry.Assets;
-    const asset = await query.getValue(assetId);
-
-    if (!asset) throw new AssetNotFound(assetId);
-
-    if (asset.asset_type.type === 'Erc20') {
-      return this.getErc20Balance(account, assetId);
-    }
-
     return assetId === SYSTEM_ASSET_ID
       ? this.getSystemBalance(account)
-      : this.getTokenBalance(account, assetId);
+      : this.getTokenBalanceData(account, assetId);
   }
 
   async getSystemBalance(account: string): Promise<bigint> {
