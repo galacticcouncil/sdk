@@ -25,5 +25,5 @@ export const laos_chain = new Parachain({
   parachainId: 3370,
   ss58Format: 42,
   usesH160Acc: true,
-  ws: 'wss://laos-rpc.dwellir.com',
+  ws: 'wss://rpc.laos.laosfoundation.io',
 });
