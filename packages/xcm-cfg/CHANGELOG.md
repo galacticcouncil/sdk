@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 9.2.1
+
+### Patch Changes
+
+- Remove / update not working rpc's (Kilt, Laos, Crust, Zeitgeist)
+
 ## 9.2.0
 
 ### Minor Changes

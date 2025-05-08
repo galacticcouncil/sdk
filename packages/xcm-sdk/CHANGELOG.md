@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 9.2.1
+
+### Patch Changes
+
+- Fix dryRun result xcm version upgrade (substrate)
+
 ## 9.2.0
 
 ### Minor Changes
