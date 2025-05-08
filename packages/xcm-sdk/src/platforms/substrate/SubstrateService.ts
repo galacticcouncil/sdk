@@ -106,14 +106,24 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<CallDryRunEffects> {
     const extrinsic = this.getExtrinsic(config);
+
+    const dryRunFn = this.api.call.dryRunApi.dryRunCall;
+    const dryRunParams = dryRunFn.meta.params;
+    const dryRun = dryRunFn as (...args: any[]) => Promise<any>;
+    const dryRunArgs = [
+      {
+        System: { Signed: account },
+      },
+      extrinsic.inner.toHex(),
+    ] as any;
+
+    if (dryRunParams.length === 3) {
+      dryRunArgs.push(4);
+    }
+
     let result;
     try {
-      result = await this.api.call.dryRunApi.dryRunCall(
-        {
-          System: { Signed: account },
-        },
-        extrinsic.inner.toHex()
-      );
+      result = await dryRun(...dryRunArgs);
     } catch (e) {
       console.error(e);
       throw new Error('Dry run execution failed!');
