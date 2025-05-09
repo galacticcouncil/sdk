@@ -58,6 +58,8 @@ import {
   sol,
   sky,
   tbtc,
+  eurc,
+  xlm,
   lbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
@@ -372,6 +374,39 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: eurc,
+      id: 1000746,
+      decimals: 12,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X5: [
+            {
+              Parachain: 2094,
+            },
+            {
+              PalletInstance: 53,
+            },
+            {
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 4,
+                data: '0x4555524300000000000000000000000000000000000000000000000000000000',
+              },
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0xcf4f5a26e2090bb3adcf02c7a9d73dbfe6659cc690461475b86437fa49c71136',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: eth,
       decimals: 18,
       id: 34,
@@ -503,8 +538,8 @@ export const hydration = new EvmParachain({
               },
             },
           ],
-        }
-      }
+        },
+      },
     },
     {
       asset: ksm,
@@ -1200,6 +1235,27 @@ export const hydration = new EvmParachain({
             },
             {
               GeneralIndex: 31337,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: xlm,
+      id: 1000198,
+      decimals: 12,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2094,
+            },
+            {
+              PalletInstance: 53,
+            },
+            {
+              GeneralIndex: 2,
             },
           ],
         },
