@@ -5,8 +5,8 @@ import { stringToU8a } from '@polkadot/util';
 
 import { decodeEventLog } from 'viem';
 
+import { AAVE_POOL_ABI } from '../../aave';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
-import { AAVE_ABI } from '../../evm';
 
 import { ERC20 } from '../../utils/erc20';
 import { findNestedKey } from '../../utils/json';
@@ -93,7 +93,7 @@ export class AavePoolClient extends PoolClient {
           const { log } = event.data.toHuman() as any;
           try {
             const { eventName, args } = decodeEventLog({
-              abi: AAVE_ABI,
+              abi: AAVE_POOL_ABI,
               topics: log.topics,
               data: log.data,
             });

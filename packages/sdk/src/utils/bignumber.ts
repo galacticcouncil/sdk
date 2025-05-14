@@ -18,7 +18,7 @@ export function scale(input: BigNumber, decimalPlaces: number): BigNumber {
   return input.times(scaleMul);
 }
 
-export function bnum(val: string | number | BigNumber): BigNumber {
+export function bnum(val: string | number | bigint | BigNumber): BigNumber {
   return new BigNumber(val.toString());
 }
 

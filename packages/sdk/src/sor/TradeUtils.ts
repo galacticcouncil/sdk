@@ -6,13 +6,13 @@ import { encodeFunctionData } from 'viem';
 import { PolkadotApiClient, SubstrateTransaction } from '../api';
 import { BalanceClient } from '../client';
 import {
-  AAVE_ABI,
+  AAVE_POOL_ABI,
   AAVE_GAS_LIMIT,
-  AAVE_PROXY,
+  AAVE_POOL_PROXY,
   AAVE_ROUNDING_THRESHOLD,
   AAVE_UINT_256_MAX,
-  EvmClient,
-} from '../evm';
+} from '../aave';
+import { EvmClient } from '../evm';
 import { Hop, PoolType } from '../pool';
 
 import { ERC20 } from '../utils/erc20';
@@ -173,14 +173,14 @@ export class TradeUtils extends PolkadotApiClient {
     const asset = ERC20.fromAssetId(reserve);
 
     const withdrawCalldata = encodeFunctionData({
-      abi: AAVE_ABI,
+      abi: AAVE_POOL_ABI,
       functionName: 'withdraw',
       args: [asset as `0x${string}`, amount, to as `0x${string}`],
     });
 
     const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
       to,
-      AAVE_PROXY,
+      AAVE_POOL_PROXY,
       withdrawCalldata,
       0n,
       AAVE_GAS_LIMIT,
