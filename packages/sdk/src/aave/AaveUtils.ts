@@ -20,40 +20,6 @@ export class AaveUtils {
     this.client = new AaveClient();
   }
 
-  // async getUserData(user: string, reserve: string) {
-  //   const to = H160.fromAny(user);
-
-  //   const [poolReserves, userReserves, userData] = await Promise.all([
-  //     this.client.getReservesData(),
-  //     this.client.getUserReservesData(to),
-  //     this.client.getUserAccountData(to),
-  //   ]);
-
-  //   const timestamp = Math.floor(Date.now() / 1000);
-
-  //   const [
-  //     totalCollateralBase,
-  //     totalDebtBase,
-  //     availableBorrowsBase,
-  //     currentLiquidationThreshold,
-  //     ltv,
-  //     healthFactor,
-  //   ] = userData;
-
-  //   const [pReserves, baseCurrency] = poolReserves;
-  //   const [uReserves, userEmodeCategoryId] = userReserves;
-
-  //   const sum = formatUserSummary(
-  //     uReserves,
-  //     pReserves,
-  //     timestamp,
-  //     userEmodeCategoryId
-  //   );
-
-  //   console.log(userData);
-  //   console.log(sum);
-  // }
-
   private async loadCtx(user: string, reserve: string): Promise<AaveCtx> {
     const to = H160.fromAny(user);
     const reserveAsset = ERC20.fromAssetId(reserve);

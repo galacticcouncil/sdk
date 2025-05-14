@@ -1,4 +1,4 @@
-export * from './aave';
+export { AaveClient, AaveUtils } from './aave';
 export * from './api';
 export * from './consts';
 export * from './client';
