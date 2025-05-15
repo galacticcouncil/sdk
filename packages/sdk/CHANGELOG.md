@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 7.0.3
+
+### Patch Changes
+
+- fixed omnipool dynamic fees
+
 ## 7.0.2
 
 ### Patch Changes
