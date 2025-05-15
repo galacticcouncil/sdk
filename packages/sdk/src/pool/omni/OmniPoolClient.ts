@@ -15,7 +15,7 @@ import {
   SYSTEM_ASSET_ID,
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { toPct, toPoolFee } from '../../utils/mapper';
+import { toDecimals, toPoolFee } from '../../utils/mapper';
 
 import {
   PoolBase,
@@ -218,14 +218,14 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      toPct(feePrev).toString(),
+      toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      toDecimals(feeMin).toString(),
+      toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
   }
 
   private getProtocolFee(
@@ -268,14 +268,14 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      toPct(feePrev).toString(),
+      toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      toDecimals(feeMin).toString(),
+      toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
   }
 
   private getPoolId(): string {
