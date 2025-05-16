@@ -199,7 +199,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { assetFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();
@@ -249,7 +249,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { protocolFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();

@@ -30,7 +30,7 @@ class GetBestSellExample extends PolkadotExecutor {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
 
-    const trade = await router.getBestSell('5', '10', '1');
+    const trade = await router.getBestSell('5', '10', '10');
     const transaction = txUtils.buildSellTx(trade);
     console.log('Transaction hash: ' + transaction.hex);
     return trade;
