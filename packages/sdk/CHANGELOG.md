@@ -1,10 +1,16 @@
 # @galacticcouncil/sdk
 
+## 7.1.0
+
+### Minor Changes
+
+- Aave module support
+
 ## 7.0.3
 
 ### Patch Changes
 
-- fixed omnipool dynamic fees
+- Fixed omnipool dynamic fees
 
 ## 7.0.2
 
