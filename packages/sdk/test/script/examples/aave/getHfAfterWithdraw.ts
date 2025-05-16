@@ -1,4 +1,4 @@
-import { AaveUtils, bnum } from '../../../../src';
+import { AaveUtils } from '../../../../src';
 
 const BENEFICIARY = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 
@@ -6,8 +6,8 @@ const main = async () => {
   const aave = new AaveUtils();
   const result = await aave.getHealthFactorAfterWithdraw(
     BENEFICIARY,
-    '15',
-    bnum('160000000000')
+    '15', // vDOT
+    '16' // Withdraw 16 avDOTs
   );
   console.log(result);
 };
