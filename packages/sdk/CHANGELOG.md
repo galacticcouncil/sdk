@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 7.1.1
+
+### Patch Changes
+
+- Set omnipool dyn fee minimal block diff to 1
+
 ## 7.1.0
 
 ### Minor Changes
