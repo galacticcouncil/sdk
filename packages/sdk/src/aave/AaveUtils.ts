@@ -3,8 +3,8 @@ import { AaveCtx, AaveReserveCtx } from './types';
 
 import { H160 } from '../utils/h160';
 import { ERC20 } from '../utils/erc20';
-
 import { bnum, BigNumber, ZERO, scale } from '../utils/bignumber';
+
 import { Amount } from '../types';
 
 const RAY = bnum('1e27');

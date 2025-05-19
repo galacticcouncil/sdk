@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import {
-  PoolService,
+  CachingPoolService,
   PoolType,
   TradeRouter,
   TradeUtils,
@@ -21,7 +21,7 @@ class GetBestSellExample extends PolkadotExecutor {
       },
     ];
 
-    const poolService = new PoolService(api);
+    const poolService = new CachingPoolService(api);
     const txUtils = new TradeUtils(api);
 
     await poolService.syncRegistry(external);
