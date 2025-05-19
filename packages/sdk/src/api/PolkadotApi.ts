@@ -2,6 +2,8 @@ import { ApiPromise } from '@polkadot/api';
 import { CallDryRunEffects } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
+import { getLogValue } from '../utils/log';
+
 import '@galacticcouncil/api-augment/hydradx';
 import '@galacticcouncil/api-augment/basilisk';
 
@@ -50,23 +52,9 @@ export abstract class PolkadotApiClient {
         ? process.env['GC_DEBUG']
         : window.localStorage.getItem('gc.debug');
 
-    const logOn = this.getLogValue(debug);
+    const logOn = getLogValue(debug);
     if (logOn) {
       console.log(message, ...optionalParams);
-    }
-  }
-
-  private getLogValue(value: any) {
-    switch (value) {
-      case true:
-      case 'true':
-      case 1:
-      case '1':
-      case 'on':
-      case 'yes':
-        return true;
-      default:
-        return false;
     }
   }
 }

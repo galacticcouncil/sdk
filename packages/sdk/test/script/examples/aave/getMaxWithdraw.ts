@@ -1,6 +1,6 @@
 import { AaveUtils } from '../../../../src';
 
-const BENEFICIARY = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+const BENEFICIARY = '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh';
 
 const main = async () => {
   const aave = new AaveUtils();

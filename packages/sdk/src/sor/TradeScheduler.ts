@@ -1,0 +1,390 @@
+import { ApiPromise } from '@polkadot/api';
+
+import { memoize1 } from '@thi.ng/memoize';
+
+import {
+  ORDER_MIN_BLOCK_PERIOD,
+  TWAP_BLOCK_PERIOD,
+  TWAP_MAX_PRICE_IMPACT,
+  TWAP_MAX_DURATION,
+} from './const';
+import { TradeDcaOrder, TradeTwapOrder, TradeOrderError } from './types';
+
+import { TradeRouter } from './TradeRouter';
+import { TradeUtils } from './TradeUtils';
+
+import { PolkadotApiClient } from '../api';
+import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
+import { BigNumber, bnum, toDecimals } from '../utils/bignumber';
+
+const MINUTE_MS = 60 * 1000;
+
+export class TradeScheduler extends PolkadotApiClient {
+  readonly router: TradeRouter;
+  readonly txUtils: TradeUtils;
+
+  private memMinBudget = memoize1((mem: number) => {
+    return this.api.consts.dca.minBudgetInNativeCurrency.toString();
+  });
+
+  private memBlockTime = memoize1((mem: number) => {
+    return this.api.consts.aura.slotDuration.toNumber();
+  });
+
+  constructor(api: ApiPromise, router: TradeRouter) {
+    super(api);
+    this.router = router;
+    this.txUtils = new TradeUtils(api);
+  }
+
+  get blockTime(): number {
+    return this.memBlockTime(0);
+  }
+
+  get minBudget(): BigNumber {
+    const budget = this.memMinBudget(0);
+    return bnum(budget);
+  }
+
+  async getDcaOrder(
+    assetIn: string,
+    assetOut: string,
+    amountInTotal: string | BigNumber,
+    period: number,
+    frequency?: number
+  ): Promise<TradeDcaOrder> {
+    const [amountInMin, trade] = await Promise.all([
+      this.getMinimumOrderBudget(assetIn),
+      this.router.getBestSell(assetIn, assetOut, amountInTotal),
+    ]);
+
+    const { amountIn, swaps, priceImpactPct } = trade;
+
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+
+    const { assetInDecimals } = firstSwap;
+    const { assetOutDecimals } = lastSwap;
+
+    const priceImpact = Math.abs(priceImpactPct);
+    const periodInMinutes = period / MINUTE_MS;
+
+    const minTradeCount = this.getMinimumTradeCount(amountIn, amountInMin);
+    const optTradeCount = this.getOptimalTradeCount(priceImpact);
+    const tradesCount = frequency
+      ? Math.round(periodInMinutes / frequency)
+      : optTradeCount;
+
+    const minFreq = Math.ceil(periodInMinutes / minTradeCount);
+    const optFreq = Math.round(periodInMinutes / optTradeCount);
+    const freq = Math.round(periodInMinutes / tradesCount);
+
+    const amountInPerTrade = amountIn
+      .dividedBy(tradesCount)
+      .decimalPlaces(0, 1);
+
+    const dca = await this.router.getBestSell(
+      assetIn,
+      assetOut,
+      toDecimals(amountInPerTrade, assetInDecimals)
+    );
+
+    const isLessThanMinimalAmount = amountIn.isLessThan(amountInMin);
+
+    const errors: TradeOrderError[] = [];
+    if (isLessThanMinimalAmount) {
+      errors.push(TradeOrderError.OrderTooSmall);
+    }
+
+    const tradeInterval = this.toBlockPeriod(freq * MINUTE_MS);
+    const tradeRoute = this.txUtils.buildRoute(swaps);
+
+    return {
+      amountIn: amountIn,
+      assetIn: assetIn,
+      assetOut: assetOut,
+      errors: errors,
+      frequencyMin: minFreq,
+      frequencyOpt: optFreq,
+      frequency: freq,
+      tradeAmountIn: dca.amountIn,
+      tradeAmountOut: dca.amountOut,
+      tradeCount: tradesCount,
+      tradeInterval: tradeInterval,
+      tradeRoute: tradeRoute,
+      toHuman() {
+        return {
+          amountIn: toDecimals(amountIn, assetInDecimals),
+          assetIn: assetIn,
+          assetOut: assetOut,
+          errors: errors,
+          frequencyMin: minFreq,
+          frequencyOpt: optFreq,
+          frequency: freq,
+          tradeAmountIn: toDecimals(dca.amountIn, assetInDecimals),
+          tradeAmountOut: toDecimals(dca.amountOut, assetOutDecimals),
+          tradeCount: tradesCount,
+          tradeInterval: tradeInterval,
+          tradeRoute: tradeRoute,
+        };
+      },
+    } as TradeDcaOrder;
+  }
+
+  /**
+   * Calculate minimum order budget (amountIn) required for order
+   * execution.
+   *
+   * @param asset - assetIn id
+   * @returns minimum order budget
+   */
+  private async getMinimumOrderBudget(asset: string): Promise<BigNumber> {
+    if (SYSTEM_ASSET_ID === asset) {
+      return this.minBudget;
+    }
+
+    const spot = await this.router.getBestSpotPrice(SYSTEM_ASSET_ID, asset);
+    if (spot) {
+      return this.minBudget
+        .times(spot.amount)
+        .div(bnum(10).pow(SYSTEM_ASSET_DECIMALS))
+        .decimalPlaces(0, 1);
+    }
+    throw new Error('Unable to calculate order budget');
+  }
+
+  /**
+   * Calculate minimum number of trades for order execution.
+   *
+   * Single trade execution amount must be at least 20% of
+   * minimum order budget.
+   *
+   * @param amountIn - entering / given budget
+   * @param amountInMin - minimal budget to schedule an order
+   * @returns minimum number of trades to execute the order
+   */
+  private getMinimumTradeCount(
+    amountIn: BigNumber,
+    amountInMin: BigNumber
+  ): number {
+    const minAmountIn = amountInMin.multipliedBy(0.2);
+    const res = amountIn.dividedBy(minAmountIn).toNumber();
+    return Math.round(res);
+  }
+
+  /**
+   * Calculate optimal number of trades for order execution.
+   *
+   * We aim to achieve price impact 0.1% per single execution
+   * with at least 3 trades.
+   *
+   * @param priceImpact - price inpact of swap execution (via single trade)
+   * @returns optimal number of trades to execute the order
+   */
+  private getOptimalTradeCount(priceImpact: number): number {
+    const estTradeCount = Math.round(priceImpact * 10) || 1;
+    return Math.max(estTradeCount, 3);
+  }
+
+  async getTwapSellOrder(
+    assetIn: string,
+    assetOut: string,
+    amountInTotal: string | BigNumber
+  ): Promise<TradeTwapOrder> {
+    const [amountInMin, sell] = await Promise.all([
+      this.getMinimumOrderBudget(assetIn),
+      this.router.getBestSell(assetIn, assetOut, amountInTotal),
+    ]);
+
+    const { amountIn, swaps, priceImpactPct, type } = sell;
+
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+
+    const { assetInDecimals } = firstSwap;
+    const { assetOutDecimals } = lastSwap;
+
+    const priceImpact = Math.abs(priceImpactPct);
+    const tradeCount = this.getTwapTradeCount(priceImpact);
+
+    const amountInPerTrade = amountIn.dividedBy(tradeCount).decimalPlaces(0, 1);
+
+    const twap = await this.router.getBestSell(
+      firstSwap.assetIn,
+      lastSwap.assetOut,
+      toDecimals(amountInPerTrade, assetInDecimals)
+    );
+
+    const isSingleTrade = tradeCount === 1;
+    const isLessThanMinimalAmount = amountIn.isLessThan(amountInMin);
+    const isOrderImpactTooBig = twap.priceImpactPct < TWAP_MAX_PRICE_IMPACT;
+
+    const errors: TradeOrderError[] = [];
+    if (isLessThanMinimalAmount || isSingleTrade) {
+      errors.push(TradeOrderError.OrderTooSmall);
+    } else if (isOrderImpactTooBig) {
+      errors.push(TradeOrderError.OrderImpactTooBig);
+    }
+
+    const amountOut = twap.amountOut.multipliedBy(tradeCount);
+    const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
+    const tradeRoute = this.txUtils.buildRoute(swaps);
+
+    return {
+      amountIn: amountIn,
+      amountOut: amountOut,
+      assetIn: assetIn,
+      assetOut: assetOut,
+      errors: errors,
+      priceImpactPct: twap.priceImpactPct,
+      tradeAmountIn: twap.amountIn,
+      tradeAmountOut: twap.amountOut,
+      tradeCount: tradeCount,
+      tradeFee: tradeFee,
+      tradeInterval: TWAP_BLOCK_PERIOD,
+      tradeRoute: tradeRoute,
+      tradeType: type,
+      toHuman() {
+        return {
+          amountIn: toDecimals(amountIn, assetInDecimals),
+          amountOut: toDecimals(amountOut, assetOutDecimals),
+          assetIn: assetIn,
+          assetOut: assetOut,
+          errors: errors,
+          priceImpactPct: twap.priceImpactPct,
+          tradeAmountIn: toDecimals(twap.amountIn, assetInDecimals),
+          tradeAmountOut: toDecimals(twap.amountOut, assetOutDecimals),
+          tradeCount: tradeCount,
+          tradeFee: toDecimals(tradeFee, assetOutDecimals),
+          tradeInterval: TWAP_BLOCK_PERIOD,
+          tradeRoute: tradeRoute,
+          tradeType: type,
+        };
+      },
+    } as TradeTwapOrder;
+  }
+
+  async getTwapBuyOrder(
+    assetIn: string,
+    assetOut: string,
+    amountInTotal: string | BigNumber
+  ): Promise<TradeTwapOrder> {
+    const [amountInMin, buy] = await Promise.all([
+      this.getMinimumOrderBudget(assetIn),
+      this.router.getBestBuy(assetIn, assetOut, amountInTotal),
+    ]);
+
+    const { amountOut, swaps, priceImpactPct, type } = buy;
+
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+
+    const { assetInDecimals } = firstSwap;
+    const { assetOutDecimals } = lastSwap;
+
+    const priceImpact = Math.abs(priceImpactPct);
+    const tradeCount = this.getTwapTradeCount(priceImpact);
+
+    const amountOutPerTrade = amountOut
+      .dividedBy(tradeCount)
+      .decimalPlaces(0, 1);
+
+    const twap = await this.router.getBestBuy(
+      firstSwap.assetIn,
+      lastSwap.assetOut,
+      toDecimals(amountOutPerTrade, assetOutDecimals)
+    );
+
+    const amountIn = twap.amountIn.multipliedBy(tradeCount);
+
+    const isSingleTrade = tradeCount === 1;
+    const isLessThanMinimalAmount = amountIn.isLessThan(amountInMin);
+    const isOrderImpactTooBig = twap.priceImpactPct < TWAP_MAX_PRICE_IMPACT;
+
+    const errors: TradeOrderError[] = [];
+    if (isLessThanMinimalAmount || isSingleTrade) {
+      errors.push(TradeOrderError.OrderTooSmall);
+    } else if (isOrderImpactTooBig) {
+      errors.push(TradeOrderError.OrderImpactTooBig);
+    }
+
+    const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
+    const tradeRoute = this.txUtils.buildRoute(swaps);
+
+    return {
+      amountIn: amountIn,
+      amountOut: amountOut,
+      assetIn: assetIn,
+      assetOut: assetOut,
+      errors: errors,
+      priceImpactPct: twap.priceImpactPct,
+      tradeAmountIn: twap.amountIn,
+      tradeAmountOut: twap.amountOut,
+      tradeCount: tradeCount,
+      tradeFee: tradeFee,
+      tradeInterval: TWAP_BLOCK_PERIOD,
+      tradeRoute: tradeRoute,
+      tradeType: type,
+      toHuman() {
+        return {
+          amountIn: toDecimals(amountIn, assetInDecimals),
+          amountOut: toDecimals(amountOut, assetOutDecimals),
+          assetIn: assetIn,
+          assetOut: assetOut,
+          errors: errors,
+          priceImpactPct: twap.priceImpactPct,
+          tradeAmountIn: toDecimals(twap.amountIn, assetInDecimals),
+          tradeAmountOut: toDecimals(twap.amountOut, assetOutDecimals),
+          tradeCount: tradeCount,
+          tradeFee: toDecimals(tradeFee, assetInDecimals),
+          tradeInterval: TWAP_BLOCK_PERIOD,
+          tradeRoute: tradeRoute,
+          tradeType: type,
+        };
+      },
+    } as TradeTwapOrder;
+  }
+
+  /**
+   * Calculate number of trades for twap order execution.
+   *
+   * We aim to achieve price impact 0.1% per single execution
+   * with max execution time 6 hours.
+   *
+   * @param priceImpact - price inpact of swap execution (via single trade)
+   * @returns optimal number of trades to execute the twap order
+   */
+  private getTwapTradeCount(priceImpact: number): number {
+    const optTradeCount = this.getOptimalTradeCount(priceImpact);
+    const executionTime = this.getTwapExecutionTime(optTradeCount);
+
+    if (executionTime > TWAP_MAX_DURATION) {
+      const maxTradeCount =
+        TWAP_MAX_DURATION / (this.blockTime * TWAP_BLOCK_PERIOD);
+      return Math.round(maxTradeCount);
+    }
+    return optTradeCount;
+  }
+
+  /**
+   * Calculate approx. execution time for twap order.
+   *
+   * @param tradeCount - number of trades per order
+   * @returns unix representation of execution time
+   */
+  private getTwapExecutionTime(tradeCount: number): number {
+    return tradeCount * TWAP_BLOCK_PERIOD * this.blockTime;
+  }
+
+  /**
+   * Convert unix execution period to block period
+   *
+   * @param periodMsec - period in miliseconds
+   * @returns block execution period
+   */
+  private toBlockPeriod(periodMsec: number): number {
+    const noOfBlocks = periodMsec / this.blockTime;
+    const estPeriod = Math.round(noOfBlocks);
+    return Math.max(estPeriod, ORDER_MIN_BLOCK_PERIOD);
+  }
+}

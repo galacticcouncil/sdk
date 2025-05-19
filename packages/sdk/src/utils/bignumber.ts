@@ -22,4 +22,13 @@ export function bnum(val: string | number | bigint | BigNumber): BigNumber {
   return new BigNumber(val.toString());
 }
 
+export function toBn(amount: string | number, decimals: number): BigNumber {
+  const input = bnum(amount);
+  return scale(input, decimals);
+}
+
+export function toDecimals(amount: BigNumber, decimals: number): string {
+  return amount.shiftedBy(-1 * decimals).toString();
+}
+
 export { BigNumber };

@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { RUNTIME_DECIMALS } from '../../consts';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
-import { toDecimals } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import { OmniMath } from './OmniMath';
 
@@ -228,8 +228,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -245,7 +245,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -268,8 +268,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -285,7 +285,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;

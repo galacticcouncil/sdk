@@ -1,4 +1,5 @@
-import type { Hop, PoolBuy, PoolError, PoolSell } from '../pool';
+import { SubstrateTransaction } from 'api';
+import { Hop, PoolBuy, PoolError, PoolSell, PoolType } from '../pool';
 import type { BigNumber } from '../utils/bignumber';
 
 export interface Humanizer {
@@ -28,6 +29,12 @@ export enum TradeType {
   Sell = 'Sell',
 }
 
+export type TradeRoute = {
+  pool: PoolType | { Stableswap: string };
+  assetIn: string;
+  assetOut: string;
+};
+
 export interface Trade extends Humanizer {
   type: TradeType;
   amountIn: BigNumber;
@@ -37,4 +44,36 @@ export interface Trade extends Humanizer {
   tradeFeePct: number;
   priceImpactPct: number;
   swaps: Swap[];
+}
+
+export interface TradeOrder extends Humanizer {
+  amountIn: BigNumber;
+  assetIn: string;
+  assetOut: string;
+  errors: TradeOrderError[];
+  tradeAmountIn: BigNumber;
+  tradeAmountOut: BigNumber;
+  tradeCount: number;
+  tradeInterval: number;
+  tradeRoute: TradeRoute[];
+  toTx(): SubstrateTransaction;
+}
+
+export interface TradeDcaOrder extends TradeOrder {
+  frequency: number;
+  frequencyMin: number;
+  frequencyOpt: number;
+}
+
+export interface TradeTwapOrder extends TradeOrder {
+  amountOut: BigNumber;
+  priceImpactPct: number;
+  tradeFee: BigNumber;
+  tradeType: TradeType;
+}
+
+export enum TradeOrderError {
+  OrderTooSmall = 'OrderTooSmall',
+  OrderTooBig = 'OrderTooBig',
+  OrderImpactTooBig = 'OrderImpactTooBig',
 }

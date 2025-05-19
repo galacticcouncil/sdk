@@ -19,7 +19,14 @@ import { ERC20 } from '../utils/erc20';
 import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
 
-import { Swap, Trade, TradeType } from './types';
+import {
+  Swap,
+  Trade,
+  TradeOrder,
+  TradeRoute,
+  TradeTwapOrder,
+  TradeType,
+} from './types';
 
 export class TradeUtils extends PolkadotApiClient {
   private balanceClient: BalanceClient;
@@ -212,13 +219,150 @@ export class TradeUtils extends PolkadotApiClient {
     } as SubstrateTransaction;
   }
 
-  buildRoute(swaps: Swap[]) {
+  buildDcaTx(
+    beneficiary: string,
+    order: TradeOrder,
+    maxRetries = 3,
+    slippagePct = 1
+  ): SubstrateTransaction {
+    const {
+      amountIn,
+      assetIn,
+      assetOut,
+      tradeAmountIn,
+      tradeInterval,
+      tradeRoute,
+    } = order;
+
+    const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
+      {
+        owner: beneficiary,
+        period: tradeInterval,
+        maxRetries,
+        totalAmount: amountIn.toFixed(),
+        slippage: Number(slippagePct) * 10000,
+        order: {
+          Sell: {
+            assetIn: assetIn,
+            assetOut: assetOut,
+            amountIn: tradeAmountIn.toFixed(),
+            minAmountOut: '0',
+            route: tradeRoute,
+          },
+        },
+      },
+      null
+    );
+
+    return {
+      hex: tx.toHex(),
+      name: 'DcaSchedule',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as SubstrateTransaction;
+  }
+
+  buildTwapSellTx(
+    beneficiary: string,
+    order: TradeTwapOrder,
+    maxRetries = 3,
+    slippagePct = 1
+  ): SubstrateTransaction {
+    const {
+      amountIn,
+      assetIn,
+      assetOut,
+      tradeAmountIn,
+      tradeAmountOut,
+      tradeInterval,
+      tradeRoute,
+    } = order;
+
+    const slippage = getFraction(tradeAmountOut, slippagePct);
+    const minAmountOut = tradeAmountOut.minus(slippage);
+
+    const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
+      {
+        owner: beneficiary,
+        period: tradeInterval,
+        maxRetries,
+        totalAmount: amountIn.toFixed(),
+        slippage: Number(slippagePct) * 10000,
+        order: {
+          Sell: {
+            assetIn: assetIn,
+            assetOut: assetOut,
+            amountIn: tradeAmountIn.toFixed(),
+            minAmountOut: minAmountOut.toFixed(),
+            route: tradeRoute,
+          },
+        },
+      },
+      null
+    );
+
+    return {
+      hex: tx.toHex(),
+      name: 'TwapSellSchedule',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as SubstrateTransaction;
+  }
+
+  buildTwapBuyTx(
+    beneficiary: string,
+    order: TradeTwapOrder,
+    maxRetries = 3,
+    slippagePct = 1
+  ): SubstrateTransaction {
+    const {
+      amountIn,
+      assetIn,
+      assetOut,
+      tradeAmountIn,
+      tradeAmountOut,
+      tradeInterval,
+      tradeRoute,
+    } = order;
+
+    const slippage = getFraction(tradeAmountIn, slippagePct);
+    const maxAmountIn = tradeAmountIn.plus(slippage);
+
+    const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
+      {
+        owner: beneficiary,
+        period: tradeInterval,
+        maxRetries,
+        totalAmount: amountIn.toFixed(),
+        slippage: Number(slippagePct) * 10000,
+        order: {
+          Buy: {
+            assetIn: assetIn,
+            assetOut: assetOut,
+            amountOut: tradeAmountOut.toFixed(),
+            maxAmountIn: maxAmountIn.toFixed(),
+            route: tradeRoute,
+          },
+        },
+      },
+      null
+    );
+
+    return {
+      hex: tx.toHex(),
+      name: 'TwapBuySchedule',
+      get: () => tx,
+      dryRun: (account: string) => this.dryRun(account, tx),
+    } as SubstrateTransaction;
+  }
+
+  buildRoute(swaps: Swap[]): TradeRoute[] {
     return swaps.map(({ assetIn, assetOut, pool, poolId }: Hop) => {
       if (pool === PoolType.Stable) {
         return {
           pool: {
             Stableswap: poolId,
-          },
+          } as { Stableswap: string },
           assetIn,
           assetOut,
         };
