@@ -1,7 +1,8 @@
-import { Router } from './Router';
+import { Router, RouterOptions } from './Router';
+import { TradeUtils } from './TradeUtils';
 
 import { RouteNotFound } from '../errors';
-import { Hop, Pool, PoolFees, PoolType } from '../pool';
+import { Hop, IPoolService, Pool, PoolFees, PoolType } from '../pool';
 import { Amount } from '../types';
 import { BigNumber, bnum, scale, toDecimals } from '../utils/bignumber';
 import { FeeUtils } from '../utils/fee';
@@ -14,6 +15,17 @@ import {
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
+  readonly utils: TradeUtils;
+
+  constructor(
+    poolService: IPoolService,
+    tradeUtils: TradeUtils,
+    routerOptions?: RouterOptions
+  ) {
+    super(poolService, routerOptions);
+    this.utils = tradeUtils;
+  }
+
   /**
    * Check whether trade is direct or not
    *

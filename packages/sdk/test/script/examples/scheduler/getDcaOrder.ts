@@ -4,6 +4,7 @@ import {
   CachingPoolService,
   TradeRouter,
   TradeScheduler,
+  TradeUtils,
 } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
@@ -12,21 +13,25 @@ import { ApiUrl } from '../../types';
 const BENEFICIARY = '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh';
 
 const DAY_PERIOD = 24 * 60 * 60 * 1000;
+const MAX_RETRIES = 3;
 
 class GetDcaOrder extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new CachingPoolService(api);
-    const router = new TradeRouter(poolService);
-    const scheduler = new TradeScheduler(api, router);
 
-    const dca = await scheduler.getDcaOrder('10', '0', '60', DAY_PERIOD);
-    const transaction = scheduler.txUtils.buildDcaTx(BENEFICIARY, dca);
-    console.log('Transaction hash: ' + transaction.hex);
+    const utils = new TradeUtils(api);
+    const router = new TradeRouter(poolService, utils);
+    const scheduler = new TradeScheduler(router);
 
-    const res = await transaction.dryRun(BENEFICIARY);
-    console.log(res.toHuman());
+    const order = await scheduler.getDcaOrder('10', '0', '10', DAY_PERIOD);
+    const orderTx = order.toTx(BENEFICIARY, MAX_RETRIES);
 
-    return dca.toHuman();
+    console.log('Transaction hash: ' + orderTx.hex);
+
+    const result = await orderTx.dryRun(BENEFICIARY);
+    console.log(result.toHuman());
+
+    return order.toHuman();
   }
 }
 
