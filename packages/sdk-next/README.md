@@ -4,6 +4,10 @@
 
 Next gen hydration sdk build on top of [Polkadot API (Papi)](https://papi.how/).
 
+⚠️ **Disclaimer:** Next is not prod ready yet. Offical `1.x` release coming soon.
+
+Missing functionality & progress tracked [here](https://github.com/galacticcouncil/sdk/issues/119)
+
 Table of content:
 
 - [Installation](#installation)
