@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -36,11 +36,11 @@
   },
   "dependencies": {
     "@galacticcouncil/descriptors": "^1.1.1",
-    "@galacticcouncil/math-lbp": "^1.0.0",
-    "@galacticcouncil/math-liquidity-mining": "^1.0.0",
-    "@galacticcouncil/math-omnipool": "^1.1.0",
-    "@galacticcouncil/math-stableswap": "^2.0.0",
-    "@galacticcouncil/math-xyk": "^1.0.0",
+    "@galacticcouncil/math-lbp": "^1.1.0",
+    "@galacticcouncil/math-liquidity-mining": "^1.1.0",
+    "@galacticcouncil/math-omnipool": "^1.2.0",
+    "@galacticcouncil/math-stableswap": "^2.1.0",
+    "@galacticcouncil/math-xyk": "^1.1.0",
     "@noble/hashes": "^1.6.1",
     "@thi.ng/cache": "^2.1.35",
     "@thi.ng/memoize": "^4.0.2",
