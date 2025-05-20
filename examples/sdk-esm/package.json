@@ -11,6 +11,6 @@
     "esbuild": "^0.25.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^7.1.1"
+    "@galacticcouncil/sdk": "^7.2.0"
   }
 }
