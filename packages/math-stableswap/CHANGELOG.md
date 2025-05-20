@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 2.1.0
+
+### Minor Changes
+
+- Build wasms with latest wasm-pack
+
 ## 2.0.0
 
 ### Major Changes

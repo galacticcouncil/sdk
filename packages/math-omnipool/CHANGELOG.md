@@ -1,5 +1,11 @@
 # @galacticcouncil/math-omnipool
 
+## 1.2.0
+
+### Minor Changes
+
+- Build wasms with latest wasm-pack
+
 ## 1.1.0
 
 ### Minor Changes

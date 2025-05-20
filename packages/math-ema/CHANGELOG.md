@@ -1,5 +1,11 @@
 # @galacticcouncil/math-ema
 
+## 1.1.0
+
+### Minor Changes
+
+- Build wasms with latest wasm-pack
+
 ## 1.0.0
 
 ### Major Changes
