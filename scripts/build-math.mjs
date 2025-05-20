@@ -28,7 +28,11 @@ const fetchResource = async (math, target, file) => {
 };
 
 const fetchTree = async () => {
-  const resp = await fetch(GITHUB_API);
+  const resp = await fetch(GITHUB_API, {
+    method: 'GET',
+    headers: {},
+  });
+
   const json = await resp.json();
   return json.tree;
 };
