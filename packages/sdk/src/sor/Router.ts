@@ -23,10 +23,6 @@ export class Router {
     includeOnly: [],
   };
 
-  /**
-   * @param poolService - Fetch pool data from substrate based pools
-   * @param routerOptions - Optional router options
-   */
   constructor(poolService: IPoolService, routerOptions?: RouterOptions) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();

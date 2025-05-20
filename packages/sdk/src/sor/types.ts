@@ -54,9 +54,13 @@ export interface TradeOrder extends Humanizer {
   tradeAmountIn: BigNumber;
   tradeAmountOut: BigNumber;
   tradeCount: number;
-  tradeInterval: number;
+  tradePeriod: number;
   tradeRoute: TradeRoute[];
-  toTx(): SubstrateTransaction;
+  toTx(
+    beneficiary: string,
+    maxRetries: number,
+    slippagePct?: number
+  ): SubstrateTransaction;
 }
 
 export interface TradeDcaOrder extends TradeOrder {

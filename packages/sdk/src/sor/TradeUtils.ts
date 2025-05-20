@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
 import { type SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
+import { memoize1 } from '@thi.ng/memoize';
+
 import { encodeFunctionData } from 'viem';
 
 import { PolkadotApiClient, SubstrateTransaction } from '../api';
@@ -15,6 +17,7 @@ import {
 import { EvmClient } from '../evm';
 import { Hop, PoolType } from '../pool';
 
+import { bnum, BigNumber } from '../utils/bignumber';
 import { ERC20 } from '../utils/erc20';
 import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
@@ -32,10 +35,27 @@ export class TradeUtils extends PolkadotApiClient {
   private balanceClient: BalanceClient;
   private evmClient: EvmClient;
 
+  private memMinOrderBudget = memoize1((mem: number) => {
+    return this.api.consts.dca.minBudgetInNativeCurrency.toString();
+  });
+
+  private memBlockTime = memoize1((mem: number) => {
+    return this.api.consts.aura.slotDuration.toNumber();
+  });
+
   constructor(api: ApiPromise) {
     super(api);
     this.balanceClient = new BalanceClient(api);
     this.evmClient = new EvmClient();
+  }
+
+  get blockTime(): number {
+    return this.memBlockTime(0);
+  }
+
+  get minOrderBudget(): BigNumber {
+    const budget = this.memMinOrderBudget(0);
+    return bnum(budget);
   }
 
   buildBuyTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
@@ -150,8 +170,8 @@ export class TradeUtils extends PolkadotApiClient {
   }
 
   async buildWithdrawAndSellReserveTx(
-    beneficiary: string,
     trade: Trade,
+    beneficiary: string,
     slippagePct = 1
   ): Promise<SubstrateTransaction> {
     const { amountIn, amountOut, swaps } = trade;
@@ -220,9 +240,9 @@ export class TradeUtils extends PolkadotApiClient {
   }
 
   buildDcaTx(
-    beneficiary: string,
     order: TradeOrder,
-    maxRetries = 3,
+    beneficiary: string,
+    maxRetries: number,
     slippagePct = 1
   ): SubstrateTransaction {
     const {
@@ -230,14 +250,14 @@ export class TradeUtils extends PolkadotApiClient {
       assetIn,
       assetOut,
       tradeAmountIn,
-      tradeInterval,
+      tradePeriod,
       tradeRoute,
     } = order;
 
     const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
       {
         owner: beneficiary,
-        period: tradeInterval,
+        period: tradePeriod,
         maxRetries,
         totalAmount: amountIn.toFixed(),
         slippage: Number(slippagePct) * 10000,
@@ -263,8 +283,8 @@ export class TradeUtils extends PolkadotApiClient {
   }
 
   buildTwapSellTx(
-    beneficiary: string,
     order: TradeTwapOrder,
+    beneficiary: string,
     maxRetries = 3,
     slippagePct = 1
   ): SubstrateTransaction {
@@ -274,7 +294,7 @@ export class TradeUtils extends PolkadotApiClient {
       assetOut,
       tradeAmountIn,
       tradeAmountOut,
-      tradeInterval,
+      tradePeriod,
       tradeRoute,
     } = order;
 
@@ -284,7 +304,7 @@ export class TradeUtils extends PolkadotApiClient {
     const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
       {
         owner: beneficiary,
-        period: tradeInterval,
+        period: tradePeriod,
         maxRetries,
         totalAmount: amountIn.toFixed(),
         slippage: Number(slippagePct) * 10000,
@@ -310,8 +330,8 @@ export class TradeUtils extends PolkadotApiClient {
   }
 
   buildTwapBuyTx(
-    beneficiary: string,
     order: TradeTwapOrder,
+    beneficiary: string,
     maxRetries = 3,
     slippagePct = 1
   ): SubstrateTransaction {
@@ -321,7 +341,7 @@ export class TradeUtils extends PolkadotApiClient {
       assetOut,
       tradeAmountIn,
       tradeAmountOut,
-      tradeInterval,
+      tradePeriod,
       tradeRoute,
     } = order;
 
@@ -331,7 +351,7 @@ export class TradeUtils extends PolkadotApiClient {
     const tx: SubmittableExtrinsic = this.api.tx.dca.schedule(
       {
         owner: beneficiary,
-        period: tradeInterval,
+        period: tradePeriod,
         maxRetries,
         totalAmount: amountIn.toFixed(),
         slippage: Number(slippagePct) * 10000,
