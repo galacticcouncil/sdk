@@ -13,7 +13,7 @@ import { configService, wallet, whClient, whScan } from './setup';
 // Define transfer constraints
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('susds');
+const asset = configService.getAsset('eth');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -28,8 +28,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = '0x7d5b401C887117a567F2F334976E34FddA73176e';
-const destAddr = '7NPoMQbiA6trJKkjB35uk96MeJD4PGWkLQLH7k7hXEkZpiba';
+const srcAddr = 'INSERT_ADDRESS';
+const destAddr = 'INSERT_ADDRESS';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -50,7 +50,7 @@ const transfer = await TransferBuilder(wallet)
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const transferAmount = '0.3';
+const transferAmount = '0.1';
 
 const [call, fee] = await Promise.all([
   transfer.buildCall(transferAmount),
