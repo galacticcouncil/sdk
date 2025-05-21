@@ -1,4 +1,4 @@
-import { SubstrateTransaction } from 'api';
+import { SubstrateTransaction } from '../api';
 import { Hop, PoolBuy, PoolError, PoolSell, PoolType } from '../pool';
 import type { BigNumber } from '../utils/bignumber';
 
@@ -44,6 +44,7 @@ export interface Trade extends Humanizer {
   tradeFeePct: number;
   priceImpactPct: number;
   swaps: Swap[];
+  toTx(slippagePct?: number): SubstrateTransaction;
 }
 
 export interface TradeOrder extends Humanizer {

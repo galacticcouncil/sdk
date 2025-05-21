@@ -1,27 +1,26 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
+    const { poolService, tradeRouter } = createSdkContext(api);
 
     await Promise.all([
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
+      tradeRouter.getPools(),
+      tradeRouter.getPools(),
+      tradeRouter.getPools(),
+      tradeRouter.getPools(),
+      tradeRouter.getPools(),
+      tradeRouter.getPools(),
     ]);
 
     api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
       const block = lastHeader.number.toString();
       console.log('===============', block, '===============');
-      router.getPools().then((p) => {
+      tradeRouter.getPools().then((p) => {
         p.forEach((o) => {
           o.tokens.forEach((t) => {
             if (t.id === '1') {
