@@ -53,6 +53,8 @@ import {
   wsteth,
   wud,
   lbtc,
+  susds_mwh,
+  susds,
 } from '../../../assets';
 import {
   acala,
@@ -255,6 +257,7 @@ const toMoonbeam: AssetRoute[] = [
   toTransferTemplate(usdt, moonbeam, 0.3),
   toTransferTemplate(usdc, moonbeam, 0.3),
   toMoonbeamErc20Template(dai_mwh),
+  toMoonbeamErc20Template(susds_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
   toMoonbeamErc20Template(wbtc_mwh),
@@ -296,6 +299,7 @@ const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumViaWormholeTemplate(dai_mwh, dai),
+  toEthereumViaWormholeTemplate(susds_mwh, susds),
   toEthereumViaWormholeTemplate(weth_mwh, eth),
   toEthereumViaWormholeTemplate(wbtc_mwh, wbtc),
   toEthereumViaWormholeTemplate(usdt_mwh, usdt),
