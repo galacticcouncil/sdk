@@ -1,3 +1,7 @@
+import { ApiPromise } from '@polkadot/api';
+
+import { memoize1 } from '@thi.ng/memoize';
+
 import {
   ORDER_MIN_BLOCK_PERIOD,
   TWAP_BLOCK_PERIOD,
@@ -9,17 +13,35 @@ import { TradeDcaOrder, TradeTwapOrder, TradeOrderError } from './types';
 import { TradeRouter } from './TradeRouter';
 import { TradeUtils } from './TradeUtils';
 
-import { SubstrateTransaction } from '../api';
+import { PolkadotApiClient, SubstrateTransaction } from '../api';
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber, bnum, toDecimals } from '../utils/bignumber';
 
-export class TradeScheduler {
+export class TradeScheduler extends PolkadotApiClient {
   readonly router: TradeRouter;
-  readonly txUtils: TradeUtils;
+  readonly utils: TradeUtils;
 
-  constructor(router: TradeRouter) {
+  private memMinOrderBudget = memoize1((_mem: number) => {
+    return this.api.consts.dca.minBudgetInNativeCurrency.toString();
+  });
+
+  private memBlockTime = memoize1((_mem: number) => {
+    return this.api.consts.aura.slotDuration.toNumber();
+  });
+
+  constructor(api: ApiPromise, router: TradeRouter) {
+    super(api);
     this.router = router;
-    this.txUtils = router.utils;
+    this.utils = router.utils;
+  }
+
+  get blockTime(): number {
+    return this.memBlockTime(0);
+  }
+
+  get minOrderBudget(): BigNumber {
+    const budget = this.memMinOrderBudget(0);
+    return bnum(budget);
   }
 
   /**
@@ -82,7 +104,7 @@ export class TradeScheduler {
     }
 
     const tradePeriod = this.toBlockPeriod(freq);
-    const tradeRoute = this.txUtils.buildRoute(swaps);
+    const tradeRoute = this.utils.buildRoute(swaps);
 
     const order = {
       amountIn: amountIn,
@@ -104,12 +126,7 @@ export class TradeScheduler {
       maxRetries: number,
       slippagePct = 1
     ): SubstrateTransaction => {
-      return this.txUtils.buildDcaTx(
-        order,
-        beneficiary,
-        maxRetries,
-        slippagePct
-      );
+      return this.utils.buildDcaTx(order, beneficiary, maxRetries, slippagePct);
     };
 
     return {
@@ -143,12 +160,12 @@ export class TradeScheduler {
    */
   private async getMinimumOrderBudget(asset: string): Promise<BigNumber> {
     if (SYSTEM_ASSET_ID === asset) {
-      return this.txUtils.minOrderBudget;
+      return this.minOrderBudget;
     }
 
     const spot = await this.router.getBestSpotPrice(SYSTEM_ASSET_ID, asset);
     if (spot) {
-      return this.txUtils.minOrderBudget
+      return this.minOrderBudget
         .times(spot.amount)
         .div(bnum(10).pow(SYSTEM_ASSET_DECIMALS))
         .decimalPlaces(0, 1);
@@ -189,6 +206,14 @@ export class TradeScheduler {
     return Math.max(estTradeCount, 3);
   }
 
+  /**
+   * Build a TWAP sell order
+   *
+   * @param assetIn - storage key of assetIn
+   * @param assetOut - storage key of assetOut
+   * @param amountInTotal - order budget
+   * @returns twap trade sell order
+   */
   async getTwapSellOrder(
     assetIn: string,
     assetOut: string,
@@ -231,9 +256,9 @@ export class TradeScheduler {
 
     const amountOut = twap.amountOut.multipliedBy(tradeCount);
     const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
-    const tradeRoute = this.txUtils.buildRoute(swaps);
+    const tradeRoute = this.utils.buildRoute(swaps);
 
-    return {
+    const order = {
       amountIn: amountIn,
       amountOut: amountOut,
       assetIn: assetIn,
@@ -247,6 +272,24 @@ export class TradeScheduler {
       tradePeriod: TWAP_BLOCK_PERIOD,
       tradeRoute: tradeRoute,
       tradeType: type,
+    } as TradeTwapOrder;
+
+    const orderTx = (
+      beneficiary: string,
+      maxRetries: number,
+      slippagePct = 1
+    ): SubstrateTransaction => {
+      return this.utils.buildTwapSellTx(
+        order,
+        beneficiary,
+        maxRetries,
+        slippagePct
+      );
+    };
+
+    return {
+      ...order,
+      toTx: orderTx,
       toHuman() {
         return {
           amountIn: toDecimals(amountIn, assetInDecimals),
@@ -267,6 +310,14 @@ export class TradeScheduler {
     } as TradeTwapOrder;
   }
 
+  /**
+   * Build a TWAP buy order
+   *
+   * @param assetIn - storage key of assetIn
+   * @param assetOut - storage key of assetOut
+   * @param amountInTotal - order budget
+   * @returns twap trade buy order
+   */
   async getTwapBuyOrder(
     assetIn: string,
     assetOut: string,
@@ -312,9 +363,9 @@ export class TradeScheduler {
     }
 
     const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
-    const tradeRoute = this.txUtils.buildRoute(swaps);
+    const tradeRoute = this.utils.buildRoute(swaps);
 
-    return {
+    const order = {
       amountIn: amountIn,
       amountOut: amountOut,
       assetIn: assetIn,
@@ -328,6 +379,24 @@ export class TradeScheduler {
       tradePeriod: TWAP_BLOCK_PERIOD,
       tradeRoute: tradeRoute,
       tradeType: type,
+    } as TradeTwapOrder;
+
+    const orderTx = (
+      beneficiary: string,
+      maxRetries: number,
+      slippagePct = 1
+    ): SubstrateTransaction => {
+      return this.utils.buildTwapBuyTx(
+        order,
+        beneficiary,
+        maxRetries,
+        slippagePct
+      );
+    };
+
+    return {
+      ...order,
+      toTx: orderTx,
       toHuman() {
         return {
           amountIn: toDecimals(amountIn, assetInDecimals),
@@ -363,7 +432,7 @@ export class TradeScheduler {
 
     if (executionTime > TWAP_MAX_DURATION) {
       const maxTradeCount =
-        TWAP_MAX_DURATION / (this.txUtils.blockTime * TWAP_BLOCK_PERIOD);
+        TWAP_MAX_DURATION / (this.blockTime * TWAP_BLOCK_PERIOD);
       return Math.round(maxTradeCount);
     }
     return optTradeCount;
@@ -376,7 +445,7 @@ export class TradeScheduler {
    * @returns unix representation of execution time
    */
   private getTwapExecutionTime(tradeCount: number): number {
-    return tradeCount * TWAP_BLOCK_PERIOD * this.txUtils.blockTime;
+    return tradeCount * TWAP_BLOCK_PERIOD * this.blockTime;
   }
 
   /**
@@ -386,7 +455,7 @@ export class TradeScheduler {
    * @returns block execution period
    */
   private toBlockPeriod(periodMsec: number): number {
-    const noOfBlocks = periodMsec / this.txUtils.blockTime;
+    const noOfBlocks = periodMsec / this.blockTime;
     const estPeriod = Math.round(noOfBlocks);
     return Math.max(estPeriod, ORDER_MIN_BLOCK_PERIOD);
   }

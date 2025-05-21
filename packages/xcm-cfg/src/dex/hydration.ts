@@ -26,15 +26,11 @@ export class HydrationDex implements Dex {
   readonly getCtx = memoize1(async (mem: number) => {
     console.log('init swap router', mem, '✅');
     const api = await this.chain.api;
-    const pool = this.poolService ? this.poolService : new PoolService(api);
-    const txUtils = new TradeUtils(api);
-    const router = new TradeRouter(pool, {
+    const poolCtx = this.poolService ? this.poolService : new PoolService(api);
+    const utils = new TradeUtils(api);
+    return new TradeRouter(poolCtx, utils, {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
-    return {
-      router,
-      txUtils,
-    };
   });
 
   constructor(chain: AnyChain, poolService?: PoolService) {
@@ -53,7 +49,7 @@ export class HydrationDex implements Dex {
     const aOut = this.chain.getMetadataAssetId(assetOut);
     const amount = amountOut.toDecimal(amountOut.decimals);
 
-    const { router, txUtils } = await this.getCtx(1);
+    const router = await this.getCtx(1);
     try {
       const mostLiquidRoute = await router.getMostLiquidRoute(
         aIn.toString(),
@@ -70,7 +66,7 @@ export class HydrationDex implements Dex {
       const amountIn = BigInt(trade.amountIn.toNumber());
       return {
         amount: amountIn,
-        route: txUtils.buildRoute(trade.swaps),
+        route: router.utils.buildRoute(trade.swaps),
       } as SwapQuote;
     } catch (e) {
       if (fallbackPrice) {

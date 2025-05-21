@@ -1,26 +1,23 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter, TradeUtils } from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 class GetBuyExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const txUtils = new TradeUtils(api);
+    const { tradeRouter } = createSdkContext(api);
 
-    const router = new TradeRouter(poolService);
-
-    const paths = await router.getAllPaths('1', '10');
+    const paths = await tradeRouter.getAllPaths('1', '10');
     const sortByHopsDesc = paths.sort((a, b) => {
       const swapsA = a.length;
       const swapsB = b.length;
       return swapsA < swapsB ? 1 : -1;
     });
 
-    const trade = await router.getBuy('1', '10', 10, sortByHopsDesc[0]);
-    const transaction = txUtils.buildBuyTx(trade);
-    console.log('Transaction hash: ' + transaction.hex);
+    const trade = await tradeRouter.getBuy('1', '10', 10, sortByHopsDesc[0]);
+    const tradeTx = trade.toTx();
+    console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }
 }

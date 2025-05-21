@@ -1,30 +1,24 @@
 import { ApiPromise } from '@polkadot/api';
-import {
-  CachingPoolService,
-  TradeRouter,
-  TradeScheduler,
-} from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 const BENEFICIARY = '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh';
+const MAX_RETRIES = 3;
 
 class GetTwapOrder extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const poolService = new CachingPoolService(api);
-    const router = new TradeRouter(poolService);
-    const scheduler = new TradeScheduler(api, router);
+    const { tradeScheduler } = createSdkContext(api);
 
-    const twap = await scheduler.getTwapSellOrder('10', '0', '50000');
-    const transaction = scheduler.txUtils.buildTwapSellTx(BENEFICIARY, twap);
-    console.log('Transaction hash: ' + transaction.hex);
+    const twap = await tradeScheduler.getTwapSellOrder('10', '0', '50000');
+    const twapTx = twap.toTx(BENEFICIARY, MAX_RETRIES);
+    console.log('Transaction hash: ' + twapTx.hex);
 
-    const res = await transaction.dryRun(BENEFICIARY);
-    console.log(res.toHuman());
-
+    const { executionResult } = await twapTx.dryRun(BENEFICIARY);
+    console.log('Transaction status: ' + executionResult.isOk);
     return twap.toHuman();
   }
 }
 
-new GetTwapOrder(ApiUrl.HydraDx, 'Get Twap order').run();
+new GetTwapOrder(ApiUrl.HydraDx, 'Get Twap SELL order').run();

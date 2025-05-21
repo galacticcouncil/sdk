@@ -169,6 +169,7 @@ export class TradeRouter extends Router {
 
     const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
 
+    const utilsCtx = this.utils;
     return {
       type: TradeType.Sell,
       amountIn: firstSwap.amountIn,
@@ -179,6 +180,9 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact.toNumber(),
       swaps: swaps,
+      toTx(slippagePct = 1) {
+        return utilsCtx.buildSellTx(this, slippagePct);
+      },
       toHuman() {
         return {
           type: TradeType.Sell,
@@ -506,6 +510,7 @@ export class TradeRouter extends Router {
       bestRoutePriceImpact = calculateDiffToRef(swapAmount, delta0X).toNumber();
     }
 
+    const utilsCtx = this.utils;
     return {
       type: TradeType.Buy,
       amountOut: firstSwap.amountOut,
@@ -516,6 +521,9 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact,
       swaps: swaps,
+      toTx(slippagePct = 1) {
+        return utilsCtx.buildBuyTx(this, slippagePct);
+      },
       toHuman() {
         return {
           type: TradeType.Buy,

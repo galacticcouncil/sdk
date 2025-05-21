@@ -1,6 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import {
   CachingPoolService,
+  createSdkContext,
   PoolType,
   TradeRouter,
   TradeUtils,
@@ -8,31 +9,27 @@ import {
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
+
+const external = [
+  {
+    decimals: 2,
+    id: '420',
+    name: 'BEEFY',
+    origin: 1000,
+    symbol: 'BEEFY',
+    internalId: '1000036',
+  },
+];
+
 class GetBestSellExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
-    const external = [
-      {
-        decimals: 2,
-        id: '420',
-        name: 'BEEFY',
-        origin: 1000,
-        symbol: 'BEEFY',
-        internalId: '1000036',
-      },
-    ];
-
-    const poolService = new CachingPoolService(api);
-    const txUtils = new TradeUtils(api);
+    const { poolService, tradeRouter } = createSdkContext(api);
 
     await poolService.syncRegistry(external);
 
-    const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
-    });
-
-    const trade = await router.getBestSell('5', '10', '10');
-    const transaction = txUtils.buildSellTx(trade);
-    console.log('Transaction hash: ' + transaction.hex);
+    const trade = await tradeRouter.getBestSell('5', '10', '10');
+    const tradeTx = trade.toTx();
+    console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }
 }
