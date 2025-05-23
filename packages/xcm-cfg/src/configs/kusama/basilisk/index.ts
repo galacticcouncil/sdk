@@ -44,7 +44,7 @@ export const basiliskConfig = new ChainRoutes({
     toTransferTemplate(bsx, karura, 0.0933),
     toTransferTemplate(ksm, kusama, 0.00012),
     toTransferTemplate(teer, integritee, 0.000004),
-    toTransferTemplate(xrt, robonomics, 0.00000464),
+    //toTransferTemplate(xrt, robonomics, 0.00000464),
     toTransferTemplate(tnkr, tinkernet, 0.0095),
   ],
 });
