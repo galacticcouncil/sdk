@@ -1,45 +1,31 @@
 import { ApiPromise } from '@polkadot/api';
 import { type SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-import { encodeFunctionData } from 'viem';
-
 import { PolkadotApiClient, SubstrateTransaction } from '../api';
 import { BalanceClient } from '../client';
-import {
-  AAVE_POOL_ABI,
-  AAVE_GAS_LIMIT,
-  AAVE_POOL_PROXY,
-  AAVE_ROUNDING_THRESHOLD,
-  AAVE_UINT_256_MAX,
-} from '../aave';
+import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
 import { EvmClient } from '../evm';
-import { Hop, PoolType } from '../pool';
-
-import { ERC20 } from '../utils/erc20';
-import { H160 } from '../utils/h160';
+import { PoolType } from '../pool';
 import { getFraction } from '../utils/math';
 
-import {
-  Swap,
-  Trade,
-  TradeOrder,
-  TradeRoute,
-  TradeTwapOrder,
-  TradeType,
-} from './types';
+import { Swap, Trade, TradeOrder, TradeOrderType, TradeType } from './types';
+import { TradeRouteBuilder, TradeValidator } from './utils';
 
-export class TradeUtils extends PolkadotApiClient {
-  private balanceClient: BalanceClient;
+export class TxBuilder extends PolkadotApiClient {
   private evmClient: EvmClient;
 
-  constructor(api: ApiPromise) {
+  private balanceClient: BalanceClient;
+  private aaveUtils: AaveUtils;
+
+  constructor(api: ApiPromise, evmClient?: EvmClient) {
     super(api);
+    this.evmClient = evmClient ?? new EvmClient();
+    this.aaveUtils = new AaveUtils(this.evmClient);
     this.balanceClient = new BalanceClient(api);
-    this.evmClient = new EvmClient();
   }
 
-  buildBuyTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
-    if (trade.type !== TradeType.Buy) throw new Error('Not permitted');
+  private buildBuyTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
+    TradeValidator.ensureType(trade, TradeType.Buy);
 
     const { amountIn, amountOut, swaps } = trade;
 
@@ -67,20 +53,19 @@ export class TradeUtils extends PolkadotApiClient {
         assetOut,
         amountOut.toFixed(),
         maxAmountIn.toFixed(),
-        this.buildRoute(swaps)
+        TradeRouteBuilder.build(swaps)
       );
     }
 
-    return {
-      hex: tx.toHex(),
-      name: 'RouterBuy',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    return this.wrapTx('RouterBuy', tx);
   }
 
-  buildSellTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
-    if (trade.type !== TradeType.Sell) throw new Error('Not permitted');
+  protected async buildSellTx(
+    trade: Trade,
+    beneficiary: string,
+    slippagePct = 1
+  ): Promise<SubstrateTransaction> {
+    TradeValidator.ensureType(trade, TradeType.Sell);
 
     const { amountIn, amountOut, swaps } = trade;
 
@@ -108,20 +93,26 @@ export class TradeUtils extends PolkadotApiClient {
         assetOut,
         amountIn.toFixed(),
         minAmountOut.toFixed(),
-        this.buildRoute(swaps)
+        TradeRouteBuilder.build(swaps)
       );
     }
 
-    return {
-      hex: tx.toHex(),
-      name: 'RouterSell',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    if (firstSwap.isWithdraw()) {
+      const hasDebt = await this.aaveUtils.hasBorrowPositions(beneficiary);
+      if (hasDebt) {
+        tx = this.dispatchWithExtraGas(tx);
+      }
+    }
+
+    return this.wrapTx('RouterSell', tx);
   }
 
-  buildSellAllTx(trade: Trade, slippagePct = 1): SubstrateTransaction {
-    if (trade.type !== TradeType.Sell) throw new Error('Not permitted');
+  protected async buildSellAllTx(
+    trade: Trade,
+    beneficiary: string,
+    slippagePct = 1
+  ): Promise<SubstrateTransaction> {
+    TradeValidator.ensureType(trade, TradeType.Sell);
 
     const { amountOut, swaps } = trade;
 
@@ -134,97 +125,53 @@ export class TradeUtils extends PolkadotApiClient {
     const assetOut = lastSwap.assetOut;
     const minAmountOut = amountOut.minus(slippage);
 
-    const tx: SubmittableExtrinsic = this.api.tx.router.sellAll(
+    let tx: SubmittableExtrinsic = this.api.tx.router.sellAll(
       assetIn,
       assetOut,
       minAmountOut.toFixed(),
-      this.buildRoute(swaps)
+      TradeRouteBuilder.build(swaps)
     );
 
-    return {
-      hex: tx.toHex(),
-      name: 'RouterSellAll',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    if (firstSwap.isWithdraw()) {
+      const hasDebt = await this.aaveUtils.hasBorrowPositions(beneficiary);
+      if (hasDebt) {
+        tx = this.dispatchWithExtraGas(tx);
+      }
+    }
+
+    return this.wrapTx('RouterSellAll', tx);
   }
 
-  async buildWithdrawAndSellReserveTx(
+  async buildTradeTx(
     trade: Trade,
     beneficiary: string,
     slippagePct = 1
   ): Promise<SubstrateTransaction> {
-    const { amountIn, amountOut, swaps } = trade;
+    const { amountIn, swaps, type } = trade;
 
-    const firstSwap = swaps[0];
-    const lastSwap = swaps[swaps.length - 1];
+    if (type === TradeType.Buy) {
+      return this.buildBuyTx(trade, slippagePct);
+    }
 
-    if (!firstSwap.isWithdraw()) throw new Error('Not permitted');
+    const { assetIn } = swaps[0];
 
-    const aToken = firstSwap.assetIn;
-    const reserve = firstSwap.assetOut;
+    const balance = await this.balanceClient.getBalance(beneficiary, assetIn);
+    const isMax = amountIn.isGreaterThanOrEqualTo(balance.minus(5));
 
-    const [gasPrice, aTokenBalance] = await Promise.all([
-      this.evmClient.getProvider().getGasPrice(),
-      this.balanceClient.getBalance(beneficiary, aToken),
-    ]);
-
-    const isMax = amountIn.isGreaterThanOrEqualTo(
-      aTokenBalance.minus(AAVE_ROUNDING_THRESHOLD)
-    );
-
-    const gasPriceMargin = (gasPrice * 10n) / 100n;
-
-    const to = H160.fromAny(beneficiary);
-    const amount = isMax ? AAVE_UINT_256_MAX : BigInt(amountIn.toFixed());
-    const asset = ERC20.fromAssetId(reserve);
-
-    const withdrawCalldata = encodeFunctionData({
-      abi: AAVE_POOL_ABI,
-      functionName: 'withdraw',
-      args: [asset as `0x${string}`, amount, to as `0x${string}`],
-    });
-
-    const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
-      to,
-      AAVE_POOL_PROXY,
-      withdrawCalldata,
-      0n,
-      AAVE_GAS_LIMIT,
-      gasPrice + gasPriceMargin,
-      gasPrice + gasPriceMargin,
-      null,
-      []
-    );
-
-    const slippage = getFraction(amountOut, slippagePct);
-    const assetIn = reserve;
-    const assetOut = lastSwap.assetOut;
-    const minAmountOut = amountOut.minus(slippage);
-
-    const reserveSellTx: SubmittableExtrinsic = this.api.tx.router.sell(
-      assetIn,
-      assetOut,
-      amountIn.minus(AAVE_ROUNDING_THRESHOLD).toFixed(),
-      minAmountOut.toFixed(),
-      this.buildRoute(swaps.slice(1))
-    );
-
-    const tx = this.api.tx.utility.batchAll([withdrawTx, reserveSellTx]);
-    return {
-      hex: tx.toHex(),
-      name: 'WithdrawAndRouterReserveSell',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    if (isMax) {
+      return this.buildSellAllTx(trade, beneficiary, slippagePct);
+    }
+    return this.buildSellTx(trade, beneficiary, slippagePct);
   }
 
-  buildDcaTx(
+  protected buildDcaTx(
     order: TradeOrder,
     beneficiary: string,
     maxRetries: number,
     slippagePct = 1
   ): SubstrateTransaction {
+    TradeValidator.ensureOrderType(order, TradeOrderType.Dca);
+
     const {
       amountIn,
       assetIn,
@@ -254,20 +201,17 @@ export class TradeUtils extends PolkadotApiClient {
       null
     );
 
-    return {
-      hex: tx.toHex(),
-      name: 'DcaSchedule',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    return this.wrapTx('DcaSchedule', tx);
   }
 
-  buildTwapSellTx(
-    order: TradeTwapOrder,
+  protected buildTwapSellTx(
+    order: TradeOrder,
     beneficiary: string,
     maxRetries: number,
     slippagePct = 1
   ): SubstrateTransaction {
+    TradeValidator.ensureOrderType(order, TradeOrderType.TwapSell);
+
     const {
       amountIn,
       assetIn,
@@ -301,20 +245,17 @@ export class TradeUtils extends PolkadotApiClient {
       null
     );
 
-    return {
-      hex: tx.toHex(),
-      name: 'TwapSellSchedule',
-      get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    return this.wrapTx('DcaSchedule.twapSell', tx);
   }
 
-  buildTwapBuyTx(
-    order: TradeTwapOrder,
+  protected buildTwapBuyTx(
+    order: TradeOrder,
     beneficiary: string,
     maxRetries: number,
     slippagePct = 1
   ): SubstrateTransaction {
+    TradeValidator.ensureOrderType(order, TradeOrderType.TwapBuy);
+
     const {
       amountIn,
       assetIn,
@@ -348,34 +289,49 @@ export class TradeUtils extends PolkadotApiClient {
       null
     );
 
+    return this.wrapTx('DcaSchedule.twapBuy', tx);
+  }
+
+  buildOrderTx(
+    order: TradeOrder,
+    beneficiary: string,
+    maxRetries: number,
+    slippagePct = 1
+  ): SubstrateTransaction {
+    switch (order.type) {
+      case TradeOrderType.Dca:
+        return this.buildDcaTx(order, beneficiary, maxRetries, slippagePct);
+      case TradeOrderType.TwapSell:
+        return this.buildTwapSellTx(
+          order,
+          beneficiary,
+          maxRetries,
+          slippagePct
+        );
+      case TradeOrderType.TwapBuy:
+        return this.buildTwapBuyTx(order, beneficiary, maxRetries, slippagePct);
+      default:
+        throw new Error(`Unsupported TradeOrderType: ${order.type}`);
+    }
+  }
+
+  private wrapTx(name: string, tx: SubmittableExtrinsic): SubstrateTransaction {
     return {
       hex: tx.toHex(),
-      name: 'TwapBuySchedule',
+      name,
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
-    } as SubstrateTransaction;
+    };
   }
 
-  buildRoute(swaps: Swap[]): TradeRoute[] {
-    return swaps.map(({ assetIn, assetOut, pool, poolId }: Hop) => {
-      if (pool === PoolType.Stable) {
-        return {
-          pool: {
-            Stableswap: poolId,
-          } as { Stableswap: string },
-          assetIn,
-          assetOut,
-        };
-      }
-      return {
-        pool,
-        assetIn,
-        assetOut,
-      };
-    });
+  private dispatchWithExtraGas(tx: SubmittableExtrinsic): SubmittableExtrinsic {
+    return this.api.tx.dispatcher['dispatchWithExtraGas'](
+      tx.inner.toHex(),
+      AAVE_GAS_LIMIT
+    );
   }
 
-  isDirectOmnipoolTrade(swaps: Swap[]): boolean {
+  private isDirectOmnipoolTrade(swaps: Swap[]): boolean {
     return swaps.length === 1 && swaps[0].pool === PoolType.Omni;
   }
 }

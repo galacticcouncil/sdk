@@ -1,51 +1,51 @@
-import { ApiPromise } from '@polkadot/api';
-
-import { memoize1 } from '@thi.ng/memoize';
-
 import {
+  DEFAULT_BLOCK_TIME,
+  DEFAULT_MIN_BUDGET,
   ORDER_MIN_BLOCK_PERIOD,
   TWAP_BLOCK_PERIOD,
   TWAP_MAX_PRICE_IMPACT,
   TWAP_MAX_DURATION,
 } from './const';
-import { TradeDcaOrder, TradeTwapOrder, TradeOrderError } from './types';
+import {
+  TradeDcaOrder,
+  TradeOrder,
+  TradeOrderError,
+  TradeOrderType,
+} from './types';
+import { TradeRouteBuilder } from './utils';
 
 import { TradeRouter } from './TradeRouter';
-import { TradeUtils } from './TradeUtils';
 
-import { PolkadotApiClient, SubstrateTransaction } from '../api';
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber, bnum, toDecimals } from '../utils/bignumber';
 
-export class TradeScheduler extends PolkadotApiClient {
-  readonly router: TradeRouter;
-  readonly utils: TradeUtils;
+export type TradeSchedulerOptions = {
+  blockTime?: number;
+  minBudgetInNative?: BigNumber;
+};
 
-  private memMinOrderBudget = memoize1((_mem: number) => {
-    return this.api.consts.dca.minBudgetInNativeCurrency.toString();
-  });
+export class TradeScheduler {
+  private readonly schedulerOptions: TradeSchedulerOptions;
+  protected readonly router: TradeRouter;
 
-  private memBlockTime = memoize1((_mem: number) => {
-    return this.api.consts.aura.slotDuration.toNumber();
-  });
-
-  constructor(api: ApiPromise, router: TradeRouter) {
-    super(api);
+  constructor(router: TradeRouter, options: TradeSchedulerOptions = {}) {
     this.router = router;
-    this.utils = router.utils;
+    this.schedulerOptions = Object.freeze({
+      blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
+      minBudgetInNative: options.minBudgetInNative ?? DEFAULT_MIN_BUDGET,
+    });
   }
 
   get blockTime(): number {
-    return this.memBlockTime(0);
+    return this.schedulerOptions.blockTime!;
   }
 
   get minOrderBudget(): BigNumber {
-    const budget = this.memMinOrderBudget(0);
-    return bnum(budget);
+    return this.schedulerOptions.minBudgetInNative!;
   }
 
   /**
-   * Build a DCA order
+   * Build a DCA (Dollar Cost Averaging) order
    *
    * @param assetIn - storage key of assetIn
    * @param assetOut - storage key of assetOut
@@ -78,17 +78,15 @@ export class TradeScheduler extends PolkadotApiClient {
 
     const minTradeCount = this.getMinimumTradeCount(amountIn, amountInMin);
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
-    const tradesCount = frequency
+    const tradeCount = frequency
       ? Math.round(duration / frequency)
       : optTradeCount;
 
     const minFreq = Math.ceil(duration / minTradeCount);
     const optFreq = Math.round(duration / optTradeCount);
-    const freq = Math.round(duration / tradesCount);
+    const freq = Math.round(duration / tradeCount);
 
-    const amountInPerTrade = amountIn
-      .dividedBy(tradesCount)
-      .decimalPlaces(0, 1);
+    const amountInPerTrade = amountIn.dividedBy(tradeCount).decimalPlaces(0, 1);
 
     const dca = await this.router.getBestSell(
       assetIn,
@@ -103,49 +101,39 @@ export class TradeScheduler extends PolkadotApiClient {
       errors.push(TradeOrderError.OrderTooSmall);
     }
 
+    const amountOut = dca.amountOut.multipliedBy(tradeCount);
     const tradePeriod = this.toBlockPeriod(freq);
-    const tradeRoute = this.utils.buildRoute(swaps);
+    const tradeFee = dca.tradeFee.multipliedBy(tradeCount);
+    const tradeRoute = TradeRouteBuilder.build(swaps);
 
     const order = {
-      amountIn: amountIn,
       assetIn: assetIn,
       assetOut: assetOut,
       errors: errors,
       frequencyMin: minFreq,
       frequencyOpt: optFreq,
       frequency: freq,
-      tradeAmountIn: dca.amountIn,
-      tradeAmountOut: dca.amountOut,
-      tradeCount: tradesCount,
+      tradeCount: tradeCount,
+      tradeFee: tradeFee,
+      tradeImpactPct: dca.priceImpactPct,
       tradePeriod: tradePeriod,
       tradeRoute: tradeRoute,
-    } as TradeDcaOrder;
-
-    const orderTx = (
-      beneficiary: string,
-      maxRetries: number,
-      slippagePct = 1
-    ): SubstrateTransaction => {
-      return this.utils.buildDcaTx(order, beneficiary, maxRetries, slippagePct);
-    };
+      type: TradeOrderType.Dca,
+    } as Partial<TradeDcaOrder>;
 
     return {
       ...order,
-      toTx: orderTx,
+      amountIn: amountIn,
+      amountOut: amountOut,
+      tradeAmountIn: dca.amountIn,
+      tradeAmountOut: dca.amountOut,
       toHuman() {
         return {
+          ...order,
           amountIn: toDecimals(amountIn, assetInDecimals),
-          assetIn: assetIn,
-          assetOut: assetOut,
-          errors: errors,
-          frequencyMin: minFreq,
-          frequencyOpt: optFreq,
-          frequency: freq,
+          amountOut: toDecimals(amountOut, assetOutDecimals),
           tradeAmountIn: toDecimals(dca.amountIn, assetInDecimals),
           tradeAmountOut: toDecimals(dca.amountOut, assetOutDecimals),
-          tradeCount: tradesCount,
-          tradePeriod: tradePeriod,
-          tradeRoute: tradeRoute,
         };
       },
     } as TradeDcaOrder;
@@ -198,7 +186,7 @@ export class TradeScheduler extends PolkadotApiClient {
    * We aim to achieve price impact 0.1% per single execution
    * with at least 3 trades.
    *
-   * @param priceImpact - price inpact of swap execution (via single trade)
+   * @param priceImpact - price impact of swap execution (single trade)
    * @returns optimal number of trades to execute the order
    */
   private getOptimalTradeCount(priceImpact: number): number {
@@ -207,24 +195,24 @@ export class TradeScheduler extends PolkadotApiClient {
   }
 
   /**
-   * Build a TWAP sell order
+   * Build a TWAP (Time-Weighted Average Price) sell order
    *
-   * @param assetIn - storage key of assetIn
-   * @param assetOut - storage key of assetOut
+   * @param assetIn - assetIn id
+   * @param assetOut - assetOut id
    * @param amountInTotal - order budget
-   * @returns twap trade sell order
+   * @returns twap trade order
    */
   async getTwapSellOrder(
     assetIn: string,
     assetOut: string,
     amountInTotal: string | BigNumber
-  ): Promise<TradeTwapOrder> {
+  ): Promise<TradeOrder> {
     const [amountInMin, sell] = await Promise.all([
       this.getMinimumOrderBudget(assetIn),
       this.router.getBestSell(assetIn, assetOut, amountInTotal),
     ]);
 
-    const { amountIn, swaps, priceImpactPct, type } = sell;
+    const { amountIn, swaps, priceImpactPct } = sell;
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
@@ -256,79 +244,58 @@ export class TradeScheduler extends PolkadotApiClient {
 
     const amountOut = twap.amountOut.multipliedBy(tradeCount);
     const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
-    const tradeRoute = this.utils.buildRoute(swaps);
+    const tradeRoute = TradeRouteBuilder.build(swaps);
 
     const order = {
-      amountIn: amountIn,
-      amountOut: amountOut,
       assetIn: assetIn,
       assetOut: assetOut,
       errors: errors,
-      priceImpactPct: twap.priceImpactPct,
-      tradeAmountIn: twap.amountIn,
-      tradeAmountOut: twap.amountOut,
       tradeCount: tradeCount,
-      tradeFee: tradeFee,
+      tradeImpactPct: twap.priceImpactPct,
       tradePeriod: TWAP_BLOCK_PERIOD,
       tradeRoute: tradeRoute,
-      tradeType: type,
-    } as TradeTwapOrder;
-
-    const orderTx = (
-      beneficiary: string,
-      maxRetries: number,
-      slippagePct = 1
-    ): SubstrateTransaction => {
-      return this.utils.buildTwapSellTx(
-        order,
-        beneficiary,
-        maxRetries,
-        slippagePct
-      );
-    };
+      type: TradeOrderType.TwapSell,
+    } as Partial<TradeOrder>;
 
     return {
       ...order,
-      toTx: orderTx,
+      amountIn: amountIn,
+      amountOut: amountOut,
+      tradeAmountIn: twap.amountIn,
+      tradeAmountOut: twap.amountOut,
+      tradeFee: tradeFee,
       toHuman() {
         return {
+          ...order,
           amountIn: toDecimals(amountIn, assetInDecimals),
           amountOut: toDecimals(amountOut, assetOutDecimals),
-          assetIn: assetIn,
-          assetOut: assetOut,
-          errors: errors,
-          priceImpactPct: twap.priceImpactPct,
           tradeAmountIn: toDecimals(twap.amountIn, assetInDecimals),
           tradeAmountOut: toDecimals(twap.amountOut, assetOutDecimals),
-          tradeCount: tradeCount,
           tradeFee: toDecimals(tradeFee, assetOutDecimals),
-          tradePeriod: TWAP_BLOCK_PERIOD,
-          tradeRoute: tradeRoute,
-          tradeType: type,
         };
       },
-    } as TradeTwapOrder;
+    } as TradeOrder;
   }
 
   /**
-   * Build a TWAP buy order
+   * Build a TWAP (Time-Weighted Average Price) buy order
    *
-   * @param assetIn - storage key of assetIn
-   * @param assetOut - storage key of assetOut
+   * @param assetIn - assetIn id
+   * @param assetOut - assetOut id
    * @param amountInTotal - order budget
-   * @returns twap trade buy order
+   * @returns twap trade order
    */
   async getTwapBuyOrder(
     assetIn: string,
     assetOut: string,
     amountInTotal: string | BigNumber
-  ): Promise<TradeTwapOrder> {
+  ): Promise<TradeOrder> {
     const [amountInMin, buy] = await Promise.all([
       this.getMinimumOrderBudget(assetIn),
       this.router.getBestBuy(assetIn, assetOut, amountInTotal),
     ]);
 
-    const { amountOut, swaps, priceImpactPct, type } = buy;
+    const { amountOut, swaps, priceImpactPct } = buy;
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
@@ -363,58 +330,37 @@ export class TradeScheduler extends PolkadotApiClient {
     }
 
     const tradeFee = twap.tradeFee.multipliedBy(tradeCount);
-    const tradeRoute = this.utils.buildRoute(swaps);
+    const tradeRoute = TradeRouteBuilder.build(swaps);
 
     const order = {
-      amountIn: amountIn,
-      amountOut: amountOut,
       assetIn: assetIn,
       assetOut: assetOut,
       errors: errors,
-      priceImpactPct: twap.priceImpactPct,
-      tradeAmountIn: twap.amountIn,
-      tradeAmountOut: twap.amountOut,
       tradeCount: tradeCount,
-      tradeFee: tradeFee,
+      tradeImpactPct: twap.priceImpactPct,
       tradePeriod: TWAP_BLOCK_PERIOD,
       tradeRoute: tradeRoute,
-      tradeType: type,
-    } as TradeTwapOrder;
-
-    const orderTx = (
-      beneficiary: string,
-      maxRetries: number,
-      slippagePct = 1
-    ): SubstrateTransaction => {
-      return this.utils.buildTwapBuyTx(
-        order,
-        beneficiary,
-        maxRetries,
-        slippagePct
-      );
-    };
+      type: TradeOrderType.TwapBuy,
+    } as Partial<TradeOrder>;
 
     return {
       ...order,
-      toTx: orderTx,
+      amountIn: amountIn,
+      amountOut: amountOut,
+      tradeAmountIn: twap.amountIn,
+      tradeAmountOut: twap.amountOut,
+      tradeFee: tradeFee,
       toHuman() {
         return {
+          ...order,
           amountIn: toDecimals(amountIn, assetInDecimals),
           amountOut: toDecimals(amountOut, assetOutDecimals),
-          assetIn: assetIn,
-          assetOut: assetOut,
-          errors: errors,
-          priceImpactPct: twap.priceImpactPct,
           tradeAmountIn: toDecimals(twap.amountIn, assetInDecimals),
           tradeAmountOut: toDecimals(twap.amountOut, assetOutDecimals),
-          tradeCount: tradeCount,
           tradeFee: toDecimals(tradeFee, assetInDecimals),
-          tradePeriod: TWAP_BLOCK_PERIOD,
-          tradeRoute: tradeRoute,
-          tradeType: type,
         };
       },
-    } as TradeTwapOrder;
+    } as TradeOrder;
   }
 
   /**
@@ -423,8 +369,8 @@ export class TradeScheduler extends PolkadotApiClient {
    * We aim to achieve price impact 0.1% per single execution
    * with max execution time 6 hours.
    *
-   * @param priceImpact - price inpact of swap execution (via single trade)
-   * @returns optimal number of trades to execute the twap order
+   * @param priceImpact - price impact of swap execution (via single trade)
+   * @returns optimal number of trades to execute the order
    */
   private getTwapTradeCount(priceImpact: number): number {
     const optTradeCount = this.getOptimalTradeCount(priceImpact);

@@ -5,22 +5,22 @@ import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { poolService, tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, ctx } = createSdkContext(apiPromise);
 
     await Promise.all([
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
+      api.router.getPools(),
+      api.router.getPools(),
+      api.router.getPools(),
+      api.router.getPools(),
+      api.router.getPools(),
+      api.router.getPools(),
     ]);
 
-    api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
+    apiPromise.rpc.chain.subscribeNewHeads(async (lastHeader) => {
       const block = lastHeader.number.toString();
       console.log('===============', block, '===============');
-      tradeRouter.getPools().then((p) => {
+      api.router.getPools().then((p) => {
         p.forEach((o) => {
           o.tokens.forEach((t) => {
             if (t.id === '1') {
@@ -34,12 +34,12 @@ class GetOnBlockPoolChangeExample extends PolkadotExecutor {
 
     setTimeout(() => {
       console.log('Sync reg 1 ');
-      poolService.syncRegistry();
+      ctx.pool.syncRegistry();
     }, 45 * 1000);
 
     setTimeout(() => {
       console.log('Sync reg 2');
-      poolService.syncRegistry();
+      ctx.pool.syncRegistry();
     }, 90 * 1000);
 
     return [];

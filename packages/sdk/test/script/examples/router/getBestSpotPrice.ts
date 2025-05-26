@@ -32,11 +32,11 @@ const external = [
 ];
 
 class GetBestSpotPriceExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { poolService, tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, ctx } = createSdkContext(apiPromise);
 
-    await poolService.syncRegistry(external);
-    return tradeRouter.getBestSpotPrice('5', '0');
+    await ctx.pool.syncRegistry(external);
+    return api.router.getBestSpotPrice('5', '0');
   }
 }
 

@@ -8,11 +8,11 @@ import externalDegen from '../../config/external.degen.json';
 import external from '../../config/external.degen.json';
 
 class GetAllAssetsExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { poolService, tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, ctx } = createSdkContext(apiPromise);
 
-    await poolService.syncRegistry(externalDegen);
-    return tradeRouter.getAllAssets();
+    await ctx.pool.syncRegistry(externalDegen);
+    return api.router.getAllAssets();
   }
 }
 

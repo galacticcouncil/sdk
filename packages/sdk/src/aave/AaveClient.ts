@@ -10,8 +10,8 @@ import { EvmClient } from '../evm';
 export class AaveClient {
   private evmClient: EvmClient;
 
-  constructor() {
-    this.evmClient = new EvmClient();
+  constructor(evmClient?: EvmClient) {
+    this.evmClient = evmClient ?? new EvmClient();
   }
 
   async getReservesData() {

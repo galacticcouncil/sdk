@@ -3,19 +3,15 @@ import { ApiPromise } from '@polkadot/api';
 import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
+import { BENEFICIARY, DAY_MS, MAX_RETRIES } from '../../const';
 import { ApiUrl } from '../../types';
 
-const BENEFICIARY = '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh';
-const MAX_RETRIES = 3;
-
-const DAY_PERIOD = 24 * 60 * 60 * 1000;
-
 class GetDcaOrder extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { tradeScheduler } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, tx } = createSdkContext(apiPromise);
 
-    const order = await tradeScheduler.getDcaOrder('10', '0', '10', DAY_PERIOD);
-    const orderTx = order.toTx(BENEFICIARY, MAX_RETRIES);
+    const order = await api.scheduler.getDcaOrder('10', '0', '10', DAY_MS);
+    const orderTx = tx.buildOrderTx(order, BENEFICIARY, MAX_RETRIES);
     console.log('Transaction hash: ' + orderTx.hex);
 
     const { executionResult } = await orderTx.dryRun(BENEFICIARY);

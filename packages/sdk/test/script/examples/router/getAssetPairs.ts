@@ -5,10 +5,10 @@ import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 class GetAssetPairsExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api } = createSdkContext(apiPromise);
 
-    return tradeRouter.getAssetPairs('1');
+    return api.router.getAssetPairs('1');
   }
 }
 

@@ -2,21 +2,22 @@ import { ApiPromise } from '@polkadot/api';
 import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
+import { BENEFICIARY } from '../../const';
 import { ApiUrl } from '../../types';
 
 class GetSellExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, tx } = createSdkContext(apiPromise);
 
-    const paths = await tradeRouter.getAllPaths('0', '5');
+    const paths = await api.router.getAllPaths('0', '5');
     const sortByHopsDesc = paths.sort((a, b) => {
       const swapsA = a.length;
       const swapsB = b.length;
       return swapsA < swapsB ? 1 : -1;
     });
 
-    const trade = await tradeRouter.getSell('0', '5', 1, sortByHopsDesc[0]);
-    const tradeTx = trade.toTx();
+    const trade = await api.router.getSell('0', '5', '1', sortByHopsDesc[0]);
+    const tradeTx = await tx.buildTradeTx(trade, BENEFICIARY);
     console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }
