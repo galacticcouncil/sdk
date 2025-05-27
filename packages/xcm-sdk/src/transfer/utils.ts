@@ -1,4 +1,9 @@
-import { AnyChain, AssetAmount, EvmParachain } from '@galacticcouncil/xcm-core';
+import {
+  big,
+  AnyChain,
+  AssetAmount,
+  EvmParachain,
+} from '@galacticcouncil/xcm-core';
 
 import Big from 'big.js';
 
@@ -88,4 +93,15 @@ export async function formatEvmAddress(
     return evmParachain.getDerivatedAddress(address);
   }
   return address;
+}
+
+/**
+ * Format amount if defined
+ *
+ * @param decimals - fee asset decimals
+ * @param amount - fee amount
+ * @returns formatted amount or 0
+ */
+export function formatAmount(decimals: number, amount?: number): bigint {
+  return amount ? big.toBigInt(amount, decimals) : 0n;
 }

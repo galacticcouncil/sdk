@@ -162,14 +162,18 @@ export class SubstrateService {
   ): Promise<bigint> {
     if (this.chain.usesDeliveryFee) {
       const acc = this.estimateDeliveryFeeWith(account, config);
-      const { executionResult, emittedEvents } = await this.dryRun(acc, config);
-      if (executionResult.isOk) {
-        return getDeliveryFeeFromDryRun(emittedEvents);
-      } else {
-        const error = getErrorFromDryRun(this.api, executionResult.asErr);
-        console.warn(`Can't estimate delivery fee. Reason:\n ${error}`);
-      }
+
       try {
+        const { executionResult, emittedEvents } = await this.dryRun(
+          acc,
+          config
+        );
+        if (executionResult.isOk) {
+          return getDeliveryFeeFromDryRun(emittedEvents);
+        } else {
+          const error = getErrorFromDryRun(this.api, executionResult.asErr);
+          console.warn(`Can't estimate delivery fee. Reason:\n ${error}`);
+        }
       } catch (e) {}
     }
     return 0n;

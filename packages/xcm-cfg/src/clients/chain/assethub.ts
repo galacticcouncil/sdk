@@ -81,6 +81,10 @@ export class AssethubClient extends BaseClient {
   }
 
   async calculateDeliveryFee(xcm: any, destParachainId: number) {
+    return 360_000_000n;
+
+    // TEMP fix
+
     const api = await this.chain.api;
     const result = await api.call.xcmPaymentApi.queryDeliveryFees<
       Result<XcmVersionedAssets, any>
