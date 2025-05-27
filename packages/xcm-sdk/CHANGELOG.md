@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 9.2.2
+
+### Patch Changes
+
+- Temp fix broken relay / hub dryRun2 / xcmPaymentApi
+
 ## 9.2.1
 
 ### Patch Changes
