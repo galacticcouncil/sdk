@@ -10,7 +10,7 @@ import {
 } from '../../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
 
-import { toParaStablesTemplate, xcmDeliveryFee } from './templates';
+import { toParaStablesTemplate, extraFee } from './templates';
 
 const toKusama = new AssetRoute({
   source: {
@@ -19,7 +19,7 @@ const toKusama = new AssetRoute({
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
+      extra: extraFee,
     },
     destinationFee: {
       balance: BalanceBuilder().substrate().system().account(),
@@ -43,7 +43,7 @@ const toPolkadotAssethub = new AssetRoute({
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
+      extra: extraFee,
     },
     destinationFee: {
       balance: BalanceBuilder().substrate().system().account(),
