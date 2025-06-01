@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 8.0.0
+
+### Major Changes
+
+- update
+
 ## 7.2.0
 
 ### Minor Changes

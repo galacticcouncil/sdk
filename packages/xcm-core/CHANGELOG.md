@@ -1,5 +1,17 @@
 # @galacticcouncil/xcm-core
 
+## 8.0.0
+
+### Major Changes
+
+- Upgrade pjs to 16.x 
+- Update SubstrateApis socket init config
+
+### Patch Changes
+
+- 09497fe: Support esm server side
+- 92b3b99: Rollback V5 augment fix
+
 ## 7.1.0
 
 ### Minor Changes

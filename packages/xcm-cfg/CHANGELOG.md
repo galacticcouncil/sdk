@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.0.0
+
+### Major Changes
+
+- Enable relay / hub dryRun2 / xcmPaymentApi
+- Upgrade to pjs 16.x @see patch
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.0.0
+  - @galacticcouncil/sdk@8.0.0
+
 ## 9.2.2
 
 ### Patch Changes
