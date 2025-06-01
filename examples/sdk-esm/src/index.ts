@@ -3,7 +3,17 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { degen } from './external';
 
-const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const ws = 'wss://hydration-rpc.n.dwellir.com';
+
+const wsProvider = new WsProvider(
+  ws,
+  2_500, // autoConnect (2.5 seconds)
+  {}, // headers
+  60_000, // request timeout  (60 seconds)
+  102400, // cache capacity
+  10 * 60_000 // cache TTL (10 minutes)
+);
+
 const api = await ApiPromise.create({ provider: wsProvider });
 
 // Initialize Trade Router
@@ -17,6 +27,6 @@ const result = await tradeRouter.getAllAssets();
 console.log(result);
 
 setTimeout(() => {
-  poolService.unsubscribe();
+  poolService.destroy();
   console.log('Unsubscribed');
 }, 60000);

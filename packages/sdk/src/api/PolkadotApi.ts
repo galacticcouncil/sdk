@@ -12,11 +12,11 @@ export abstract class PolkadotApiClient {
     this.api = api;
   }
 
-  public get chainDecimals() {
+  get chainDecimals() {
     return this.api.registry.chainDecimals[0];
   }
 
-  public get chainToken() {
+  get chainToken() {
     return this.api.registry.chainTokens[0];
   }
 

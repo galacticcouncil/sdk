@@ -29,6 +29,32 @@ For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ## Usage
 
+⚠️ Important: In the 8.x release, we upgraded `@polkadot/api` to version **16.x**.
+
+> 🐛 **Note:** A **TTL-based LRU cache** was introduced starting from
+`@polkadot/api` **v14.1.1**, which can break router behavior if not
+addressed (eviction issue).
+
+- 📄 [Release notes – v14.1.1](https://github.com/polkadot-js/api/releases/tag/v14.1.1)  
+- 🐞 [GitHub Issue #6154](https://github.com/polkadot-js/api/issues/6154)
+- 🐞 [GitHub Issue #6122](https://github.com/polkadot-js/api/issues/6122)
+
+To ensure the router works as expected, **either**:
+
+1. Use a custom `WsProvider` configuration with cache TTL at least 10 minutes
+2. Use a custom `WsProvider` configuration with cache TTL disabled (null)
+
+```typescript
+const wsProvider = new WsProvider(
+  ws,
+  2_500, // autoConnect (2.5 seconds)
+  {}, // headers
+  60_000, // request timeout  (60 seconds)
+  102400, // cache capacity
+  10 * 60_000 // cache TTL (10 minutes)
+);
+```
+
 ### PoolService
 
 Build and subscribe to the given AMM types, supplying data for the Router API.
@@ -52,7 +78,8 @@ Initialize pool context and sync registry.
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
-const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const ws = 'wss://hydration-rpc.n.dwellir.com';
+const wsProvider = new WsProvider(ws, 2_500, {}, 60_000, 102400, 10 * 60_000);
 const api = await ApiPromise.create({ provider: wsProvider });
 
 const poolService = new PoolService(api);
@@ -86,7 +113,8 @@ List all tradable assets available in the current pool context.
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
-const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const ws = 'wss://hydration-rpc.n.dwellir.com';
+const wsProvider = new WsProvider(ws, 2_500, {}, 60_000, 102400, 10 * 60_000);
 const api = await ApiPromise.create({ provider: wsProvider });
 
 const poolService = new PoolService(api);
@@ -125,7 +153,8 @@ Calculate sell of 1 DOT for HDX & build tx with 5% slippage (default to 1% if no
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { TradeRouter, PoolService, PoolType } from '@galacticcouncil/sdk';
 
-const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+const ws = 'wss://hydration-rpc.n.dwellir.com';
+const wsProvider = new WsProvider(ws, 2_500, {}, 60_000, 102400, 10 * 60_000);
 const api = await ApiPromise.create({ provider: wsProvider });
 
 const poolService = new PoolService(api);

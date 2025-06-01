@@ -19,7 +19,7 @@ export abstract class PoolClient extends BalanceClient {
 
   private memPoolsCache = new TLRUCache<number, Promise<PoolBase[]>>(null, {
     maxlen: 1,
-    ttl: 60 * 60 * 1000,
+    ttl: 1 * 60 * 60 * 1000,
     release: (mem) => {
       if (this.mem > mem) {
         this.log(this.getPoolType(), `mem ${mem} released at`, new Date());
