@@ -1,7 +1,6 @@
 import { defineChain, Chain } from 'viem';
 
 const rpcHttpList = [
-  'https://rpc.hydradx.cloud',
   'https://hydration-rpc.n.dwellir.com',
   'https://hydration.dotters.network',
   'https://rpc.helikon.io/hydradx',
@@ -15,7 +14,6 @@ const rpcHttpList = [
 ];
 
 const rpcWebsocketList = [
-  'wss://rpc.hydradx.cloud',
   'wss://hydration-rpc.n.dwellir.com',
   'wss://hydration.dotters.network',
   'wss://rpc.helikon.io/hydradx',
