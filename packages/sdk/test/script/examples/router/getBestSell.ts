@@ -1,13 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import {
-  CachingPoolService,
-  createSdkContext,
-  PoolType,
-  TradeRouter,
-  TradeUtils,
-} from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
+import { BENEFICIARY } from '../../const';
 import { ApiUrl } from '../../types';
 
 const external = [
@@ -22,14 +17,19 @@ const external = [
 ];
 
 class GetBestSellExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { poolService, tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, ctx, tx } = createSdkContext(apiPromise);
 
-    await poolService.syncRegistry(external);
+    await ctx.pool.syncRegistry(external);
 
-    const trade = await tradeRouter.getBestSell('5', '10', '10');
-    const tradeTx = trade.toTx();
+    const trade = await api.router.getBestSell('1005', '15', '550');
+    const tradeTx = await tx.buildTradeTx(trade, BENEFICIARY);
     console.log('Transaction hash: ' + tradeTx.hex);
+
+    console.log(JSON.stringify(tradeTx.get().toHuman(), null, 2));
+
+    const { executionResult } = await tradeTx.dryRun(BENEFICIARY);
+    console.log('Transaction status: ' + executionResult.isOk);
     return trade;
   }
 }

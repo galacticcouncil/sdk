@@ -30,6 +30,10 @@ export class EvmClient {
     return this.chain.nativeCurrency.decimals;
   }
 
+  async getGasPrice(): Promise<bigint> {
+    return this.getProvider().getGasPrice();
+  }
+
   getProvider(): PublicClient {
     return createPublicClient({
       chain: this.chain,

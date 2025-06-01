@@ -1,4 +1,3 @@
-import { SubstrateTransaction } from '../api';
 import { Hop, PoolBuy, PoolError, PoolSell, PoolType } from '../pool';
 import type { BigNumber } from '../utils/bignumber';
 
@@ -24,6 +23,17 @@ export type Swap = Hop &
 export type SellSwap = Swap & PoolSell;
 export type BuySwap = Swap & PoolBuy;
 
+export interface Trade extends Humanizer {
+  type: TradeType;
+  amountIn: BigNumber;
+  amountOut: BigNumber;
+  spotPrice: BigNumber;
+  tradeFee: BigNumber;
+  tradeFeePct: number;
+  priceImpactPct: number;
+  swaps: Swap[];
+}
+
 export enum TradeType {
   Buy = 'Buy',
   Sell = 'Sell',
@@ -35,50 +45,36 @@ export type TradeRoute = {
   assetOut: string;
 };
 
-export interface Trade extends Humanizer {
-  type: TradeType;
-  amountIn: BigNumber;
-  amountOut: BigNumber;
-  spotPrice: BigNumber;
-  tradeFee: BigNumber;
-  tradeFeePct: number;
-  priceImpactPct: number;
-  swaps: Swap[];
-  toTx(slippagePct?: number): SubstrateTransaction;
-}
-
 export interface TradeOrder extends Humanizer {
   amountIn: BigNumber;
+  amountOut: BigNumber;
   assetIn: string;
   assetOut: string;
   errors: TradeOrderError[];
   tradeAmountIn: BigNumber;
   tradeAmountOut: BigNumber;
   tradeCount: number;
+  tradeFee: BigNumber;
+  tradeImpactPct: number;
   tradePeriod: number;
   tradeRoute: TradeRoute[];
-  toTx(
-    beneficiary: string,
-    maxRetries: number,
-    slippagePct?: number
-  ): SubstrateTransaction;
+  type: TradeOrderType;
 }
 
-export interface TradeDcaOrder extends TradeOrder {
-  frequency: number;
-  frequencyMin: number;
-  frequencyOpt: number;
-}
-
-export interface TradeTwapOrder extends TradeOrder {
-  amountOut: BigNumber;
-  priceImpactPct: number;
-  tradeFee: BigNumber;
-  tradeType: TradeType;
+export enum TradeOrderType {
+  Dca = 'Dca',
+  TwapSell = 'TwapSell',
+  TwapBuy = 'TwapBuy',
 }
 
 export enum TradeOrderError {
   OrderTooSmall = 'OrderTooSmall',
   OrderTooBig = 'OrderTooBig',
   OrderImpactTooBig = 'OrderImpactTooBig',
+}
+
+export interface TradeDcaOrder extends TradeOrder {
+  frequency: number;
+  frequencyMin: number;
+  frequencyOpt: number;
 }

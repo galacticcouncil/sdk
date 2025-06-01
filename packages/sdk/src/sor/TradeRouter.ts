@@ -1,8 +1,7 @@
-import { Router, RouterOptions } from './Router';
-import { TradeUtils } from './TradeUtils';
+import { Router } from './Router';
 
 import { RouteNotFound } from '../errors';
-import { Hop, IPoolService, Pool, PoolFees, PoolType } from '../pool';
+import { Hop, Pool, PoolFees, PoolType } from '../pool';
 import { Amount } from '../types';
 import { BigNumber, bnum, scale, toDecimals } from '../utils/bignumber';
 import { FeeUtils } from '../utils/fee';
@@ -15,17 +14,6 @@ import {
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
-  readonly utils: TradeUtils;
-
-  constructor(
-    poolService: IPoolService,
-    tradeUtils: TradeUtils,
-    routerOptions?: RouterOptions
-  ) {
-    super(poolService, routerOptions);
-    this.utils = tradeUtils;
-  }
-
   /**
    * Check whether trade is direct or not
    *
@@ -169,7 +157,6 @@ export class TradeRouter extends Router {
 
     const bestRoutePriceImpact = calculateDiffToRef(delta0Y, swapAmount);
 
-    const utilsCtx = this.utils;
     return {
       type: TradeType.Sell,
       amountIn: firstSwap.amountIn,
@@ -180,9 +167,6 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact.toNumber(),
       swaps: swaps,
-      toTx(slippagePct = 1) {
-        return utilsCtx.buildSellTx(this, slippagePct);
-      },
       toHuman() {
         return {
           type: TradeType.Sell,
@@ -277,8 +261,8 @@ export class TradeRouter extends Router {
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
         amountIn: aIn,
-        calculatedOut: calculatedOut,
         amountOut: amountOut,
+        calculatedOut: calculatedOut,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -298,8 +282,8 @@ export class TradeRouter extends Router {
           return {
             ...hop,
             amountIn: toDecimals(aIn, poolPair.decimalsIn),
-            calculatedOut: toDecimals(calculatedOut, poolPair.decimalsOut),
             amountOut: toDecimals(amountOut, poolPair.decimalsOut),
+            calculatedOut: toDecimals(calculatedOut, poolPair.decimalsOut),
             spotPrice: toDecimals(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
@@ -510,7 +494,6 @@ export class TradeRouter extends Router {
       bestRoutePriceImpact = calculateDiffToRef(swapAmount, delta0X).toNumber();
     }
 
-    const utilsCtx = this.utils;
     return {
       type: TradeType.Buy,
       amountOut: firstSwap.amountOut,
@@ -521,9 +504,6 @@ export class TradeRouter extends Router {
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: bestRoutePriceImpact,
       swaps: swaps,
-      toTx(slippagePct = 1) {
-        return utilsCtx.buildBuyTx(this, slippagePct);
-      },
       toHuman() {
         return {
           type: TradeType.Buy,
@@ -630,9 +610,9 @@ export class TradeRouter extends Router {
         ...hop,
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
+        amountIn: amountIn,
         amountOut: aOut,
         calculatedIn: calculatedIn,
-        amountIn: amountIn,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -651,9 +631,9 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
+            amountIn: toDecimals(amountIn, poolPair.decimalsIn),
             amountOut: toDecimals(aOut, poolPair.decimalsOut),
             calculatedIn: toDecimals(calculatedIn, poolPair.decimalsIn),
-            amountIn: toDecimals(amountIn, poolPair.decimalsIn),
             spotPrice: toDecimals(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,

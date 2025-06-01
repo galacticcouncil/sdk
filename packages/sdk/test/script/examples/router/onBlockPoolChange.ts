@@ -7,34 +7,18 @@ import { ApiUrl } from '../../types';
 import { appendFileSync } from 'fs';
 
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const { poolService, tradeRouter } = createSdkContext(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api } = createSdkContext(apiPromise);
 
-<<<<<<< HEAD
-    const header = await api.rpc.chain.getHeader();
+    const header = await apiPromise.rpc.chain.getHeader();
     const line = '\nCurrent block number:' + header.number.toString();
     appendFileSync('./test.txt', line, 'utf8');
 
-    await api.query.omnipool.assets.entries();
+    await apiPromise.query.omnipool.assets.entries();
 
-    api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
+    apiPromise.rpc.chain.subscribeNewHeads(async (lastHeader) => {
       const block = lastHeader.number.toString();
-      router.getPools().then((p) => {
-=======
-    await Promise.all([
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-      tradeRouter.getPools(),
-    ]);
-
-    api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
-      const block = lastHeader.number.toString();
-      console.log('===============', block, '===============');
-      tradeRouter.getPools().then((p) => {
->>>>>>> ea1c0517 (scheduler: sdk context factory)
+      api.router.getPools().then((p) => {
         p.forEach((o) => {
           console.log('Pool: ' + o.address);
           o.tokens.forEach((t) => {

@@ -5,6 +5,7 @@ import { H160 } from '../utils/h160';
 import { ERC20 } from '../utils/erc20';
 import { bnum, BigNumber, ZERO, scale } from '../utils/bignumber';
 
+import { EvmClient } from '../evm';
 import { Amount } from '../types';
 
 const RAY = bnum('1e27');
@@ -13,8 +14,9 @@ const TARGET_WITHDRAW_HF = bnum('1.01');
 export class AaveUtils {
   private client: AaveClient;
 
-  constructor() {
-    this.client = new AaveClient();
+  constructor(evmClient?: EvmClient) {
+    const evm = evmClient ?? new EvmClient();
+    this.client = new AaveClient(evm);
   }
 
   async loadAaveCtx(user: string): Promise<AaveCtx> {
@@ -95,6 +97,19 @@ export class AaveUtils {
       totalDebt: totalDebt,
       reserves: reserves,
     };
+  }
+
+  /**
+   * Check if user has active borrow positions
+   *
+   * @param user - user address
+   * @returns true if user has debt, otherwise false
+   */
+  async hasBorrowPositions(user: string): Promise<boolean> {
+    const to = H160.fromAny(user);
+    const userData = await this.client.getUserAccountData(to);
+    const [_totalCollateralBase, totalDebtBase] = userData;
+    return totalDebtBase > 0n;
   }
 
   /**

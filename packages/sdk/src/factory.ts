@@ -1,33 +1,65 @@
 import { ApiPromise } from '@polkadot/api';
 
-import { AssetClient, BalanceClient } from './client';
+import { AaveUtils } from './aave';
+import { AssetClient, BalanceClient, ChainParams } from './client';
+import { EvmClient } from './evm';
 import { CachingPoolService, PoolService } from './pool';
-import { TradeRouter, TradeScheduler, TradeUtils } from './sor';
+import { TradeRouter, TradeScheduler, TxBuilder } from './sor';
 
 export type SdkCtx = {
-  assetClient: AssetClient;
-  balanceClient: BalanceClient;
-  poolService: PoolService;
-  tradeRouter: TradeRouter;
-  tradeScheduler: TradeScheduler;
-  tradeUtils: TradeUtils;
+  api: {
+    aave: AaveUtils;
+    router: TradeRouter;
+    scheduler: TradeScheduler;
+  };
+  client: {
+    asset: AssetClient;
+    balance: BalanceClient;
+    evm: EvmClient;
+  };
+  ctx: {
+    pool: PoolService;
+  };
+  tx: TxBuilder;
+  destroy: () => void;
 };
 
-export function createSdkContext(api: ApiPromise): SdkCtx {
-  const assetClient = new AssetClient(api);
-  const balanceClient = new BalanceClient(api);
+export function createSdkContext(
+  api: ApiPromise,
+  evmClient?: EvmClient
+): SdkCtx {
+  const evm = evmClient ?? new EvmClient();
 
-  const poolService = new CachingPoolService(api);
-  const tradeUtils = new TradeUtils(api);
-  const tradeRouter = new TradeRouter(poolService, tradeUtils);
-  const tradeScheduler = new TradeScheduler(api, tradeRouter);
+  const poolCtx = new CachingPoolService(api);
+
+  const params = new ChainParams(api);
+
+  const aave = new AaveUtils(evm);
+  const router = new TradeRouter(poolCtx);
+  const scheduler = new TradeScheduler(router, {
+    blockTime: params.blockTime,
+    minBudgetInNative: params.minOrderBudget,
+  });
+
+  const tx = new TxBuilder(api, evm);
 
   return {
-    assetClient,
-    balanceClient,
-    poolService,
-    tradeRouter,
-    tradeScheduler,
-    tradeUtils,
+    api: {
+      aave,
+      router,
+      scheduler,
+    },
+    client: {
+      asset: new AssetClient(api),
+      balance: new BalanceClient(api),
+      evm: evm,
+    },
+    ctx: {
+      pool: poolCtx,
+    },
+    tx,
+    destroy: () => {
+      poolCtx.destroy();
+    },
   } as SdkCtx;
 }
