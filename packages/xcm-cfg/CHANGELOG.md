@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.0.1
+
+### Patch Changes
+
+- Drop wss://rpc.hydradx.cloud from rpc list
+
 ## 10.0.0
 
 ### Major Changes

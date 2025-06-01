@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 8.0.1
+
+### Patch Changes
+
+- Drop wss://rpc.hydradx.cloud from rpc list
+
 ## 8.0.0
 
 ### Major Changes
@@ -7,10 +13,10 @@
 ⚠️ Important: In the 8.x release, we upgraded `@polkadot/api` to version **16.x**.
 
 > 🐛 **Note:** A **TTL-based LRU cache** was introduced starting from
-`@polkadot/api` **v14.1.1**, which can break router behavior if not
-addressed (eviction issue).
+> `@polkadot/api` **v14.1.1**, which can break router behavior if not
+> addressed (eviction issue).
 
-- 📄 [Release notes – v14.1.1](https://github.com/polkadot-js/api/releases/tag/v14.1.1)  
+- 📄 [Release notes – v14.1.1](https://github.com/polkadot-js/api/releases/tag/v14.1.1)
 - 🐞 [GitHub Issue #6154](https://github.com/polkadot-js/api/issues/6154)
 - 🐞 [GitHub Issue #6122](https://github.com/polkadot-js/api/issues/6122)
 
