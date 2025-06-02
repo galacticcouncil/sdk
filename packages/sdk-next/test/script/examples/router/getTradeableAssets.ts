@@ -1,24 +1,21 @@
 import { PolkadotClient } from 'polkadot-api';
 
+import { createSdkContext } from '../../../../src';
+
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool, sor } from '../../../../src';
-
 class GetTradeableAssets extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const ctx = new pool.PoolContextProvider(client)
-      .withOmnipool()
-      .withStableswap()
-      .withXyk();
+    const sdk = await createSdkContext(client);
 
-    const router = new sor.Router(ctx);
+    const { api } = sdk;
 
-    const tradeableAssets = await router.getTradeableAssets();
+    const tradeableAssets = await api.router.getTradeableAssets();
     console.log(tradeableAssets);
 
     return () => {
-      ctx.destroy();
+      sdk.destroy();
       client.destroy();
     };
   }

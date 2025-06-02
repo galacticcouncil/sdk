@@ -1,0 +1,73 @@
+import { PolkadotClient } from 'polkadot-api';
+
+import { AaveUtils } from './aave';
+import { AssetClient, BalanceClient, ChainParams } from './client';
+import { EvmClient } from './evm';
+import { PoolContextProvider } from './pool';
+import { TradeRouter, TradeScheduler, TxBuilder } from './sor';
+
+export type SdkCtx = {
+  api: {
+    aave: AaveUtils;
+    router: TradeRouter;
+    scheduler: TradeScheduler;
+  };
+  client: {
+    asset: AssetClient;
+    balance: BalanceClient;
+    evm: EvmClient;
+  };
+  ctx: {
+    pool: PoolContextProvider;
+  };
+  tx: TxBuilder;
+  destroy: () => void;
+};
+
+export async function createSdkContext(
+  client: PolkadotClient,
+  evmClient?: EvmClient
+): Promise<SdkCtx> {
+  const evm = evmClient ?? new EvmClient();
+
+  const poolCtx = new PoolContextProvider(client)
+    .withAave()
+    .withOmnipool()
+    .withStableswap()
+    .withXyk();
+
+  const params = new ChainParams(client);
+  const [blockTime, minOrderBudget] = await Promise.all([
+    params.getBlockTime(),
+    params.getMinOrderBudget(),
+  ]);
+
+  const aave = new AaveUtils(evm);
+  const router = new TradeRouter(poolCtx);
+  const scheduler = new TradeScheduler(router, {
+    blockTime: blockTime,
+    minBudgetInNative: minOrderBudget,
+  });
+
+  const tx = new TxBuilder(client, evm);
+
+  return {
+    api: {
+      aave,
+      router,
+      scheduler,
+    },
+    client: {
+      asset: new AssetClient(client),
+      balance: new BalanceClient(client),
+      evm: evm,
+    },
+    ctx: {
+      pool: poolCtx,
+    },
+    tx,
+    destroy: () => {
+      poolCtx.destroy();
+    },
+  } as SdkCtx;
+}
