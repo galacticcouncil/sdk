@@ -94,8 +94,7 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(susde, susde),
   toHydrationViaSnowbridgeTemplate(tbtc, tbtc),
   toHydrationViaSnowbridgeTemplate(lbtc, lbtc),
-  // Waiting for Snowbridge V2
-  //toHydrationViaSnowbridgeTemplate(ldo, ldo),
+  toHydrationViaSnowbridgeTemplate(ldo, ldo),
   toHydrationViaSnowbridgeTemplate(link, link),
   toHydrationViaSnowbridgeTemplate(sky, sky),
   toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
