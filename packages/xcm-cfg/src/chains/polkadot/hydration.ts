@@ -55,6 +55,7 @@ import {
   ztg,
   susde,
   susds,
+  susds_mwh,
   sol,
   sky,
   tbtc,
@@ -825,6 +826,31 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: susds_mwh,
+      decimals: 18,
+      id: 1000745,
+      min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xda430218862d3db25de9f61458645dde49a9e9c1',
               },
             },
           ],
