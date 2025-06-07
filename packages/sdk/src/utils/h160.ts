@@ -5,13 +5,14 @@ import { Buffer } from 'buffer';
 
 import { HYDRADX_SS58_PREFIX } from '../consts';
 
-const prefixBytes = Buffer.from('ETH\0');
+const ETH_PREFIX = 'ETH\0';
 
 export function isEvmAccount(address: string): boolean {
   if (!address) return false;
 
   try {
     const pub = decodeAddress(address, true);
+    const prefixBytes = Buffer.from(ETH_PREFIX);
     return Buffer.from(pub.subarray(0, prefixBytes.length)).equals(prefixBytes);
   } catch {
     return false;
@@ -36,13 +37,12 @@ export function isSs58Address(address: string): boolean {
 }
 
 export class H160 {
-  static prefixBytes = Buffer.from('ETH\0');
-
   static toAccount = (address: string) => {
     const addressBytes = Buffer.from(address.slice(2), 'hex');
+    const prefixBytes = Buffer.from(ETH_PREFIX);
     return encodeAddress(
       new Uint8Array(
-        Buffer.concat([H160.prefixBytes, addressBytes, Buffer.alloc(8)])
+        Buffer.concat([prefixBytes, addressBytes, Buffer.alloc(8)])
       ),
       HYDRADX_SS58_PREFIX
     );
@@ -50,7 +50,8 @@ export class H160 {
 
   static fromAccount = (address: string) => {
     const decodedBytes = decodeAddress(address);
-    const addressBytes = decodedBytes.slice(H160.prefixBytes.length, -8);
+    const prefixBytes = Buffer.from(ETH_PREFIX);
+    const addressBytes = decodedBytes.slice(prefixBytes.length, -8);
     return '0x' + Buffer.from(addressBytes).toString('hex');
   };
 

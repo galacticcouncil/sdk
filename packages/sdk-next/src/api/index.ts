@@ -1,2 +1,2 @@
-export * from './client';
 export * from './Papi';
+export * from './client';

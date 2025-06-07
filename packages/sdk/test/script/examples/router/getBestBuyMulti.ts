@@ -1,26 +1,18 @@
 import { ApiPromise } from '@polkadot/api';
-import {
-  PoolService,
-  PoolType,
-  TradeRouter,
-  TradeUtils,
-} from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
+import { BENEFICIARY } from '../../const';
 import { ApiUrl } from '../../types';
 
 class GetBestBuyMultiExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const txUtils = new TradeUtils(api);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api, tx } = createSdkContext(apiPromise);
 
-    const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Omni, PoolType.Stable],
-    });
+    const trade = await api.router.getBestBuy('0', '18', '10');
+    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
 
-    const trade = await router.getBestBuy('0', '18', '10');
-    const transaction = txUtils.buildBuyTx(trade);
-    console.log('Transaction hash: ' + transaction.hex);
+    console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }
 }

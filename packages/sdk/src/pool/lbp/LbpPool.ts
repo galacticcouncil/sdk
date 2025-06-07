@@ -11,7 +11,7 @@ import {
   SellCtx,
 } from '../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toPct } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import { LbpMath } from './LbpMath';
 
@@ -128,7 +128,7 @@ export class LbpPool implements Pool {
 
     if (feeAsset === poolPair.assetOut) {
       const fee = this.calculateTradeFee(amountOut, fees);
-      const feePct = toPct(
+      const feePct = FeeUtils.toPct(
         this.repayFeeApply ? fees.repayFee : fees.exchangeFee
       );
       const amountOutPlusFee = amountOut.plus(fee);
@@ -206,7 +206,7 @@ export class LbpPool implements Pool {
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut, fees);
-      const feePct = toPct(
+      const feePct = FeeUtils.toPct(
         this.repayFeeApply ? fees.repayFee : fees.exchangeFee
       );
       const amountOut = calculatedOut.minus(fee);

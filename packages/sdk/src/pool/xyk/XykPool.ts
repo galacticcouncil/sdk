@@ -11,7 +11,7 @@ import {
   SellCtx,
 } from '../types';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toPct } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import { XykMath } from './XykMath';
 
@@ -90,7 +90,7 @@ export class XykPool implements Pool {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
-    const feePct = toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountIn = calculatedIn.plus(fee);
 
     const errors: PoolError[] = [];
@@ -129,7 +129,7 @@ export class XykPool implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
-    const feePct = toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountOut = calculatedOut.minus(fee);
 
     const errors: PoolError[] = [];
