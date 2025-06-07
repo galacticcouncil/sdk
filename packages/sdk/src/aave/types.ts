@@ -1,13 +1,13 @@
 import BigNumber from 'bignumber.js';
 
-export type AaveCtx = {
+export type AaveSummary = {
   healthFactor: number;
   totalCollateral: BigNumber;
   totalDebt: BigNumber;
-  reserves: AaveReserveCtx[];
+  reserves: AaveReserveData[];
 };
 
-export type AaveReserveCtx = {
+export type AaveReserveData = {
   aTokenBalance: BigNumber;
   decimals: number;
   isCollateral: boolean;

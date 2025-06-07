@@ -11,7 +11,11 @@ class GetDcaOrder extends PolkadotExecutor {
     const { api, tx } = createSdkContext(apiPromise);
 
     const order = await api.scheduler.getDcaOrder('10', '0', '10', DAY_MS);
-    const orderTx = tx.buildOrderTx(order, BENEFICIARY, MAX_RETRIES);
+    const orderTx = await tx
+      .order(order)
+      .withBeneficiary(BENEFICIARY)
+      .withMaxRetries(MAX_RETRIES)
+      .build();
     console.log('Transaction hash: ' + orderTx.hex);
 
     const { executionResult } = await orderTx.dryRun(BENEFICIARY);

@@ -1,6 +1,6 @@
-import { Swap, TradeRoute } from '../types';
+import { Swap, TradeRoute } from './types';
 
-import { PoolType } from '../../pool';
+import { PoolType } from '../pool';
 
 export class TradeRouteBuilder {
   static build(swaps: Swap[]): TradeRoute[] {

@@ -10,7 +10,7 @@ class GetBestBuyExample extends PolkadotExecutor {
     const { api, tx } = createSdkContext(apiPromise);
 
     const trade = await api.router.getBestBuy('69', '690', '10');
-    const tradeTx = await tx.buildTradeTx(trade, BENEFICIARY);
+    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }

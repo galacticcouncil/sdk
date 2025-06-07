@@ -4,7 +4,8 @@ import { AaveUtils } from './aave';
 import { AssetClient, BalanceClient, ChainParams } from './client';
 import { EvmClient } from './evm';
 import { CachingPoolService, PoolService } from './pool';
-import { TradeRouter, TradeScheduler, TxBuilder } from './sor';
+import { TradeRouter, TradeScheduler } from './sor';
+import { TxBuilderFactory } from './tx';
 
 export type SdkCtx = {
   api: {
@@ -20,7 +21,7 @@ export type SdkCtx = {
   ctx: {
     pool: PoolService;
   };
-  tx: TxBuilder;
+  tx: TxBuilderFactory;
   destroy: () => void;
 };
 
@@ -28,20 +29,20 @@ export function createSdkContext(
   api: ApiPromise,
   evmClient?: EvmClient
 ): SdkCtx {
-  const evm = evmClient ?? new EvmClient();
-
-  const poolCtx = new CachingPoolService(api);
-
   const params = new ChainParams(api);
 
+  const evm = evmClient ?? new EvmClient();
+
+  // Initialize pool context
+  const poolCtx = new CachingPoolService(api);
+
+  // Initialize APIs
   const aave = new AaveUtils(evm);
   const router = new TradeRouter(poolCtx);
   const scheduler = new TradeScheduler(router, {
     blockTime: params.blockTime,
     minBudgetInNative: params.minOrderBudget,
   });
-
-  const tx = new TxBuilder(api, evm);
 
   return {
     api: {
@@ -57,7 +58,7 @@ export function createSdkContext(
     ctx: {
       pool: poolCtx,
     },
-    tx,
+    tx: new TxBuilderFactory(api, evm),
     destroy: () => {
       poolCtx.destroy();
     },

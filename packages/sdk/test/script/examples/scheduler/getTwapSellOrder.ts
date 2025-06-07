@@ -10,7 +10,11 @@ class GetTwapOrder extends PolkadotExecutor {
     const { api, tx } = createSdkContext(apiPromise);
 
     const twap = await api.scheduler.getTwapSellOrder('10', '0', '50000');
-    const twapTx = tx.buildOrderTx(twap, BENEFICIARY, MAX_RETRIES);
+    const twapTx = await tx
+      .order(twap)
+      .withBeneficiary(BENEFICIARY)
+      .withMaxRetries(MAX_RETRIES)
+      .build();
     console.log('Transaction hash: ' + twapTx.hex);
 
     const { executionResult } = await twapTx.dryRun(BENEFICIARY);

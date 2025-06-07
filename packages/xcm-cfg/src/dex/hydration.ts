@@ -10,8 +10,8 @@ import {
   PoolService,
   PoolType,
   RUNTIME_DECIMALS,
+  TradeRouteBuilder,
   TradeRouter,
-  TradeUtils,
 } from '@galacticcouncil/sdk';
 
 import { memoize1 } from '@thi.ng/memoize';
@@ -27,8 +27,7 @@ export class HydrationDex implements Dex {
     console.log('init swap router', mem, '✅');
     const api = await this.chain.api;
     const poolCtx = this.poolService ? this.poolService : new PoolService(api);
-    const utils = new TradeUtils(api);
-    return new TradeRouter(poolCtx, utils, {
+    return new TradeRouter(poolCtx, {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
   });
@@ -66,7 +65,7 @@ export class HydrationDex implements Dex {
       const amountIn = BigInt(trade.amountIn.toNumber());
       return {
         amount: amountIn,
-        route: router.utils.buildRoute(trade.swaps),
+        route: TradeRouteBuilder.build(trade.swaps),
       } as SwapQuote;
     } catch (e) {
       if (fallbackPrice) {

@@ -30,6 +30,7 @@ export interface Trade extends Humanizer {
   spotPrice: BigNumber;
   tradeFee: BigNumber;
   tradeFeePct: number;
+  tradeFeeRange?: [number, number];
   priceImpactPct: number;
   swaps: Swap[];
 }

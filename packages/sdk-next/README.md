@@ -41,7 +41,7 @@ import { api, createSdkContext } from '@galacticcouncil/sdk-next';
 const client = await api.getWs('wss://hydradx-rpc.dwellir.com');
 const sdk = await createSdkContext(client);
 
-// Don't forget to cleanup when DONE
+// Don't forget to cleanup resources when DONE
 sdk.destroy();
 client.destroy();
 ```
@@ -152,10 +152,13 @@ Calculate sell of 1 DOT for HDX & build tx with 5% slippage (default to 1% if no
 const { api, tx } = sdk;
 
 const trade = await api.router.getBestSell(5, 10, 10_000_000_000n);
-const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
+const tradeTx = await tx.trade(trade)
+  .withBeneficiary(BENEFICIARY)
+  .withSlippage(5)
+  .build();
 const tradeCall = await tradeTx.get().getEncodedData();
 console.log(trade.toHuman());
-console.log('Transaction hash: ' + tradeCall.asHex());
+console.log('Transaction hash:', tradeCall.asHex());
 ```
 
 **Note:** For convenience, the router amount can be specified either as a native bigint or as a human-readable string.

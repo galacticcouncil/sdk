@@ -17,7 +17,7 @@ class GetSellExample extends PolkadotExecutor {
     });
 
     const trade = await api.router.getSell('0', '5', '1', sortByHopsDesc[0]);
-    const tradeTx = await tx.buildTradeTx(trade, BENEFICIARY);
+    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
     return trade;
   }

@@ -1,5 +1,5 @@
 import { AaveClient } from './AaveClient';
-import { AaveCtx, AaveReserveCtx } from './types';
+import { AaveSummary, AaveReserveData } from './types';
 
 import { H160 } from '../utils/h160';
 import { ERC20 } from '../utils/erc20';
@@ -19,7 +19,7 @@ export class AaveUtils {
     this.client = new AaveClient(evm);
   }
 
-  async loadAaveCtx(user: string): Promise<AaveCtx> {
+  async getSummary(user: string): Promise<AaveSummary> {
     const to = H160.fromAny(user);
 
     const [poolReserves, userReserves, userData] = await Promise.all([
@@ -46,7 +46,7 @@ export class AaveUtils {
     const totalCollateral = bnum(totalCollateralBase);
     const totalDebt = bnum(totalDebtBase);
 
-    const reserves: AaveReserveCtx[] = [];
+    const reserves: AaveReserveData[] = [];
 
     for (const uReserve of uReserves) {
       const reserveAsset = uReserve.underlyingAsset.toLowerCase();
@@ -151,7 +151,7 @@ export class AaveUtils {
     withdrawAmount: string
   ): Promise<number> {
     const { totalCollateral, totalDebt, reserves } =
-      await this.loadAaveCtx(user);
+      await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -202,7 +202,7 @@ export class AaveUtils {
     supplyAmount: string
   ): Promise<number> {
     const { totalCollateral, totalDebt, reserves } =
-      await this.loadAaveCtx(user);
+      await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -245,7 +245,7 @@ export class AaveUtils {
    */
   async getMaxWithdraw(user: string, reserve: string): Promise<Amount> {
     const { totalCollateral, totalDebt, reserves } =
-      await this.loadAaveCtx(user);
+      await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -263,7 +263,7 @@ export class AaveUtils {
    */
   async getMaxWithdrawAll(user: string): Promise<Record<number, Amount>> {
     const { totalCollateral, totalDebt, reserves } =
-      await this.loadAaveCtx(user);
+      await this.getSummary(user);
 
     const result: Record<number, Amount> = {};
 
@@ -282,7 +282,7 @@ export class AaveUtils {
   }
 
   private calculateWithdrawMax(
-    reserve: AaveReserveCtx,
+    reserve: AaveReserveData,
     totalCollateral: BigNumber,
     totalDebt: BigNumber
   ) {
