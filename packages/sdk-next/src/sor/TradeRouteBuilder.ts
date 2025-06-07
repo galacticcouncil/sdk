@@ -1,8 +1,8 @@
 import { Enum } from 'polkadot-api';
 
-import { Swap, TradeRoute } from '../types';
+import { Hop, PoolType } from '../pool';
 
-import { Hop, PoolType } from '../../pool';
+import { Swap, TradeRoute } from './types';
 
 export class TradeRouteBuilder {
   static build(swaps: Swap[]): TradeRoute[] {

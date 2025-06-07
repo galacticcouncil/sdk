@@ -1,8 +1,7 @@
 export { Router } from './Router';
 export { TradeRouter } from './TradeRouter';
 export { TradeScheduler } from './TradeScheduler';
-export { TxBuilder } from './TxBuilder';
 
-export { TradeRouteBuilder } from './utils';
+export { TradeRouteBuilder } from './TradeRouteBuilder';
 
 export * from './types';

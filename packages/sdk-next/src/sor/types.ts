@@ -1,6 +1,6 @@
 import { Enum } from 'polkadot-api';
 
-import type { Hop, PoolBuy, PoolError, PoolSell, PoolType } from '../pool';
+import type { Hop, PoolBuy, PoolError, PoolSell } from '../pool';
 
 export interface Humanizer {
   toHuman(): any;
@@ -31,6 +31,7 @@ export interface Trade extends Humanizer {
   spotPrice: bigint;
   tradeFee: bigint;
   tradeFeePct: number;
+  tradeFeeRange?: [number, number];
   priceImpactPct: number;
   swaps: Swap[];
 }

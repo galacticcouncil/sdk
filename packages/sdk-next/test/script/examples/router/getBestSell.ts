@@ -13,10 +13,10 @@ class GetBestSell extends PapiExecutor {
     const { api, tx } = sdk;
 
     const trade = await api.router.getBestSell(5, 10, 10_000_000_000n);
-    const tradeTx = await tx.buildTradeTx(trade, BENEFICIARY);
+    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());
-    console.log('Transaction hash: ' + tradeCall);
+    console.log('Transaction hash: ' + tradeCall.asHex());
 
     return () => {
       sdk.destroy();

@@ -1,11 +1,11 @@
-export type AaveCtx = {
+export type AaveSummary = {
   healthFactor: number;
   totalCollateral: bigint;
   totalDebt: bigint;
-  reserves: AaveReserveCtx[];
+  reserves: AaveReserveData[];
 };
 
-export type AaveReserveCtx = {
+export type AaveReserveData = {
   aTokenBalance: bigint;
   decimals: number;
   isCollateral: boolean;

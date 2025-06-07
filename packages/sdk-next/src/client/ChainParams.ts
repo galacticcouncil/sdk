@@ -1,18 +1,13 @@
 import { PolkadotClient } from 'polkadot-api';
-import { hydration } from '@galacticcouncil/descriptors';
 
-export class ChainParams {
-  private client: PolkadotClient;
+import { Papi } from '../api';
 
+export class ChainParams extends Papi {
   private _minOrderBudget?: bigint;
   private _blockTime?: number;
 
   constructor(client: PolkadotClient) {
-    this.client = client;
-  }
-
-  public get api() {
-    return this.client.getTypedApi(hydration);
+    super(client);
   }
 
   async getBlockTime(): Promise<number> {
