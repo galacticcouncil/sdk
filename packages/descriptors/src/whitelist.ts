@@ -1,6 +1,7 @@
 export const whitelist: string[] = [
   'api.AaveTradeExecutor.*',
   'api.CurrenciesApi.*',
+  'api.DryRunApi.*',
   'const.Aura.*',
   'const.DCA.*',
   'const.DynamicFees.*',
