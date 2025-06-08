@@ -142,16 +142,16 @@ export abstract class PoolClient extends BalanceClient {
     const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
     return this.subscribeTokenBalance(
       pool.address,
-      pool.tokens,
       this.updateBalancesCallback(pool, isNotStableswap)
     );
   }
 
   private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
+    const ids = pool.tokens.filter((t) => t.type === 'Erc20').map((t) => t.id);
     return this.subscribeErc20Balance(
       pool.address,
-      pool.tokens,
-      this.updateBalancesCallback(pool, () => true)
+      this.updateBalancesCallback(pool, () => true),
+      ids
     );
   }
 

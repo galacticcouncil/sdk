@@ -1,5 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { createSdkContext } from '../../../../src';
+import { humanizeError } from '../../../../src/utils/error';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { BENEFICIARY } from '../../const';
@@ -22,7 +23,7 @@ class GetBestSellExample extends PolkadotExecutor {
 
     await ctx.pool.syncRegistry(external);
 
-    const trade = await api.router.getBestSell('1005', '15', '550');
+    const trade = await api.router.getBestSell('1005', '15', '61.1');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
 

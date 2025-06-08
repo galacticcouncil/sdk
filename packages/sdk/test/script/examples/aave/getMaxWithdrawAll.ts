@@ -1,11 +1,13 @@
-import { AaveUtils } from '../../../../src';
+import { AaveUtils, toDecimals } from '../../../../src';
 
 import { BENEFICIARY } from '../../const';
 
 const main = async () => {
   const aave = new AaveUtils();
   const result = await aave.getMaxWithdrawAll(BENEFICIARY);
-  console.log(result);
+  for (const [key, value] of Object.entries(result)) {
+    console.log(key, '=>', toDecimals(value.amount, value.decimals));
+  }
 };
 
 main()

@@ -1,6 +1,17 @@
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
+import { encodeFunctionData } from 'viem';
+
+import {
+  AAVE_GAS_LIMIT,
+  AAVE_POOL_ABI,
+  AAVE_POOL_PROXY,
+  AAVE_UINT_256_MAX,
+} from '../aave';
 import { Trade, TradeRouteBuilder, TradeType } from '../sor';
+import { BigNumber } from '../utils/bignumber';
+import { ERC20 } from '../utils/erc20';
+import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
 
 import { TxBuilder } from './TxBuilder';
@@ -51,15 +62,24 @@ export class TradeTxBuilder extends TxBuilder {
       return this.buildBuyTx();
     }
 
-    const { assetIn } = swaps[0];
+    const firstSwap = swaps[0];
+    const { assetIn, assetOut } = firstSwap;
 
-    const balance = await this.balanceClient.getBalance(
-      this.beneficiary,
-      assetIn
-    );
+    let balance: BigNumber;
+    if (firstSwap.isWithdraw()) {
+      const maxWithdraw = await this.aaveUtils.getMaxWithdraw(
+        this.beneficiary,
+        assetOut
+      );
+      balance = maxWithdraw.amount;
+    } else {
+      balance = await this.balanceClient.getBalance(this.beneficiary, assetIn);
+    }
+
     const isMax = amountIn.isGreaterThanOrEqualTo(balance.minus(5));
 
-    if (isMax) {
+    // TODO: Remove withdraw check when sell all fixed for atokens
+    if (isMax && !firstSwap.isWithdraw()) {
       return this.buildSellAllTx();
     }
     return this.buildSellTx();
@@ -99,7 +119,7 @@ export class TradeTxBuilder extends TxBuilder {
     return this.wrapTx('RouterBuy', tx);
   }
 
-  protected async buildSellTx(): Promise<SubstrateTransaction> {
+  private async buildSellTx(): Promise<SubstrateTransaction> {
     const { amountIn, amountOut, swaps } = this.trade;
 
     const firstSwap = swaps[0];
@@ -140,7 +160,7 @@ export class TradeTxBuilder extends TxBuilder {
     return this.wrapTx('RouterSell', tx);
   }
 
-  protected async buildSellAllTx(): Promise<SubstrateTransaction> {
+  private async buildSellAllTx(): Promise<SubstrateTransaction> {
     const { amountOut, swaps } = this.trade;
 
     const firstSwap = swaps[0];
@@ -167,5 +187,48 @@ export class TradeTxBuilder extends TxBuilder {
     }
 
     return this.wrapTx('RouterSellAll', tx);
+  }
+
+  private async buildWithdrawTx(
+    max?: BigNumber
+  ): Promise<SubstrateTransaction> {
+    const { swaps } = this.trade;
+
+    const amountIn = max || this.trade.amountIn;
+
+    const firstSwap = swaps[0];
+    const reserve = firstSwap.assetOut;
+
+    const gasPrice = await this.evmClient.getGasPrice();
+    const gasPriceMargin = (gasPrice * 10n) / 100n;
+
+    const to = H160.fromAny(this.beneficiary);
+    const amount = max ? AAVE_UINT_256_MAX : BigInt(amountIn.toFixed());
+    const asset = ERC20.fromAssetId(reserve);
+
+    const withdrawCalldata = encodeFunctionData({
+      abi: AAVE_POOL_ABI,
+      functionName: 'withdraw',
+      args: [asset as `0x${string}`, amount, to as `0x${string}`],
+    });
+
+    const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
+      to,
+      AAVE_POOL_PROXY,
+      withdrawCalldata,
+      0n,
+      AAVE_GAS_LIMIT,
+      gasPrice + gasPriceMargin,
+      gasPrice + gasPriceMargin,
+      null,
+      []
+    );
+
+    return {
+      hex: withdrawTx.toHex(),
+      name: 'Withdraw',
+      get: () => withdrawTx,
+      dryRun: (account: string) => this.dryRun(account, withdrawTx),
+    } as SubstrateTransaction;
   }
 }

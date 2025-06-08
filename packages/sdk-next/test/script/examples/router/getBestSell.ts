@@ -1,6 +1,6 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { createSdkContext } from '../../../../src';
+import { createSdkContext, json } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
@@ -12,7 +12,7 @@ class GetBestSell extends PapiExecutor {
 
     const { api, tx } = sdk;
 
-    const trade = await api.router.getBestSell(5, 10, 10_000_000_000n);
+    const trade = await api.router.getBestSell(1005, 15, '50');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());

@@ -31,10 +31,8 @@ export abstract class TxBuilder extends Papi {
   }
 
   protected async dispatchWithExtraGas(tx: Transaction): Promise<Transaction> {
-    const hex = await tx.getEncodedData();
-    const call = Enum('EncodedCall', hex);
     return this.api.tx.Dispatcher.dispatch_with_extra_gas({
-      call: call,
+      call: tx.decodedCall,
       extra_gas: AAVE_GAS_LIMIT,
     });
   }
