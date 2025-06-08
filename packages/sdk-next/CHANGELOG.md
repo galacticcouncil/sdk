@@ -1,5 +1,20 @@
 # @galacticcouncil/sdk-next
 
+## 0.2.0
+
+### Minor Changes
+
+[87a6630]: https://github.com/galacticcouncil/sdk/commit/87a6630
+[3c19e33]: https://github.com/galacticcouncil/sdk/commit/3c19e33
+
+- [[#87a6630][87a6630]] next: add scheduling, refactor tx module
+- [[#3c19e33][3c19e33]] next: add aave, evm, scheduler
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.2.0
+
 ## 0.1.0
 
 ### Minor Changes

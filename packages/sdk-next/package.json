@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -35,7 +35,7 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
-    "@galacticcouncil/descriptors": "^1.1.1",
+    "@galacticcouncil/descriptors": "^1.2.0",
     "@galacticcouncil/math-lbp": "^1.1.0",
     "@galacticcouncil/math-liquidity-mining": "^1.1.0",
     "@galacticcouncil/math-omnipool": "^1.2.0",
