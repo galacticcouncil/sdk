@@ -289,6 +289,16 @@ export class TradeRouter extends Router {
         tradeFeeRange: feePctRange,
         priceImpactPct: priceImpactPct,
         errors: errors,
+        isSupply() {
+          return (
+            pool.type === PoolType.Aave && pool.tokens[0].id === hop.assetIn
+          );
+        },
+        isWithdraw() {
+          return (
+            pool.type === PoolType.Aave && pool.tokens[1].id === hop.assetIn
+          );
+        },
         toHuman() {
           return {
             ...hop,
@@ -622,6 +632,16 @@ export class TradeRouter extends Router {
         tradeFeeRange: feePctRange,
         priceImpactPct: priceImpactPct,
         errors: errors,
+        isSupply() {
+          return (
+            pool.type === PoolType.Aave && pool.tokens[0].id === hop.assetIn
+          );
+        },
+        isWithdraw() {
+          return (
+            pool.type === PoolType.Aave && pool.tokens[1].id === hop.assetIn
+          );
+        },
         toHuman() {
           return {
             ...hop,

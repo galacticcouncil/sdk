@@ -15,7 +15,7 @@ import {
   SYSTEM_ASSET_ID,
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { toDecimals, toPoolFee } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import {
   PoolBase,
@@ -140,10 +140,10 @@ export class OmniPoolClient extends PoolClient {
     const max = assetFeeMax + protocolFeeMax;
 
     return {
-      assetFee: toPoolFee(assetFee),
-      protocolFee: toPoolFee(protocolFee),
-      min: toPoolFee(min),
-      max: toPoolFee(max),
+      assetFee: FeeUtils.fromPermill(assetFee),
+      protocolFee: FeeUtils.fromPermill(protocolFee),
+      min: FeeUtils.fromPermill(min),
+      max: FeeUtils.fromPermill(max),
     } as OmniPoolFees;
   }
 
@@ -189,8 +189,8 @@ export class OmniPoolClient extends PoolClient {
     const { minFee, maxFee, decay, amplification } =
       this.api.consts.dynamicFees.assetFeeParameters;
 
-    const feeMin = toPoolFee(minFee.toNumber());
-    const feeMax = toPoolFee(maxFee.toNumber());
+    const feeMin = FeeUtils.fromPermill(minFee.toNumber());
+    const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
 
     if (dynamicFee.isNone || oracle.isNone) {
       return [minFee.toNumber(), minFee.toNumber(), maxFee.toNumber()];
@@ -211,17 +211,17 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity = entry.liquidity.a.toString();
     }
 
-    const feePrev = toPoolFee(assetFee.toNumber());
+    const feePrev = FeeUtils.fromPermill(assetFee.toNumber());
     const fee = OmniMath.recalculateAssetFee(
       oracleAmountIn,
       oracleAmountOut,
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      toDecimals(feePrev).toString(),
+      FeeUtils.toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toDecimals(feeMin).toString(),
-      toDecimals(feeMax).toString(),
+      FeeUtils.toDecimals(feeMin).toString(),
+      FeeUtils.toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
@@ -239,8 +239,8 @@ export class OmniPoolClient extends PoolClient {
     const { minFee, maxFee, decay, amplification } =
       this.api.consts.dynamicFees.protocolFeeParameters;
 
-    const feeMin = toPoolFee(minFee.toNumber());
-    const feeMax = toPoolFee(maxFee.toNumber());
+    const feeMin = FeeUtils.fromPermill(minFee.toNumber());
+    const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
 
     if (dynamicFee.isNone || oracle.isNone) {
       return [minFee.toNumber(), minFee.toNumber(), maxFee.toNumber()];
@@ -261,17 +261,17 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity = entry.liquidity.a.toString();
     }
 
-    const feePrev = toPoolFee(protocolFee.toNumber());
+    const feePrev = FeeUtils.fromPermill(protocolFee.toNumber());
     const fee = OmniMath.recalculateProtocolFee(
       oracleAmountIn,
       oracleAmountOut,
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      toDecimals(feePrev).toString(),
+      FeeUtils.toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toDecimals(feeMin).toString(),
-      toDecimals(feeMax).toString(),
+      FeeUtils.toDecimals(feeMin).toString(),
+      FeeUtils.toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );

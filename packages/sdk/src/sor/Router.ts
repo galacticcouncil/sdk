@@ -17,23 +17,15 @@ export type RouterOptions = {
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routerOptions: RouterOptions;
+
   protected readonly poolService: IPoolService;
 
-  private readonly defaultRouterOptions: RouterOptions = {
-    includeOnly: [],
-  };
-
-  /**
-   * @param poolService - Fetch pool data from substrate based pools
-   * @param routerOptions - Optional router options
-   */
-  constructor(poolService: IPoolService, routerOptions?: RouterOptions) {
+  constructor(poolService: IPoolService, routerOptions: RouterOptions = {}) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
-    this.routerOptions = {
-      ...this.defaultRouterOptions,
-      ...routerOptions,
-    };
+    this.routerOptions = Object.freeze({
+      includeOnly: routerOptions.includeOnly ?? [],
+    });
   }
 
   /**

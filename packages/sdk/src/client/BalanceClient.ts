@@ -4,7 +4,6 @@ import { UnsubscribePromise } from '@polkadot/api-base/types';
 
 import { PolkadotApiClient } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 export class BalanceClient extends PolkadotApiClient {
@@ -57,19 +56,16 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeTokenBalance(
     address: string,
-    assets: Asset[],
     onChange: (balances: [string, BigNumber][]) => void
   ): UnsubscribePromise {
-    const supported = assets
-      .filter((a) => a.type !== 'Erc20')
-      .filter((a) => a.id !== SYSTEM_ASSET_ID);
+    const keys = await this.api.query.tokens.accounts.keys(address);
+    const queries = keys.map((key) => [address, key.args[1].toString()]);
 
-    const callArgs = supported.map((a) => [address, a.id]);
-    return this.api.query.tokens.accounts.multi(callArgs, (balances) => {
+    return this.api.query.tokens.accounts.multi(queries, (balances) => {
       const result: [string, BigNumber][] = [];
       balances.forEach((data, i) => {
         const freeBalance = this.calculateFreeBalance(data);
-        const token = callArgs[i][1];
+        const token = queries[i][1];
         result.push([token, freeBalance]);
       });
       onChange(result);
@@ -78,17 +74,32 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeErc20Balance(
     address: string,
-    assets: Asset[],
-    onChange: (balances: [string, BigNumber][]) => void
+    onChange: (balances: [string, BigNumber][]) => void,
+    includeOnly?: string[]
   ): UnsubscribePromise {
-    const supported = assets.filter((a) => a.type === 'Erc20');
+    const getErc20s = async () => {
+      const assets = await this.api.query.assetRegistry.assets.entries();
+      return assets
+        .filter(([_args, value]) => {
+          const { assetType } = value.unwrap();
+          return assetType.toString() === 'Erc20';
+        })
+        .map(
+          ([
+            {
+              args: [id],
+            },
+          ]) => id.toString()
+        );
+    };
 
+    const ids = includeOnly ? includeOnly : await getErc20s();
     const getErc20Balance = async () => {
       const result: [string, BigNumber][] = [];
       const balances: [string, BigNumber][] = await Promise.all(
-        supported.map(async (token: Asset) => [
-          token.id,
-          await this.getErc20Balance(address, token.id),
+        ids.map(async (id: string) => [
+          id,
+          await this.getErc20Balance(address, id),
         ])
       );
       balances.forEach(([token, balance]) => {

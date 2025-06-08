@@ -13,6 +13,8 @@ import { erc20, json } from '../../utils';
 import { AavePoolToken } from './AavePool';
 import { AAVE_ABI } from './AaveAbi';
 
+const { ERC20 } = erc20;
+
 const SYNC_MM_EVENTS = ['Supply', 'Withdraw', 'Repay', 'Borrow'];
 
 export class AavePoolClient extends PoolClient<PoolBase> {
@@ -147,6 +149,6 @@ export class AavePoolClient extends PoolClient<PoolBase> {
       const accountKey20 = json.findNestedKey(reserve.location, 'AccountKey20');
       return accountKey20['AccountKey20'].key;
     }
-    return erc20.ERC20Mapping.encodeEvmAddress(reserve.id);
+    return ERC20.fromAssetId(reserve.id);
   }
 }

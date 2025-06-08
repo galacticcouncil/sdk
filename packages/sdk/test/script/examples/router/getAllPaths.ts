@@ -1,14 +1,14 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
 class GetAllPathsExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
-    return router.getAllPaths('0', '5');
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api } = createSdkContext(apiPromise);
+
+    return api.router.getAllPaths('0', '5');
   }
 }
 

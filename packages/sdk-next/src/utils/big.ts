@@ -20,3 +20,7 @@ export function toBigInt(amount: string | number, decimals: number): bigint {
   const fixedPoint = result.toFixed(0, Big.roundDown);
   return BigInt(fixedPoint);
 }
+
+export function asBigInt(value: Big): bigint {
+  return BigInt(value.round(0, Big.roundDown).toFixed(0));
+}

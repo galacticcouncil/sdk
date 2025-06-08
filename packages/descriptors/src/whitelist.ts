@@ -1,6 +1,9 @@
 export const whitelist: string[] = [
   'api.AaveTradeExecutor.*',
   'api.CurrenciesApi.*',
+  'api.DryRunApi.*',
+  'const.Aura.*',
+  'const.DCA.*',
   'const.DynamicFees.*',
   'const.LBP.*',
   'const.Omnipool.*',
@@ -24,6 +27,8 @@ export const whitelist: string[] = [
   'query.System.Account',
   'query.System.Number',
   'query.XYK.PoolAssets',
+  'tx.DCA.*',
+  'tx.Dispatcher.*',
   'tx.Omnipool.buy',
   'tx.Omnipool.sell',
   'tx.Router.buy',
