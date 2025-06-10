@@ -308,8 +308,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
   toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
-  // Waiting for Snowbridge V2
-  //toEthereumViaSnowbridgeTemplate(ldo, ldo),
+  toEthereumViaSnowbridgeTemplate(ldo, ldo),
   toEthereumViaSnowbridgeTemplate(link, link),
   toEthereumViaSnowbridgeTemplate(sky, sky),
   toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
