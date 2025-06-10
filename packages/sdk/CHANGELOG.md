@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 8.1.1
+
+### Patch Changes
+
+- Allow passing opt assets to balance subscribe (revert)
+
 ## 8.1.0
 
 ### Minor Changes
