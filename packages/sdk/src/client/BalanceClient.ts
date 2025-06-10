@@ -56,10 +56,17 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeTokenBalance(
     address: string,
-    onChange: (balances: [string, BigNumber][]) => void
+    onChange: (balances: [string, BigNumber][]) => void,
+    assets?: string[]
   ): UnsubscribePromise {
     const keys = await this.api.query.tokens.accounts.keys(address);
-    const queries = keys.map((key) => [address, key.args[1].toString()]);
+
+    const queries = assets
+      ? assets.map((a) => [address, a])
+      : keys.map(({ args: [acc, token] }) => [
+          acc.toString(),
+          token.toString(),
+        ]);
 
     return this.api.query.tokens.accounts.multi(queries, (balances) => {
       const result: [string, BigNumber][] = [];
@@ -75,7 +82,7 @@ export class BalanceClient extends PolkadotApiClient {
   async subscribeErc20Balance(
     address: string,
     onChange: (balances: [string, BigNumber][]) => void,
-    includeOnly?: string[]
+    assets?: string[]
   ): UnsubscribePromise {
     const getErc20s = async () => {
       const assets = await this.api.query.assetRegistry.assets.entries();
@@ -93,22 +100,17 @@ export class BalanceClient extends PolkadotApiClient {
         );
     };
 
-    const ids = includeOnly ? includeOnly : await getErc20s();
+    const ids = assets ? assets : await getErc20s();
     const getErc20Balance = async () => {
-      const result: [string, BigNumber][] = [];
       const balances: [string, BigNumber][] = await Promise.all(
         ids.map(async (id: string) => [
           id,
           await this.getErc20Balance(address, id),
         ])
       );
-      balances.forEach(([token, balance]) => {
-        result.push([token, balance]);
-      });
-      onChange(result);
+      onChange(balances);
     };
 
-    await getErc20Balance();
     return this.api.rpc.chain.subscribeNewHeads(async () => {
       getErc20Balance();
     });
