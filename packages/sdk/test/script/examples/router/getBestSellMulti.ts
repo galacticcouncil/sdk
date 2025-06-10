@@ -17,7 +17,7 @@ class GetBestSellMultiExample extends PolkadotExecutor {
 }
 
 new GetBestSellMultiExample(
-  ApiUrl.HydraDx,
+  ApiUrl.Hydration,
   'Get best sell price (Multi)',
   true
 ).run();

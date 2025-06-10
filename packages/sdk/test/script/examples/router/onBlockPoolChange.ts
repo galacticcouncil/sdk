@@ -40,7 +40,7 @@ class GetOnBlockPoolChangeExample extends PolkadotExecutor {
 }
 
 new GetOnBlockPoolChangeExample(
-  ApiUrl.HydraDx_Dwellir,
+  ApiUrl.Hydration,
   'Get on block change',
   true
 ).run();

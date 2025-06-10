@@ -12,4 +12,4 @@ class GetPoolsExample extends PolkadotExecutor {
   }
 }
 
-new GetPoolsExample(ApiUrl.HydraDx, 'Get pools', true).run();
+new GetPoolsExample(ApiUrl.Hydration, 'Get pools', true).run();

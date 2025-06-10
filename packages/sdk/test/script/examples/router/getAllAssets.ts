@@ -12,4 +12,4 @@ class GetAllAssetsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllAssetsExample(ApiUrl.HydraDx, 'Get all assets').run();
+new GetAllAssetsExample(ApiUrl.Hydration, 'Get all assets').run();

@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { BalanceClient } from '../../../src';
+import { BalanceClient, toDecimals } from '../../../src';
 
 import { PolkadotExecutor } from '../PjsExecutor';
 import { BENEFICIARY } from '../const';
@@ -9,12 +9,17 @@ class SubscribeErc20Example extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const balance = new BalanceClient(api);
 
-    balance.subscribeErc20Balance(BENEFICIARY, (balances) => {
-      balances.forEach(([id, val]) => {
-        console.log(id, '=>', val.toString());
-      });
-    });
+    balance.subscribeErc20Balance(
+      '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh',
+      (balances) => {
+        balances.forEach(([id, val]) => {
+          if (id === '1001') {
+            console.log(id, '=>', toDecimals(val, 10));
+          }
+        });
+      }
+    );
   }
 }
 
-new SubscribeErc20Example(ApiUrl.HydraDx_Dwellir, 'Get Subscribe Erc20').run();
+new SubscribeErc20Example(ApiUrl.Hydration, 'Get Subscribe Erc20').run();

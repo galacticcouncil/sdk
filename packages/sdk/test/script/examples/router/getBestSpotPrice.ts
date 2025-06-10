@@ -40,4 +40,8 @@ class GetBestSpotPriceExample extends PolkadotExecutor {
   }
 }
 
-new GetBestSpotPriceExample(ApiUrl.HydraDx, 'Get best spot price', true).run();
+new GetBestSpotPriceExample(
+  ApiUrl.Hydration,
+  'Get best spot price',
+  true
+).run();

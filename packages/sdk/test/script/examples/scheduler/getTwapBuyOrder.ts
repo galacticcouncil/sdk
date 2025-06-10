@@ -23,4 +23,4 @@ class GetTwapOrder extends PolkadotExecutor {
   }
 }
 
-new GetTwapOrder(ApiUrl.HydraDx, 'Get Twap BUY order').run();
+new GetTwapOrder(ApiUrl.Hydration, 'Get Twap BUY order').run();

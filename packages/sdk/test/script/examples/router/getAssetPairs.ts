@@ -12,4 +12,4 @@ class GetAssetPairsExample extends PolkadotExecutor {
   }
 }
 
-new GetAssetPairsExample(ApiUrl.Nice, 'Get asset pairs').run();
+new GetAssetPairsExample(ApiUrl.Hydration, 'Get asset pairs').run();

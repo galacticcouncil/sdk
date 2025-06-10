@@ -12,4 +12,4 @@ class GetAllPathsExample extends PolkadotExecutor {
   }
 }
 
-new GetAllPathsExample(ApiUrl.HydraDx, 'Get all paths').run();
+new GetAllPathsExample(ApiUrl.Hydration, 'Get all paths').run();

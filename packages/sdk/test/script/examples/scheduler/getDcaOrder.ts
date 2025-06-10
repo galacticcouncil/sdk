@@ -24,4 +24,4 @@ class GetDcaOrder extends PolkadotExecutor {
   }
 }
 
-new GetDcaOrder(ApiUrl.HydraDx, 'Get DCA order').run();
+new GetDcaOrder(ApiUrl.Hydration, 'Get DCA order').run();

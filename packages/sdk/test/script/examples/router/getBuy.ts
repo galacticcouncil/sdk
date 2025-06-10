@@ -23,4 +23,4 @@ class GetBuyExample extends PolkadotExecutor {
   }
 }
 
-new GetBuyExample(ApiUrl.HydraDx, 'Get best buy price HydraDX', true).run();
+new GetBuyExample(ApiUrl.Hydration, 'Get best buy price HydraDX', true).run();
