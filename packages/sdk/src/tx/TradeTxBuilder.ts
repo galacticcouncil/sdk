@@ -65,21 +65,24 @@ export class TradeTxBuilder extends TxBuilder {
     const firstSwap = swaps[0];
     const { assetIn, assetOut } = firstSwap;
 
-    let balance: BigNumber;
+    const balance = await this.balanceClient.getBalance(
+      this.beneficiary,
+      assetIn
+    );
+    const maxThreshold = balance.minus(5);
+
+    let isMax: boolean;
     if (firstSwap.isWithdraw()) {
       const maxWithdraw = await this.aaveUtils.getMaxWithdraw(
         this.beneficiary,
         assetOut
       );
-      balance = maxWithdraw.amount;
+      isMax = maxWithdraw.amount.isGreaterThanOrEqualTo(maxThreshold);
     } else {
-      balance = await this.balanceClient.getBalance(this.beneficiary, assetIn);
+      isMax = amountIn.isGreaterThanOrEqualTo(maxThreshold);
     }
 
-    const isMax = amountIn.isGreaterThanOrEqualTo(balance.minus(5));
-
-    // TODO: Remove withdraw check when sell all fixed for atokens
-    if (isMax && !firstSwap.isWithdraw()) {
+    if (isMax) {
       return this.buildSellAllTx();
     }
     return this.buildSellTx();

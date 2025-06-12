@@ -8,18 +8,18 @@ import { OrderTxBuilder } from './OrderTxBuilder';
 
 export class TxBuilderFactory {
   private api: ApiPromise;
-  private evmClient: EvmClient;
+  private evm: EvmClient;
 
-  constructor(api: ApiPromise, evmClient?: EvmClient) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     this.api = api;
-    this.evmClient = evmClient ?? new EvmClient();
+    this.evm = evm;
   }
 
   trade(trade: Trade): TradeTxBuilder {
-    return new TradeTxBuilder(this.api, this.evmClient).setTrade(trade);
+    return new TradeTxBuilder(this.api, this.evm).setTrade(trade);
   }
 
   order(order: TradeOrder): OrderTxBuilder {
-    return new OrderTxBuilder(this.api, this.evmClient).setOrder(order);
+    return new OrderTxBuilder(this.api, this.evm).setOrder(order);
   }
 }

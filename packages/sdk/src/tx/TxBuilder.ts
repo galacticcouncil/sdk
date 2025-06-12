@@ -2,6 +2,8 @@ import { ApiPromise } from '@polkadot/api';
 import { type SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { type CallDryRunEffects } from '@polkadot/types/interfaces';
 
+import { PublicClient } from 'viem';
+
 import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
 import { PolkadotApiClient } from '../api';
 import { BalanceClient } from '../client';
@@ -12,15 +14,18 @@ import { Swap } from '../sor';
 import { SubstrateTransaction } from './types';
 
 export abstract class TxBuilder extends PolkadotApiClient {
-  protected readonly evmClient: EvmClient;
+  protected readonly evm: EvmClient;
+  protected readonly evmClient: PublicClient;
+
   protected readonly balanceClient: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
-  constructor(api: ApiPromise, evmClient?: EvmClient) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     super(api);
-    this.evmClient = evmClient ?? new EvmClient();
+    this.evm = evm;
+    this.evmClient = evm.getWsProvider();
     this.balanceClient = new BalanceClient(api);
-    this.aaveUtils = new AaveUtils(this.evmClient);
+    this.aaveUtils = new AaveUtils(evm);
   }
 
   protected wrapTx(
