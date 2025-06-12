@@ -12,7 +12,7 @@
 - [[#4c1f73f2][4c1f73f2]] sdk: stableswap mm oracle support
 - [[#8ab43456][8ab43456]] aave: fix sellAll calc
 - [[#7ac95e0f][7ac95e0f]] sdk: evm share ws conn
-- [[#3613c7b2][3613c7b2]] aave: fix max liq index calc
+- [[#3613c7b2][3613c7b2]] aave: fix liq index calc
 
 ## 8.1.1
 

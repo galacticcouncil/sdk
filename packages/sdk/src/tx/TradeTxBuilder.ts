@@ -71,17 +71,16 @@ export class TradeTxBuilder extends TxBuilder {
     );
     const maxThreshold = balance.minus(5);
 
-    let isMax: boolean;
+    let canSellAll = true;
     if (firstSwap.isWithdraw()) {
       const maxWithdraw = await this.aaveUtils.getMaxWithdraw(
         this.beneficiary,
         assetOut
       );
-      isMax = maxWithdraw.amount.isGreaterThanOrEqualTo(maxThreshold);
-    } else {
-      isMax = amountIn.isGreaterThanOrEqualTo(maxThreshold);
+      canSellAll = maxWithdraw.amount.isGreaterThanOrEqualTo(maxThreshold);
     }
 
+    const isMax = canSellAll && amountIn.isGreaterThanOrEqualTo(maxThreshold);
     if (isMax) {
       return this.buildSellAllTx();
     }
