@@ -7,6 +7,7 @@ import {
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 import {
+  EvmClient,
   PoolService,
   PoolType,
   RUNTIME_DECIMALS,
@@ -26,7 +27,10 @@ export class HydrationDex implements Dex {
   readonly getCtx = memoize1(async (mem: number) => {
     console.log('init swap router', mem, '✅');
     const api = await this.chain.api;
-    const poolCtx = this.poolService ? this.poolService : new PoolService(api);
+    const evm = new EvmClient(api);
+    const poolCtx = this.poolService
+      ? this.poolService
+      : new PoolService(api, evm);
     return new TradeRouter(poolCtx, {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });

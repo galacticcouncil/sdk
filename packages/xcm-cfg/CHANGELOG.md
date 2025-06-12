@@ -1,10 +1,18 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.2.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@9.0.0
+
 ## 10.1.0
 
-### Minor Changes
+### Patch Changes
 
-- fdfd
+- Updated dependencies
+  - @galacticcouncil/sdk@8.1.0
 
 ## 10.0.1
 

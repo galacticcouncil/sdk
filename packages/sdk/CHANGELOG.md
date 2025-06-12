@@ -1,5 +1,19 @@
 # @galacticcouncil/sdk
 
+## 9.0.0
+
+### Major Changes
+
+[4c1f73f2]: https://github.com/galacticcouncil/sdk/commit/4c1f73f2
+[8ab43456]: https://github.com/galacticcouncil/sdk/commit/8ab43456
+[7ac95e0f]: https://github.com/galacticcouncil/sdk/commit/7ac95e0f
+[3613c7b2]: https://github.com/galacticcouncil/sdk/commit/3613c7b2
+
+- [[#4c1f73f2][4c1f73f2]] sdk: stableswap mm oracle support
+- [[#8ab43456][8ab43456]] aave: fix sellAll calc
+- [[#7ac95e0f][7ac95e0f]] sdk: evm share ws conn
+- [[#3613c7b2][3613c7b2]] aave: fix max liq index calc
+
 ## 8.1.1
 
 ### Patch Changes
