@@ -5,12 +5,17 @@ import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
 import { BalanceClient } from '../client';
+import { EvmClient } from '../evm';
+import { MmOracleClient } from '../mm';
 import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 
 export abstract class PoolClient extends BalanceClient {
+  protected evm: EvmClient;
+  protected mmOracle: MmOracleClient;
+
   protected pools: PoolBase[] = [];
   protected subs: UnsubscribePromise[] = [];
 
@@ -32,8 +37,10 @@ export abstract class PoolClient extends BalanceClient {
     return this.getPools();
   }, this.memPoolsCache);
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     super(api);
+    this.evm = evm;
+    this.mmOracle = new MmOracleClient(evm);
   }
 
   abstract isSupported(): boolean;

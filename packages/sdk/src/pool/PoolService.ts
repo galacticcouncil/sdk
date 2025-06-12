@@ -5,6 +5,7 @@ import { memoize1 } from '@thi.ng/memoize';
 import { PolkadotApiClient } from '../api';
 import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
+import { EvmClient } from '../evm';
 import { Asset, ExternalAsset } from '../types';
 
 import { AavePoolClient } from './aave';
@@ -26,6 +27,7 @@ import { PoolClient } from './PoolClient';
 
 export class PoolService extends PolkadotApiClient implements IPoolService {
   protected readonly api: ApiPromise;
+  protected readonly evm: EvmClient;
 
   protected readonly assetClient: AssetClient;
 
@@ -44,15 +46,17 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     return this.syncRegistry();
   });
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     super(api);
     this.api = api;
+    this.evm = evm;
+
     this.assetClient = new AssetClient(this.api);
-    this.aaveClient = new AavePoolClient(this.api);
-    this.xykClient = new XykPoolClient(this.api);
-    this.omniClient = new OmniPoolClient(this.api);
-    this.lbpClient = new LbpPoolClient(this.api);
-    this.stableClient = new StableSwapClient(this.api);
+    this.aaveClient = new AavePoolClient(this.api, evm);
+    this.xykClient = new XykPoolClient(this.api, evm);
+    this.omniClient = new OmniPoolClient(this.api, evm);
+    this.lbpClient = new LbpPoolClient(this.api, evm);
+    this.stableClient = new StableSwapClient(this.api, evm);
     this.clients = [
       this.aaveClient,
       this.xykClient,

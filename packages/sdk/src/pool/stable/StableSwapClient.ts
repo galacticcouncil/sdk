@@ -228,7 +228,6 @@ export class StableSwapClient extends PoolClient {
     const latest = source.map(async (s, i) => {
       if (s.isOracle) {
         const [oracleName, oraclePeriod, oracleAsset] = s.asOracle;
-
         const oracleKey = [oracleAsset.toString(), assets[i]]
           .map((a) => Number(a))
           .sort((a, b) => a - b);
@@ -244,6 +243,17 @@ export class StableSwapClient extends PoolClient {
         return oracleAsset.toString() === oracleKey[0].toString()
           ? [[priceNum, priceDenom], updatedAt.toString()]
           : [[priceDenom, priceNum], updatedAt.toString()];
+      } else if (s.isMmOracle) {
+        const h160 = s.asMmOracle;
+        const { price, decimals, updatedAt } = await this.mmOracle.getData(
+          h160.toString()
+        );
+
+        const priceDenom = 10 ** decimals;
+        return [
+          [price.toString(), priceDenom.toString()],
+          updatedAt.toString(),
+        ];
       } else {
         return [s.asValue.map((p) => p.toString()), blockNumber];
       }
