@@ -10,23 +10,25 @@ import { Amount } from '../types';
 
 const RAY = bnum('1e27');
 const TARGET_WITHDRAW_HF = bnum('1.01');
+const SECONDS_PER_YEAR = bnum('31536000');
 
 export class AaveUtils {
-  private client: AaveClient;
+  readonly client: AaveClient;
 
-  constructor(evmClient?: EvmClient) {
-    const evm = evmClient ?? new EvmClient();
+  constructor(evm: EvmClient) {
     this.client = new AaveClient(evm);
   }
 
   async getSummary(user: string): Promise<AaveSummary> {
     const to = H160.fromAny(user);
 
-    const [poolReserves, userReserves, userData] = await Promise.all([
-      this.client.getReservesData(),
-      this.client.getUserReservesData(to),
-      this.client.getUserAccountData(to),
-    ]);
+    const [poolReserves, userReserves, userData, blockTimestamp] =
+      await Promise.all([
+        this.client.getReservesData(),
+        this.client.getUserReservesData(to),
+        this.client.getUserAccountData(to),
+        this.client.getBlockTimestamp(),
+      ]);
 
     const [pReserves] = poolReserves;
     const [uReserves, userEmodeCategoryId] = userReserves;
@@ -60,10 +62,23 @@ export class AaveUtils {
 
       const scaledABalance = bnum(uReserve.scaledATokenBalance);
       const liquidityIndex = bnum(pReserve.liquidityIndex);
+      const liquidityRate = bnum(pReserve.liquidityRate);
       const priceInRef = bnum(pReserve.priceInMarketReferenceCurrency);
 
+      const nextBlockTimestamp = blockTimestamp + 6; // adding 6 sec (blocktime)
+      const linearInterest = this.calculateLinearInterest(
+        liquidityRate,
+        pReserve.lastUpdateTimestamp,
+        nextBlockTimestamp
+      );
+
+      const currLiquidityIndex = liquidityIndex
+        .multipliedBy(linearInterest)
+        .dividedBy(RAY)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
       const aTokenBalance = scaledABalance
-        .multipliedBy(liquidityIndex)
+        .multipliedBy(currLiquidityIndex)
         .dividedBy(RAY)
         .decimalPlaces(0, BigNumber.ROUND_DOWN);
 
@@ -318,5 +333,22 @@ export class AaveUtils {
       amount: maxWithdrawable,
       decimals,
     } as Amount;
+  }
+
+  private calculateLinearInterest(
+    liquidityRate: BigNumber,
+    lastUpdateTimestamp: number,
+    currentTimestamp: number
+  ): BigNumber {
+    const delta = currentTimestamp - lastUpdateTimestamp;
+    if (delta <= 0) return RAY;
+
+    const linearAccumulation = liquidityRate
+      .multipliedBy(delta)
+      .dividedBy(SECONDS_PER_YEAR)
+      .plus(RAY)
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+    return linearAccumulation;
   }
 }
