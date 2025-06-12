@@ -1,18 +1,5 @@
 import { defineChain, Chain } from 'viem';
 
-const rpcHttpList = [
-  'https://hydration-rpc.n.dwellir.com',
-  'https://hydration.dotters.network',
-  'https://rpc.helikon.io/hydradx',
-  'https://hydration.ibp.network',
-  'https://rpc.cay.hydration.cloud',
-  'https://rpc.parm.hydration.cloud',
-  'https://rpc.roach.hydration.cloud',
-  'https://rpc.zipp.hydration.cloud',
-  'https://rpc.sin.hydration.cloud',
-  'https://rpc.coke.hydration.cloud',
-];
-
 const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
   'wss://hydration.dotters.network',
@@ -26,30 +13,36 @@ const rpcWebsocketList = [
   'wss://rpc.coke.hydration.cloud',
 ];
 
-export const evmMainnet: Chain = defineChain({
-  id: 222222,
-  name: 'Hydration',
-  network: 'hydration',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'WETH',
-    symbol: 'WETH',
-  },
-  rpcUrls: {
-    public: {
-      http: rpcHttpList,
-      webSocket: rpcWebsocketList,
+export const createChain = (provider: any): Chain => {
+  const endpoints: string[] = provider.__internal__endpoints;
+
+  const isMainnet = endpoints.some((e) => rpcWebsocketList.includes(e));
+  const rpcs = endpoints.map((e) =>
+    e.replace('wss://', 'https://').replace('ws://', 'http://')
+  );
+
+  return defineChain({
+    id: 222222,
+    name: 'Hydration',
+    network: 'hydration',
+    nativeCurrency: {
+      decimals: 18,
+      name: 'WETH',
+      symbol: 'WETH',
     },
-    default: {
-      http: rpcHttpList,
-      webSocket: rpcWebsocketList,
+    rpcUrls: {
+      default: {
+        http: rpcs,
+      },
     },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Hydration Explorer',
-      url: 'https://explorer.evm.hydration.cloud',
+    blockExplorers: {
+      default: {
+        name: 'Hydration Explorer',
+        url: isMainnet
+          ? 'https://explorer.evm.hydration.cloud'
+          : 'https://explorer.nice.hydration.cloud',
+      },
     },
-  },
-  testnet: false,
-});
+    testnet: !isMainnet,
+  }) as Chain;
+};

@@ -1,6 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
 import { LRUCache } from '@thi.ng/cache';
 
+import { EvmClient } from '../evm';
+
 import { Pool, PoolFees, PoolPair } from './types';
 
 import { PoolService } from './PoolService';
@@ -9,8 +11,8 @@ export class CachingPoolService extends PoolService {
   private feeCache: LRUCache<string, PoolFees>;
   private disconnectSubscribeNewHeads: (() => void) | null = null;
 
-  constructor(api: ApiPromise) {
-    super(api);
+  constructor(api: ApiPromise, evm: EvmClient) {
+    super(api, evm);
     this.feeCache = new LRUCache<string, PoolFees>(null);
     this.api.rpc.chain
       .subscribeNewHeads(async (_lastHeader) => {

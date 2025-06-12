@@ -16,25 +16,21 @@ export type SdkCtx = {
   client: {
     asset: AssetClient;
     balance: BalanceClient;
-    evm: EvmClient;
   };
   ctx: {
     pool: PoolService;
   };
+  evm: EvmClient;
   tx: TxBuilderFactory;
   destroy: () => void;
 };
 
-export function createSdkContext(
-  api: ApiPromise,
-  evmClient?: EvmClient
-): SdkCtx {
+export function createSdkContext(api: ApiPromise): SdkCtx {
   const params = new ChainParams(api);
-
-  const evm = evmClient ?? new EvmClient();
+  const evm = new EvmClient(api);
 
   // Initialize pool context
-  const poolCtx = new CachingPoolService(api);
+  const poolCtx = new CachingPoolService(api, evm);
 
   // Initialize APIs
   const aave = new AaveUtils(evm);
@@ -53,11 +49,11 @@ export function createSdkContext(
     client: {
       asset: new AssetClient(api),
       balance: new BalanceClient(api),
-      evm: evm,
     },
     ctx: {
       pool: poolCtx,
     },
+    evm: evm,
     tx: new TxBuilderFactory(api, evm),
     destroy: () => {
       poolCtx.destroy();
