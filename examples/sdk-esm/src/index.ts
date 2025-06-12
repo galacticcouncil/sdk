@@ -1,32 +1,20 @@
-import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
+import { createSdkContext, PoolType } from '@galacticcouncil/sdk';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-
-import { degen } from './external';
 
 const ws = 'wss://hydration-rpc.n.dwellir.com';
 
-const wsProvider = new WsProvider(
-  ws,
-  2_500, // autoConnect (2.5 seconds)
-  {}, // headers
-  60_000, // request timeout  (60 seconds)
-  102400, // cache capacity
-  10 * 60_000 // cache TTL (10 minutes)
-);
+const wsProvider = new WsProvider(ws, 2_500, {}, 60_000, 102400, 10 * 60_000);
+const apiPromise = await ApiPromise.create({ provider: wsProvider });
 
-const api = await ApiPromise.create({ provider: wsProvider });
+const sdk = createSdkContext(apiPromise);
 
-// Initialize Trade Router
-const poolService = new PoolService(api);
-const tradeRouter = new TradeRouter(poolService);
+const { api } = sdk;
 
-await poolService.syncRegistry(degen);
-
-// Do something
-const result = await tradeRouter.getAllAssets();
-console.log(result);
+const pools = await api.router.getPools();
+console.log(pools.filter((p) => p.type === PoolType.Stable));
 
 setTimeout(() => {
-  poolService.destroy();
+  sdk.destroy();
+  apiPromise.disconnect();
   console.log('Unsubscribed');
 }, 60000);

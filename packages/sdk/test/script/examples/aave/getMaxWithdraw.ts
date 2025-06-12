@@ -1,14 +1,17 @@
-import { AaveUtils } from '../../../../src';
+import { ApiPromise } from '@polkadot/api';
+import { createSdkContext } from '../../../../src';
 
+import { PolkadotExecutor } from '../../PjsExecutor';
 import { BENEFICIARY } from '../../const';
+import { ApiUrl } from '../../types';
 
-const main = async () => {
-  const aave = new AaveUtils();
-  const result = await aave.getMaxWithdraw(BENEFICIARY, '15');
-  console.log(result);
-};
+class GetMawWithdraw extends PolkadotExecutor {
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api } = createSdkContext(apiPromise);
 
-main()
-  .then(() => console.log('Get MAX withdraw complete ✅'))
-  .catch(console.error)
-  .finally(() => process.exit(0));
+    const result = await api.aave.getMaxWithdraw(BENEFICIARY, '15');
+    console.log(result);
+  }
+}
+
+new GetMawWithdraw(ApiUrl.Hydration, 'Get max withdraw', true).run();
