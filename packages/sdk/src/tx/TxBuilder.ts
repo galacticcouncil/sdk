@@ -4,7 +4,7 @@ import { type CallDryRunEffects } from '@polkadot/types/interfaces';
 
 import { PublicClient } from 'viem';
 
-import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
+import { AAVE_EXTRA_GAS, AaveUtils } from '../aave';
 import { PolkadotApiClient } from '../api';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
@@ -30,11 +30,13 @@ export abstract class TxBuilder extends PolkadotApiClient {
 
   protected wrapTx(
     name: string,
-    tx: SubmittableExtrinsic
+    tx: SubmittableExtrinsic,
+    extraGas?: bigint
   ): SubstrateTransaction {
     return {
       hex: tx.toHex(),
       name,
+      extraGas,
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
     };
@@ -67,9 +69,9 @@ export abstract class TxBuilder extends PolkadotApiClient {
   protected dispatchWithExtraGas(
     tx: SubmittableExtrinsic
   ): SubmittableExtrinsic {
-    return this.api.tx.dispatcher['dispatchWithExtraGas'](
+    return this.api.tx.dispatcher.dispatchWithExtraGas(
       tx.inner.toHex(),
-      AAVE_GAS_LIMIT
+      AAVE_EXTRA_GAS
     );
   }
 

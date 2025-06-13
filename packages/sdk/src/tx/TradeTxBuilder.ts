@@ -1,17 +1,7 @@
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-import { encodeFunctionData } from 'viem';
-
-import {
-  AAVE_GAS_LIMIT,
-  AAVE_POOL_ABI,
-  AAVE_POOL_PROXY,
-  AAVE_UINT_256_MAX,
-} from '../aave';
+import { AAVE_EXTRA_GAS } from '../aave';
 import { Trade, TradeRouteBuilder, TradeType } from '../sor';
-import { BigNumber } from '../utils/bignumber';
-import { ERC20 } from '../utils/erc20';
-import { H160 } from '../utils/h160';
 import { getFraction } from '../utils/math';
 
 import { TxBuilder } from './TxBuilder';
@@ -155,7 +145,8 @@ export class TradeTxBuilder extends TxBuilder {
     if (firstSwap.isWithdraw()) {
       const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
       if (hasDebt) {
-        tx = this.dispatchWithExtraGas(tx);
+        const txWithExtraGas = this.dispatchWithExtraGas(tx);
+        return this.wrapTx('RouterSellAll', txWithExtraGas, AAVE_EXTRA_GAS);
       }
     }
 
@@ -174,7 +165,7 @@ export class TradeTxBuilder extends TxBuilder {
     const assetOut = lastSwap.assetOut;
     const minAmountOut = amountOut.minus(slippage);
 
-    let tx: SubmittableExtrinsic = this.api.tx.router.sellAll(
+    const tx: SubmittableExtrinsic = this.api.tx.router.sellAll(
       assetIn,
       assetOut,
       minAmountOut.toFixed(),
@@ -184,53 +175,11 @@ export class TradeTxBuilder extends TxBuilder {
     if (firstSwap.isWithdraw()) {
       const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
       if (hasDebt) {
-        tx = this.dispatchWithExtraGas(tx);
+        const txWithExtraGas = this.dispatchWithExtraGas(tx);
+        return this.wrapTx('RouterSellAll', txWithExtraGas, AAVE_EXTRA_GAS);
       }
     }
 
     return this.wrapTx('RouterSellAll', tx);
-  }
-
-  private async buildWithdrawTx(
-    max?: BigNumber
-  ): Promise<SubstrateTransaction> {
-    const { swaps } = this.trade;
-
-    const amountIn = max || this.trade.amountIn;
-
-    const firstSwap = swaps[0];
-    const reserve = firstSwap.assetOut;
-
-    const gasPrice = await this.evmClient.getGasPrice();
-    const gasPriceMargin = (gasPrice * 10n) / 100n;
-
-    const to = H160.fromAny(this.beneficiary);
-    const amount = max ? AAVE_UINT_256_MAX : BigInt(amountIn.toFixed());
-    const asset = ERC20.fromAssetId(reserve);
-
-    const withdrawCalldata = encodeFunctionData({
-      abi: AAVE_POOL_ABI,
-      functionName: 'withdraw',
-      args: [asset as `0x${string}`, amount, to as `0x${string}`],
-    });
-
-    const withdrawTx: SubmittableExtrinsic = this.api.tx.evm.call(
-      to,
-      AAVE_POOL_PROXY,
-      withdrawCalldata,
-      0n,
-      AAVE_GAS_LIMIT,
-      gasPrice + gasPriceMargin,
-      gasPrice + gasPriceMargin,
-      null,
-      []
-    );
-
-    return {
-      hex: withdrawTx.toHex(),
-      name: 'Withdraw',
-      get: () => withdrawTx,
-      dryRun: (account: string) => this.dryRun(account, withdrawTx),
-    } as SubstrateTransaction;
   }
 }

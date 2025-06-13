@@ -5,7 +5,7 @@ export const AAVE_POOL_DATA_PROVIDER =
 export const AAVE_LENDING_POOL_ADDRESS =
   '0xf3Ba4D1b50f78301BDD7EAEa9B67822A15FCA691';
 
-export const AAVE_GAS_LIMIT = 1_000_000n;
+export const AAVE_EXTRA_GAS = 1_000_000n;
 export const AAVE_ROUNDING_THRESHOLD = 5;
 export const AAVE_UINT_256_MAX = BigInt(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
