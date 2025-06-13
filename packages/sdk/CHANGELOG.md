@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.1.0
+
+### Minor Changes
+
+- Pass optional extra gas in transaction dto
+
 ## 9.0.1
 
 ### Patch Changes
