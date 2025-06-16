@@ -63,6 +63,8 @@ export class AaveUtils {
       const scaledABalance = bnum(uReserve.scaledATokenBalance);
       const liquidityIndex = bnum(pReserve.liquidityIndex);
       const liquidityRate = bnum(pReserve.liquidityRate);
+      const availableLiquidity = bnum(pReserve.availableLiquidity);
+
       const priceInRef = bnum(pReserve.priceInMarketReferenceCurrency);
 
       const nextBlockTimestamp = blockTimestamp + 6; // adding 6 sec (blocktime)
@@ -82,8 +84,10 @@ export class AaveUtils {
         .dividedBy(RAY)
         .decimalPlaces(0, BigNumber.ROUND_DOWN);
 
+      const userIsInEmode = userEmodeCategoryId !== 0;
+
       const reserveLiquidationThreshold = bnum(
-        userEmodeCategoryId === pReserve.eModeCategoryId
+        userIsInEmode && userEmodeCategoryId === pReserve.eModeCategoryId
           ? pReserve.eModeLiquidationThreshold
           : pReserve.reserveLiquidationThreshold
       ).div(10000);
@@ -97,6 +101,7 @@ export class AaveUtils {
 
       reserves.push({
         aTokenBalance,
+        availableLiquidity,
         decimals: Number(pReserve.decimals),
         isCollateral,
         priceInRef,
@@ -258,16 +263,15 @@ export class AaveUtils {
    * @param reserve - reserve on-chain id (registry)
    * @returns aToken max withdrawable balance
    */
-  async getMaxWithdraw(user: string, reserve: string): Promise<Amount> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+  async getMaxWithdraw(user: string, reserveId: string): Promise<Amount> {
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
 
-    const reserveAsset = ERC20.fromAssetId(reserve);
-    const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
+    const reserveAsset = ERC20.fromAssetId(reserveId);
+    const reserve = reserves.find((r) => r.reserveAsset === reserveAsset);
 
-    if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserveAsset);
+    if (!reserve) throw new Error('Missing reserve data for ' + reserveAsset);
 
-    return this.calculateWithdrawMax(reserveCtx, totalCollateral, totalDebt);
+    return this.calculateWithdrawMax(reserve, totalDebt, healthFactor);
   }
 
   /**
@@ -277,16 +281,15 @@ export class AaveUtils {
    * @returns aTokens max withdrawable balances
    */
   async getMaxWithdrawAll(user: string): Promise<Record<number, Amount>> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
 
     const result: Record<number, Amount> = {};
 
     for (const reserve of reserves) {
       const amount = this.calculateWithdrawMax(
         reserve,
-        totalCollateral,
-        totalDebt
+        totalDebt,
+        healthFactor
       );
 
       if (reserve.reserveId) {
@@ -296,43 +299,58 @@ export class AaveUtils {
     return result;
   }
 
+  /**
+   * Calculate maxWithdraw using following formula:
+   *
+   * maxWithdraw = (HF - 1.01 x totalDebt) / reserveLT
+   */
   private calculateWithdrawMax(
     reserve: AaveReserveData,
-    totalCollateral: BigNumber,
-    totalDebt: BigNumber
-  ) {
-    const { aTokenBalance, decimals, priceInRef, reserveLiquidationThreshold } =
-      reserve;
+    totalDebt: BigNumber,
+    currentHF: number
+  ): Amount {
+    const {
+      aTokenBalance,
+      availableLiquidity,
+      decimals,
+      priceInRef,
+      reserveLiquidationThreshold,
+      isCollateral,
+    } = reserve;
 
-    const requiredCollateral = TARGET_WITHDRAW_HF.multipliedBy(totalDebt)
-      .div(reserveLiquidationThreshold)
-      .decimalPlaces(0, BigNumber.ROUND_UP);
+    let maxWithdrawableTokens = aTokenBalance;
 
-    const withdrawableRef = totalCollateral
-      .minus(requiredCollateral)
-      .decimalPlaces(0, 1);
+    // If the asset is used as collateral and user has debt, compute HF-limited max
+    if (isCollateral && totalDebt.gt(0)) {
+      const excessHF = bnum(currentHF).minus(TARGET_WITHDRAW_HF);
 
-    if (withdrawableRef.lte(0)) {
-      return {
-        amount: ZERO,
-        decimals: decimals,
-      };
+      if (excessHF.gt(0)) {
+        const maxCollateralToWithdrawInRef = excessHF
+          .multipliedBy(totalDebt)
+          .dividedBy(reserveLiquidationThreshold)
+          .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+        const hfCapped = maxCollateralToWithdrawInRef
+          .dividedBy(priceInRef)
+          .multipliedBy(bnum(10).pow(decimals))
+          .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+        maxWithdrawableTokens = BigNumber.minimum(aTokenBalance, hfCapped);
+      } else {
+        maxWithdrawableTokens = ZERO;
+      }
     }
 
-    const withdrawableTokens = withdrawableRef
-      .multipliedBy(bnum(10).pow(decimals)) // apply token decimals
-      .dividedBy(priceInRef) // divide by ref price decimals
-      .decimalPlaces(0, BigNumber.ROUND_DOWN);
-
-    const maxWithdrawable = BigNumber.minimum(
-      aTokenBalance,
-      withdrawableTokens
+    // Apply pool liquidity cap
+    const maxOrCap = BigNumber.minimum(
+      maxWithdrawableTokens,
+      availableLiquidity
     );
 
     return {
-      amount: maxWithdrawable,
+      amount: maxOrCap,
       decimals,
-    } as Amount;
+    };
   }
 
   private calculateLinearInterest(
