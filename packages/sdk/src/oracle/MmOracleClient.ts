@@ -30,11 +30,12 @@ export class MmOracleClient {
     const [_roundId, answer, _startedAt, updatedAt] = data;
     const updatedAtBlock =
       block.number - (block.timestamp - updatedAt) / BigInt(blockTimeInSec);
+    const updatedAtNum = Number(updatedAtBlock);
 
     return {
       price: answer,
       decimals: decimals,
-      updatedAt: Number(updatedAtBlock),
+      updatedAt: updatedAtNum < 0 ? 0 : updatedAtNum,
     };
   }
 }

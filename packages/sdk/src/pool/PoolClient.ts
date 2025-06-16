@@ -6,7 +6,7 @@ import { TLRUCache } from '@thi.ng/cache';
 
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
-import { MmOracleClient } from '../mm';
+import { MmOracleClient } from '../oracle';
 import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
