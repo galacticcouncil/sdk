@@ -146,7 +146,7 @@ export class TradeScheduler {
    * @param asset - assetIn id
    * @returns minimum order budget
    */
-  private async getMinimumOrderBudget(asset: string): Promise<BigNumber> {
+  async getMinimumOrderBudget(asset: string): Promise<BigNumber> {
     if (SYSTEM_ASSET_ID === asset) {
       return this.minOrderBudget;
     }
