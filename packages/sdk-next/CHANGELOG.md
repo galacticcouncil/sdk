@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.3.0
+
+### Minor Changes
+
+[b1cb49da]: https://github.com/galacticcouncil/sdk/commit/b1cb49da
+
+- [[#b1cb49da][b1cb49da]] sdk: min order budget public accessor
+
 ## 0.2.0
 
 ### Minor Changes

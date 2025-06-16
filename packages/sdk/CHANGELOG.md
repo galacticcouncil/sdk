@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk
 
+## 9.2.0
+
+### Minor Changes
+
+[aaf6f862]: https://github.com/galacticcouncil/sdk/commit/aaf6f862
+[b1cb49da]: https://github.com/galacticcouncil/sdk/commit/b1cb49da
+
+- [[#aaf6f862][aaf6f862]] oracle: fallback to 0 if updated block negative
+- [[#b1cb49da][b1cb49da]] sdk: min order budget public accessor
+
 ## 9.1.0
 
 ### Minor Changes
