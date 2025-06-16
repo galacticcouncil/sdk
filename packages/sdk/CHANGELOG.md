@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk
 
+## 9.3.0
+
+### Minor Changes
+
+[50ae7924]: https://github.com/galacticcouncil/sdk/commit/50ae7924
+
+- [[#50ae7924][50ae7924]] aave: calculates withdrawable based on excess HF
+
 ## 9.2.0
 
 ### Minor Changes
