@@ -116,7 +116,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: susds_mwh,
       decimals: 18,
-      id: '0x931715FEE2d06333043d11F658C8CE934aC61D0c',
+      id: '0xda430218862d3db25de9f61458645dde49a9e9c1',
       xcmLocation: {
         parents: 0,
         interior: {
