@@ -63,5 +63,4 @@ const main = async () => {
 
 main()
   .then(() => console.log('Snapshot version bump done ✅'))
-  .catch(console.error)
-  .finally(() => process.exit(0));
+  .catch(console.error);
