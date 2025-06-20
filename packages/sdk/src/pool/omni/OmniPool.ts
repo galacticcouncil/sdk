@@ -130,7 +130,7 @@ export class OmniPool implements Pool {
     const feePct =
       calculatedIn === ZERO
         ? ZERO
-        : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(2);
+        : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -175,7 +175,7 @@ export class OmniPool implements Pool {
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 
     const fee = calculatedOut.minus(amountOut);
-    const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(2);
+    const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -228,8 +228,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -245,7 +245,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -268,8 +268,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -285,7 +285,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;

@@ -8,7 +8,11 @@ import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { Option, u32 } from '@polkadot/types-codec';
 import { ITuple } from '@polkadot/types-codec/types';
 
-import { HYDRADX_SS58_PREFIX, TRADEABLE_DEFAULT } from '../../consts';
+import {
+  HYDRADX_SS58_PREFIX,
+  PERMILL_DENOMINATOR,
+  TRADEABLE_DEFAULT,
+} from '../../consts';
 import { FeeUtils } from '../../utils/fee';
 
 import {
@@ -189,18 +193,18 @@ export class StableSwapClient extends PoolClient {
 
     const latestPegs = await this.getLatestPegs(poolInfo, pegs, blockNumber);
     const recentPegs = this.getRecentPegs(pegs);
-    const maxPegUpdate = pegs.maxPegUpdate.toHuman();
-    const fee = poolInfo.fee.toHuman();
+    const maxPegUpdate = FeeUtils.fromPermill(pegs.maxPegUpdate.toNumber());
+    const fee = FeeUtils.fromPermill(poolInfo.fee.toNumber());
 
     const [updatedFee, updatedPegs] = StableMath.recalculatePegs(
       JSON.stringify(recentPegs),
       JSON.stringify(latestPegs),
       blockNumber,
-      maxPegUpdate.replace(/%/g, ''),
-      fee.replace(/%/g, '')
+      FeeUtils.toRaw(maxPegUpdate).toString(),
+      FeeUtils.toRaw(fee).toString()
     );
 
-    const updatedFeePermill = Number(updatedFee) * 10000;
+    const updatedFeePermill = Number(updatedFee) * PERMILL_DENOMINATOR;
     return {
       pegsFee: FeeUtils.fromPermill(updatedFeePermill),
       pegs: updatedPegs,
@@ -269,7 +273,7 @@ export class StableSwapClient extends PoolClient {
 
   private getPoolLimits(): PoolLimits {
     const minTradingLimit =
-      this.api.consts.stableswap.minTradingLimit.toJSON() as number;
+      this.api.consts.stableswap.minTradingLimit.toNumber();
     return {
       maxInRatio: 0,
       maxOutRatio: 0,

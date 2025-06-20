@@ -12,6 +12,7 @@ import { Option, u32 } from '@polkadot/types-codec';
 import {
   HUB_ASSET_ID,
   HYDRADX_SS58_PREFIX,
+  PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
@@ -218,14 +219,18 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      FeeUtils.toDecimals(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      FeeUtils.toDecimals(feeMin).toString(),
-      FeeUtils.toDecimals(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
+    return [
+      minFee.toNumber(),
+      Number(fee) * PERMILL_DENOMINATOR,
+      maxFee.toNumber(),
+    ];
   }
 
   private getProtocolFee(
@@ -268,14 +273,18 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      FeeUtils.toDecimals(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      FeeUtils.toDecimals(feeMin).toString(),
-      FeeUtils.toDecimals(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
+    return [
+      minFee.toNumber(),
+      Number(fee) * PERMILL_DENOMINATOR,
+      maxFee.toNumber(),
+    ];
   }
 
   private getPoolId(): string {
@@ -286,10 +295,10 @@ export class OmniPoolClient extends PoolClient {
   }
 
   private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
+    const maxInRatio = this.api.consts.omnipool.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toNumber();
     const minTradingLimit =
-      this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;
+      this.api.consts.omnipool.minimumTradingLimit.toNumber();
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,
