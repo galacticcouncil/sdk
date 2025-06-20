@@ -40,8 +40,10 @@ import {
   unq,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   vastr,
   vdot,
   wbtc,
@@ -919,6 +921,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: usdc_eth,
+      decimals: 6,
+      id: 1000766,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: usdt,
       decimals: 6,
       id: 10,
@@ -959,6 +987,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xc30e9ca94cf52f3bf5692aacf81353a27052c46f',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: usdt_eth,
+      decimals: 6,
+      id: 1000767,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xdac17f958d2ee523a2206206994597c13d831ec7',
               },
             },
           ],

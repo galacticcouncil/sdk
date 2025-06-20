@@ -40,8 +40,10 @@ import {
   unq,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   vastr,
   vdot,
   ztg,
@@ -308,11 +310,12 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
   toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
-  // Waiting for Snowbridge V2
-  //toEthereumViaSnowbridgeTemplate(ldo, ldo),
+  toEthereumViaSnowbridgeTemplate(ldo, ldo),
   toEthereumViaSnowbridgeTemplate(link, link),
   toEthereumViaSnowbridgeTemplate(sky, sky),
   toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
+  toEthereumViaSnowbridgeTemplate(usdc_eth, usdc),
+  toEthereumViaSnowbridgeTemplate(usdt_eth, usdt),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
