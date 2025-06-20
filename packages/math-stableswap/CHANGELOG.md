@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 2.2.0
+
+### Minor Changes
+
+- WASM refactor: https://github.com/galacticcouncil/HydraDX-wasm/pull/40
+
 ## 2.1.0
 
 ### Minor Changes

@@ -1,5 +1,20 @@
 # @galacticcouncil/sdk-next
 
+## 0.4.0
+
+### Minor Changes
+
+- WASM refactor: https://github.com/galacticcouncil/HydraDX-wasm/pull/40
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.2.0
+  - @galacticcouncil/math-stableswap@2.2.0
+  - @galacticcouncil/math-omnipool@1.3.0
+  - @galacticcouncil/math-lbp@1.2.0
+  - @galacticcouncil/math-xyk@1.2.0
+
 ## 0.3.0
 
 ### Minor Changes

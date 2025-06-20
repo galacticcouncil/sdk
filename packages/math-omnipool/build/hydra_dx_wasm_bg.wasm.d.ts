@@ -23,7 +23,6 @@ export const is_sell_allowed: (a: number) => number;
 export const is_buy_allowed: (a: number) => number;
 export const is_add_liquidity_allowed: (a: number) => number;
 export const is_remove_liquidity_allowed: (a: number) => number;
-export const calculate_pool_trade_fee: (a: number, b: number, c: number, d: number, e: number) => void;
 export const __wbindgen_add_to_stack_pointer: (a: number) => number;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

@@ -3,7 +3,6 @@ import {
   calculate_lrna_in_given_out,
   calculate_out_given_in,
   calculate_out_given_lrna_in,
-  calculate_pool_trade_fee,
   calculate_spot_price,
   calculate_lrna_spot_price,
   calculate_shares,
@@ -119,14 +118,6 @@ export class OmniMath {
       amountOut,
       assetFee
     );
-  }
-
-  static calculatePoolTradeFee(
-    amount: string,
-    feeNumerator: number,
-    feeDenominator: number
-  ): string {
-    return calculate_pool_trade_fee(amount, feeNumerator, feeDenominator);
   }
 
   static calculateShares(

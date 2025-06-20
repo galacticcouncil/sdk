@@ -11,4 +11,3 @@ export function calculate_global_farm_shares(valued_shares: string, multiplier: 
 export function calculate_yield_farm_rewards(yield_farm_rpz: string, global_farm_rpz: string, multiplier: string, total_valued_shares: string): string;
 export function calculate_yield_farm_delta_rpvs(yield_farm_rpz: string, global_farm_rpz: string, multiplier: string, total_valued_shares: string): string;
 export function calculate_global_farm_rewards(total_shares_z: string, price_adjustment: string, yield_per_period: string, max_reward_per_period: string, periods_since_last_update: string): string;
-export function calculate_pool_trade_fee(a: string, fee_numerator: number, fee_denominator: number): string;

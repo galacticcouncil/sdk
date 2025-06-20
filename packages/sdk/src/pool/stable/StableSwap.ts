@@ -381,15 +381,6 @@ export class StableSwap implements Pool {
     return bnum(spot).div(base);
   }
 
-  calculateTradeFee(amount: BigNumber, fees: StableSwapFees): BigNumber {
-    const fee = StableMath.calculatePoolTradeFee(
-      amount.toString(),
-      fees.fee[0],
-      fees.fee[1]
-    );
-    return bnum(fee);
-  }
-
   private getPegs(): string {
     return JSON.stringify(this.pegs);
   }

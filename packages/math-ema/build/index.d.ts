@@ -1,6 +1,5 @@
 /* tslint:disable */
 /* eslint-disable */
-export function calculate_pool_trade_fee(a: string, fee_numerator: number, fee_denominator: number): string;
 /**
  * Calculate the iterated exponential moving average for the given prices.
  * + `iterations` is the number of iterations of the EMA to calculate (expected to be a serialized `u32`).
