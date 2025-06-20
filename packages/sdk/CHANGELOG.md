@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.5.1
+
+### Patch Changes
+
+- Revert range calc
+
 ## 9.5.0
 
 ### Minor Changes
