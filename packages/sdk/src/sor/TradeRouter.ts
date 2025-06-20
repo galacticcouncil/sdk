@@ -51,20 +51,16 @@ export class TradeRouter extends Router {
    * @returns min & max fee range if swap through the pool with dynamic fees support
    */
   private getRouteFeeRange(swaps: Swap[]): [number, number] | undefined {
-    let min = 0;
-    let max = 0;
-
-    for (const swap of swaps) {
-      if (swap.tradeFeeRange) {
-        min += swap.tradeFeeRange[0];
-        max += swap.tradeFeeRange[1];
-      } else {
-        min += swap.tradeFeePct;
-        max += swap.tradeFeePct;
-      }
+    const hasDynFee = swaps.filter((s: Swap) => s.tradeFeeRange).length > 0;
+    if (hasDynFee) {
+      const min = swaps
+        .map((s: Swap) => s.tradeFeeRange?.[0] ?? s.tradeFeePct)
+        .reduce((a: number, b: number) => a + b);
+      const max = swaps
+        .map((s: Swap) => s.tradeFeeRange?.[1] ?? s.tradeFeePct)
+        .reduce((a: number, b: number) => a + b);
+      return [min, max];
     }
-
-    return [FeeUtils.safeRound(min), FeeUtils.safeRound(max)];
   }
 
   /**
