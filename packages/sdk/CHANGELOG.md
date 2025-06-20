@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk
 
+## 9.5.0
+
+### Minor Changes
+
+[2f687c3a]: https://github.com/galacticcouncil/sdk/commit/2f687c3a
+
+- [[#2f687c3a][2f687c3a]] sdk: fix stableswap effective fee calc, re-work FeeUtils
+
 ## 9.4.0
 
 ### Minor Changes
