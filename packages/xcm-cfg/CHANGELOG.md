@@ -1,5 +1,12 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.3.0
+
+### Minor Changes
+
+- 6a4ec54: add L1 native usdt & usdc
+- 6a4ec54: enable ldo
+
 ## 10.2.0
 
 ### Patch Changes
