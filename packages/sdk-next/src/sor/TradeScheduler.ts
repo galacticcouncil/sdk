@@ -368,7 +368,7 @@ export class TradeScheduler {
    * @param priceImpact - price impact of swap execution (via single trade)
    * @returns optimal number of trades to execute the order
    */
-  private getTwapTradeCount(priceImpact: number): number {
+  getTwapTradeCount(priceImpact: number): number {
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
     const executionTime = this.getTwapExecutionTime(optTradeCount);
 
@@ -386,7 +386,7 @@ export class TradeScheduler {
    * @param tradeCount - number of trades per order
    * @returns unix representation of execution time
    */
-  private getTwapExecutionTime(tradeCount: number): number {
+  getTwapExecutionTime(tradeCount: number): number {
     return tradeCount * TWAP_BLOCK_PERIOD * this.blockTime;
   }
 
