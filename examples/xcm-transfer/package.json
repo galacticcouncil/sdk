@@ -12,7 +12,7 @@
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^9.5.1",
+    "@galacticcouncil/sdk": "^9.5.2",
     "@galacticcouncil/xcm-cfg": "^10.3.0",
     "@galacticcouncil/xcm-sdk": "^10.0.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",

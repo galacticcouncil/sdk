@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.5.2
+
+### Patch Changes
+
+- Update twap api accessors
+
 ## 9.5.1
 
 ### Patch Changes
