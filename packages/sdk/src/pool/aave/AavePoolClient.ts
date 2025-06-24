@@ -30,6 +30,10 @@ export class AavePoolClient extends PoolClient {
     return this.api.call.aaveTradeExecutor.pools !== undefined;
   }
 
+  getPoolType(): PoolType {
+    return PoolType.Aave;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const poolAssets =
       await this.api.call.aaveTradeExecutor.pools<
@@ -61,10 +65,6 @@ export class AavePoolClient extends PoolClient {
     _poolAddress: string
   ): Promise<PoolFees> {
     return {} as PoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.Aave;
   }
 
   private getPoolId(reserve: string, atoken: string): string {

@@ -67,6 +67,10 @@ export class OmniPoolClient extends PoolClient {
     return this.api.query.omnipool !== undefined;
   }
 
+  getPoolType(): PoolType {
+    return PoolType.Omni;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAddress = this.getPoolId();
@@ -175,10 +179,6 @@ export class OmniPoolClient extends PoolClient {
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     } as OmniPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.Omni;
   }
 
   async subscribePoolChange(pool: PoolBase): UnsubscribePromise {

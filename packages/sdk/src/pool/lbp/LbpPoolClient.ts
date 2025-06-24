@@ -26,6 +26,10 @@ export class LbpPoolClient extends PoolClient {
     return this.api.query.lbp !== undefined;
   }
 
+  getPoolType(): PoolType {
+    return PoolType.LBP;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const [poolData, validationData] = await Promise.all([
       this.api.query.lbp.poolData.entries(),
@@ -79,10 +83,6 @@ export class LbpPoolClient extends PoolClient {
       repayFee: this.getRepayFee(),
       exchangeFee: pool.fee as PoolFee,
     } as LbpPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.LBP;
   }
 
   async subscribePoolChange(pool: PoolBase): UnsubscribePromise {

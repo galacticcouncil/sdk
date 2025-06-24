@@ -22,6 +22,10 @@ export class XykPoolClient extends PoolClient {
     return this.api.query.xyk !== undefined;
   }
 
+  getPoolType(): PoolType {
+    return PoolType.XYK;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const poolAssets = await this.api.query.xyk.poolAssets.entries();
     const pools = poolAssets.map(
@@ -66,10 +70,6 @@ export class XykPoolClient extends PoolClient {
     return {
       exchangeFee: this.getExchangeFee(),
     } as XykPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.XYK;
   }
 
   protected subscribePoolChange(_pool: PoolBase): UnsubscribePromise {
