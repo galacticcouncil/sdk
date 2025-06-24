@@ -1,0 +1,38 @@
+{
+  "name": "@galacticcouncil/math-hsm",
+  "version": "1.0.0",
+  "description": "HSM pool math",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/math-hsm",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydration",
+    "basilisk",
+    "math",
+    "hsm"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./build/index.js",
+      "require": "./build/index.js",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-math.mjs --name hsm",
+    "clean": "rimraf build",
+    "link": "npm ln"
+  }
+}
