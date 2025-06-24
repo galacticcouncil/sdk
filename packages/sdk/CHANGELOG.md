@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.5.3
+
+### Patch Changes
+
+- fix: token balance free calc
+
 ## 9.5.2
 
 ### Patch Changes
