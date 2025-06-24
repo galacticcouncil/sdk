@@ -1,7 +1,5 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { firstValueFrom } from 'rxjs';
-
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
@@ -19,4 +17,4 @@ class GetisolatedFarm extends PapiExecutor {
   }
 }
 
-new GetisolatedFarm(ApiUrl.Hydration, 'Get omnipool farm').run();
+new GetisolatedFarm(ApiUrl.Hydration, 'Get isolated farm').run();

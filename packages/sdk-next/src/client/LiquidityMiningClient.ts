@@ -8,12 +8,12 @@ import {
 import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
 import Big from 'big.js';
 
-import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from 'consts';
+import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
 import { Papi } from '../api';
 import { BalanceClient } from './BalanceClient';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
-import { shiftNeg } from 'utils/format';
+import { shiftNeg } from '../utils/format';
 
 type OmnipoolGlobalFarm =
   HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];

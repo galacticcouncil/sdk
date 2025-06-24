@@ -1,7 +1,5 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { firstValueFrom } from 'rxjs';
-
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
