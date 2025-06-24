@@ -7,6 +7,7 @@ export enum PoolType {
   Omni = 'Omnipool',
   Stable = 'Stableswap',
   XYK = 'Xyk',
+  HSM = 'Hsm',
 }
 
 export enum PoolError {

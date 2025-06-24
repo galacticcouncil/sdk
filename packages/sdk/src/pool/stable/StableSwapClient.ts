@@ -42,6 +42,10 @@ export class StableSwapClient extends PoolClient {
     return this.api.query.stableswap.poolPegs !== undefined;
   }
 
+  getPoolType(): PoolType {
+    return PoolType.Stable;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const [pools, parachainBlock] = await Promise.all([
       this.api.query.stableswap.pools.entries(),
@@ -89,10 +93,6 @@ export class StableSwapClient extends PoolClient {
     return {
       fee: pool.pegsFee as PoolFee,
     } as StableSwapFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.Stable;
   }
 
   async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
