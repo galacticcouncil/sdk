@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.3.1
+
+### Patch Changes
+
+- fix mrl payload (bump to v5)
+
 ## 10.3.0
 
 ### Minor Changes
