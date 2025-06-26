@@ -125,6 +125,9 @@ export class BalanceClient extends PolkadotApiClient {
   ): BigNumber {
     const freeBalance = data.free.toString();
     const frozenBalance = data.frozen.toString();
+
+    if (BigNumber(freeBalance).lt(frozenBalance)) return BigNumber(0);
+
     return BigNumber(freeBalance).minus(frozenBalance);
   }
 }
