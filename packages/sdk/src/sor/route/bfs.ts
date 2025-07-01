@@ -3,7 +3,7 @@ import { Queue } from '../../utils/Queue';
 export type Path = Node[];
 export type Node = [id: number, from: string];
 
-const MAX_SIZE_OF_PATH = 5;
+const MAX_SIZE_OF_PATH = 6;
 
 /**
  * Breadth First Search.

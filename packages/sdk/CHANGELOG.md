@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.6.0
+
+### Minor Changes
+
+- sdk: bfs max path +1
+
 ## 9.5.4
 
 ### Patch Changes
