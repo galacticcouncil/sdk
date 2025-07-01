@@ -1,7 +1,7 @@
 import { Queue } from '../../utils/Queue';
 
-export type Path = Node[];
 export type Node = [id: number, from: string];
+export type Path = Node[];
 
 const MAX_SIZE_OF_PATH = 6;
 

@@ -3,6 +3,8 @@ import { getNodesAndEdges, Edge } from './graph';
 
 import { PoolBase } from '../../pool';
 
+export type RouteProposal = Edge[];
+
 export class RouteSuggester {
   /**
    * Proposals are ideal paths from
@@ -25,7 +27,7 @@ export class RouteSuggester {
     tokenIn: string,
     tokenOut: string | null,
     pools: PoolBase[]
-  ): Edge[][] {
+  ): RouteProposal[] {
     const nodeEdges = getNodesAndEdges(pools);
     const poolAssets = Object.keys(nodeEdges);
     const possiblePairs: Edge[] = poolAssets
