@@ -56,30 +56,36 @@ export class StableSwapClient extends PoolClient {
         },
         state,
       ]) => {
-        const pool: PalletStableswapPoolInfo = state.unwrap();
-        const poolId = id.toString();
-        const poolAddress = this.getPoolAddress(poolId);
+        try {
+          const pool: PalletStableswapPoolInfo = state.unwrap();
+          const poolId = id.toString();
+          const poolAddress = this.getPoolAddress(poolId);
 
-        const [poolDelta, poolTokens, poolPegs] = await Promise.all([
-          this.getPoolDelta(poolId, pool, blockNumber.toString()),
-          this.getPoolTokens(poolAddress, poolId, pool),
-          this.getPoolPegs(poolId, pool, blockNumber.toString()),
-        ]);
+          const [poolDelta, poolTokens, poolPegs] = await Promise.all([
+            this.getPoolDelta(poolId, pool, blockNumber.toString()),
+            this.getPoolTokens(poolAddress, poolId, pool),
+            this.getPoolPegs(poolId, pool, blockNumber.toString()),
+          ]);
 
-        this.stablePools.set(poolAddress, pool);
-        return {
-          address: poolAddress,
-          id: poolId,
-          type: PoolType.Stable,
-          fee: FeeUtils.fromPermill(pool.fee.toNumber()),
-          tokens: poolTokens,
-          ...poolDelta,
-          ...poolPegs,
-          ...this.getPoolLimits(),
-        } as PoolBase;
+          this.stablePools.set(poolAddress, pool);
+          return {
+            address: poolAddress,
+            id: poolId,
+            type: PoolType.Stable,
+            fee: FeeUtils.fromPermill(pool.fee.toNumber()),
+            tokens: poolTokens,
+            ...poolDelta,
+            ...poolPegs,
+            ...this.getPoolLimits(),
+          } as PoolBase;
+        } catch (e) {
+          console.warn(`Skipping pool ${id.toString()}\n`, String(e));
+          return null;
+        }
       }
     );
-    return Promise.all(stablePools);
+    const results = await Promise.all(stablePools);
+    return results.filter((pool): pool is PoolBase => pool !== null);
   }
 
   async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
@@ -258,8 +264,10 @@ export class StableSwapClient extends PoolClient {
           [price.toString(), priceDenom.toString()],
           updatedAt.toString(),
         ];
-      } else {
+      } else if (s.isValue) {
         return [s.asValue.map((p) => p.toString()), blockNumber];
+      } else {
+        throw Error(s.type + ' is not supported');
       }
     });
     return Promise.all(latest);
