@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.6.1
+
+### Patch Changes
+
+- fix evm client init
+
 ## 9.6.0
 
 ### Minor Changes
