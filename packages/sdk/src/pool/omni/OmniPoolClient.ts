@@ -77,7 +77,7 @@ export class OmniPoolClient extends PoolClient {
 
     const tokens = await Promise.all(poolTokens);
 
-    // Adding LRNA info
+    // add LRNA
     tokens.push({
       id: hubAssetId,
       tradeable: hubAssetTradeability.bits.toNumber(),

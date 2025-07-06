@@ -319,18 +319,14 @@ export class TradeRouter extends Router {
       throw new RouteNotFound(assetIn, assetOut);
     }
 
-    // Get pools with assetIn (except virtual shares)
+    // Get pools with assetIn
     const assetInPools = pools.filter((pool) =>
-      pool.tokens.some((t) => t.id === assetIn && t.id !== pool.id)
+      pool.tokens.some((t) => t.id === assetIn)
     );
 
     // Get liquidity of assetIn sorted by DESC
     const assetInLiquidityDesc = assetInPools
-      .map((p) => {
-        return p.type === PoolType.Aave
-          ? p.tokens
-          : p.tokens.filter((t) => t.id === assetIn);
-      })
+      .map((p) => p.tokens.filter((t) => t.id === assetIn))
       .map((t) => {
         return t
           .map((t) => bnum(t.balance).shiftedBy(-1 * t.decimals))
