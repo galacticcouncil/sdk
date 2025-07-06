@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.6.2
+
+### Patch Changes
+
+- Use virtual share issuance for liquidity route calc
+
 ## 9.6.1
 
 ### Patch Changes
