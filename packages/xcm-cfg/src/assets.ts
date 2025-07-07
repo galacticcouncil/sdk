@@ -210,6 +210,11 @@ export const tnkr = new Asset({
   originSymbol: 'TNKR',
 });
 
+export const trac = new Asset({
+  key: 'trac',
+  originSymbol: 'TRAC',
+});
+
 export const unq = new Asset({
   key: 'unq',
   originSymbol: 'UNQ',
@@ -347,6 +352,7 @@ export const assets: Asset[] = [
   susds,
   teer,
   tnkr,
+  trac,
   tbtc,
   unq,
   usdc,
