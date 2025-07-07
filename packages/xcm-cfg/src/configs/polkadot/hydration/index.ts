@@ -27,6 +27,7 @@ import {
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pen,
   pha,
@@ -71,6 +72,7 @@ import {
   laos_chain,
   moonbeam,
   mythos,
+  neuroweb,
   nodle,
   pendulum,
   polkadot,
@@ -292,6 +294,8 @@ const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
+const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 1.1)];
+
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
@@ -384,6 +388,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
+    ...toNeuroweb,
     ...toNodle,
     ...toPhala,
     ...toPolkadot,

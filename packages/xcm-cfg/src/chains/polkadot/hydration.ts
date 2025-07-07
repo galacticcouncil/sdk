@@ -35,6 +35,7 @@ import {
   pha,
   pink,
   ring,
+  neuro,
   nodl,
   sub,
   trac,
@@ -618,6 +619,20 @@ export const hydration = new EvmParachain({
         interior: {
           X1: {
             Parachain: 3369,
+          },
+        },
+      },
+    },
+    {
+      asset: neuro,
+      decimals: 18,
+      id: 36,
+      min: 0.59,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2043,
           },
         },
       },

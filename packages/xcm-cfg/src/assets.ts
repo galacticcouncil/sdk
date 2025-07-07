@@ -150,6 +150,11 @@ export const nodl = new Asset({
   originSymbol: 'NODL',
 });
 
+export const neuro = new Asset({
+  key: 'neuro',
+  originSymbol: 'NEURO',
+});
+
 export const pen = new Asset({
   key: 'pen',
   originSymbol: 'PEN',
@@ -340,6 +345,7 @@ export const assets: Asset[] = [
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pha,
   pen,
