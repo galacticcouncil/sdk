@@ -326,7 +326,11 @@ export class TradeRouter extends Router {
 
     // Get liquidity of assetIn sorted by DESC
     const assetInLiquidityDesc = assetInPools
-      .map((p) => p.tokens.filter((t) => t.id === assetIn))
+      .map((p) => {
+        return p.type === PoolType.Aave
+          ? p.tokens
+          : p.tokens.filter((t) => t.id === assetIn);
+      })
       .map((t) => {
         return t
           .map((t) => bnum(t.balance).shiftedBy(-1 * t.decimals))
