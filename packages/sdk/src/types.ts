@@ -41,4 +41,5 @@ export interface Balance {
   transferable: string;
   reservedBalance: string;
   frozenBalance: string;
+  assetId: string;
 }

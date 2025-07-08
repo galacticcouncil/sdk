@@ -1,7 +1,12 @@
 import { ApiPromise } from '@polkadot/api';
 
 import { AaveUtils } from './aave';
-import { AssetClient, BalanceClient, ChainParams } from './client';
+import {
+  AssetClient,
+  BalanceClient,
+  ChainParams,
+  BalanceClientV2,
+} from './client';
 import { EvmClient } from './evm';
 import { CachingPoolService, PoolService } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
@@ -16,6 +21,7 @@ export type SdkCtx = {
   client: {
     asset: AssetClient;
     balance: BalanceClient;
+    balanceV2: BalanceClientV2;
   };
   ctx: {
     pool: PoolService;
@@ -49,6 +55,7 @@ export function createSdkContext(api: ApiPromise): SdkCtx {
     client: {
       asset: new AssetClient(api),
       balance: new BalanceClient(api),
+      balanceV2: new BalanceClientV2(api),
     },
     ctx: {
       pool: poolCtx,
