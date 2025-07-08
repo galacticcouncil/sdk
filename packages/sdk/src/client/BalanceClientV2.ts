@@ -32,7 +32,7 @@ export class BalanceClientV2 extends PolkadotApiClient {
 
   async getAccountBalances(account: string): Promise<Array<Balance>> {
     const accountBalances =
-      await this.api.call.currenciesApi.account<
+      await this.api.call.currenciesApi.accounts<
         Vec<ITuple<[u32, OrmlTokensAccountData]>>
       >(account);
 
