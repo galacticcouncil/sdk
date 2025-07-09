@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.6.3
+
+### Patch Changes
+
+- fix aave token liq calc
+
 ## 9.6.2
 
 ### Patch Changes
