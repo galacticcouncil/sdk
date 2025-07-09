@@ -19,7 +19,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: neuro,
       fee: {
-        amount: 0.044306118,
+        amount: 0.205,
         asset: neuro,
       },
     },

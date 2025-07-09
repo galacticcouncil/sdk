@@ -627,7 +627,7 @@ export const hydration = new EvmParachain({
       asset: neuro,
       decimals: 18,
       id: 36,
-      min: 0.59,
+      min: 0.001,
       xcmLocation: {
         parents: 1,
         interior: {

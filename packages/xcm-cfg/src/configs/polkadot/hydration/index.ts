@@ -294,7 +294,7 @@ const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
-const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 1.1)];
+const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 0.205)];
 
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
