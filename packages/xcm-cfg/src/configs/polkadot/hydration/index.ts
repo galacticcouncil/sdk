@@ -27,6 +27,7 @@ import {
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pen,
   pha,
@@ -37,6 +38,7 @@ import {
   sub,
   susde,
   tbtc,
+  trac,
   unq,
   usdc,
   usdc_mwh,
@@ -71,6 +73,7 @@ import {
   laos_chain,
   moonbeam,
   mythos,
+  neuroweb,
   nodle,
   pendulum,
   polkadot,
@@ -292,6 +295,8 @@ const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
+const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 0.205)];
+
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
@@ -309,6 +314,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
+  toEthereumViaSnowbridgeTemplate(trac, trac),
   toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
   toEthereumViaSnowbridgeTemplate(ldo, ldo),
   toEthereumViaSnowbridgeTemplate(link, link),
@@ -384,6 +390,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
+    ...toNeuroweb,
     ...toNodle,
     ...toPhala,
     ...toPolkadot,
