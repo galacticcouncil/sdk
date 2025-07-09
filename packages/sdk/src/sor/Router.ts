@@ -46,7 +46,7 @@ export class Router {
    *
    * @returns {Asset[]} List of all available assets
    */
-  async getTradeableAssets(): Promise<Asset[]> {
+  async getAllAssets(): Promise<Asset[]> {
     const pools = await this.getPools();
     const asset = this.getAssets(pools);
     return [...new Map(asset).values()];

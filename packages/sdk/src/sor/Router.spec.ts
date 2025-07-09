@@ -59,7 +59,7 @@ describe('Router with mocked XYK pool service', () => {
   it('Should return all assets in pool', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
-    const result = await router.getTradeableAssets();
+    const result = await router.getAllAssets();
     expect(result).toStrictEqual([
       {
         id: '0',
