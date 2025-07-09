@@ -45,7 +45,11 @@ export abstract class PoolClient extends BalanceClient {
 
   abstract isSupported(): boolean;
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(poolPair: PoolPair, address: string): Promise<PoolFees>;
+  abstract getPoolFees(
+    block: number,
+    pair: PoolPair,
+    address: string
+  ): Promise<PoolFees>;
   protected abstract loadPools(): Promise<PoolBase[]>;
   protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
 
