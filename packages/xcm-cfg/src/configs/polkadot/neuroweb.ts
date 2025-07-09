@@ -27,7 +27,7 @@ const toHydration: AssetRoute[] = [
   }),
 ];
 
-export const astarConfig = new ChainRoutes({
+export const neurowebConfig = new ChainRoutes({
   chain: neuroweb,
   routes: [...toHydration],
 });
