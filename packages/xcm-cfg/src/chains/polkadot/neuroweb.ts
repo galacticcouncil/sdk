@@ -13,7 +13,11 @@ export const neuroweb = new Parachain({
       asset: neuro,
       xcmLocation: {
         parents: 0,
-        interior: 'Here',
+        interior: {
+          X1: {
+            PalletInstance: 10,
+          },
+        }
       },
     },
   ],
