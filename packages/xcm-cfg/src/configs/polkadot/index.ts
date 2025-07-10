@@ -22,6 +22,7 @@ import { darwiniaConfig } from './darwinia';
 import { ajunaConfig } from './ajuna';
 import { laosConfig } from './laos';
 import { energywebxConfig } from './energywebx';
+import { neurowebConfig } from './neuroweb';
 
 export const polkadotChainsConfig: ChainRoutes[] = [
   acalaConfig,
@@ -35,6 +36,7 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   interlayConfig,
   moonbeamConfig,
   mythosConfig,
+  neurowebConfig,
   nodleConfig,
   polkadotConfig,
   polkadotCexConfig,

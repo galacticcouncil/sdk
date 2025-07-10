@@ -19,6 +19,7 @@ import {
   ldo,
   link,
   sky,
+  trac,
   wsteth,
   lbtc,
 } from '../../../assets';
@@ -99,6 +100,7 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(ldo, ldo),
   toHydrationViaSnowbridgeTemplate(link, link),
   toHydrationViaSnowbridgeTemplate(sky, sky),
+  toHydrationViaSnowbridgeTemplate(trac, trac),
   toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
   toHydrationViaSnowbridgeTemplate(usdc, usdc_eth),
   toHydrationViaSnowbridgeTemplate(usdt, usdt_eth),

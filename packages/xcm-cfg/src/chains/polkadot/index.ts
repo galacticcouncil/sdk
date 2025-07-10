@@ -14,6 +14,7 @@ import { kilt_chain } from './kilt';
 import { laos_chain } from './laos';
 import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
+import { neuroweb } from './neuroweb';
 import { nodle } from './nodle';
 import { pendulum } from './pendulum';
 import { phala } from './phala';
@@ -36,6 +37,7 @@ export const polkadotChains: AnyChain[] = [
   hydration,
   kilt_chain,
   laos_chain,
+  neuroweb,
   interlay,
   moonbeam,
   mythos,
@@ -63,6 +65,7 @@ export {
   hydration,
   kilt_chain,
   laos_chain,
+  neuroweb,
   interlay,
   moonbeam,
   mythos,

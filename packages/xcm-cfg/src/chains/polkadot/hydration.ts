@@ -35,8 +35,10 @@ import {
   pha,
   pink,
   ring,
+  neuro,
   nodl,
   sub,
+  trac,
   unq,
   usdc,
   usdc_mwh,
@@ -622,6 +624,20 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: neuro,
+      decimals: 12,
+      id: 36,
+      min: 0.001,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2043,
+          },
+        },
+      },
+    },
+    {
       asset: nodl,
       decimals: 11,
       id: 26,
@@ -853,6 +869,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: trac,
+      decimals: 18,
+      id: 35,
+      min: 0.028,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xaA7a9CA87d3694B5755f213B5D04094b8d0F0A6F',
               },
             },
           ],
