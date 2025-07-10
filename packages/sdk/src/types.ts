@@ -36,9 +36,9 @@ export interface ExternalAsset extends AssetMetadata {
 }
 
 export interface Balance {
-  freeBalance: string;
+  free: string;
   total: string;
   transferable: string;
-  reservedBalance: string;
-  frozenBalance: string;
+  reserved: string;
+  frozen: string;
 }

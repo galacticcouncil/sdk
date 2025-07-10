@@ -124,21 +124,21 @@ export class BalanceClientV2 extends PolkadotApiClient {
   protected calculateBalance(
     data: PalletBalancesAccountData | OrmlTokensAccountData
   ): Balance {
-    const free = BigNumber(data.free.toString());
-    const frozenBalance = data.frozen.toString();
-    const reservedBalance = data.reserved.toString();
+    const freeBN = BigNumber(data.free.toString());
+    const frozen = data.frozen.toString();
+    const reserved = data.reserved.toString();
 
-    const transferable = free.gte(frozenBalance)
-      ? free.minus(frozenBalance).toString()
+    const transferable = freeBN.gte(frozen)
+      ? freeBN.minus(frozen).toString()
       : '0';
-    const total = free.plus(reservedBalance).toString();
+    const total = freeBN.plus(reserved).toString();
 
     return {
-      freeBalance: free.toString(),
+      free: freeBN.toString(),
       total,
       transferable,
-      reservedBalance,
-      frozenBalance,
+      reserved,
+      frozen,
     };
   }
 }
