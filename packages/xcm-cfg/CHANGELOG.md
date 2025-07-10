@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.4.0
+
+### Minor Changes
+
+- 1243a49: Add TRAC and NEURO
+
 ## 10.3.1
 
 ### Patch Changes
