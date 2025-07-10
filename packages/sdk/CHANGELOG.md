@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.7.0
+
+### Minor Changes
+
+- cf0aee6: BalanceClientV2 supporting whole balance breakdown
+
 ## 9.6.3
 
 ### Patch Changes
@@ -10,7 +16,7 @@
 
 ### Patch Changes
 
-- Use virtual share issuance for liquidity route calc
+- use virtual share issuance for liquidity route calc
 
 ## 9.6.1
 
