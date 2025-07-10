@@ -9,8 +9,6 @@ import { PolkadotApiClient } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { BigNumber } from '../utils/bignumber';
 import { Balance } from '../types';
-import { u32, Vec } from '@polkadot/types-codec';
-import { ITuple } from '@polkadot/types-codec/types';
 
 export class BalanceClientV2 extends PolkadotApiClient {
   constructor(api: ApiPromise) {
@@ -30,30 +28,19 @@ export class BalanceClientV2 extends PolkadotApiClient {
       : this.getTokenBalance(account, assetId);
   }
 
-  async getAccountBalances(account: string): Promise<Array<Balance>> {
-    const accountBalances =
-      await this.api.call.currenciesApi.accounts<
-        Vec<ITuple<[u32, OrmlTokensAccountData]>>
-      >(account);
-
-    return accountBalances.map(([id, accountBalance]) =>
-      this.calculateBalance(accountBalance, id.toString())
-    );
-  }
-
   async getSystemBalance(account: string): Promise<Balance> {
     const { data } = await this.api.query.system.account(account);
-    return this.calculateBalance(data, SYSTEM_ASSET_ID);
+    return this.calculateBalance(data);
   }
 
   async getTokenBalance(account: string, assetId: string): Promise<Balance> {
     const data = await this.api.query.tokens.accounts(account, assetId);
-    return this.calculateBalance(data, assetId);
+    return this.calculateBalance(data);
   }
 
   async getErc20Balance(account: string, assetId: string): Promise<Balance> {
     const data = await this.getTokenBalanceData(account, assetId);
-    return this.calculateBalance(data, assetId);
+    return this.calculateBalance(data);
   }
 
   async subscribeSystemBalance(
@@ -61,7 +48,7 @@ export class BalanceClientV2 extends PolkadotApiClient {
     onChange: (token: string, balance: Balance) => void
   ): UnsubscribePromise {
     return this.api.query.system.account(address, ({ data }) =>
-      onChange(SYSTEM_ASSET_ID, this.calculateBalance(data, SYSTEM_ASSET_ID))
+      onChange(SYSTEM_ASSET_ID, this.calculateBalance(data))
     );
   }
 
@@ -83,7 +70,7 @@ export class BalanceClientV2 extends PolkadotApiClient {
       const result: [string, Balance][] = [];
       balances.forEach((data, i) => {
         const token = queries[i][1];
-        const balance = this.calculateBalance(data, token);
+        const balance = this.calculateBalance(data);
         result.push([token, balance]);
       });
       onChange(result);
@@ -135,8 +122,7 @@ export class BalanceClientV2 extends PolkadotApiClient {
   }
 
   protected calculateBalance(
-    data: PalletBalancesAccountData | OrmlTokensAccountData,
-    assetId: string
+    data: PalletBalancesAccountData | OrmlTokensAccountData
   ): Balance {
     const free = BigNumber(data.free.toString());
     const frozenBalance = data.frozen.toString();
@@ -153,7 +139,6 @@ export class BalanceClientV2 extends PolkadotApiClient {
       transferable,
       reservedBalance,
       frozenBalance,
-      assetId,
     };
   }
 }
