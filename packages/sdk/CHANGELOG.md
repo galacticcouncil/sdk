@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 9.8.0
+
+### Minor Changes
+
+- 3ec8fb7: fee memo short term dedup
+- c974dd0: route proposals cache
+
 ## 9.7.0
 
 ### Minor Changes
