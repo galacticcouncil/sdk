@@ -93,9 +93,13 @@ export class StableSwapClient extends PoolClient {
     return results.filter((pool): pool is PoolBase => pool !== null);
   }
 
-  async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
+  async getPoolFees(
+    _block: number,
+    _poolPair: PoolPair,
+    poolAddress: string
+  ): Promise<PoolFees> {
     const pool = this.pools.find(
-      (pool) => pool.address === address
+      (pool) => pool.address === poolAddress
     ) as StableSwapBase;
     return {
       fee: pool.pegsFee as PoolFee,

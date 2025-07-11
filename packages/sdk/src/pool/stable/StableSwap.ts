@@ -287,11 +287,11 @@ export class StableSwap implements Pool {
 
     if (poolPair.assetIn == this.id) {
       const base = scale(ONE, poolPair.decimalsIn - poolPair.decimalsOut);
-      return bnum(spot).div(base);
+      return bnum(spot).div(base).decimalPlaces(0, 1);
     }
 
     const base = scale(ONE, 18 - poolPair.decimalsIn);
-    return bnum(spot).div(base);
+    return bnum(spot).div(base).decimalPlaces(0, 1);
   }
 
   private calculateOut(
@@ -381,11 +381,11 @@ export class StableSwap implements Pool {
 
     if (poolPair.assetOut == this.id) {
       const base = scale(ONE, poolPair.decimalsOut - poolPair.decimalsIn);
-      return bnum(spot).div(base);
+      return bnum(spot).div(base).decimalPlaces(0, 1);
     }
 
     const base = scale(ONE, 18 - poolPair.decimalsOut);
-    return bnum(spot).div(base);
+    return bnum(spot).div(base).decimalPlaces(0, 1);
   }
 
   private getPegs(): string {

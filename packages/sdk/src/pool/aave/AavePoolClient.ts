@@ -55,7 +55,11 @@ export class AavePoolClient extends PoolClient {
     });
   }
 
-  async getPoolFees(_poolPair: PoolPair, _address: string): Promise<PoolFees> {
+  async getPoolFees(
+    _block: number,
+    _poolPair: PoolPair,
+    _poolAddress: string
+  ): Promise<PoolFees> {
     return {} as PoolFees;
   }
 

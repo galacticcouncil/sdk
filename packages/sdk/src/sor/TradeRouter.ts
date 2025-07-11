@@ -14,6 +14,16 @@ import {
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
+  private async loadRouteContext(assetIn: string, assetOut: string) {
+    const pools = await super.getPools();
+    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+
+    const paths = super.getPaths(assetIn, assetOut, pools);
+    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+
+    return { paths, pools, poolsMap };
+  }
+
   /**
    * Check whether trade is direct or not
    *
@@ -109,15 +119,7 @@ export class TradeRouter extends Router {
     amountIn: BigNumber | string | number,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+    const { paths, poolsMap } = await this.loadRouteContext(assetIn, assetOut);
 
     let swaps: SellSwap[];
     if (route) {
@@ -308,16 +310,10 @@ export class TradeRouter extends Router {
    * @return Most liquid route of given token pair
    */
   async getMostLiquidRoute(assetIn: string, assetOut: string): Promise<Hop[]> {
-    const pools = await super.getPools();
-    const { poolsMap } = await super.validateTokenPair(
+    const { paths, pools, poolsMap } = await this.loadRouteContext(
       assetIn,
-      assetOut,
-      pools
+      assetOut
     );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) {
-      throw new RouteNotFound(assetIn, assetOut);
-    }
 
     // Get pools with assetIn
     const assetInPools = pools.filter((pool) =>
@@ -367,17 +363,14 @@ export class TradeRouter extends Router {
     assetIn: string,
     assetOut: string
   ): Promise<Amount | undefined> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) {
+    let context;
+    try {
+      context = await this.loadRouteContext(assetIn, assetOut);
+    } catch {
       return Promise.resolve(undefined);
     }
+
+    const { poolsMap } = context;
 
     const route = await this.getMostLiquidRoute(assetIn, assetOut);
     const swaps = await this.toSellSwaps('1', route, poolsMap);
@@ -441,15 +434,7 @@ export class TradeRouter extends Router {
     amountOut: BigNumber | string | number,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+    const { paths, poolsMap } = await this.loadRouteContext(assetIn, assetOut);
 
     let swaps: BuySwap[];
     if (route) {

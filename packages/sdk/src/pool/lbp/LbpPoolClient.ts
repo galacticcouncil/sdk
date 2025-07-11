@@ -67,9 +67,13 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
+  async getPoolFees(
+    _block: number,
+    _poolPair: PoolPair,
+    poolAddress: string
+  ): Promise<PoolFees> {
     const pool = this.pools.find(
-      (pool) => pool.address === address
+      (pool) => pool.address === poolAddress
     ) as LbpPoolBase;
     return {
       repayFee: this.getRepayFee(),
