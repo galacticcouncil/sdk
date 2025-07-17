@@ -96,6 +96,7 @@ import {
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
   toTransferTemplate,
+  toAssetHubForeignAssetTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -107,48 +108,16 @@ const toAcala: AssetRoute[] = [
 ];
 
 const toAssetHub: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: dot,
-      fee: {
-        amount: 0.19,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: ksm,
-      fee: {
-        amount: 0.05,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
+  toAssetHubForeignAssetTemplate(dot, XcmTransferType.DestinationReserve, 0.19),
+  toAssetHubForeignAssetTemplate(ksm, XcmTransferType.DestinationReserve, 0.05),
+  toAssetHubForeignAssetTemplate(eth, XcmTransferType.LocalReserve, 0.0000055),
+  toAssetHubForeignAssetTemplate(usdc_eth, XcmTransferType.LocalReserve, 0.01),
+  toAssetHubForeignAssetTemplate(usdt_eth, XcmTransferType.LocalReserve, 0.01),
+  toAssetHubForeignAssetTemplate(tbtc, XcmTransferType.LocalReserve, 0.00000023),
+  toAssetHubForeignAssetTemplate(aave, XcmTransferType.LocalReserve, 0.00006),
+  toAssetHubForeignAssetTemplate(link, XcmTransferType.LocalReserve, 0.001),
+  toAssetHubForeignAssetTemplate(sky, XcmTransferType.LocalReserve, 0.52),
+  toAssetHubForeignAssetTemplate(ldo, XcmTransferType.LocalReserve, 0.013),
   new AssetRoute({
     source: {
       asset: usdt,

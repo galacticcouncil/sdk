@@ -1,14 +1,22 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import {
+  aave,
   ded,
   dot,
   dota,
+  eth,
   ksm,
+  ldo,
+  link,
   myth,
   pink,
+  sky,
+  tbtc,
   usdc,
+  usdc_eth,
   usdt,
+  usdt_eth,
   wud,
 } from '../../../assets';
 import {
@@ -33,6 +41,7 @@ import {
   toParaStablesWithSwapTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
+  toHydrationForeignAssetTemplate,
   extraFee,
 } from './templates';
 
@@ -61,31 +70,15 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: ksm,
-      fee: {
-        amount: 0.0001,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.LocalReserve,
-    }),
-  }),
+  toHydrationForeignAssetTemplate(ksm, XcmTransferType.LocalReserve, 0.0001),
+  toHydrationForeignAssetTemplate(eth, XcmTransferType.DestinationReserve, 0.0000055),
+  toHydrationForeignAssetTemplate(usdc_eth, XcmTransferType.DestinationReserve, 0.01),
+  toHydrationForeignAssetTemplate(usdt_eth, XcmTransferType.DestinationReserve, 0.01),
+  toHydrationForeignAssetTemplate(tbtc, XcmTransferType.DestinationReserve, 0.00000023),
+  toHydrationForeignAssetTemplate(aave, XcmTransferType.DestinationReserve, 0.00006),
+  toHydrationForeignAssetTemplate(link, XcmTransferType.DestinationReserve, 0.001),
+  toHydrationForeignAssetTemplate(sky, XcmTransferType.DestinationReserve, 0.52),
+  toHydrationForeignAssetTemplate(ldo, XcmTransferType.DestinationReserve, 0.013),
   toParaStablesTemplate(usdt, hydration, 0.02),
   toParaStablesTemplate(usdc, hydration, 0.02),
   toHydrationExtTemplate(pink),

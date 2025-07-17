@@ -5,12 +5,13 @@ import {
   ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xcm-core';
 
-import { dot, usdt } from '../../../assets';
+import { aave, dot, eth, ksm, ldo, link, sky, tbtc, usdc_eth, usdt, usdt_eth } from '../../../assets';
 import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
+  XcmTransferType,
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
@@ -141,4 +142,36 @@ export function toHydrationExtTemplate(asset: Asset): AssetRoute {
 
 export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
   return toParaExtTemplate(asset, moonbeam, 0.25);
+}
+
+export function toHydrationForeignAssetTemplate(
+  asset: Asset,
+  transferType: XcmTransferType,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: BalanceBuilder().substrate().foreignAssets().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: extraFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().foreignAssets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: transferType,
+    }),
+  });
 }

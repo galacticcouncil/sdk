@@ -4,7 +4,7 @@ import {
   ParachainParams,
 } from '@galacticcouncil/xcm-core';
 
-import { ded, dot, dota, ksm, myth, pink, usdc, usdt, wud } from '../../assets';
+import { aave, ded, dot, dota, eth, ksm, ldo, link, myth, pink, sky, tbtc, usdc, usdc_eth, usdt, usdt_eth, wud } from '../../assets';
 
 const config = {
   assetsData: [
@@ -153,6 +153,198 @@ const config = {
           X1: [
             {
               GlobalConsensus: 'Kusama',
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: eth,
+      decimals: 18,
+      min: 0.0000055,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: {
+            GlobalConsensus: {
+              Ethereum: {
+                chainId: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      asset: usdc_eth,
+      decimals: 6,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: usdt_eth,
+      decimals: 6,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: tbtc,
+      decimals: 18,
+      min: 0.00000023,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: aave,
+      decimals: 18,
+      min: 0.00006,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: link,
+      decimals: 18,
+      min: 0.001,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x514910771af9ca656af840dff83e8264ecf986ca',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: sky,
+      decimals: 18,
+      min: 0.52,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x56072c95faa701256059aa122697b133aded9279',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: ldo,
+      decimals: 18,
+      min: 0.013,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x5a98fcbea516cf06857215779fd812ca3bef1b32',
+              },
             },
           ],
         },

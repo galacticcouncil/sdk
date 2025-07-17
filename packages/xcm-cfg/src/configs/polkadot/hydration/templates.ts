@@ -342,3 +342,31 @@ export function toSolanaViaWormholeTemplate(
     tags: [Tag.Mrl, Tag.Wormhole],
   });
 }
+
+export function toAssetHubForeignAssetTemplate(
+  asset: Asset,
+  transferType: XcmTransferType,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: asset,
+      fee: {
+        amount: destinationFee,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: transferType,
+    }),
+  });
+}
