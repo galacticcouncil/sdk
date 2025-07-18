@@ -15,6 +15,22 @@ const external = [
     symbol: 'BEEFY',
     internalId: '1000036',
   },
+  {
+    decimals: 10,
+    id: '23',
+    internalId: '1000021',
+    name: 'PINK',
+    origin: 1000,
+    symbol: 'PINK',
+  },
+  {
+    decimals: 10,
+    id: '30',
+    internalId: '1000019',
+    name: 'DED',
+    origin: 1000,
+    symbol: 'DED',
+  },
 ];
 
 class GetBestSellExample extends PolkadotExecutor {
@@ -23,7 +39,7 @@ class GetBestSellExample extends PolkadotExecutor {
 
     await ctx.pool.syncRegistry(external);
 
-    const trade = await api.router.getBestSell('1005', '15', '61.1');
+    const trade = await api.router.getBestSell('30', '10', '10');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
 

@@ -3,7 +3,7 @@ import { Queue } from '../../utils/Queue';
 export type Node = [id: number, from: string];
 export type Path = Node[];
 
-const MAX_SIZE_OF_PATH = 6;
+const MAX_SIZE_OF_PATH = 7;
 
 /**
  * Breadth First Search.
@@ -49,27 +49,21 @@ export class Bfs {
 
     // First node of path has no from (initial)
     currentPath.push([src, '']);
+
     queue.enqueue(currentPath);
 
     while (queue.size() > 0) {
       const path = queue.dequeue();
 
-      if (path == null) {
-        return paths;
-      }
-
-      // Max number of edges to get from src to dst
-      if (path.length > MAX_SIZE_OF_PATH) {
-        return paths;
+      if (!path || path.length > MAX_SIZE_OF_PATH) {
+        continue;
       }
 
       const last = path[path.length - 1];
 
       // If destination is undefined save all traversal to paths
       // If last node is the desired destination save to paths
-      if (dst === null) {
-        paths.push(path);
-      } else if (last[0] === dst) {
+      if (dst === null || last[0] === dst) {
         paths.push(path);
       }
 
@@ -83,6 +77,65 @@ export class Bfs {
         }
       });
     }
+
+    return paths;
+  }
+
+  /**
+   * Finding shortest paths in graph from given source to destination
+   *
+   * @param g - routes graph containing nodes & corresponding edges
+   * @param src - source node
+   * @param dst - destination node or null if requesting all posible paths from src
+   * @returns shortest paths
+   */
+  findShortestPaths(
+    g: Map<number, Path>,
+    src: number,
+    dst: number | null
+  ): Path[] {
+    // Store the result paths
+    const paths: Path[] = [];
+    // Store the traversing paths
+    const queue = new Queue<Path>();
+    // Store the current path
+    const currentPath: Path = [];
+
+    // First node of path has no from (initial)
+    currentPath.push([src, '']);
+
+    queue.enqueue(currentPath);
+
+    let shortestLength = Infinity;
+
+    while (queue.size() > 0) {
+      const path = queue.dequeue();
+
+      if (!path) {
+        continue;
+      }
+
+      const last = path[path.length - 1];
+
+      if (last[0] === dst) {
+        if (path.length < shortestLength) {
+          shortestLength = path.length;
+          paths.length = 0;
+          paths.push(path);
+        } else if (path.length === shortestLength) {
+          paths.push(path);
+        }
+        continue;
+      }
+
+      const neighbors = g.get(last[0]);
+      for (const neighbor of neighbors ?? []) {
+        if (this.isNotVisited(neighbor, path)) {
+          queue.enqueue([...path, neighbor]);
+        }
+      }
+    }
+
     return paths;
   }
 

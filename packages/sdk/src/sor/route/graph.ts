@@ -7,10 +7,10 @@ export type NodeEdges = {
 };
 
 /**
- * Calculate nodes & edges from substrate pools
+ * Calculate nodes & edges from pools
  *
- * @param pools - given substrate pools
- * @returns nodes & corresponding edges
+ * @param pools - pools
+ * @returns nodes & edges
  */
 export function getNodesAndEdges(pools: PoolBase[]): NodeEdges {
   const edgesFromNode: NodeEdges = {};

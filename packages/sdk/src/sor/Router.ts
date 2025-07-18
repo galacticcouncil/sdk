@@ -129,7 +129,7 @@ export class Router {
    */
   protected getPaths(
     assetIn: string,
-    assetOut: string | null,
+    assetOut: string,
     pools: PoolBase[]
   ): Hop[][] {
     const poolsMap = this.toPoolsMap(pools);
@@ -142,7 +142,7 @@ export class Router {
 
   private getProposals(
     assetIn: string,
-    assetOut: string | null,
+    assetOut: string,
     pools: PoolBase[]
   ): RouteProposal[] {
     const key = `${assetIn}->${assetOut}::${hashPools(pools)}`;
