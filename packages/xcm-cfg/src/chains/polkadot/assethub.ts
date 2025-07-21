@@ -165,13 +165,15 @@ const config = {
       xcmLocation: {
         parents: 2,
         interior: {
-          X1: {
-            GlobalConsensus: {
-              Ethereum: {
-                chainId: 1,
+          X1: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
               },
             },
-          },
+          ],
         },
       },
     },
