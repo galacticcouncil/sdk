@@ -343,9 +343,8 @@ export function toSolanaViaWormholeTemplate(
   });
 }
 
-export function toAssetHubForeignAssetTemplate(
+export function toHubForeignAssetTemplate(
   asset: Asset,
-  transferType: XcmTransferType,
   destinationFee: number
 ): AssetRoute {
   return new AssetRoute({
@@ -361,12 +360,12 @@ export function toAssetHubForeignAssetTemplate(
       chain: assetHub,
       asset: asset,
       fee: {
-        amount: destinationFee,
-        asset: asset,
+        amount: 0.19,
+        asset: dot,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: transferType,
+      transferType: XcmTransferType.DestinationReserve,
     }),
   });
 }

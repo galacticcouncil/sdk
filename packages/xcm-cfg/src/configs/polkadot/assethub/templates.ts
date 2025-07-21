@@ -146,7 +146,6 @@ export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
 
 export function toHydrationForeignAssetTemplate(
   asset: Asset,
-  transferType: XcmTransferType,
   destinationFee: number
 ): AssetRoute {
   return new AssetRoute({
@@ -171,7 +170,7 @@ export function toHydrationForeignAssetTemplate(
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: transferType,
+      transferType: XcmTransferType.LocalReserve,
     }),
   });
 }

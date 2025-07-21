@@ -96,7 +96,7 @@ import {
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
   toTransferTemplate,
-  toAssetHubForeignAssetTemplate,
+  toHubForeignAssetTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -108,16 +108,16 @@ const toAcala: AssetRoute[] = [
 ];
 
 const toAssetHub: AssetRoute[] = [
-  toAssetHubForeignAssetTemplate(dot, XcmTransferType.DestinationReserve, 0.19),
-  toAssetHubForeignAssetTemplate(ksm, XcmTransferType.DestinationReserve, 0.05),
-  toAssetHubForeignAssetTemplate(eth, XcmTransferType.LocalReserve, 0.0000055),
-  toAssetHubForeignAssetTemplate(usdc_eth, XcmTransferType.LocalReserve, 0.01),
-  toAssetHubForeignAssetTemplate(usdt_eth, XcmTransferType.LocalReserve, 0.01),
-  toAssetHubForeignAssetTemplate(tbtc, XcmTransferType.LocalReserve, 0.00000023),
-  toAssetHubForeignAssetTemplate(aave, XcmTransferType.LocalReserve, 0.00006),
-  toAssetHubForeignAssetTemplate(link, XcmTransferType.LocalReserve, 0.001),
-  toAssetHubForeignAssetTemplate(sky, XcmTransferType.LocalReserve, 0.52),
-  toAssetHubForeignAssetTemplate(ldo, XcmTransferType.LocalReserve, 0.013),
+  toHubForeignAssetTemplate(dot, 0.19),
+  toHubForeignAssetTemplate(ksm, 0.05),
+  toHubForeignAssetTemplate(eth, 0.0000055),
+  toHubForeignAssetTemplate(usdc_eth, 0.01),
+  toHubForeignAssetTemplate(usdt_eth, 0.01),
+  toHubForeignAssetTemplate(tbtc, 0.00000023),
+  toHubForeignAssetTemplate(aave, 0.00006),
+  toHubForeignAssetTemplate(link, 0.001),
+  toHubForeignAssetTemplate(sky, 0.52),
+  toHubForeignAssetTemplate(ldo, 0.013),
   new AssetRoute({
     source: {
       asset: usdt,
