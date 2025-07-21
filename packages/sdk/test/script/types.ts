@@ -8,6 +8,6 @@ export enum ApiUrl {
   Basilisk_Rococo_CLOUD = 'wss://basilisk-rococo-rpc.play.hydration.cloud',
   Hydration = 'wss://hydration-rpc.n.dwellir.com',
   Nice = 'wss://rpc.nice.hydration.cloud',
-  Lark = 'wss://node.lark.hydration.cloud',
+  Lark1 = 'wss://1.lark.hydration.cloud',
   Lark3 = 'wss://3.lark.hydration.cloud',
 }
