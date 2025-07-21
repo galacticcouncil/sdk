@@ -7,26 +7,29 @@ export type RouteProposal = Edge[];
 
 export class RouteSuggester {
   /**
-   * Returns ideal shortest path proposals from `tokenIn` to `tokenOut`
-   * based on BFS over trusted or relevant pools.
+   * Returns ideal path proposals from `tokenIn` to `tokenOut`
+   * based on BFS over trusted, isolated or both pools.
    *
    * - Trusted pools = all pools except XYK (isolated)
    *
    * The routing strategy is:
+   * - If neither `tokenIn` and `tokenOut` is in a trusted pool:
+   *   → Run BFS over isolated pools only, searching for all paths.
    * - If both `tokenIn` and `tokenOut` are in trusted pools:
-   *   → BFS is executed over trusted pools only
+   *   → Run BFS over trusted pools only, searching for shortest paths.
    * - Otherwise:
-   *   → BFS is executed over relevant pools (isolated + trusted)
+   *   → Run BFS over all relevant pools (trusted + isolated).
    *
-   * This minimizes search scope while ensuring all viable paths are discovered.
+   * This strategy minimizes search scope while ensuring all viable
+   * paths are discovered.
    *
    * NOTE: Filtering of valid swaps and pair execution is handled by the router,
    * not in this step.
    *
    * @param tokenIn - The starting token (asset ID as string)
    * @param tokenOut - The destination token (asset ID as string)
-   * @param pools - The full list of available pools
-   * @returns Array of shortest path proposals (each path is a list of edges)
+   * @param pools - The list of available pools
+   * @returns Array of path proposals (each path is a list of edges)
    */
   getProposals(
     tokenIn: string,
@@ -69,7 +72,7 @@ export class RouteSuggester {
       return this.parsePaths(paths);
     }
 
-    // Case 1: Trusted-only
+    // Case 2: Trusted-only
     if (tokenInTrusted && tokenOutTrusted) {
       const graph = buildGraphFromPools(trustedPools);
       const paths = bfs.findShortestPaths(graph, tokenInId, tokenOutId);
