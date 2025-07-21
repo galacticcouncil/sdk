@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.9.0
+
+### Minor Changes
+
+- 5de2359: sdk: speed up bfs by pre-filtering the relevant amms
+
 ## 9.8.0
 
 ### Minor Changes
