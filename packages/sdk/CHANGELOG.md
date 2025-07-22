@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.9.1
+
+### Patch Changes
+
+- fix: suggester use all paths in trusted set
+
 ## 9.9.0
 
 ### Minor Changes
