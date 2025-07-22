@@ -51,7 +51,6 @@ export class OmniPoolClient extends PoolClient {
   });
 
   private memOracleQuery = memoize1((key: string) => {
-    this.log('Fetching oracle price for', key);
     const oracleKey = key.split(':');
     return this.api.query.emaOracle.oracles<TEmaOracle>(
       ORACLE_NAME,
@@ -61,7 +60,6 @@ export class OmniPoolClient extends PoolClient {
   }, this.memQueryCache);
 
   private memFeesQuery = memoize1((key: string) => {
-    this.log('Fetching dyn fees for', key);
     return this.api.query.dynamicFees.assetFee(key);
   }, this.memQueryCache);
 

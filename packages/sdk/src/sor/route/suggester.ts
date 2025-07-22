@@ -75,7 +75,7 @@ export class RouteSuggester {
     // Case 2: Trusted-only
     if (tokenInTrusted && tokenOutTrusted) {
       const graph = buildGraphFromPools(trustedPools);
-      const paths = bfs.findShortestPaths(graph, tokenInId, tokenOutId);
+      const paths = bfs.findPaths(graph, tokenInId, tokenOutId);
       return this.parsePaths(paths);
     }
 
