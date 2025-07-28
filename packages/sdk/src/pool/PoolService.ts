@@ -13,6 +13,7 @@ import { LbpPoolClient } from './lbp';
 import { OmniPoolClient } from './omni';
 import { XykPoolClient } from './xyk';
 import { StableSwapClient } from './stable';
+import { HsmClient } from './hsm';
 
 import {
   IPoolService,
@@ -36,6 +37,7 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
   protected readonly omniClient: OmniPoolClient;
   protected readonly lbpClient: LbpPoolClient;
   protected readonly stableClient: StableSwapClient;
+  protected readonly hsmClient: HsmClient;
 
   protected readonly clients: PoolClient[] = [];
 
@@ -60,12 +62,14 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     this.omniClient = new OmniPoolClient(this.api, evm);
     this.lbpClient = new LbpPoolClient(this.api, evm);
     this.stableClient = new StableSwapClient(this.api, evm);
+    this.hsmClient = new HsmClient(this.api, evm, this.stableClient);
     this.clients = [
       this.aaveClient,
       this.xykClient,
       this.omniClient,
       this.lbpClient,
       this.stableClient,
+      this.hsmClient,
     ];
 
     this.api.rpc.chain
@@ -124,6 +128,7 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     this.omniClient.unsubscribe();
     this.lbpClient.unsubscribe();
     this.stableClient.unsubscribe();
+    this.hsmClient.unsubscribe();
     this.disconnectSubscribeNewHeads?.();
   }
 
@@ -143,6 +148,8 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
           poolPair,
           pool.address
         );
+      case PoolType.HSM:
+        return this.hsmClient.getPoolFees(this.block, poolPair, pool.address);
       default:
         throw new PoolNotFound(pool.type);
     }
