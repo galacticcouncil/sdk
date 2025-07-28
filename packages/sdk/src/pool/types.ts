@@ -82,12 +82,12 @@ export interface Pool extends PoolBase {
   validateAndBuy(
     poolPair: PoolPair,
     amountOut: BigNumber,
-    dynamicFees: PoolFees | null
+    fees: PoolFees | null
   ): BuyCtx;
   validateAndSell(
     poolPair: PoolPair,
-    amountOut: BigNumber,
-    dynamicFees: PoolFees | null
+    amountIn: BigNumber,
+    fees: PoolFees | null
   ): SellCtx;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;

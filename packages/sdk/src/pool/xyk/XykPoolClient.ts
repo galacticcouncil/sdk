@@ -18,12 +18,23 @@ import { PoolClient } from '../PoolClient';
 import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient {
-  isSupported(): boolean {
-    return this.api.query.xyk !== undefined;
-  }
-
   getPoolType(): PoolType {
     return PoolType.XYK;
+  }
+
+  private getPoolLimits(): PoolLimits {
+    const maxInRatio = this.api.consts.xyk.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toNumber();
+    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toNumber();
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  isSupported(): boolean {
+    return this.api.query.xyk !== undefined;
   }
 
   async loadPools(): Promise<PoolBase[]> {
@@ -72,23 +83,12 @@ export class XykPoolClient extends PoolClient {
     } as XykPoolFees;
   }
 
-  protected subscribePoolChange(_pool: PoolBase): UnsubscribePromise {
-    throw new Error('Pool change subscription not supported!');
-  }
-
   private getExchangeFee(): PoolFee {
     const [numerator, denominator] = this.api.consts.xyk.getExchangeFee;
     return FeeUtils.fromRate(numerator.toNumber(), denominator.toNumber());
   }
 
-  private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.xyk.maxInRatio.toNumber();
-    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toNumber();
-    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toNumber();
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
+  protected async subscribeUpdates(): UnsubscribePromise {
+    return () => {};
   }
 }

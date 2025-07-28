@@ -23,13 +23,6 @@
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./build/index.js",
-      "require": "./build/index.js",
-      "types": "./build/index.d.ts"
-    }
-  },
   "scripts": {
     "build": "node ../../scripts/build-math.mjs --name hsm",
     "clean": "rimraf build",

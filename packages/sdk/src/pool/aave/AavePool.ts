@@ -20,28 +20,16 @@ export class AavePool implements Pool {
   minTradingLimit: number;
 
   static fromPool(pool: PoolBase): AavePool {
-    return new AavePool(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-    );
+    return new AavePool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number
-  ) {
+  constructor(pool: PoolBase) {
     this.type = PoolType.Aave;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {
@@ -71,11 +59,7 @@ export class AavePool implements Pool {
     } as PoolPair;
   }
 
-  validateAndBuy(
-    poolPair: PoolPair,
-    amountOut: BigNumber,
-    _fees: PoolFees
-  ): BuyCtx {
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const errors: PoolError[] = [];
 
@@ -92,11 +76,7 @@ export class AavePool implements Pool {
     } as BuyCtx;
   }
 
-  validateAndSell(
-    poolPair: PoolPair,
-    amountIn: BigNumber,
-    _fees: PoolFees
-  ): SellCtx {
+  validateAndSell(poolPair: PoolPair, amountIn: BigNumber): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const errors: PoolError[] = [];
 
