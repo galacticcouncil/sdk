@@ -12,7 +12,7 @@
     "esbuild": "^0.25.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^1.0.0-beta.0",
+    "@galacticcouncil/sdk-next": "^0.4.1",
     "@galacticcouncil/ui": "^5.5.0"
   }
 }

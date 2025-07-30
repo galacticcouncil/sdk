@@ -26,7 +26,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
-    console.log(this.getPoolType(), 'mem pools', mem, '✅');
+    this.log(this.getPoolType(), 'mem pools', mem, '✅');
     return this.loadPools();
   });
 

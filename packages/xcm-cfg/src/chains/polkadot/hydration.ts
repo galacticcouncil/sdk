@@ -35,13 +35,17 @@ import {
   pha,
   pink,
   ring,
+  neuro,
   nodl,
   sub,
+  trac,
   unq,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   vastr,
   vdot,
   wbtc,
@@ -67,7 +71,6 @@ import { HydrationEvmResolver } from '../../resolvers';
 const evmResolver = new HydrationEvmResolver();
 
 const rpcHttpList = [
-  'https://rpc.hydradx.cloud',
   'https://hydration-rpc.n.dwellir.com',
   'https://hydration.dotters.network',
   'https://rpc.helikon.io/hydradx',
@@ -81,7 +84,6 @@ const rpcHttpList = [
 ];
 
 const rpcWebsocketList = [
-  'wss://rpc.hydradx.cloud',
   'wss://hydration-rpc.n.dwellir.com',
   'wss://hydration.dotters.network',
   'wss://rpc.helikon.io/hydradx',
@@ -657,6 +659,20 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: neuro,
+      decimals: 12,
+      id: 36,
+      min: 0.001,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X1: {
+            Parachain: 2043,
+          },
+        },
+      },
+    },
+    {
       asset: nodl,
       decimals: 11,
       id: 26,
@@ -895,6 +911,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: trac,
+      decimals: 18,
+      id: 35,
+      min: 0.028,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xaA7a9CA87d3694B5755f213B5D04094b8d0F0A6F',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: unq,
       decimals: 18,
       id: 25,
@@ -956,6 +998,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: usdc_eth,
+      decimals: 6,
+      id: 1000766,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: usdt,
       decimals: 6,
       id: 10,
@@ -996,6 +1064,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xc30e9ca94cf52f3bf5692aacf81353a27052c46f',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: usdt_eth,
+      decimals: 6,
+      id: 1000767,
+      min: 0.01,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xdac17f958d2ee523a2206206994597c13d831ec7',
               },
             },
           ],

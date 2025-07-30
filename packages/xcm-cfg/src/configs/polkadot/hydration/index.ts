@@ -27,6 +27,7 @@ import {
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pen,
   pha,
@@ -37,11 +38,14 @@ import {
   sub,
   susde,
   tbtc,
+  trac,
   unq,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   vastr,
   vdot,
   ztg,
@@ -71,6 +75,7 @@ import {
   laos_chain,
   moonbeam,
   mythos,
+  neuroweb,
   nodle,
   pendulum,
   polkadot,
@@ -296,6 +301,8 @@ const toPendulum: AssetRoute[] = [
   toTransferTemplate(xlm, pendulum, 0.73),
 ];
 
+const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 0.205)];
+
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
@@ -313,12 +320,14 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   toEthereumViaSnowbridgeTemplate(aave, aave),
   toEthereumViaSnowbridgeTemplate(susde, susde),
   toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
+  toEthereumViaSnowbridgeTemplate(trac, trac),
   toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
-  // Waiting for Snowbridge V2
-  //toEthereumViaSnowbridgeTemplate(ldo, ldo),
+  toEthereumViaSnowbridgeTemplate(ldo, ldo),
   toEthereumViaSnowbridgeTemplate(link, link),
   toEthereumViaSnowbridgeTemplate(sky, sky),
   toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
+  toEthereumViaSnowbridgeTemplate(usdc_eth, usdc),
+  toEthereumViaSnowbridgeTemplate(usdt_eth, usdt),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
@@ -387,6 +396,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
+    ...toNeuroweb,
     ...toNodle,
     ...toPhala,
     ...toPolkadot,

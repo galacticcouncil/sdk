@@ -34,3 +34,11 @@ export interface ExternalAsset extends AssetMetadata {
   internalId: string;
   isWhiteListed?: boolean;
 }
+
+export interface Balance {
+  free: string;
+  total: string;
+  transferable: string;
+  reserved: string;
+  frozen: string;
+}

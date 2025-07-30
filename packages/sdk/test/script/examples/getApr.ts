@@ -17,4 +17,4 @@ class GetFarmAprExample extends PolkadotExecutor {
   }
 }
 
-new GetFarmAprExample(ApiUrl.HydraDx, 'Get farm apr').run();
+new GetFarmAprExample(ApiUrl.Hydration, 'Get farm apr').run();

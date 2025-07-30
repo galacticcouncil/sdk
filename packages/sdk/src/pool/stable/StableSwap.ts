@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { TRADEABLE_DEFAULT } from '../../consts';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
-import { toDecimals, toPct } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import { StableMath } from './StableMath';
 import { OmniMath } from '../omni/OmniMath';
@@ -133,7 +133,12 @@ export class StableSwap implements Pool {
   ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
-    const feePct = toPct(fees.fee);
+
+    const fee = amountIn.minus(calculatedIn);
+    const feePct =
+      calculatedIn === ZERO
+        ? ZERO
+        : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -154,7 +159,7 @@ export class StableSwap implements Pool {
       amountIn: amountIn,
       calculatedIn: calculatedIn,
       amountOut: amountOut,
-      feePct: feePct,
+      feePct: feePct.toNumber(),
       errors: errors,
     } as BuyCtx;
   }
@@ -166,7 +171,9 @@ export class StableSwap implements Pool {
   ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
-    const feePct = toPct(fees.fee);
+
+    const fee = calculatedOut.minus(amountOut);
+    const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -187,7 +194,7 @@ export class StableSwap implements Pool {
       amountIn: amountIn,
       calculatedOut: calculatedOut,
       amountOut: amountOut,
-      feePct: feePct,
+      feePct: feePct.toNumber(),
       errors: errors,
     } as SellCtx;
   }
@@ -203,7 +210,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountOut.toFixed(0),
       this.amplification,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -221,7 +228,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetIn),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -239,7 +246,7 @@ export class StableSwap implements Pool {
       amountOut.toFixed(0),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -280,11 +287,11 @@ export class StableSwap implements Pool {
 
     if (poolPair.assetIn == this.id) {
       const base = scale(ONE, poolPair.decimalsIn - poolPair.decimalsOut);
-      return bnum(spot).div(base);
+      return bnum(spot).div(base).decimalPlaces(0, 1);
     }
 
     const base = scale(ONE, 18 - poolPair.decimalsIn);
-    return bnum(spot).div(base);
+    return bnum(spot).div(base).decimalPlaces(0, 1);
   }
 
   private calculateOut(
@@ -298,7 +305,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountIn.toFixed(0),
       this.amplification,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -316,7 +323,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -333,7 +340,7 @@ export class StableSwap implements Pool {
       this.getAssets(poolPair.assetIn, amountIn),
       this.amplification,
       this.totalIssuance,
-      fees ? toDecimals(fees.fee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.fee).toString() : ZERO.toString(),
       this.getPegs()
     );
     const priceBN = bnum(price);
@@ -374,20 +381,11 @@ export class StableSwap implements Pool {
 
     if (poolPair.assetOut == this.id) {
       const base = scale(ONE, poolPair.decimalsOut - poolPair.decimalsIn);
-      return bnum(spot).div(base);
+      return bnum(spot).div(base).decimalPlaces(0, 1);
     }
 
     const base = scale(ONE, 18 - poolPair.decimalsOut);
-    return bnum(spot).div(base);
-  }
-
-  calculateTradeFee(amount: BigNumber, fees: StableSwapFees): BigNumber {
-    const fee = StableMath.calculatePoolTradeFee(
-      amount.toString(),
-      fees.fee[0],
-      fees.fee[1]
-    );
-    return bnum(fee);
+    return bnum(spot).div(base).decimalPlaces(0, 1);
   }
 
   private getPegs(): string {

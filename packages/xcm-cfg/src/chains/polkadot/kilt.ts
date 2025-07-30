@@ -24,5 +24,5 @@ export const kilt_chain = new Parachain({
   name: 'Kilt',
   parachainId: 2086,
   ss58Format: 38,
-  ws: 'wss://kilt-rpc.dwellir.com',
+  ws: 'wss://spiritnet.kilt.io',
 });

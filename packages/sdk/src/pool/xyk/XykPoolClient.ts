@@ -2,6 +2,8 @@ import type { u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
+import { FeeUtils } from '../../utils/fee';
+
 import {
   PoolBase,
   PoolType,
@@ -56,7 +58,11 @@ export class XykPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  async getPoolFees(_poolPair: PoolPair, _address: string): Promise<PoolFees> {
+  async getPoolFees(
+    _block: number,
+    _poolPair: PoolPair,
+    _poolAddress: string
+  ): Promise<PoolFees> {
     return {
       exchangeFee: this.getExchangeFee(),
     } as XykPoolFees;
@@ -71,15 +77,14 @@ export class XykPoolClient extends PoolClient {
   }
 
   private getExchangeFee(): PoolFee {
-    const exFee = this.api.consts.xyk.getExchangeFee;
-    return exFee.toJSON() as PoolFee;
+    const [numerator, denominator] = this.api.consts.xyk.getExchangeFee;
+    return FeeUtils.fromRate(numerator.toNumber(), denominator.toNumber());
   }
 
   private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.xyk.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toJSON() as number;
-    const minTradingLimit =
-      this.api.consts.xyk.minTradingLimit.toJSON() as number;
+    const maxInRatio = this.api.consts.xyk.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.xyk.maxOutRatio.toNumber();
+    const minTradingLimit = this.api.consts.xyk.minTradingLimit.toNumber();
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,

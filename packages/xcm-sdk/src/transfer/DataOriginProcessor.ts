@@ -13,7 +13,7 @@ import {
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { formatEvmAddress } from './utils';
+import { formatAmount, formatEvmAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
@@ -102,12 +102,17 @@ export class DataOriginProcessor extends DataProcessor {
       ? await formatEvmAddress(sender, chain)
       : sender;
 
-    return this.adapter.estimateFee(
+    const networkFee = await this.adapter.estimateFee(
       address,
       amount,
       source.feeBalance,
       transfer
     );
+
+    const { fee } = route.source;
+    const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
+    const totalFee = networkFee.amount + extraFee;
+    return networkFee.copyWith({ amount: totalFee });
   }
 
   async getFeeBalance(address: string): Promise<AssetAmount> {

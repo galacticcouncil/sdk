@@ -3,6 +3,7 @@ import type { PalletLbpPool } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
 import { bnum, scale } from '../../utils/bignumber';
+import { FeeUtils } from '../../utils/fee';
 
 import {
   PoolBase,
@@ -52,10 +53,12 @@ export class LbpPoolClient extends PoolClient {
           );
 
           this.poolsData.set(id.toString(), poolData);
+
+          const [feeNom, feeDenom] = poolData.fee;
           return {
             address: poolAddress,
             type: PoolType.LBP,
-            fee: poolData.fee.toJSON() as PoolFee,
+            fee: FeeUtils.fromRate(feeNom.toNumber(), feeDenom.toNumber()),
             ...poolDelta,
             ...this.getPoolLimits(),
           } as PoolBase;
@@ -64,9 +67,13 @@ export class LbpPoolClient extends PoolClient {
     return Promise.all(pools);
   }
 
-  async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
+  async getPoolFees(
+    _block: number,
+    _poolPair: PoolPair,
+    poolAddress: string
+  ): Promise<PoolFees> {
     const pool = this.pools.find(
-      (pool) => pool.address === address
+      (pool) => pool.address === poolAddress
     ) as LbpPoolBase;
     return {
       repayFee: this.getRepayFee(),
@@ -196,15 +203,14 @@ export class LbpPoolClient extends PoolClient {
   }
 
   private getRepayFee(): PoolFee {
-    const repayFee = this.api.consts.lbp.repayFee;
-    return repayFee.toJSON() as PoolFee;
+    const [numerator, denominator] = this.api.consts.lbp.repayFee;
+    return FeeUtils.fromRate(numerator.toNumber(), denominator.toNumber());
   }
 
   private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.lbp.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.lbp.maxOutRatio.toJSON() as number;
-    const minTradingLimit =
-      this.api.consts.lbp.minTradingLimit.toJSON() as number;
+    const maxInRatio = this.api.consts.lbp.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.lbp.maxOutRatio.toNumber();
+    const minTradingLimit = this.api.consts.lbp.minTradingLimit.toNumber();
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,

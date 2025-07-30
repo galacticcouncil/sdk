@@ -33,7 +33,7 @@ import {
   toParaStablesWithSwapTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
-  xcmDeliveryFee,
+  extraFee,
 } from './templates';
 
 const toHydration: AssetRoute[] = [
@@ -44,7 +44,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
@@ -68,7 +68,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().foreignAssets().account(),
@@ -102,7 +102,7 @@ const toPolkadot: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -129,7 +129,7 @@ const toKusamaAssethub: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().foreignAssets().account(),
@@ -166,7 +166,7 @@ const toMythos: AssetRoute[] = [
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().foreignAssets().account(),

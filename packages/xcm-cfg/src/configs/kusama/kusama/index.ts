@@ -4,7 +4,7 @@ import { ksm } from '../../../assets';
 import { basilisk, karura, kusama, kusamaAssetHub } from '../../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
 
-import { toParaTemplate, xcmDeliveryFee } from './templates';
+import { toParaTemplate, extraFee } from './templates';
 
 const toAssetHub: AssetRoute = new AssetRoute({
   source: {
@@ -13,7 +13,7 @@ const toAssetHub: AssetRoute = new AssetRoute({
     fee: {
       asset: ksm,
       balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
+      extra: extraFee,
     },
     destinationFee: {
       balance: BalanceBuilder().substrate().system().account(),

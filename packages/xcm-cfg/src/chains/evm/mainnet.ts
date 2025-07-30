@@ -14,6 +14,7 @@ import {
   susde,
   susds,
   tbtc,
+  trac,
   usdc,
   usdt,
   wbtc,
@@ -97,6 +98,11 @@ export const ethereum = new EvmChain({
       asset: sky,
       decimals: 18,
       id: '0x56072c95faa701256059aa122697b133aded9279',
+    },
+    {
+      asset: trac,
+      decimals: 18,
+      id: '0xaA7a9CA87d3694B5755f213B5D04094b8d0F0A6F',
     },
     {
       asset: wsteth,

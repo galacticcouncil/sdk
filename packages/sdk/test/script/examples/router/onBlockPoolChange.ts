@@ -1,54 +1,46 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '../../../../src';
+import { createSdkContext } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
 
+import { appendFileSync } from 'fs';
+
 class GetOnBlockPoolChangeExample extends PolkadotExecutor {
-  async script(api: ApiPromise): Promise<any> {
-    const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService);
+  async script(apiPromise: ApiPromise): Promise<any> {
+    const { api } = createSdkContext(apiPromise);
 
-    await Promise.all([
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-      router.getPools(),
-    ]);
+    const header = await apiPromise.rpc.chain.getHeader();
+    const line = '\nCurrent block number:' + header.number.toString();
+    appendFileSync('./test.txt', line, 'utf8');
 
-    api.rpc.chain.subscribeNewHeads(async (lastHeader) => {
+    await apiPromise.query.omnipool.assets.entries();
+
+    apiPromise.rpc.chain.subscribeNewHeads(async (lastHeader) => {
       const block = lastHeader.number.toString();
-      console.log('===============', block, '===============');
-      router.getPools().then((p) => {
+      api.router.getPools().then((p) => {
         p.forEach((o) => {
+          console.log('Pool: ' + o.address);
           o.tokens.forEach((t) => {
-            if (t.id === '1') {
-              // Checking LRNA balance change
-              console.log(t.id, t.balance.toString());
-            }
+            console.log(t.id, ' => ', t.balance.toString());
           });
+
+          const zero = o.tokens.find((t) => t.balance.toString() === '0');
+          if (zero) {
+            const line = '\n' + block + '\t' + o.address + '\t' + o.type;
+            appendFileSync('./test.txt', line, 'utf8');
+          }
         });
+        console.log('===============', block, '===============');
       });
     });
-
-    setTimeout(() => {
-      console.log('Sync reg 1 ');
-      poolService.syncRegistry();
-    }, 45 * 1000);
-
-    setTimeout(() => {
-      console.log('Sync reg 2');
-      poolService.syncRegistry();
-    }, 90 * 1000);
 
     return [];
   }
 }
 
 new GetOnBlockPoolChangeExample(
-  ApiUrl.HydraDx,
+  ApiUrl.Hydration,
   'Get on block change',
   true
 ).run();

@@ -155,6 +155,11 @@ export const nodl = new Asset({
   originSymbol: 'NODL',
 });
 
+export const neuro = new Asset({
+  key: 'neuro',
+  originSymbol: 'NEURO',
+});
+
 export const pen = new Asset({
   key: 'pen',
   originSymbol: 'PEN',
@@ -215,6 +220,11 @@ export const tnkr = new Asset({
   originSymbol: 'TNKR',
 });
 
+export const trac = new Asset({
+  key: 'trac',
+  originSymbol: 'TRAC',
+});
+
 export const unq = new Asset({
   key: 'unq',
   originSymbol: 'UNQ',
@@ -230,6 +240,11 @@ export const usdt_mwh = new Asset({
   key: 'usdt_mwh',
 });
 
+export const usdt_eth = new Asset({
+  ...usdt,
+  key: 'usdt_eth',
+});
+
 export const usdc = new Asset({
   key: 'usdc',
   originSymbol: 'USDC',
@@ -238,6 +253,11 @@ export const usdc = new Asset({
 export const usdc_mwh = new Asset({
   ...usdc,
   key: 'usdc_mwh',
+});
+
+export const usdc_eth = new Asset({
+  ...usdc,
+  key: 'usdc_eth',
 });
 
 export const vastr = new Asset({
@@ -336,6 +356,7 @@ export const assets: Asset[] = [
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pha,
   pen,
@@ -348,12 +369,15 @@ export const assets: Asset[] = [
   susds,
   teer,
   tnkr,
+  trac,
   tbtc,
   unq,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   vastr,
   vdot,
   wbtc,

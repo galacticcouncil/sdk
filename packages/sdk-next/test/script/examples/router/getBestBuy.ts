@@ -1,27 +1,25 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { PapiExecutor } from '../../PapiExecutor';
-import { ApiUrl } from '../../types';
+import { createSdkContext } from '../../../../src';
 
-import { pool, sor } from '../../../../src';
+import { PapiExecutor } from '../../PapiExecutor';
+import { BENEFICIARY } from '../../const';
+import { ApiUrl } from '../../types';
 
 class GetBestBuy extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const ctx = new pool.PoolContextProvider(client)
-      .withOmnipool()
-      .withStableswap()
-      .withXyk();
+    const sdk = await createSdkContext(client);
 
-    const router = new sor.TradeRouter(ctx);
-    const utils = new sor.TradeUtils(client);
+    const { api, tx } = sdk;
 
-    const buy = await router.getBestBuy(10, 5, 100_000_000_000n);
-    const tx = await utils.buildBuyTx(buy);
-    console.log(buy.toHuman());
-    console.log('Transaction hash: ' + tx.asHex());
+    const trade = await api.router.getBestBuy(10, 5, 100_000_000_000n);
+    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
+    const tradeCall = await tradeTx.get().getEncodedData();
+    console.log(trade.toHuman());
+    console.log('Transaction hash: ' + tradeCall.asHex());
 
     return () => {
-      ctx.destroy();
+      sdk.destroy();
       client.destroy();
     };
   }

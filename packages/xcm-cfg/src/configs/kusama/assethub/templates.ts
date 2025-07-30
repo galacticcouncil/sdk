@@ -7,7 +7,9 @@ import {
   ExtrinsicBuilder,
 } from '../../../builders';
 
-export const xcmDeliveryFee = 0.0015;
+// const xcmDeliveryFee = 0.0015;
+
+export const extraFee = 0;
 
 export function toParaStablesTemplate(
   asset: Asset,
@@ -21,7 +23,7 @@ export function toParaStablesTemplate(
       fee: {
         asset: ksm,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),

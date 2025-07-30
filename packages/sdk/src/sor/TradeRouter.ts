@@ -3,8 +3,8 @@ import { Router } from './Router';
 import { RouteNotFound } from '../errors';
 import { Hop, Pool, PoolFees, PoolType } from '../pool';
 import { Amount } from '../types';
-import { BigNumber, bnum, scale } from '../utils/bignumber';
-import { toHuman, toPct } from '../utils/mapper';
+import { BigNumber, bnum, scale, toDecimals } from '../utils/bignumber';
+import { FeeUtils } from '../utils/fee';
 import {
   calculateSellFee,
   calculateBuyFee,
@@ -14,6 +14,16 @@ import {
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 export class TradeRouter extends Router {
+  private async loadRouteContext(assetIn: string, assetOut: string) {
+    const pools = await super.getPools();
+    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+
+    const paths = super.getPaths(assetIn, assetOut, pools);
+    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+
+    return { paths, pools, poolsMap };
+  }
+
   /**
    * Check whether trade is direct or not
    *
@@ -70,8 +80,8 @@ export class TradeRouter extends Router {
    * @returns min & max fee range if swap through the pool with dynamic fees support
    */
   private getPoolFeeRange(fees: PoolFees): [number, number] | undefined {
-    const feeMin = fees.min ? toPct(fees.min) : undefined;
-    const feeMax = fees.max ? toPct(fees.max) : undefined;
+    const feeMin = fees.min ? FeeUtils.toPct(fees.min) : undefined;
+    const feeMax = fees.max ? FeeUtils.toPct(fees.max) : undefined;
     if (feeMin && feeMax) {
       return [feeMin, feeMax];
     }
@@ -109,15 +119,7 @@ export class TradeRouter extends Router {
     amountIn: BigNumber | string | number,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+    const { paths, poolsMap } = await this.loadRouteContext(assetIn, assetOut);
 
     let swaps: SellSwap[];
     if (route) {
@@ -170,10 +172,10 @@ export class TradeRouter extends Router {
       toHuman() {
         return {
           type: TradeType.Sell,
-          amountIn: toHuman(firstSwap.amountIn, firstSwap.assetInDecimals),
-          amountOut: toHuman(lastSwap.amountOut, lastSwap.assetOutDecimals),
-          spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetOutDecimals),
-          tradeFee: toHuman(tradeFee, lastSwap.assetOutDecimals),
+          amountIn: toDecimals(firstSwap.amountIn, firstSwap.assetInDecimals),
+          amountOut: toDecimals(lastSwap.amountOut, lastSwap.assetOutDecimals),
+          spotPrice: toDecimals(bestRouteSpotPrice, lastSwap.assetOutDecimals),
+          tradeFee: toDecimals(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: bestRoutePriceImpact.toNumber(),
@@ -261,8 +263,8 @@ export class TradeRouter extends Router {
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
         amountIn: aIn,
-        calculatedOut: calculatedOut,
         amountOut: amountOut,
+        calculatedOut: calculatedOut,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -281,10 +283,10 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
-            amountIn: toHuman(aIn, poolPair.decimalsIn),
-            calculatedOut: toHuman(calculatedOut, poolPair.decimalsOut),
-            amountOut: toHuman(amountOut, poolPair.decimalsOut),
-            spotPrice: toHuman(spotPrice, poolPair.decimalsOut),
+            amountIn: toDecimals(aIn, poolPair.decimalsIn),
+            amountOut: toDecimals(amountOut, poolPair.decimalsOut),
+            calculatedOut: toDecimals(calculatedOut, poolPair.decimalsOut),
+            spotPrice: toDecimals(spotPrice, poolPair.decimalsOut),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct.toNumber(),
@@ -308,20 +310,14 @@ export class TradeRouter extends Router {
    * @return Most liquid route of given token pair
    */
   async getMostLiquidRoute(assetIn: string, assetOut: string): Promise<Hop[]> {
-    const pools = await super.getPools();
-    const { poolsMap } = await super.validateTokenPair(
+    const { paths, pools, poolsMap } = await this.loadRouteContext(
       assetIn,
-      assetOut,
-      pools
+      assetOut
     );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) {
-      throw new RouteNotFound(assetIn, assetOut);
-    }
 
-    // Get pools with assetIn (except virtual shares)
+    // Get pools with assetIn
     const assetInPools = pools.filter((pool) =>
-      pool.tokens.some((t) => t.id === assetIn && t.id !== pool.id)
+      pool.tokens.some((t) => t.id === assetIn)
     );
 
     // Get liquidity of assetIn sorted by DESC
@@ -367,17 +363,14 @@ export class TradeRouter extends Router {
     assetIn: string,
     assetOut: string
   ): Promise<Amount | undefined> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) {
+    let context;
+    try {
+      context = await this.loadRouteContext(assetIn, assetOut);
+    } catch {
       return Promise.resolve(undefined);
     }
+
+    const { poolsMap } = context;
 
     const route = await this.getMostLiquidRoute(assetIn, assetOut);
     const swaps = await this.toSellSwaps('1', route, poolsMap);
@@ -441,15 +434,7 @@ export class TradeRouter extends Router {
     amountOut: BigNumber | string | number,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await super.validateTokenPair(
-      assetIn,
-      assetOut,
-      pools
-    );
-    const paths = super.getPaths(assetIn, assetOut, poolsMap, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+    const { paths, poolsMap } = await this.loadRouteContext(assetIn, assetOut);
 
     let swaps: BuySwap[];
     if (route) {
@@ -507,10 +492,13 @@ export class TradeRouter extends Router {
       toHuman() {
         return {
           type: TradeType.Buy,
-          amountOut: toHuman(firstSwap.amountOut, firstSwap.assetOutDecimals),
-          amountIn: toHuman(lastSwap.amountIn, lastSwap.assetInDecimals),
-          spotPrice: toHuman(bestRouteSpotPrice, lastSwap.assetInDecimals),
-          tradeFee: toHuman(tradeFee, lastSwap.assetInDecimals),
+          amountOut: toDecimals(
+            firstSwap.amountOut,
+            firstSwap.assetOutDecimals
+          ),
+          amountIn: toDecimals(lastSwap.amountIn, lastSwap.assetInDecimals),
+          spotPrice: toDecimals(bestRouteSpotPrice, lastSwap.assetInDecimals),
+          tradeFee: toDecimals(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: bestRoutePriceImpact,
@@ -607,9 +595,9 @@ export class TradeRouter extends Router {
         ...hop,
         assetInDecimals: poolPair.decimalsIn,
         assetOutDecimals: poolPair.decimalsOut,
+        amountIn: amountIn,
         amountOut: aOut,
         calculatedIn: calculatedIn,
-        amountIn: amountIn,
         spotPrice: spotPrice,
         tradeFeePct: feePct,
         tradeFeeRange: feePctRange,
@@ -628,10 +616,10 @@ export class TradeRouter extends Router {
         toHuman() {
           return {
             ...hop,
-            amountOut: toHuman(aOut, poolPair.decimalsOut),
-            calculatedIn: toHuman(calculatedIn, poolPair.decimalsIn),
-            amountIn: toHuman(amountIn, poolPair.decimalsIn),
-            spotPrice: toHuman(spotPrice, poolPair.decimalsIn),
+            amountIn: toDecimals(amountIn, poolPair.decimalsIn),
+            amountOut: toDecimals(aOut, poolPair.decimalsOut),
+            calculatedIn: toDecimals(calculatedIn, poolPair.decimalsIn),
+            spotPrice: toDecimals(spotPrice, poolPair.decimalsIn),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,

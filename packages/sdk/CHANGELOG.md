@@ -1,5 +1,220 @@
 # @galacticcouncil/sdk
 
+## 9.9.1
+
+### Patch Changes
+
+- fix: suggester use all paths in trusted set
+
+## 9.9.0
+
+### Minor Changes
+
+- 5de2359: sdk: speed up bfs by pre-filtering the relevant amms
+
+## 9.8.0
+
+### Minor Changes
+
+- 3ec8fb7: fee memo short term dedup
+- c974dd0: route proposals cache
+
+## 9.7.0
+
+### Minor Changes
+
+- cf0aee6: BalanceClientV2 supporting whole balance breakdown
+
+## 9.6.3
+
+### Patch Changes
+
+- fix aave token liq calc
+
+## 9.6.2
+
+### Patch Changes
+
+- use virtual share issuance for liquidity route calc
+
+## 9.6.1
+
+### Patch Changes
+
+- fix evm client init
+
+## 9.6.0
+
+### Minor Changes
+
+- sdk: bfs max path +1
+
+## 9.5.4
+
+### Patch Changes
+
+- 0aa7120: Fix negative free balance
+
+## 9.5.3
+
+### Patch Changes
+
+- fix: token balance free calc
+
+## 9.5.2
+
+### Patch Changes
+
+- Update twap api accessors
+
+## 9.5.1
+
+### Patch Changes
+
+- Revert range calc
+
+## 9.5.0
+
+### Minor Changes
+
+[2f687c3a]: https://github.com/galacticcouncil/sdk/commit/2f687c3a
+
+- [[#2f687c3a][2f687c3a]] sdk: fix stableswap effective fee calc, re-work FeeUtils
+
+## 9.4.0
+
+### Minor Changes
+
+- WASM refactor: https://github.com/galacticcouncil/HydraDX-wasm/pull/40
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.2.0
+  - @galacticcouncil/math-stableswap@2.2.0
+  - @galacticcouncil/math-omnipool@1.3.0
+  - @galacticcouncil/math-lbp@1.2.0
+  - @galacticcouncil/math-xyk@1.2.0
+
+## 9.3.0
+
+### Minor Changes
+
+[50ae7924]: https://github.com/galacticcouncil/sdk/commit/50ae7924
+
+- [[#50ae7924][50ae7924]] aave: calculates withdrawable based on excess HF
+
+## 9.2.0
+
+### Minor Changes
+
+[aaf6f862]: https://github.com/galacticcouncil/sdk/commit/aaf6f862
+[b1cb49da]: https://github.com/galacticcouncil/sdk/commit/b1cb49da
+
+- [[#aaf6f862][aaf6f862]] oracle: fallback to 0 if updated block negative
+- [[#b1cb49da][b1cb49da]] sdk: min order budget public accessor
+
+## 9.1.0
+
+### Minor Changes
+
+- Pass optional extra gas in transaction dto
+
+## 9.0.1
+
+### Patch Changes
+
+- Fix tx eligible for sellAll
+
+## 9.0.0
+
+### Major Changes
+
+[4c1f73f2]: https://github.com/galacticcouncil/sdk/commit/4c1f73f2
+[8ab43456]: https://github.com/galacticcouncil/sdk/commit/8ab43456
+[7ac95e0f]: https://github.com/galacticcouncil/sdk/commit/7ac95e0f
+[3613c7b2]: https://github.com/galacticcouncil/sdk/commit/3613c7b2
+
+- [[#4c1f73f2][4c1f73f2]] sdk: stableswap mm oracle support
+- [[#8ab43456][8ab43456]] aave: fix sellAll calc
+- [[#7ac95e0f][7ac95e0f]] sdk: evm share ws conn
+- [[#3613c7b2][3613c7b2]] aave: fix liq index calc
+
+## 8.1.1
+
+### Patch Changes
+
+- Allow passing opt assets to balance subscribe (revert)
+
+## 8.1.0
+
+### Minor Changes
+
+⚠️ Important: TxUtils were dropped, use TxBuilderFactory
+
+[6685efaa]: https://github.com/galacticcouncil/sdk/commit/6685efaa
+[b8999637]: https://github.com/galacticcouncil/sdk/commit/b8999637
+[2aa74490]: https://github.com/galacticcouncil/sdk/commit/2aa74490
+[1f8d83ae]: https://github.com/galacticcouncil/sdk/commit/1f8d83ae
+[7ffcfe8b]: https://github.com/galacticcouncil/sdk/commit/7ffcfe8b
+[06123937]: https://github.com/galacticcouncil/sdk/commit/06123937
+
+- [[#6685efaa][6685efaa]] sdk: fix aave max tx build
+- [[#b8999637][b8999637]] sdk: tx module
+- [[#2aa74490][2aa74490]] scheduler: sdk context support
+- [[#1f8d83ae][1f8d83ae]] scheduler: sdk context factory
+- [[#06123937][06123937]] scheduler: dca & twap init
+
+## 8.0.1
+
+### Patch Changes
+
+- Drop wss://rpc.hydradx.cloud from rpc list
+
+## 8.0.0
+
+### Major Changes
+
+⚠️ Important: In the 8.x release, we upgraded `@polkadot/api` to version **16.x**.
+
+To ensure the router works as expected, **either**:
+
+1. Use a custom `WsProvider` configuration with cache TTL at least 10 minutes
+2. Use a custom `WsProvider` configuration with cache TTL disabled (null)
+
+For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
+## 7.2.0
+
+### Minor Changes
+
+- Bump all maths to latest wasm-pack build
+
+- Updated dependencies
+  - @galacticcouncil/math-lbp@1.1.0
+  - @galacticcouncil/math-liquidity-mining@1.1.0
+  - @galacticcouncil/math-omnipool@1.2.0
+  - @galacticcouncil/math-stableswap@2.1.0
+  - @galacticcouncil/math-xyk@1.1.0
+
+## 7.1.1
+
+### Patch Changes
+
+- Set omnipool dyn fee minimal block diff to 1
+
+## 7.1.0
+
+### Minor Changes
+
+- Aave module support
+
+## 7.0.3
+
+### Patch Changes
+
+- Fixed omnipool dynamic fees
+
 ## 7.0.2
 
 ### Patch Changes

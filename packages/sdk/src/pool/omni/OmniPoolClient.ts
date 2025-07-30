@@ -9,13 +9,17 @@ import { stringToU8a } from '@polkadot/util';
 import { ITuple } from '@polkadot/types-codec/types';
 import { Option, u32 } from '@polkadot/types-codec';
 
+import { memoize1 } from '@thi.ng/memoize';
+import { TLRUCache } from '@thi.ng/cache';
+
 import {
   HUB_ASSET_ID,
   HYDRADX_SS58_PREFIX,
+  PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { toPct, toPoolFee } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import {
   PoolBase,
@@ -32,7 +36,33 @@ import { OmniPoolFees, OmniPoolToken } from './OmniPool';
 
 type OmniPoolFeeRange = [number, number, number];
 
+type TEmaOracle = Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>;
+type TDynamicFees = Option<PalletDynamicFeesFeeEntry>;
+
+const ORACLE_NAME = 'omnipool';
+const ORACLE_PERIOD = 'Short';
+
 export class OmniPoolClient extends PoolClient {
+  private dynamicFees: Map<string, TDynamicFees> = new Map();
+  private oracles: Map<string, TEmaOracle> = new Map();
+
+  private memQueryCache = new TLRUCache<string, Promise<any>>(null, {
+    ttl: 6 * 1000,
+  });
+
+  private memOracleQuery = memoize1((key: string) => {
+    const oracleKey = key.split(':');
+    return this.api.query.emaOracle.oracles<TEmaOracle>(
+      ORACLE_NAME,
+      oracleKey,
+      ORACLE_PERIOD
+    );
+  }, this.memQueryCache);
+
+  private memFeesQuery = memoize1((key: string) => {
+    return this.api.query.dynamicFees.assetFee(key);
+  }, this.memQueryCache);
+
   isSupported(): boolean {
     return this.api.query.omnipool !== undefined;
   }
@@ -76,7 +106,7 @@ export class OmniPoolClient extends PoolClient {
 
     const tokens = await Promise.all(poolTokens);
 
-    // Adding LRNA info
+    // add LRNA
     tokens.push({
       id: hubAssetId,
       tradeable: hubAssetTradeability.bits.toNumber(),
@@ -94,34 +124,39 @@ export class OmniPoolClient extends PoolClient {
     ];
   }
 
-  async getPoolFees(poolPair: PoolPair, _address: string): Promise<PoolFees> {
+  private async getDynamicFees(feeAsset: string): Promise<TDynamicFees> {
+    if (this.dynamicFees.has(feeAsset)) {
+      return this.dynamicFees.get(feeAsset)!;
+    }
+    return this.memFeesQuery(feeAsset);
+  }
+
+  private async getOraclePrice(asset: string): Promise<TEmaOracle> {
+    const oracleKey = this.getOracleKey(asset);
+    const oracleCacheKey = oracleKey.join(':');
+    if (this.oracles.has(oracleCacheKey)) {
+      return this.oracles.get(oracleCacheKey)!;
+    }
+    return this.memOracleQuery(oracleCacheKey);
+  }
+
+  async getPoolFees(
+    block: number,
+    poolPair: PoolPair,
+    _poolAddress: string
+  ): Promise<PoolFees> {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
 
-    const oracleName = 'omnipool';
-    const oraclePeriod = 'Short';
-
-    const oracleKey = (asset: string) => {
-      return asset === SYSTEM_ASSET_ID
-        ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
-        : [HUB_ASSET_ID, asset];
-    };
-
-    const [blockNumber, dynamicFees, oracleAssetFee, oracleProtocolFee] =
-      await Promise.all([
-        this.api.query.system.number(),
-        this.api.query.dynamicFees.assetFee(feeAsset),
-        this.api.query.emaOracle.oracles<
-          Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-        >(oracleName, oracleKey(feeAsset), oraclePeriod),
-        this.api.query.emaOracle.oracles<
-          Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-        >(oracleName, oracleKey(protocolAsset), oraclePeriod),
-      ]);
+    const [dynamicFees, oracleAssetFee, oracleProtocolFee] = await Promise.all([
+      this.getDynamicFees(feeAsset),
+      this.getOraclePrice(feeAsset),
+      this.getOraclePrice(protocolAsset),
+    ]);
 
     const [assetFeeMin, assetFee, assetFeeMax] = this.getAssetFee(
       poolPair,
-      blockNumber.toNumber(),
+      block,
       dynamicFees,
       oracleAssetFee
     );
@@ -129,21 +164,16 @@ export class OmniPoolClient extends PoolClient {
     const [protocolFeeMin, protocolFee, protocolFeeMax] =
       protocolAsset === HUB_ASSET_ID
         ? [0, 0, 0] // No protocol fee for LRNA sell
-        : this.getProtocolFee(
-            poolPair,
-            blockNumber.toNumber(),
-            dynamicFees,
-            oracleProtocolFee
-          );
+        : this.getProtocolFee(poolPair, block, dynamicFees, oracleProtocolFee);
 
     const min = assetFeeMin + protocolFeeMin;
     const max = assetFeeMax + protocolFeeMax;
 
     return {
-      assetFee: toPoolFee(assetFee),
-      protocolFee: toPoolFee(protocolFee),
-      min: toPoolFee(min),
-      max: toPoolFee(max),
+      assetFee: FeeUtils.fromPermill(assetFee),
+      protocolFee: FeeUtils.fromPermill(protocolFee),
+      min: FeeUtils.fromPermill(min),
+      max: FeeUtils.fromPermill(max),
     } as OmniPoolFees;
   }
 
@@ -153,14 +183,62 @@ export class OmniPoolClient extends PoolClient {
 
   async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
     const assetsArgs = pool.tokens.map((t) => t.id);
-    return this.api.query.omnipool.assets.multi(assetsArgs, (states) => {
-      pool.tokens = states.map((state, i) => {
-        const token = pool.tokens[i];
-        if (state.isNone) return token;
-        const unwrapped: PalletOmnipoolAssetState = state.unwrap();
-        return this.updateTokenState(token, unwrapped);
-      });
+    const unsubFns: (() => void)[] = [];
+
+    const unsubAssets = await this.api.query.omnipool.assets.multi(
+      assetsArgs,
+      (states) => {
+        pool.tokens = states.map((state, i) => {
+          const token = pool.tokens[i];
+          if (state.isNone) return token;
+          const unwrapped: PalletOmnipoolAssetState = state.unwrap();
+          return this.updateTokenState(token, unwrapped);
+        });
+      }
+    );
+    unsubFns.push(unsubAssets);
+
+    const unsubAssetsFees = await this.api.query.dynamicFees.assetFee.multi(
+      assetsArgs,
+      (fees) => {
+        fees.forEach((fee, i) => {
+          const key = assetsArgs[i];
+          this.dynamicFees.set(key, fee);
+        });
+      }
+    );
+    unsubFns.push(unsubAssetsFees);
+
+    const oracleQueries = assetsArgs.map((id) => {
+      const pair = this.getOracleKey(id);
+      return [ORACLE_NAME, pair, ORACLE_PERIOD] as [
+        string,
+        [string, string],
+        string,
+      ];
     });
+
+    const unsubOracles = await this.api.query.emaOracle.oracles.multi(
+      oracleQueries,
+      (oracles) => {
+        oracles.forEach(async (oracle, i) => {
+          const key = oracleQueries[i];
+          const [_name, pair, _period] = key;
+          this.oracles.set(pair.join(':'), oracle);
+        });
+      }
+    );
+    unsubFns.push(unsubOracles);
+
+    return () => {
+      for (const unsub of unsubFns) {
+        try {
+          unsub();
+        } catch (e) {
+          console.warn('Omnipool unsubscribe failed', e);
+        }
+      }
+    };
   }
 
   private updateTokenState(
@@ -189,8 +267,8 @@ export class OmniPoolClient extends PoolClient {
     const { minFee, maxFee, decay, amplification } =
       this.api.consts.dynamicFees.assetFeeParameters;
 
-    const feeMin = toPoolFee(minFee.toNumber());
-    const feeMax = toPoolFee(maxFee.toNumber());
+    const feeMin = FeeUtils.fromPermill(minFee.toNumber());
+    const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
 
     if (dynamicFee.isNone || oracle.isNone) {
       return [minFee.toNumber(), minFee.toNumber(), maxFee.toNumber()];
@@ -199,7 +277,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { assetFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();
@@ -211,21 +289,25 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity = entry.liquidity.a.toString();
     }
 
-    const feePrev = toPoolFee(assetFee.toNumber());
+    const feePrev = FeeUtils.fromPermill(assetFee.toNumber());
     const fee = OmniMath.recalculateAssetFee(
       oracleAmountIn,
       oracleAmountOut,
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      toPct(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [
+      minFee.toNumber(),
+      Number(fee) * PERMILL_DENOMINATOR,
+      maxFee.toNumber(),
+    ];
   }
 
   private getProtocolFee(
@@ -239,8 +321,8 @@ export class OmniPoolClient extends PoolClient {
     const { minFee, maxFee, decay, amplification } =
       this.api.consts.dynamicFees.protocolFeeParameters;
 
-    const feeMin = toPoolFee(minFee.toNumber());
-    const feeMax = toPoolFee(maxFee.toNumber());
+    const feeMin = FeeUtils.fromPermill(minFee.toNumber());
+    const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
 
     if (dynamicFee.isNone || oracle.isNone) {
       return [minFee.toNumber(), minFee.toNumber(), maxFee.toNumber()];
@@ -249,7 +331,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { protocolFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();
@@ -261,21 +343,31 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity = entry.liquidity.a.toString();
     }
 
-    const feePrev = toPoolFee(protocolFee.toNumber());
+    const feePrev = FeeUtils.fromPermill(protocolFee.toNumber());
     const fee = OmniMath.recalculateProtocolFee(
       oracleAmountIn,
       oracleAmountOut,
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      toPct(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [
+      minFee.toNumber(),
+      Number(fee) * PERMILL_DENOMINATOR,
+      maxFee.toNumber(),
+    ];
+  }
+
+  private getOracleKey(asset: string): [string, string] {
+    return asset === SYSTEM_ASSET_ID
+      ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
+      : [HUB_ASSET_ID, asset];
   }
 
   private getPoolId(): string {
@@ -286,10 +378,10 @@ export class OmniPoolClient extends PoolClient {
   }
 
   private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.omnipool.maxInRatio.toJSON() as number;
-    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toJSON() as number;
+    const maxInRatio = this.api.consts.omnipool.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toNumber();
     const minTradingLimit =
-      this.api.consts.omnipool.minimumTradingLimit.toJSON() as number;
+      this.api.consts.omnipool.minimumTradingLimit.toNumber();
     return {
       maxInRatio: maxInRatio,
       maxOutRatio: maxOutRatio,

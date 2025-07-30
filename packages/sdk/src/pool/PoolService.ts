@@ -5,6 +5,7 @@ import { memoize1 } from '@thi.ng/memoize';
 import { PolkadotApiClient } from '../api';
 import { AssetClient } from '../client';
 import { PoolNotFound } from '../errors';
+import { EvmClient } from '../evm';
 import { Asset, ExternalAsset } from '../types';
 
 import { AavePoolClient } from './aave';
@@ -26,6 +27,7 @@ import { PoolClient } from './PoolClient';
 
 export class PoolService extends PolkadotApiClient implements IPoolService {
   protected readonly api: ApiPromise;
+  protected readonly evm: EvmClient;
 
   protected readonly assetClient: AssetClient;
 
@@ -38,21 +40,26 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
   protected readonly clients: PoolClient[] = [];
 
   protected onChainAssets: Asset[] = [];
+  protected block: number = 0;
+
+  private disconnectSubscribeNewHeads: (() => void) | null = null;
 
   private memRegistry = memoize1((mem: number) => {
     this.log(`Registry mem ${mem} sync`);
     return this.syncRegistry();
   });
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     super(api);
     this.api = api;
+    this.evm = evm;
+
     this.assetClient = new AssetClient(this.api);
-    this.aaveClient = new AavePoolClient(this.api);
-    this.xykClient = new XykPoolClient(this.api);
-    this.omniClient = new OmniPoolClient(this.api);
-    this.lbpClient = new LbpPoolClient(this.api);
-    this.stableClient = new StableSwapClient(this.api);
+    this.aaveClient = new AavePoolClient(this.api, evm);
+    this.xykClient = new XykPoolClient(this.api, evm);
+    this.omniClient = new OmniPoolClient(this.api, evm);
+    this.lbpClient = new LbpPoolClient(this.api, evm);
+    this.stableClient = new StableSwapClient(this.api, evm);
     this.clients = [
       this.aaveClient,
       this.xykClient,
@@ -60,6 +67,19 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       this.lbpClient,
       this.stableClient,
     ];
+
+    this.api.rpc.chain
+      .subscribeNewHeads(async (lastHeader) => {
+        const block = lastHeader.number.toNumber();
+        this.onNewBlock(block);
+      })
+      .then((subsFn) => {
+        this.disconnectSubscribeNewHeads = subsFn;
+      });
+  }
+
+  protected onNewBlock(block: number): void {
+    this.block = block;
   }
 
   get assets(): Asset[] {
@@ -104,20 +124,25 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     this.omniClient.unsubscribe();
     this.lbpClient.unsubscribe();
     this.stableClient.unsubscribe();
+    this.disconnectSubscribeNewHeads?.();
   }
 
   async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
     switch (pool.type) {
       case PoolType.Aave:
-        return this.aaveClient.getPoolFees(poolPair, pool.address);
+        return this.aaveClient.getPoolFees(this.block, poolPair, pool.address);
       case PoolType.XYK:
-        return this.xykClient.getPoolFees(poolPair, pool.address);
+        return this.xykClient.getPoolFees(this.block, poolPair, pool.address);
       case PoolType.Omni:
-        return this.omniClient.getPoolFees(poolPair, pool.address);
+        return this.omniClient.getPoolFees(this.block, poolPair, pool.address);
       case PoolType.LBP:
-        return this.lbpClient.getPoolFees(poolPair, pool.address);
+        return this.lbpClient.getPoolFees(this.block, poolPair, pool.address);
       case PoolType.Stable:
-        return this.stableClient.getPoolFees(poolPair, pool.address);
+        return this.stableClient.getPoolFees(
+          this.block,
+          poolPair,
+          pool.address
+        );
       default:
         throw new PoolNotFound(pool.type);
     }

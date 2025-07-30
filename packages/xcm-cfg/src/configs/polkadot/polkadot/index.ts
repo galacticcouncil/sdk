@@ -10,7 +10,7 @@ import {
 } from '../../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
 
-import { toParaTemplate, xcmDeliveryFee } from './templates';
+import { toParaTemplate, extraFee } from './templates';
 
 const toAssetHub = new AssetRoute({
   source: {
@@ -19,7 +19,7 @@ const toAssetHub = new AssetRoute({
     fee: {
       asset: dot,
       balance: BalanceBuilder().substrate().system().account(),
-      extra: xcmDeliveryFee,
+      extra: extraFee,
     },
     destinationFee: {
       balance: BalanceBuilder().substrate().system().account(),

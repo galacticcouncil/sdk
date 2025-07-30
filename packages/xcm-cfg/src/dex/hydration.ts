@@ -7,11 +7,12 @@ import {
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 import {
+  EvmClient,
   PoolService,
   PoolType,
   RUNTIME_DECIMALS,
+  TradeRouteBuilder,
   TradeRouter,
-  TradeUtils,
 } from '@galacticcouncil/sdk';
 
 import { memoize1 } from '@thi.ng/memoize';
@@ -26,15 +27,13 @@ export class HydrationDex implements Dex {
   readonly getCtx = memoize1(async (mem: number) => {
     console.log('init swap router', mem, '✅');
     const api = await this.chain.api;
-    const pool = this.poolService ? this.poolService : new PoolService(api);
-    const txUtils = new TradeUtils(api);
-    const router = new TradeRouter(pool, {
+    const evm = new EvmClient(api);
+    const poolCtx = this.poolService
+      ? this.poolService
+      : new PoolService(api, evm);
+    return new TradeRouter(poolCtx, {
       includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
-    return {
-      router,
-      txUtils,
-    };
   });
 
   constructor(chain: AnyChain, poolService?: PoolService) {
@@ -53,7 +52,7 @@ export class HydrationDex implements Dex {
     const aOut = this.chain.getMetadataAssetId(assetOut);
     const amount = amountOut.toDecimal(amountOut.decimals);
 
-    const { router, txUtils } = await this.getCtx(1);
+    const router = await this.getCtx(1);
     try {
       const mostLiquidRoute = await router.getMostLiquidRoute(
         aIn.toString(),
@@ -70,7 +69,7 @@ export class HydrationDex implements Dex {
       const amountIn = BigInt(trade.amountIn.toNumber());
       return {
         amount: amountIn,
-        route: txUtils.buildRoute(trade.swaps),
+        route: TradeRouteBuilder.build(trade.swaps),
       } as SwapQuote;
     } catch (e) {
       if (fallbackPrice) {

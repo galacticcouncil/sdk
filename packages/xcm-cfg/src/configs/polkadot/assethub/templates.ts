@@ -14,7 +14,9 @@ import {
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
-export const xcmDeliveryFee = 0.036;
+// const xcmDeliveryFee = 0.036;
+
+export const extraFee = 0;
 
 const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
   const { source } = params;
@@ -47,7 +49,7 @@ function toParaExtTemplate(
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -114,7 +116,7 @@ export function toParaStablesTemplate(
       fee: {
         asset: dot,
         balance: BalanceBuilder().substrate().system().account(),
-        extra: xcmDeliveryFee,
+        extra: extraFee,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),

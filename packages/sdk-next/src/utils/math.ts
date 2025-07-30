@@ -47,6 +47,8 @@ export function calculateDiffToAvg(v1: bigint, v2: bigint): number {
  */
 
 export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
+  if (vRef === 0n) return 0;
+
   const vFinb = Big(vFin.toString());
   const vRefb = Big(vRef.toString());
 

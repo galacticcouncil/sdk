@@ -15,11 +15,20 @@ export const INFINITY = bnum('Infinity');
 export function scale(input: BigNumber, decimalPlaces: number): BigNumber {
   const scalePow = new BigNumber(decimalPlaces.toString());
   const scaleMul = new BigNumber(10).pow(scalePow);
-  return input.times(scaleMul);
+  return input.times(scaleMul).decimalPlaces(4);
 }
 
-export function bnum(val: string | number | BigNumber): BigNumber {
+export function bnum(val: string | number | bigint | BigNumber): BigNumber {
   return new BigNumber(val.toString());
+}
+
+export function toBn(amount: string | number, decimals: number): BigNumber {
+  const input = bnum(amount);
+  return scale(input, decimals);
+}
+
+export function toDecimals(amount: BigNumber, decimals: number): string {
+  return amount.shiftedBy(-1 * decimals).toString();
 }
 
 export { BigNumber };

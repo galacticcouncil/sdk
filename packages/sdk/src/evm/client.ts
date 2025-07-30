@@ -1,21 +1,28 @@
+import { ApiPromise, WsProvider } from '@polkadot/api';
+
 import {
   createPublicClient,
   createWalletClient,
   custom,
   http,
-  webSocket,
   Chain,
   PublicClient,
   WalletClient,
 } from 'viem';
 
-import { evmMainnet } from './chain';
+import { createChain } from './chain';
+import { pjsWebSocket } from './transport';
 
 export class EvmClient {
+  private wsProvider: WsProvider;
+
   readonly chain: Chain;
 
-  constructor(chain?: Chain) {
-    this.chain = chain ? chain : evmMainnet;
+  constructor(api: ApiPromise) {
+    const { provider } = (api as any)._options;
+
+    this.wsProvider = provider as WsProvider;
+    this.chain = createChain(provider);
   }
 
   get chainId(): number {
@@ -40,7 +47,7 @@ export class EvmClient {
   getWsProvider(): PublicClient {
     return createPublicClient({
       chain: this.chain,
-      transport: webSocket(),
+      transport: pjsWebSocket(this.wsProvider),
     });
   }
 

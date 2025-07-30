@@ -20,5 +20,8 @@ export const crust = new Parachain({
   name: 'Crust network',
   parachainId: 2008,
   ss58Format: 88,
-  ws: 'wss://crust-parachain.crustapps.net',
+  ws: [
+    'wss://crust-parachain.crustnetwork.app',
+    'wss://crust-parachain.crustapps.net',
+  ],
 });

@@ -54,33 +54,18 @@ export class SubstrateApis {
   ): Promise<ApiPromise> {
     let currentRetry = 0;
     return new Promise((resolve) => {
-      const provider = new WsProvider(endpoints);
+      const provider = new WsProvider(
+        endpoints,
+        2_500, // autoConnect (2.5 seconds)
+        {}, // headers
+        60_000, // request timeout (60 seconds)
+        102400, // cache capacity
+        10 * 60_000 // cache TTL (10 minutes)
+      );
       provider.on('connected', async () => {
         const promise = ApiPromise.create({
           provider,
           noInitWarn: true,
-          types: {
-            VersionedMultiLocation: {
-              _enum: {
-                V0: 'MultiLocationV0',
-                V1: 'MultiLocationV1',
-                V2: 'MultiLocationV2',
-                V3: 'MultiLocationV3',
-                V4: 'MultiLocationV4',
-                V5: 'MultiLocationV4',
-              },
-            },
-            VersionedXcm: {
-              _enum: {
-                V0: 'XcmV0',
-                V1: 'XcmV1',
-                V2: 'XcmV2',
-                V3: 'XcmV3',
-                V4: 'XcmV4',
-                V5: 'XcmV4',
-              },
-            },
-          },
           metadata,
         });
 

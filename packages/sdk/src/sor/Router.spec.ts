@@ -26,7 +26,7 @@ describe('Router with mocked XYK pool service', () => {
   it('Should return suggested hops from token 1 (KSM) to 2 (aUSD)', async () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
-    const result = await router.getAllPaths('1', '2');
+    const result = await router.getRoutes('1', '2');
     expect(result).toStrictEqual([
       [
         {
@@ -101,47 +101,5 @@ describe('Router with mocked XYK pool service', () => {
         isWhiteListed: undefined,
       },
     ]);
-  });
-
-  it('Should return all assets pair reacheable from token 1 (KSM)', async () => {
-    expect(poolService).toBeDefined();
-    expect(router).toBeDefined();
-    const result = await router.getAssetPairs('1');
-    expect(result).toStrictEqual([
-      {
-        id: '2',
-        decimals: 12,
-        symbol: 'AUSD',
-        icon: 'AUSD',
-        name: 'Acala Dollar',
-        type: 'Token',
-        isSufficient: true,
-        existentialDeposit: '1000',
-        location: undefined,
-        meta: undefined,
-        isWhiteListed: undefined,
-      },
-      {
-        id: '0',
-        decimals: 12,
-        symbol: 'BSX',
-        icon: 'BSX',
-        name: 'BSX',
-        type: 'Token',
-        isSufficient: true,
-        existentialDeposit: '1000',
-        location: undefined,
-        meta: undefined,
-        isWhiteListed: undefined,
-      },
-    ]);
-  });
-
-  it('Should throw error if not-existing asset used in given pool', async () => {
-    expect(poolService).toBeDefined();
-    expect(router).toBeDefined();
-    await expect(async () => {
-      await router.getAssetPairs('not-existing');
-    }).rejects.toThrow('not-existing is not supported token');
   });
 });

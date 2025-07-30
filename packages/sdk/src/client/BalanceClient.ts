@@ -1,10 +1,12 @@
 import { ApiPromise } from '@polkadot/api';
-import { OrmlTokensAccountData } from '@polkadot/types/lookup';
+import {
+  PalletBalancesAccountData,
+  OrmlTokensAccountData,
+} from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
 import { PolkadotApiClient } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 export class BalanceClient extends PolkadotApiClient {
@@ -31,19 +33,13 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getTokenBalance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+    const data = await this.api.query.tokens.accounts(account, assetId);
+    return this.calculateFreeBalance(data);
   }
 
   async getErc20Balance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.getTokenBalanceData(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: 0n, frozen });
+    const data = await this.getTokenBalanceData(account, assetId);
+    return this.calculateFreeBalance(data);
   }
 
   async subscribeSystemBalance(
@@ -57,19 +53,23 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeTokenBalance(
     address: string,
-    assets: Asset[],
-    onChange: (balances: [string, BigNumber][]) => void
+    onChange: (balances: [string, BigNumber][]) => void,
+    assets?: string[]
   ): UnsubscribePromise {
-    const supported = assets
-      .filter((a) => a.type !== 'Erc20')
-      .filter((a) => a.id !== SYSTEM_ASSET_ID);
+    const keys = await this.api.query.tokens.accounts.keys(address);
 
-    const callArgs = supported.map((a) => [address, a.id]);
-    return this.api.query.tokens.accounts.multi(callArgs, (balances) => {
+    const queries = assets
+      ? assets.map((a) => [address, a])
+      : keys.map(({ args: [acc, token] }) => [
+          acc.toString(),
+          token.toString(),
+        ]);
+
+    return this.api.query.tokens.accounts.multi(queries, (balances) => {
       const result: [string, BigNumber][] = [];
       balances.forEach((data, i) => {
         const freeBalance = this.calculateFreeBalance(data);
-        const token = callArgs[i][1];
+        const token = queries[i][1];
         result.push([token, freeBalance]);
       });
       onChange(result);
@@ -78,26 +78,36 @@ export class BalanceClient extends PolkadotApiClient {
 
   async subscribeErc20Balance(
     address: string,
-    assets: Asset[],
-    onChange: (balances: [string, BigNumber][]) => void
+    onChange: (balances: [string, BigNumber][]) => void,
+    assets?: string[]
   ): UnsubscribePromise {
-    const supported = assets.filter((a) => a.type === 'Erc20');
-
-    const getErc20Balance = async () => {
-      const result: [string, BigNumber][] = [];
-      const balances: [string, BigNumber][] = await Promise.all(
-        supported.map(async (token: Asset) => [
-          token.id,
-          await this.getErc20Balance(address, token.id),
-        ])
-      );
-      balances.forEach(([token, balance]) => {
-        result.push([token, balance]);
-      });
-      onChange(result);
+    const getErc20s = async () => {
+      const assets = await this.api.query.assetRegistry.assets.entries();
+      return assets
+        .filter(([_args, value]) => {
+          const { assetType } = value.unwrap();
+          return assetType.toString() === 'Erc20';
+        })
+        .map(
+          ([
+            {
+              args: [id],
+            },
+          ]) => id.toString()
+        );
     };
 
-    await getErc20Balance();
+    const ids = assets ? assets : await getErc20s();
+    const getErc20Balance = async () => {
+      const balances: [string, BigNumber][] = await Promise.all(
+        ids.map(async (id: string) => [
+          id,
+          await this.getErc20Balance(address, id),
+        ])
+      );
+      onChange(balances);
+    };
+
     return this.api.rpc.chain.subscribeNewHeads(async () => {
       getErc20Balance();
     });
@@ -110,14 +120,14 @@ export class BalanceClient extends PolkadotApiClient {
     );
   }
 
-  protected calculateFreeBalance(data: any): BigNumber {
-    const { free, miscFrozen, feeFrozen, frozen } = data;
-    const freeBN = new BigNumber(free);
-    const miscFrozenBN = new BigNumber(miscFrozen || frozen);
-    const feeFrozenBN = new BigNumber(feeFrozen || 0n);
-    const maxFrozenBN = miscFrozenBN.gt(feeFrozenBN)
-      ? miscFrozenBN
-      : feeFrozenBN;
-    return freeBN.minus(maxFrozenBN);
+  protected calculateFreeBalance(
+    data: PalletBalancesAccountData | OrmlTokensAccountData
+  ): BigNumber {
+    const freeBalance = data.free.toString();
+    const frozenBalance = data.frozen.toString();
+
+    if (BigNumber(freeBalance).lt(frozenBalance)) return BigNumber(0);
+
+    return BigNumber(freeBalance).minus(frozenBalance);
   }
 }

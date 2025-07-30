@@ -16,7 +16,15 @@ export abstract class PolkadotExecutor {
   }
 
   async run() {
-    const wsProvider = new WsProvider(this.apiUrl);
+    const wsProvider = new WsProvider(
+      this.apiUrl,
+      2_500, // autoConnect (2.5 seconds)
+      {}, // headers
+      60_000, // request timeout (60 seconds)
+      102400, // cache capacity
+      10 * 60_000 // cache TTL (10 minutes)
+    );
+
     const api = await ApiPromise.create({ provider: wsProvider });
 
     const { specName, specVersion } = api.consts.system.version;
@@ -40,7 +48,6 @@ export abstract class PolkadotExecutor {
       })
       .finally(() => {
         console.timeEnd('Execution time:');
-        api.disconnect();
       });
   }
 

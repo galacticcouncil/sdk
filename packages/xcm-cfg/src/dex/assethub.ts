@@ -8,7 +8,6 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { TypeRegistry } from '@polkadot/types';
-import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
 import { AssethubClient } from '../clients';
 
@@ -41,8 +40,8 @@ export class AssethubDex implements Dex {
     const api = await this.chain.api;
     const balance =
       await api.call.assetConversionApi.quotePriceTokensForExactTokens(
-        aInLocation as unknown as StagingXcmV3MultiLocation,
-        aOutLocation as unknown as StagingXcmV3MultiLocation,
+        aInLocation.toU8a(),
+        aOutLocation.toU8a(),
         amountOut.amount,
         true
       );

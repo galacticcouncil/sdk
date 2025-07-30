@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 export class ERC20 {
   static fromAssetId(assetId: string) {
     const id = Number(assetId);

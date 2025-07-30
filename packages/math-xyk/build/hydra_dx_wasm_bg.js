@@ -6,13 +6,13 @@ export function __wbg_set_wasm(val) {
 
 let WASM_VECTOR_LEN = 0;
 
-let cachedUint8Memory0 = null;
+let cachedUint8ArrayMemory0 = null;
 
-function getUint8Memory0() {
-    if (cachedUint8Memory0 === null || cachedUint8Memory0.byteLength === 0) {
-        cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+function getUint8ArrayMemory0() {
+    if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
+        cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
     }
-    return cachedUint8Memory0;
+    return cachedUint8ArrayMemory0;
 }
 
 const lTextEncoder = typeof TextEncoder === 'undefined' ? (0, module.require)('util').TextEncoder : TextEncoder;
@@ -37,7 +37,7 @@ function passStringToWasm0(arg, malloc, realloc) {
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
         const ptr = malloc(buf.length, 1) >>> 0;
-        getUint8Memory0().subarray(ptr, ptr + buf.length).set(buf);
+        getUint8ArrayMemory0().subarray(ptr, ptr + buf.length).set(buf);
         WASM_VECTOR_LEN = buf.length;
         return ptr;
     }
@@ -45,7 +45,7 @@ function passStringToWasm0(arg, malloc, realloc) {
     let len = arg.length;
     let ptr = malloc(len, 1) >>> 0;
 
-    const mem = getUint8Memory0();
+    const mem = getUint8ArrayMemory0();
 
     let offset = 0;
 
@@ -60,7 +60,7 @@ function passStringToWasm0(arg, malloc, realloc) {
             arg = arg.slice(offset);
         }
         ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
-        const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
+        const view = getUint8ArrayMemory0().subarray(ptr + offset, ptr + len);
         const ret = encodeString(arg, view);
 
         offset += ret.written;
@@ -71,13 +71,13 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
-let cachedInt32Memory0 = null;
+let cachedDataViewMemory0 = null;
 
-function getInt32Memory0() {
-    if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
-        cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
+function getDataViewMemory0() {
+    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
+        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
     }
-    return cachedInt32Memory0;
+    return cachedDataViewMemory0;
 }
 
 const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
@@ -88,14 +88,14 @@ cachedTextDecoder.decode();
 
 function getStringFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
-    return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 /**
-* @param {string} s
-* @param {string} b
-* @param {string} a
-* @returns {string}
-*/
+ * @param {string} s
+ * @param {string} b
+ * @param {string} a
+ * @returns {string}
+ */
 export function get_spot_price(s, b, a) {
     let deferred4_0;
     let deferred4_1;
@@ -108,8 +108,8 @@ export function get_spot_price(s, b, a) {
         const ptr2 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         wasm.get_spot_price(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred4_0 = r0;
         deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -120,10 +120,10 @@ export function get_spot_price(s, b, a) {
 }
 
 /**
-* @param {string} s
-* @param {string} b
-* @returns {string}
-*/
+ * @param {string} s
+ * @param {string} b
+ * @returns {string}
+ */
 export function calculate_spot_price(s, b) {
     let deferred3_0;
     let deferred3_1;
@@ -134,8 +134,8 @@ export function calculate_spot_price(s, b) {
         const ptr1 = passStringToWasm0(b, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
         wasm.calculate_spot_price(retptr, ptr0, len0, ptr1, len1);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred3_0 = r0;
         deferred3_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -146,12 +146,12 @@ export function calculate_spot_price(s, b) {
 }
 
 /**
-* @param {string} s
-* @param {string} b
-* @param {string} fee_rate_n
-* @param {string} fee_rate_d
-* @returns {string}
-*/
+ * @param {string} s
+ * @param {string} b
+ * @param {string} fee_rate_n
+ * @param {string} fee_rate_d
+ * @returns {string}
+ */
 export function calculate_spot_price_with_fee(s, b, fee_rate_n, fee_rate_d) {
     let deferred5_0;
     let deferred5_1;
@@ -166,8 +166,8 @@ export function calculate_spot_price_with_fee(s, b, fee_rate_n, fee_rate_d) {
         const ptr3 = passStringToWasm0(fee_rate_d, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
         wasm.calculate_spot_price_with_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred5_0 = r0;
         deferred5_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -178,11 +178,11 @@ export function calculate_spot_price_with_fee(s, b, fee_rate_n, fee_rate_d) {
 }
 
 /**
-* @param {string} s
-* @param {string} b
-* @param {string} a
-* @returns {string}
-*/
+ * @param {string} s
+ * @param {string} b
+ * @param {string} a
+ * @returns {string}
+ */
 export function calculate_out_given_in(s, b, a) {
     let deferred4_0;
     let deferred4_1;
@@ -195,8 +195,8 @@ export function calculate_out_given_in(s, b, a) {
         const ptr2 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         wasm.calculate_out_given_in(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred4_0 = r0;
         deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -207,11 +207,11 @@ export function calculate_out_given_in(s, b, a) {
 }
 
 /**
-* @param {string} s
-* @param {string} b
-* @param {string} a
-* @returns {string}
-*/
+ * @param {string} s
+ * @param {string} b
+ * @param {string} a
+ * @returns {string}
+ */
 export function calculate_in_given_out(s, b, a) {
     let deferred4_0;
     let deferred4_1;
@@ -224,8 +224,8 @@ export function calculate_in_given_out(s, b, a) {
         const ptr2 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         wasm.calculate_in_given_out(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred4_0 = r0;
         deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -236,11 +236,11 @@ export function calculate_in_given_out(s, b, a) {
 }
 
 /**
-* @param {string} reserve_a
-* @param {string} reserve_b
-* @param {string} amount_a
-* @returns {string}
-*/
+ * @param {string} reserve_a
+ * @param {string} reserve_b
+ * @param {string} amount_a
+ * @returns {string}
+ */
 export function calculate_liquidity_in(reserve_a, reserve_b, amount_a) {
     let deferred4_0;
     let deferred4_1;
@@ -253,8 +253,8 @@ export function calculate_liquidity_in(reserve_a, reserve_b, amount_a) {
         const ptr2 = passStringToWasm0(amount_a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         wasm.calculate_liquidity_in(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred4_0 = r0;
         deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -265,11 +265,11 @@ export function calculate_liquidity_in(reserve_a, reserve_b, amount_a) {
 }
 
 /**
-* @param {string} reserve_a
-* @param {string} amount_a
-* @param {string} total_shares
-* @returns {string}
-*/
+ * @param {string} reserve_a
+ * @param {string} amount_a
+ * @param {string} total_shares
+ * @returns {string}
+ */
 export function calculate_shares(reserve_a, amount_a, total_shares) {
     let deferred4_0;
     let deferred4_1;
@@ -282,8 +282,8 @@ export function calculate_shares(reserve_a, amount_a, total_shares) {
         const ptr2 = passStringToWasm0(total_shares, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
         wasm.calculate_shares(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred4_0 = r0;
         deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -294,12 +294,12 @@ export function calculate_shares(reserve_a, amount_a, total_shares) {
 }
 
 /**
-* @param {string} reserve_a
-* @param {string} reserve_b
-* @param {string} shares
-* @param {string} total_shares
-* @returns {string}
-*/
+ * @param {string} reserve_a
+ * @param {string} reserve_b
+ * @param {string} shares
+ * @param {string} total_shares
+ * @returns {string}
+ */
 export function calculate_liquidity_out_asset_a(reserve_a, reserve_b, shares, total_shares) {
     let deferred5_0;
     let deferred5_1;
@@ -314,8 +314,8 @@ export function calculate_liquidity_out_asset_a(reserve_a, reserve_b, shares, to
         const ptr3 = passStringToWasm0(total_shares, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
         wasm.calculate_liquidity_out_asset_a(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred5_0 = r0;
         deferred5_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -326,12 +326,12 @@ export function calculate_liquidity_out_asset_a(reserve_a, reserve_b, shares, to
 }
 
 /**
-* @param {string} reserve_a
-* @param {string} reserve_b
-* @param {string} shares
-* @param {string} total_shares
-* @returns {string}
-*/
+ * @param {string} reserve_a
+ * @param {string} reserve_b
+ * @param {string} shares
+ * @param {string} total_shares
+ * @returns {string}
+ */
 export function calculate_liquidity_out_asset_b(reserve_a, reserve_b, shares, total_shares) {
     let deferred5_0;
     let deferred5_1;
@@ -346,8 +346,8 @@ export function calculate_liquidity_out_asset_b(reserve_a, reserve_b, shares, to
         const ptr3 = passStringToWasm0(total_shares, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
         wasm.calculate_liquidity_out_asset_b(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred5_0 = r0;
         deferred5_1 = r1;
         return getStringFromWasm0(r0, r1);
@@ -358,11 +358,11 @@ export function calculate_liquidity_out_asset_b(reserve_a, reserve_b, shares, to
 }
 
 /**
-* @param {string} a
-* @param {number} fee_numerator
-* @param {number} fee_denominator
-* @returns {string}
-*/
+ * @param {string} a
+ * @param {number} fee_numerator
+ * @param {number} fee_denominator
+ * @returns {string}
+ */
 export function calculate_pool_trade_fee(a, fee_numerator, fee_denominator) {
     let deferred2_0;
     let deferred2_1;
@@ -371,8 +371,8 @@ export function calculate_pool_trade_fee(a, fee_numerator, fee_denominator) {
         const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.calculate_pool_trade_fee(retptr, ptr0, len0, fee_numerator, fee_denominator);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         deferred2_0 = r0;
         deferred2_1 = r1;
         return getStringFromWasm0(r0, r1);

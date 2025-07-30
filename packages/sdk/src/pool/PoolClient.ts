@@ -5,12 +5,17 @@ import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
 import { BalanceClient } from '../client';
+import { EvmClient } from '../evm';
+import { MmOracleClient } from '../oracle';
 import { Asset } from '../types';
 import { BigNumber } from '../utils/bignumber';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 
 export abstract class PoolClient extends BalanceClient {
+  protected evm: EvmClient;
+  protected mmOracle: MmOracleClient;
+
   protected pools: PoolBase[] = [];
   protected subs: UnsubscribePromise[] = [];
 
@@ -19,7 +24,7 @@ export abstract class PoolClient extends BalanceClient {
 
   private memPoolsCache = new TLRUCache<number, Promise<PoolBase[]>>(null, {
     maxlen: 1,
-    ttl: 60 * 60 * 1000,
+    ttl: 1 * 60 * 60 * 1000,
     release: (mem) => {
       if (this.mem > mem) {
         this.log(this.getPoolType(), `mem ${mem} released at`, new Date());
@@ -32,13 +37,19 @@ export abstract class PoolClient extends BalanceClient {
     return this.getPools();
   }, this.memPoolsCache);
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, evm: EvmClient) {
     super(api);
+    this.evm = evm;
+    this.mmOracle = new MmOracleClient(evm);
   }
 
   abstract isSupported(): boolean;
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(poolPair: PoolPair, address: string): Promise<PoolFees>;
+  abstract getPoolFees(
+    block: number,
+    pair: PoolPair,
+    address: string
+  ): Promise<PoolFees>;
   protected abstract loadPools(): Promise<PoolBase[]>;
   protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
 
@@ -142,16 +153,16 @@ export abstract class PoolClient extends BalanceClient {
     const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
     return this.subscribeTokenBalance(
       pool.address,
-      pool.tokens,
       this.updateBalancesCallback(pool, isNotStableswap)
     );
   }
 
   private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
+    const ids = pool.tokens.filter((t) => t.type === 'Erc20').map((t) => t.id);
     return this.subscribeErc20Balance(
       pool.address,
-      pool.tokens,
-      this.updateBalancesCallback(pool, () => true)
+      this.updateBalancesCallback(pool, () => true),
+      ids
     );
   }
 
