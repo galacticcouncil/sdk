@@ -70,11 +70,6 @@ export class HsmPool extends StableSwap {
        * buybackLimit = how much Hollar can be bought back
        */
       if (amountIn.gt(buybackLimit)) {
-        // console.log(
-        //   'Buyback limit:',
-        //   amountIn.shiftedBy(-1 * poolPair.decimalsIn).toFixed(),
-        //   buybackLimit.shiftedBy(-1 * poolPair.decimalsOut).toFixed()
-        // );
         errors.push(PoolError.MaxBuyBackExceeded);
       }
 
@@ -85,7 +80,6 @@ export class HsmPool extends StableSwap {
        * Check if buy price less than max price
        */
       if (buyPrice.gt(maxPrice)) {
-        //console.log('Price check:', buyPrice.toFixed(), maxPrice.toFixed());
         errors.push(PoolError.MaxBuyPriceExceeded);
       }
     }
@@ -143,10 +137,7 @@ export class HsmPool extends StableSwap {
     return bnum(price);
   }
 
-  private calculateCollateralInGivenHollarOut(
-    poolPair: PoolPair,
-    amountOut: BigNumber
-  ): BigNumber {
+  private calculateCollateralInGivenHollarOut(amountOut: BigNumber): BigNumber {
     const collateralPeg = this.getCollateralPeg();
     const price = HsmMath.calculateCollateralInGivenHollarOut(
       amountOut.toFixed(0),
@@ -158,7 +149,7 @@ export class HsmPool extends StableSwap {
 
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber {
     if (poolPair.assetOut == this.hollarId) {
-      return this.calculateCollateralInGivenHollarOut(poolPair, amountOut);
+      return this.calculateCollateralInGivenHollarOut(amountOut);
     }
     return this.calculateHollarInGivenCollateralOut(poolPair, amountOut);
   }
@@ -179,10 +170,7 @@ export class HsmPool extends StableSwap {
     return bnum(price);
   }
 
-  private calculateHollarOutGivenCollateralIn(
-    poolPair: PoolPair,
-    amountIn: BigNumber
-  ): BigNumber {
+  private calculateHollarOutGivenCollateralIn(amountIn: BigNumber): BigNumber {
     const collateralPeg = this.getCollateralPeg();
     const price = HsmMath.calculateHollarOutGivenCollateralIn(
       amountIn.toFixed(0),
@@ -196,7 +184,7 @@ export class HsmPool extends StableSwap {
     if (poolPair.assetIn == this.hollarId) {
       return this.calculateCollateralOutGivenHollarIn(poolPair, amountIn);
     }
-    return this.calculateHollarOutGivenCollateralIn(poolPair, amountIn);
+    return this.calculateHollarOutGivenCollateralIn(amountIn);
   }
 
   private calculateImbalance(poolPair: PoolPair): BigNumber {
