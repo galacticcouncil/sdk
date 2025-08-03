@@ -8,14 +8,7 @@ import {
 } from '../types';
 import { StableSwap, StableSwapBase, StableSwapPair } from '../stable';
 
-import {
-  BigNumber,
-  bnum,
-  ONE,
-  scale,
-  toDecimals,
-  ZERO,
-} from '../../utils/bignumber';
+import { BigNumber, bnum, ONE, scale } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
 
 import { HsmMath } from './HsmMath';
@@ -26,7 +19,7 @@ export type HsmPoolBase = StableSwapBase & {
   maxInHolding: BigNumber;
   purchaseFee: PoolFee;
   buyBackFee: PoolFee;
-  buyBackRate: string;
+  buyBackRate: PoolFee;
 };
 
 export class HsmPool extends StableSwap {
@@ -35,7 +28,7 @@ export class HsmPool extends StableSwap {
   hollarId: string;
   purchaseFee: PoolFee;
   buyBackFee: PoolFee;
-  buyBackRate: string;
+  buyBackRate: PoolFee;
 
   static fromPool(pool: HsmPoolBase): HsmPool {
     return new HsmPool(pool);
@@ -60,35 +53,53 @@ export class HsmPool extends StableSwap {
     return super.parsePair(tokenIn, tokenOut);
   }
 
-  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyCtx {
-    const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
+  validateBuyConstraints(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    amountOut: BigNumber
+  ): PoolError[] {
     const errors: PoolError[] = [];
 
-    if (poolPair.assetIn == this.hollarId) {
-      const collateralPeg = this.getCollateralPeg();
-      const inbalance = HsmMath.calculateImbalance(
-        poolPair.balanceIn.toString(),
-        JSON.stringify(collateralPeg),
-        poolPair.balanceOut.toString()
-      );
-
-      const buybackLimit = HsmMath.calculateBuybackLimit(
-        bnum(inbalance).toString(),
-        this.buyBackRate
-      );
-
-      console.log(inbalance, buybackLimit);
+    if (poolPair.assetIn === this.hollarId) {
+      const buybackLimit = this.calculateBuybackLimit(poolPair);
 
       /**
        * Check if the requested amount exceeds the buyback limit
        *
-       * calculatedIn = the amount of Hollar the user is trying to sell to HSM
+       * amountIn = the amount of Hollar the user is trying to sell to HSM
        * buybackLimit = how much Hollar can be bought back
        */
-      if (calculatedIn.gt(bnum(buybackLimit))) {
+      if (amountIn.gt(buybackLimit)) {
+        // console.log(
+        //   'Buyback limit:',
+        //   amountIn.shiftedBy(-1 * poolPair.decimalsIn).toFixed(),
+        //   buybackLimit.shiftedBy(-1 * poolPair.decimalsOut).toFixed()
+        // );
         errors.push(PoolError.MaxBuyBackExceeded);
       }
+
+      const buyPrice = this.calculateBuyPrice(poolPair, amountIn, amountOut);
+      const maxPrice = this.calculateMaxPrice(poolPair);
+
+      /**
+       * Check if buy price less than max price
+       */
+      if (buyPrice.gt(maxPrice)) {
+        //console.log('Price check:', buyPrice.toFixed(), maxPrice.toFixed());
+        errors.push(PoolError.MaxBuyPriceExceeded);
+      }
     }
+
+    return errors;
+  }
+
+  validateAndBuy(poolPair: PoolPair, amountOut: BigNumber): BuyCtx {
+    const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
+    const errors = this.validateBuyConstraints(
+      poolPair,
+      calculatedIn,
+      amountOut
+    );
 
     return {
       amountIn: calculatedIn,
@@ -101,53 +112,11 @@ export class HsmPool extends StableSwap {
 
   validateAndSell(poolPair: PoolPair, amountIn: BigNumber): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
-    const errors: PoolError[] = [];
-
-    if (poolPair.assetIn == this.hollarId) {
-      const collateralPeg = this.getCollateralPeg();
-      const inbalance = HsmMath.calculateImbalance(
-        poolPair.balanceIn.toString(),
-        JSON.stringify(collateralPeg),
-        poolPair.balanceOut.toString()
-      );
-
-      const buybackLimit = HsmMath.calculateBuybackLimit(
-        bnum(inbalance).toString(),
-        this.buyBackRate
-      );
-
-      /**
-       * Check if the requested amount exceeds the buyback limit
-       *
-       * amountIn = the amount of Hollar the user is trying to sell to HSM
-       * buybackLimit = how much Hollar can be bought back
-       */
-      if (amountIn.gt(bnum(buybackLimit))) {
-        errors.push(PoolError.MaxBuyBackExceeded);
-      }
-
-      const aIn = amountIn.dividedBy(bnum(10).pow(poolPair.decimalsIn));
-      const aOut = calculatedOut.dividedBy(bnum(10).pow(poolPair.decimalsOut));
-      const buyFmt = aOut.dividedBy(aIn);
-
-      const maxPrice = HsmMath.calculateMaxPrice(
-        JSON.stringify(collateralPeg),
-        this.maxBuyPriceCoefficient.toFixed(0)
-      );
-      const [maxNom, maxDenom] = JSON.parse(maxPrice);
-      const max = bnum(maxNom).div(bnum(maxDenom));
-      const maxFmt = max.shiftedBy(-1 * poolPair.decimalsOut);
-
-      /**
-       * Check if buy price less than max price
-       *
-       * buyFmt = actual buy price
-       * maxFmt = max buy price
-       */
-      if (buyFmt.gt(maxFmt)) {
-        errors.push(PoolError.MaxBuyPriceExceeded);
-      }
-    }
+    const errors = this.validateBuyConstraints(
+      poolPair,
+      amountIn,
+      calculatedOut
+    );
 
     return {
       amountIn: amountIn,
@@ -228,6 +197,46 @@ export class HsmPool extends StableSwap {
       return this.calculateCollateralOutGivenHollarIn(poolPair, amountIn);
     }
     return this.calculateHollarOutGivenCollateralIn(poolPair, amountIn);
+  }
+
+  private calculateImbalance(poolPair: PoolPair): BigNumber {
+    const collateralPeg = this.getCollateralPeg();
+    const imbalance = HsmMath.calculateImbalance(
+      poolPair.balanceIn.toString(),
+      JSON.stringify(collateralPeg),
+      poolPair.balanceOut.toString()
+    );
+    return bnum(imbalance);
+  }
+
+  private calculateBuybackLimit(poolPair: PoolPair): BigNumber {
+    const imbalance = this.calculateImbalance(poolPair);
+    const buybackLimit = HsmMath.calculateBuybackLimit(
+      imbalance.toString(),
+      FeeUtils.toRaw(this.buyBackRate).toString()
+    );
+    return bnum(buybackLimit);
+  }
+
+  private calculateBuyPrice(
+    poolPair: PoolPair,
+    amountIn: BigNumber,
+    amountOut: BigNumber
+  ): BigNumber {
+    const aIn = amountIn.dividedBy(bnum(10).pow(poolPair.decimalsIn));
+    const aOut = amountOut.dividedBy(bnum(10).pow(poolPair.decimalsOut));
+    return aOut.dividedBy(aIn);
+  }
+
+  private calculateMaxPrice(poolPair: PoolPair): BigNumber {
+    const collateralPeg = this.getCollateralPeg();
+    const maxPrice = HsmMath.calculateMaxPrice(
+      JSON.stringify(collateralPeg),
+      this.maxBuyPriceCoefficient.toFixed(0)
+    );
+    const [maxNom, maxDenom] = JSON.parse(maxPrice);
+    const max = bnum(maxNom).div(bnum(maxDenom));
+    return max.shiftedBy(-1 * poolPair.decimalsOut);
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): BigNumber {

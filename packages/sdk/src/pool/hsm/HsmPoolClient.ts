@@ -67,7 +67,7 @@ export class HsmClient extends PoolClient {
           maxInHolding: bnum(maxInHolding.unwrap().toString()),
           purchaseFee: FeeUtils.fromPermill(purchaseFee.toNumber()),
           buyBackFee: FeeUtils.fromPermill(buyBackFee.toNumber()),
-          buyBackRate: buybackRate.toString(),
+          buyBackRate: FeeUtils.fromPerbill(buybackRate.toNumber()),
         } as PoolBase;
       }
     });
