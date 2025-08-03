@@ -12,7 +12,7 @@ import { FeeUtils } from '../../utils/fee';
 import { PoolType, PoolPair, PoolFees, PoolBase } from '../types';
 import { StableSwapClient } from '../stable';
 import { PoolClient } from '../PoolClient';
-import { HsmPoolBase, HsmPoolFees } from './HsmPool';
+import { HsmPoolBase } from './HsmPool';
 
 export class HsmClient extends PoolClient {
   private stableClient: StableSwapClient;
@@ -51,6 +51,7 @@ export class HsmClient extends PoolClient {
         maxInHolding,
         purchaseFee,
         buyBackFee,
+        buybackRate,
       } = collateralInfo;
 
       const stablePool = stablePools.find((p) => p.id === poolId.toString());
@@ -60,11 +61,13 @@ export class HsmClient extends PoolClient {
           ...stablePool,
           address: address,
           type: PoolType.HSM,
+          tokens: stablePool.tokens.filter((t) => t.id !== poolId.toString()),
           hollarId: hollarId,
           maxBuyPriceCoefficient: bnum(maxBuyPriceCoefficient.toString()),
           maxInHolding: bnum(maxInHolding.unwrap().toString()),
           purchaseFee: FeeUtils.fromPermill(purchaseFee.toNumber()),
           buyBackFee: FeeUtils.fromPermill(buyBackFee.toNumber()),
+          buyBackRate: buybackRate.toString(),
         } as PoolBase;
       }
     });
@@ -74,16 +77,9 @@ export class HsmClient extends PoolClient {
   async getPoolFees(
     _block: number,
     _poolPair: PoolPair,
-    poolAddress: string
+    _poolAddress: string
   ): Promise<PoolFees> {
-    const pool = this.pools.find(
-      (pool) => pool.address === poolAddress
-    ) as HsmPoolBase;
-    return {
-      fee: pool.fee,
-      purchaseFee: pool.purchaseFee,
-      buyBackFee: pool.buyBackFee,
-    } as HsmPoolFees;
+    return {} as PoolFees;
   }
 
   protected async subscribeBalances(): UnsubscribePromise {

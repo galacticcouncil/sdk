@@ -365,7 +365,7 @@ export class StableSwap implements Pool {
     return bnum(spot).div(base).decimalPlaces(0, 1);
   }
 
-  getPegs(): string {
+  private getPegs(): string {
     return JSON.stringify(this.pegs);
   }
 
