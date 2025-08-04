@@ -20,6 +20,7 @@ import {
   Pool,
   PoolBase,
   PoolFees,
+  PoolFilter,
   PoolPair,
   PoolType,
 } from './types';
@@ -100,24 +101,34 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     this.onChainAssets = assets;
   }
 
-  async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
+  async getPools(filter: PoolFilter = {}): Promise<PoolBase[]> {
     if (!this.isRegistrySynced) {
       await this.memRegistry(1);
     }
 
-    if (includeOnly.length == 0) {
-      const pools = await Promise.all(
-        this.clients
-          .filter((client) => client.isSupported())
-          .map((client) => client.getPoolsMem())
+    const { includeOnly = [], exclude = [] } = filter;
+
+    if (includeOnly.length > 0) {
+      return this.getFilteredPools((client) =>
+        includeOnly.includes(client.getPoolType())
       );
-      return pools.flat();
     }
 
+    if (exclude.length > 0) {
+      return this.getFilteredPools(
+        (client) => !exclude.includes(client.getPoolType())
+      );
+    }
+
+    return this.getFilteredPools((client) => client.isSupported());
+  }
+
+  private async getFilteredPools(
+    supplier: (client: PoolClient) => boolean
+  ): Promise<PoolBase[]> {
+    const clients = this.clients.filter(supplier);
     const pools = await Promise.all(
-      this.clients
-        .filter((client) => includeOnly.some((t) => t === client.getPoolType()))
-        .map((client) => client.getPoolsMem())
+      clients.map((client) => client.getPoolsMem())
     );
     return pools.flat();
   }

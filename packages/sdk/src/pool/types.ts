@@ -1,6 +1,11 @@
 import type { Asset } from '../types';
 import type { BigNumber } from '../utils/bignumber';
 
+export type PoolFilter = {
+  includeOnly?: PoolType[];
+  exclude?: PoolType[];
+};
+
 export enum PoolType {
   Aave = 'Aave',
   LBP = 'Lbp',
@@ -98,7 +103,7 @@ export interface Pool extends PoolBase {
 }
 
 export interface IPoolService {
-  getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
+  getPools(filter?: PoolFilter): Promise<PoolBase[]>;
   getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees>;
 }
 

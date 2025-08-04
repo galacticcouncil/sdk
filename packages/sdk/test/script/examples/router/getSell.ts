@@ -9,7 +9,7 @@ class GetSellExample extends PolkadotExecutor {
   async script(apiPromise: ApiPromise): Promise<any> {
     const { api, tx } = createSdkContext(apiPromise);
 
-    const paths = await api.router.getAllPaths('0', '5');
+    const paths = await api.router.getRoutes('0', '5');
     const sortByHopsDesc = paths.sort((a, b) => {
       const swapsA = a.length;
       const swapsB = b.length;

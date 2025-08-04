@@ -7,13 +7,11 @@ import {
   Pool,
   PoolBase,
   PoolFactory,
-  PoolType,
+  PoolFilter,
 } from '../pool';
 import { Asset } from '../types';
 
-export type RouterOptions = {
-  includeOnly?: PoolType[];
-};
+export type RouterOptions = PoolFilter;
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
@@ -26,9 +24,7 @@ export class Router {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
     this.routeProposals = new Map();
-    this.routerOptions = Object.freeze({
-      includeOnly: routerOptions.includeOnly ?? [],
-    });
+    this.routerOptions = Object.freeze(routerOptions);
   }
 
   /**
@@ -37,8 +33,7 @@ export class Router {
    * @returns {PoolBase[]} List of all substrate based pools
    */
   async getPools(): Promise<PoolBase[]> {
-    const includeOnly = this.routerOptions.includeOnly;
-    return await this.poolService.getPools(includeOnly);
+    return await this.poolService.getPools(this.routerOptions);
   }
 
   /**

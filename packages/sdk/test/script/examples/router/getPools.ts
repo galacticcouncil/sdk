@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { createSdkContext } from '../../../../src';
+import { createSdkContext, PoolType } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
