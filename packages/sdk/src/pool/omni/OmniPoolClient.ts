@@ -63,6 +63,51 @@ export class OmniPoolClient extends PoolClient {
     return this.api.query.dynamicFees.assetFee(key);
   }, this.memQueryCache);
 
+  getPoolType(): PoolType {
+    return PoolType.Omni;
+  }
+
+  private getPoolId(): string {
+    return encodeAddress(
+      stringToU8a('modlomnipool'.padEnd(32, '\0')),
+      HYDRADX_SS58_PREFIX
+    );
+  }
+
+  private getOracleKey(asset: string): [string, string] {
+    return asset === SYSTEM_ASSET_ID
+      ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
+      : [HUB_ASSET_ID, asset];
+  }
+
+  private getPoolLimits(): PoolLimits {
+    const maxInRatio = this.api.consts.omnipool.maxInRatio.toNumber();
+    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toNumber();
+    const minTradingLimit =
+      this.api.consts.omnipool.minimumTradingLimit.toNumber();
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  private async getDynamicFees(feeAsset: string): Promise<TDynamicFees> {
+    if (this.dynamicFees.has(feeAsset)) {
+      return this.dynamicFees.get(feeAsset)!;
+    }
+    return this.memFeesQuery(feeAsset);
+  }
+
+  private async getOraclePrice(asset: string): Promise<TEmaOracle> {
+    const oracleKey = this.getOracleKey(asset);
+    const oracleCacheKey = oracleKey.join(':');
+    if (this.oracles.has(oracleCacheKey)) {
+      return this.oracles.get(oracleCacheKey)!;
+    }
+    return this.memOracleQuery(oracleCacheKey);
+  }
+
   isSupported(): boolean {
     return this.api.query.omnipool !== undefined;
   }
@@ -124,22 +169,6 @@ export class OmniPoolClient extends PoolClient {
     ];
   }
 
-  private async getDynamicFees(feeAsset: string): Promise<TDynamicFees> {
-    if (this.dynamicFees.has(feeAsset)) {
-      return this.dynamicFees.get(feeAsset)!;
-    }
-    return this.memFeesQuery(feeAsset);
-  }
-
-  private async getOraclePrice(asset: string): Promise<TEmaOracle> {
-    const oracleKey = this.getOracleKey(asset);
-    const oracleCacheKey = oracleKey.join(':');
-    if (this.oracles.has(oracleCacheKey)) {
-      return this.oracles.get(oracleCacheKey)!;
-    }
-    return this.memOracleQuery(oracleCacheKey);
-  }
-
   async getPoolFees(
     block: number,
     poolPair: PoolPair,
@@ -175,85 +204,6 @@ export class OmniPoolClient extends PoolClient {
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     } as OmniPoolFees;
-  }
-
-  getPoolType(): PoolType {
-    return PoolType.Omni;
-  }
-
-  async subscribePoolChange(pool: PoolBase): UnsubscribePromise {
-    const assetsArgs = pool.tokens.map((t) => t.id);
-    const unsubFns: (() => void)[] = [];
-
-    const unsubAssets = await this.api.query.omnipool.assets.multi(
-      assetsArgs,
-      (states) => {
-        pool.tokens = states.map((state, i) => {
-          const token = pool.tokens[i];
-          if (state.isNone) return token;
-          const unwrapped: PalletOmnipoolAssetState = state.unwrap();
-          return this.updateTokenState(token, unwrapped);
-        });
-      }
-    );
-    unsubFns.push(unsubAssets);
-
-    const unsubAssetsFees = await this.api.query.dynamicFees.assetFee.multi(
-      assetsArgs,
-      (fees) => {
-        fees.forEach((fee, i) => {
-          const key = assetsArgs[i];
-          this.dynamicFees.set(key, fee);
-        });
-      }
-    );
-    unsubFns.push(unsubAssetsFees);
-
-    const oracleQueries = assetsArgs.map((id) => {
-      const pair = this.getOracleKey(id);
-      return [ORACLE_NAME, pair, ORACLE_PERIOD] as [
-        string,
-        [string, string],
-        string,
-      ];
-    });
-
-    const unsubOracles = await this.api.query.emaOracle.oracles.multi(
-      oracleQueries,
-      (oracles) => {
-        oracles.forEach(async (oracle, i) => {
-          const key = oracleQueries[i];
-          const [_name, pair, _period] = key;
-          this.oracles.set(pair.join(':'), oracle);
-        });
-      }
-    );
-    unsubFns.push(unsubOracles);
-
-    return () => {
-      for (const unsub of unsubFns) {
-        try {
-          unsub();
-        } catch (e) {
-          console.warn('Omnipool unsubscribe failed', e);
-        }
-      }
-    };
-  }
-
-  private updateTokenState(
-    token: PoolToken,
-    tokenState: PalletOmnipoolAssetState
-  ) {
-    const { hubReserve, shares, tradable, cap, protocolShares } = tokenState;
-    return {
-      ...token,
-      hubReserves: bnum(hubReserve.toString()),
-      shares: bnum(shares.toString()),
-      cap: bnum(cap.toString()),
-      protocolShares: bnum(protocolShares.toString()),
-      tradeable: tradable.bits.toNumber(),
-    } as OmniPoolToken;
   }
 
   private getAssetFee(
@@ -364,28 +314,80 @@ export class OmniPoolClient extends PoolClient {
     ];
   }
 
-  private getOracleKey(asset: string): [string, string] {
-    return asset === SYSTEM_ASSET_ID
-      ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
-      : [HUB_ASSET_ID, asset];
-  }
+  protected async subscribeUpdates(): UnsubscribePromise {
+    const [pool] = this.pools;
 
-  private getPoolId(): string {
-    return encodeAddress(
-      stringToU8a('modlomnipool'.padEnd(32, '\0')),
-      HYDRADX_SS58_PREFIX
+    const assetsArgs = pool.tokens.map((t) => t.id);
+    const unsubFns: (() => void)[] = [];
+
+    const unsubAssets = await this.api.query.omnipool.assets.multi(
+      assetsArgs,
+      (states) => {
+        pool.tokens = states.map((state, i) => {
+          const token = pool.tokens[i];
+          if (state.isNone) return token;
+          const unwrapped: PalletOmnipoolAssetState = state.unwrap();
+          return this.updateTokenState(token, unwrapped);
+        });
+      }
     );
+    unsubFns.push(unsubAssets);
+
+    const unsubAssetsFees = await this.api.query.dynamicFees.assetFee.multi(
+      assetsArgs,
+      (fees) => {
+        fees.forEach((fee, i) => {
+          const key = assetsArgs[i];
+          this.dynamicFees.set(key, fee);
+        });
+      }
+    );
+    unsubFns.push(unsubAssetsFees);
+
+    const oracleQueries = assetsArgs.map((id) => {
+      const pair = this.getOracleKey(id);
+      return [ORACLE_NAME, pair, ORACLE_PERIOD] as [
+        string,
+        [string, string],
+        string,
+      ];
+    });
+
+    const unsubOracles = await this.api.query.emaOracle.oracles.multi(
+      oracleQueries,
+      (oracles) => {
+        oracles.forEach(async (oracle, i) => {
+          const key = oracleQueries[i];
+          const [_name, pair, _period] = key;
+          this.oracles.set(pair.join(':'), oracle);
+        });
+      }
+    );
+    unsubFns.push(unsubOracles);
+
+    return () => {
+      for (const unsub of unsubFns) {
+        try {
+          unsub();
+        } catch (e) {
+          console.warn('Omnipool unsubscribe failed', e);
+        }
+      }
+    };
   }
 
-  private getPoolLimits(): PoolLimits {
-    const maxInRatio = this.api.consts.omnipool.maxInRatio.toNumber();
-    const maxOutRatio = this.api.consts.omnipool.maxOutRatio.toNumber();
-    const minTradingLimit =
-      this.api.consts.omnipool.minimumTradingLimit.toNumber();
+  private updateTokenState(
+    token: PoolToken,
+    tokenState: PalletOmnipoolAssetState
+  ) {
+    const { hubReserve, shares, tradable, cap, protocolShares } = tokenState;
     return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
+      ...token,
+      hubReserves: bnum(hubReserve.toString()),
+      shares: bnum(shares.toString()),
+      cap: bnum(cap.toString()),
+      protocolShares: bnum(protocolShares.toString()),
+      tradeable: tradable.bits.toNumber(),
+    } as OmniPoolToken;
   }
 }

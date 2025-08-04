@@ -65,13 +65,13 @@
 
 ### Patch Changes
 
-- Update twap api accessors
+- sdk: update twap api accessors
 
 ## 9.5.1
 
 ### Patch Changes
 
-- Revert range calc
+- sdk: revert range calc
 
 ## 9.5.0
 

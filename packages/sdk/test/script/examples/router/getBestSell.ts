@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { createSdkContext } from '../../../../src';
+import { createSdkContext, PoolType } from '../../../../src';
 import { humanizeError } from '../../../../src/utils/error';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
@@ -38,8 +38,7 @@ class GetBestSellExample extends PolkadotExecutor {
     const { api, ctx, tx } = createSdkContext(apiPromise);
 
     await ctx.pool.syncRegistry(external);
-
-    const trade = await api.router.getBestSell('30', '10', '10');
+    const trade = await api.router.getBestSell('1000745', '222', '1');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
 
@@ -49,4 +48,4 @@ class GetBestSellExample extends PolkadotExecutor {
   }
 }
 
-new GetBestSellExample(ApiUrl.Hydration, 'Get best sell price', true).run();
+new GetBestSellExample(ApiUrl.Lark1, 'Get best sell price', true).run();
