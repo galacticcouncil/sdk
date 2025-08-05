@@ -60,6 +60,7 @@ import {
   susde,
   susds,
   sol,
+  sqd,
   sky,
   tbtc,
   lbtc,
@@ -634,6 +635,27 @@ export const hydration = new EvmParachain({
           X1: {
             Parachain: 2043,
           },
+        },
+      },
+    },
+    {
+      asset: sqd,
+      decimals: 18,
+      id: 37,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2004,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x9c4c6eaad9b926ba09f702f4ad880ef71998ef18',
+              },
+            },
+          ],
         },
       },
     },
