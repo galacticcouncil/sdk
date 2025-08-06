@@ -2,6 +2,8 @@ import type {
   PalletEmaOracleOracleEntry,
   PalletDynamicFeesFeeEntry,
   PalletOmnipoolAssetState,
+  PalletDynamicFeesFeeParams,
+  PalletDynamicFeesAssetFeeConfig,
 } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { encodeAddress } from '@polkadot/util-crypto';
@@ -18,7 +20,7 @@ import {
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
-import { bnum } from '../../utils/bignumber';
+import { BigNumber, bnum } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
 
 import {
@@ -38,12 +40,15 @@ type OmniPoolFeeRange = [number, number, number];
 
 type TEmaOracle = Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>;
 type TDynamicFees = Option<PalletDynamicFeesFeeEntry>;
+type TDynamicFeesConfiguration = Option<PalletDynamicFeesAssetFeeConfig>;
 
 const ORACLE_NAME = 'omnipool';
 const ORACLE_PERIOD = 'Short';
 
 export class OmniPoolClient extends PoolClient {
   private dynamicFees: Map<string, TDynamicFees> = new Map();
+  private dynamicFeesConfiguration: Map<string, TDynamicFeesConfiguration> =
+    new Map();
   private oracles: Map<string, TEmaOracle> = new Map();
 
   private memQueryCache = new TLRUCache<string, Promise<any>>(null, {
@@ -61,6 +66,10 @@ export class OmniPoolClient extends PoolClient {
 
   private memFeesQuery = memoize1((key: string) => {
     return this.api.query.dynamicFees.assetFee(key);
+  }, this.memQueryCache);
+
+  private memFeesConfigurationQuery = memoize1((key: string) => {
+    return this.api.query.dynamicFees.assetFeeConfiguration(key);
   }, this.memQueryCache);
 
   getPoolType(): PoolType {
@@ -97,6 +106,15 @@ export class OmniPoolClient extends PoolClient {
       return this.dynamicFees.get(feeAsset)!;
     }
     return this.memFeesQuery(feeAsset);
+  }
+
+  private async getDynamicFeesConfiguration(
+    feeAsset: string
+  ): Promise<TDynamicFeesConfiguration> {
+    if (this.dynamicFeesConfiguration.has(feeAsset)) {
+      return this.dynamicFeesConfiguration.get(feeAsset)!;
+    }
+    return this.memFeesConfigurationQuery(feeAsset);
   }
 
   private async getOraclePrice(asset: string): Promise<TEmaOracle> {
@@ -173,9 +191,23 @@ export class OmniPoolClient extends PoolClient {
     block: number,
     poolPair: PoolPair,
     _poolAddress: string
-  ): Promise<PoolFees> {
+  ): Promise<OmniPoolFees> {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
+
+    const feeConfiguration = await this.getDynamicFeesConfiguration(
+      feeAsset
+    ).then((configuration) => configuration.unwrapOr(null));
+
+    if (feeConfiguration?.isFixed) {
+      const assetFee = feeConfiguration.asFixed.assetFee.toNumber();
+      const protocolFee = feeConfiguration.asFixed.protocolFee.toNumber();
+
+      return {
+        assetFee: FeeUtils.fromPermill(assetFee),
+        protocolFee: FeeUtils.fromPermill(protocolFee),
+      };
+    }
 
     const [dynamicFees, oracleAssetFee, oracleProtocolFee] = await Promise.all([
       this.getDynamicFees(feeAsset),
@@ -187,13 +219,24 @@ export class OmniPoolClient extends PoolClient {
       poolPair,
       block,
       dynamicFees,
-      oracleAssetFee
+      oracleAssetFee,
+      feeConfiguration?.isDynamic
+        ? feeConfiguration.asDynamic.assetFeeParams
+        : undefined
     );
 
     const [protocolFeeMin, protocolFee, protocolFeeMax] =
       protocolAsset === HUB_ASSET_ID
         ? [0, 0, 0] // No protocol fee for LRNA sell
-        : this.getProtocolFee(poolPair, block, dynamicFees, oracleProtocolFee);
+        : this.getProtocolFee(
+            poolPair,
+            block,
+            dynamicFees,
+            oracleProtocolFee,
+            feeConfiguration?.isDynamic
+              ? feeConfiguration.asDynamic.protocolFeeParams
+              : undefined
+          );
 
     const min = assetFeeMin + protocolFeeMin;
     const max = assetFeeMax + protocolFeeMax;
@@ -203,19 +246,20 @@ export class OmniPoolClient extends PoolClient {
       protocolFee: FeeUtils.fromPermill(protocolFee),
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
-    } as OmniPoolFees;
+    };
   }
 
   private getAssetFee(
     poolPair: PoolPair,
     blockNumber: number,
     dynamicFee: Option<PalletDynamicFeesFeeEntry>,
-    oracle: Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
+    oracle: Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>,
+    configuration?: PalletDynamicFeesFeeParams
   ): OmniPoolFeeRange {
     const { assetOut, balanceOut } = poolPair;
 
     const { minFee, maxFee, decay, amplification } =
-      this.api.consts.dynamicFees.assetFeeParameters;
+      configuration || this.api.consts.dynamicFees.assetFeeParameters;
 
     const feeMin = FeeUtils.fromPermill(minFee.toNumber());
     const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
@@ -264,12 +308,13 @@ export class OmniPoolClient extends PoolClient {
     poolPair: PoolPair,
     blockNumber: number,
     dynamicFee: Option<PalletDynamicFeesFeeEntry>,
-    oracle: Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
+    oracle: Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>,
+    configuration?: PalletDynamicFeesFeeParams
   ): OmniPoolFeeRange {
     const { assetIn, balanceIn } = poolPair;
 
     const { minFee, maxFee, decay, amplification } =
-      this.api.consts.dynamicFees.protocolFeeParameters;
+      configuration || this.api.consts.dynamicFees.protocolFeeParameters;
 
     const feeMin = FeeUtils.fromPermill(minFee.toNumber());
     const feeMax = FeeUtils.fromPermill(maxFee.toNumber());
@@ -343,6 +388,18 @@ export class OmniPoolClient extends PoolClient {
       }
     );
     unsubFns.push(unsubAssetsFees);
+
+    const unsubAssetsFeeConfigurations =
+      await this.api.query.dynamicFees.assetFeeConfiguration.multi(
+        assetsArgs,
+        (configs) => {
+          configs.forEach((config, i) => {
+            const key = assetsArgs[i];
+            this.dynamicFeesConfiguration.set(key, config);
+          });
+        }
+      );
+    unsubFns.push(unsubAssetsFeeConfigurations);
 
     const oracleQueries = assetsArgs.map((id) => {
       const pair = this.getOracleKey(id);
