@@ -23,4 +23,4 @@ class GetSellExample extends PolkadotExecutor {
   }
 }
 
-new GetSellExample(ApiUrl.Hydration, 'Get sell price', true).run();
+new GetSellExample(ApiUrl.Hydration, 'Get sell', true).run();
