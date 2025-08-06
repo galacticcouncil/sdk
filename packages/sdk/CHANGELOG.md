@@ -1,5 +1,20 @@
 # @galacticcouncil/sdk
 
+## 9.10.0
+
+### Minor Changes
+
+[4fc9586e]: https://github.com/galacticcouncil/sdk/commit/4fc9586e
+[ba407030]: https://github.com/galacticcouncil/sdk/commit/ba407030
+[19ae8b4b]: https://github.com/galacticcouncil/sdk/commit/19ae8b4b
+[c046c9b4]: https://github.com/galacticcouncil/sdk/commit/c046c9b4
+
+- [[#4fc9586e][4fc9586e]] sdk: support pool filter (exclude)
+
+- [[#ba407030][ba407030]] hsm: buy contraints update
+- [[#19ae8b4b][19ae8b4b]] hsm: initial validations
+- [[#c046c9b4][c046c9b4]] hsm: add pool module
+
 ## 9.9.1
 
 ### Patch Changes

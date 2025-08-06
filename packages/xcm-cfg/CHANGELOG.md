@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.5.0
+
+### Minor Changes
+
+- c7abc3e: add cfg rpc
+
 ## 10.4.0
 
 ### Minor Changes
