@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk
 
+## 9.11.0
+
+### Minor Changes
+
+- f091023: Update omnipool dynamic fee calculation
+- support asset dyn fee config
+
 ## 9.10.0
 
 ### Minor Changes
