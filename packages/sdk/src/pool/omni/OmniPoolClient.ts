@@ -20,17 +20,10 @@ import {
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
-import { BigNumber, bnum } from '../../utils/bignumber';
+import { bnum } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
 
-import {
-  PoolBase,
-  PoolType,
-  PoolToken,
-  PoolLimits,
-  PoolFees,
-  PoolPair,
-} from '../types';
+import { PoolBase, PoolType, PoolToken, PoolLimits, PoolPair } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { OmniMath } from './OmniMath';
@@ -130,6 +123,10 @@ export class OmniPoolClient extends PoolClient {
     return this.api.query.omnipool !== undefined;
   }
 
+  isAssetConfigSupported(): boolean {
+    return this.api.query.dynamicFees.assetFeeConfiguration !== undefined;
+  }
+
   async loadPools(): Promise<PoolBase[]> {
     const hubAssetId = this.api.consts.omnipool.hubAssetId.toString();
     const poolAddress = this.getPoolId();
@@ -195,9 +192,12 @@ export class OmniPoolClient extends PoolClient {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
 
-    const feeConfiguration = await this.getDynamicFeesConfiguration(
-      feeAsset
-    ).then((configuration) => configuration.unwrapOr(null));
+    let feeConfiguration;
+    if (this.isAssetConfigSupported()) {
+      feeConfiguration = await this.getDynamicFeesConfiguration(feeAsset).then(
+        (configuration) => configuration.unwrapOr(null)
+      );
+    }
 
     if (feeConfiguration?.isFixed) {
       const assetFee = feeConfiguration.asFixed.assetFee.toNumber();
@@ -389,17 +389,19 @@ export class OmniPoolClient extends PoolClient {
     );
     unsubFns.push(unsubAssetsFees);
 
-    const unsubAssetsFeeConfigurations =
-      await this.api.query.dynamicFees.assetFeeConfiguration.multi(
-        assetsArgs,
-        (configs) => {
-          configs.forEach((config, i) => {
-            const key = assetsArgs[i];
-            this.dynamicFeesConfiguration.set(key, config);
-          });
-        }
-      );
-    unsubFns.push(unsubAssetsFeeConfigurations);
+    if (this.isAssetConfigSupported()) {
+      const unsubAssetsFeeConfigurations =
+        await this.api.query.dynamicFees.assetFeeConfiguration.multi(
+          assetsArgs,
+          (configs) => {
+            configs.forEach((config, i) => {
+              const key = assetsArgs[i];
+              this.dynamicFeesConfiguration.set(key, config);
+            });
+          }
+        );
+      unsubFns.push(unsubAssetsFeeConfigurations);
+    }
 
     const oracleQueries = assetsArgs.map((id) => {
       const pair = this.getOracleKey(id);
