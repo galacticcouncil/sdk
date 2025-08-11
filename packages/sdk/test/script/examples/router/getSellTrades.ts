@@ -9,7 +9,7 @@ class GetSellTradesExample extends PolkadotExecutor {
   async script(apiPromise: ApiPromise): Promise<any> {
     const { api, tx } = createSdkContext(apiPromise);
 
-    const trades = await api.router.getSellTrades('10', '5', '1');
+    const trades = await api.router.getSellTrades('1000625', '222', '1');
 
     console.log('No of routes: ' + trades.length);
     const table = trades.map((t) => {
@@ -27,11 +27,15 @@ class GetSellTradesExample extends PolkadotExecutor {
     });
     console.table(table);
 
-    const [trade] = trades;
-    const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
-    console.log('Transaction hash: ' + tradeTx.hex);
-    return trade;
+    const [bestTrade] = trades;
+
+    const bestTradeTx = await tx
+      .trade(bestTrade)
+      .withBeneficiary(BENEFICIARY)
+      .build();
+    console.log('Transaction hash: ' + bestTradeTx.hex);
+    return bestTrade;
   }
 }
 
-new GetSellTradesExample(ApiUrl.Hydration, 'Get sell price', true).run();
+new GetSellTradesExample(ApiUrl.Lark1, 'Get sell price', true).run();

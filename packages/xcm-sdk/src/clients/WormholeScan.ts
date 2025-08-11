@@ -45,18 +45,27 @@ export interface Operation {
       txHash: string;
     };
   };
-  vaa: {
+  targetChain?: {
+    status: string;
+  };
+  vaa?: {
     guardianSetIndex: number;
     isDuplicated: boolean;
     raw: string;
   };
 }
 
+export interface OperationParsedPayload {
+  targetRecipient: string;
+  targetRelayerFee: bigint;
+  toNativeTokenAmount: bigint;
+}
+
 export interface OperationPayload {
   amount: string;
   fee: string;
   fromAddress: string;
-  parsedPayload: any;
+  parsedPayload: OperationParsedPayload;
   payload: string;
   payloadType: number;
   toAddress: string;
