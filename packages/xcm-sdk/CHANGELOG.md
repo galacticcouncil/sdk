@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.1.0
+
+### Minor Changes
+
+- wormhole transfer api
+
 ## 10.0.0
 
 ### Major Changes
