@@ -1,21 +1,21 @@
-import { Edge, RouteSuggester } from './route';
+import { Edge, RouteSuggester, RouteProposal } from './route';
 
 import {
+  hashPools,
   Hop,
   IPoolService,
   Pool,
   PoolBase,
   PoolFactory,
-  PoolType,
+  PoolFilter,
 } from '../pool';
 import { Asset } from '../types';
 
-export type RouterOptions = {
-  includeOnly?: PoolType[];
-};
+export type RouterOptions = PoolFilter;
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
+  private readonly routeProposals: Map<string, RouteProposal[]>;
   private readonly routerOptions: RouterOptions;
 
   protected readonly poolService: IPoolService;
@@ -23,9 +23,8 @@ export class Router {
   constructor(poolService: IPoolService, routerOptions: RouterOptions = {}) {
     this.poolService = poolService;
     this.routeSuggester = new RouteSuggester();
-    this.routerOptions = Object.freeze({
-      includeOnly: routerOptions.includeOnly ?? [],
-    });
+    this.routeProposals = new Map();
+    this.routerOptions = Object.freeze(routerOptions);
   }
 
   /**
@@ -34,8 +33,7 @@ export class Router {
    * @returns {PoolBase[]} List of all substrate based pools
    */
   async getPools(): Promise<PoolBase[]> {
-    const includeOnly = this.routerOptions.includeOnly;
-    return await this.poolService.getPools(includeOnly);
+    return await this.poolService.getPools(this.routerOptions);
   }
 
   /**
@@ -45,24 +43,8 @@ export class Router {
    */
   async getAllAssets(): Promise<Asset[]> {
     const pools = await this.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const asset = await this.getAssets(pools);
+    const asset = this.getAssets(pools);
     return [...new Map(asset).values()];
-  }
-
-  /**
-   * Calculate and return list of all assets, given token can be trade with
-   *
-   * @param {string} asset - Storage key of asset
-   * @returns {Asset[]} List of all available assets, given token can be trade with
-   */
-  async getAssetPairs(asset: string): Promise<Asset[]> {
-    const pools = await this.getPools();
-    if (pools.length === 0) throw new Error('No pools configured');
-    const { assets, poolsMap } = await this.validateToken(asset, pools);
-    const hops = this.getPaths(asset, null, poolsMap, pools);
-    const dest = hops.map((hop) => hop[hop.length - 1].assetOut);
-    return this.toAssets([...new Set(dest)], assets);
   }
 
   /**
@@ -72,11 +54,35 @@ export class Router {
    * @param {string} assetOut - Storage key of assetOut
    * @returns {<Hop[][]>} All possible paths containing route hops
    */
-  async getAllPaths(assetIn: string, assetOut: string): Promise<Hop[][]> {
+  async getRoutes(assetIn: string, assetOut: string): Promise<Hop[][]> {
     const pools = await this.getPools();
+    this.validateInput(assetIn, assetOut, pools);
+    return this.getPaths(assetIn, assetOut, pools);
+  }
+
+  /**
+   * Ckeck if asset pair is valid
+   *
+   * @param {number} assetIn - assetIn id
+   * @param {number} assetOut - assetOut id
+   * @param {PoolBase[]} pools - trading pools
+   */
+  protected validateInput(
+    assetIn: string,
+    assetOut: string,
+    pools: PoolBase[]
+  ): Map<string, Pool> {
     if (pools.length === 0) throw new Error('No pools configured');
-    const { poolsMap } = await this.validateTokenPair(assetIn, assetOut, pools);
-    return this.getPaths(assetIn, assetOut, poolsMap, pools);
+    if (assetIn === assetOut)
+      throw new Error("Trading pair can't be identical");
+
+    const assets = this.getAssets(pools);
+    if (assets.get(assetIn) === null)
+      throw new Error(assetIn + ' is not supported asset');
+    if (assets.get(assetOut) === null)
+      throw new Error(assetOut + ' is not supported asset');
+
+    return this.toPoolsMap(pools);
   }
 
   /**
@@ -85,7 +91,7 @@ export class Router {
    * @param pools - pools
    * @returns Map of all available assets
    */
-  protected async getAssets(pools: PoolBase[]): Promise<Map<string, Asset>> {
+  protected getAssets(pools: PoolBase[]): Map<string, Asset> {
     const assets = pools
       .map((pool: PoolBase) =>
         pool.tokens.map((t) => {
@@ -118,63 +124,35 @@ export class Router {
    */
   protected getPaths(
     assetIn: string,
-    assetOut: string | null,
-    poolsMap: Map<string, Pool>,
+    assetOut: string,
     pools: PoolBase[]
   ): Hop[][] {
-    const routeProposals = this.routeSuggester.getProposals(
-      assetIn,
-      assetOut,
-      pools
-    );
+    const poolsMap = this.toPoolsMap(pools);
+    const routeProposals = this.getProposals(assetIn, assetOut, pools);
     const routes = routeProposals
       .filter((path: Edge[]) => this.validPath(path, poolsMap))
       .map((path: Edge[]) => this.toHops(path, poolsMap));
     return routes;
   }
 
-  /**
-   * Ckeck if input asset pair is valid and throw expection if not
-   *
-   * @param assetIn - Storage key of assetIn
-   * @param assetOut - Storage key of assetOut
-   * @returns Pool assets & map
-   */
-  protected async validateTokenPair(
+  private getProposals(
     assetIn: string,
     assetOut: string,
     pools: PoolBase[]
-  ) {
-    const assets = await this.getAssets(pools);
-    if (assets.get(assetIn) == null)
-      throw new Error(assetIn + ' is not supported token');
-    if (assets.get(assetOut) == null)
-      throw new Error(assetOut + ' is not supported token');
-    const poolsMap = this.getPoolMap(pools);
-    return { assets, poolsMap };
-  }
+  ): RouteProposal[] {
+    const key = `${assetIn}->${assetOut}::${hashPools(pools)}`;
 
-  /**
-   * Ckeck if input asset is valid and throw exception if not
-   *
-   * @param token - Storage key of token
-   * @returns Pool assets & map
-   */
-  protected async validateToken(token: string, pools: PoolBase[]) {
-    const assets = await this.getAssets(pools);
-    if (assets.get(token) == null)
-      throw new Error(token + ' is not supported token');
-    const poolsMap = this.getPoolMap(pools);
-    return { assets, poolsMap };
-  }
+    if (this.routeProposals.has(key)) {
+      return this.routeProposals.get(key)!;
+    }
 
-  /**
-   * Create pool map from substrate based pools
-   */
-  private getPoolMap(pools: PoolBase[]): Map<string, Pool> {
-    return new Map<string, Pool>(
-      pools.map((i) => [i.address, PoolFactory.get(i)])
+    const proposals = this.routeSuggester.getProposals(
+      assetIn,
+      assetOut,
+      pools
     );
+    this.routeProposals.set(key, proposals);
+    return proposals;
   }
 
   /**
@@ -210,6 +188,12 @@ export class Router {
     return poolsMap.get(address)?.validatePair(from, to) || false;
   }
 
+  private toPoolsMap(pools: PoolBase[]): Map<string, Pool> {
+    return new Map<string, Pool>(
+      pools.map((i) => [i.address, PoolFactory.get(i)])
+    );
+  }
+
   private toHops(path: Edge[], poolsMap: Map<string, Pool>): Hop[] {
     return path.map(([address, from, to]: Edge) => {
       const pool = poolsMap.get(address);
@@ -221,9 +205,5 @@ export class Router {
         assetOut: to,
       } as Hop;
     });
-  }
-
-  private toAssets(tokens: string[], assets: Map<string, Asset>): Asset[] {
-    return tokens.map((token) => assets.get(token)!);
   }
 }

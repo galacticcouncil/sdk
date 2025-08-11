@@ -57,7 +57,7 @@ export function calculateDiffToRef(
  */
 export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
   const total = ONE.minus(deltaY.div(delta0Y));
-  return total.multipliedBy(100).decimalPlaces(2);
+  return total.multipliedBy(100).decimalPlaces(4);
 }
 
 /**
@@ -71,7 +71,7 @@ export function calculateSellFee(delta0Y: BigNumber, deltaY: BigNumber) {
  */
 export function calculateBuyFee(delta0X: BigNumber, deltaX: BigNumber) {
   const total = deltaX.div(delta0X).minus(ONE);
-  return total.multipliedBy(100).decimalPlaces(2);
+  return total.multipliedBy(100).decimalPlaces(4);
 }
 
 /**

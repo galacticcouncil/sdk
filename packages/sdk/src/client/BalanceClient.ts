@@ -1,5 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { OrmlTokensAccountData } from '@polkadot/types/lookup';
+import {
+  PalletBalancesAccountData,
+  OrmlTokensAccountData,
+} from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 
 import { PolkadotApiClient } from '../api';
@@ -30,19 +33,13 @@ export class BalanceClient extends PolkadotApiClient {
   }
 
   async getTokenBalance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.api.query.tokens.accounts(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: reserved, frozen });
+    const data = await this.api.query.tokens.accounts(account, assetId);
+    return this.calculateFreeBalance(data);
   }
 
   async getErc20Balance(account: string, assetId: string): Promise<BigNumber> {
-    const { free, reserved, frozen } = await this.getTokenBalanceData(
-      account,
-      assetId
-    );
-    return this.calculateFreeBalance({ free, feeFrozen: 0n, frozen });
+    const data = await this.getTokenBalanceData(account, assetId);
+    return this.calculateFreeBalance(data);
   }
 
   async subscribeSystemBalance(
@@ -123,14 +120,14 @@ export class BalanceClient extends PolkadotApiClient {
     );
   }
 
-  protected calculateFreeBalance(data: any): BigNumber {
-    const { free, miscFrozen, feeFrozen, frozen } = data;
-    const freeBN = new BigNumber(free);
-    const miscFrozenBN = new BigNumber(miscFrozen || frozen);
-    const feeFrozenBN = new BigNumber(feeFrozen || 0n);
-    const maxFrozenBN = miscFrozenBN.gt(feeFrozenBN)
-      ? miscFrozenBN
-      : feeFrozenBN;
-    return freeBN.minus(maxFrozenBN);
+  protected calculateFreeBalance(
+    data: PalletBalancesAccountData | OrmlTokensAccountData
+  ): BigNumber {
+    const freeBalance = data.free.toString();
+    const frozenBalance = data.frozen.toString();
+
+    if (BigNumber(freeBalance).lt(frozenBalance)) return BigNumber(0);
+
+    return BigNumber(freeBalance).minus(frozenBalance);
   }
 }

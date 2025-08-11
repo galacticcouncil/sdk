@@ -1,3 +1,5 @@
+import { SubstrateTransaction } from '@galacticcouncil/sdk';
+
 import { ApiPromise } from '@polkadot/api';
 import { ISubmittableResult } from '@polkadot/types/types';
 
@@ -5,12 +7,12 @@ import { getWalletBySource } from '@talismn/connect-wallets';
 
 export async function signAndSend(
   address: string,
-  call: string,
   api: ApiPromise,
+  tx: SubstrateTransaction,
   onStatusChange: (status: ISubmittableResult) => void,
   onError: (error: unknown) => void
 ) {
-  const extrinsic = api.tx(call);
+  const extrinsic = tx.get();
 
   const wallet = getWalletBySource('polkadot-js');
   if (!wallet) {

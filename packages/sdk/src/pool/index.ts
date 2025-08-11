@@ -9,3 +9,4 @@ export * from './lbp';
 export * from './stable';
 
 export * from './types';
+export * from './utils';

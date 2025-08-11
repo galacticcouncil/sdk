@@ -14,11 +14,15 @@ const rpcWebsocketList = [
 ];
 
 export const createChain = (provider: any): Chain => {
-  const endpoints: string[] = provider.__internal__endpoints;
+  const activeEndpoint: string = provider.endpoint;
+  const allWs = [activeEndpoint, ...rpcWebsocketList];
 
-  const isMainnet = endpoints.some((e) => rpcWebsocketList.includes(e));
-  const rpcs = endpoints.map((e) =>
-    e.replace('wss://', 'https://').replace('ws://', 'http://')
+  const rpcs = Array.from(
+    new Set(
+      allWs.map((e) =>
+        e.replace('wss://', 'https://').replace('ws://', 'http://')
+      )
+    )
   );
 
   return defineChain({
@@ -38,11 +42,9 @@ export const createChain = (provider: any): Chain => {
     blockExplorers: {
       default: {
         name: 'Hydration Explorer',
-        url: isMainnet
-          ? 'https://explorer.evm.hydration.cloud'
-          : 'https://explorer.nice.hydration.cloud',
+        url: 'https://explorer.evm.hydration.cloud',
       },
     },
-    testnet: !isMainnet,
+    testnet: false,
   }) as Chain;
 };

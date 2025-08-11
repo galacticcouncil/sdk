@@ -4,7 +4,6 @@ import {
   calculate_amplification,
   calculate_add_one_asset,
   calculate_liquidity_out_one_asset,
-  calculate_pool_trade_fee,
   calculate_shares,
   calculate_shares_for_amount,
   calculate_spot_price_with_fee,
@@ -179,14 +178,6 @@ export class StableMath {
       fee,
       pegs
     );
-  }
-
-  static calculatePoolTradeFee(
-    amount: string,
-    feeNumerator: number,
-    feeDenominator: number
-  ): string {
-    return calculate_pool_trade_fee(amount, feeNumerator, feeDenominator);
   }
 
   static recalculatePegs(

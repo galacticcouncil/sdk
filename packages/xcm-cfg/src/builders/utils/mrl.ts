@@ -1,5 +1,8 @@
 import { Parachain } from '@galacticcouncil/xcm-core';
+
 import { TypeRegistry, Enum, Struct } from '@polkadot/types';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { u8aToHex } from '@polkadot/util';
 
 const registry = new TypeRegistry();
 
@@ -20,15 +23,23 @@ export function createPayload(
   address: string,
   isEthereumStyle = false
 ): VersionedUserAction {
+  let acc;
+  if (isEthereumStyle) {
+    acc = address;
+  } else {
+    const decoded = decodeAddress(address);
+    acc = u8aToHex(decoded);
+  }
+
   const multilocation = {
-    V1: {
+    V5: {
       parents: 1,
       interior: {
         X2: [
           { Parachain: parachain.parachainId },
           isEthereumStyle
-            ? { AccountKey20: { key: address } }
-            : { AccountId32: { id: address } },
+            ? { AccountKey20: { key: acc } }
+            : { AccountId32: { id: acc } },
         ],
       },
     },

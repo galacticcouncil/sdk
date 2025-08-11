@@ -22,4 +22,3 @@ export function is_sell_allowed(bits: number): boolean;
 export function is_buy_allowed(bits: number): boolean;
 export function is_add_liquidity_allowed(bits: number): boolean;
 export function is_remove_liquidity_allowed(bits: number): boolean;
-export function calculate_pool_trade_fee(a: string, fee_numerator: number, fee_denominator: number): string;

@@ -419,31 +419,6 @@ module.exports.calculate_global_farm_rewards = function(total_shares_z, price_ad
     }
 };
 
-/**
- * @param {string} a
- * @param {number} fee_numerator
- * @param {number} fee_denominator
- * @returns {string}
- */
-module.exports.calculate_pool_trade_fee = function(a, fee_numerator, fee_denominator) {
-    let deferred2_0;
-    let deferred2_1;
-    try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.calculate_pool_trade_fee(retptr, ptr0, len0, fee_numerator, fee_denominator);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred2_0 = r0;
-        deferred2_1 = r1;
-        return getStringFromWasm0(r0, r1);
-    } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
-    }
-};
-
 const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
 const bytes = require('fs').readFileSync(path);
 

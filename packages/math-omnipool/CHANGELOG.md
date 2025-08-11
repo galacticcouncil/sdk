@@ -1,5 +1,11 @@
 # @galacticcouncil/math-omnipool
 
+## 1.3.0
+
+### Minor Changes
+
+- WASM refactor: https://github.com/galacticcouncil/HydraDX-wasm/pull/40
+
 ## 1.2.0
 
 ### Minor Changes

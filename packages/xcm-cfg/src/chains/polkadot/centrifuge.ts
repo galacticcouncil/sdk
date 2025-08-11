@@ -5,6 +5,11 @@ import {
 
 import { cfg, dot, glmr } from '../../assets';
 
+const rpcWebsocketList = [
+  'wss://rpc-centrifuge.luckyfriday.io',
+  'wss://fullnode.centrifuge.io'
+];
+
 export const centrifuge = new Parachain({
   assetsData: [
     {
@@ -49,5 +54,5 @@ export const centrifuge = new Parachain({
   name: 'Centrifuge',
   parachainId: 2031,
   ss58Format: 36,
-  ws: 'wss://fullnode.centrifuge.io',
+  ws: rpcWebsocketList,
 });

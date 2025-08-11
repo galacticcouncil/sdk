@@ -10,14 +10,17 @@ import {
   weth_mwh,
   usdc,
   usdc_mwh,
+  usdc_eth,
   usdt,
   usdt_mwh,
+  usdt_eth,
   aave,
   susde,
   tbtc,
   ldo,
   link,
   sky,
+  trac,
   wsteth,
   lbtc,
   susds,
@@ -97,11 +100,13 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(susde, susde),
   toHydrationViaSnowbridgeTemplate(tbtc, tbtc),
   toHydrationViaSnowbridgeTemplate(lbtc, lbtc),
-  // Waiting for Snowbridge V2
-  //toHydrationViaSnowbridgeTemplate(ldo, ldo),
+  toHydrationViaSnowbridgeTemplate(ldo, ldo),
   toHydrationViaSnowbridgeTemplate(link, link),
   toHydrationViaSnowbridgeTemplate(sky, sky),
+  toHydrationViaSnowbridgeTemplate(trac, trac),
   toHydrationViaSnowbridgeTemplate(wsteth, wsteth),
+  toHydrationViaSnowbridgeTemplate(usdc, usdc_eth),
+  toHydrationViaSnowbridgeTemplate(usdt, usdt_eth),
 ];
 
 const toMoonbeamViaWormhole: AssetRoute[] = [

@@ -1,5 +1,30 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.5.0
+
+### Minor Changes
+
+- c7abc3e: add cfg rpc
+
+## 10.4.0
+
+### Minor Changes
+
+- 1243a49: Add TRAC and NEURO
+
+## 10.3.1
+
+### Patch Changes
+
+- fix mrl payload (bump to v5)
+
+## 10.3.0
+
+### Minor Changes
+
+- 6a4ec54: add L1 native usdt & usdc
+- 6a4ec54: enable ldo
+
 ## 10.2.0
 
 ### Patch Changes

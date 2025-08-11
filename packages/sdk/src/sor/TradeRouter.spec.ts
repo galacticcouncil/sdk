@@ -37,9 +37,7 @@ describe('TradeRouter with mocked XYK pool service', () => {
     expect(poolService).toBeDefined();
     expect(router).toBeDefined();
     const bestSpotPrice = await router.getBestSpotPrice('1', '2');
-    expect(bestSpotPrice?.amount.toString()).toEqual(
-      '46707793025305.313609467466196651139368'
-    );
+    expect(bestSpotPrice?.amount.toString()).toEqual('46707793025305.3136');
     expect(bestSpotPrice?.decimals).toEqual(12);
   });
 

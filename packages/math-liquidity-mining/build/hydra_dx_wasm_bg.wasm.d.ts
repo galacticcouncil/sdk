@@ -12,7 +12,6 @@ export const calculate_global_farm_shares: (a: number, b: number, c: number, d: 
 export const calculate_yield_farm_rewards: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => void;
 export const calculate_yield_farm_delta_rpvs: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => void;
 export const calculate_global_farm_rewards: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => void;
-export const calculate_pool_trade_fee: (a: number, b: number, c: number, d: number, e: number) => void;
 export const __wbindgen_add_to_stack_pointer: (a: number) => number;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

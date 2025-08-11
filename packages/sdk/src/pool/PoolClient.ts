@@ -45,9 +45,13 @@ export abstract class PoolClient extends BalanceClient {
 
   abstract isSupported(): boolean;
   abstract getPoolType(): PoolType;
-  abstract getPoolFees(poolPair: PoolPair, address: string): Promise<PoolFees>;
+  abstract getPoolFees(
+    block: number,
+    pair: PoolPair,
+    address: string
+  ): Promise<PoolFees>;
   protected abstract loadPools(): Promise<PoolBase[]>;
-  protected abstract subscribePoolChange(pool: PoolBase): UnsubscribePromise;
+  protected abstract subscribeUpdates(): UnsubscribePromise;
 
   get augmentedPools() {
     return this.pools
@@ -72,44 +76,50 @@ export abstract class PoolClient extends BalanceClient {
   async getPools(): Promise<PoolBase[]> {
     this.unsubscribe();
     this.pools = await this.loadPools();
-    this.subs = this.subscribe();
+    const balanceSubs = this.subscribeBalances();
+    const updatesSubs = this.subscribeUpdates();
+
+    this.subs.push(balanceSubs);
+    this.subs.push(updatesSubs);
+
     const type = this.getPoolType();
     this.log(type, `mem ${this.mem} pools(${this.augmentedPools.length})`);
     this.log(type, `mem ${this.mem} subs(${this.subs.length})`);
     return this.augmentedPools;
   }
 
-  private subscribe() {
-    const subs = this.augmentedPools.map((pool: PoolBase) => {
-      const poolSubs = [];
+  protected async subscribeBalances(): UnsubscribePromise {
+    const unsub = this.augmentedPools.map(async (pool: PoolBase) => {
+      const unsubFns = [];
 
-      try {
-        const subChange = this.subscribePoolChange(pool);
-        poolSubs.push(subChange);
-      } catch (e) {}
-
-      if (pool.type === PoolType.Aave) {
-        return poolSubs;
-      }
-
-      const tokenSub = this.subscribeTokensPoolBalance(pool);
-      poolSubs.push(tokenSub);
+      const tokenSub = await this.subscribeTokensPoolBalance(pool);
+      unsubFns.push(tokenSub);
 
       if (this.hasSystemAsset(pool)) {
-        const subSystem = this.subscribeSystemPoolBalance(pool);
-        poolSubs.push(subSystem);
+        const subSystem = await this.subscribeSystemPoolBalance(pool);
+        unsubFns.push(subSystem);
       }
 
       if (this.hasErc20Asset(pool)) {
-        const subErc20 = this.subscribeErc20PoolBalance(pool);
-        poolSubs.push(subErc20);
+        const subErc20 = await this.subscribeErc20PoolBalance(pool);
+        unsubFns.push(subErc20);
       }
 
       this.subscribeLog(pool);
-      return poolSubs;
+      return unsubFns;
     });
 
-    return subs.flat();
+    const unsubFns = await Promise.all(unsub);
+
+    return () => {
+      for (const unsub of unsubFns.flat()) {
+        try {
+          unsub();
+        } catch (e) {
+          console.warn('Balance unsub failed', e);
+        }
+      }
+    };
   }
 
   private hasSystemAsset(pool: PoolBase) {
@@ -122,7 +132,7 @@ export abstract class PoolClient extends BalanceClient {
 
   unsubscribe() {
     this.subs.forEach((unsub) => {
-      unsub.then((fn) => fn());
+      unsub.then((fn) => fn()).catch((e) => console.warn('Unsub failed', e));
     });
   }
 

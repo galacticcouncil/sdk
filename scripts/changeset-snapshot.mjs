@@ -58,10 +58,10 @@ const main = async () => {
     );
     writeFileSync(output, releaseJson);
   }
+  console.log('Executing release plan...');
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 
 main()
   .then(() => console.log('Snapshot version bump done ✅'))
-  .catch(console.error)
-  .finally(() => process.exit(0));
+  .catch(console.error);

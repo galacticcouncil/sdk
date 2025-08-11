@@ -10,6 +10,7 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
+
 import { RUNTIME_DECIMALS } from '../../consts';
 import { BigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
@@ -51,31 +52,17 @@ export class OmniPool implements Pool {
   hubAssetId: string;
 
   static fromPool(pool: OmniPoolBase): OmniPool {
-    return new OmniPool(
-      pool.address,
-      pool.tokens as OmniPoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.hubAssetId
-    );
+    return new OmniPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: OmniPoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number,
-    hubAssetId: string
-  ) {
+  constructor(pool: OmniPoolBase) {
     this.type = PoolType.Omni;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.hubAssetId = hubAssetId;
+    this.address = pool.address;
+    this.tokens = pool.tokens as OmniPoolToken[];
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.hubAssetId = pool.hubAssetId;
   }
 
   validatePair(_tokenIn: string, tokenOut: string): boolean {
@@ -130,7 +117,7 @@ export class OmniPool implements Pool {
     const feePct =
       calculatedIn === ZERO
         ? ZERO
-        : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(2);
+        : fee.div(calculatedIn).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -175,7 +162,7 @@ export class OmniPool implements Pool {
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 
     const fee = calculatedOut.minus(amountOut);
-    const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(2);
+    const feePct = fee.div(calculatedOut).multipliedBy(100).decimalPlaces(4);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -228,8 +215,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -245,7 +232,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -268,8 +255,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toDecimals(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -285,7 +272,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? FeeUtils.toDecimals(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;

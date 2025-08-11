@@ -1,6 +1,7 @@
 import { LbpPool, LbpPoolBase } from './lbp';
 import { OmniPool, OmniPoolBase } from './omni';
 import { StableSwap, StableSwapBase } from './stable';
+import { HsmPool, HsmPoolBase } from './hsm';
 import { XykPool } from './xyk';
 import { AavePool } from './aave';
 
@@ -19,6 +20,8 @@ export class PoolFactory {
         return LbpPool.fromPool(pool as LbpPoolBase);
       case PoolType.Stable:
         return StableSwap.fromPool(pool as StableSwapBase);
+      case PoolType.HSM:
+        return HsmPool.fromPool(pool as HsmPoolBase);
       default: {
         throw new Error('Pool type ' + pool.type + ' is not supported yet');
       }
