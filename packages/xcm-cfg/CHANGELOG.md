@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.6.0
+
+### Minor Changes
+
+- f65c819: add susds
+
 ## 10.5.0
 
 ### Minor Changes

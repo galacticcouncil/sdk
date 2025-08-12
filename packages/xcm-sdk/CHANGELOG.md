@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.1.2
+
+### Patch Changes
+
+- fix wormhole withdraws receiver based on payload type
+
 ## 10.1.1
 
 ### Patch Changes
