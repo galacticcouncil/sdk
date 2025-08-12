@@ -34,4 +34,4 @@ class PrintMostLiquidRoutes extends PolkadotExecutor {
   }
 }
 
-new PrintMostLiquidRoutes(ApiUrl.Hydration, 'Get all paths').run();
+new PrintMostLiquidRoutes(ApiUrl.Hydration, 'Print most liq routes').run();
