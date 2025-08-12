@@ -68,50 +68,49 @@ export class WormholeTransfer {
       ...this.filters,
     });
 
-    const result = operations
-      .filter((o) => o.targetChain)
-      .map(async (o) => {
-        const { content } = o;
-        const { payload } = content;
-        const { parsedPayload } = payload;
+    const result = operations.map(async (o) => {
+      const { content } = o;
+      const { payload } = content;
+      const { parsedPayload } = payload;
 
-        const asset = this.getTokenAddress(payload);
-        const toAddress = this.toNative(parsedPayload.targetRecipient);
-        const status = this.getStatus(o);
+      const asset = this.getTokenAddress(payload);
+      const toAddress = this.toNative(parsedPayload.targetRecipient);
+      const status = this.getStatus(o);
 
-        const fromChain = this.chains.find(
-          (c) => c instanceof Parachain && c.parachainId === this.parachainId
-        )!;
+      const fromChain = this.chains.find(
+        (c) => c instanceof Parachain && c.parachainId === this.parachainId
+      )!;
 
-        const toChain = this.chains.find(
-          (c) =>
-            Wormhole.isKnown(c) &&
-            Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-        )!;
+      const toChain = this.chains.find(
+        (c) =>
+          Wormhole.isKnown(c) &&
+          Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
+      )!;
 
-        let redeem;
-        if (status === WhStatus.VaaEmitted && o.vaa) {
-          const { timestamp } = this.whClient.getVaaHeader(o.vaa.raw);
-          const vaaRaw = o.vaa.raw;
+      let redeem;
+      if (status === WhStatus.VaaEmitted && o.vaa) {
+        const { timestamp } = this.whClient.getVaaHeader(o.vaa.raw);
+        const vaaRaw = o.vaa.raw;
 
-          if (this.isStuck(timestamp)) {
-            redeem = (from: string) =>
-              this.whClient.redeem(toChain, from, vaaRaw);
-          }
+        if (this.isStuck(timestamp)) {
+          redeem = (from: string) =>
+            this.whClient.redeem(toChain, from, vaaRaw);
         }
+      }
 
-        return {
-          asset: asset,
-          assetSymbol: o.data.symbol,
-          amount: o.data.tokenAmount,
-          from: address,
-          fromChain: fromChain,
-          to: toAddress,
-          toChain: toChain,
-          status: status,
-          redeem: redeem,
-        };
-      });
+      return {
+        asset: asset,
+        assetSymbol: o.data.symbol,
+        amount: o.data.tokenAmount,
+        from: address,
+        fromChain: fromChain,
+        to: toAddress,
+        toChain: toChain,
+        status: status,
+        redeem: redeem,
+        operation: o,
+      };
+    });
 
     return Promise.all(result);
   }
@@ -125,7 +124,7 @@ export class WormholeTransfer {
     const result = operations
       .filter((o) => {
         const { content } = o;
-        return this.whScan.isMrlTransfer(content.payload) && o.targetChain;
+        return this.whScan.isMrlTransfer(content.payload);
       })
       .map(async (o) => {
         const { content } = o;
@@ -175,6 +174,7 @@ export class WormholeTransfer {
           toChain: toChain,
           status: status,
           redeem: redeem,
+          operation: o,
         };
       });
 
