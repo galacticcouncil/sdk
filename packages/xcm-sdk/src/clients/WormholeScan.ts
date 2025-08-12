@@ -25,6 +25,7 @@ export interface Operation {
   id: string;
   content: {
     payload: OperationPayload;
+    standarizedProperties: OperationProperties;
   };
   data: {
     symbol: string;
@@ -72,6 +73,15 @@ export interface OperationPayload {
   toChain: number;
   tokenAddress: string;
   tokenChain: number;
+}
+
+export interface OperationProperties {
+  fromChain: number;
+  fromAddress: string;
+  toChain: number;
+  toAddress: string;
+  tokenChain: number;
+  tokenAddress: string;
 }
 
 export class WormholeScan {

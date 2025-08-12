@@ -71,10 +71,13 @@ export class WormholeTransfer {
     const result = operations.map(async (o) => {
       const { content } = o;
       const { payload } = content;
-      const { parsedPayload } = payload;
+      const { payloadType, parsedPayload } = payload;
 
       const asset = this.getTokenAddress(payload);
-      const toAddress = this.toNative(parsedPayload.targetRecipient);
+      const toAddress =
+        payloadType === 3
+          ? this.toNative(parsedPayload.targetRecipient)
+          : this.toNative(payload.toAddress);
       const status = this.getStatus(o);
 
       const fromChain = this.chains.find(

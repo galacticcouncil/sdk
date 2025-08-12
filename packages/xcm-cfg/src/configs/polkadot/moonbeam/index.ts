@@ -156,10 +156,12 @@ const toEthereumViaWormhole: AssetRoute[] = [
     contract: ContractBuilder()
       .Batch()
       .batchAll([
-        ContractBuilder().Erc20().approve(),
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
   }),
   new AssetRoute({
     source: {
@@ -188,10 +190,12 @@ const toEthereumViaWormhole: AssetRoute[] = [
     contract: ContractBuilder()
       .Batch()
       .batchAll([
-        ContractBuilder().Erc20().approve(),
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
   }),
 ];
 
