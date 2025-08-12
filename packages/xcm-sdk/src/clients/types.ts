@@ -1,5 +1,6 @@
 import { AnyChain } from '@galacticcouncil/xcm-core';
 
+import { Operation } from './WormholeScan';
 import { Call } from '../platforms';
 
 export interface WhTransfer {
@@ -12,6 +13,7 @@ export interface WhTransfer {
   toChain: AnyChain;
   status: WhStatus;
   redeem?: (from: string) => Call;
+  operation: Operation;
 }
 
 export enum WhStatus {
