@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.1.1
+
+### Patch Changes
+
+- link operations to wh transfer
+
 ## 10.1.0
 
 ### Minor Changes
