@@ -94,6 +94,7 @@ import {
   toHubWithCexFwd2Template,
   toEthereumViaSnowbridgeTemplate,
   toEthereumViaWormholeTemplate,
+  toEthereumViaWormholeTokenBridgeTemplate,
   toMoonbeamErc20Template,
   toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
@@ -306,11 +307,11 @@ const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
   toEthereumViaWormholeTemplate(dai_mwh, dai),
-  toEthereumViaWormholeTemplate(susds_mwh, susds),
   toEthereumViaWormholeTemplate(weth_mwh, eth),
   toEthereumViaWormholeTemplate(wbtc_mwh, wbtc),
   toEthereumViaWormholeTemplate(usdt_mwh, usdt),
   toEthereumViaWormholeTemplate(usdc_mwh, usdc),
+  toEthereumViaWormholeTokenBridgeTemplate(susds_mwh, susds),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [

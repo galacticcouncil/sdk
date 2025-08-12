@@ -254,7 +254,7 @@ export function toEthereumViaWormholeTemplate(
   });
 }
 
-export function toEthereumViaSnowbridgeTemplate(
+export function toEthereumViaWormholeTokenBridgeTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -264,6 +264,7 @@ export function toEthereumViaSnowbridgeTemplate(
       balance: balance(),
       fee: fee(),
       destinationFee: {
+        asset: assetIn,
         balance: balance(),
       },
     },
@@ -272,15 +273,43 @@ export function toEthereumViaSnowbridgeTemplate(
       asset: assetOut,
       fee: {
         amount: FeeAmountBuilder()
-          .Snowbridge()
-          .calculateOutboundFee({ hub: assetHub }),
-        asset: dot,
+          .Wormhole()
+          .TokenBridge()
+          .calculateBridgeFee(),
+        asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-    tags: [Tag.Snowbridge],
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).priorMulti([
+      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilder().polkadotXcm().send().transact({
+        fee: MRL_EXECUTION_FEE,
+      }),
+    ]),
+    transact: {
+      chain: moonbeam,
+      fee: {
+        amount: MRL_XCM_FEE,
+        asset: glmr,
+        balance: balance(),
+      },
+      extrinsic: ExtrinsicBuilder()
+        .ethereumXcm()
+        .transact(
+          ContractBuilder()
+            .Batch()
+            .batchAll([
+              ContractBuilder().Erc20().approve(),
+              ContractBuilder()
+                .Wormhole()
+                .TokenBridge()
+                .transferTokens(),
+            ])
+        ),
+    },
+    tags: [Tag.Mrl, Tag.Wormhole],
   });
 }
 
@@ -340,5 +369,35 @@ export function toSolanaViaWormholeTemplate(
         ),
     },
     tags: [Tag.Mrl, Tag.Wormhole],
+  });
+}
+
+export function toEthereumViaSnowbridgeTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: ethereum,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateOutboundFee({ hub: assetHub }),
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+    tags: [Tag.Snowbridge],
   });
 }
