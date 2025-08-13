@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.6.1
+
+### Patch Changes
+
+- fix: switch solana wh transfer back to relayer
+
 ## 10.6.0
 
 ### Minor Changes
