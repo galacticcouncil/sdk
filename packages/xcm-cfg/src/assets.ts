@@ -185,6 +185,11 @@ export const sol = new Asset({
   originSymbol: 'SOL',
 });
 
+export const sqd = new Asset({
+  key: 'sqd',
+  originSymbol: 'SQD',
+});
+
 export const sub = new Asset({
   key: 'sub',
   originSymbol: 'SUB',
@@ -358,6 +363,7 @@ export const assets: Asset[] = [
   ring,
   sky,
   sol,
+  sqd,
   sub,
   susde,
   susds,
