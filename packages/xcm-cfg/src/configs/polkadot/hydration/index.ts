@@ -331,7 +331,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeBridgeTemplate(sol, sol, solana),
+  withdrawViaWormholeRelayerTemplate(sol, sol, solana),
 ];
 
 const toCexViaRelay = new AssetRoute({
