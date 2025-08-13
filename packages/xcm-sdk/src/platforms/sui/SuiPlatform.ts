@@ -1,12 +1,14 @@
 import {
   Asset,
   AssetAmount,
+  CallType,
   MoveConfig,
   SuiChain,
   SuiQueryConfig,
 } from '@galacticcouncil/xcm-core';
 
 import { SuiClient } from '@mysten/sui/client';
+import { toBase64 } from '@mysten/bcs';
 
 import {
   distinctUntilChanged,
@@ -16,8 +18,11 @@ import {
   Subject,
 } from 'rxjs';
 
-import { Call, Platform } from '../types';
 import { SuiBalanceFactory } from './balance';
+import { SuiCall } from './types';
+import { resolveCommandsTyped } from './utils';
+
+import { Platform } from '../types';
 
 export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
   readonly #client: SuiClient;
@@ -26,23 +31,51 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
     this.#client = chain.client;
   }
 
-  buildCall(
+  async buildCall(
     account: string,
-    amount: bigint,
-    feeBalance: AssetAmount,
+    _amount: bigint,
+    _feeBalance: AssetAmount,
     config: MoveConfig
-  ): Promise<Call> {
-    console.log('here');
-    throw new Error('Method not implemented.');
+  ): Promise<SuiCall> {
+    const { transaction } = config;
+
+    transaction.setSender(account);
+
+    const txBytes = await transaction.build({ client: this.#client });
+    const txJson = await transaction.toJSON();
+
+    const commands = resolveCommandsTyped(JSON.parse(txJson));
+    return {
+      from: account,
+      commands: commands,
+      data: toBase64(txBytes),
+      type: CallType.Sui,
+      dryRun: () => {},
+    } as SuiCall;
   }
 
-  estimateFee(
+  async estimateFee(
     account: string,
-    amount: bigint,
+    _amount: bigint,
     feeBalance: AssetAmount,
     config: MoveConfig
   ): Promise<AssetAmount> {
-    throw new Error('Method not implemented.');
+    const { transaction } = config;
+
+    transaction.setSender(account);
+    const txBytes = await transaction.build({ client: this.#client });
+    const sim = await this.#client.dryRunTransactionBlock({
+      transactionBlock: txBytes,
+    });
+
+    const gasUsed = sim.effects.gasUsed;
+
+    const computation = BigInt(gasUsed.computationCost);
+    const storage = BigInt(gasUsed.storageCost);
+    const rebate = BigInt(gasUsed.storageRebate);
+    const mist = computation + storage - rebate;
+
+    return feeBalance.copyWith({ amount: mist });
   }
 
   async getBalance(asset: Asset, config: SuiQueryConfig): Promise<AssetAmount> {
@@ -51,7 +84,6 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
       query.getBalance(),
       query.getDecimals(),
     ]);
-    console.log(balance);
     return AssetAmount.fromAsset(asset, {
       amount: balance,
       decimals: decimals,
@@ -62,20 +94,24 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
     asset: Asset,
     config: SuiQueryConfig
   ): Promise<Observable<AssetAmount>> {
-    throw Error('Fdf');
     const subject = new Subject<AssetAmount>();
     const observable = subject.pipe(shareReplay(1));
-    const { address } = config;
 
-    const unsub = await this.#client.subscribeEvent({
-      filter: { MoveEventType: '0x2::coin::BalanceChange' },
-      onMessage: (event) => {
-        console.log(event);
-      },
-    });
+    const run = async () => {
+      const updateBalance = async () => {
+        const balance = await this.getBalance(asset, config);
+        subject.next(balance);
+      };
+      await updateBalance();
+      const intervalId = setInterval(() => {}, 3000);
+      return () => clearInterval(intervalId);
+    };
+
+    let disconnect: () => void;
+    run().then((unsub) => (disconnect = unsub));
 
     return observable.pipe(
-      finalize(() => unsub()),
+      finalize(() => disconnect?.()),
       distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
     ) as Observable<AssetAmount>;
   }
