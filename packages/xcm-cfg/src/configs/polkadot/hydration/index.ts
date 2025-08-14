@@ -34,6 +34,7 @@ import {
   pink,
   ring,
   sol,
+  sui,
   sky,
   sub,
   susde,
@@ -84,6 +85,7 @@ import {
   phala,
   solana,
   subsocial,
+  sui_chain,
   unique,
   zeitgeist,
   polkadotCex,
@@ -334,6 +336,10 @@ const toSolanaViaWormhole: AssetRoute[] = [
   withdrawViaWormholeRelayerTemplate(sol, sol, solana),
 ];
 
+const toSuiViaWormhole: AssetRoute[] = [
+  withdrawViaWormholeRelayerTemplate(sui, sui, sui_chain),
+];
+
 const toCexViaRelay = new AssetRoute({
   source: {
     asset: dot,
@@ -402,6 +408,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toPolkadot,
     ...toPendulum,
     ...toSolanaViaWormhole,
+    ...toSuiViaWormhole,
     ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,

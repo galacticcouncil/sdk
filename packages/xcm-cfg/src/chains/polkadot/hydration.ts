@@ -38,6 +38,7 @@ import {
   neuro,
   nodl,
   sub,
+  sui,
   trac,
   unq,
   usdc,
@@ -792,6 +793,31 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x99fec54a5ad36d50a4bba3a41cab983a5bb86a7d',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: sui,
+      decimals: 9,
+      id: 1000753,
+      min: 0.003,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
               },
             },
           ],

@@ -14,6 +14,7 @@ import {
   pink,
   sol,
   susds_mwh,
+  sui,
   usdc,
   usdc_mwh,
   usdt,
@@ -128,6 +129,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xda430218862d3db25de9f61458645dde49a9e9c1',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: sui,
+      decimals: 9,
+      id: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
               },
             },
           ],

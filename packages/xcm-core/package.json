@@ -38,14 +38,17 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.6.1",
-    "@wormhole-foundation/sdk-base": "^1.2.0",
-    "@wormhole-foundation/sdk-connect": "^1.2.0",
-    "@wormhole-foundation/sdk-definitions": "^1.2.0",
-    "@wormhole-foundation/sdk-solana": "^1.2.0",
-    "@wormhole-foundation/sdk-solana-tokenbridge": "^1.2.0",
+    "@wormhole-foundation/sdk-base": "^3.2.0",
+    "@wormhole-foundation/sdk-connect": "^3.2.0",
+    "@wormhole-foundation/sdk-definitions": "^3.2.0",
+    "@wormhole-foundation/sdk-solana": "^3.2.0",
+    "@wormhole-foundation/sdk-solana-tokenbridge": "^3.2.0",
+    "@wormhole-foundation/sdk-sui": "^3.2.0",
+    "@wormhole-foundation/sdk-sui-tokenbridge": "^3.2.0",
     "big.js": "^6.2.1",
     "bigint-buffer": "^1.1.5",
     "buffer": "^6.0.3",
+    "bs58": "^6.0.0",
     "lru-cache": "^11.0.0"
   },
   "peerDependencies": {
