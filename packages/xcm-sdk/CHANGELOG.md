@@ -1,5 +1,22 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.2.0
+
+### Minor Changes
+
+[3949d8ab]: https://github.com/galacticcouncil/sdk/commit/3949d8ab
+[a97f26a5]: https://github.com/galacticcouncil/sdk/commit/a97f26a5
+[3d8b3ca0]: https://github.com/galacticcouncil/sdk/commit/3d8b3ca0
+
+- [[#3949d8ab][3949d8ab]] sui: platform impl, adapter
+- [[#a97f26a5][a97f26a5]] sui: build call & fee est
+- [[#3d8b3ca0][3d8b3ca0]] sui: dry run support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.1.0
+
 ## 10.1.2
 
 ### Patch Changes
