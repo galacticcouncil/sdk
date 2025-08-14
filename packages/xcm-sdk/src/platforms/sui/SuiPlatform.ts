@@ -22,7 +22,7 @@ import { SuiBalanceFactory } from './balance';
 import { SuiCall } from './types';
 import { resolveCommandsTyped } from './utils';
 
-import { Platform } from '../types';
+import { DryRunResult, Platform } from '../types';
 
 export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
   readonly #client: SuiClient;
@@ -50,7 +50,16 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
       commands: commands,
       data: toBase64(txBytes),
       type: CallType.Sui,
-      dryRun: () => {},
+      dryRun: async () => {
+        const sim = await this.#client.dryRunTransactionBlock({
+          transactionBlock: txBytes,
+        });
+
+        return {
+          call: config.module + '.' + config.func,
+          error: sim.executionErrorSource,
+        } as DryRunResult;
+      },
     } as SuiCall;
   }
 
