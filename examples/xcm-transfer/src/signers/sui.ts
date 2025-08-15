@@ -15,7 +15,6 @@ export async function signAndSend(
   const transaction = Transaction.from(data);
 
   const wallet = (window as any).phantom.sui;
-  console.log(wallet);
   try {
     const params = {
       transaction: await transaction.toJSON(),
