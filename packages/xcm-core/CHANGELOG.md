@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.2.0
+
+### Minor Changes
+
+- xcm: cleanup address space utils
+
 ## 8.1.0
 
 ### Minor Changes

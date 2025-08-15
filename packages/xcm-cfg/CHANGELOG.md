@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.8.0
+
+### Minor Changes
+
+- xcm: cleanup address space utils
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.2.0
+
 ## 10.7.0
 
 ### Minor Changes
