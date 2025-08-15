@@ -99,6 +99,7 @@ import {
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
   toTransferTemplate,
+  toHubForeignAssetTemplate,
   withdrawViaSnowbridgeTemplate,
   withdrawViaWormholeRelayerTemplate,
   withdrawViaWormholeBridgeTemplate,
@@ -113,48 +114,16 @@ const toAcala: AssetRoute[] = [
 ];
 
 const toAssetHub: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: dot,
-      fee: {
-        amount: 0.19,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: ksm,
-      fee: {
-        amount: 0.05,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
+  toHubForeignAssetTemplate(dot, 0.19),
+  toHubForeignAssetTemplate(ksm, 0.05),
+  toHubForeignAssetTemplate(eth, 0.0000055),
+  toHubForeignAssetTemplate(usdc_eth, 0.01),
+  toHubForeignAssetTemplate(usdt_eth, 0.01),
+  toHubForeignAssetTemplate(tbtc, 0.00000023),
+  toHubForeignAssetTemplate(aave, 0.00006),
+  toHubForeignAssetTemplate(link, 0.001),
+  toHubForeignAssetTemplate(sky, 0.52),
+  toHubForeignAssetTemplate(ldo, 0.013),
   new AssetRoute({
     source: {
       asset: usdt,

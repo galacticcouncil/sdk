@@ -309,3 +309,30 @@ export function withdrawViaSnowbridgeTemplate(
     tags: [Tag.Snowbridge],
   });
 }
+
+export function toHubForeignAssetTemplate(
+  asset: Asset,
+  destinationFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: assetHub,
+      asset: asset,
+      fee: {
+        amount: 0.19,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  });
+}
