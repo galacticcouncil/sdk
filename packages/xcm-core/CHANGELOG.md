@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.3.0
+
+### Minor Changes
+
+- sui: support string (hex) chain id
+
 ## 8.2.0
 
 ### Minor Changes

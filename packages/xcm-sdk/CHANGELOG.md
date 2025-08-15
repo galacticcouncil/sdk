@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.4.0
+
+### Minor Changes
+
+- sui: support string (hex) chain id
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.3.0
+
 ## 10.3.0
 
 ### Minor Changes

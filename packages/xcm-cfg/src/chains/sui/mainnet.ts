@@ -6,7 +6,7 @@ import {
 import { sui } from '../../assets';
 
 export const sui_chain = new SuiChain({
-  id: 1,
+  id: '0x35834a8a',
   key: 'sui',
   name: 'Sui',
   assetsData: [
