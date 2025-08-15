@@ -18,6 +18,8 @@ import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
 
+const { EvmAddr } = addr;
+
 export class DataOriginProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
     super(adapter, config);
@@ -82,7 +84,7 @@ export class DataOriginProcessor extends DataProcessor {
     }
 
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = addr.isH160(feeAssetId.toString())
+    const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
     const feeBalanceConfig = source.destinationFee.balance.build({
@@ -125,7 +127,7 @@ export class DataOriginProcessor extends DataProcessor {
 
     const feeAsset = await this.getFeeAsset(address);
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = addr.isH160(feeAssetId.toString())
+    const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
     const feeBalanceConfig = source.fee.balance.build({

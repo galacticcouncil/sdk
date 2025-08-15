@@ -18,6 +18,8 @@ import { WhTransfer, WhStatus } from './types';
 
 const REDEEM_THRESHOLD = 5 * 60 * 1000; // 5 minutes
 
+const { Ss58Addr } = addr;
+
 export class WormholeTransfer {
   private parachainId: number;
   private config: ConfigService;
@@ -142,7 +144,7 @@ export class WormholeTransfer {
         const account = accountId32['id'];
 
         const asset = this.getTokenAddress(payload);
-        const toAddress = addr.encodePubKey(account, 0);
+        const toAddress = Ss58Addr.encodePubKey(account);
         const status = this.getStatus(o);
 
         const fromChain = this.chains.find(

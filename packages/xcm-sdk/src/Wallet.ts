@@ -28,6 +28,8 @@ import { Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
 
+const { EvmAddr } = addr;
+
 export interface WalletOptions {
   configService: ConfigService;
   transferValidations?: TransferValidation[];
@@ -203,7 +205,7 @@ export class Wallet {
       .map(async ({ source }) => {
         const { asset, balance } = source;
         const assetId = chainRoutes.chain.getBalanceAssetId(asset);
-        const account = addr.isH160(assetId.toString())
+        const account = EvmAddr.isValid(assetId.toString())
           ? await formatEvmAddress(address, chainRoutes.chain)
           : address;
         const balanceConfig = balance.build({

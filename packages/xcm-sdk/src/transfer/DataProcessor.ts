@@ -10,6 +10,8 @@ import {
 import { formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService } from '../platforms';
 
+const { EvmAddr } = addr;
+
 export abstract class DataProcessor {
   readonly adapter: PlatformAdapter;
   readonly config: TransferConfig;
@@ -36,7 +38,7 @@ export abstract class DataProcessor {
     const asset = source.asset;
 
     const assetId = chain.getBalanceAssetId(asset);
-    const account = addr.isH160(assetId.toString())
+    const account = EvmAddr.isValid(assetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
     const balanceConfig = route.source.balance.build({
