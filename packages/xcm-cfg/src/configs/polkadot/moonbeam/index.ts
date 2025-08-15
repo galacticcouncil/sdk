@@ -9,6 +9,7 @@ import {
   hdx,
   pink,
   sol,
+  susds_mwh,
   usdc,
   usdc_mwh,
   usdt,
@@ -50,6 +51,7 @@ const toHydration: AssetRoute[] = [
   toHydrationXcTemplate(usdt, 0.3),
   toHydrationXcTemplate(usdc, 0.3),
   toHydrationErc20Template(dai_mwh, 0.004),
+  toHydrationErc20Template(susds_mwh, 0.004),
   toHydrationErc20Template(usdc_mwh, 0.004),
   toHydrationErc20Template(usdt_mwh, 0.004),
   toHydrationErc20Template(wbtc_mwh, 0.0000001),
@@ -154,10 +156,12 @@ const toEthereumViaWormhole: AssetRoute[] = [
     contract: ContractBuilder()
       .Batch()
       .batchAll([
-        ContractBuilder().Erc20().approve(),
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
   }),
   new AssetRoute({
     source: {
@@ -186,10 +190,12 @@ const toEthereumViaWormhole: AssetRoute[] = [
     contract: ContractBuilder()
       .Batch()
       .batchAll([
-        ContractBuilder().Erc20().approve(),
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
         ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
       ]),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
   }),
 ];
 

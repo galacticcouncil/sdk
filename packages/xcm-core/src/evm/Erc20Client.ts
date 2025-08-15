@@ -5,6 +5,8 @@ import { EvmClient } from './EvmClient';
 
 import { addr } from '../utils';
 
+const { EvmAddr } = addr;
+
 export class Erc20Client {
   readonly client: EvmClient;
   readonly address: string;
@@ -30,7 +32,7 @@ export class Erc20Client {
   }
 
   private validateContractAddress(address: string) {
-    if (!addr.isH160(address)) {
+    if (!EvmAddr.isValid(address)) {
       throw new Error(
         'Contract address ' + address + ' is not valid h160 address'
       );

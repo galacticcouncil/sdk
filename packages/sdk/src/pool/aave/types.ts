@@ -6,3 +6,19 @@ export interface AaveTradeExecutorPoolData extends Struct {
   readonly liqudityIn: u128;
   readonly liqudityOut: u128;
 }
+
+export type RouterExecutedEvent = [
+  assetIn: number,
+  assetOut: number,
+  amountIn: bigint,
+  amountOut: bigint,
+  eventId: number,
+];
+
+export type EvmLogEvent = [
+  log: {
+    address: `0x${string}`;
+    topics: [signature: `0x${string}`, ...args: `0x${string}`[]];
+    data: `0x${string}`;
+  },
+];

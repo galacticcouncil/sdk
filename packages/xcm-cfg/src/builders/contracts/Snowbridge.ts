@@ -10,6 +10,8 @@ import {
 
 import { parseAssetId } from '../utils';
 
+const { Ss58Addr } = addr;
+
 const sendToken = (): ContractConfigBuilder => ({
   build: (params) => {
     const { address, amount, asset, source, destination } = params;
@@ -32,7 +34,7 @@ const sendToken = (): ContractConfigBuilder => ({
       args: [
         parsedAssetId,
         rcv.parachainId,
-        [1, addr.getPubKey(address) as `0x${string}`],
+        [1, Ss58Addr.getPubKey(address) as `0x${string}`],
         bridgeFeeInDot,
         amount,
       ],

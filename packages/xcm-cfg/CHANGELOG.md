@@ -1,5 +1,60 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.9.0
+
+### Minor Changes
+
+- sui: support string (hex) chain id
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.3.0
+
+## 10.8.0
+
+### Minor Changes
+
+- xcm: cleanup address space utils
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.2.0
+
+## 10.7.0
+
+### Minor Changes
+
+[76ca2949]: https://github.com/galacticcouncil/sdk/commit/76ca2949
+[3de641b1]: https://github.com/galacticcouncil/sdk/commit/3de641b1
+
+- [[#76ca2949][76ca2949]] sui: transfer configs
+- [[#3de641b1][3de641b1]] fix: hub sufficiency check
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.1.0
+
+## 10.6.1
+
+### Patch Changes
+
+- fix: switch solana wh transfer back to relayer
+
+## 10.6.0
+
+### Minor Changes
+
+- f65c819: add susds
+
+## 10.5.0
+
+### Minor Changes
+
+- c7abc3e: add cfg rpc
+
 ## 10.4.0
 
 ### Minor Changes

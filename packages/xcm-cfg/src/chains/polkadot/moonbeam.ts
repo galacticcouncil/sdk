@@ -13,6 +13,8 @@ import {
   hdx,
   pink,
   sol,
+  susds_mwh,
+  sui,
   usdc,
   usdc_mwh,
   usdt,
@@ -106,6 +108,48 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: susds_mwh,
+      decimals: 18,
+      id: '0xda430218862d3db25de9f61458645dde49a9e9c1',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xda430218862d3db25de9f61458645dde49a9e9c1',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: sui,
+      decimals: 9,
+      id: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
               },
             },
           ],

@@ -1,5 +1,38 @@
 # @galacticcouncil/sdk
 
+## 9.11.0
+
+### Minor Changes
+
+- f091023: Support asset dyn fee config
+
+## 9.10.0
+
+### Minor Changes
+
+[4fc9586e]: https://github.com/galacticcouncil/sdk/commit/4fc9586e
+[ba407030]: https://github.com/galacticcouncil/sdk/commit/ba407030
+[19ae8b4b]: https://github.com/galacticcouncil/sdk/commit/19ae8b4b
+[c046c9b4]: https://github.com/galacticcouncil/sdk/commit/c046c9b4
+
+- [[#4fc9586e][4fc9586e]] sdk: support pool filter (exclude)
+
+- [[#ba407030][ba407030]] hsm: buy contraints update
+- [[#19ae8b4b][19ae8b4b]] hsm: initial validations
+- [[#c046c9b4][c046c9b4]] hsm: add pool module
+
+## 9.9.1
+
+### Patch Changes
+
+- fix: suggester use all paths in trusted set
+
+## 9.9.0
+
+### Minor Changes
+
+- 5de2359: sdk: speed up bfs by pre-filtering the relevant amms
+
 ## 9.8.0
 
 ### Minor Changes
@@ -53,13 +86,13 @@
 
 ### Patch Changes
 
-- Update twap api accessors
+- sdk: update twap api accessors
 
 ## 9.5.1
 
 ### Patch Changes
 
-- Revert range calc
+- sdk: revert range calc
 
 ## 9.5.0
 

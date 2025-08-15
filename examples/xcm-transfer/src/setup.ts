@@ -7,7 +7,12 @@ import {
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
 
-import { Wallet, WormholeClient, WormholeScan } from '@galacticcouncil/xcm-sdk';
+import {
+  Wallet,
+  WormholeClient,
+  WormholeScan,
+  WormholeTransfer,
+} from '@galacticcouncil/xcm-sdk';
 
 import { externals } from './externals';
 
@@ -27,6 +32,7 @@ export const wallet = new Wallet({
 // Initialize clients
 export const whScan = new WormholeScan();
 export const whClient = new WormholeClient();
+export const whTransfers = new WormholeTransfer(configService, 2034);
 
 // Register external assets
 configService.registerExternal(externals);

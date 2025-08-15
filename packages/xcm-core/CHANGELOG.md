@@ -1,10 +1,30 @@
 # @galacticcouncil/xcm-core
 
+## 8.3.0
+
+### Minor Changes
+
+- sui: support string (hex) chain id
+
+## 8.2.0
+
+### Minor Changes
+
+- xcm: cleanup address space utils
+
+## 8.1.0
+
+### Minor Changes
+
+[44309f9f]: https://github.com/galacticcouncil/sdk/commit/44309f9f
+
+- [[#44309f9f][44309f9f]] sui: core definitions & types
+
 ## 8.0.0
 
 ### Major Changes
 
-- Upgrade pjs to 16.x 
+- Upgrade pjs to 16.x
 - Update SubstrateApis socket init config
 
 ### Patch Changes

@@ -10,12 +10,13 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
+import { OmniMath } from '../omni';
+
 import { TRADEABLE_DEFAULT } from '../../consts';
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
 
 import { StableMath } from './StableMath';
-import { OmniMath } from '../omni/OmniMath';
 
 export type StableSwapPair = PoolPair & {
   tradeableIn: number;
@@ -50,46 +51,22 @@ export class StableSwap implements Pool {
   pegsFee: PoolFee;
 
   static fromPool(pool: StableSwapBase): StableSwap {
-    return new StableSwap(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.amplification,
-      pool.id,
-      pool.fee,
-      pool.totalIssuance,
-      pool.pegs,
-      pool.pegsFee
-    );
+    return new StableSwap(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number,
-    amplification: string,
-    id: string,
-    fee: PoolFee,
-    totalIssuance: string,
-    pegs: string[][],
-    pegsFee: PoolFee
-  ) {
+  constructor(pool: StableSwapBase) {
     this.type = PoolType.Stable;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.amplification = amplification;
-    this.id = id;
-    this.fee = fee;
-    this.totalIssuance = totalIssuance;
-    this.pegs = pegs;
-    this.pegsFee = pegsFee;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.amplification = pool.amplification;
+    this.id = pool.id;
+    this.fee = pool.fee;
+    this.totalIssuance = pool.totalIssuance;
+    this.pegs = pool.pegs;
+    this.pegsFee = pool.pegsFee;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {
