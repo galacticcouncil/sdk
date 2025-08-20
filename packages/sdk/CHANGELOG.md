@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.12.0
+
+### Minor Changes
+
+- hsm: validate hollar out (facilitator & holding check)
+
 ## 9.11.0
 
 ### Minor Changes
