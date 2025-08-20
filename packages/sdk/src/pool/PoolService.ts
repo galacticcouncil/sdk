@@ -1,4 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
+import { Vec } from '@polkadot/types';
+import { FrameSystemEventRecord } from '@polkadot/types/lookup';
 
 import { memoize1 } from '@thi.ng/memoize';
 
@@ -45,7 +47,12 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
   protected onChainAssets: Asset[] = [];
   protected block: number = 0;
 
+  private blockHandlers: Array<(block: number) => void> = [];
+  private eventHandlers: Array<(events: Vec<FrameSystemEventRecord>) => void> =
+    [];
+
   private disconnectSubscribeNewHeads: (() => void) | null = null;
+  private disconnectSubscribeEvents: (() => void) | null = null;
 
   private memRegistry = memoize1((mem: number) => {
     this.log(`Registry mem ${mem} sync`);
@@ -73,6 +80,9 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       this.hsmClient,
     ];
 
+    this.blockHandlers = this.clients.map((c) => c.onNewBlockHandler);
+    this.eventHandlers = this.clients.map((c) => c.onEventsHandler);
+
     this.api.rpc.chain
       .subscribeNewHeads(async (lastHeader) => {
         const block = lastHeader.number.toNumber();
@@ -81,10 +91,35 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
       .then((subsFn) => {
         this.disconnectSubscribeNewHeads = subsFn;
       });
+
+    this.api.query.system
+      .events((events) => {
+        this.onEvents(events);
+      })
+      .then((subsFn) => {
+        this.disconnectSubscribeEvents = subsFn;
+      });
   }
 
   protected onNewBlock(block: number): void {
     this.block = block;
+    for (const handler of this.blockHandlers) {
+      try {
+        handler(block);
+      } catch (e) {
+        this.log('onNewBlock handler error', e);
+      }
+    }
+  }
+
+  protected onEvents(events: Vec<FrameSystemEventRecord>): void {
+    for (const handler of this.eventHandlers) {
+      try {
+        handler(events);
+      } catch (e) {
+        this.log('onEvents handler error', e);
+      }
+    }
   }
 
   get assets(): Asset[] {
@@ -141,6 +176,7 @@ export class PoolService extends PolkadotApiClient implements IPoolService {
     this.stableClient.unsubscribe();
     this.hsmClient.unsubscribe();
     this.disconnectSubscribeNewHeads?.();
+    this.disconnectSubscribeEvents?.();
   }
 
   async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {

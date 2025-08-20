@@ -1,5 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
+import { Vec } from '@polkadot/types';
+import { FrameSystemEventRecord } from '@polkadot/types/lookup';
 
 import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
@@ -8,7 +10,6 @@ import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
 import { MmOracleClient } from '../oracle';
 import { Asset } from '../types';
-import { BigNumber } from '../utils/bignumber';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 
@@ -19,8 +20,11 @@ export abstract class PoolClient extends BalanceClient {
   protected pools: PoolBase[] = [];
   protected subs: UnsubscribePromise[] = [];
 
-  private assets: Map<string, Asset> = new Map([]);
-  private mem: number = 0;
+  protected assets: Map<string, Asset> = new Map([]);
+  protected mem: number = 0;
+
+  readonly onNewBlockHandler: (block: number) => void;
+  readonly onEventsHandler: (events: Vec<FrameSystemEventRecord>) => void;
 
   private memPoolsCache = new TLRUCache<number, Promise<PoolBase[]>>(null, {
     maxlen: 1,
@@ -41,7 +45,12 @@ export abstract class PoolClient extends BalanceClient {
     super(api);
     this.evm = evm;
     this.mmOracle = new MmOracleClient(evm);
+    this.onNewBlockHandler = this.onNewBlock.bind(this);
+    this.onEventsHandler = this.onEvents.bind(this);
   }
+
+  protected onNewBlock(_block: number): void {}
+  protected onEvents(_events: Vec<FrameSystemEventRecord>): void {}
 
   abstract isSupported(): boolean;
   abstract getPoolType(): PoolType;

@@ -1,4 +1,3 @@
-import type { u32 } from '@polkadot/types-codec';
 import type { PalletLbpPool } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 

@@ -1,4 +1,5 @@
 import type { Vec } from '@polkadot/types';
+import type { FrameSystemEventRecord } from '@polkadot/types/lookup';
 import { UnsubscribePromise } from '@polkadot/api-base/types';
 import { encodeAddress } from '@polkadot/util-crypto';
 import { stringToU8a } from '@polkadot/util';
@@ -17,14 +18,11 @@ import { PoolClient } from '../PoolClient';
 
 import { AAVE_POOL_ABI } from '../../aave';
 import { HYDRADX_SS58_PREFIX } from '../../consts';
+import { EvmLogEvent } from '../../evm';
 import { ERC20 } from '../../utils/erc20';
 import { findNestedKey } from '../../utils/json';
 
-import {
-  AaveTradeExecutorPoolData,
-  EvmLogEvent,
-  RouterExecutedEvent,
-} from './types';
+import { AaveTradeExecutorPoolData, RouterExecutedEvent } from './types';
 
 const SYNC_MM_EVENTS = ['Supply', 'Withdraw', 'Repay', 'Borrow'];
 
@@ -91,63 +89,62 @@ export class AavePoolClient extends PoolClient {
     return {} as PoolFees;
   }
 
+  protected onEvents(events: Vec<FrameSystemEventRecord>): void {
+    events.forEach((record) => {
+      const { event } = record;
+      const eventKey = `${event.section}:${event.method}`;
+
+      if (eventKey === 'router:Executed') {
+        const [assetIn, assetOut] = event.data.toJSON() as RouterExecutedEvent;
+        this.pools
+          .filter((pool) =>
+            pool.tokens.some(
+              (t) => t.id === assetIn.toString() || t.id === assetOut.toString()
+            )
+          )
+          .forEach((pool) => {
+            this.log(
+              `Sync AAVE via [router:Executed] :: ${assetIn}:${assetOut}`
+            );
+            this.updatePoolState(pool);
+          });
+      }
+
+      if (eventKey === 'evm:Log') {
+        const [log] = event.data.toJSON() as EvmLogEvent;
+        try {
+          const { eventName, args } = decodeEventLog({
+            abi: AAVE_POOL_ABI,
+            topics: log.topics,
+            data: log.data,
+          });
+
+          if (SYNC_MM_EVENTS.includes(eventName)) {
+            const evtReserveId = args.reserve.toLowerCase();
+            this.pools
+              .filter((pool) => {
+                const [reserve] = pool.tokens;
+                const reserveId = this.getReserveH160Id(reserve).toLowerCase();
+                return reserveId === evtReserveId;
+              })
+              .forEach((pool) => {
+                this.log(
+                  `Sync AAVE via [evm:Log] :: ${eventName} ${evtReserveId}`
+                );
+                this.updatePoolState(pool);
+              });
+          }
+        } catch (e) {}
+      }
+    });
+  }
+
   protected async subscribeBalances(): UnsubscribePromise {
     return () => {};
   }
 
   protected async subscribeUpdates(): UnsubscribePromise {
-    return this.api.query.system.events((events) => {
-      events.forEach((record) => {
-        const { event } = record;
-        const eventKey = `${event.section}:${event.method}`;
-
-        if (eventKey === 'router:Executed') {
-          const [assetIn, assetOut] =
-            event.data.toJSON() as RouterExecutedEvent;
-          this.pools
-            .filter((pool) =>
-              pool.tokens.some(
-                (t) =>
-                  t.id === assetIn.toString() || t.id === assetOut.toString()
-              )
-            )
-            .forEach((pool) => {
-              this.log(
-                `Sync AAVE via [router:Executed] :: ${assetIn}:${assetOut}`
-              );
-              this.updatePoolState(pool);
-            });
-        }
-
-        if (eventKey === 'evm:Log') {
-          const [log] = event.data.toJSON() as EvmLogEvent;
-          try {
-            const { eventName, args } = decodeEventLog({
-              abi: AAVE_POOL_ABI,
-              topics: log.topics,
-              data: log.data,
-            });
-
-            if (SYNC_MM_EVENTS.includes(eventName)) {
-              const evtReserveId = args.reserve.toLowerCase();
-              this.pools
-                .filter((pool) => {
-                  const [reserve] = pool.tokens;
-                  const reserveId =
-                    this.getReserveH160Id(reserve).toLowerCase();
-                  return reserveId === evtReserveId;
-                })
-                .forEach((pool) => {
-                  this.log(
-                    `Sync AAVE via [evm:Log] :: ${eventName} ${evtReserveId}`
-                  );
-                  this.updatePoolState(pool);
-                });
-            }
-          } catch (e) {}
-        }
-      });
-    });
+    return () => {};
   }
 
   protected async updatePoolState(pool: PoolBase) {

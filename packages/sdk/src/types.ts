@@ -1,5 +1,3 @@
-import type { BigNumber } from './utils/bignumber';
-
 export type Amount = {
   amount: BigNumber;
   decimals: number;
