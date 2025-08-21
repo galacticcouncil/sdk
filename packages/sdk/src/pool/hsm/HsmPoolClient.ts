@@ -187,29 +187,54 @@ export class HsmClient extends PoolClient {
   }
 
   protected async subscribeBalances(): UnsubscribePromise {
-    const unsub = this.pools.map(async (pool: PoolBase) => {
-      const { collateralId, hsmAddress, tokens } = pool as HsmPoolBase;
+    const tokenQueries: string[][] = [];
+    const erc20Queries: string[][] = [];
+
+    const unsubFns: (() => void)[] = [];
+
+    for (const pool of this.pools) {
+      const { tokens, hsmAddress, collateralId } = pool as HsmPoolBase;
 
       const collateral = tokens.find((t) => t.id === collateralId)!;
-      const collateralBalanceCb = (balances: [string, BigNumber][]) => {
-        const [collateral] = balances;
-        const [_id, balance] = collateral;
-        Object.assign(pool, { collateralBalance: balance });
-      };
 
       if (collateral.type === 'Erc20') {
-        return this.subscribeErc20Balance(hsmAddress, collateralBalanceCb, [
-          collateralId,
-        ]);
+        erc20Queries.push([hsmAddress, collateralId]);
+      } else {
+        tokenQueries.push([hsmAddress, collateralId]);
       }
-      return this.subscribeTokenBalance(hsmAddress, collateralBalanceCb, [
-        collateralId,
-      ]);
-    });
+    }
 
-    const unsubFns = await Promise.all(unsub);
+    const updateBalancesCallback = (balances: [string[], BigNumber][]) => {
+      balances.forEach(([query, balance]) => {
+        const [_, asset] = query;
+        const pool = this.pools.find((p) =>
+          p.tokens.some((t) => t.id === asset)
+        );
+
+        if (pool) {
+          Object.assign(pool, { collateralBalance: balance });
+        }
+      });
+    };
+
+    if (tokenQueries.length > 0) {
+      const tokenSub = await this.subscribeTokenBalances(
+        tokenQueries,
+        updateBalancesCallback
+      );
+      unsubFns.push(tokenSub);
+    }
+
+    if (erc20Queries.length > 0) {
+      const erc20Sub = await this.subscribeErc20Balances(
+        erc20Queries,
+        updateBalancesCallback
+      );
+      unsubFns.push(erc20Sub);
+    }
+
     return () => {
-      for (const unsub of unsubFns.flat()) {
+      for (const unsub of unsubFns) {
         try {
           unsub();
         } catch (e) {

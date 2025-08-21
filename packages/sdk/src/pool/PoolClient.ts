@@ -6,6 +6,7 @@ import { FrameSystemEventRecord } from '@polkadot/types/lookup';
 import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
+import { SYSTEM_ASSET_ID } from '../consts';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
 import { MmOracleClient } from '../oracle';
@@ -98,30 +99,86 @@ export abstract class PoolClient extends BalanceClient {
   }
 
   protected async subscribeBalances(): UnsubscribePromise {
-    const unsub = this.augmentedPools.map(async (pool: PoolBase) => {
-      const unsubFns = [];
+    const systemQueries: string[] = [];
+    const tokenQueries: string[][] = [];
+    const erc20Queries: string[][] = [];
 
-      const tokenSub = await this.subscribeTokensPoolBalance(pool);
+    const unsubFns: (() => void)[] = [];
+
+    for (const pool of this.augmentedPools) {
+      const { address, tokens } = pool;
+
+      tokens
+        .filter((t) => t.id === SYSTEM_ASSET_ID)
+        .forEach(() => {
+          systemQueries.push(address);
+        });
+
+      tokens
+        .filter(
+          (t) =>
+            t.type === 'Token' && t.id !== SYSTEM_ASSET_ID && t.id !== pool.id
+        )
+        .forEach((t) => {
+          tokenQueries.push([address, t.id]);
+        });
+
+      tokens
+        .filter((t) => t.type === 'Erc20')
+        .forEach((t) => {
+          erc20Queries.push([address, t.id]);
+        });
+    }
+
+    const updateBalancesSysCallback = (balances: [string, BigNumber][]) => {
+      balances.forEach(([query, balance]) => {
+        const pool = this.pools.find((p) => p.address === query);
+        if (pool) {
+          const tokenIndex = pool.tokens.findIndex(
+            (t) => t.id === SYSTEM_ASSET_ID
+          );
+          pool.tokens[tokenIndex].balance = balance.toString();
+        }
+      });
+    };
+
+    const updateBalancesCallback = (balances: [string[], BigNumber][]) => {
+      balances.forEach(([query, balance]) => {
+        const [address, asset] = query;
+        const pool = this.pools.find((p) => p.address === address);
+        if (pool) {
+          const tokenIndex = pool.tokens.findIndex((t) => t.id === asset);
+          pool.tokens[tokenIndex].balance = balance.toString();
+        }
+      });
+    };
+
+    if (systemQueries.length > 0) {
+      const systemSub = await this.subscribeSystemBalances(
+        systemQueries,
+        updateBalancesSysCallback
+      );
+      unsubFns.push(systemSub);
+    }
+
+    if (tokenQueries.length > 0) {
+      const tokenSub = await this.subscribeTokenBalances(
+        tokenQueries,
+        updateBalancesCallback
+      );
       unsubFns.push(tokenSub);
+    }
 
-      if (this.hasSystemAsset(pool)) {
-        const subSystem = await this.subscribeSystemPoolBalance(pool);
-        unsubFns.push(subSystem);
-      }
-
-      if (this.hasErc20Asset(pool)) {
-        const subErc20 = await this.subscribeErc20PoolBalance(pool);
-        unsubFns.push(subErc20);
-      }
-
-      this.subscribeLog(pool);
-      return unsubFns;
-    });
-
-    const unsubFns = await Promise.all(unsub);
+    if (erc20Queries.length > 0) {
+      const erc20Sub = await this.subscribeErc20Balances(
+        erc20Queries,
+        updateBalancesCallback
+      );
+      unsubFns.push(erc20Sub);
+    }
 
     return () => {
-      for (const unsub of unsubFns.flat()) {
+      for (const unsub of unsubFns) {
         try {
           unsub();
         } catch (e) {
@@ -131,54 +188,10 @@ export abstract class PoolClient extends BalanceClient {
     };
   }
 
-  private hasSystemAsset(pool: PoolBase) {
-    return pool.tokens.some((t) => t.id === '0');
-  }
-
-  private hasErc20Asset(pool: PoolBase) {
-    return pool.tokens.some((t) => t.type === 'Erc20');
-  }
-
   unsubscribe() {
     this.subs.forEach((unsub) => {
       unsub.then((fn) => fn()).catch((e) => console.warn('Unsub failed', e));
     });
-  }
-
-  private subscribeLog(pool: PoolBase) {
-    const poolAddr = pool.address.substring(0, 10).concat('...');
-    this.log(`${pool.type} mem ${this.mem} [${poolAddr}] balance subscribed`);
-  }
-
-  private subscribeSystemPoolBalance(pool: PoolBase): UnsubscribePromise {
-    return this.subscribeSystemBalance(
-      pool.address,
-      this.updateBalanceCallback(pool)
-    );
-  }
-
-  private subscribeTokensPoolBalance(pool: PoolBase): UnsubscribePromise {
-    /**
-     * Skip balance update for shared token in stablepool
-     *
-     * @param p - asset pool
-     * @param t - pool token
-     * @returns true if pool id different than token, otherwise false (shared token)
-     */
-    const isNotStableswap = (p: PoolBase, t: string) => p.id !== t;
-    return this.subscribeTokenBalance(
-      pool.address,
-      this.updateBalancesCallback(pool, isNotStableswap)
-    );
-  }
-
-  private subscribeErc20PoolBalance(pool: PoolBase): UnsubscribePromise {
-    const ids = pool.tokens.filter((t) => t.type === 'Erc20').map((t) => t.id);
-    return this.subscribeErc20Balance(
-      pool.address,
-      this.updateBalancesCallback(pool, () => true),
-      ids
-    );
   }
 
   /**
@@ -209,28 +222,5 @@ export abstract class PoolClient extends BalanceClient {
       };
     });
     return pool;
-  }
-
-  private updateBalancesCallback(
-    pool: PoolBase,
-    canUpdate: (pool: PoolBase, token: string) => boolean
-  ) {
-    return function (balances: [string, BigNumber][]) {
-      balances.forEach(([token, balance]) => {
-        const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-        if (tokenIndex >= 0 && canUpdate(pool, token)) {
-          pool.tokens[tokenIndex].balance = balance.toString();
-        }
-      });
-    };
-  }
-
-  private updateBalanceCallback(pool: PoolBase) {
-    return function (token: string, balance: BigNumber) {
-      const tokenIndex = pool.tokens.findIndex((t) => t.id == token);
-      if (tokenIndex >= 0) {
-        pool.tokens[tokenIndex].balance = balance.toString();
-      }
-    };
   }
 }
