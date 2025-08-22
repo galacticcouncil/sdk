@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk
 
+## 9.13.0
+
+### Minor Changes
+
+- sdk: reduce no of balance subs (multiquery)
+
+## 9.12.0
+
+### Minor Changes
+
+- hsm: validate hollar out (facilitator & holding check)
+
 ## 9.11.0
 
 ### Minor Changes

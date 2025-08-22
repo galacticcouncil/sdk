@@ -1,4 +1,5 @@
 import {
+  mrl,
   EvmParachain,
   MoveConfig,
   MoveConfigBuilder,
@@ -16,8 +17,6 @@ import {
   getOldestEmitterCapObjectId,
   getPackageId,
 } from '@wormhole-foundation/sdk-sui';
-
-import { mrl } from '../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;

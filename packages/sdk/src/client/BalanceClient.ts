@@ -51,6 +51,21 @@ export class BalanceClient extends PolkadotApiClient {
     );
   }
 
+  async subscribeSystemBalances(
+    queries: string[],
+    onChange: (balances: [string, BigNumber][]) => void
+  ): UnsubscribePromise {
+    return this.api.query.system.account.multi(queries, (balances) => {
+      const result: [string, BigNumber][] = [];
+      balances.forEach((data, i) => {
+        const freeBalance = this.calculateFreeBalance(data.data);
+        const query = queries[i];
+        result.push([query, freeBalance]);
+      });
+      onChange(result);
+    });
+  }
+
   async subscribeTokenBalance(
     address: string,
     onChange: (balances: [string, BigNumber][]) => void,
@@ -71,6 +86,21 @@ export class BalanceClient extends PolkadotApiClient {
         const freeBalance = this.calculateFreeBalance(data);
         const token = queries[i][1];
         result.push([token, freeBalance]);
+      });
+      onChange(result);
+    });
+  }
+
+  async subscribeTokenBalances(
+    queries: string[][],
+    onChange: (balances: [string[], BigNumber][]) => void
+  ): UnsubscribePromise {
+    return this.api.query.tokens.accounts.multi(queries, (balances) => {
+      const result: [string[], BigNumber][] = [];
+      balances.forEach((data, i) => {
+        const freeBalance = this.calculateFreeBalance(data);
+        const query = queries[i];
+        result.push([query, freeBalance]);
       });
       onChange(result);
     });
@@ -104,6 +134,25 @@ export class BalanceClient extends PolkadotApiClient {
           id,
           await this.getErc20Balance(address, id),
         ])
+      );
+      onChange(balances);
+    };
+
+    return this.api.rpc.chain.subscribeNewHeads(async () => {
+      getErc20Balance();
+    });
+  }
+
+  async subscribeErc20Balances(
+    queries: string[][],
+    onChange: (balances: [string[], BigNumber][]) => void
+  ): UnsubscribePromise {
+    const getErc20Balance = async () => {
+      const balances: [string[], BigNumber][] = await Promise.all(
+        queries.map(async (query) => {
+          const [address, asset] = query;
+          return [query, await this.getErc20Balance(address, asset)];
+        })
       );
       onChange(balances);
     };

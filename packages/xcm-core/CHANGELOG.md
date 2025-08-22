@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.4.0
+
+### Minor Changes
+
+- xcm: fix deposit wh transfers api
+
 ## 8.3.0
 
 ### Minor Changes

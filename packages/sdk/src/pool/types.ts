@@ -17,7 +17,10 @@ export enum PoolType {
 
 export enum PoolError {
   UnknownError = 'UnknownError',
+  FacilitatorCapacityExceeded = 'FacilitatorCapacityExceeded',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
+  InsufficientCollateral = 'InsufficientCollateral',
+  MaxHoldingExceeded = 'MaxHoldingExceeded',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
   TradeNotAllowed = 'TradeNotAllowed',

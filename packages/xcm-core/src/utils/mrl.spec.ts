@@ -1,4 +1,4 @@
-import { Parachain } from '@galacticcouncil/xcm-core';
+import { Parachain } from '../chain';
 
 import { createPayload, decodePayload } from './mrl';
 
