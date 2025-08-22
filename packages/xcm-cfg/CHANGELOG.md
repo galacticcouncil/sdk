@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.10.0
+
+### Minor Changes
+
+- xcm: fix deposit wh transfers api
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.4.0
+
 ## 10.9.0
 
 ### Minor Changes
