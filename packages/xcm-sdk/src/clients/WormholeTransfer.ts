@@ -1,15 +1,12 @@
 import {
   acc,
-  addr,
-  multiloc,
+  mrl,
   AnyChain,
   ConfigService,
   Parachain,
   Wormhole,
+  Precompile,
 } from '@galacticcouncil/xcm-core';
-
-import { TypeRegistry } from '@polkadot/types';
-import { XcmVersionedLocation } from '@polkadot/types/lookup';
 
 import { WormholeClient } from './WormholeClient';
 import { Operation, OperationPayload, WormholeScan } from './WormholeScan';
@@ -17,8 +14,6 @@ import { Operation, OperationPayload, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
 
 const REDEEM_THRESHOLD = 5 * 60 * 1000; // 5 minutes
-
-const { Ss58Addr } = addr;
 
 export class WormholeTransfer {
   private parachainId: number;
@@ -43,7 +38,7 @@ export class WormholeTransfer {
   get filters(): Record<string, string> {
     const toDate = new Date();
     const fromDate = new Date();
-    fromDate.setDate(toDate.getDate() - 7);
+    fromDate.setDate(toDate.getDate() - 3);
 
     const toISO = toDate.toISOString();
     const fromISO = fromDate.toISOString();
@@ -66,8 +61,8 @@ export class WormholeTransfer {
     );
 
     const operations = await this.whScan.getOperations({
-      address: mda,
       ...this.filters,
+      address: mda,
     });
 
     const result = operations.map(async (o) => {
@@ -120,41 +115,40 @@ export class WormholeTransfer {
     return Promise.all(result);
   }
 
-  async getDeposits(address: string): Promise<WhTransfer[]> {
+  async getDeposits(address: string, to = 'hydration'): Promise<WhTransfer[]> {
     const operations = await this.whScan.getOperations({
-      address: address,
       ...this.filters,
+      address: Precompile.Bridge,
+      pageSize: '100',
     });
 
+    const toChain = this.config.chains.get(to);
+    if (!toChain) {
+      return [];
+    }
+
+    const payloadHex = mrl.createPayload(toChain as Parachain, address).toHex();
     const result = operations
       .filter((o) => {
         const { content } = o;
-        return this.whScan.isMrlTransfer(content.payload);
+        const { payload } = content;
+        return (
+          payload.payloadType === 3 &&
+          payload.toChain === 16 &&
+          '0x' + payload.payload === payloadHex
+        );
       })
       .map(async (o) => {
-        const { content } = o;
+        const { content, sourceChain } = o;
         const { payload } = content;
 
-        const decodedPayload = this.decodeMrlPayload(payload.payload).toJSON();
-        const parachain = this.parseMultilocation('parachain', decodedPayload);
-        const accountId32 = this.parseMultilocation(
-          'accountId32',
-          decodedPayload
-        );
-        const account = accountId32['id'];
-
         const asset = this.getTokenAddress(payload);
-        const toAddress = Ss58Addr.encodePubKey(account);
         const status = this.getStatus(o);
 
         const fromChain = this.chains.find(
           (c) =>
             Wormhole.isKnown(c) &&
             Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-        )!;
-
-        const toChain = this.chains.find(
-          (c) => c instanceof Parachain && c.parachainId === parachain
         )!;
 
         let redeem;
@@ -173,9 +167,9 @@ export class WormholeTransfer {
           asset: asset,
           assetSymbol: o.data.symbol,
           amount: o.data.tokenAmount,
-          from: address,
+          from: sourceChain.from,
           fromChain: fromChain,
-          to: toAddress,
+          to: address,
           toChain: toChain,
           status: status,
           redeem: redeem,
@@ -207,36 +201,6 @@ export class WormholeTransfer {
       return this.toNative(tokenAddress);
     }
     return tokenAddress;
-  }
-
-  /**
-   * Decode MRL payload
-   *
-   * @param payload - transfer payload
-   * @returns xcm versioned multilocation
-   */
-  private decodeMrlPayload(payload: string): XcmVersionedLocation {
-    const registry = new TypeRegistry();
-    return registry.createType(
-      'VersionedMultiLocation',
-      '0x' + payload.substring(2)
-    ) as unknown as XcmVersionedLocation;
-  }
-
-  /**
-   * Parse multilocation JSON
-   *
-   * @param key - attr key
-   * @param multilocation - multilocation JSON
-   * @returns parsed arg if exist, otherwise undefined
-   */
-  private parseMultilocation(key: string, multilocation?: any) {
-    if (location) {
-      const entry = multiloc.findNestedKey(multilocation, key);
-      return entry && entry[key];
-    } else {
-      return undefined;
-    }
   }
 
   private toNative(wormholeAddress: string) {

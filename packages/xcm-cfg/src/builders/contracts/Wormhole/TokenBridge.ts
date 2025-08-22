@@ -1,4 +1,5 @@
 import {
+  mrl,
   Abi,
   ContractConfig,
   ContractConfigBuilder,
@@ -8,7 +9,7 @@ import {
   Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
-import { mrl, parseAssetId } from '../../utils';
+import { parseAssetId } from '../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;
