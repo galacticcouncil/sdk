@@ -1,7 +1,6 @@
 import { Edge, RouteSuggester, RouteProposal } from './route';
 
 import {
-  hashPools,
   Hop,
   IPoolService,
   Pool,
@@ -16,6 +15,7 @@ export type RouterOptions = PoolFilter;
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routeProposals: Map<string, RouteProposal[]>;
+  private readonly routeableCache = new Map<string, Promise<string[]>>();
   private readonly routerOptions: RouterOptions;
 
   protected readonly poolService: IPoolService;
@@ -27,13 +27,21 @@ export class Router {
     this.routerOptions = Object.freeze(routerOptions);
   }
 
+  protected buildRouteKey(
+    assetIn: string,
+    assetOut: string,
+    _pools: PoolBase[]
+  ): string {
+    return `${assetIn}->${assetOut}`;
+  }
+
   /**
    * Return all pools
    *
    * @returns {PoolBase[]} List of all substrate based pools
    */
   async getPools(): Promise<PoolBase[]> {
-    return await this.poolService.getPools(this.routerOptions);
+    return this.poolService.getPools(this.routerOptions);
   }
 
   /**
@@ -45,6 +53,33 @@ export class Router {
     const pools = await this.getPools();
     const asset = this.getAssets(pools);
     return [...new Map(asset).values()];
+  }
+
+  /**
+   * Return list of all routeble assets from substrate based pools
+   *
+   * @returns {string[]} List of all routeable asset ids
+   */
+  async getRouteableAssets(toAsset: string): Promise<string[]> {
+    const cached = this.routeableCache.get(toAsset);
+    if (cached) return cached;
+
+    const compute = (async () => {
+      const assets = await this.getAllAssets();
+      const routes = await Promise.all(
+        assets
+          .map((a) => a.id)
+          .filter((a) => a !== toAsset)
+          .map((id) => this.getRoutes(id, toAsset))
+      );
+      return routes
+        .filter((r) => r.length > 0)
+        .map(([first]) => first[0].assetIn)
+        .sort();
+    })();
+
+    this.routeableCache.set(toAsset, compute);
+    return compute;
   }
 
   /**
@@ -140,7 +175,7 @@ export class Router {
     assetOut: string,
     pools: PoolBase[]
   ): RouteProposal[] {
-    const key = `${assetIn}->${assetOut}::${hashPools(pools)}`;
+    const key = this.buildRouteKey(assetIn, assetOut, pools);
 
     if (this.routeProposals.has(key)) {
       return this.routeProposals.get(key)!;
