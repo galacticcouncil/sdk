@@ -21,15 +21,27 @@ export class AssethubClient extends BaseClient {
   async checkIfSufficient(asset: Asset): Promise<boolean> {
     const api = await this.chain.api;
     const assetId = this.chain.getAssetId(asset);
-    const response =
-      await api.query.assetRegistry.asset<Option<PalletAssetsAssetDetails>>(
-        assetId
-      );
-    if (response.isEmpty) {
+    const assetLocation = this.chain.getAssetXcmLocation(asset);
+
+    if (assetId === 0) {
       return true;
     }
-    const details = response.unwrap();
-    return details.isSufficient.isTrue;
+
+    const response =
+      assetId === asset.originSymbol
+        ? await api.query.foreignAssets.asset<Option<PalletAssetsAssetDetails>>(
+            assetLocation
+          )
+        : await api.query.assets.asset<Option<PalletAssetsAssetDetails>>(
+            assetId
+          );
+
+    if (response && response.isSome) {
+      const details = response.unwrap();
+      return details.isSufficient.isTrue;
+    }
+
+    return false;
   }
 
   async checkIfFrozen(address: string, asset: Asset): Promise<boolean> {

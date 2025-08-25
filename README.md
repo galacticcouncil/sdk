@@ -32,6 +32,11 @@ Collection of SDK(s) crafted to ease Hydration & Basilisk chains integration.
 [math-ema_log]: ./packages/math-ema/CHANGELOG.md
 [math-ema]: ./packages/math-ema
 
+[math-hsm_v]: https://img.shields.io/npm/v/@galacticcouncil/math-hsm.svg
+[math-hsm_npm]: https://www.npmjs.com/package/@galacticcouncil/math-hsm
+[math-hsm_log]: ./packages/math-hsm/CHANGELOG.md
+[math-hsm]: ./packages/math-hsm
+
 [math-lbp_v]: https://img.shields.io/npm/v/@galacticcouncil/math-lbp.svg
 [math-lbp_npm]: https://www.npmjs.com/package/@galacticcouncil/math-lbp
 [math-lbp_log]: ./packages/math-lbp/CHANGELOG.md
@@ -69,6 +74,7 @@ Collection of SDK(s) crafted to ease Hydration & Basilisk chains integration.
 | [`@galacticcouncil/xcm-cfg`][xcm-cfg]               | [![xcm-cfg_v]][xcm-cfg_npm]         | [changelog][xcm-cfg_log]     | Cross-chain route configs       |
 | [`@galacticcouncil/xcm-sdk`][xcm-sdk]               | [![xcm-sdk_v]][xcm-sdk_npm]         | [changelog][xcm-sdk_log]     | Cross-chain transfer sdk        |
 | [`@galacticcouncil/math-ema`][math-ema]             | [![math-ema_v]][math-ema_npm]       | [changelog][math-ema_log]    | EMA math                        |
+| [`@galacticcouncil/math-hsm`][math-hsm]             | [![math-hsm_v]][math-hsm_npm]       | [changelog][math-hsm_log]    | HSM math                        |
 | [`@galacticcouncil/math-lbp`][math-lbp]             | [![math-lbp_v]][math-lbp_npm]       | [changelog][math-lbp_log]    | LBP math                        |
 | [`@galacticcouncil/math-liquidity-mining`][math-lm] | [![math-lm_v]][math-lm_npm]         | [changelog][math-lm_log]     | Liquidity mining math           |
 | [`@galacticcouncil/math-omnipool`][math-omni]       | [![math-omni_v]][math-omni_npm]     | [changelog][math-omni_log]   | Omnipool math                   |

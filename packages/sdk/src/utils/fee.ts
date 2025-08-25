@@ -1,4 +1,4 @@
-import { PERMILL_DENOMINATOR } from '../consts';
+import { PERMILL_DENOMINATOR, PERBILL_DENOMINATOR } from '../consts';
 import { PoolFee } from '../pool';
 
 export class FeeUtils {
@@ -14,6 +14,10 @@ export class FeeUtils {
 
   static fromPermill(permill: number): PoolFee {
     return [permill, PERMILL_DENOMINATOR] as PoolFee;
+  }
+
+  static fromPerbill(perbill: number): PoolFee {
+    return [perbill, PERBILL_DENOMINATOR] as PoolFee;
   }
 
   static fromRate(numerator: number, denominator: number): PoolFee {

@@ -1,8 +1,8 @@
-import { Parachain } from '@galacticcouncil/xcm-core';
-
 import { TypeRegistry, Enum, Struct } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
+
+import { Parachain } from '../chain';
 
 const registry = new TypeRegistry();
 

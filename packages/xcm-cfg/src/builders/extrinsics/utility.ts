@@ -2,7 +2,6 @@ import {
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   ExtrinsicConfigBuilderParams,
-  Parachain,
 } from '@galacticcouncil/xcm-core';
 
 const pallet = 'utility';

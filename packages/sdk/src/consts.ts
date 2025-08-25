@@ -1,6 +1,7 @@
 export const BASILISK_PARACHAIN_ID = 2090;
 
 export const PERMILL_DENOMINATOR = 1_000_000;
+export const PERBILL_DENOMINATOR = 1_000_000_000;
 
 export const HUB_ASSET_ID = '1';
 

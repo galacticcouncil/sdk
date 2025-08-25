@@ -185,6 +185,11 @@ export const sol = new Asset({
   originSymbol: 'SOL',
 });
 
+export const sui = new Asset({
+  key: 'sui',
+  originSymbol: 'SUI',
+});
+
 export const sub = new Asset({
   key: 'sub',
   originSymbol: 'SUB',
@@ -198,6 +203,11 @@ export const susde = new Asset({
 export const susds = new Asset({
   key: 'susds',
   originSymbol: 'sUSDS',
+});
+
+export const susds_mwh = new Asset({
+  ...susds,
+  key: 'susds_mwh',
 });
 
 export const tbtc = new Asset({
@@ -353,9 +363,11 @@ export const assets: Asset[] = [
   ring,
   sky,
   sol,
+  sui,
   sub,
   susde,
   susds,
+  susds_mwh,
   teer,
   tnkr,
   trac,
