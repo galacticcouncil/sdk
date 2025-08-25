@@ -1,0 +1,5 @@
+---
+'@galacticcouncil/sdk': minor
+---
+
+@nohaapav
