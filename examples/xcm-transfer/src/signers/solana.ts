@@ -18,11 +18,11 @@ export async function signAndSend(
 
   const versioned = new VersionedTransaction(mssgV0);
 
-  const solana = (window as any).solana;
+  const wallet = (window as any).phantom.solana;
   try {
-    await solana.connect();
+    await wallet.connect();
     versioned.sign(signers);
-    const { signature } = await solana.signAndSendTransaction(versioned);
+    const { signature } = await wallet.signAndSendTransaction(versioned);
     onTransactionSend(signature);
     await ctx.connection.getSignatureStatus(signature);
   } catch (err) {

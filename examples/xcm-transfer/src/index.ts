@@ -7,7 +7,7 @@ import {
   logSrcChains,
   logDestChains,
 } from './utils';
-import { evm, solana, substrate, substrateV2 } from './signers';
+import { evm, solana, sui, substrate, substrateV2 } from './signers';
 import { configService, wallet, whClient, whScan } from './setup';
 
 // Define transfer constraints
@@ -131,6 +131,24 @@ async function signEvm(address: string) {
  */
 async function signSolana() {
   solana.signAndSend(
+    call,
+    srcChain,
+    (hash) => {
+      console.log('TxHash: ' + hash);
+    },
+    (error) => {
+      console.error(error);
+    }
+  );
+}
+
+/**
+ * Sign sui transaction
+ *
+ * @param address - signer address
+ */
+async function signSui() {
+  sui.signAndSend(
     call,
     srcChain,
     (hash) => {

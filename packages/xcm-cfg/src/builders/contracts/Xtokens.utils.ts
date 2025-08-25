@@ -3,6 +3,8 @@ import { Parachain, addr } from '@galacticcouncil/xcm-core';
 import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
+const { EvmAddr } = addr;
+
 type DestinationMultilocation = [
   /**
    * 1 - if transaction is going through a relay chain
@@ -52,7 +54,7 @@ export function getDestinationMultilocation(
   address: string,
   destination: Parachain
 ): DestinationMultilocation {
-  const accountType = addr.isH160(address) ? '03' : '01';
+  const accountType = EvmAddr.isValid(address) ? '03' : '01';
   const acc = `0x${accountType}${u8aToHex(
     decodeAddress(address),
     -1,

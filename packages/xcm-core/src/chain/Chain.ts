@@ -16,6 +16,7 @@ export enum ChainEcosystem {
   Polkadot = 'Polkadot',
   Kusama = 'Kusama',
   Solana = 'Solana',
+  Sui = 'Sui',
 }
 
 export type ChainRpcs = {
@@ -28,6 +29,7 @@ export enum ChainType {
   'EvmParachain' = 'evm-parachain',
   'EvmChain' = 'evm-chain',
   'SolanaChain' = 'solana-chain',
+  'SuiChain' = 'sui-chain',
 }
 
 /**
@@ -105,6 +107,10 @@ export abstract class Chain<T extends ChainAssetData> {
 
   isSolana(): boolean {
     return this.getType() === ChainType.SolanaChain;
+  }
+
+  isSui(): boolean {
+    return this.getType() === ChainType.SuiChain;
   }
 
   isEvmChain(): boolean {

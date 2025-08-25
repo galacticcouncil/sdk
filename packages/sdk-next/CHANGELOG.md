@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- Update twap api accessors
+- sdk: update twap api accessors
 
 ## 0.4.0
 

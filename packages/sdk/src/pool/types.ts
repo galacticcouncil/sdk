@@ -1,20 +1,31 @@
 import type { Asset } from '../types';
 import type { BigNumber } from '../utils/bignumber';
 
+export type PoolFilter = {
+  includeOnly?: PoolType[];
+  exclude?: PoolType[];
+};
+
 export enum PoolType {
   Aave = 'Aave',
   LBP = 'Lbp',
   Omni = 'Omnipool',
   Stable = 'Stableswap',
   XYK = 'Xyk',
+  HSM = 'Hsm',
 }
 
 export enum PoolError {
   UnknownError = 'UnknownError',
+  FacilitatorCapacityExceeded = 'FacilitatorCapacityExceeded',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
+  InsufficientCollateral = 'InsufficientCollateral',
+  MaxHoldingExceeded = 'MaxHoldingExceeded',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
   TradeNotAllowed = 'TradeNotAllowed',
+  MaxBuyBackExceeded = 'MaxBuyBackExceeded',
+  MaxBuyPriceExceeded = 'MaxBuyPriceExceeded',
 }
 
 export interface PoolPair {
@@ -81,12 +92,12 @@ export interface Pool extends PoolBase {
   validateAndBuy(
     poolPair: PoolPair,
     amountOut: BigNumber,
-    dynamicFees: PoolFees | null
+    fees: PoolFees | null
   ): BuyCtx;
   validateAndSell(
     poolPair: PoolPair,
-    amountOut: BigNumber,
-    dynamicFees: PoolFees | null
+    amountIn: BigNumber,
+    fees: PoolFees | null
   ): SellCtx;
   calculateInGivenOut(poolPair: PoolPair, amountOut: BigNumber): BigNumber;
   calculateOutGivenIn(poolPair: PoolPair, amountIn: BigNumber): BigNumber;
@@ -95,7 +106,7 @@ export interface Pool extends PoolBase {
 }
 
 export interface IPoolService {
-  getPools(includeOnly?: PoolType[]): Promise<PoolBase[]>;
+  getPools(filter?: PoolFilter): Promise<PoolBase[]>;
   getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees>;
 }
 

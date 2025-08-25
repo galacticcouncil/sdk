@@ -8,10 +8,13 @@ import {
 import { AssethubClient } from '../../clients';
 
 export class HubEdValidation extends TransferValidation {
-  protected async skipFor(data: TransferCtx): Promise<boolean> {
-    const { asset, source } = data;
+  protected async skipFor(ctx: TransferCtx): Promise<boolean> {
+    const { asset, destination } = ctx;
 
-    const isSufficientFeeAsset = asset.isEqual(source.destinationFee);
+    const chain = destination.chain as Parachain;
+    const client = new AssethubClient(chain);
+
+    const isSufficientFeeAsset = await client.checkIfSufficient(asset);
     return isSufficientFeeAsset;
   }
 

@@ -9,5 +9,6 @@ export enum ApiUrl {
   Hydration = 'wss://hydration-rpc.n.dwellir.com',
   Nice = 'wss://rpc.nice.hydration.cloud',
   Lark1 = 'wss://1.lark.hydration.cloud',
+  Lark2 = 'wss://2.lark.hydration.cloud',
   Lark3 = 'wss://3.lark.hydration.cloud',
 }

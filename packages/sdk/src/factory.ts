@@ -9,8 +9,10 @@ import {
 } from './client';
 import { EvmClient } from './evm';
 import { CachingPoolService, PoolService } from './pool';
-import { TradeRouter, TradeScheduler } from './sor';
+import { RouterOptions, TradeRouter, TradeScheduler } from './sor';
 import { TxBuilderFactory } from './tx';
+
+const DEFAULT_OPTS = { router: {} };
 
 export type SdkCtx = {
   api: {
@@ -31,7 +33,10 @@ export type SdkCtx = {
   destroy: () => void;
 };
 
-export function createSdkContext(api: ApiPromise): SdkCtx {
+export function createSdkContext(
+  api: ApiPromise,
+  opts: { router: RouterOptions } = DEFAULT_OPTS
+): SdkCtx {
   const params = new ChainParams(api);
   const evm = new EvmClient(api);
 
@@ -40,7 +45,7 @@ export function createSdkContext(api: ApiPromise): SdkCtx {
 
   // Initialize APIs
   const aave = new AaveUtils(evm);
-  const router = new TradeRouter(poolCtx);
+  const router = new TradeRouter(poolCtx, opts.router);
   const scheduler = new TradeScheduler(router, {
     blockTime: params.blockTime,
     minBudgetInNative: params.minOrderBudget,

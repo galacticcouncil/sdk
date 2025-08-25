@@ -21,9 +21,9 @@ import {
 import { SolanaBalanceFactory } from './balance';
 import { SolanaTransferFactory } from './transfer';
 import { SolanaCall, SolanaDryRunResult } from './types';
+import { ixToHuman } from './utils';
 
 import { Platform } from '../types';
-import { ixToHuman } from './utils';
 
 export class SolanaPlatform
   implements Platform<ProgramConfig, SolanaQueryConfig>

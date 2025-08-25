@@ -18,6 +18,8 @@ import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
 
+const { EvmAddr } = addr;
+
 export class DataOriginProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
     super(adapter, config);
@@ -82,7 +84,7 @@ export class DataOriginProcessor extends DataProcessor {
     }
 
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = addr.isH160(feeAssetId.toString())
+    const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
     const feeBalanceConfig = source.destinationFee.balance.build({
@@ -125,7 +127,7 @@ export class DataOriginProcessor extends DataProcessor {
 
     const feeAsset = await this.getFeeAsset(address);
     const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = addr.isH160(feeAssetId.toString())
+    const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
     const feeBalanceConfig = source.fee.balance.build({
@@ -161,7 +163,7 @@ export class DataOriginProcessor extends DataProcessor {
 
   private async getTransfer(ctx: TransferCtx) {
     const { chain, route } = this.config;
-    const { contract, extrinsic, program } = route;
+    const { contract, extrinsic, program, move } = route;
 
     if (extrinsic) {
       const { address, amount, asset, sender } = ctx;
@@ -178,7 +180,7 @@ export class DataOriginProcessor extends DataProcessor {
       });
     }
 
-    const callable = contract || program;
+    const callable = contract || program || move;
     if (callable) {
       return callable.build({
         ...ctx,
@@ -186,7 +188,7 @@ export class DataOriginProcessor extends DataProcessor {
     }
 
     throw new Error(
-      'AssetRoute transfer config is invalid! Specify contract, extrinsic or program instructions.'
+      'AssetRoute transfer config is invalid! Specify contract, extrinsic, move or program instructions.'
     );
   }
 
