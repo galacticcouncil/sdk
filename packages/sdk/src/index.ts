@@ -4,6 +4,7 @@ export * from './consts';
 export * from './client';
 export * from './errors';
 export * from './evm';
+export * from './oracle';
 export * from './pool';
 export * from './sor';
 export * from './tx';

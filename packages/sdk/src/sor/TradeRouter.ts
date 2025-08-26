@@ -288,6 +288,66 @@ export class TradeRouter extends Router {
   }
 
   /**
+   * Calculate and cache the most liquid route
+   *
+   * To avoid routing through the pools with low liquidity, 0.1% from the
+   * most liquid pool asset is used as reference value to determine the
+   * sweet spot.
+   *
+   * @param {string} assetIn - asset in
+   * @param {string} assetOut - asset out
+   * @param {Ctx} ctx - route ctx
+   * @return most liquid route of given asset pair
+   */
+  private async calculateMostLiquidRoute(
+    assetIn: string,
+    assetOut: string,
+    ctx: Ctx
+  ): Promise<Hop[]> {
+    const { paths, pools, poolsMap } = ctx;
+
+    // Get pools with assetIn
+    const assetInPools = pools.filter((pool) =>
+      pool.tokens.some((t) => t.id === assetIn)
+    );
+
+    // Get liquidity of assetIn sorted by DESC
+    const assetInLiquidityDesc = assetInPools
+      .map((p) => {
+        return p.type === PoolType.Aave
+          ? p.tokens
+          : p.tokens.filter((t) => t.id === assetIn);
+      })
+      .map((t) => {
+        return t
+          .map((t) => bnum(t.balance).shiftedBy(-1 * t.decimals))
+          .reduce((a, b) => a.plus(b));
+      })
+      .sort((a, b) => (b.isLessThan(a) ? -1 : 1));
+
+    const liquidity = assetInLiquidityDesc[0];
+    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
+    const routesPromises = paths.map(
+      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
+    );
+    const routes = await Promise.all(routesPromises);
+    const route = this.findBestSellRoute(routes);
+    const mlr = route.map((r) => {
+      return {
+        poolAddress: r.poolAddress,
+        poolId: r?.poolId,
+        pool: r.pool,
+        assetIn: r.assetIn,
+        assetOut: r.assetOut,
+      } as Hop;
+    });
+
+    const key = this.buildRouteKey(assetIn, assetOut, pools);
+    this.mlr.set(key, mlr);
+    return mlr;
+  }
+
+  /**
    * Calculate and return sell route for given path
    *
    * @param amountIn - amount of assetIn to sell for assetOut
@@ -373,66 +433,6 @@ export class TradeRouter extends Router {
       });
     }
     return swaps;
-  }
-
-  /**
-   * Calculate and cache the most liquid route
-   *
-   * To avoid routing through the pools with low liquidity, 0.1% from the
-   * most liquid pool asset is used as reference value to determine the
-   * sweet spot.
-   *
-   * @param {string} assetIn - asset in
-   * @param {string} assetOut - asset out
-   * @param {Ctx} ctx - route ctx
-   * @return most liquid route of given asset pair
-   */
-  private async calculateMostLiquidRoute(
-    assetIn: string,
-    assetOut: string,
-    ctx: Ctx
-  ): Promise<Hop[]> {
-    const { paths, pools, poolsMap } = ctx;
-
-    // Get pools with assetIn
-    const assetInPools = pools.filter((pool) =>
-      pool.tokens.some((t) => t.id === assetIn)
-    );
-
-    // Get liquidity of assetIn sorted by DESC
-    const assetInLiquidityDesc = assetInPools
-      .map((p) => {
-        return p.type === PoolType.Aave
-          ? p.tokens
-          : p.tokens.filter((t) => t.id === assetIn);
-      })
-      .map((t) => {
-        return t
-          .map((t) => bnum(t.balance).shiftedBy(-1 * t.decimals))
-          .reduce((a, b) => a.plus(b));
-      })
-      .sort((a, b) => (b.isLessThan(a) ? -1 : 1));
-
-    const liquidity = assetInLiquidityDesc[0];
-    const liquidityIn = liquidity.div(100).multipliedBy(0.1);
-    const routesPromises = paths.map(
-      async (path) => await this.toSellSwaps(liquidityIn, path, poolsMap)
-    );
-    const routes = await Promise.all(routesPromises);
-    const route = this.findBestSellRoute(routes);
-    const mlr = route.map((r) => {
-      return {
-        poolAddress: r.poolAddress,
-        poolId: r?.poolId,
-        pool: r.pool,
-        assetIn: r.assetIn,
-        assetOut: r.assetOut,
-      } as Hop;
-    });
-
-    const key = this.buildRouteKey(assetIn, assetOut, pools);
-    this.mlr.set(key, mlr);
-    return mlr;
   }
 
   /**
