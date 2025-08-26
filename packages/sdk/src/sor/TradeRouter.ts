@@ -480,14 +480,14 @@ export class TradeRouter extends Router {
       const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
       const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
       return { amount: spotPriceAmount, decimals: spotPriceDecimals };
-    });
+    }).catch(() => undefined);
   }
 
   /**
    * Calculate and return best possible spot prices
    *
    * @param {string} asset - dollar pegged asset
-   * @return best possible spot prices for tradeable / routable asset
+   * @return best possible spot prices for routable assets
    */
   async getBestSpotPrices(
     asset: string

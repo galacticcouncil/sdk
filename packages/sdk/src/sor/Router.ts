@@ -30,9 +30,9 @@ export class Router {
   protected buildRouteKey(
     assetIn: string,
     assetOut: string,
-    _pools: PoolBase[]
+    pools: PoolBase[]
   ): string {
-    return `${assetIn}->${assetOut}`;
+    return `${assetIn}->${assetOut}::${pools.length}`;
   }
 
   /**
