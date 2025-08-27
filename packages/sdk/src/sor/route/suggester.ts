@@ -84,6 +84,11 @@ export class RouteSuggester {
     const relevantIsolatedPools = isolatedPools.filter((p) =>
       p.tokens.some((t) => t.id === isolatedOnlyToken)
     );
+
+    if (relevantIsolatedPools.length === 0) {
+      return [];
+    }
+
     const relevantPools = [...trustedPools, ...relevantIsolatedPools];
     const graph = buildGraphFromPools(relevantPools);
     const paths = bfs.findPaths(graph, tokenInId, tokenOutId);
