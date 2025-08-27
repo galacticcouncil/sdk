@@ -484,24 +484,6 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible spot prices
-   *
-   * @param {string} asset - dollar pegged asset
-   * @return best possible spot prices for routable assets
-   */
-  async getBestSpotPrices(
-    asset: string
-  ): Promise<Map<string, Amount | undefined>> {
-    const assets = await this.getRouteableAssets(asset);
-    const results = await Promise.all(
-      assets.map((id) =>
-        this.getBestSpotPrice(id, asset).then((price) => [id, price] as const)
-      )
-    );
-    return new Map(results);
-  }
-
-  /**
    * Find best buy route without errors, if there is none return first one found
    *
    * @param swaps - buy routes

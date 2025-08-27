@@ -49,17 +49,24 @@ class GetAllAssetsExample extends PolkadotExecutor {
       api.router.getRouteableAssets(dollarPeggedAsset),
     ]);
 
+    console.log('pools: ' + pools.length);
     console.log(
       'all: ' + ids.length,
       'routable: ' + routable.length,
-      'tradeable: ' + tradeable.length,
-      'pools: ' + pools.length
+      'tradeable: ' + tradeable.length
     );
 
     apiPromise.rpc.chain.subscribeNewHeads(async () => {
       const start = performance.now();
-      await api.router.getBestSpotPrices(dollarPeggedAsset);
+      const results = await Promise.all(
+        routable.map((id) =>
+          api.router
+            .getBestSpotPrice(id, dollarPeggedAsset)
+            .then((price) => [id, price] as const)
+        )
+      );
       console.log('spot:', performance.now() - start);
+      const prices = new Map(results);
     });
   }
 }

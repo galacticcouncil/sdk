@@ -15,7 +15,6 @@ export type RouterOptions = PoolFilter;
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routeProposals: Map<string, RouteProposal[]>;
-  private readonly routeableCache = new Map<string, Promise<string[]>>();
   private readonly routerOptions: RouterOptions;
 
   protected readonly poolService: IPoolService;
@@ -61,25 +60,17 @@ export class Router {
    * @returns {string[]} List of all routeable asset ids
    */
   async getRouteableAssets(toAsset: string): Promise<string[]> {
-    const cached = this.routeableCache.get(toAsset);
-    if (cached) return cached;
-
-    const compute = (async () => {
-      const assets = await this.getAllAssets();
-      const routes = await Promise.all(
-        assets
-          .map((a) => a.id)
-          .filter((a) => a !== toAsset)
-          .map((id) => this.getRoutes(id, toAsset))
-      );
-      return routes
-        .filter((r) => r.length > 0)
-        .map(([first]) => first[0].assetIn)
-        .sort();
-    })();
-
-    this.routeableCache.set(toAsset, compute);
-    return compute;
+    const assets = await this.getAllAssets();
+    const routes = await Promise.all(
+      assets
+        .map((a) => a.id)
+        .filter((a) => a !== toAsset)
+        .map((id) => this.getRoutes(id, toAsset))
+    );
+    return routes
+      .filter((r) => r.length > 0)
+      .map(([first]) => first[0].assetIn)
+      .sort();
   }
 
   /**
