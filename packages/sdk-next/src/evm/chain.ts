@@ -31,7 +31,7 @@ export const createChain = (): Chain => {
     blockExplorers: {
       default: {
         name: 'Hydration Explorer',
-        url: 'https://explorer.evm.hydration.cloud',
+        url: 'https://hydration.subscan.io',
       },
     },
     testnet: false,
