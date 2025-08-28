@@ -416,11 +416,11 @@
     }
   },
   "hydration-moonbeam-glmr": {
-    "updated": 1741660554150,
+    "updated": 1756379169039,
     "destination": {
-      "fee": "0.00951057125",
+      "fee": "0.00982307125",
       "feeAsset": "GLMR",
-      "feeNative": "9510571250000000"
+      "feeNative": "9823071250000000"
     }
   },
   "hydration-moonbeam-dot": {

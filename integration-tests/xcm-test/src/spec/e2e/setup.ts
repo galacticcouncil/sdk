@@ -1,4 +1,4 @@
-import { PoolService } from '@galacticcouncil/sdk';
+import { EvmClient, PoolService } from '@galacticcouncil/sdk';
 
 import {
   assetsMap,
@@ -20,7 +20,7 @@ export const configService = new HydrationConfigService({
 
 export const initWithCtx = async (ctx: SetupCtx): Promise<Wallet> => {
   // Initialize pool service with chopsticks ctx
-  const poolService = new PoolService(ctx.api);
+  const poolService = new PoolService(ctx.api, new EvmClient(ctx.api));
 
   const wallet = new Wallet({
     configService: configService,
