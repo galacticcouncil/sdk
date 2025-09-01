@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk
 
+## 9.14.0
+
+### Minor Changes
+
+[572718c7]: https://github.com/galacticcouncil/sdk/commit/572718c7
+[5c46abff]: https://github.com/galacticcouncil/sdk/commit/5c46abff
+[fcd4afe1]: https://github.com/galacticcouncil/sdk/commit/fcd4afe1
+
+- [[#572718c7][572718c7]] sdk: upgrade perf, mlr cache, getSpotPrices api, cold starts
+- [[#5c46abff][5c46abff]] sdk: export mm oracle module
+- [[#fcd4afe1][fcd4afe1]] sdk: plength to cache composite key
+
 ## 9.13.0
 
 ### Minor Changes
