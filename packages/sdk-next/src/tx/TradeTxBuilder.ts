@@ -55,7 +55,7 @@ export class TradeTxBuilder extends TxBuilder {
       this.beneficiary,
       assetIn
     );
-    const isMax = amountIn >= balance - 5n;
+    const isMax = amountIn >= balance.transferable - 5n;
 
     if (isMax) {
       return this.buildSellAllTx();
