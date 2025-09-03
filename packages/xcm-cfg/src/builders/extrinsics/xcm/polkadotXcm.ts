@@ -10,6 +10,8 @@ import {
   toBeneficiary,
   toBridgeXcmOnDest,
   toDepositXcmOnDest,
+  toDepositReserveAssetXcmOnDest,
+  toInitiateTeleportXcmOnDest,
   toDest,
   toTransferType,
   toTransactMessage,
@@ -241,16 +243,44 @@ const transferAssetsUsingTypeAndThen = (
           transferFeeLocation
         );
 
-        const customXcmOnDest =
-          destination.chain.key === 'ethereum'
-            ? toBridgeXcmOnDest(
-                version,
-                account,
-                from,
-                transferAssetLocation,
-                messageId
-              )
-            : toDepositXcmOnDest(version, account);
+        // Determine custom XCM based on destination and transfer type
+        let customXcmOnDest;
+        if (destination.chain.key === 'ethereum') {
+          customXcmOnDest = toBridgeXcmOnDest(
+            version,
+            account,
+            from,
+            transferAssetLocation,
+            messageId
+          );
+        } else if (ctx.key === 'kusama' && rcv.key === 'basilisk') {
+          customXcmOnDest = toDepositReserveAssetXcmOnDest(
+            version,
+            account,
+            rcv,
+            transferFeeLocation,
+            destination.fee.amount
+          );
+        } else if (ctx.key === 'kusama' && rcv.key === 'kusamaAssetHub') {
+          customXcmOnDest = toDepositXcmOnDest(version, account);
+        } else if (rcv.parachainId === 0 && transferType === XcmTransferType.DestinationReserve) {
+          customXcmOnDest = toInitiateTeleportXcmOnDest(
+            version,
+            account,
+            transferAssetLocation,
+            destination.fee.amount
+          );
+        } else if (ctx.parachainId === 0 && (transferType === XcmTransferType.LocalReserve || transferType === XcmTransferType.Teleport)) {
+          customXcmOnDest = toDepositReserveAssetXcmOnDest(
+            version,
+            account,
+            rcv,
+            transferFeeLocation,
+            destination.fee.amount
+          );
+        } else {
+          customXcmOnDest = toDepositXcmOnDest(version, account);
+        }
 
         return [
           dest,

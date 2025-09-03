@@ -10,7 +10,7 @@ import {
   robonomics,
   tinkernet,
 } from '../../../chains';
-import { ExtrinsicBuilder } from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 import { toTransferTemplate } from './templates';
@@ -37,12 +37,63 @@ const toAssetHub: AssetRoute[] = [
   }),
 ];
 
+const toKusama: AssetRoute[] = [
+  // Basilisk -> Kusama: DestinationReserve with InitiateTeleport
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: kusama,
+      asset: ksm,
+      fee: {
+        amount: 0.00012,
+        asset: ksm,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
+];
+
+const toKusamaAssetHub: AssetRoute[] = [
+  // Basilisk -> Kusama Asset Hub: DestinationReserve with DepositAsset
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: kusamaAssetHub,
+      asset: ksm,
+      fee: {
+        amount: 0.0012,
+        asset: ksm,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
+];
+
 export const basiliskConfig = new ChainRoutes({
   chain: basilisk,
   routes: [
     ...toAssetHub,
+    ...toKusama,
+    ...toKusamaAssetHub,
     toTransferTemplate(bsx, karura, 0.0933),
-    toTransferTemplate(ksm, kusama, 0.00012),
     toTransferTemplate(teer, integritee, 0.000004),
     toTransferTemplate(xrt, robonomics, 0.00000464),
     toTransferTemplate(tnkr, tinkernet, 0.0095),

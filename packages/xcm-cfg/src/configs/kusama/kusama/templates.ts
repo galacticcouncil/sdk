@@ -1,7 +1,7 @@
 import { AnyChain, AssetRoute } from '@galacticcouncil/xcm-core';
 
 import { ksm } from '../../../assets';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
+import { BalanceBuilder, ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 // const xcmDeliveryFee = 0.002;
 
@@ -32,6 +32,8 @@ export function toParaTemplate(
         asset: ksm,
       },
     },
-    extrinsic: ExtrinsicBuilder().xcmPallet().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xcmPallet().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }
