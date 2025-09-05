@@ -24,6 +24,7 @@ export const whitelist: string[] = [
   'query.Tokens.TotalIssuance',
   'query.Stableswap.AssetTradability',
   'query.Stableswap.Pools',
+  'query.Stableswap.PoolPegs',
   'query.System.Account',
   'query.System.Number',
   'query.XYK.PoolAssets',
