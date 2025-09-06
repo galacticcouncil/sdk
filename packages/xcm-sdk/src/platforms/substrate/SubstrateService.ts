@@ -105,10 +105,8 @@ export class SubstrateService {
 
   async dryRun(
     account: string,
-    config: ExtrinsicConfig
+    extrinsic: SubmittableExtrinsic
   ): Promise<CallDryRunEffects> {
-    const extrinsic = this.getExtrinsic(config);
-
     const dryRunFn = this.api.call.dryRunApi.dryRunCall;
     const dryRunParams = dryRunFn.meta.params;
     const dryRun = dryRunFn as (...args: any[]) => Promise<any>;
@@ -166,9 +164,10 @@ export class SubstrateService {
       const acc = this.estimateDeliveryFeeWith(account, config);
 
       try {
+        const extrinsic = this.getExtrinsic(config);
         const { executionResult, emittedEvents } = await this.dryRun(
           acc,
-          config
+          extrinsic
         );
         if (executionResult.isOk) {
           return getDeliveryFeeFromDryRun(emittedEvents);
