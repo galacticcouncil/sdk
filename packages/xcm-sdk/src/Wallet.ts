@@ -1,8 +1,10 @@
 import {
+  acc,
   addr,
   big,
   Asset,
   AnyChain,
+  AnyParachain,
   AssetAmount,
   ConfigBuilder,
   ConfigService,
@@ -16,7 +18,13 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 
-import { Call, PlatformAdapter } from './platforms';
+import {
+  Call,
+  PlatformAdapter,
+  SubstrateCall,
+  SubstrateExec,
+  SubstrateService,
+} from './platforms';
 import {
   calculateMax,
   calculateMin,
@@ -62,6 +70,56 @@ export class Wallet {
       .destination(dstChain)
       .build();
     return this.getTransferData(transfer, srcAddress, dstAddress);
+  }
+
+  async remoteXcm(
+    srcAddress: string,
+    srcChain: string | AnyParachain,
+    dstChain: string | AnyParachain,
+    dstCall: SubstrateCall,
+    opts: {
+      srcFeeAsset?: Asset;
+    } = {}
+  ): Promise<SubstrateCall> {
+    const src = this.config.getChain(srcChain) as AnyParachain;
+    const dst = this.config.getChain(dstChain) as AnyParachain;
+
+    const isSubstrateExec = src.isSubstrate() && dst.isSubstrate();
+    if (!isSubstrateExec)
+      throw Error('RemoteXcm is supported only between parachains');
+
+    const [srcSub, dstSub] = await Promise.all([
+      SubstrateService.create(src),
+      SubstrateService.create(dst),
+    ]);
+
+    const exec = new SubstrateExec(srcSub, dstSub);
+
+    const dstAddress = acc.getMultilocationDerivatedAccount(
+      src.parachainId,
+      srcAddress,
+      1,
+      dst.usesH160Acc
+    );
+
+    const transfer = await this.transfer(
+      dstSub.asset,
+      srcAddress,
+      srcChain,
+      dstAddress,
+      dstChain
+    );
+
+    return exec.remoteExec(
+      srcAddress,
+      dstAddress,
+      dstCall,
+      (fees) => {
+        const feesFmt = fees.toDecimal(fees.decimals);
+        return transfer.buildCall(feesFmt);
+      },
+      opts
+    );
   }
 
   async getTransferData(
