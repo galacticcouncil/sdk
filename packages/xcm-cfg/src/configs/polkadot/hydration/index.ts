@@ -99,9 +99,9 @@ import {
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
   toTransferTemplate,
-  withdrawViaSnowbridgeTemplate,
-  withdrawViaWormholeRelayerTemplate,
-  withdrawViaWormholeBridgeTemplate,
+  viaSnowbridgeTemplate,
+  viaWormholeRelayerTemplate,
+  viaWormholeBridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -309,35 +309,35 @@ const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
-  withdrawViaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
-  withdrawViaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
-  withdrawViaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
-  withdrawViaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
-  withdrawViaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
+  viaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
+  viaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
+  viaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
+  viaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
+  viaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
+  viaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  withdrawViaSnowbridgeTemplate(eth, eth, ethereum),
-  withdrawViaSnowbridgeTemplate(aave, aave, ethereum),
-  withdrawViaSnowbridgeTemplate(susde, susde, ethereum),
-  withdrawViaSnowbridgeTemplate(tbtc, tbtc, ethereum),
-  withdrawViaSnowbridgeTemplate(trac, trac, ethereum),
-  withdrawViaSnowbridgeTemplate(lbtc, lbtc, ethereum),
-  withdrawViaSnowbridgeTemplate(ldo, ldo, ethereum),
-  withdrawViaSnowbridgeTemplate(link, link, ethereum),
-  withdrawViaSnowbridgeTemplate(sky, sky, ethereum),
-  withdrawViaSnowbridgeTemplate(wsteth, wsteth, ethereum),
-  withdrawViaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
-  withdrawViaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
+  viaSnowbridgeTemplate(eth, eth, ethereum),
+  viaSnowbridgeTemplate(aave, aave, ethereum),
+  viaSnowbridgeTemplate(susde, susde, ethereum),
+  viaSnowbridgeTemplate(tbtc, tbtc, ethereum),
+  viaSnowbridgeTemplate(trac, trac, ethereum),
+  viaSnowbridgeTemplate(lbtc, lbtc, ethereum),
+  viaSnowbridgeTemplate(ldo, ldo, ethereum),
+  viaSnowbridgeTemplate(link, link, ethereum),
+  viaSnowbridgeTemplate(sky, sky, ethereum),
+  viaSnowbridgeTemplate(wsteth, wsteth, ethereum),
+  viaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
+  viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeRelayerTemplate(sol, sol, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(sui, sui, sui_chain),
+  viaWormholeRelayerTemplate(sui, sui, sui_chain),
 ];
 
 const toCexViaRelay = new AssetRoute({

@@ -190,13 +190,12 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
   return toParaErc20Template(asset, zeitgeist, 0.1);
 }
 
-function withdrawViaWormholeTemplate(
+function viaWormholeTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain,
   destinationFee: FeeAmountConfigBuilder | number,
-  transfer: ContractConfigBuilder,
-  transferApprove: ContractConfigBuilder,
+  transact: ContractConfigBuilder,
   tags: Tag[]
 ): AssetRoute {
   return new AssetRoute({
@@ -233,53 +232,57 @@ function withdrawViaWormholeTemplate(
         asset: glmr,
         balance: balance(),
       },
-      extrinsic: ExtrinsicBuilder()
-        .ethereumXcm()
-        .transact(
-          ContractBuilder().Batch().batchAll([transferApprove, transfer])
-        ),
+      extrinsic: ExtrinsicBuilder().ethereumXcm().transact(transact),
     },
     tags: tags,
   });
 }
 
-export function withdrawViaWormholeBridgeTemplate(
+export function viaWormholeBridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
 ): AssetRoute {
-  return withdrawViaWormholeTemplate(
+  return viaWormholeTemplate(
     assetIn,
     assetOut,
     to,
     0,
-    ContractBuilder().Wormhole().TokenBridge().transferTokens(),
     ContractBuilder()
-      .Erc20()
-      .approve((ctx) => ctx.getTokenBridge()),
+      .Batch()
+      .batchAll([
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenBridge()),
+        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
+      ]),
     [Tag.Mrl, Tag.Wormhole]
   );
 }
 
-export function withdrawViaWormholeRelayerTemplate(
+export function viaWormholeRelayerTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
 ): AssetRoute {
-  return withdrawViaWormholeTemplate(
+  return viaWormholeTemplate(
     assetIn,
     assetOut,
     to,
     FeeAmountBuilder().Wormhole().TokenRelayer().calculateRelayerFee(),
-    ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
     ContractBuilder()
-      .Erc20()
-      .approve((ctx) => ctx.getTokenRelayer()),
+      .Batch()
+      .batchAll([
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
+      ]),
     [Tag.Mrl, Tag.Wormhole, Tag.Relayer]
   );
 }
 
-export function withdrawViaSnowbridgeTemplate(
+export function viaSnowbridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
