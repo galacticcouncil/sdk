@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.11.0
+
+### Minor Changes
+
+[77b4fd74]: https://github.com/galacticcouncil/sdk/commit/77b4fd74
+[85e1f9b9]: https://github.com/galacticcouncil/sdk/commit/85e1f9b9
+
+- [[#77b4fd74][77b4fd74]] xcm: support calldata in dex
+- [[#85e1f9b9][85e1f9b9]] xcm: cleanup cfg
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.5.0
+
 ## 10.10.0
 
 ### Minor Changes

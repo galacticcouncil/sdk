@@ -1,10 +1,18 @@
 # @galacticcouncil/xcm-core
 
+## 8.5.0
+
+### Minor Changes
+
+[77b4fd74]: https://github.com/galacticcouncil/sdk/commit/77b4fd74
+
+- [[#77b4fd74][77b4fd74]] xcm: support calldata in dex
+
 ## 8.4.0
 
 ### Minor Changes
 
-- xcm: fix deposit wh transfers api
+- xcm: move mrl utils
 
 ## 8.3.0
 

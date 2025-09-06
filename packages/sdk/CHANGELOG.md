@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.15.0
+
+### Minor Changes
+
+- Pool ctx api & evm accessors read-only
+
 ## 9.14.0
 
 ### Minor Changes

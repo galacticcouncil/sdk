@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.6.0
+
+### Minor Changes
+
+[42e29743]: https://github.com/galacticcouncil/sdk/commit/42e29743
+[eef0b7e2]: https://github.com/galacticcouncil/sdk/commit/eef0b7e2
+
+- [[#42e29743][42e29743]] xcm: wallet remote xcm support
+- [[#eef0b7e2][eef0b7e2]] wh: mrl redeem via xcm support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.5.0
+
 ## 10.5.0
 
 ### Minor Changes
