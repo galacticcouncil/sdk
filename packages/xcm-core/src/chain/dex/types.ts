@@ -15,4 +15,12 @@ export interface Dex {
     amountOut: AssetAmount,
     fallbackPrice?: boolean
   ): Promise<SwapQuote>;
+
+  getCalldata(
+    account: string,
+    assetIn: Asset,
+    assetOut: Asset,
+    amountOut: AssetAmount,
+    slippage?: number
+  ): Promise<string>;
 }
