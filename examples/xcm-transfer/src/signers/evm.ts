@@ -1,5 +1,8 @@
+import { H160 } from '@galacticcouncil/sdk';
 import { AnyChain, AnyEvmChain, EvmParachain } from '@galacticcouncil/xcm-core';
 import { Call, EvmCall } from '@galacticcouncil/xcm-sdk';
+
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
@@ -19,36 +22,38 @@ export async function signAndSend(
   await signer.switchChain({ id: client.chain.id });
   await signer.request({ method: 'eth_requestAccounts' });
 
-  let data: `0x${string}` | null = null;
+  let extrinsic: SubmittableExtrinsic | null = null;
   let txHash: `0x${string}` | null = null;
+
   if (chain instanceof EvmParachain) {
     try {
       const api = await chain.api;
-      const extrinsic = api.tx(call.data);
-      data = extrinsic.inner.toHex();
-      console.log(extrinsic.inner.toHuman());
+      extrinsic = api.tx(call.data);
+      console.log(extrinsic.toHuman());
     } catch (error) {}
   }
 
-  if (data) {
+  if (extrinsic) {
+    const data = extrinsic.inner.toHex();
+    const account = H160.toAccount(address);
+
     const [gas, gasPrice] = await Promise.all([
       provider.estimateGas({
-        account: address as `0x${string}`,
+        account: account as `0x${string}`,
         data: data as `0x${string}`,
         to: DISPATCH_ADDRESS as `0x${string}`,
       }),
       provider.getGasPrice(),
     ]);
 
-    const onePrc = gasPrice / 100n;
-    const gasPricePlus = gasPrice + onePrc * 10n;
+    const gasPriceExtra = gasPrice + (gasPrice / 100n) * 10n;
 
     txHash = await signer.sendTransaction({
       account: address as `0x${string}`,
       chain: client.chain,
       data: data,
-      maxPriorityFeePerGas: gasPricePlus,
-      maxFeePerGas: gasPricePlus,
+      maxPriorityFeePerGas: gasPriceExtra,
+      maxFeePerGas: gasPriceExtra,
       gas: (gas * 11n) / 10n,
       to: DISPATCH_ADDRESS as `0x${string}`,
     });
