@@ -2,6 +2,7 @@ import {
   Abi,
   AnyChain,
   AnyEvmChain,
+  EvmParachain,
   Precompile,
   Wormhole,
 } from '@galacticcouncil/xcm-core';
@@ -12,7 +13,7 @@ import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
 import { encodeFunctionData } from 'viem';
 
-import { EvmCall } from '../platforms';
+import { EvmCall, SubstrateCall } from '../platforms';
 
 export class WormholeClient {
   getVaaHeader(vaaHex: string) {
@@ -86,5 +87,29 @@ export class WormholeClient {
       from: from,
       to: Precompile.Bridge,
     } as EvmCall;
+  }
+
+  async redeemMrlViaXcm(
+    moonchain: EvmParachain,
+    from: string,
+    vaaBytes: string
+  ): Promise<SubstrateCall> {
+    const api = await moonchain.api;
+    const claim = this.redeemMrl(from, vaaBytes);
+    const tx = api.tx.ethereumXcm.transact({
+      ['V2']: {
+        gasLimit: 5_000_000n,
+        action: {
+          Call: claim.to,
+        },
+        value: 0n,
+        input: claim.data,
+      },
+    });
+
+    return {
+      data: tx.toHex(),
+      from: from,
+    } as SubstrateCall;
   }
 }

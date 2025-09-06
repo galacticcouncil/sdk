@@ -12,7 +12,7 @@ export interface WhTransfer {
   to: string;
   toChain: AnyChain;
   status: WhStatus;
-  redeem?: (from: string) => Call;
+  redeem?: (from: string) => Promise<Call>;
   operation: Operation;
 }
 

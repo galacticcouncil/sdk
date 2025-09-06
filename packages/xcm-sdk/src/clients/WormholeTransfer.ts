@@ -6,6 +6,7 @@ import {
   Parachain,
   Wormhole,
   Precompile,
+  EvmParachain,
 } from '@galacticcouncil/xcm-core';
 
 import { WormholeClient } from './WormholeClient';
@@ -93,7 +94,7 @@ export class WormholeTransfer {
         const vaaRaw = o.vaa.raw;
 
         if (this.isStuck(timestamp)) {
-          redeem = (from: string) =>
+          redeem = async (from: string) =>
             this.whClient.redeem(toChain, from, vaaRaw);
         }
       }
@@ -127,7 +128,8 @@ export class WormholeTransfer {
       return [];
     }
 
-    const payloadHex = mrl.createPayload(toChain as Parachain, address).toHex();
+    const toParachain = toChain as Parachain;
+    const payloadHex = mrl.createPayload(toParachain, address).toHex();
     const result = operations
       .filter((o) => {
         const { content } = o;
@@ -151,15 +153,24 @@ export class WormholeTransfer {
             Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
         )!;
 
+        const viaChain = this.chains.find(
+          (c) =>
+            Wormhole.isKnown(c) &&
+            Wormhole.fromChain(c).getWormholeId() === payload.toChain
+        )!;
+
         let redeem;
         if (status === WhStatus.VaaEmitted && o.vaa) {
           const { timestamp } = this.whClient.getVaaHeader(o.vaa.raw);
           const vaaRaw = o.vaa.raw;
 
           if (this.isStuck(timestamp)) {
-            redeem = (address: string) => {
-              return this.whClient.redeemMrl(address, vaaRaw);
-            };
+            redeem = async (address: string) =>
+              this.whClient.redeemMrlViaXcm(
+                viaChain as EvmParachain,
+                address,
+                vaaRaw
+              );
           }
         }
 
