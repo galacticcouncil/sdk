@@ -1,5 +1,3 @@
-import type { BigNumber } from './utils/bignumber';
-
 export type Amount = {
   amount: BigNumber;
   decimals: number;
@@ -33,4 +31,12 @@ export interface ExternalAsset extends AssetMetadata {
   name: string;
   internalId: string;
   isWhiteListed?: boolean;
+}
+
+export interface Balance {
+  free: string;
+  total: string;
+  transferable: string;
+  reserved: string;
+  frozen: string;
 }

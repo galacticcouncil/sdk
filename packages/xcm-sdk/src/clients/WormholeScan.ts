@@ -25,6 +25,7 @@ export interface Operation {
   id: string;
   content: {
     payload: OperationPayload;
+    standarizedProperties: OperationProperties;
   };
   data: {
     symbol: string;
@@ -45,24 +46,42 @@ export interface Operation {
       txHash: string;
     };
   };
-  vaa: {
+  targetChain?: {
+    status: string;
+  };
+  vaa?: {
     guardianSetIndex: number;
     isDuplicated: boolean;
     raw: string;
   };
 }
 
+export interface OperationParsedPayload {
+  targetRecipient: string;
+  targetRelayerFee: bigint;
+  toNativeTokenAmount: bigint;
+}
+
 export interface OperationPayload {
   amount: string;
   fee: string;
   fromAddress: string;
-  parsedPayload: any;
+  parsedPayload: OperationParsedPayload;
   payload: string;
   payloadType: number;
   toAddress: string;
   toChain: number;
   tokenAddress: string;
   tokenChain: number;
+}
+
+export interface OperationProperties {
+  fromChain: number;
+  fromAddress: string;
+  toChain: number;
+  toAddress: string;
+  tokenChain: number;
+  tokenAddress: string;
 }
 
 export class WormholeScan {

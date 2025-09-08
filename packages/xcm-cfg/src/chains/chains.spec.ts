@@ -60,6 +60,7 @@ describe('chains config', () => {
           'crust',
           'interlay',
           'kilt',
+          'neuroweb',
           'nodle',
           'pendulum',
           'phala',

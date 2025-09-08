@@ -15,7 +15,7 @@ export const INFINITY = bnum('Infinity');
 export function scale(input: BigNumber, decimalPlaces: number): BigNumber {
   const scalePow = new BigNumber(decimalPlaces.toString());
   const scaleMul = new BigNumber(10).pow(scalePow);
-  return input.times(scaleMul).decimalPlaces(0, 1);
+  return input.times(scaleMul).decimalPlaces(4);
 }
 
 export function bnum(val: string | number | bigint | BigNumber): BigNumber {

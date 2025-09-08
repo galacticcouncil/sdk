@@ -2,7 +2,9 @@ import {
   AnyChain,
   Asset,
   AssetRoute,
+  ContractConfigBuilder,
   ExtrinsicConfigBuilderParams,
+  FeeAmountConfigBuilder,
 } from '@galacticcouncil/xcm-core';
 
 import { dot, glmr, usdt } from '../../../assets';
@@ -13,14 +15,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import {
-  assetHub,
-  assetHubCex,
-  ethereum,
-  moonbeam,
-  solana,
-  zeitgeist,
-} from '../../../chains';
+import { assetHub, assetHubCex, moonbeam, zeitgeist } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -195,9 +190,13 @@ export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
   return toParaErc20Template(asset, zeitgeist, 0.1);
 }
 
-export function toEthereumViaWormholeTemplate(
+function viaWormholeTemplate(
   assetIn: Asset,
-  assetOut: Asset
+  assetOut: Asset,
+  to: AnyChain,
+  destinationFee: FeeAmountConfigBuilder | number,
+  transact: ContractConfigBuilder,
+  tags: Tag[]
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -210,13 +209,10 @@ export function toEthereumViaWormholeTemplate(
       },
     },
     destination: {
-      chain: ethereum,
+      chain: to,
       asset: assetOut,
       fee: {
-        amount: FeeAmountBuilder()
-          .Wormhole()
-          .TokenRelayer()
-          .calculateRelayerFee(),
+        amount: destinationFee,
         asset: assetOut,
       },
     },
@@ -236,27 +232,60 @@ export function toEthereumViaWormholeTemplate(
         asset: glmr,
         balance: balance(),
       },
-      extrinsic: ExtrinsicBuilder()
-        .ethereumXcm()
-        .transact(
-          ContractBuilder()
-            .Batch()
-            .batchAll([
-              ContractBuilder().Erc20().approve(),
-              ContractBuilder()
-                .Wormhole()
-                .TokenRelayer()
-                .transferTokensWithRelay(),
-            ])
-        ),
+      extrinsic: ExtrinsicBuilder().ethereumXcm().transact(transact),
     },
-    tags: [Tag.Mrl, Tag.Wormhole],
+    tags: tags,
   });
 }
 
-export function toEthereumViaSnowbridgeTemplate(
+export function viaWormholeBridgeTemplate(
   assetIn: Asset,
-  assetOut: Asset
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  return viaWormholeTemplate(
+    assetIn,
+    assetOut,
+    to,
+    0,
+    ContractBuilder()
+      .Batch()
+      .batchAll([
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenBridge()),
+        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
+      ]),
+    [Tag.Mrl, Tag.Wormhole]
+  );
+}
+
+export function viaWormholeRelayerTemplate(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  return viaWormholeTemplate(
+    assetIn,
+    assetOut,
+    to,
+    FeeAmountBuilder().Wormhole().TokenRelayer().calculateRelayerFee(),
+    ContractBuilder()
+      .Batch()
+      .batchAll([
+        ContractBuilder()
+          .Erc20()
+          .approve((ctx) => ctx.getTokenRelayer()),
+        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
+      ]),
+    [Tag.Mrl, Tag.Wormhole, Tag.Relayer]
+  );
+}
+
+export function viaSnowbridgeTemplate(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -268,7 +297,7 @@ export function toEthereumViaSnowbridgeTemplate(
       },
     },
     destination: {
-      chain: ethereum,
+      chain: to,
       asset: assetOut,
       fee: {
         amount: FeeAmountBuilder()
@@ -281,64 +310,5 @@ export function toEthereumViaSnowbridgeTemplate(
       transferType: XcmTransferType.DestinationReserve,
     }),
     tags: [Tag.Snowbridge],
-  });
-}
-
-export function toSolanaViaWormholeTemplate(
-  assetIn: Asset,
-  assetOut: Asset
-): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: assetIn,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        asset: assetIn,
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: solana,
-      asset: assetOut,
-      fee: {
-        amount: FeeAmountBuilder()
-          .Wormhole()
-          .TokenRelayer()
-          .calculateRelayerFee(),
-        asset: assetOut,
-      },
-    },
-    extrinsic: ExtrinsicDecorator(
-      isDestinationFeeSwapSupported,
-      swapExtrinsicBuilder
-    ).priorMulti([
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: MRL_EXECUTION_FEE,
-      }),
-    ]),
-    transact: {
-      chain: moonbeam,
-      fee: {
-        amount: MRL_XCM_FEE,
-        asset: glmr,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder()
-        .ethereumXcm()
-        .transact(
-          ContractBuilder()
-            .Batch()
-            .batchAll([
-              ContractBuilder().Erc20().approve(),
-              ContractBuilder()
-                .Wormhole()
-                .TokenRelayer()
-                .transferTokensWithRelay(),
-            ])
-        ),
-    },
-    tags: [Tag.Mrl, Tag.Wormhole],
   });
 }

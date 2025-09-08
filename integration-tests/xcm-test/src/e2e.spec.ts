@@ -55,7 +55,7 @@ const getPolkadotChains = () => {
     bridge,
     //chains,
     chains: Array.from(configService.chains.values()).filter((c) =>
-      ['polkadot', 'assethub', 'hydration'].includes(c.key)
+      ['polkadot', 'assethub', 'hydration', 'moonbeam'].includes(c.key)
     ) as Parachain[],
   };
 };

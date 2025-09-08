@@ -26,6 +26,15 @@ export class AssethubDex implements Dex {
     this.client = new AssethubClient(this.chain);
   }
 
+  async getCalldata(
+    _account: string,
+    _assetIn: Asset,
+    _assetOut: Asset,
+    _amountOut: AssetAmount
+  ): Promise<string> {
+    throw Error('Not supported for ' + this.chain.key);
+  }
+
   async getQuote(
     assetIn: Asset,
     assetOut: Asset,

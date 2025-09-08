@@ -8,7 +8,7 @@ class GetAllPathsExample extends PolkadotExecutor {
   async script(apiPromise: ApiPromise): Promise<any> {
     const { api } = createSdkContext(apiPromise);
 
-    return api.router.getAllPaths('0', '5');
+    return api.router.getRoutes('0', '5');
   }
 }
 

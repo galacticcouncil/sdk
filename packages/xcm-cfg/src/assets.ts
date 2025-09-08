@@ -150,6 +150,11 @@ export const nodl = new Asset({
   originSymbol: 'NODL',
 });
 
+export const neuro = new Asset({
+  key: 'neuro',
+  originSymbol: 'NEURO',
+});
+
 export const pen = new Asset({
   key: 'pen',
   originSymbol: 'PEN',
@@ -180,6 +185,11 @@ export const sol = new Asset({
   originSymbol: 'SOL',
 });
 
+export const sui = new Asset({
+  key: 'sui',
+  originSymbol: 'SUI',
+});
+
 export const sub = new Asset({
   key: 'sub',
   originSymbol: 'SUB',
@@ -195,6 +205,11 @@ export const susds = new Asset({
   originSymbol: 'sUSDS',
 });
 
+export const susds_mwh = new Asset({
+  ...susds,
+  key: 'susds_mwh',
+});
+
 export const tbtc = new Asset({
   key: 'tbtc',
   originSymbol: 'tBTC',
@@ -208,6 +223,11 @@ export const teer = new Asset({
 export const tnkr = new Asset({
   key: 'tnkr',
   originSymbol: 'TNKR',
+});
+
+export const trac = new Asset({
+  key: 'trac',
+  originSymbol: 'TRAC',
 });
 
 export const unq = new Asset({
@@ -335,6 +355,7 @@ export const assets: Asset[] = [
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pha,
   pen,
@@ -342,11 +363,14 @@ export const assets: Asset[] = [
   ring,
   sky,
   sol,
+  sui,
   sub,
   susde,
   susds,
+  susds_mwh,
   teer,
   tnkr,
+  trac,
   tbtc,
   unq,
   usdc,

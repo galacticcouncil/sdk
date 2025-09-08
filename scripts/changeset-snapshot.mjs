@@ -58,6 +58,7 @@ const main = async () => {
     );
     writeFileSync(output, releaseJson);
   }
+  console.log('Executing release plan...');
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
 };
 

@@ -7,6 +7,8 @@ import { Wormhole, WormholeDef } from '../bridge';
 import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
+const { EvmAddr } = addr;
+
 export interface EvmParachainParams extends ParachainParams {
   evmChain: EvmChainDef;
   evmResolver?: EvmResolver;
@@ -43,7 +45,7 @@ export class EvmParachain extends Parachain {
   }
 
   async getDerivatedAddress(address: string): Promise<string> {
-    if (addr.isH160(address)) {
+    if (EvmAddr.isValid(address)) {
       return address;
     }
 

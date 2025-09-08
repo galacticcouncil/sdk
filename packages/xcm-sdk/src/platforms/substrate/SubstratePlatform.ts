@@ -68,8 +68,9 @@ export class SubstratePlatform
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
+              const extrinsic = substrate.getExtrinsic(config);
               const { executionResult, emittedEvents, forwardedXcms } =
-                await substrate.dryRun(account, config);
+                await substrate.dryRun(account, extrinsic);
 
               const error = executionResult.isErr
                 ? getErrorFromDryRun(substrate.api, executionResult.asErr)

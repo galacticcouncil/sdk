@@ -74,11 +74,20 @@ jobs:
         with:
           name: release-plan
 
+      - name: 🔐 Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: galacticcouncil
+          repositories: hydration-ui
+
       - name: 🤘 Checkout hydration-ui repository
         uses: actions/checkout@v4
         with:
           repository: 'galacticcouncil/hydration-ui'
-          token: ${{ secrets.TARGET_REPO_PAT }}
+          token: ${{ steps.generate-token.outputs.token }}
           path: 'hydration-ui'
 
       - name: ⚙️ Setup Node.js
@@ -104,7 +113,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.TARGET_REPO_PAT }}
+          token: ${{ steps.generate-token.outputs.token }}
           title: '🧚 SDK Preview: [${{ env.PR_TITLE }}]'
           body: |
             This PR was triggered by SDK upgrade no. ${{ env.PR }}

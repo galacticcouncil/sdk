@@ -27,16 +27,19 @@ import {
   ldot,
   link,
   myth,
+  neuro,
   nodl,
   pen,
   pha,
   pink,
   ring,
   sol,
+  sui,
   sky,
   sub,
   susde,
   tbtc,
+  trac,
   unq,
   usdc,
   usdc_mwh,
@@ -55,6 +58,8 @@ import {
   wsteth,
   wud,
   lbtc,
+  susds_mwh,
+  susds,
 } from '../../../assets';
 import {
   acala,
@@ -65,21 +70,25 @@ import {
   centrifuge,
   crust,
   darwinia,
+  energywebx,
+  ethereum,
   hydration,
   interlay,
   kilt_chain,
   laos_chain,
   moonbeam,
   mythos,
+  neuroweb,
   nodle,
   pendulum,
   polkadot,
   phala,
+  solana,
   subsocial,
+  sui_chain,
   unique,
   zeitgeist,
   polkadotCex,
-  energywebx,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -87,12 +96,12 @@ import { balance, fee } from './configs';
 import {
   toHubExtTemplate,
   toHubWithCexFwd2Template,
-  toEthereumViaSnowbridgeTemplate,
-  toEthereumViaWormholeTemplate,
   toMoonbeamErc20Template,
-  toSolanaViaWormholeTemplate,
   toZeitgeistErc20Template,
   toTransferTemplate,
+  viaSnowbridgeTemplate,
+  viaWormholeRelayerTemplate,
+  viaWormholeBridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -257,6 +266,7 @@ const toMoonbeam: AssetRoute[] = [
   toTransferTemplate(usdt, moonbeam, 0.3),
   toTransferTemplate(usdc, moonbeam, 0.3),
   toMoonbeamErc20Template(dai_mwh),
+  toMoonbeamErc20Template(susds_mwh),
   toMoonbeamErc20Template(usdc_mwh),
   toMoonbeamErc20Template(usdt_mwh),
   toMoonbeamErc20Template(wbtc_mwh),
@@ -292,34 +302,42 @@ const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
 const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
 
+const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 0.205)];
+
 const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
-  toEthereumViaWormholeTemplate(dai_mwh, dai),
-  toEthereumViaWormholeTemplate(weth_mwh, eth),
-  toEthereumViaWormholeTemplate(wbtc_mwh, wbtc),
-  toEthereumViaWormholeTemplate(usdt_mwh, usdt),
-  toEthereumViaWormholeTemplate(usdc_mwh, usdc),
+  viaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
+  viaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
+  viaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
+  viaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
+  viaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
+  viaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  toEthereumViaSnowbridgeTemplate(eth, eth),
-  toEthereumViaSnowbridgeTemplate(aave, aave),
-  toEthereumViaSnowbridgeTemplate(susde, susde),
-  toEthereumViaSnowbridgeTemplate(tbtc, tbtc),
-  toEthereumViaSnowbridgeTemplate(lbtc, lbtc),
-  toEthereumViaSnowbridgeTemplate(ldo, ldo),
-  toEthereumViaSnowbridgeTemplate(link, link),
-  toEthereumViaSnowbridgeTemplate(sky, sky),
-  toEthereumViaSnowbridgeTemplate(wsteth, wsteth),
-  toEthereumViaSnowbridgeTemplate(usdc_eth, usdc),
-  toEthereumViaSnowbridgeTemplate(usdt_eth, usdt),
+  viaSnowbridgeTemplate(eth, eth, ethereum),
+  viaSnowbridgeTemplate(aave, aave, ethereum),
+  viaSnowbridgeTemplate(susde, susde, ethereum),
+  viaSnowbridgeTemplate(tbtc, tbtc, ethereum),
+  viaSnowbridgeTemplate(trac, trac, ethereum),
+  viaSnowbridgeTemplate(lbtc, lbtc, ethereum),
+  viaSnowbridgeTemplate(ldo, ldo, ethereum),
+  viaSnowbridgeTemplate(link, link, ethereum),
+  viaSnowbridgeTemplate(sky, sky, ethereum),
+  viaSnowbridgeTemplate(wsteth, wsteth, ethereum),
+  viaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
+  viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
-  toSolanaViaWormholeTemplate(sol, sol),
+  viaWormholeRelayerTemplate(sol, sol, solana),
+];
+
+const toSuiViaWormhole: AssetRoute[] = [
+  viaWormholeRelayerTemplate(sui, sui, sui_chain),
 ];
 
 const toCexViaRelay = new AssetRoute({
@@ -384,11 +402,13 @@ export const hydrationConfig = new ChainRoutes({
     ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,
+    ...toNeuroweb,
     ...toNodle,
     ...toPhala,
     ...toPolkadot,
     ...toPendulum,
     ...toSolanaViaWormhole,
+    ...toSuiViaWormhole,
     ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,

@@ -30,7 +30,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
-    "@galacticcouncil/api-augment": "^0.7.0",
+    "@galacticcouncil/api-augment": "^0.8.1",
     "@types/jest": "^29.5.14",
     "esbuild": "^0.25.0",
     "esbuild-plugin-copy": "^2.1.1",
@@ -50,19 +50,15 @@
   },
   "overrides": {
     "cross-spawn": "^7.0.5",
-    "@acala-network/chopsticks-testing": {
-      "@polkadot/api": "16.1.1",
-      "@polkadot/types": "16.1.1",
-      "@polkadot/api-derive": "16.1.1"
-    },
-    "@acala-network/chopsticks-utils": {
-      "@polkadot/api": "16.1.1",
-      "@polkadot/types": "16.1.1",
-      "@polkadot/api-derive": "16.1.1"
-    },
-    "@acala-network/chopsticks": {
-      "@polkadot/api": "16.1.1"
-    }
+    "@polkadot/api": "16.1.1",
+    "@polkadot/api-base": "16.1.1",
+    "@polkadot/api-augment": "16.1.1",
+    "@polkadot/types": "16.1.1",
+    "@polkadot/rpc-provider": "16.1.1"
   },
-  "packageManager": "npm@10.7.0"
+  "packageManager": "npm@10.7.0",
+  "dependencies": {
+    "@wormhole-foundation/sdk-solana": "^3.2.0",
+    "@wormhole-foundation/sdk-solana-tokenbridge": "^3.2.0"
+  }
 }

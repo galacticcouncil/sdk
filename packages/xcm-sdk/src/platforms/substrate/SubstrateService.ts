@@ -19,6 +19,8 @@ import { blake2AsHex } from '@polkadot/util-crypto';
 
 import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
 
+const { Ss58Addr } = addr;
+
 export class SubstrateService {
   readonly api: ApiPromise;
 
@@ -103,10 +105,8 @@ export class SubstrateService {
 
   async dryRun(
     account: string,
-    config: ExtrinsicConfig
+    extrinsic: SubmittableExtrinsic
   ): Promise<CallDryRunEffects> {
-    const extrinsic = this.getExtrinsic(config);
-
     const dryRunFn = this.api.call.dryRunApi.dryRunCall;
     const dryRunParams = dryRunFn.meta.params;
     const dryRun = dryRunFn as (...args: any[]) => Promise<any>;
@@ -164,9 +164,10 @@ export class SubstrateService {
       const acc = this.estimateDeliveryFeeWith(account, config);
 
       try {
+        const extrinsic = this.getExtrinsic(config);
         const { executionResult, emittedEvents } = await this.dryRun(
           acc,
-          config
+          extrinsic
         );
         if (executionResult.isOk) {
           return getDeliveryFeeFromDryRun(emittedEvents);
@@ -199,8 +200,8 @@ export class SubstrateService {
       if (parachain) {
         const saPub = acc.getSovereignAccounts(parachain);
         return this.chain.parachainId === 0
-          ? addr.encodePubKey(saPub.relay, 0)
-          : addr.encodePubKey(saPub.generic, 0);
+          ? Ss58Addr.encodePubKey(saPub.relay)
+          : Ss58Addr.encodePubKey(saPub.generic);
       }
 
       // Upward (use chain treasury account if any)

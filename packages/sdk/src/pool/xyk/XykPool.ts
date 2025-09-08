@@ -10,6 +10,7 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
+
 import { BigNumber, bnum, ONE, scale, ZERO } from '../../utils/bignumber';
 import { FeeUtils } from '../../utils/fee';
 
@@ -28,28 +29,16 @@ export class XykPool implements Pool {
   minTradingLimit: number;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-    );
+    return new XykPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: number,
-    maxOutRatio: number,
-    minTradeLimit: number
-  ) {
+  constructor(pool: PoolBase) {
     this.type = PoolType.XYK;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
   }
 
   validatePair(_tokenIn: string, _tokenOut: string): boolean {

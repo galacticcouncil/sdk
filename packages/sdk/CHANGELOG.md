@@ -1,5 +1,111 @@
 # @galacticcouncil/sdk
 
+## 9.15.0
+
+### Minor Changes
+
+- Pool ctx api & evm accessors read-only
+
+## 9.14.0
+
+### Minor Changes
+
+[572718c7]: https://github.com/galacticcouncil/sdk/commit/572718c7
+[5c46abff]: https://github.com/galacticcouncil/sdk/commit/5c46abff
+[fcd4afe1]: https://github.com/galacticcouncil/sdk/commit/fcd4afe1
+
+- [[#572718c7][572718c7]] sdk: upgrade perf, mlr cache, getSpotPrices api, cold starts
+- [[#5c46abff][5c46abff]] sdk: export mm oracle module
+- [[#fcd4afe1][fcd4afe1]] sdk: plength to cache composite key
+
+## 9.13.0
+
+### Minor Changes
+
+- sdk: reduce no of balance subs (multiquery)
+
+## 9.12.0
+
+### Minor Changes
+
+- hsm: validate hollar out (facilitator & holding check)
+
+## 9.11.0
+
+### Minor Changes
+
+- f091023: Support asset dyn fee config
+
+## 9.10.0
+
+### Minor Changes
+
+[4fc9586e]: https://github.com/galacticcouncil/sdk/commit/4fc9586e
+[ba407030]: https://github.com/galacticcouncil/sdk/commit/ba407030
+[19ae8b4b]: https://github.com/galacticcouncil/sdk/commit/19ae8b4b
+[c046c9b4]: https://github.com/galacticcouncil/sdk/commit/c046c9b4
+
+- [[#4fc9586e][4fc9586e]] sdk: support pool filter (exclude)
+
+- [[#ba407030][ba407030]] hsm: buy contraints update
+- [[#19ae8b4b][19ae8b4b]] hsm: initial validations
+- [[#c046c9b4][c046c9b4]] hsm: add pool module
+
+## 9.9.1
+
+### Patch Changes
+
+- fix: suggester use all paths in trusted set
+
+## 9.9.0
+
+### Minor Changes
+
+- 5de2359: sdk: speed up bfs by pre-filtering the relevant amms
+
+## 9.8.0
+
+### Minor Changes
+
+- 3ec8fb7: fee memo short term dedup
+- c974dd0: route proposals cache
+
+## 9.7.0
+
+### Minor Changes
+
+- cf0aee6: BalanceClientV2 supporting whole balance breakdown
+
+## 9.6.3
+
+### Patch Changes
+
+- fix aave token liq calc
+
+## 9.6.2
+
+### Patch Changes
+
+- use virtual share issuance for liquidity route calc
+
+## 9.6.1
+
+### Patch Changes
+
+- fix evm client init
+
+## 9.6.0
+
+### Minor Changes
+
+- sdk: bfs max path +1
+
+## 9.5.4
+
+### Patch Changes
+
+- 0aa7120: Fix negative free balance
+
 ## 9.5.3
 
 ### Patch Changes
@@ -10,13 +116,13 @@
 
 ### Patch Changes
 
-- Update twap api accessors
+- sdk: update twap api accessors
 
 ## 9.5.1
 
 ### Patch Changes
 
-- Revert range calc
+- sdk: revert range calc
 
 ## 9.5.0
 

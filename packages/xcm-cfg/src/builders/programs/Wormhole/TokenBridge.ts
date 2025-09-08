@@ -1,4 +1,5 @@
 import {
+  mrl,
   EvmParachain,
   Parachain,
   Precompile,
@@ -23,8 +24,6 @@ import {
   createApproveAuthoritySignerInstruction,
   createTransferNativeWithPayloadInstruction,
 } from '@wormhole-foundation/sdk-solana-tokenbridge';
-
-import { mrl } from '../../utils';
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;

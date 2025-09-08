@@ -2,6 +2,7 @@ import {
   Abi,
   AnyChain,
   AnyEvmChain,
+  EvmParachain,
   Precompile,
   Wormhole,
 } from '@galacticcouncil/xcm-core';
@@ -12,19 +13,30 @@ import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
 import { encodeFunctionData } from 'viem';
 
-import { EvmCall } from '../platforms';
+import { EvmCall, SubstrateCall } from '../platforms';
 
 export class WormholeClient {
-  async isTransferCompleted(
-    chain: AnyChain,
-    vaaBytes: string
-  ): Promise<boolean> {
+  getVaaHeader(vaaHex: string) {
+    const vaaBytes = encoding.b64.decode(vaaHex);
+    const vaa = deserialize('Uint8Array', vaaBytes);
+    return {
+      timestamp: vaa.timestamp,
+      emitterChain: vaa.emitterChain,
+      emitterAddress: vaa.emitterAddress.toString(),
+      sequence: vaa.sequence,
+      payload: vaa.payload,
+      hash: vaa.hash,
+      id: keccak256(vaa.hash),
+    };
+  }
+
+  async isTransferCompleted(chain: AnyChain, vaaHex: string): Promise<boolean> {
     const ctx = chain as AnyEvmChain;
     const ctxWh = ctx.wormhole as Wormhole;
     const provider = ctx.client.getProvider();
     const tokenBridge = ctxWh.getTokenBridge();
 
-    const vaaArray = encoding.b64.decode(vaaBytes);
+    const vaaArray = encoding.b64.decode(vaaHex);
     const vaaArrayDes = deserialize('Uint8Array', vaaArray);
     const vaaDigestArray = keccak256(vaaArrayDes.hash);
     const vaaDigest = encoding.hex.encode(vaaDigestArray);
@@ -75,5 +87,29 @@ export class WormholeClient {
       from: from,
       to: Precompile.Bridge,
     } as EvmCall;
+  }
+
+  async redeemMrlViaXcm(
+    moonchain: EvmParachain,
+    from: string,
+    vaaBytes: string
+  ): Promise<SubstrateCall> {
+    const api = await moonchain.api;
+    const claim = this.redeemMrl(from, vaaBytes);
+    const tx = api.tx.ethereumXcm.transact({
+      ['V2']: {
+        gasLimit: 5_000_000n,
+        action: {
+          Call: claim.to,
+        },
+        value: 0n,
+        input: claim.data,
+      },
+    });
+
+    return {
+      data: tx.toHex(),
+      from: from,
+    } as SubstrateCall;
   }
 }

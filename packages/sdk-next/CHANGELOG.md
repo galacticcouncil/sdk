@@ -1,10 +1,21 @@
 # @galacticcouncil/sdk-next
 
+## 0.5.0
+
+### Minor Changes
+
+- bump papi to latest (1.16.2)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.3.0
+
 ## 0.4.1
 
 ### Patch Changes
 
-- Update twap api accessors
+- sdk: update twap api accessors
 
 ## 0.4.0
 
