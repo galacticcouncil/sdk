@@ -4,6 +4,7 @@ import {
   Enum,
   PolkadotClient,
   SS58String,
+  TypedApi,
 } from 'polkadot-api';
 import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
 import Big from 'big.js';
@@ -12,8 +13,9 @@ import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
 import { Papi } from '../api';
 import { BalanceClient } from './BalanceClient';
-import { HydrationQueries } from '@galacticcouncil/descriptors';
+import { hydration, HydrationQueries } from '@galacticcouncil/descriptors';
 import { shiftNeg } from '../utils/format';
+import { OmnipoolLiquidityMiningClaimSim } from './claimSimulator';
 import { Balance } from 'types';
 
 type OmnipoolGlobalFarm =
@@ -21,12 +23,24 @@ type OmnipoolGlobalFarm =
 type OmnipoolYieldFarm =
   HydrationQueries['OmnipoolWarehouseLM']['YieldFarm']['Value'];
 
+export type OmnipoolWarehouseLMDeposit =
+  HydrationQueries['OmnipoolWarehouseLM']['Deposit']['Value'];
+
+export type OmnipoolWarehouseLMDepositYieldFarmEntry =
+  OmnipoolWarehouseLMDeposit['yield_farm_entries'][number];
+
 type OmnipolFarm = {
   id: string;
   globalFarm: OmnipoolGlobalFarm;
   yieldFarm: OmnipoolYieldFarm;
   priceAdjustment: bigint | undefined;
   balance: Balance;
+};
+
+export type FarmDepositReward = {
+  readonly reward: bigint;
+  readonly maxReward: bigint;
+  readonly assetId: number;
 };
 
 const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
@@ -356,5 +370,188 @@ export class LiquidityMining extends Papi {
           farm ? this.farmData(farm, relayBlockNumber, true) : undefined
         )
       : [];
+  }
+
+  async getDepositReward(
+    poolId: string,
+    farmEntry: OmnipoolWarehouseLMDepositYieldFarmEntry,
+    isXyk: boolean,
+    relayChainBlockNumber: number
+  ) {
+    const globalFarmId = farmEntry.global_farm_id;
+    const yieldFarmId = farmEntry.yield_farm_id;
+
+    const yieldFarm = isXyk
+      ? await this.api.query.XYKWarehouseLM.YieldFarm.getValue(
+          poolId,
+          globalFarmId,
+          yieldFarmId
+        )
+      : await this.api.query.OmnipoolWarehouseLM.YieldFarm.getValue(
+          Number(poolId),
+          globalFarmId,
+          yieldFarmId
+        );
+    const globalFarm = isXyk
+      ? await this.api.query.XYKWarehouseLM.GlobalFarm.getValue(globalFarmId)
+      : await this.api.query.OmnipoolWarehouseLM.GlobalFarm.getValue(
+          globalFarmId
+        );
+
+    if (!globalFarm || !yieldFarm) return undefined;
+
+    const rewardCurrency = globalFarm.reward_currency;
+    const incentivizedAsset = globalFarm.incentivized_asset;
+
+    const accountAddresses: Array<[address: string, assetId: number]> = [
+      [this.getFarmAddress(0, isXyk), globalFarm.reward_currency],
+      [this.getFarmAddress(globalFarm.id, isXyk), globalFarm.reward_currency],
+    ];
+
+    const balances = await getAccountAssetBalances(
+      this.api,
+      accountAddresses
+    )();
+
+    const oracles = await this.getOraclePrice(
+      rewardCurrency,
+      incentivizedAsset
+    );
+
+    const multiCurrency = new MultiCurrencyContainer(
+      accountAddresses,
+      balances
+    );
+
+    const simulator = new OmnipoolLiquidityMiningClaimSim(
+      (sub) => this.getFarmAddress(sub),
+      multiCurrency,
+      (id) => this.api.query.AssetRegistry.Assets.getValue(id)
+    );
+
+    const reward = await simulator.claim_rewards(
+      globalFarm,
+      yieldFarm,
+      farmEntry,
+      relayChainBlockNumber,
+      oracles ?? globalFarm.price_adjustment
+    );
+
+    if (!reward) {
+      return undefined;
+    }
+
+    const meta = await this.api.query.AssetRegistry.Assets.getValue(
+      reward.assetId
+    );
+
+    if (!meta) {
+      return undefined;
+    }
+
+    if (reward.reward <= meta.existential_deposit) {
+      return undefined;
+    }
+
+    return reward;
+  }
+}
+
+export const BN_QUINTILL = Big(10).pow(18);
+
+const NATIVE_ASSET_ID = '0';
+type Api = TypedApi<typeof hydration>;
+
+export const getAccountAssetBalances =
+  (api: Api, pairs: Array<[address: string, assetId: number]>) => async () => {
+    const [tokens, natives] = await Promise.all([
+      api.query.Tokens.Accounts.getValues(
+        pairs.filter(([_, assetId]) => assetId.toString() !== NATIVE_ASSET_ID)
+      ),
+      api.query.System.Account.getValues(
+        pairs
+          .filter(([_, assetId]) => assetId.toString() === NATIVE_ASSET_ID)
+          .map(([account]) => [account])
+      ),
+    ]);
+
+    const values: Array<{
+      free: bigint;
+      reserved: bigint;
+      frozen: bigint;
+      assetId: string;
+    }> = [];
+    for (
+      let tokenIdx = 0, nativeIdx = 0;
+      tokenIdx + nativeIdx < pairs.length;
+
+    ) {
+      const idx = tokenIdx + nativeIdx;
+      const [, assetId] = pairs[idx];
+
+      if (assetId.toString() === NATIVE_ASSET_ID) {
+        values.push({
+          assetId: assetId.toString(),
+          free: natives[nativeIdx].data.free,
+          reserved: natives[nativeIdx].data.reserved,
+          frozen: natives[nativeIdx].data.frozen,
+        });
+
+        nativeIdx += 1;
+      } else {
+        values.push({
+          assetId: assetId.toString(),
+          free: tokens[tokenIdx].free,
+          reserved: tokens[tokenIdx].reserved,
+          frozen: tokens[tokenIdx].frozen,
+        });
+
+        tokenIdx += 1;
+      }
+    }
+
+    return values;
+  };
+
+export class MultiCurrencyContainer {
+  result = new Map<string, bigint>();
+
+  getKey(asset: number, accountId: string): string {
+    return [accountId, asset.toString()].join(',');
+  }
+
+  constructor(
+    keys: [string, number][],
+    values: { free: bigint; reserved: bigint; frozen: bigint }[]
+  ) {
+    for (let i = 0; i < keys.length; ++i) {
+      const [accountId, asset] = keys[i];
+      this.result.set(this.getKey(asset, accountId), values[i].free);
+    }
+  }
+
+  free_balance(asset: number, accountId: string): bigint {
+    // TODO: use existencial amounts as a placeholder
+    const result = this.result.get(this.getKey(asset, accountId)) ?? 0n;
+    return result;
+  }
+
+  transfer(
+    asset: number,
+    sourceAccount: string,
+    targetAccount: string,
+    amount: bigint
+  ) {
+    const sourceKey = this.getKey(asset, sourceAccount);
+    const targetKey = this.getKey(asset, targetAccount);
+
+    const sourceValue = this.result.get(sourceKey) ?? 0n;
+    const targetValue = this.result.get(targetKey) ?? 0n;
+
+    if (sourceValue < amount)
+      throw new Error('Attempting to transfer more than is present');
+
+    this.result.set(sourceKey, sourceValue + amount);
+    this.result.set(targetKey, targetValue + amount);
   }
 }
