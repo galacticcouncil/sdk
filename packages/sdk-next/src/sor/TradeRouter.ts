@@ -1,12 +1,51 @@
-import { Router } from './Router';
+import { Router, RouterOptions } from './Router';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 import { RouteNotFound } from '../errors';
-import { Hop, Pool, PoolFees, PoolType } from '../pool';
+import {
+  Hop,
+  IPoolCtxProvider,
+  Pool,
+  PoolBase,
+  PoolFees,
+  PoolType,
+} from '../pool';
 import { Amount } from '../types';
 import { big, fmt, math } from '../utils';
 
+type Ctx = {
+  paths: Hop[][];
+  pools: PoolBase[];
+  poolsMap: Map<string, Pool>;
+};
+
 export class TradeRouter extends Router {
+  private readonly mlr: Map<string, Hop[]>;
+  private poolsSnapshot?: PoolBase[];
+
+  constructor(ctx: IPoolCtxProvider, routerOptions: RouterOptions = {}) {
+    super(ctx, routerOptions);
+    this.mlr = new Map();
+  }
+
+  private buildCtxSync(assetIn: number, assetOut: number): Ctx {
+    const pools = this.poolsSnapshot!;
+    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+    const paths = super.getPaths(assetIn, assetOut, pools);
+    if (!paths.length) throw new RouteNotFound(assetIn, assetOut);
+    return { paths, pools, poolsMap };
+  }
+
+  private async withCtx<T>(
+    assetIn: number,
+    assetOut: number,
+    fn: (ctx: Ctx) => Promise<T> | T
+  ): Promise<T> {
+    if (!this.poolsSnapshot) this.poolsSnapshot = await super.getPools();
+    const ctx = this.buildCtxSync(assetIn, assetOut);
+    return fn(ctx);
+  }
+
   /**
    * Check whether trade is direct or not
    *
@@ -95,7 +134,7 @@ export class TradeRouter extends Router {
    * @param route - best possible trade route (sell)
    * @returns sell spot price
    */
-  private async getSellSpot(route: SellSwap[]): Promise<bigint> {
+  private getSellSpot(route: SellSwap[]): bigint {
     const lastSwap = route[route.length - 1];
 
     if (route.length === 1) {
@@ -115,13 +154,13 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return sell trade for assetIn>assetOut
+   * Calculate and return sell trade for assetIn > assetOut pair
    *
-   * @param {number} assetIn - assetIn id
-   * @param {number} assetOut - assetOut id
-   * @param {bigint} amountIn - amount of assetIn to sell for assetOut
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @param {bigint | string} amountIn - amount of assetIn to sell for assetOut
    * @param {Hop[]} route - explicit route to use for trade
-   * @returns sell trade of given token pair
+   * @returns sell trade of given asset pair
    */
   async getSell(
     assetIn: number,
@@ -129,35 +168,43 @@ export class TradeRouter extends Router {
     amountIn: bigint | string,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+    return this.withCtx(assetIn, assetOut, async ({ paths, poolsMap }) => {
+      let swaps: SellSwap[];
+      if (route) {
+        swaps = await this.toSellSwaps(amountIn, route, poolsMap);
+      } else {
+        const promises = paths.map((path) =>
+          this.toSellSwaps(amountIn, path, poolsMap)
+        );
+        const routes = await Promise.all(promises);
+        swaps = this.findBestSellRoute(routes);
+      }
 
-    const paths = super.getPaths(assetIn, assetOut, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+      return this.buildSell(poolsMap, swaps);
+    });
+  }
 
-    let swaps: SellSwap[];
-    if (route) {
-      swaps = await this.toSellSwaps(amountIn, route, poolsMap);
-    } else {
-      const routes = await Promise.all(
-        paths.map((path) => this.toSellSwaps(amountIn, path, poolsMap))
-      );
-      swaps = this.findBestSellRoute(routes);
-    }
+  /**
+   * Build sell trade
+   *
+   * @param poolsMap - pools map
+   * @param route - sell route
+   * @returns - sell trade
+   */
+  private buildSell(poolsMap: Map<string, Pool>, route: SellSwap[]) {
+    const firstSwap = route[0];
+    const lastSwap = route[route.length - 1];
+    const isDirect = this.isDirectTrade(route);
 
-    const firstSwap = swaps[0];
-    const lastSwap = swaps[swaps.length - 1];
-    const isDirect = this.isDirectTrade(swaps);
-
-    const spotPrice = await this.getSellSpot(swaps);
+    const spotPrice = this.getSellSpot(route);
 
     const deltaY = lastSwap.amountOut;
     const delta0Y = isDirect
       ? lastSwap.calculatedOut
-      : this.calculateDelta0Y(firstSwap.amountIn, swaps, poolsMap);
+      : this.calculateDelta0Y(firstSwap.amountIn, route, poolsMap);
 
     const tradeFee = delta0Y - deltaY;
-    const tradeFeeRange = this.getRouteFeeRange(swaps);
+    const tradeFeeRange = this.getRouteFeeRange(route);
     const tradeFeePct = isDirect
       ? lastSwap.tradeFeePct
       : math.calculateSellFee(delta0Y, deltaY);
@@ -177,7 +224,7 @@ export class TradeRouter extends Router {
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: priceImpactPct,
-      swaps: swaps,
+      swaps: route,
       toHuman() {
         return {
           type: TradeType.Sell,
@@ -194,7 +241,7 @@ export class TradeRouter extends Router {
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: priceImpactPct,
-          swaps: swaps.map((s: SellSwap) => s.toHuman()),
+          swaps: route.map((s: SellSwap) => s.toHuman()),
         };
       },
     } as Trade;
@@ -229,6 +276,64 @@ export class TradeRouter extends Router {
       amounts.push(calculatedOut);
     }
     return amounts[amounts.length - 1];
+  }
+
+  /**
+   * Calculate and cache the most liquid route
+   *
+   * To avoid routing through the pools with low liquidity, 0.1% from the
+   * most liquid pool asset is used as reference value to determine the
+   * sweet spot.
+   *
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @param {Ctx} ctx - route ctx
+   * @return most liquid route of given asset pair
+   */
+  private async calculateMostLiquidRoute(
+    assetIn: number,
+    assetOut: number,
+    ctx: Ctx
+  ): Promise<Hop[]> {
+    const { paths, pools, poolsMap } = ctx;
+
+    // Get pools with assetIn
+    const assetInPools = pools.filter((pool) =>
+      pool.tokens.some((t) => t.id === assetIn)
+    );
+
+    // Get liquidity of assetIn sorted by DESC
+    const assetInLiquidityDesc = assetInPools
+      .map((p) => {
+        return p.type === PoolType.Aave
+          ? p.tokens
+          : p.tokens.filter((t) => t.id === assetIn);
+      })
+      .map((t) => {
+        return t.map((t) => t.balance).reduce((a, b) => a + b);
+      })
+      .sort((a, b) => (b < a ? -1 : 1));
+
+    const liquidity = assetInLiquidityDesc[0];
+    const liquidityIn = math.getFraction(liquidity, 0.1);
+
+    const routes = await Promise.all(
+      paths.map((path) => this.toSellSwaps(liquidityIn, path, poolsMap))
+    );
+    const route = this.findBestSellRoute(routes);
+    const mlr = route.map((r) => {
+      return {
+        poolAddress: r.poolAddress,
+        poolId: r?.poolId,
+        pool: r.pool,
+        assetIn: r.assetIn,
+        assetOut: r.assetOut,
+      } as Hop;
+    });
+
+    const key = this.buildRouteKey(assetIn, assetOut, pools);
+    this.mlr.set(key, mlr);
+    return mlr;
   }
 
   /**
@@ -318,81 +423,52 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return most liquid route for tokenIn>tokenOut
+   * Returns the most liquid route
    *
-   * To avoid routing through the pools with low liquidity, 0.1% from the
-   * most liquid pool asset is used as reference value to determine the
-   * sweet spot.
-   *
-   * @param {number} assetIn - assetIn id
-   * @param {number} assetOut - assetout id
-   * @return Most liquid route of given token pair
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @return most liquid route of given asset pair
    */
   async getMostLiquidRoute(assetIn: number, assetOut: number): Promise<Hop[]> {
-    const pools = await super.getPools();
-    const poolsMap = super.validateInput(assetIn, assetOut, pools);
-    const paths = super.getPaths(assetIn, assetOut, pools);
-
-    // Get pools with assetIn (except virtual shares)
-    const assetInPools = pools.filter((pool) =>
-      pool.tokens.some((t) => t.id === assetIn && t.id !== pool.id)
-    );
-
-    // Get liquidity of assetIn sorted by DESC
-    const assetInLiquidityDesc = assetInPools
-      .map((p) => {
-        return p.type === PoolType.Aave
-          ? p.tokens
-          : p.tokens.filter((t) => t.id === assetIn);
-      })
-      .map((t) => {
-        return t.map((t) => t.balance).reduce((a, b) => a + b);
-      })
-      .sort((a, b) => (b < a ? -1 : 1));
-
-    const liquidity = assetInLiquidityDesc[0];
-    const liquidityIn = math.getFraction(liquidity, 0.1);
-
-    const routes = await Promise.all(
-      paths.map((path) => this.toSellSwaps(liquidityIn, path, poolsMap))
-    );
-    const route = this.findBestSellRoute(routes);
-    return route.map((r) => {
-      return {
-        poolAddress: r.poolAddress,
-        poolId: r?.poolId,
-        pool: r.pool,
-        assetIn: r.assetIn,
-        assetOut: r.assetOut,
-      } as Hop;
+    return this.withCtx(assetIn, assetOut, async (ctx) => {
+      const routeKey = this.buildRouteKey(assetIn, assetOut, ctx.pools);
+      const route = this.mlr.get(routeKey);
+      if (route) {
+        return route;
+      }
+      return this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
     });
   }
 
   /**
-   * Calculate and return best spot price for tokenIn>tokenOut
+   * Calculate and return best possible spot price for assetIn > assetOut pair
    *
-   * @param {number} assetIn - assetIn id
-   * @param {number} assetOut - assetOut id
-   * @return best possible spot price of given asset pair, or undefined
-   * if given pair swap is not supported
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @return best possible spot price of given asset pair, or undefined if trade not supported
    */
   async getSpotPrice(assetIn: number, assetOut: number): Promise<Amount> {
-    const pools = await super.getPools();
-    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+    return this.withCtx(assetIn, assetOut, async (ctx) => {
+      const { pools, poolsMap } = ctx;
 
-    const route = await this.getMostLiquidRoute(assetIn, assetOut);
-    const swaps = await this.toSellSwaps('1', route, poolsMap);
+      const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
+      let route = this.mlr.get(routeKey);
+      if (!route) {
+        route = await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
+      }
 
-    const spotPrice = await this.getSellSpot(swaps);
-    const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
-    return { amount: spotPrice, decimals: spotPriceDecimals };
+      const swaps = await this.toSellSwaps('1', route, poolsMap);
+      const spotPrice = this.getSellSpot(swaps);
+      const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
+      return { amount: spotPrice, decimals: spotPriceDecimals };
+    });
   }
 
   /**
-   * Find the best buy swap without errors, if there is none return first one found
+   * Find best buy route without errors, if there is none return first one found
    *
-   * @param {BuySwap[]} swaps - all possible buy routes
-   * @returns best buy swap if exist, otherwise first one found
+   * @param swaps - buy routes
+   * @returns best buy route if exist, otherwise first one found
    */
   private findBestBuyRoute(swaps: BuySwap[][]): BuySwap[] {
     const sortedResults = swaps.sort((a, b) => {
@@ -409,12 +485,12 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible buy trade for assetIn>assetOut
+   * Calculate and return best possible buy trade for assetIn > assetOut pair
    *
-   * @param {number} assetIn - assetIn id
-   * @param {number} assetOut - assetOut id
-   * @param {bigint} amountOut - amount of tokenOut to buy for tokenIn
-   * @returns best possible buy trade of given token pair
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @param {bigint | string} amountOut - amount of assetOut to buy for assetIn
+   * @returns best possible buy trade of given asset pair
    */
   async getBestBuy(
     assetIn: number,
@@ -430,7 +506,7 @@ export class TradeRouter extends Router {
    * @param route - best possible trade route (buy)
    * @returns buy spot price
    */
-  private async getBuySpot(route: BuySwap[]): Promise<bigint> {
+  private getBuySpot(route: BuySwap[]): bigint {
     const lastSwap = route[0];
 
     if (route.length === 1) {
@@ -450,13 +526,13 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return buy trade for assetIn>assetOut
+   * Calculate and return buy trade for assetIn > assetOut pair
    *
-   * @param {number} assetIn - assetIn id
-   * @param {number} assetOut - assetOut id
-   * @param {bigint} amountOut - amount of assetOut to buy for assetIn
+   * @param {number} assetIn - asset in
+   * @param {number} assetOut - asset out
+   * @param {bigint | string} amountOut - amount of assetOut to buy for assetIn
    * @param {Hop[]} route - explicit route to use for trade
-   * @returns buy trade of given token pair
+   * @returns buy trade of given asset pair
    */
   async getBuy(
     assetIn: number,
@@ -464,35 +540,43 @@ export class TradeRouter extends Router {
     amountOut: bigint | string,
     route?: Hop[]
   ): Promise<Trade> {
-    const pools = await super.getPools();
-    const poolsMap = super.validateInput(assetIn, assetOut, pools);
+    return this.withCtx(assetIn, assetOut, async ({ paths, poolsMap }) => {
+      let swaps: BuySwap[];
+      if (route) {
+        swaps = await this.toBuySwaps(amountOut, route, poolsMap);
+      } else {
+        const promises = paths.map((path) =>
+          this.toBuySwaps(amountOut, path, poolsMap)
+        );
+        const routes = await Promise.all(promises);
+        swaps = this.findBestBuyRoute(routes);
+      }
 
-    const paths = super.getPaths(assetIn, assetOut, pools);
-    if (paths.length === 0) throw new RouteNotFound(assetIn, assetOut);
+      return this.buildBuy(poolsMap, swaps);
+    });
+  }
 
-    let swaps: BuySwap[];
-    if (route) {
-      swaps = await this.toBuySwaps(amountOut, route, poolsMap);
-    } else {
-      const routes = await Promise.all(
-        paths.map((path) => this.toBuySwaps(amountOut, path, poolsMap))
-      );
-      swaps = this.findBestBuyRoute(routes);
-    }
+  /**
+   * Build buy trade
+   *
+   * @param poolsMap - pools map
+   * @param route - buy route
+   * @returns - buy trade
+   */
+  private buildBuy(poolsMap: Map<string, Pool>, route: BuySwap[]) {
+    const firstSwap = route[route.length - 1];
+    const lastSwap = route[0];
+    const isDirect = this.isDirectTrade(route);
 
-    const firstSwap = swaps[swaps.length - 1];
-    const lastSwap = swaps[0];
-    const isDirect = this.isDirectTrade(swaps);
-
-    const spotPrice = await this.getBuySpot(swaps);
+    const spotPrice = this.getBuySpot(route);
 
     const deltaX = lastSwap.amountIn;
     const delta0X = isDirect
       ? lastSwap.calculatedIn
-      : this.calculateDelta0X(firstSwap.amountOut, swaps, poolsMap);
+      : this.calculateDelta0X(firstSwap.amountOut, route, poolsMap);
 
     const tradeFee = deltaX - delta0X;
-    const tradeFeeRange = this.getRouteFeeRange(swaps);
+    const tradeFeeRange = this.getRouteFeeRange(route);
     const tradeFeePct = isDirect
       ? lastSwap.tradeFeePct
       : math.calculateBuyFee(delta0X, deltaX);
@@ -517,7 +601,7 @@ export class TradeRouter extends Router {
       tradeFeePct: tradeFeePct,
       tradeFeeRange: tradeFeeRange,
       priceImpactPct: priceImpactPct,
-      swaps: swaps,
+      swaps: route,
       toHuman() {
         return {
           type: TradeType.Buy,
@@ -531,7 +615,7 @@ export class TradeRouter extends Router {
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
           priceImpactPct: priceImpactPct,
-          swaps: swaps.map((s: BuySwap) => s.toHuman()),
+          swaps: route.map((s: BuySwap) => s.toHuman()),
         };
       },
     } as Trade;

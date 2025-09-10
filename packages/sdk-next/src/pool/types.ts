@@ -1,5 +1,10 @@
 import type { AssetType } from '../types';
 
+export type PoolFilter = {
+  useOnly?: PoolType[];
+  exclude?: PoolType[];
+};
+
 export enum PoolType {
   Aave = 'Aave',
   LBP = 'LBP',
@@ -99,7 +104,7 @@ export interface Pool extends PoolBase {
 }
 
 export interface IPoolCtxProvider {
-  getPools(): Promise<PoolBase[]>;
+  getPools(filter?: PoolFilter): Promise<PoolBase[]>;
   getPoolFees(pool: PoolBase, feeAsset: number): Promise<PoolFees>;
 }
 
