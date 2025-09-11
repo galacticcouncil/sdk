@@ -3,9 +3,10 @@
   "descriptorPath": ".papi/descriptors",
   "entries": {
     "hydration": {
-      "wsUrl": "wss://hydradx-rpc.dwellir.com",
+      "wsUrl": "wss://hydration-rpc.n.dwellir.com",
       "metadata": ".papi/metadata/hydration.scale",
-      "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d"
+      "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d",
+      "codeHash": "0x5b3789c70537a0508cf6065fcd09ba930a24918afc8f00a49c7e6474eb643af6"
     }
   }
 }
