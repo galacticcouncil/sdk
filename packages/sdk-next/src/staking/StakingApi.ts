@@ -32,8 +32,11 @@ export class StakingApi {
   async getFreePotBalance(): Promise<bigint> {
     const palletId = await this.client.getPalletId();
     const potAddress = getHydraAccountAddress(palletId);
-
-    return this.balanceClient.getBalance(potAddress, SYSTEM_ASSET_ID);
+    const balance = await this.balanceClient.getBalance(
+      potAddress,
+      SYSTEM_ASSET_ID
+    );
+    return balance.transferable;
   }
 
   async getStakingPosition(id: bigint) {

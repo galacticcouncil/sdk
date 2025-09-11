@@ -13,6 +13,8 @@ import {
 import { Amount } from '../types';
 import { big, fmt, math } from '../utils';
 
+const { FeeUtils } = fmt;
+
 type Ctx = {
   paths: Hop[][];
   pools: PoolBase[];
@@ -104,8 +106,8 @@ export class TradeRouter extends Router {
    * dynamic fees support
    */
   private getPoolFeeRange(fees: PoolFees): [number, number] | undefined {
-    const feeMin = fees.min ? fmt.toPct(fees.min) : undefined;
-    const feeMax = fees.max ? fmt.toPct(fees.max) : undefined;
+    const feeMin = fees.min ? FeeUtils.toPct(fees.min) : undefined;
+    const feeMax = fees.max ? FeeUtils.toPct(fees.max) : undefined;
     if (feeMin && feeMax) {
       return [feeMin, feeMax];
     }

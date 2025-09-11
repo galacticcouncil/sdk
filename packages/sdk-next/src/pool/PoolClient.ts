@@ -17,11 +17,16 @@ import {
 
 import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
+import { EvmClient } from '../evm';
+import { MmOracleClient } from '../oracle';
 import { AssetBalance } from '../types';
 
 import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
 
 export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
+  protected evm: EvmClient;
+  protected mmOracle: MmOracleClient;
+
   private override: PoolTokenOverride[] = [];
   private mem: number = 0;
 
@@ -30,8 +35,10 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     return this.loadPools();
   });
 
-  constructor(client: PolkadotClient) {
+  constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
+    this.evm = evm;
+    this.mmOracle = new MmOracleClient(evm);
   }
 
   protected abstract loadPools(): Promise<T[]>;

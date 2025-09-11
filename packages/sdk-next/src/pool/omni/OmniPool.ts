@@ -15,6 +15,8 @@ import { math, fmt } from '../../utils';
 
 import { OmniMath } from './OmniMath';
 
+const { FeeUtils } = fmt;
+
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: bigint;
   hubReservesOut: bigint;
@@ -214,8 +216,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0',
-      fees ? fmt.toDecimals(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -231,7 +233,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -254,8 +256,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0',
-      fees ? fmt.toDecimals(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -271,7 +273,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;

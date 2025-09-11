@@ -3,6 +3,7 @@ import { PolkadotClient } from 'polkadot-api';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { Papi } from '../api';
+import { EvmClient } from '../evm';
 import { PoolNotFound } from '../errors';
 
 import { AavePoolClient } from './aave';
@@ -22,6 +23,8 @@ import {
 import { PoolClient } from './PoolClient';
 
 export class PoolContextProvider extends Papi implements IPoolCtxProvider {
+  readonly evm: EvmClient;
+
   private readonly lbpClient: LbpPoolClient;
   private readonly omniClient: OmniPoolClient;
   private readonly stableClient: StableSwapClient;
@@ -41,13 +44,14 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private isReady: boolean = false;
   private isDestroyed = new Subject<boolean>();
 
-  constructor(client: PolkadotClient) {
+  constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
-    this.lbpClient = new LbpPoolClient(client);
-    this.omniClient = new OmniPoolClient(client);
-    this.stableClient = new StableSwapClient(client);
-    this.xykClient = new XykPoolClient(client);
-    this.aaveClient = new AavePoolClient(client);
+    this.evm = evm;
+    this.lbpClient = new LbpPoolClient(client, evm);
+    this.omniClient = new OmniPoolClient(client, evm);
+    this.stableClient = new StableSwapClient(client, evm);
+    this.xykClient = new XykPoolClient(client, evm);
+    this.aaveClient = new AavePoolClient(client, evm);
     this.clients = [
       this.lbpClient,
       this.omniClient,
