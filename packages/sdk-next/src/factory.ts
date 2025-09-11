@@ -7,12 +7,14 @@ import { PoolContextProvider } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
 
 import { TxBuilderFactory } from './tx';
+import { StakingApi, StakingClient } from './staking';
 
 export type SdkCtx = {
   api: {
     aave: AaveUtils;
     router: TradeRouter;
     scheduler: TradeScheduler;
+    staking: StakingApi;
   };
   client: {
     asset: AssetClient;
@@ -53,15 +55,20 @@ export async function createSdkContext(
     minBudgetInNative: minOrderBudget,
   });
 
+  const balance = new BalanceClient(client);
+  const stakingClient = new StakingClient(client);
+  const staking = new StakingApi(stakingClient, balance);
+
   return {
     api: {
       aave,
       router,
       scheduler,
+      staking,
     },
     client: {
       asset: new AssetClient(client),
-      balance: new BalanceClient(client),
+      balance,
       evm: evm,
     },
     ctx: {
