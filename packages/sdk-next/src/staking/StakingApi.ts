@@ -29,11 +29,15 @@ export class StakingApi {
     this.balanceClient = balanceClient;
   }
 
-  async getFreePotBalance(): Promise<bigint> {
+  async getTransferablePotBalance(): Promise<bigint> {
     const palletId = await this.client.getPalletId();
     const potAddress = getHydraAccountAddress(palletId);
+    const balance = await this.balanceClient.getBalance(
+      potAddress,
+      SYSTEM_ASSET_ID
+    );
 
-    return this.balanceClient.getBalance(potAddress, SYSTEM_ASSET_ID);
+    return balance.transferable;
   }
 
   async getStakingPosition(id: bigint) {
@@ -122,15 +126,19 @@ export class StakingApi {
       return undefined;
     }
 
-    const [freePotbalance, periodLength, unclaimablePeriods, sixBlockSince] =
-      await Promise.all([
-        this.getFreePotBalance(),
-        this.client.getPeriodLength(),
-        this.client.getUnclaimablePeriods(),
-        this.client.getSixBlockSince(),
-      ]);
+    const [
+      transferablePotbalance,
+      periodLength,
+      unclaimablePeriods,
+      sixBlockSince,
+    ] = await Promise.all([
+      this.getTransferablePotBalance(),
+      this.client.getPeriodLength(),
+      this.client.getUnclaimablePeriods(),
+      this.client.getSixBlockSince(),
+    ]);
 
-    const pendingRewards = Big(freePotbalance.toString()).minus(
+    const pendingRewards = Big(transferablePotbalance.toString()).minus(
       potReservedBalance.toString()
     );
 
