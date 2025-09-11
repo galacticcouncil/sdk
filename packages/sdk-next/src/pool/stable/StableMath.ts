@@ -186,13 +186,15 @@ export class StableMath {
     currentBlock: string,
     maxPegUpdate: string,
     poolFee: string
-  ) {
-    return recalculate_peg(
+  ): [string, string[][]] {
+    const pegs = recalculate_peg(
       currentPegs,
       targetPegs,
       currentBlock,
       maxPegUpdate,
       poolFee
     );
+
+    return JSON.parse(pegs);
   }
 }

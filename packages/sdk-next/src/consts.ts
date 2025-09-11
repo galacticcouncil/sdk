@@ -1,6 +1,10 @@
 // Runtime
 export const RUNTIME_DECIMALS = 18;
 
+// Permill
+export const PERMILL_DENOMINATOR = 1_000_000;
+export const PERBILL_DENOMINATOR = 1_000_000_000;
+
 // System
 export const SYSTEM_ASSET_ID = 0;
 export const SYSTEM_ASSET_DECIMALS = 12;

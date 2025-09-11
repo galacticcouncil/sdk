@@ -28,9 +28,11 @@ export type StableSwapFees = PoolFees & {
 
 export type StableSwapBase = PoolBase & {
   amplification: bigint;
-  id: string;
+  id: number;
   fee: PoolFee;
   totalIssuance: bigint;
+  pegs: string[][];
+  pegsFee: PoolFee;
 };
 
 export class StableSwap implements Pool {
