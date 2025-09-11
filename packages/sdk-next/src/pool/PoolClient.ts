@@ -17,7 +17,7 @@ import {
 
 import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
-import { AssetAmount } from '../types';
+import { AssetBalance } from '../types';
 
 import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
 
@@ -81,12 +81,12 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
       );
   }
 
-  private subscribePoolBalance(pool: T): Observable<AssetAmount[]> {
+  private subscribePoolBalance(pool: T): Observable<AssetBalance[]> {
     if (pool.type === PoolType.Aave) {
       return of([]);
     }
 
-    const subs: Observable<AssetAmount | AssetAmount[]>[] = [
+    const subs: Observable<AssetBalance | AssetBalance[]>[] = [
       this.subscribeTokensBalance(pool.address),
     ];
 
@@ -130,14 +130,14 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     });
   }
 
-  private updatePool = (pool: PoolBase, balances: AssetAmount[]): T => {
+  private updatePool = (pool: PoolBase, balances: AssetBalance[]): T => {
     const tokens = pool.tokens.map((token) => {
       const balance = balances.find((balance) => balance.id === token.id);
       const override = this.override.find((o) => o.id === token.id);
       if (balance) {
         return {
           ...token,
-          balance: balance.amount,
+          balance: balance.balance.transferable,
           decimals: token.decimals || override?.decimals,
         };
       }

@@ -100,7 +100,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
           id: accumulated,
           decimals: accumulatedMeta?.decimals,
           existentialDeposit: accumulatedMeta?.existential_deposit,
-          balance: accumulatedBalance,
+          balance: accumulatedBalance.transferable,
           weight: accumulatedWeight,
           type: accumulatedMeta?.asset_type.type,
         } as WeightedPoolToken,
@@ -108,7 +108,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
           id: distributed,
           decimals: distributedMeta?.decimals,
           existentialDeposit: distributedMeta?.existential_deposit,
-          balance: distributedBalance,
+          balance: distributedBalance.transferable,
           weight: distributedWeight,
           type: distributedMeta?.asset_type.type,
         } as WeightedPoolToken,
@@ -141,7 +141,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         feeCollector,
         accumulatedAsset
       );
-      return repayFeeCurrent < repayTarget;
+      return repayFeeCurrent.transferable < repayTarget;
     } catch (err) {
       // Collector account is empty (No trade has been executed yet)
       return true;

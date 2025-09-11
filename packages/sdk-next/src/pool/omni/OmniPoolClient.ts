@@ -43,7 +43,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         id: id,
         decimals: meta?.decimals,
         existentialDeposit: meta?.existential_deposit,
-        balance: balance,
+        balance: balance.transferable,
         cap: cap,
         hubReserves: hub_reserve,
         protocolShares: protocol_shares,
@@ -60,7 +60,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       id: hubAssetId,
       decimals: hubAssetMeta?.decimals,
       existentialDeposit: hubAssetMeta?.existential_deposit,
-      balance: hubAssetBalance,
+      balance: hubAssetBalance.transferable,
       tradeable: hubAssetTradeability,
       type: hubAssetMeta?.asset_type.type,
     } as OmniPoolToken);

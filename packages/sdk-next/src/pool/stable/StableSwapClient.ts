@@ -101,7 +101,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         id: id,
         decimals: meta?.decimals,
         existentialDeposit: meta?.existential_deposit,
-        balance: balance,
+        balance: balance.transferable,
         tradeable: tradeability,
         type: meta?.asset_type.type,
       } as PoolToken;
