@@ -1,21 +1,25 @@
+import { PolkadotClient } from 'polkadot-api';
+
 import {
   createPublicClient,
   createWalletClient,
   custom,
   http,
-  webSocket,
   Chain,
   PublicClient,
   WalletClient,
 } from 'viem';
 
-import { evmMainnet } from './chain';
+import { createChain } from './chain';
 
 export class EvmClient {
+  private client: PolkadotClient;
+
   readonly chain: Chain;
 
-  constructor(chain?: Chain) {
-    this.chain = chain ? chain : evmMainnet;
+  constructor(client: PolkadotClient) {
+    this.client = client;
+    this.chain = createChain();
   }
 
   get chainId(): number {
@@ -30,10 +34,6 @@ export class EvmClient {
     return this.chain.nativeCurrency.decimals;
   }
 
-  async getGasPrice(): Promise<bigint> {
-    return this.getProvider().getGasPrice();
-  }
-
   getProvider(): PublicClient {
     return createPublicClient({
       chain: this.chain,
@@ -43,8 +43,10 @@ export class EvmClient {
 
   getWsProvider(): PublicClient {
     return createPublicClient({
-      chain: this.chain,
-      transport: webSocket(),
+      transport: custom({
+        request: ({ method, params }) =>
+          this.client._request(method, params || []),
+      }),
     });
   }
 

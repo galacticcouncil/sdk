@@ -1,3 +1,5 @@
+import { PublicClient } from 'viem';
+
 import { AAVE_POOL_ABI, AAVE_POOL_DATA_PROVIDER_ABI } from './abi';
 import {
   AAVE_LENDING_POOL_ADDRESS,
@@ -8,15 +10,14 @@ import {
 import { EvmClient } from '../evm';
 
 export class AaveClient {
-  private evmClient: EvmClient;
+  private client: PublicClient;
 
-  constructor(evmClient?: EvmClient) {
-    this.evmClient = evmClient ?? new EvmClient();
+  constructor(evm: EvmClient) {
+    this.client = evm.getWsProvider();
   }
 
   async getReservesData() {
-    const evmProvider = this.evmClient.getProvider();
-    const output = await evmProvider.readContract({
+    const output = await this.client.readContract({
       abi: AAVE_POOL_DATA_PROVIDER_ABI,
       address: AAVE_POOL_DATA_PROVIDER as `0x${string}`,
       args: [AAVE_LENDING_POOL_ADDRESS as `0x${string}`],
@@ -26,8 +27,7 @@ export class AaveClient {
   }
 
   async getUserReservesData(user: string) {
-    const evmProvider = this.evmClient.getProvider();
-    const output = await evmProvider.readContract({
+    const output = await this.client.readContract({
       abi: AAVE_POOL_DATA_PROVIDER_ABI,
       address: AAVE_POOL_DATA_PROVIDER as `0x${string}`,
       args: [AAVE_LENDING_POOL_ADDRESS as `0x${string}`, user as `0x${string}`],
@@ -37,8 +37,7 @@ export class AaveClient {
   }
 
   async getUserAccountData(user: string) {
-    const evmProvider = this.evmClient.getProvider();
-    const output = await evmProvider.readContract({
+    const output = await this.client.readContract({
       abi: AAVE_POOL_ABI,
       address: AAVE_POOL_PROXY as `0x${string}`,
       args: [user as `0x${string}`],

@@ -29,19 +29,18 @@ export type SdkCtx = {
 };
 
 export async function createSdkContext(
-  client: PolkadotClient,
-  evmClient?: EvmClient
+  client: PolkadotClient
 ): Promise<SdkCtx> {
   const params = new ChainParams(client);
+  const evm = new EvmClient(client);
+
   const [blockTime, minOrderBudget] = await Promise.all([
     params.getBlockTime(),
     params.getMinOrderBudget(),
   ]);
 
-  const evm = evmClient ?? new EvmClient();
-
   // Initialize pool context
-  const poolCtx = new PoolContextProvider(client)
+  const poolCtx = new PoolContextProvider(client, evm)
     .withAave()
     .withOmnipool()
     .withStableswap()

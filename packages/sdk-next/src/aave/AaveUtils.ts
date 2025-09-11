@@ -18,8 +18,7 @@ const WAD = 10n ** 18n;
 export class AaveUtils {
   private client: AaveClient;
 
-  constructor(evmClient?: EvmClient) {
-    const evm = evmClient ?? new EvmClient();
+  constructor(evm: EvmClient) {
     this.client = new AaveClient(evm);
   }
 
