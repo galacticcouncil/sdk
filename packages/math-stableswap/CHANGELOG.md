@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 2.3.0
+
+### Minor Changes
+
+- f183193: stable: peg max update type change
+
 ## 2.2.0
 
 ### Minor Changes

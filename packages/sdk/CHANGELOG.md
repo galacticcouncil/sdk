@@ -1,5 +1,16 @@
 # @galacticcouncil/sdk
 
+## 9.16.0
+
+### Minor Changes
+
+- f183193: stable: peg max update type change
+
+### Patch Changes
+
+- Updated dependencies [f183193]
+  - @galacticcouncil/math-stableswap@2.3.0
+
 ## 9.15.0
 
 ### Minor Changes

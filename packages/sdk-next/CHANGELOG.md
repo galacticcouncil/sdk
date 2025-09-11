@@ -1,5 +1,20 @@
 # @galacticcouncil/sdk-next
 
+## 0.6.0
+
+### Minor Changes
+
+- eb1e3d2: Add stableswap pegs
+- 34be9c6: Staking client
+- 5b3d616: Balance client => Return full balance
+
+### Patch Changes
+
+- Updated dependencies [f183193]
+- Updated dependencies [eb1e3d2]
+  - @galacticcouncil/math-stableswap@2.3.0
+  - @galacticcouncil/descriptors@1.4.0
+
 ## 0.5.0
 
 ### Minor Changes
