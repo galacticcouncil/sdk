@@ -60,10 +60,35 @@ const toPolkadotAssethub = new AssetRoute({
   extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
 });
 
+const toBasilisk = new AssetRoute({
+  source: {
+    asset: ksm,
+    balance: BalanceBuilder().substrate().system().account(),
+    fee: {
+      asset: ksm,
+      balance: BalanceBuilder().substrate().system().account(),
+      extra: extraFee,
+    },
+    destinationFee: {
+      balance: BalanceBuilder().substrate().system().account(),
+    },
+  },
+  destination: {
+    chain: basilisk,
+    asset: ksm,
+    fee: {
+      amount: 0.0012,
+      asset: ksm,
+    },
+  },
+  extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+});
+
 export const assetHubConfig = new ChainRoutes({
   chain: kusamaAssetHub,
   routes: [
     toKusama,
+    toBasilisk,
     toPolkadotAssethub,
     toParaStablesTemplate(usdt, basilisk, 0.001),
     toParaStablesTemplate(usdt, karura, 0.001),
