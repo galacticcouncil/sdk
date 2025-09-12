@@ -1,3 +1,4 @@
+import Big from 'big.js';
 import { PERMILL_DENOMINATOR, PERBILL_DENOMINATOR } from '../consts';
 import { PoolFee } from '../pool';
 
@@ -36,4 +37,19 @@ export class FeeUtils {
   static safeRound(value: number): number {
     return parseFloat(value.toPrecision(15));
   }
+}
+
+export function shiftNeg(
+  amount: string | number | bigint,
+  decimals: number
+): string {
+  const amountBig = Big(
+    typeof amount === 'bigint' ? amount.toString() : amount
+  );
+
+  if (decimals === 0) {
+    return amountBig.toString();
+  }
+
+  return amountBig.div(Math.pow(10, decimals)).toString();
 }
