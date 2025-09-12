@@ -11,6 +11,8 @@ import { fmt } from '../../utils';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 
+const { FeeUtils } = fmt;
+
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   protected async loadPools(): Promise<OmniPoolBase[]> {
     const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
@@ -43,7 +45,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         id: id,
         decimals: meta?.decimals,
         existentialDeposit: meta?.existential_deposit,
-        balance: balance,
+        balance: balance.transferable,
         cap: cap,
         hubReserves: hub_reserve,
         protocolShares: protocol_shares,
@@ -60,7 +62,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       id: hubAssetId,
       decimals: hubAssetMeta?.decimals,
       existentialDeposit: hubAssetMeta?.existential_deposit,
-      balance: hubAssetBalance,
+      balance: hubAssetBalance.transferable,
       tradeable: hubAssetTradeability,
       type: hubAssetMeta?.asset_type.type,
     } as OmniPoolToken);
@@ -112,17 +114,17 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     if (dynamicFees) {
       const { asset_fee, protocol_fee } = dynamicFees;
       return {
-        assetFee: fmt.fromPermill(asset_fee),
-        protocolFee: fmt.fromPermill(protocol_fee),
-        min: fmt.fromPermill(min),
-        max: fmt.fromPermill(max),
+        assetFee: FeeUtils.fromPermill(asset_fee),
+        protocolFee: FeeUtils.fromPermill(protocol_fee),
+        min: FeeUtils.fromPermill(min),
+        max: FeeUtils.fromPermill(max),
       } as OmniPoolFees;
     } else {
       return {
-        assetFee: fmt.fromPermill(afp.min_fee),
-        protocolFee: fmt.fromPermill(pfp.min_fee),
-        min: fmt.fromPermill(min),
-        max: fmt.fromPermill(max),
+        assetFee: FeeUtils.fromPermill(afp.min_fee),
+        protocolFee: FeeUtils.fromPermill(pfp.min_fee),
+        min: FeeUtils.fromPermill(min),
+        max: FeeUtils.fromPermill(max),
       } as OmniPoolFees;
     }
   }

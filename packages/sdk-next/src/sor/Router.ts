@@ -1,4 +1,4 @@
-import { Edge, RouteSuggester } from './route';
+import { Edge, RouteSuggester, RouteProposal } from './route';
 
 import {
   Hop,
@@ -6,42 +6,38 @@ import {
   Pool,
   PoolBase,
   PoolFactory,
-  PoolType,
+  PoolFilter,
 } from '../pool';
 
-export type RouterOptions = {
-  useOnly: PoolType[];
-};
+export type RouterOptions = PoolFilter;
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
+  private readonly routeProposals: Map<string, RouteProposal[]>;
   private readonly routerOptions: RouterOptions;
 
   protected readonly ctx: IPoolCtxProvider;
 
-  private readonly defaultRouterOptions: RouterOptions = {
-    useOnly: [],
-  };
-
-  constructor(ctx: IPoolCtxProvider, routerOptions?: RouterOptions) {
+  constructor(ctx: IPoolCtxProvider, routerOptions: RouterOptions = {}) {
     this.ctx = ctx;
     this.routeSuggester = new RouteSuggester();
-    this.routerOptions = {
-      ...this.defaultRouterOptions,
-      ...routerOptions,
-    };
+    this.routeProposals = new Map();
+    this.routerOptions = Object.freeze(routerOptions);
+  }
+
+  protected buildRouteKey(
+    assetIn: number,
+    assetOut: number,
+    pools: PoolBase[]
+  ): string {
+    return `${assetIn}->${assetOut}::${pools.length}`;
   }
 
   /**
    * List trading pools
    */
   async getPools(): Promise<PoolBase[]> {
-    const pools = await this.ctx.getPools();
-    const useOnly = this.routerOptions.useOnly;
-    if (useOnly.length === 0) {
-      return pools;
-    }
-    return pools.filter((p) => useOnly.includes(p.type));
+    return this.ctx.getPools(this.routerOptions);
   }
 
   /**
@@ -63,6 +59,24 @@ export class Router {
     const pools = await this.getPools();
     const assets = this.getAssets(pools);
     return Array.from(assets);
+  }
+
+  /**
+   * Return list of all routeble assets from substrate based pools
+   *
+   * @returns {number[]} List of all routeable asset ids
+   */
+  async getRouteableAssets(toAsset: number): Promise<number[]> {
+    const assets = await this.getTradeableAssets();
+    const routes = await Promise.all(
+      assets
+        .filter((a) => a !== toAsset)
+        .map((id) => this.getRoutes(id, toAsset))
+    );
+    return routes
+      .filter((r) => r.length > 0)
+      .map(([first]) => first[0].assetIn)
+      .sort();
   }
 
   /**
@@ -112,18 +126,34 @@ export class Router {
    */
   protected getPaths(
     assetIn: number,
-    assetOut: number | null,
+    assetOut: number,
     pools: PoolBase[]
   ): Hop[][] {
     const poolsMap = this.toPoolsMap(pools);
-    const routeProposals = this.routeSuggester.getProposals(
+    const routeProposals = this.getProposals(assetIn, assetOut, pools);
+    return routeProposals
+      .filter((path: Edge[]) => this.validPath(path, poolsMap))
+      .map((path: Edge[]) => this.toHops(path, poolsMap));
+  }
+
+  private getProposals(
+    assetIn: number,
+    assetOut: number,
+    pools: PoolBase[]
+  ): RouteProposal[] {
+    const key = this.buildRouteKey(assetIn, assetOut, pools);
+
+    if (this.routeProposals.has(key)) {
+      return this.routeProposals.get(key)!;
+    }
+
+    const proposals = this.routeSuggester.getProposals(
       assetIn,
       assetOut,
       pools
     );
-    return routeProposals
-      .filter((path: Edge[]) => this.validPath(path, poolsMap))
-      .map((path: Edge[]) => this.toHops(path, poolsMap));
+    this.routeProposals.set(key, proposals);
+    return proposals;
   }
 
   /**

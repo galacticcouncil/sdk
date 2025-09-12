@@ -15,6 +15,8 @@ import { fmt } from '../../utils';
 
 import { XykMath } from './XykMath';
 
+const { FeeUtils } = fmt;
+
 export type XykPoolFees = PoolFees & {
   exchangeFee: PoolFee;
 };
@@ -84,7 +86,7 @@ export class XykPool implements Pool {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
-    const feePct = fmt.toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountIn = calculatedIn + fee;
 
     const errors: PoolError[] = [];
@@ -120,7 +122,7 @@ export class XykPool implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
-    const feePct = fmt.toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountOut = calculatedOut - fee;
 
     const errors: PoolError[] = [];

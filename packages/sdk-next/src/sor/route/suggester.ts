@@ -1,40 +1,95 @@
 import { Bfs, Node, Path } from './bfs';
 import { getNodesAndEdges, Edge } from './graph';
 
-import { PoolBase } from '../../pool';
+import { PoolBase, PoolType } from '../../pool';
+
+export type RouteProposal = Edge[];
 
 export class RouteSuggester {
   /**
-   * Proposals are ideal paths from
-   * 1) tokenIn to tokenOut
-   * 2) tokenIn to *(all possible paths are requested)
+   * Returns ideal path proposals from `tokenIn` to `tokenOut`
+   * based on BFS over trusted, isolated or both pools.
    *
-   * calculated from all permutations of tokens of given pools.
+   * - Trusted pools = all pools except XYK (isolated)
    *
-   * E.g. permutation of pool A={1,3} is 2, such as {1,3}, {3,1} where 1 are 3
-   * are pool assets(tokens)
+   * The routing strategy is:
+   * - If neither `tokenIn` and `tokenOut` is in a trusted pool:
+   *   → Run BFS over isolated pools only, searching for all paths.
+   * - If both `tokenIn` and `tokenOut` are in trusted pools:
+   *   → Run BFS over trusted pools only, searching for shortest paths.
+   * - Otherwise:
+   *   → Run BFS over all relevant pools (trusted + isolated).
    *
-   * Filtering of valid paths and corresponding asset pairs is done by router itself!!!
+   * This strategy minimizes search scope while ensuring all viable
+   * paths are discovered.
    *
-   * @param tokenIn - tokenIn
-   * @param tokenOut - tokenOut or null if all possible paths from tokenIn are requested
-   * @param pools - substrate based pools
-   * @returns all possible path proposals
+   * NOTE: Filtering of valid swaps and pair execution is handled by the router,
+   * not in this step.
+   *
+   * @param tokenIn - The starting token (asset ID as string)
+   * @param tokenOut - The destination token (asset ID as string)
+   * @param pools - The list of available pools
+   * @returns Array of path proposals (each path is a list of edges)
    */
   getProposals(
     tokenIn: number,
-    tokenOut: number | null,
+    tokenOut: number,
     pools: PoolBase[]
-  ): Edge[][] {
-    const nodeEdges = getNodesAndEdges(pools);
-    const poolAssets = Object.keys(nodeEdges);
-    const possiblePairs: Edge[] = poolAssets
-      .map((node) => nodeEdges[node])
-      .flat();
+  ): RouteProposal[] {
+    const isolatedPools = pools.filter((p) => p.type === PoolType.XYK);
+    const trustedPools = pools.filter((p) => p.type !== PoolType.XYK);
+
+    const trustedSet = new Set(
+      trustedPools
+        .map((p) => p.tokens)
+        .flat()
+        .map((t) => t.id)
+    );
+
+    const tokenInTrusted = trustedSet.has(tokenIn);
+    const tokenOutTrusted = trustedSet.has(tokenOut);
+
     const bfs = new Bfs();
-    const bfsGraph = bfs.buildAndPopulateGraph(poolAssets, possiblePairs);
-    const possiblePaths = bfs.findPaths(bfsGraph, tokenIn, tokenOut);
-    return this.parsePaths(possiblePaths);
+    const buildGraphFromPools = (inputPools: PoolBase[]) => {
+      const nodeEdges = getNodesAndEdges(inputPools);
+      const assets = Object.keys(nodeEdges);
+      const routes: Edge[] = assets.flatMap((node) => nodeEdges[node]);
+      return bfs.buildAndPopulateGraph(assets, routes);
+    };
+
+    // Case 1: Isolated-only
+    if (!tokenInTrusted && !tokenOutTrusted) {
+      const relevantIsolatedPools = isolatedPools.filter(
+        (p) =>
+          p.tokens.find((t) => t.id === tokenIn) ||
+          p.tokens.find((t) => t.id === tokenOut)
+      );
+      const graph = buildGraphFromPools(relevantIsolatedPools);
+      const paths = bfs.findPaths(graph, tokenIn, tokenOut);
+      return this.parsePaths(paths);
+    }
+
+    // Case 2: Trusted-only
+    if (tokenInTrusted && tokenOutTrusted) {
+      const graph = buildGraphFromPools(trustedPools);
+      const paths = bfs.findPaths(graph, tokenIn, tokenOut);
+      return this.parsePaths(paths);
+    }
+
+    // Case 3: Mixed (isolated <-> trusted)
+    const isolatedOnlyToken = tokenInTrusted ? tokenOut : tokenIn;
+    const relevantIsolatedPools = isolatedPools.filter((p) =>
+      p.tokens.some((t) => t.id === isolatedOnlyToken)
+    );
+
+    if (relevantIsolatedPools.length === 0) {
+      return [];
+    }
+
+    const relevantPools = [...trustedPools, ...relevantIsolatedPools];
+    const graph = buildGraphFromPools(relevantPools);
+    const paths = bfs.findPaths(graph, tokenIn, tokenOut);
+    return this.parsePaths(paths);
   }
 
   private parsePaths(possiblePaths: Path[]): Edge[][] {

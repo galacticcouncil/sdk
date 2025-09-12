@@ -7,12 +7,14 @@ import { PoolContextProvider } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
 
 import { TxBuilderFactory } from './tx';
+import { StakingApi, StakingClient } from './staking';
 
 export type SdkCtx = {
   api: {
     aave: AaveUtils;
     router: TradeRouter;
     scheduler: TradeScheduler;
+    staking: StakingApi;
   };
   client: {
     asset: AssetClient;
@@ -27,19 +29,18 @@ export type SdkCtx = {
 };
 
 export async function createSdkContext(
-  client: PolkadotClient,
-  evmClient?: EvmClient
+  client: PolkadotClient
 ): Promise<SdkCtx> {
   const params = new ChainParams(client);
+  const evm = new EvmClient(client);
+
   const [blockTime, minOrderBudget] = await Promise.all([
     params.getBlockTime(),
     params.getMinOrderBudget(),
   ]);
 
-  const evm = evmClient ?? new EvmClient();
-
   // Initialize pool context
-  const poolCtx = new PoolContextProvider(client)
+  const poolCtx = new PoolContextProvider(client, evm)
     .withAave()
     .withOmnipool()
     .withStableswap()
@@ -53,15 +54,20 @@ export async function createSdkContext(
     minBudgetInNative: minOrderBudget,
   });
 
+  const balance = new BalanceClient(client);
+  const stakingClient = new StakingClient(client);
+  const staking = new StakingApi(stakingClient, balance);
+
   return {
     api: {
       aave,
       router,
       scheduler,
+      staking,
     },
     client: {
       asset: new AssetClient(client),
-      balance: new BalanceClient(client),
+      balance,
       evm: evm,
     },
     ctx: {

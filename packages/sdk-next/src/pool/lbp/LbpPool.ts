@@ -15,6 +15,8 @@ import { fmt } from '../../utils';
 
 import { LbpMath } from './LbpMath';
 
+const { FeeUtils } = fmt;
+
 export type WeightedPoolPair = PoolPair & {
   weightIn: bigint;
   weightOut: bigint;
@@ -125,7 +127,7 @@ export class LbpPool implements Pool {
 
     if (feeAsset === poolPair.assetOut) {
       const fee = this.calculateTradeFee(amountOut, fees);
-      const feePct = fmt.toPct(
+      const feePct = FeeUtils.toPct(
         this.repayFeeApply ? fees.repayFee : fees.exchangeFee
       );
       const amountOutPlusFee = amountOut + fee;
@@ -203,7 +205,7 @@ export class LbpPool implements Pool {
     } else {
       const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
       const fee = this.calculateTradeFee(calculatedOut, fees);
-      const feePct = fmt.toPct(
+      const feePct = FeeUtils.toPct(
         this.repayFeeApply ? fees.repayFee : fees.exchangeFee
       );
       const amountOut = calculatedOut - fee;

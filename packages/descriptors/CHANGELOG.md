@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.4.0
+
+### Minor Changes
+
+- eb1e3d2: Add stableswap pegs
+
 ## 1.3.0
 
 ### Minor Changes
