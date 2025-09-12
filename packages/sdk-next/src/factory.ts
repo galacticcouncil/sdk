@@ -1,7 +1,12 @@
 import { PolkadotClient } from 'polkadot-api';
 
 import { AaveUtils } from './aave';
-import { AssetClient, BalanceClient, ChainParams } from './client';
+import {
+  AssetClient,
+  BalanceClient,
+  ChainParams,
+  LiquidityMining,
+} from './client';
 import { EvmClient } from './evm';
 import { PoolContextProvider } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
@@ -20,6 +25,7 @@ export type SdkCtx = {
     asset: AssetClient;
     balance: BalanceClient;
     evm: EvmClient;
+    mining: LiquidityMining;
   };
   ctx: {
     pool: PoolContextProvider;
@@ -69,6 +75,7 @@ export async function createSdkContext(
       asset: new AssetClient(client),
       balance,
       evm: evm,
+      mining: new LiquidityMining(client),
     },
     ctx: {
       pool: poolCtx,
