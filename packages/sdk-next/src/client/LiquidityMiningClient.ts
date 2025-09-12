@@ -14,6 +14,7 @@ import { Papi } from '../api';
 import { BalanceClient } from './BalanceClient';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { shiftNeg } from '../utils/format';
+import { Balance } from 'types';
 
 type OmnipoolGlobalFarm =
   HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];
@@ -25,7 +26,7 @@ type OmnipolFarm = {
   globalFarm: OmnipoolGlobalFarm;
   yieldFarm: OmnipoolYieldFarm;
   priceAdjustment: bigint | undefined;
-  balance: bigint;
+  balance: Balance;
 };
 
 const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
@@ -184,7 +185,7 @@ export class LiquidityMining extends Papi {
 
     const distributedRewards = pending_rewards + accumulated_paid_rewards;
     const maxRewards = max_reward_per_period * BigInt(planned_yielding_periods);
-    const potMaxRewards = balance + distributedRewards;
+    const potMaxRewards = balance.transferable + distributedRewards;
     const leftToDistribute = potMaxRewards - distributedRewards;
 
     const periodsLeft = Big(leftToDistribute.toString()).div(
