@@ -8,6 +8,7 @@ import { TradeRouter, TradeScheduler } from './sor';
 
 import { TxBuilderFactory } from './tx';
 import { StakingApi, StakingClient } from './staking';
+import { LiquidityMiningApi, LiquidityMiningClient } from './farm';
 
 export type SdkCtx = {
   api: {
@@ -15,6 +16,7 @@ export type SdkCtx = {
     router: TradeRouter;
     scheduler: TradeScheduler;
     staking: StakingApi;
+    farm: LiquidityMiningApi;
   };
   client: {
     asset: AssetClient;
@@ -57,6 +59,8 @@ export async function createSdkContext(
   const balance = new BalanceClient(client);
   const stakingClient = new StakingClient(client);
   const staking = new StakingApi(stakingClient, balance);
+  const farmClient = new LiquidityMiningClient(client);
+  const farm = new LiquidityMiningApi(farmClient, balance);
 
   return {
     api: {
@@ -64,6 +68,7 @@ export async function createSdkContext(
       router,
       scheduler,
       staking,
+      farm,
     },
     client: {
       asset: new AssetClient(client),

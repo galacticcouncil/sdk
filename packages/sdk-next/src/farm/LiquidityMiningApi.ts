@@ -11,10 +11,13 @@ import Big from 'big.js';
 import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
 import { Papi } from '../api';
-import { BalanceClient } from './BalanceClient';
+import { BalanceClient } from '../client/BalanceClient';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { shiftNeg } from '../utils/format';
 import { Balance } from 'types';
+import { LiquidityMiningClient } from './LiquidityMiningClient';
+
+const secondsInYear = Big(365.2425).times(24).times(60).times(60);
 
 type OmnipoolGlobalFarm =
   HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];
@@ -32,16 +35,15 @@ type OmnipolFarm = {
 const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
 const blockTime = 6;
 
-export class LiquidityMining extends Papi {
-  protected readonly balanceClient: BalanceClient;
+export class LiquidityMiningApi {
+  private readonly client: LiquidityMiningClient;
+  private readonly balanceClient: BalanceClient;
+
   protected omnipoolAssetIds: string[] = [];
 
-  private secondsInYear = Big(365.2425).times(24).times(60).times(60);
-
-  constructor(client: PolkadotClient) {
-    super(client);
-
-    this.balanceClient = new BalanceClient(client);
+  constructor(client: LiquidityMiningClient, balanceClient: BalanceClient) {
+    this.client = client;
+    this.balanceClient = balanceClient;
   }
 
   async getOraclePrice(
@@ -54,11 +56,7 @@ export class LiquidityMining extends Papi {
 
     if (rewardCurrency === incentivizedAsset) return DEFAULT_ORACLE_PRICE;
 
-    const res = await this.api.query.EmaOracle.Oracles.getValue(
-      Binary.fromText('omnipool'),
-      orderedAssets,
-      Enum('TenMinutes')
-    );
+    const res = await this.client.getOraclePrice(orderedAssets);
 
     if (res) {
       const { n, d } = res[0].price;
@@ -154,7 +152,7 @@ export class LiquidityMining extends Papi {
       RUNTIME_DECIMALS
     );
 
-    const periodsPerYear = this.secondsInYear
+    const periodsPerYear = secondsInYear
       .div(Big(blockTime).times(blocks_per_period))
       .toString();
 
@@ -242,14 +240,8 @@ export class LiquidityMining extends Papi {
   }
 
   async getOmnipoolFarms(id: string) {
-    const activeYieldFarmIds =
-      await this.api.query.OmnipoolWarehouseLM.ActiveYieldFarm.getEntries(
-        Number(id)
-      );
-    const parachainSystem =
-      await this.api.query.ParachainSystem.ValidationData.getValue();
-
-    const relayBlockNumber = parachainSystem?.relay_parent_number;
+    const activeYieldFarmIds = await this.client.getOmnipooFarms(Number(id));
+    const relayBlockNumber = await this.client.getRelayBlockNumber();
 
     const farms = await Promise.all(
       activeYieldFarmIds.map(async ({ keyArgs, value }) => {
@@ -257,16 +249,13 @@ export class LiquidityMining extends Papi {
         const yieldFarmId = value;
 
         const globalFarm =
-          await this.api.query.OmnipoolWarehouseLM.GlobalFarm.getValue(
-            globalFarmId
-          );
+          await this.client.getOmnipoolGlobalFarm(globalFarmId);
 
-        const yieldFarm =
-          await this.api.query.OmnipoolWarehouseLM.YieldFarm.getValue(
-            Number(id),
-            globalFarmId,
-            yieldFarmId
-          );
+        const yieldFarm = await this.client.getOmnipoolYieldFarm(
+          Number(id),
+          globalFarmId,
+          yieldFarmId
+        );
 
         if (!globalFarm || !yieldFarm) return undefined;
 
@@ -302,12 +291,8 @@ export class LiquidityMining extends Papi {
   }
 
   async getIsolatedFarms(id: string) {
-    const activeYieldFarmIds =
-      await this.api.query.XYKWarehouseLM.ActiveYieldFarm.getEntries(id);
-    const parachainSystem =
-      await this.api.query.ParachainSystem.ValidationData.getValue();
-
-    const relayBlockNumber = parachainSystem?.relay_parent_number;
+    const activeYieldFarmIds = await this.client.getIsolatedFarms(id);
+    const relayBlockNumber = await this.client.getRelayBlockNumber();
 
     const farms = await Promise.all(
       activeYieldFarmIds.map(async ({ keyArgs, value }) => {
@@ -315,14 +300,13 @@ export class LiquidityMining extends Papi {
         const yieldFarmId = value;
 
         const globalFarm =
-          await this.api.query.XYKWarehouseLM.GlobalFarm.getValue(globalFarmId);
+          await this.client.getIsolatedGlobalFarm(globalFarmId);
 
-        const yieldFarm =
-          await this.api.query.XYKWarehouseLM.YieldFarm.getValue(
-            id,
-            globalFarmId,
-            yieldFarmId
-          );
+        const yieldFarm = await this.client.getIsolatedYieldFarm(
+          id,
+          globalFarmId,
+          yieldFarmId
+        );
 
         if (!globalFarm || !yieldFarm) return undefined;
 
