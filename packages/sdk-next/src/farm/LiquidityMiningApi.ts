@@ -1,16 +1,9 @@
-import {
-  AccountId,
-  Binary,
-  Enum,
-  PolkadotClient,
-  SS58String,
-} from 'polkadot-api';
+import { AccountId, SS58String } from 'polkadot-api';
 import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
 import Big from 'big.js';
 
 import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
-import { Papi } from '../api';
 import { BalanceClient } from '../client/BalanceClient';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { shiftNeg } from '../utils/format';

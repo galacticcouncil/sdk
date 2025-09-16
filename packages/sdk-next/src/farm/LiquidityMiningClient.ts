@@ -1,4 +1,4 @@
-import { Papi } from 'api';
+import { Papi } from '../api';
 import { Binary, Enum } from 'polkadot-api';
 
 export class LiquidityMiningClient extends Papi {
