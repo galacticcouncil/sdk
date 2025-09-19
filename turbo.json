@@ -4,9 +4,13 @@
     "prebuild": {
       "cache": true
     },
+    "postbuild": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
     "build": {
       "outputs": ["build/**"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "^postbuild"]
     },
     "build:watch": {
       "cache": false
