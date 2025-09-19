@@ -142,12 +142,10 @@ export class TradeTxBuilder extends TxBuilder {
       );
     }
 
-    if (firstSwap.isWithdraw()) {
-      const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-      if (hasDebt) {
-        const txWithExtraGas = this.dispatchWithExtraGas(tx);
-        return this.wrapTx('RouterSell', txWithExtraGas, AAVE_EXTRA_GAS);
-      }
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      const txWithExtraGas = this.dispatchWithExtraGas(tx);
+      return this.wrapTx('RouterSell', txWithExtraGas, AAVE_EXTRA_GAS);
     }
 
     return this.wrapTx('RouterSell', tx);
@@ -172,12 +170,10 @@ export class TradeTxBuilder extends TxBuilder {
       TradeRouteBuilder.build(swaps)
     );
 
-    if (firstSwap.isWithdraw()) {
-      const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-      if (hasDebt) {
-        const txWithExtraGas = this.dispatchWithExtraGas(tx);
-        return this.wrapTx('RouterSellAll', txWithExtraGas, AAVE_EXTRA_GAS);
-      }
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      const txWithExtraGas = this.dispatchWithExtraGas(tx);
+      return this.wrapTx('RouterSellAll', txWithExtraGas, AAVE_EXTRA_GAS);
     }
 
     return this.wrapTx('RouterSellAll', tx);
