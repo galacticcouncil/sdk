@@ -253,7 +253,15 @@ const transferAssetsUsingTypeAndThen = (
             transferAssetLocation,
             messageId
           );
-        } else if (ctx.key === 'kusama' && rcv.key === 'basilisk') {
+        } else if (ctx.parachainId === 0 && rcv.parachainId === 1000) {
+          // Relay -> Hub
+          customXcmOnDest = toDepositXcmOnDest(version, account);
+        } else if (
+          ctx.parachainId === 0 &&
+          (transferType === XcmTransferType.LocalReserve ||
+            transferType === XcmTransferType.Teleport)
+        ) {
+          // Relay -> Parachain (LocalReserve / Teleport)
           customXcmOnDest = toDepositReserveAssetXcmOnDest(
             version,
             account,
@@ -261,21 +269,15 @@ const transferAssetsUsingTypeAndThen = (
             transferFeeLocation,
             destination.fee.amount
           );
-        } else if (ctx.key === 'kusama' && rcv.key === 'kusamaAssetHub') {
-          customXcmOnDest = toDepositXcmOnDest(version, account);
-        } else if (rcv.parachainId === 0 && transferType === XcmTransferType.DestinationReserve) {
+        } else if (
+          // Parachain -> Relay (DestinationReserve)
+          rcv.parachainId === 0 &&
+          transferType === XcmTransferType.DestinationReserve
+        ) {
           customXcmOnDest = toInitiateTeleportXcmOnDest(
             version,
             account,
             transferAssetLocation,
-            destination.fee.amount
-          );
-        } else if (ctx.parachainId === 0 && (transferType === XcmTransferType.LocalReserve || transferType === XcmTransferType.Teleport)) {
-          customXcmOnDest = toDepositReserveAssetXcmOnDest(
-            version,
-            account,
-            rcv,
-            transferFeeLocation,
             destination.fee.amount
           );
         } else {

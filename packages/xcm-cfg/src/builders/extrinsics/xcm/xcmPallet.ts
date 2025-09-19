@@ -163,7 +163,11 @@ const transferAssetsUsingTypeAndThen = (
               transferAssetLocation,
               messageId
             );
-          } else if (ctx.key === 'kusama' && rcv.key === 'basilisk') {
+          } else if (
+            ctx.parachainId === 0 &&
+            (transferType === XcmTransferType.LocalReserve ||
+              transferType === XcmTransferType.Teleport)
+          ) {
             return toDepositReserveAssetXcmOnDest(
               version,
               account,

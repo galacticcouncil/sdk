@@ -8,7 +8,11 @@ import {
   kusama,
   kusamaAssetHub,
 } from '../../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../../builders';
 
 import { toParaStablesTemplate, extraFee } from './templates';
 
@@ -57,7 +61,9 @@ const toPolkadotAssethub = new AssetRoute({
       asset: ksm,
     },
   },
-  extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+    transferType: XcmTransferType.LocalReserve,
+  }),
 });
 
 const toBasilisk = new AssetRoute({
