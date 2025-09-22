@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk
 
+## 9.17.0
+
+### Minor Changes
+
+[36fbb472]: https://github.com/galacticcouncil/sdk/commit/36fbb472
+[3e41727f]: https://github.com/galacticcouncil/sdk/commit/3e41727f
+
+- [[#36fbb472][36fbb472]] sdk: wrap with extra gas if any debt
+- [[#3e41727f][3e41727f]] sdk: bump bfs to new max (10)
+
 ## 9.16.0
 
 ### Minor Changes
