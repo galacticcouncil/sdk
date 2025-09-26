@@ -119,7 +119,7 @@ export class LiquidityMiningApi {
     relayBlockNumber: number,
     isXyk?: boolean
   ) {
-    const { yieldFarm, globalFarm, priceAdjustment, balance } = farm;
+    const { yieldFarm, globalFarm, priceAdjustment, balance, id } = farm;
     const { multiplier, loyalty_curve: loyaltyCurve } = yieldFarm;
     const {
       blocks_per_period,
@@ -151,7 +151,7 @@ export class LiquidityMiningApi {
 
     let apr: string;
 
-    if (total_shares_z < 0) {
+    if (total_shares_z <= 0) {
       apr = Big(multiplierShifted)
         .times(yield_per_period.toString())
         .times(periodsPerYear)
@@ -229,7 +229,26 @@ export class LiquidityMiningApi {
       currentPeriod,
       potMaxRewards,
       fullness,
+      yieldFarmId: yieldFarm.id,
+      globalFarmId: globalFarm.id,
+      poolId: id,
     };
+  }
+
+  async getAllOmnipoolFarms() {
+    const activeYieldFarmIds = await this.client.getAllOmnipooFarms();
+
+    const poolIds = activeYieldFarmIds.reduce<string[]>(
+      (acc, activeYieldFarmId) =>
+        acc.includes(activeYieldFarmId.keyArgs[0].toString())
+          ? acc
+          : [...acc, activeYieldFarmId.keyArgs[0].toString()],
+      []
+    );
+
+    return Promise.all(
+      poolIds.map(async (poolId) => await this.getOmnipoolFarms(poolId))
+    );
   }
 
   async getOmnipoolFarms(id: string) {
@@ -261,7 +280,7 @@ export class LiquidityMiningApi {
           incentivizedAsset
         );
 
-        const balance = await this.balanceClient.getTokenBalance(
+        const balance = await this.balanceClient.getBalance(
           farmAddress,
           rewardCurrency
         );
@@ -281,6 +300,22 @@ export class LiquidityMiningApi {
           farm ? this.farmData(farm, relayBlockNumber) : undefined
         )
       : [];
+  }
+
+  async getAllIsolatedFarms() {
+    const activeYieldFarmIds = await this.client.getAllIsolatedFarms();
+
+    const poolIds = activeYieldFarmIds.reduce<string[]>(
+      (acc, activeYieldFarmId) =>
+        acc.includes(activeYieldFarmId.keyArgs[0].toString())
+          ? acc
+          : [...acc, activeYieldFarmId.keyArgs[0].toString()],
+      []
+    );
+
+    return Promise.all(
+      poolIds.map(async (poolId) => await this.getIsolatedFarms(poolId))
+    );
   }
 
   async getIsolatedFarms(id: string) {
