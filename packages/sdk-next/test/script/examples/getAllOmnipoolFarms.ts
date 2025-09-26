@@ -5,13 +5,13 @@ import { ApiUrl } from '../types';
 
 import { createSdkContext } from '../../../src';
 
-class GetOmnipoolFarm extends PapiExecutor {
+class GetAllOmnipoolFarm extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
-    const omnipoolFarm = await sdk.api.farm.getOmnipoolFarms('5');
+    const allFarms = await sdk.api.farm.getAllOmnipoolFarms();
 
-    return omnipoolFarm;
+    return allFarms;
   }
 }
 
-new GetOmnipoolFarm(ApiUrl.Hydration, 'Get omnipool farm').run();
+new GetAllOmnipoolFarm(ApiUrl.Hydration, 'Get all omnipool farm').run();
