@@ -117,7 +117,9 @@ export abstract class PoolClient extends BalanceClient {
       tokens
         .filter(
           (t) =>
-            t.type === 'Token' && t.id !== SYSTEM_ASSET_ID && t.id !== pool.id
+            ['Token', 'StableSwap'].includes(t.type) &&
+            t.id !== SYSTEM_ASSET_ID &&
+            t.id !== pool.id
         )
         .forEach((t) => {
           tokenQueries.push([address, t.id]);
