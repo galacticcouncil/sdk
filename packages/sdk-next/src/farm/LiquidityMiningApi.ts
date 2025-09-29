@@ -19,6 +19,7 @@ import { RewardClaimSimulator } from './RewardClaimSimulator';
 
 import { DEFAULT_ORACLE_PRICE, DEFAULT_BLOCK_TIME } from './const';
 import {
+  Farm,
   OmnipoolFarm,
   OmnipoolWarehouseLMDepositYieldFarmEntry,
 } from './types';
@@ -129,7 +130,7 @@ export class LiquidityMiningApi {
     farm: OmnipoolFarm,
     relayBlockNumber: number,
     isXyk?: boolean
-  ) {
+  ): Farm {
     const { yieldFarm, globalFarm, priceAdjustment, balance, id } = farm;
     const { multiplier, loyalty_curve: loyaltyCurve } = yieldFarm;
     const {
@@ -257,9 +258,17 @@ export class LiquidityMiningApi {
       []
     );
 
-    return Promise.all(
-      poolIds.map(async (poolId) => await this.getOmnipoolFarms(poolId))
+    const farmEntries = await Promise.all(
+      poolIds.map(async (poolId) => {
+        const data = await this.getOmnipoolFarms(poolId);
+
+        if (!data) return undefined;
+
+        return [poolId, data] as [string, Farm[]];
+      })
     );
+
+    return Object.fromEntries(farmEntries.filter((entry) => !!entry));
   }
 
   async getOmnipoolFarms(id: string) {
@@ -324,9 +333,17 @@ export class LiquidityMiningApi {
       []
     );
 
-    return Promise.all(
-      poolIds.map(async (poolId) => await this.getIsolatedFarms(poolId))
+    const farmEntries = await Promise.all(
+      poolIds.map(async (poolId) => {
+        const data = await this.getIsolatedFarms(poolId);
+
+        if (!data) return undefined;
+
+        return [poolId, data] as [string, Farm[]];
+      })
     );
+
+    return Object.fromEntries(farmEntries.filter((entry) => !!entry));
   }
 
   async getIsolatedFarms(id: string) {
