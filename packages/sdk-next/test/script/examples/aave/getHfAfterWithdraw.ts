@@ -1,22 +1,32 @@
-import { aave } from '../../../../src';
+import { PolkadotClient } from 'polkadot-api';
 
+import { createSdkContext } from '../../../../src';
+
+import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
+import { ApiUrl } from '../../types';
 
-const main = async () => {
-  const api = new aave.AaveUtils();
+class GetHealthFactorAfterWithdraw extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const sdk = await createSdkContext(client);
 
-  const hf = await api.getHealthFactor(BENEFICIARY);
-  console.log(hf);
+    const { api } = sdk;
 
-  const result = await api.getHealthFactorAfterWithdraw(
-    BENEFICIARY,
-    15, // vDOT
-    '16' // Withdraw 16 avDOTs
-  );
-  console.log(result);
-};
+    const result = await api.aave.getHealthFactorAfterWithdraw(
+      BENEFICIARY,
+      15, // vDOT
+      '16' // Withdraw 16 avDOTs
+    );
+    console.log(result);
 
-main()
-  .then(() => console.log('Get HF after withdraw complete ✅'))
-  .catch(console.error)
-  .finally(() => process.exit(0));
+    return () => {
+      sdk.destroy();
+      client.destroy();
+    };
+  }
+}
+
+new GetHealthFactorAfterWithdraw(
+  ApiUrl.Hydration,
+  'Get healthh factor after withdraw'
+).run();
