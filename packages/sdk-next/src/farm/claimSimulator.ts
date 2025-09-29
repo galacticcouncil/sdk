@@ -6,16 +6,16 @@ import {
   calculate_user_reward,
   calculate_yield_farm_delta_rpvs,
 } from '@galacticcouncil/math-liquidity-mining';
+import { BN_QUINTILL } from './LiquidityMiningApi';
+import { MultiCurrencyContainer } from './multiCurrencyContainer';
 import {
-  BN_QUINTILL,
   FarmDepositReward,
   IsolatedGlobalFarm,
   ISolatedYieldFarm,
   OmnipoolGlobalFarm,
   OmnipoolWarehouseLMDepositYieldFarmEntry,
   OmnipoolYieldFarm,
-} from './LiquidityMiningApi';
-import { MultiCurrencyContainer } from './multiCurrencyContainer';
+} from './types';
 
 const MAX_LOYALTY_FACTOR = '1000000000000000000';
 
