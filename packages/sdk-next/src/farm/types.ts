@@ -1,15 +1,18 @@
 import { HydrationQueries } from '@galacticcouncil/descriptors';
-import { Balance } from 'types';
+
+import { Balance } from '../types';
+
+export type IsolatedGlobalFarm =
+  HydrationQueries['XYKWarehouseLM']['GlobalFarm']['Value'];
+
+export type ISolatedYieldFarm =
+  HydrationQueries['XYKWarehouseLM']['YieldFarm']['Value'];
 
 export type OmnipoolGlobalFarm =
   HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];
+
 export type OmnipoolYieldFarm =
   HydrationQueries['OmnipoolWarehouseLM']['YieldFarm']['Value'];
-export type LoyaltyCurve = OmnipoolYieldFarm['loyalty_curve'];
-export type IsolatedGlobalFarm =
-  HydrationQueries['XYKWarehouseLM']['GlobalFarm']['Value'];
-export type ISolatedYieldFarm =
-  HydrationQueries['XYKWarehouseLM']['YieldFarm']['Value'];
 
 export type OmnipoolWarehouseLMDeposit =
   HydrationQueries['OmnipoolWarehouseLM']['Deposit']['Value'];
@@ -17,13 +20,18 @@ export type OmnipoolWarehouseLMDeposit =
 export type OmnipoolWarehouseLMDepositYieldFarmEntry =
   OmnipoolWarehouseLMDeposit['yield_farm_entries'][number];
 
-export type OmnipolFarm = {
+export type OmnipoolFarm = {
   id: string;
   globalFarm: OmnipoolGlobalFarm;
   yieldFarm: OmnipoolYieldFarm;
   priceAdjustment: bigint | undefined;
   balance: Balance;
 };
+
+export type GlobalFarm = OmnipoolGlobalFarm | IsolatedGlobalFarm;
+export type YieldFarm = OmnipoolYieldFarm | ISolatedYieldFarm;
+
+export type LoyaltyCurve = OmnipoolYieldFarm['loyalty_curve'];
 
 export type FarmDepositReward = {
   readonly reward: bigint;

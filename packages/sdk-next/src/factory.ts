@@ -3,12 +3,12 @@ import { PolkadotClient } from 'polkadot-api';
 import { AaveUtils } from './aave';
 import { AssetClient, BalanceClient, ChainParams } from './client';
 import { EvmClient } from './evm';
+import { LiquidityMiningApi, LiquidityMiningClient } from './farm';
 import { PoolContextProvider } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
+import { StakingApi, StakingClient } from './staking';
 
 import { TxBuilderFactory } from './tx';
-import { StakingApi, StakingClient } from './staking';
-import { LiquidityMiningApi, LiquidityMiningClient } from './farm';
 
 export type SdkCtx = {
   api: {
@@ -48,6 +48,11 @@ export async function createSdkContext(
     .withStableswap()
     .withXyk();
 
+  // Initialize clients
+  const balance = new BalanceClient(client);
+  const stakingClient = new StakingClient(client);
+  const farmClient = new LiquidityMiningClient(client);
+
   // Initialize APIs
   const aave = new AaveUtils(evm);
   const router = new TradeRouter(poolCtx);
@@ -56,11 +61,10 @@ export async function createSdkContext(
     minBudgetInNative: minOrderBudget,
   });
 
-  const balance = new BalanceClient(client);
-  const stakingClient = new StakingClient(client);
   const staking = new StakingApi(stakingClient, balance);
-  const farmClient = new LiquidityMiningClient(client);
-  const farm = new LiquidityMiningApi(farmClient, balance);
+  const farm = new LiquidityMiningApi(farmClient, balance, {
+    blockTime: blockTime,
+  });
 
   return {
     api: {
@@ -72,7 +76,7 @@ export async function createSdkContext(
     },
     client: {
       asset: new AssetClient(client),
-      balance,
+      balance: balance,
       evm: evm,
     },
     ctx: {

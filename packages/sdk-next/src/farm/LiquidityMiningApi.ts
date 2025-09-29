@@ -1,37 +1,54 @@
 import { AccountId, SS58String } from 'polkadot-api';
-import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
+
 import Big from 'big.js';
 
-import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
+import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
 
-import { BalanceClient } from '../client/BalanceClient';
-import { shiftNeg } from '../utils/format';
-import { OmnipoolLiquidityMiningClaimSim } from './ClaimSimulator';
+import {
+  HYDRATION_SS58_PREFIX,
+  RUNTIME_DECIMALS,
+  SYSTEM_ASSET_ID,
+} from '../consts';
+import { BalanceClient } from '../client';
+import { Balance } from '../types';
+import { fmt } from '../utils';
+
 import { LiquidityMiningClient } from './LiquidityMiningClient';
-import { Balance } from 'types';
 import { MultiCurrencyContainer } from './MultiCurrencyContainer';
+import { RewardClaimSimulator } from './RewardClaimSimulator';
+
+import { DEFAULT_ORACLE_PRICE, DEFAULT_BLOCK_TIME } from './const';
 import {
   Farm,
-  OmnipolFarm,
+  OmnipoolFarm,
   OmnipoolWarehouseLMDepositYieldFarmEntry,
 } from './types';
 
 const secondsInYear = Big(365.2425).times(24).times(60).times(60);
 
-export const BN_QUINTILL = Big(10).pow(18);
-const NATIVE_ASSET_ID = '0';
-const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
-const blockTime = 6;
+export type LiquidityMiningOptions = {
+  blockTime?: number;
+};
 
 export class LiquidityMiningApi {
   private readonly client: LiquidityMiningClient;
   private readonly balanceClient: BalanceClient;
+  private readonly options: LiquidityMiningOptions;
 
-  protected omnipoolAssetIds: string[] = [];
-
-  constructor(client: LiquidityMiningClient, balanceClient: BalanceClient) {
+  constructor(
+    client: LiquidityMiningClient,
+    balanceClient: BalanceClient,
+    options: LiquidityMiningOptions = {}
+  ) {
     this.client = client;
     this.balanceClient = balanceClient;
+    this.options = Object.freeze({
+      blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
+    });
+  }
+
+  get blockTime(): number {
+    return this.options.blockTime!;
   }
 
   async getOraclePrice(
@@ -110,7 +127,7 @@ export class LiquidityMiningApi {
   }
 
   private farmData(
-    farm: OmnipolFarm,
+    farm: OmnipoolFarm,
     relayBlockNumber: number,
     isXyk?: boolean
   ): Farm {
@@ -130,18 +147,18 @@ export class LiquidityMiningApi {
       price_adjustment,
     } = globalFarm;
 
-    const priceAdjustmentShifted = shiftNeg(
+    const priceAdjustmentShifted = fmt.shiftNeg(
       priceAdjustment ?? price_adjustment,
       RUNTIME_DECIMALS
     );
-    const multiplierShifted = shiftNeg(multiplier, RUNTIME_DECIMALS);
-    const loyaltyFactorShifted = shiftNeg(
+    const multiplierShifted = fmt.shiftNeg(multiplier, RUNTIME_DECIMALS);
+    const loyaltyFactorShifted = fmt.shiftNeg(
       loyaltyCurve?.initial_reward_percentage ?? 0,
       RUNTIME_DECIMALS
     );
 
     const periodsPerYear = secondsInYear
-      .div(Big(blockTime).times(blocks_per_period))
+      .div(Big(this.blockTime).times(blocks_per_period))
       .toString();
 
     let apr: string;
@@ -427,10 +444,10 @@ export class LiquidityMiningApi {
       balances
     );
 
-    const simulator = new OmnipoolLiquidityMiningClaimSim(
+    const simulator = new RewardClaimSimulator(
       (sub) => this.getFarmAddress(sub),
-      multiCurrency,
-      (id) => this.client.getAsset(id)
+      (id) => this.client.getAsset(id),
+      multiCurrency
     );
 
     const reward = await simulator.claimRewards(
@@ -464,14 +481,14 @@ export class LiquidityMiningApi {
     const [tokens, natives] = await Promise.all([
       Promise.all(
         pairs
-          .filter(([_, assetId]) => assetId.toString() !== NATIVE_ASSET_ID)
+          .filter(([_, assetId]) => assetId !== SYSTEM_ASSET_ID)
           .map(([account, assetId]) =>
             this.balanceClient.getTokenBalance(account, assetId)
           )
       ),
       Promise.all(
         pairs
-          .filter(([_, assetId]) => assetId.toString() === NATIVE_ASSET_ID)
+          .filter(([_, assetId]) => assetId === SYSTEM_ASSET_ID)
           .map(([account]) => this.balanceClient.getSystemBalance(account))
       ),
     ]);
@@ -485,7 +502,7 @@ export class LiquidityMiningApi {
       const idx = tokenIdx + nativeIdx;
       const [, assetId] = pairs[idx];
 
-      if (assetId.toString() === NATIVE_ASSET_ID) {
+      if (assetId === SYSTEM_ASSET_ID) {
         values.push(natives[nativeIdx]);
 
         nativeIdx += 1;
