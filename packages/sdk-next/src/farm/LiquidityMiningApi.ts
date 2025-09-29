@@ -6,10 +6,10 @@ import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
 import { BalanceClient } from '../client/BalanceClient';
 import { shiftNeg } from '../utils/format';
-import { OmnipoolLiquidityMiningClaimSim } from './claimSimulator';
+import { OmnipoolLiquidityMiningClaimSim } from './ClaimSimulator';
 import { LiquidityMiningClient } from './LiquidityMiningClient';
 import { Balance } from 'types';
-import { MultiCurrencyContainer } from './multiCurrencyContainer';
+import { MultiCurrencyContainer } from './MultiCurrencyContainer';
 import {
   Farm,
   OmnipolFarm,

@@ -7,7 +7,7 @@ import {
   calculate_yield_farm_delta_rpvs,
 } from '@galacticcouncil/math-liquidity-mining';
 import { BN_QUINTILL } from './LiquidityMiningApi';
-import { MultiCurrencyContainer } from './multiCurrencyContainer';
+import { MultiCurrencyContainer } from './MultiCurrencyContainer';
 import {
   FarmDepositReward,
   IsolatedGlobalFarm,
