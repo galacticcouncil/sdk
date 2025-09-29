@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 9.17.1
+
+### Patch Changes
+
+- Fix: PoolClient share balance sync
+
 ## 9.17.0
 
 ### Minor Changes

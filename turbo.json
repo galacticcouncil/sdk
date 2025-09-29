@@ -4,13 +4,13 @@
     "prebuild": {
       "cache": true
     },
+    "build": {
+      "dependsOn": ["^postbuild"],
+      "outputs": ["build/**"]
+    },
     "postbuild": {
       "dependsOn": ["build"],
-      "outputs": []
-    },
-    "build": {
-      "outputs": ["build/**"],
-      "dependsOn": ["^build", "^postbuild"]
+      "outputs": ["build/**/*.d.ts"]
     },
     "build:watch": {
       "cache": false
