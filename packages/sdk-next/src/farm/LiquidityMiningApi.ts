@@ -4,18 +4,31 @@ import Big from 'big.js';
 
 import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
-import { BalanceClient } from '../client/BalanceClient';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
+import { BalanceClient } from '../client/BalanceClient';
 import { shiftNeg } from '../utils/format';
-import { Balance } from 'types';
+import { OmnipoolLiquidityMiningClaimSim } from './claimSimulator';
 import { LiquidityMiningClient } from './LiquidityMiningClient';
+import { Balance } from 'types';
+import { MultiCurrencyContainer } from './multiCurrencyContainer';
 
 const secondsInYear = Big(365.2425).times(24).times(60).times(60);
 
-type OmnipoolGlobalFarm =
+export type OmnipoolGlobalFarm =
   HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];
-type OmnipoolYieldFarm =
+export type OmnipoolYieldFarm =
   HydrationQueries['OmnipoolWarehouseLM']['YieldFarm']['Value'];
+
+export type IsolatedGlobalFarm =
+  HydrationQueries['XYKWarehouseLM']['GlobalFarm']['Value'];
+export type ISolatedYieldFarm =
+  HydrationQueries['XYKWarehouseLM']['YieldFarm']['Value'];
+
+export type OmnipoolWarehouseLMDeposit =
+  HydrationQueries['OmnipoolWarehouseLM']['Deposit']['Value'];
+
+export type OmnipoolWarehouseLMDepositYieldFarmEntry =
+  OmnipoolWarehouseLMDeposit['yield_farm_entries'][number];
 
 type OmnipolFarm = {
   id: string;
@@ -25,6 +38,14 @@ type OmnipolFarm = {
   balance: Balance;
 };
 
+export type FarmDepositReward = {
+  readonly reward: bigint;
+  readonly maxReward: bigint;
+  readonly assetId: number;
+};
+
+export const BN_QUINTILL = Big(10).pow(18);
+const NATIVE_ASSET_ID = '0';
 const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
 const blockTime = 6;
 
@@ -368,5 +389,123 @@ export class LiquidityMiningApi {
           farm ? this.farmData(farm, relayBlockNumber, true) : undefined
         )
       : [];
+  }
+
+  async getDepositReward(
+    poolId: string,
+    farmEntry: OmnipoolWarehouseLMDepositYieldFarmEntry,
+    isXyk: boolean,
+    relayChainBlockNumber: number
+  ) {
+    const globalFarmId = farmEntry.global_farm_id;
+    const yieldFarmId = farmEntry.yield_farm_id;
+
+    const yieldFarm = isXyk
+      ? await this.client.getIsolatedYieldFarm(
+          poolId,
+          globalFarmId,
+          yieldFarmId
+        )
+      : await this.client.getOmnipoolYieldFarm(
+          Number(poolId),
+          globalFarmId,
+          yieldFarmId
+        );
+    const globalFarm = isXyk
+      ? await this.client.getIsolatedGlobalFarm(globalFarmId)
+      : await this.client.getOmnipoolGlobalFarm(globalFarmId);
+
+    if (!globalFarm || !yieldFarm) return undefined;
+
+    const rewardCurrency = globalFarm.reward_currency;
+    const incentivizedAsset = globalFarm.incentivized_asset;
+
+    const accountAddresses: Array<[address: string, assetId: number]> = [
+      [this.getFarmAddress(0, isXyk), globalFarm.reward_currency],
+      [this.getFarmAddress(globalFarm.id, isXyk), globalFarm.reward_currency],
+    ];
+
+    const balances = await this.getAccountAssetBalances(accountAddresses);
+
+    const oracles = await this.getOraclePrice(
+      rewardCurrency,
+      incentivizedAsset
+    );
+
+    const multiCurrency = new MultiCurrencyContainer(
+      accountAddresses,
+      balances
+    );
+
+    const simulator = new OmnipoolLiquidityMiningClaimSim(
+      (sub) => this.getFarmAddress(sub),
+      multiCurrency,
+      (id) => this.client.getAsset(id)
+    );
+
+    const reward = await simulator.claimRewards(
+      globalFarm,
+      yieldFarm,
+      farmEntry,
+      relayChainBlockNumber,
+      oracles ?? globalFarm.price_adjustment
+    );
+
+    if (!reward) {
+      return undefined;
+    }
+
+    const meta = await this.client.getAsset(reward.assetId);
+
+    if (!meta) {
+      return undefined;
+    }
+
+    if (reward.reward <= meta.existential_deposit) {
+      return undefined;
+    }
+
+    return reward;
+  }
+
+  async getAccountAssetBalances(
+    pairs: Array<[address: string, assetId: number]>
+  ) {
+    const [tokens, natives] = await Promise.all([
+      Promise.all(
+        pairs
+          .filter(([_, assetId]) => assetId.toString() !== NATIVE_ASSET_ID)
+          .map(([account, assetId]) =>
+            this.balanceClient.getTokenBalance(account, assetId)
+          )
+      ),
+      Promise.all(
+        pairs
+          .filter(([_, assetId]) => assetId.toString() === NATIVE_ASSET_ID)
+          .map(([account]) => this.balanceClient.getSystemBalance(account))
+      ),
+    ]);
+
+    const values: Array<Balance> = [];
+    for (
+      let tokenIdx = 0, nativeIdx = 0;
+      tokenIdx + nativeIdx < pairs.length;
+
+    ) {
+      const idx = tokenIdx + nativeIdx;
+      const [, assetId] = pairs[idx];
+
+      if (assetId.toString() === NATIVE_ASSET_ID) {
+        values.push(natives[nativeIdx]);
+
+        nativeIdx += 1;
+      } else {
+        values.push(tokens[tokenIdx]);
+
+        tokenIdx += 1;
+      }
+    }
+
+    return values;
   }
 }

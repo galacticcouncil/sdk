@@ -75,4 +75,10 @@ export class LiquidityMiningClient extends Papi {
     const value = query.getValue(id, globalFarmId, yieldFarmId);
     return value;
   }
+
+  async getAsset(id: number) {
+    const query = this.api.query.AssetRegistry.Assets;
+    const value = query.getValue(id);
+    return value;
+  }
 }
