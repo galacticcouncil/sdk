@@ -7,6 +7,7 @@ export * as evm from './evm';
 export * as pool from './pool';
 export * as sor from './sor';
 export * as staking from './staking';
+export * as farm from './farm';
 export * as tx from './tx';
 
 export * from './factory';
