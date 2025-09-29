@@ -1,4 +1,5 @@
 import Big from 'big.js';
+
 import {
   calculate_accumulated_rps,
   calculate_global_farm_rewards,
@@ -6,32 +7,29 @@ import {
   calculate_user_reward,
   calculate_yield_farm_delta_rpvs,
 } from '@galacticcouncil/math-liquidity-mining';
+
+import { BN_QUINTILL } from './const';
 import {
-  BN_QUINTILL,
   FarmDepositReward,
-  IsolatedGlobalFarm,
-  ISolatedYieldFarm,
-  OmnipoolGlobalFarm,
   OmnipoolWarehouseLMDepositYieldFarmEntry,
-  OmnipoolYieldFarm,
-} from './LiquidityMiningApi';
-import { MultiCurrencyContainer } from './multiCurrencyContainer';
+  GlobalFarm,
+  YieldFarm,
+} from './types';
+
+import { MultiCurrencyContainer } from './MultiCurrencyContainer';
 
 const MAX_LOYALTY_FACTOR = '1000000000000000000';
 
-type GlobalFarm = OmnipoolGlobalFarm | IsolatedGlobalFarm;
-type YieldFarm = OmnipoolYieldFarm | ISolatedYieldFarm;
-
-export class OmnipoolLiquidityMiningClaimSim {
+export class RewardClaimSimulator {
   constructor(
     protected getAccount: (sub: number) => string,
-    protected multiCurrency: MultiCurrencyContainer,
     protected getAsset: (id: number) => Promise<
       | {
           existential_deposit: bigint;
         }
       | undefined
-    >
+    >,
+    protected multiCurrency: MultiCurrencyContainer
   ) {}
 
   async syncGlobalFarm(
