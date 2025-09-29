@@ -33,9 +33,6 @@
   "dependencies": {
     "@galacticcouncil/xcm-core": "^8.5.0"
   },
-  "devDependencies": {
-    "@galacticcouncil/sdk": "workspace:*"
-  },
   "peerDependencies": {
     "@galacticcouncil/sdk": "^9.11.0"
   }

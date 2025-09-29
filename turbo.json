@@ -5,15 +5,15 @@
       "cache": true
     },
     "build": {
-      "outputs": ["build/**"],
-      "dependsOn": ["^build", "^postbuild"]
-    },
-    "build:watch": {
-      "cache": false
+      "dependsOn": ["^postbuild"],
+      "outputs": ["build/**"]
     },
     "postbuild": {
       "dependsOn": ["build"],
-      "outputs": []
+      "outputs": ["build/**/*.d.ts"]
+    },
+    "build:watch": {
+      "cache": false
     },
     "clean": {
       "cache": false
