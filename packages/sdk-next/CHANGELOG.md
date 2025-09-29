@@ -1,5 +1,16 @@
 # @galacticcouncil/sdk-next
 
+## 0.7.0
+
+### Minor Changes
+
+- 5b738de: Add farming rewards calculation
+
+### Patch Changes
+
+- 4dadb83: Fix farm apr and add getAllFarms functions
+- ff240ca: Fix data from getAllFarms function
+
 ## 0.6.0
 
 ### Minor Changes

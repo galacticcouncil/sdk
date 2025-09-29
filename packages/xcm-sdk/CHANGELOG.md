@@ -1,5 +1,16 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.7.0
+
+### Minor Changes
+
+- Upgrade pjs to latest
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.6.0
+
 ## 10.6.0
 
 ### Minor Changes

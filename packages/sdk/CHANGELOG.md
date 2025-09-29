@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.0.0
+
+### Major Changes
+
+- bump pjs to latest
+
 ## 9.17.1
 
 ### Patch Changes
