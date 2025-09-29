@@ -3,13 +3,13 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
-import { client as c } from '../../../src';
+import { createSdkContext } from '../../../src';
 
 class GetisolatedFarm extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const liquidityMiningClient = new c.LiquidityMining(client);
+    const sdk = await createSdkContext(client);
 
-    const isolatedFarm = await liquidityMiningClient.getIsolatedFarms(
+    const isolatedFarm = await sdk.api.farm.getIsolatedFarms(
       '15L6BQ1sMd9pESapK13dHaXBPPtBYnDnKTVhb2gBeGrrJNBx'
     );
 
