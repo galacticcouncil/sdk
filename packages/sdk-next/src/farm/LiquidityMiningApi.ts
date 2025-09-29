@@ -5,25 +5,11 @@ import Big from 'big.js';
 import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '../consts';
 
 import { BalanceClient } from '../client/BalanceClient';
-import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { shiftNeg } from '../utils/format';
-import { Balance } from 'types';
 import { LiquidityMiningClient } from './LiquidityMiningClient';
+import { Farm, OmnipolFarm } from './types';
 
 const secondsInYear = Big(365.2425).times(24).times(60).times(60);
-
-type OmnipoolGlobalFarm =
-  HydrationQueries['OmnipoolWarehouseLM']['GlobalFarm']['Value'];
-type OmnipoolYieldFarm =
-  HydrationQueries['OmnipoolWarehouseLM']['YieldFarm']['Value'];
-
-type OmnipolFarm = {
-  id: string;
-  globalFarm: OmnipoolGlobalFarm;
-  yieldFarm: OmnipoolYieldFarm;
-  priceAdjustment: bigint | undefined;
-  balance: Balance;
-};
 
 const DEFAULT_ORACLE_PRICE = BigInt(Big(1).pow(18).toString());
 const blockTime = 6;
@@ -118,7 +104,7 @@ export class LiquidityMiningApi {
     farm: OmnipolFarm,
     relayBlockNumber: number,
     isXyk?: boolean
-  ) {
+  ): Farm {
     const { yieldFarm, globalFarm, priceAdjustment, balance, id } = farm;
     const { multiplier, loyalty_curve: loyaltyCurve } = yieldFarm;
     const {
@@ -246,9 +232,17 @@ export class LiquidityMiningApi {
       []
     );
 
-    return Promise.all(
-      poolIds.map(async (poolId) => await this.getOmnipoolFarms(poolId))
+    const farmEntries = await Promise.all(
+      poolIds.map(async (poolId) => {
+        const data = await this.getOmnipoolFarms(poolId);
+
+        if (!data) return undefined;
+
+        return [poolId, data] as [string, Farm[]];
+      })
     );
+
+    return Object.fromEntries(farmEntries.filter((entry) => !!entry));
   }
 
   async getOmnipoolFarms(id: string) {
@@ -313,9 +307,17 @@ export class LiquidityMiningApi {
       []
     );
 
-    return Promise.all(
-      poolIds.map(async (poolId) => await this.getIsolatedFarms(poolId))
+    const farmEntries = await Promise.all(
+      poolIds.map(async (poolId) => {
+        const data = await this.getIsolatedFarms(poolId);
+
+        if (!data) return undefined;
+
+        return [poolId, data] as [string, Farm[]];
+      })
     );
+
+    return Object.fromEntries(farmEntries.filter((entry) => !!entry));
   }
 
   async getIsolatedFarms(id: string) {
