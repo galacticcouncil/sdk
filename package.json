@@ -50,11 +50,11 @@
   },
   "overrides": {
     "cross-spawn": "^7.0.5",
-    "@polkadot/api": "16.1.1",
-    "@polkadot/api-base": "16.1.1",
-    "@polkadot/api-augment": "16.1.1",
-    "@polkadot/types": "16.1.1",
-    "@polkadot/rpc-provider": "16.1.1"
+    "@polkadot/api": "16.4.8",
+    "@polkadot/api-base": "16.4.8",
+    "@polkadot/api-augment": "16.4.8",
+    "@polkadot/types": "16.4.8",
+    "@polkadot/rpc-provider": "16.4.8"
   },
   "packageManager": "npm@10.7.0",
   "dependencies": {
