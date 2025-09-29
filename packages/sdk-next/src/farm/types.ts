@@ -54,4 +54,5 @@ export type Farm = {
   yieldFarmId: number;
   globalFarmId: number;
   poolId: string;
+  distributedRewards: bigint;
 };

@@ -244,6 +244,7 @@ export class LiquidityMiningApi {
       yieldFarmId: yieldFarm.id,
       globalFarmId: globalFarm.id,
       poolId: id,
+      distributedRewards,
     };
   }
 
