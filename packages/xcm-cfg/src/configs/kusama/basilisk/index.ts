@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { bsx, ksm, teer, tnkr, usdt, xrt } from '../../../assets';
+import { bsx, ksm, teer, tnkr, usdt, xrt, xon } from '../../../assets';
 import {
   basilisk,
   integritee,
@@ -9,6 +9,7 @@ import {
   kusamaAssetHub,
   robonomics,
   tinkernet,
+  xode,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -97,5 +98,6 @@ export const basiliskConfig = new ChainRoutes({
     toTransferTemplate(teer, integritee, 0.000004),
     toTransferTemplate(xrt, robonomics, 0.00000464),
     toTransferTemplate(tnkr, tinkernet, 0.0095),
+    toTransferTemplate(xon, xode, 0.0095),
   ],
 });

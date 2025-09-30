@@ -7,6 +7,7 @@ import { karuraConfig } from './karura';
 import { kusamaConfig } from './kusama';
 import { tinkernetConfig } from './tinkernet';
 import { robonomicsConfig } from './robonomics';
+import { xodeConfig } from './xode';
 
 export const kusamaChainsConfig: ChainRoutes[] = [
   assetHubConfig,
@@ -16,4 +17,5 @@ export const kusamaChainsConfig: ChainRoutes[] = [
   kusamaConfig,
   tinkernetConfig,
   robonomicsConfig,
+  xodeConfig,
 ];
