@@ -158,7 +158,7 @@ export class LiquidityMiningApi {
     );
 
     const periodsPerYear = secondsInYear
-      .div(Big(this.blockTime).times(blocks_per_period))
+      .div(Big(this.blockTime).div(1000).times(blocks_per_period))
       .toString();
 
     let apr: string;
