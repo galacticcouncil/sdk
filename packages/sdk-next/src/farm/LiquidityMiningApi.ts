@@ -205,6 +205,10 @@ export class LiquidityMiningApi {
         : periodsLeft.plus(currentPeriod)
     ).toString();
 
+    const estimatedEndBlock = Big(estimatedEndPeriod)
+      .times(blocks_per_period)
+      .toString();
+
     const fullness = Big(total_shares_z.toString())
       .div(
         Big(max_reward_per_period.toString()).div(yield_per_period.toString())
@@ -234,6 +238,7 @@ export class LiquidityMiningApi {
       minApr,
       isDistributed,
       estimatedEndPeriod,
+      estimatedEndBlock,
       maxRewards,
       incentivizedAsset,
       rewardCurrency,

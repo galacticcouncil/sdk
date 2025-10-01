@@ -44,6 +44,7 @@ export type Farm = {
   minApr: string | undefined;
   isDistributed: boolean;
   estimatedEndPeriod: string;
+  estimatedEndBlock: string;
   maxRewards: bigint;
   incentivizedAsset: number;
   rewardCurrency: number;
