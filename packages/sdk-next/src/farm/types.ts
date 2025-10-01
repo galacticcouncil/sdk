@@ -56,4 +56,5 @@ export type Farm = {
   globalFarmId: number;
   poolId: string;
   distributedRewards: bigint;
+  plannedYieldingPeriods: number;
 };

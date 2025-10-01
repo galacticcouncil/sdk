@@ -250,6 +250,7 @@ export class LiquidityMiningApi {
       globalFarmId: globalFarm.id,
       poolId: id,
       distributedRewards,
+      plannedYieldingPeriods: planned_yielding_periods,
     };
   }
 
