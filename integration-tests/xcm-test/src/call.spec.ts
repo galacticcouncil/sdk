@@ -1,4 +1,8 @@
-import { SubstrateApis } from '@galacticcouncil/xcm-core';
+import {
+  ChainEcosystem,
+  Parachain,
+  SubstrateApis,
+} from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import * as c from 'console';
@@ -11,10 +15,31 @@ const { configService, init } = setup;
 const { runXcm } = xcm;
 
 const getChains = () => {
-  const skipFor: string[] = ['nodle', 'subsocial', 'tinkernet'];
-  const chains = Array.from(configService.chains.values()).filter(
-    (c) => !skipFor.includes(c.key)
-  );
+  const bridge: string[] = ['ethereum', 'solana', 'sui'];
+  const kusamaIgnore: string[] = ['kusama', 'assethub_kusama'];
+  const polkadotIgnore: string[] = [
+    'acala',
+    'ajuna',
+    'centrifuge',
+    'crust',
+    'darwinia',
+    'interlay',
+    'kilt',
+    'laos',
+    'energywebx',
+    'neuroweb',
+    'nodle',
+    'pendulum',
+    'subsocial',
+    'unique',
+    'zeitgeist',
+  ];
+
+  const skipFor: string[] = [...kusamaIgnore, ...polkadotIgnore];
+  const chains: Parachain[] = Array.from(configService.chains.values())
+    .filter((c) => c instanceof Parachain)
+    .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
+    .filter((c) => !skipFor.includes(c.key));
 
   return {
     skipFor,

@@ -12,12 +12,12 @@
   ],
   "scripts": {
     "node": "npx tsx ./src/runNode.ts",
-    "spec:calldata": "jest --silent calldata.spec.ts",
+    "spec:calldata": "jest --silent call.spec.ts",
     "spec:dryRun": "jest --silent dryRun.spec.ts",
-    "spec:e2e": "jest --silent --forceExit e2e.spec.ts"
+    "spec:e2e": "jest --silent e2e.spec.ts"
   },
   "devDependencies": {
-    "@acala-network/chopsticks-testing": "1.1.0"
+    "@acala-network/chopsticks-testing": "1.2.2"
   },
   "dependencies": {
     "@galacticcouncil/xcm-cfg": "^10.12.0",

@@ -1,3 +1,4 @@
+import { EvmClient, PoolService } from '@galacticcouncil/sdk';
 import {
   assetsMap,
   chainsMap,
@@ -6,6 +7,7 @@ import {
   dex,
   HydrationConfigService,
 } from '@galacticcouncil/xcm-cfg';
+import { Parachain } from '@galacticcouncil/xcm-core';
 
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
@@ -25,8 +27,14 @@ export const init = async (): Promise<Wallet> => {
   const hydration = configService.getChain('hydration');
   const assethub = configService.getChain('assethub');
 
+  const hdx = hydration as Parachain;
+  const hdxApi = await hdx.api;
+
+  // Initialize pool service with chopsticks ctx
+  const poolService = new PoolService(hdxApi, new EvmClient(hdxApi));
+
   wallet.registerDex(
-    new dex.HydrationDex(hydration),
+    new dex.HydrationDex(hydration, poolService),
     new dex.AssethubDex(assethub)
   );
 

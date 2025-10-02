@@ -32,19 +32,19 @@
     }
   },
   "assethub-hydration-usdt": {
-    "updated": 1741724678835,
+    "updated": 1759397534106,
     "destination": {
-      "fee": "0.000755",
+      "fee": "0.000676",
       "feeAsset": "USDT",
-      "feeNative": "755"
+      "feeNative": "676"
     }
   },
   "assethub-hydration-usdc": {
-    "updated": 1741724685327,
+    "updated": 1759397784558,
     "destination": {
-      "fee": "0.000755",
+      "fee": "0.000676",
       "feeAsset": "USDC",
-      "feeNative": "755"
+      "feeNative": "676"
     }
   },
   "assethub-hydration-pink": {
@@ -88,27 +88,27 @@
     }
   },
   "assethub-moonbeam-usdc": {
-    "updated": 1741724753029,
+    "updated": 1759400594390,
     "destination": {
-      "fee": "0.083502",
+      "fee": "0.083585",
       "feeAsset": "USDC",
-      "feeNative": "83502"
+      "feeNative": "83585"
     }
   },
   "assethub-bifrost-usdt": {
-    "updated": 1741724799607,
+    "updated": 1759404094427,
     "destination": {
-      "fee": "0.039948",
+      "fee": "0.01296",
       "feeAsset": "USDT",
-      "feeNative": "39948"
+      "feeNative": "12960"
     }
   },
   "assethub-bifrost-usdc": {
-    "updated": 1741724805113,
+    "updated": 1759402789405,
     "destination": {
-      "fee": "0.039948",
+      "fee": "0.012967",
       "feeAsset": "USDC",
-      "feeNative": "39948"
+      "feeNative": "12967"
     }
   },
   "astar-hydration-astr": {

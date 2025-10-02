@@ -51,7 +51,7 @@ const toPolkadotAssethub = new AssetRoute({
     chain: assetHub,
     asset: ksm,
     fee: {
-      amount: 0.06,
+      amount: 0.002,
       asset: ksm,
     },
   },
