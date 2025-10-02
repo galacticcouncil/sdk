@@ -84,7 +84,6 @@ import {
   polkadot,
   phala,
   solana,
-  subsocial,
   sui_chain,
   unique,
   zeitgeist,
@@ -276,8 +275,6 @@ const toMoonbeam: AssetRoute[] = [
 
 const toPolkadot: AssetRoute[] = [toTransferTemplate(dot, polkadot, 0.003)];
 
-const toSubsocial: AssetRoute[] = [toTransferTemplate(sub, subsocial, 0.064)];
-
 const toZeitgeist: AssetRoute[] = [
   toTransferTemplate(ztg, zeitgeist, 0.0093),
   toTransferTemplate(glmr, zeitgeist, 0.002),
@@ -409,7 +406,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toPendulum,
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,
-    ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,
   ],

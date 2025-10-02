@@ -5,12 +5,9 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { toAsset, toBeneficiary, toDest } from './xcmPallet.utils';
 import {
-  toAsset as polkadotToAsset,
   toDepositXcmOnDest,
-  toDepositReserveAssetXcmOnDest,
   toBridgeXcmOnDest,
   toTransferType,
-  toDest as polkadotToDest,
 } from './polkadotXcm.utils';
 
 import {
@@ -120,15 +117,15 @@ const transferAssetsUsingTypeAndThen = (
           version
         );
 
-        const transferAsset = polkadotToAsset(transferAssetLocation, amount);
-        const transferFee = polkadotToAsset(
+        const transferAsset = toAsset(transferAssetLocation, amount);
+        const transferFee = toAsset(
           transferFeeLocation,
           destination.fee.amount
         );
 
         const isSufficientPaymentAsset = asset.isEqual(destination.fee);
 
-        const dest = polkadotToDest(version, ctx, rcv);
+        const dest = toDest(version, rcv);
 
         const assets = {
           [version]: asset.isEqual(destination.fee)
@@ -162,18 +159,6 @@ const transferAssetsUsingTypeAndThen = (
               from,
               transferAssetLocation,
               messageId
-            );
-          } else if (
-            ctx.parachainId === 0 &&
-            (transferType === XcmTransferType.LocalReserve ||
-              transferType === XcmTransferType.Teleport)
-          ) {
-            return toDepositReserveAssetXcmOnDest(
-              version,
-              account,
-              rcv,
-              transferFeeLocation,
-              destination.fee.amount
             );
           } else {
             return toDepositXcmOnDest(version, account);

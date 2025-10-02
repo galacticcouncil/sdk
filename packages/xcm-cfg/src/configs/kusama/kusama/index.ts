@@ -1,10 +1,14 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import { ksm } from '../../../assets';
-import { basilisk, karura, kusama, kusamaAssetHub } from '../../../chains';
-import { BalanceBuilder, ExtrinsicBuilder, XcmTransferType } from '../../../builders';
+import { basilisk, kusama, kusamaAssetHub } from '../../../chains';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../../builders';
 
-import { toParaTemplate, extraFee } from './templates';
+import { extraFee } from './templates';
 
 const toAssetHub: AssetRoute = new AssetRoute({
   source: {
@@ -27,7 +31,6 @@ const toAssetHub: AssetRoute = new AssetRoute({
       asset: ksm,
     },
   },
-  // Using teleportAssets for Kusama -> Kusama Asset Hub (simpler method)
   extrinsic: ExtrinsicBuilder().xcmPallet().limitedTeleportAssets(),
 });
 
@@ -52,17 +55,12 @@ const toBasilisk: AssetRoute = new AssetRoute({
       asset: ksm,
     },
   },
-  // Kusama -> Basilisk: Teleport with DepositReserveAsset
   extrinsic: ExtrinsicBuilder().xcmPallet().transferAssetsUsingTypeAndThen({
-    transferType: XcmTransferType.Teleport,
+    transferType: XcmTransferType.LocalReserve,
   }),
 });
 
 export const kusamaConfig = new ChainRoutes({
   chain: kusama,
-  routes: [
-    toAssetHub,
-    toBasilisk,
-    toParaTemplate(karura, 0.000045),
-  ],
+  routes: [toAssetHub, toBasilisk],
 });

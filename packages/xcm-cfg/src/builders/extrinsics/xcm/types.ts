@@ -3,6 +3,7 @@ export enum XcmVersion {
   v2 = 'V2',
   v3 = 'V3',
   v4 = 'V4',
+  v5 = 'V5',
 }
 
 export enum XcmTransferType {
