@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { createSdkContext } from '../../../../src';
+import { createSdkContext, toDecimals } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { BENEFICIARY } from '../../const';
@@ -9,8 +9,11 @@ class GetMawWithdraw extends PolkadotExecutor {
   async script(apiPromise: ApiPromise): Promise<any> {
     const { api } = createSdkContext(apiPromise);
 
-    const result = await api.aave.getMaxWithdraw(BENEFICIARY, '15');
-    console.log(result);
+    const { amount, decimals } = await api.aave.getMaxWithdraw(
+      BENEFICIARY,
+      '15'
+    );
+    console.log(toDecimals(amount, decimals));
   }
 }
 

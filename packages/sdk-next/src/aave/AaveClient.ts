@@ -16,6 +16,11 @@ export class AaveClient {
     this.client = evm.getWsProvider();
   }
 
+  async getBlockTimestamp() {
+    const block = await this.client.getBlock();
+    return Number(block.timestamp);
+  }
+
   async getReservesData() {
     const output = await this.client.readContract({
       abi: AAVE_POOL_DATA_PROVIDER_ABI,

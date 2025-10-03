@@ -7,6 +7,7 @@ export type AaveSummary = {
 
 export type AaveReserveData = {
   aTokenBalance: bigint;
+  availableLiquidity: bigint;
   decimals: number;
   isCollateral: boolean;
   priceInRef: bigint;

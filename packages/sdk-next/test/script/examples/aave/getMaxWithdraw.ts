@@ -1,6 +1,6 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { createSdkContext } from '../../../../src';
+import { createSdkContext, big } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
@@ -12,8 +12,8 @@ class GetMaxWithdraw extends PapiExecutor {
 
     const { api } = sdk;
 
-    const result = await api.aave.getMaxWithdraw(BENEFICIARY, 15);
-    console.log(result);
+    const { amount, decimals } = await api.aave.getMaxWithdraw(BENEFICIARY, 15);
+    console.log(big.toDecimal(amount, decimals));
 
     return () => {
       sdk.destroy();
