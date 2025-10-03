@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.13.0
+
+### Minor Changes
+
+[464b7c94]: https://github.com/galacticcouncil/sdk/commit/464b7c94
+
+- [[#464b7c94][464b7c94]] xcm: sdk 1.7.1 upgrade fixes
+
 ## 10.12.0
 
 ### Minor Changes
