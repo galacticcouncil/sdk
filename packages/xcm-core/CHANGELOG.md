@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.6.0
+
+### Minor Changes
+
+- Upgrade pjs to 16.4.8 (latest)
+
 ## 8.5.0
 
 ### Minor Changes

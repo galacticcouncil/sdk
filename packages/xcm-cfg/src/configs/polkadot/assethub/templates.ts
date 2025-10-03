@@ -11,6 +11,7 @@ import {
   BalanceBuilder,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
+  XcmTransferType,
 } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 
@@ -99,7 +100,9 @@ export function toParaStablesWithSwapTemplate(
       },
     },
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsicBuilder).prior(
-      ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.LocalReserve,
+      })
     ),
   });
 }
@@ -131,7 +134,9 @@ export function toParaStablesTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }
 

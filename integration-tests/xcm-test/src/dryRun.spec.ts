@@ -27,14 +27,24 @@ const { runXcmDryRun } = xcmDryRun;
  * @returns chains execution ctx
  */
 const getPolkadotChains = () => {
-  const bridge: string[] = ['ethereum', 'solana'];
+  const bridge: string[] = ['ethereum', 'solana', 'sui'];
   const kusamaIgnore: string[] = ['kusama', 'assethub_kusama'];
   const polkadotIgnore: string[] = [
-    'nodle',
-    'subsocial',
-    'zeitgeist',
-    'energywebx',
+    'acala',
+    'ajuna',
+    'centrifuge',
+    'crust',
     'darwinia',
+    'interlay',
+    'kilt',
+    'laos',
+    'energywebx',
+    'neuroweb',
+    'nodle',
+    'pendulum',
+    'subsocial',
+    'unique',
+    'zeitgeist',
   ];
 
   const skipFor: string[] = [...bridge, ...kusamaIgnore, ...polkadotIgnore];
@@ -68,9 +78,9 @@ describe('Wallet with XCM config', () => {
   afterAll(async () => {
     await SubstrateApis.getInstance().release();
     await Promise.all(networks.map((network) => network.teardown()));
-    reportCtx.forEach((v, k) => {
+    /*     reportCtx.forEach((v, k) => {
       write(v, 'instructions/' + k + '.json', false);
-    });
+    }); */
   });
 
   it('is defined', () => {

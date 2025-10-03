@@ -65,7 +65,6 @@ describe('chains config', () => {
           'pendulum',
           'phala',
           'polkadot',
-          'subsocial',
           'unique',
           'zeitgeist',
           'energywebx',

@@ -110,5 +110,5 @@ export const basilisk = new Parachain({
   name: 'Basilisk',
   parachainId: 2090,
   ss58Format: 10041,
-  ws: 'wss://rpc.basilisk.cloud',
+  ws: 'wss://basilisk-rpc.n.dwellir.com',
 });

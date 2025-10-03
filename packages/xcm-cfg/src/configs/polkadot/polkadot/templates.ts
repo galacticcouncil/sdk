@@ -1,7 +1,11 @@
 import { AnyChain, AssetRoute } from '@galacticcouncil/xcm-core';
 
 import { dot } from '../../../assets';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../../builders';
 
 // const xcmDeliveryFee = 0.047;
 
@@ -32,6 +36,8 @@ export function toParaTemplate(
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xcmPallet().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xcmPallet().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }

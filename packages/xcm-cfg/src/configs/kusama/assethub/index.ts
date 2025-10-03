@@ -1,20 +1,14 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { ksm, usdt } from '../../../assets';
-import {
-  assetHub,
-  basilisk,
-  karura,
-  kusama,
-  kusamaAssetHub,
-} from '../../../chains';
+import { ksm } from '../../../assets';
+import { assetHub, basilisk, kusama, kusamaAssetHub } from '../../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
   XcmTransferType,
 } from '../../../builders';
 
-import { toParaStablesTemplate, extraFee } from './templates';
+import { extraFee } from './templates';
 
 const toKusama = new AssetRoute({
   source: {
@@ -57,7 +51,7 @@ const toPolkadotAssethub = new AssetRoute({
     chain: assetHub,
     asset: ksm,
     fee: {
-      amount: 0.001,
+      amount: 0.002,
       asset: ksm,
     },
   },
@@ -87,16 +81,12 @@ const toBasilisk = new AssetRoute({
       asset: ksm,
     },
   },
-  extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+    transferType: XcmTransferType.LocalReserve,
+  }),
 });
 
 export const assetHubConfig = new ChainRoutes({
   chain: kusamaAssetHub,
-  routes: [
-    toKusama,
-    toBasilisk,
-    toPolkadotAssethub,
-    toParaStablesTemplate(usdt, basilisk, 0.001),
-    toParaStablesTemplate(usdt, karura, 0.001),
-  ],
+  routes: [toKusama, toBasilisk, toPolkadotAssethub],
 });

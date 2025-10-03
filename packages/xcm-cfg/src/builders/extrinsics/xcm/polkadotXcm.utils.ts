@@ -5,7 +5,7 @@ import {
   TxWeight,
 } from '@galacticcouncil/xcm-core';
 
-import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID } from './builder';
+import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID, RELAY_ID } from './builder';
 import { getX1Junction, instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
@@ -47,42 +47,11 @@ export const toDest = (
     };
   }
 
-  // Special case: Kusama -> Basilisk (KSM transfers route via Kusama Asset Hub)
-  if (source.key === 'kusama' && destination.key === 'basilisk') {
-    return {
-      [version]: {
-        parents: 0,
-        interior: {
-          X1: getX1Junction(version, {
-            Parachain: 1000, // Kusama Asset Hub
-          }),
-        },
-      },
-    };
-  }
-
-  // Special case: Asset Hub to relay chain - go directly to relay chain
-  if (source.parachainId === 1000 && destination.parachainId === 0) {
+  if (destination.parachainId === RELAY_ID) {
     return {
       [version]: {
         parents: 1,
         interior: 'Here',
-      },
-    };
-  }
-
-  // Special case: Parachain to relay chain (e.g., Basilisk -> Kusama)
-  // Route through Asset Hub (parachain 1000 for Kusama ecosystem)
-  if (destination.parachainId === 0) {
-    const assetHubId = destination.ecosystem === ChainEcosystem.Kusama ? 1000 : 1000; // Both ecosystems use 1000 for Asset Hub
-    return {
-      [version]: {
-        parents: 1,
-        interior: {
-          X1: getX1Junction(version, {
-            Parachain: assetHubId,
-          }),
-        },
       },
     };
   }
@@ -120,15 +89,9 @@ export const toTransferType = (
   assetLocation: object
 ) => {
   if (type === XcmTransferType.RemoteReserve) {
-    const reserveChain = multiloc.findNestedKey(assetLocation, 'Parachain');
     return {
       RemoteReserve: {
-        [version]: {
-          parents: 1,
-          interior: {
-            X1: getX1Junction(version, reserveChain),
-          },
-        },
+        [version]: assetLocation,
       },
     };
   }
@@ -149,7 +112,11 @@ export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
     [version]: [
       {
         DepositAsset: {
-          assets: { Wild: 'All' },
+          assets: {
+            Wild: {
+              AllCounted: 1,
+            },
+          },
           beneficiary: {
             parents: 0,
             interior: {
@@ -163,25 +130,23 @@ export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
 };
 
 /**
- * Creates DepositReserveAsset XCM instruction for relay chain to parachain LocalReserve transfers
- * Used for transfers like Kusama -> Basilisk
+ * Creates DepositReserveAsset XCM instruction for relay chain to parachain
+ * LocalReserve transfers
  *
  * @param version - XCM Version
  * @param account - destination account (receiver)
  * @param destination - destination parachain
- * @param transferFeeLocation - fee asset location
  * @param transferFeeAmount - fee amount for execution
  * @returns xcm DepositReserveAsset instruction
  */
-export const toDepositReserveAssetXcmOnDest = (
+const toDepositReserveAssetXcmOnDest = (
   version: XcmVersion,
   account: any,
   destination: Parachain,
-  transferFeeLocation: object,
   transferFeeAmount: any
 ) => {
-  // From the destination parachain's perspective, the relay chain asset (KSM) is at parents: 1, interior: Here
-  const relayChainAssetLocation = {
+  // From the destination parachain's perspective, the relay chain asset is at parents 1
+  const transferAssetLocation = {
     parents: 1,
     interior: 'Here',
   };
@@ -206,7 +171,7 @@ export const toDepositReserveAssetXcmOnDest = (
           xcm: [
             {
               BuyExecution: {
-                fees: toAsset(relayChainAssetLocation, transferFeeAmount),
+                fees: toAsset(transferAssetLocation, transferFeeAmount),
                 weightLimit: 'Unlimited',
               },
             },
@@ -234,22 +199,19 @@ export const toDepositReserveAssetXcmOnDest = (
 
 /**
  * Creates InitiateTeleport XCM instruction for parachain to relay chain transfers
- * Used for transfers like Basilisk -> Kusama
  *
  * @param version - XCM Version
  * @param account - destination account (receiver)
- * @param transferAssetLocation - transfer asset xcm location
  * @param transferFeeAmount - fee amount for execution
  * @returns xcm InitiateTeleport instruction
  */
-export const toInitiateTeleportXcmOnDest = (
+const toInitiateTeleportXcmOnDest = (
   version: XcmVersion,
   account: any,
-  transferAssetLocation: object,
   transferFeeAmount: any
 ) => {
-  // After teleporting to relay chain, the asset is local (parents: 0, interior: Here)
-  const localAssetLocation = {
+  // After teleporting to relay chain, the asset is local
+  const transferAssetLocation = {
     parents: 0,
     interior: 'Here',
   };
@@ -270,7 +232,7 @@ export const toInitiateTeleportXcmOnDest = (
           xcm: [
             {
               BuyExecution: {
-                fees: toAsset(localAssetLocation, transferFeeAmount),
+                fees: toAsset(transferAssetLocation, transferFeeAmount),
                 weightLimit: 'Unlimited',
               },
             },

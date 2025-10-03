@@ -1,5 +1,25 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.13.0
+
+### Minor Changes
+
+[464b7c94]: https://github.com/galacticcouncil/sdk/commit/464b7c94
+
+- [[#464b7c94][464b7c94]] xcm: sdk 1.7.1 upgrade fixes
+
+## 10.12.0
+
+### Minor Changes
+
+- Upgrade pjs to latest
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@10.0.0
+  - @galacticcouncil/xcm-core@8.6.0
+
 ## 10.11.0
 
 ### Minor Changes
