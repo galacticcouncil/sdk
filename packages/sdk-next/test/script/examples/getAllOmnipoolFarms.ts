@@ -8,9 +8,16 @@ import { createSdkContext } from '../../../src';
 class GetAllOmnipoolFarm extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
-    const allFarms = await sdk.api.farm.getAllOmnipoolFarms();
 
-    return allFarms;
+    const { api } = sdk;
+
+    const allFarms = await api.farm.getAllOmnipoolFarms();
+    console.log(allFarms);
+
+    return () => {
+      sdk.destroy();
+      client.destroy();
+    };
   }
 }
 

@@ -3,14 +3,14 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool } from '../../../../src';
+import { pool, evm } from '../../../../src';
 
 import external from '../../config/external.json';
 
 class SubscribeXyk extends PapiExecutor {
-  async script(client: PolkadotClient) {
+  async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { XykPoolClient } = pool.xyk;
-    const xykClient = new XykPoolClient(client);
+    const xykClient = new XykPoolClient(client, evm);
 
     const override = external.map((e) => {
       return { id: Number(e.internalId), decimals: e.decimals };

@@ -9,20 +9,25 @@ import {
   PoolFilter,
 } from '../pool';
 
-export type RouterOptions = PoolFilter;
+export type RouterOptions = {
+  filter: PoolFilter;
+};
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routeProposals: Map<string, RouteProposal[]>;
-  private readonly routerOptions: RouterOptions;
 
+  protected readonly opts: RouterOptions;
   protected readonly ctx: IPoolCtxProvider;
 
-  constructor(ctx: IPoolCtxProvider, routerOptions: RouterOptions = {}) {
+  constructor(ctx: IPoolCtxProvider, opts?: RouterOptions) {
     this.ctx = ctx;
+    this.opts = Object.freeze({
+      filter: {},
+      ...opts,
+    });
     this.routeSuggester = new RouteSuggester();
     this.routeProposals = new Map();
-    this.routerOptions = Object.freeze(routerOptions);
   }
 
   protected buildRouteKey(
@@ -34,10 +39,39 @@ export class Router {
   }
 
   /**
+   * Filter pools given the following contraints:
+   *
+   * 1) Exclusions always win
+   * 2) If useOnly is specified, allow only those types
+   * 3) Otherwise everything not excluded passes
+   *
+   * @param pools - supported & active amms
+   * @returns filtered pools
+   */
+  protected applyPoolFilter(pools: PoolBase[]): PoolBase[] {
+    const { useOnly = [], exclude = [] } = this.opts.filter;
+    const useOnlySet = new Set(useOnly);
+    const excludeSet = new Set(exclude);
+
+    return pools.filter((p) => {
+      if (excludeSet.has(p.type)) {
+        return false;
+      }
+
+      if (useOnlySet.size > 0) {
+        return useOnlySet.has(p.type);
+      }
+
+      return true;
+    });
+  }
+
+  /**
    * List trading pools
    */
   async getPools(): Promise<PoolBase[]> {
-    return this.ctx.getPools(this.routerOptions);
+    const pools = await this.ctx.getPools();
+    return this.applyPoolFilter(pools);
   }
 
   /**

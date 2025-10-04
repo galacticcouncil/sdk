@@ -42,11 +42,7 @@ export async function createSdkContext(
   ]);
 
   // Initialize pool context
-  const poolCtx = new PoolContextProvider(client, evm)
-    .withAave()
-    .withOmnipool()
-    .withStableswap()
-    .withXyk();
+  const poolCtx = new PoolContextProvider(client, evm);
 
   // Initialize clients
   const balance = new BalanceClient(client);

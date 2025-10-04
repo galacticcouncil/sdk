@@ -133,6 +133,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     return pool.tokens.every(({ id, decimals, balance }) => {
       const override = this.override.find((o) => o.id === id);
       const hasDecimals = !!decimals || !!override?.decimals;
+
       return balance > 0n && hasDecimals;
     });
   }

@@ -15,7 +15,6 @@ import {
   IPoolCtxProvider,
   PoolBase,
   PoolFees,
-  PoolFilter,
   PoolTokenOverride,
   PoolType,
 } from './types';
@@ -114,34 +113,33 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.isReady = false;
   }
 
-  public async getPools(filter: PoolFilter = {}): Promise<PoolBase[]> {
-    if (this.active.size === 0) throw new Error('No pools selected');
-    if (this.isReady) {
-      return Array.from(this.pools.values());
+  /**
+   * Lazy load & cache pools. By default following amm types are
+   * subscribed:
+   *
+   * 1) aave
+   * 2) omnipool
+   * 3) stableswap
+   * 4) xyk
+   *
+   * @returns active pool context
+   */
+  public async getPools(): Promise<PoolBase[]> {
+    if (this.active.size === 0) {
+      this.withAave().withOmnipool().withStableswap().withXyk();
     }
 
-    const { useOnly = [], exclude = [] } = filter;
-    const useOnlySet = new Set(useOnly);
-    const excludeSet = new Set(exclude);
+    if (this.isReady) {
+      const pools = this.pools.values();
+      return Array.from(pools);
+    }
 
-    const supplier = async (client: PoolClient<any>): Promise<boolean> => {
-      const t = client.getPoolType();
-      if (useOnlySet.size > 0) return useOnlySet.has(t);
-      if (excludeSet.size > 0) return !excludeSet.has(t);
-      return client.isSupported();
-    };
-
-    return this.getFilteredPools(supplier);
-  }
-
-  private async getFilteredPools(
-    supplier: (client: PoolClient<PoolBase>) => Promise<boolean>
-  ): Promise<PoolBase[]> {
-    const results = await Promise.all(this.clients.map(supplier));
-    const clients = this.clients.filter((_, i) => results[i]);
     const pools = await Promise.all(
-      clients.map((client) => client.getPoolsMem())
+      this.clients
+        .filter((client) => this.active.has(client.getPoolType()))
+        .map((client) => client.getPools())
     );
+    this.isReady = true;
     return pools.flat();
   }
 

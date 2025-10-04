@@ -3,12 +3,12 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool } from '../../../../src';
+import { pool, evm } from '../../../../src';
 
 class SubscribeOmnipool extends PapiExecutor {
-  async script(client: PolkadotClient) {
+  async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { OmniPoolClient } = pool.omni;
-    const subscription = new OmniPoolClient(client)
+    const subscription = new OmniPoolClient(client, evm)
       .getSubscriber()
       .subscribe((pool) => {
         console.log(pool);

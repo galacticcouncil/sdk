@@ -3,12 +3,12 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool } from '../../../../src';
+import { pool, evm } from '../../../../src';
 
 class SubscribeAave extends PapiExecutor {
-  async script(client: PolkadotClient) {
+  async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { AavePoolClient } = pool.aave;
-    const subscription = new AavePoolClient(client)
+    const subscription = new AavePoolClient(client, evm)
       .getSubscriber()
       .subscribe((pool) => {
         console.log(pool);

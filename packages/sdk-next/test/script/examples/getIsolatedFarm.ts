@@ -9,11 +9,17 @@ class GetisolatedFarm extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
 
-    const isolatedFarm = await sdk.api.farm.getIsolatedFarms(
+    const { api } = sdk;
+
+    const isolatedFarm = await api.farm.getIsolatedFarms(
       '15L6BQ1sMd9pESapK13dHaXBPPtBYnDnKTVhb2gBeGrrJNBx'
     );
+    console.log(isolatedFarm);
 
-    return isolatedFarm;
+    return () => {
+      sdk.destroy();
+      client.destroy();
+    };
   }
 }
 

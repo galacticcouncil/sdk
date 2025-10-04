@@ -3,7 +3,7 @@ import { hydration } from '@galacticcouncil/descriptors';
 
 import { ApiUrl } from './types';
 
-import { api, json } from '../../src';
+import { api, json, evm } from '../../src';
 
 export abstract class PapiExecutor {
   protected readonly apiUrl: ApiUrl;
@@ -26,7 +26,9 @@ export abstract class PapiExecutor {
     console.log(this.desc);
     console.time('Execution time:');
 
-    this.script(client)
+    const evmClient = new evm.EvmClient(client);
+
+    this.script(client, evmClient)
       .then((output: any) => {
         if (typeof output === 'function') {
           setTimeout(output, 10_000);
@@ -52,7 +54,7 @@ export abstract class PapiExecutor {
       });
   }
 
-  abstract script(client: PolkadotClient): Promise<any>;
+  abstract script(client: PolkadotClient, evm: evm.EvmClient): Promise<any>;
 
   logTime() {
     const time = [
