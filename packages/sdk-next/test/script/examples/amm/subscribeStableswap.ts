@@ -11,13 +11,20 @@ class SubscribeStableswap extends PapiExecutor {
     const subscription = new StableSwapClient(client, evm)
       .getSubscriber()
       .subscribe((pool) => {
-        console.log(pool);
+        console.log(pool.length);
         this.logTime();
       });
 
+    /*     const ss = new StableSwapClient(client, evm);
+    const a = await ss.getPoolsMem();
+    ss.subscribeBalances(a).subscribe((r) => {
+      console.log(r);
+      this.logTime();
+    }); */
+
     return () => {
-      subscription.unsubscribe();
-      client.destroy();
+      /*   subscription.unsubscribe();
+      client.destroy(); */
     };
   }
 }

@@ -1,7 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
+import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import {
   type Observable,
+  OperatorFunction,
   Subject,
   bufferCount,
   combineLatest,
@@ -17,6 +19,10 @@ import {
 import { Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { AssetBalance, Balance } from '../types';
+
+type TSystemAccount = HydrationQueries['System']['Account']['Value'];
+type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
+type TAccount = TSystemAccount['data'] | TTokenAccount;
 
 export class BalanceClient extends Papi {
   constructor(client: PolkadotClient) {
@@ -41,26 +47,6 @@ export class BalanceClient extends Papi {
     return this.calculateBalance(data);
   }
 
-  protected calculateBalance(
-    data:
-      | Awaited<
-          ReturnType<typeof this.api.query.System.Account.getValue>
-        >['data']
-      | Awaited<ReturnType<typeof this.api.query.Tokens.Accounts.getValue>>
-  ): Balance {
-    const transferable =
-      data.free >= data.frozen ? data.free - data.frozen : 0n;
-    const total = data.free + data.reserved;
-
-    return {
-      free: data.free,
-      reserved: data.reserved,
-      frozen: data.frozen,
-      total,
-      transferable,
-    };
-  }
-
   async getErc20Balance(account: string, assetId: number): Promise<Balance> {
     return this.getTokenBalanceData(account, assetId);
   }
@@ -73,19 +59,7 @@ export class BalanceClient extends Papi {
     return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
       debounceTime(250),
       map((balance) => balance.flat()),
-      startWith([]), // trigger synthetic empty "previous"
-      bufferCount(2, 1), // like pairwise, but includes the first
-      map(([prev, curr], i) => {
-        if (i === 0) return curr;
-        const m = prev.reduce((acc, o) => {
-          acc.set(o.id, o.balance);
-          return acc;
-        }, new Map<number, Balance>());
-        const delta = curr.filter(
-          (a) => !areBalancesEqual(a.balance, m.get(a.id))
-        );
-        return delta;
-      })
+      this.emitInitialAndDelta
     );
   }
 
@@ -150,6 +124,31 @@ export class BalanceClient extends Papi {
         });
 
         return result;
+      })
+    );
+  }
+
+  subscribeTokensBalanceByQuery(
+    queries: [string, number][]
+  ): Observable<Map<string, AssetBalance[]>> {
+    const query = this.api.query.Tokens.Accounts;
+
+    const streams = queries.map(([address, id]) =>
+      query
+        .watchValue(address, id, 'best')
+        .pipe(map((data) => ({ address, id, data })))
+    );
+
+    return combineLatest(streams).pipe(
+      debounceTime(50),
+      map((items) => {
+        const m = new Map<string, AssetBalance[]>();
+        for (const { address, id, data } of items) {
+          const arr = m.get(address) ?? [];
+          arr.push({ id, balance: this.calculateBalance(data) });
+          m.set(address, arr);
+        }
+        return m;
       })
     );
   }
@@ -226,8 +225,47 @@ export class BalanceClient extends Papi {
     assetId: number
   ): Promise<Balance> {
     const data = await this.api.apis.CurrenciesApi.account(assetId, account);
-
     return this.calculateBalance(data);
+  }
+
+  protected calculateBalance(data: TAccount): Balance {
+    const transferable =
+      data.free >= data.frozen ? data.free - data.frozen : 0n;
+    const total = data.free + data.reserved;
+
+    return {
+      free: data.free,
+      reserved: data.reserved,
+      frozen: data.frozen,
+      total,
+      transferable,
+    };
+  }
+
+  /**
+   * Emits the full array of balances first, then only the balances that changed
+   *
+   * @param source$ balance stream
+   * @returns asset balance array
+   */
+  protected emitInitialAndDelta(
+    source$: Observable<AssetBalance[]>
+  ): Observable<AssetBalance[]> {
+    return source$.pipe(
+      startWith([] as AssetBalance[]), // trigger synthetic empty "previous"
+      bufferCount(2, 1), // like pairwise, but includes the first
+      map(([prev, curr], i) => {
+        if (i === 0) return curr;
+        const m = prev.reduce((acc, o) => {
+          acc.set(o.id, o.balance);
+          return acc;
+        }, new Map<number, Balance>());
+        const delta = curr.filter(
+          (a) => !areBalancesEqual(a.balance, m.get(a.id))
+        );
+        return delta;
+      })
+    );
   }
 }
 

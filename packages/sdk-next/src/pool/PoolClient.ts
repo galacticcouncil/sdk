@@ -4,15 +4,28 @@ import { memoize1 } from '@thi.ng/memoize';
 
 import {
   type Observable,
+  bufferCount,
+  bufferTime,
+  concat,
   combineLatest,
   combineLatestAll,
   debounceTime,
+  filter,
   firstValueFrom,
+  forkJoin,
   from,
   map,
+  merge,
   mergeAll,
   of,
+  pairwise,
+  scan,
+  shareReplay,
+  skip,
+  startWith,
   switchMap,
+  take,
+  tap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
@@ -27,12 +40,14 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   protected evm: EvmClient;
   protected mmOracle: MmOracleClient;
 
+  protected pools: T[] = [];
+
   private override: PoolTokenOverride[] = [];
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
     this.log(this.getPoolType(), 'mem pools', mem, '✅');
-    return this.loadPools();
+    return this.getValidPools();
   });
 
   constructor(client: PolkadotClient, evm: EvmClient) {
@@ -41,84 +56,131 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     this.mmOracle = new MmOracleClient(evm);
   }
 
-  protected abstract loadPools(): Promise<T[]>;
-
-  abstract getPoolFees(pool: T, feeAsset: number): Promise<PoolFees>;
-
-  abstract getPoolType(): PoolType;
-
   abstract isSupported(): Promise<boolean>;
+  abstract getPoolFees(pool: T, feeAsset: number): Promise<PoolFees>;
+  abstract getPoolType(): PoolType;
+  protected abstract loadPools(): Promise<T[]>;
+  protected abstract subscribeUpdates(pools: T[]): Observable<T[]>;
 
-  abstract subscribePoolChange(pool: T): Observable<T>;
+  private async getValidPools(): Promise<T[]> {
+    this.pools = await this.loadPools();
+    return this.pools.filter((pool) => this.hasValidAssets(pool));
+  }
+
+  async getMemPools(): Promise<T[]> {
+    return this.memPools(this.mem);
+  }
 
   async withOverride(override?: PoolTokenOverride[]) {
     this.override = override || [];
   }
 
-  async getPoolsMem(): Promise<T[]> {
-    return this.memPools(this.mem);
-  }
-
   async getPools(): Promise<T[]> {
-    const observers = from(this.getPoolsMem()).pipe(
-      switchMap((pools) => this.subscribe(pools)),
-      combineLatestAll()
-    );
-    return firstValueFrom(observers);
+    const sub = this.getSubscriber();
+    return firstValueFrom(sub);
   }
 
-  getSubscriber(): Observable<T> {
-    return from(this.getPoolsMem()).pipe(
+  getSubscriber(): Observable<T[]> {
+    return from(this.getMemPools()).pipe(
       switchMap((pools) => this.subscribe(pools)),
-      mergeAll()
+      tap({
+        subscribe: () => console.log('subscribed'),
+        unsubscribe: () => console.log('unsubscribed'),
+      })
     );
   }
 
-  private subscribe(pools: T[]): Observable<T>[] {
-    return pools
-      .filter((pool) => this.hasValidAssets(pool))
-      .map((pool) =>
-        combineLatest([
-          this.subscribePoolChange(pool),
-          this.subscribePoolBalance(pool),
-        ]).pipe(
-          debounceTime(250),
-          map(([pool, balances]) => this.updatePool(pool, balances))
+  private subscribe(pools: T[]): Observable<T[]> {
+    return combineLatest([
+      this.subscribeUpdates(pools),
+      this.subscribeBalances(pools),
+    ]).pipe(
+      debounceTime(250),
+      map(([pools, balances]) => {
+        return this.updatePools(pools, balances);
+      })
+    );
+  }
+
+  subscribeBalances2(pools: T[]): Observable<Map<string, AssetBalance[]>> {
+    const tokenQueries: [string, number][] = [];
+
+    for (const pool of pools) {
+      const { address, tokens } = pool;
+
+      tokens
+        .filter(
+          (t) =>
+            ['Token', 'StableSwap'].includes(t.type) &&
+            t.id !== SYSTEM_ASSET_ID &&
+            t.id !== pool.id
         )
-      );
+        .forEach((t) => {
+          tokenQueries.push([address, t.id]);
+        });
+    }
+
+    return this.subscribeTokensBalanceByQuery(tokenQueries);
   }
 
-  private subscribePoolBalance(pool: T): Observable<AssetBalance[]> {
-    if (pool.type === PoolType.Aave) {
-      return of([]);
-    }
+  /**
+   * Subscribe pools balances.
+   *
+   * Balances are emitted in 2 phases:
+   *
+   * 1) Initial: all pools with asset balances
+   * 2) Updates: only deltas batched into a single emission
+   *
+   * @param pools - pools
+   * @returns map of pool balances
+   */
+  protected subscribeBalances(
+    pools: T[]
+  ): Observable<Map<string, AssetBalance[]>> {
+    const pool$ = pools.map((pool) => {
+      const { address } = pool;
 
-    const subs: Observable<AssetBalance | AssetBalance[]>[] = [
-      this.subscribeTokensBalance(pool.address),
-    ];
+      const subs: Observable<AssetBalance | AssetBalance[]>[] = [
+        this.subscribeTokensBalance(address),
+      ];
 
-    if (this.hasSystemAsset(pool)) {
-      const sub = this.subscribeSystemBalance(pool.address);
-      subs.push(sub);
-    }
+      if (this.hasSystemAsset(pool)) {
+        const sysSub = this.subscribeSystemBalance(address);
+        subs.push(sysSub);
+      }
 
-    if (this.hasErc20Asset(pool)) {
-      const ids = pool.tokens
-        .filter((t) => t.type === 'Erc20')
-        .map((t) => t.id);
-      const sub = this.subscribeErc20Balance(pool.address, ids);
-      subs.push(sub);
-    }
+      if (this.hasErc20Asset(pool)) {
+        const ids = pool.tokens
+          .filter((t) => t.type === 'Erc20')
+          .map((t) => t.id);
+        const erc20Sub = this.subscribeErc20Balance(address, ids);
+        subs.push(erc20Sub);
+      }
 
-    return combineLatest(subs).pipe(
-      map((res) =>
-        res
-          .map((r) => {
-            return Array.isArray(r) ? r : [r];
-          })
-          .flat()
-      )
+      return combineLatest(subs).pipe(
+        map((balance) => balance.flat()),
+        //this.emitInitialAndDelta,
+        map((balances) => [address, balances] as const)
+        //shareReplay({ bufferSize: 1, refCount: true })
+      );
+    });
+
+    return combineLatest(pool$).pipe(map((entries) => new Map(entries)));
+
+    /*     const initial$ = combineLatest(pool$).pipe(
+      take(1),
+      map((entries) => new Map(entries))
     );
+
+    const updates$ = from(pool$).pipe(
+      map((s$) => s$.pipe(skip(1))),
+      mergeAll(),
+      bufferTime(250),
+      filter((batch) => batch.length > 0),
+      map((batch) => new Map(batch))
+    );
+
+    return merge(initial$, updates$); */
   }
 
   private hasSystemAsset(pool: T): boolean {
@@ -133,31 +195,36 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     return pool.tokens.every(({ id, decimals, balance }) => {
       const override = this.override.find((o) => o.id === id);
       const hasDecimals = !!decimals || !!override?.decimals;
-
       return balance > 0n && hasDecimals;
     });
   }
 
-  private updatePool = (pool: PoolBase, balances: AssetBalance[]): T => {
-    const tokens = pool.tokens.map((token) => {
-      const balance = balances.find((balance) => balance.id === token.id);
-      const override = this.override.find((o) => o.id === token.id);
-      if (balance) {
+  private updatePools = (
+    pools: PoolBase[],
+    balances: Map<string, AssetBalance[]>
+  ): T[] => {
+    return pools.map((pool) => {
+      const { address, tokens } = pool;
+      const uBalances = balances.get(address) || [];
+      const uTokens = tokens.map((token) => {
+        const aBalance = uBalances.find((balance) => balance.id === token.id);
+        const aOverride = this.override.find((o) => o.id === token.id);
+        if (aBalance && token.id !== pool.id) {
+          return {
+            ...token,
+            balance: aBalance.balance.transferable,
+            decimals: token.decimals || aOverride?.decimals,
+          };
+        }
         return {
           ...token,
-          balance: balance.balance.transferable,
-          decimals: token.decimals || override?.decimals,
+          decimals: token.decimals || aOverride?.decimals,
         };
-      }
+      });
       return {
-        ...token,
-        decimals: token.decimals || override?.decimals,
-      };
+        ...pool,
+        tokens: uTokens,
+      } as T;
     });
-
-    return {
-      ...pool,
-      tokens: tokens,
-    } as T;
   };
 }

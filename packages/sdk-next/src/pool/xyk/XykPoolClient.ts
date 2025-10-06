@@ -15,7 +15,34 @@ import { PoolClient } from '../PoolClient';
 import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient<PoolBase> {
-  protected async loadPools(): Promise<PoolBase[]> {
+  getPoolType(): PoolType {
+    return PoolType.XYK;
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.XYK.MaxInRatio(),
+      this.api.constants.XYK.MaxOutRatio(),
+      this.api.constants.XYK.MinTradingLimit(),
+    ]);
+
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.XYK.PoolAssets;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
+
+  async loadPools(): Promise<PoolBase[]> {
     const query = this.api.query.XYK.PoolAssets;
 
     const [entries, limits] = await Promise.all([
@@ -59,25 +86,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     return Promise.all(pools);
   }
 
-  private async getExchangeFee(): Promise<PoolFee> {
-    const fee = await this.api.constants.XYK.GetExchangeFee();
-    return fee as PoolFee;
-  }
-
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.XYK.MaxInRatio(),
-      this.api.constants.XYK.MaxOutRatio(),
-      this.api.constants.XYK.MinTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
-  }
-
   async getPoolFees(): Promise<PoolFees> {
     const exchangeFee = await this.getExchangeFee();
     return {
@@ -85,20 +93,12 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     } as XykPoolFees;
   }
 
-  getPoolType(): PoolType {
-    return PoolType.XYK;
+  private async getExchangeFee(): Promise<PoolFee> {
+    const fee = await this.api.constants.XYK.GetExchangeFee();
+    return fee as PoolFee;
   }
 
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.XYK.PoolAssets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
-
-  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
-    return of(pool);
+  protected subscribeUpdates(pools: PoolBase[]): Observable<PoolBase[]> {
+    return of(pools);
   }
 }

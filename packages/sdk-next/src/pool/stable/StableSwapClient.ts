@@ -257,6 +257,42 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(latest);
   }
 
+  protected subscribeUpdates(
+    pools: StableSwapBase[]
+  ): Observable<StableSwapBase[]> {
+    return of(pools);
+    return this.api.query.System.Number.watchValue('best').pipe(
+      switchMap((parachainBlock) => {
+        return Promise.all(
+          pools.map(async (pool) => {
+            const poolData = this.poolsData.get(pool.address)!;
+            const [poolDelta, poolPegs] = await Promise.all([
+              this.getPoolDelta(pool.id, poolData, parachainBlock),
+              this.getPoolPegs(pool.id, poolData, parachainBlock),
+            ]);
+
+            const tokens = pool.tokens.map((t) => {
+              if (t.id === pool.id) {
+                return {
+                  ...t,
+                  balance: poolDelta.totalIssuance,
+                };
+              }
+              return t;
+            });
+
+            return {
+              ...pool,
+              tokens,
+              ...poolDelta,
+              ...poolPegs,
+            } as StableSwapBase;
+          })
+        );
+      })
+    );
+  }
+
   subscribePoolChange(pool: StableSwapBase): Observable<StableSwapBase> {
     const query = this.api.query.System.Number;
     const poolData = this.poolsData.get(pool.address);

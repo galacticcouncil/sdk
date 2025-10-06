@@ -64,8 +64,10 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     return client
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
-      .subscribe((pool) => {
-        this.pools.set(pool.address, pool);
+      .subscribe((pools: PoolBase[]) => {
+        pools.forEach((p) => {
+          this.pools.set(p.address, p);
+        });
       });
   }
 
