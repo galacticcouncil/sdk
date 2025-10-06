@@ -63,13 +63,13 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: pink,
-      balance: BalanceBuilder().substrate().assets().account(),
+      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
         balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
+        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -85,13 +85,13 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
+      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
         balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
+        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -107,13 +107,13 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().substrate().assets().account(),
+      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
         balance: BalanceBuilder().substrate().system().account(),
       },
       destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
+        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
