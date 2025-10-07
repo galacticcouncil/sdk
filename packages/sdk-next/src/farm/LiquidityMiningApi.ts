@@ -145,6 +145,7 @@ export class LiquidityMiningApi {
       incentivized_asset: incentivizedAsset,
       reward_currency: rewardCurrency,
       price_adjustment,
+      min_deposit,
     } = globalFarm;
 
     const priceAdjustmentShifted = fmt.shiftNeg(
@@ -251,6 +252,7 @@ export class LiquidityMiningApi {
       poolId: id,
       distributedRewards,
       plannedYieldingPeriods: planned_yielding_periods,
+      minDeposit: min_deposit,
     };
   }
 

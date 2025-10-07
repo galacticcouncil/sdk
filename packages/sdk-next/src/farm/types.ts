@@ -57,4 +57,5 @@ export type Farm = {
   poolId: string;
   distributedRewards: bigint;
   plannedYieldingPeriods: number;
+  minDeposit: bigint;
 };
