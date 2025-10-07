@@ -12,12 +12,16 @@ class GetHealthFactorAfterWithdraw extends PapiExecutor {
 
     const { api } = sdk;
 
-    const result = await api.aave.getHealthFactorAfterWithdraw(
-      BENEFICIARY,
-      15, // vDOT
-      '16' // Withdraw 16 avDOTs
-    );
-    console.log(result);
+    const [current, afterWithdraw] = await Promise.all([
+      api.aave.getHealthFactor(BENEFICIARY),
+      api.aave.getHealthFactorAfterWithdraw(
+        BENEFICIARY,
+        15, // vDOT
+        '160' // Withdraw 16 avDOTs
+      ),
+    ]);
+
+    console.log(current, ' => ', afterWithdraw);
 
     return () => {
       sdk.destroy();
