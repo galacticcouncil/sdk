@@ -12,14 +12,7 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { memoize1 } from '@thi.ng/memoize';
 import { TLRUCache } from '@thi.ng/cache';
 
-import {
-  type Observable,
-  combineLatest,
-  distinctUntilChanged,
-  finalize,
-  map,
-  of,
-} from 'rxjs';
+import { type Observable, distinctUntilChanged, map } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees, PoolToken } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -245,9 +238,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   protected subscribeUpdates(
-    pools: OmniPoolBase[]
+    initial: OmniPoolBase[]
   ): Observable<OmniPoolBase[]> {
-    const [pool] = pools;
+    const [pool] = initial;
 
     const observer = this.api.query.Omnipool.Assets.watchEntries({
       at: 'best',

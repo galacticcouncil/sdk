@@ -12,10 +12,8 @@ class GetPools extends PapiExecutor {
 
     const { ctx } = sdk;
 
-    ctx.pool.withXyk();
-
     const pools = await ctx.pool.getPools();
-    console.log(pools.length);
+    console.log(pools);
 
     return () => {
       sdk.destroy();

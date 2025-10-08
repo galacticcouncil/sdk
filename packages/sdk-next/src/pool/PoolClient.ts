@@ -3,29 +3,24 @@ import { PolkadotClient } from 'polkadot-api';
 import { memoize1 } from '@thi.ng/memoize';
 
 import {
-  type Observable,
+  BehaviorSubject,
+  Observable,
+  ReplaySubject,
+  Subscription,
   bufferCount,
-  bufferTime,
-  concat,
   combineLatest,
-  combineLatestAll,
   debounceTime,
+  defer,
   filter,
+  finalize,
   firstValueFrom,
-  forkJoin,
   from,
   map,
-  merge,
-  mergeAll,
-  of,
-  pairwise,
-  scan,
-  shareReplay,
   skip,
+  share,
   startWith,
   switchMap,
   take,
-  tap,
 } from 'rxjs';
 
 import { BalanceClient } from '../client';
@@ -33,21 +28,25 @@ import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
 import { MmOracleClient } from '../oracle';
 import { AssetBalance } from '../types';
+import { json } from '../utils';
 
 import { PoolBase, PoolFees, PoolTokenOverride, PoolType } from './types';
+
+const { jsonFormatter } = json;
 
 export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   protected evm: EvmClient;
   protected mmOracle: MmOracleClient;
 
-  protected pools: T[] = [];
+  protected store$ = new BehaviorSubject<T[]>([]);
 
+  private shared$?: Observable<T[]>;
   private override: PoolTokenOverride[] = [];
   private mem: number = 0;
 
   private memPools = memoize1((mem: number) => {
     this.log(this.getPoolType(), 'mem pools', mem, '✅');
-    return this.getValidPools();
+    return this.loadPools();
   });
 
   constructor(client: PolkadotClient, evm: EvmClient) {
@@ -62,12 +61,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   protected abstract loadPools(): Promise<T[]>;
   protected abstract subscribeUpdates(pools: T[]): Observable<T[]>;
 
-  private async getValidPools(): Promise<T[]> {
-    this.pools = await this.loadPools();
-    return this.pools.filter((pool) => this.hasValidAssets(pool));
-  }
-
-  async getMemPools(): Promise<T[]> {
+  private async getMemPools(): Promise<T[]> {
     return this.memPools(this.mem);
   }
 
@@ -82,58 +76,102 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
   getSubscriber(): Observable<T[]> {
     return from(this.getMemPools()).pipe(
-      switchMap((pools) => this.subscribe(pools)),
-      tap({
-        subscribe: () => console.log('subscribed'),
-        unsubscribe: () => console.log('unsubscribed'),
-      })
+      switchMap((initial) => this.subscribe(initial))
     );
   }
 
-  private subscribe(pools: T[]): Observable<T[]> {
-    return combineLatest([
-      this.subscribeUpdates(pools),
-      this.subscribeBalances(pools),
-    ]).pipe(
-      debounceTime(250),
-      map(([pools, balances]) => {
-        return this.updatePools(pools, balances);
-      })
-    );
-  }
-
-  subscribeBalances2(pools: T[]): Observable<Map<string, AssetBalance[]>> {
-    const tokenQueries: [string, number][] = [];
-
-    for (const pool of pools) {
-      const { address, tokens } = pool;
-
-      tokens
-        .filter(
-          (t) =>
-            ['Token', 'StableSwap'].includes(t.type) &&
-            t.id !== SYSTEM_ASSET_ID &&
-            t.id !== pool.id
-        )
-        .forEach((t) => {
-          tokenQueries.push([address, t.id]);
-        });
+  private subscribe(initial: T[]): Observable<T[]> {
+    if (!this.shared$) {
+      this.shared$ = this.subscribeStore(initial);
     }
 
-    return this.subscribeTokensBalanceByQuery(tokenQueries);
+    const filterDeltas = (prev: T[], curr: T[]): T[] => {
+      const prevBy = new Map(prev.map((p) => [p.address, p]));
+      const changed: T[] = [];
+      for (const p of curr) {
+        const old = prevBy.get(p.address);
+
+        if (
+          JSON.stringify(old, jsonFormatter) !==
+          JSON.stringify(p, jsonFormatter)
+        ) {
+          changed.push(p);
+        }
+      }
+      return changed;
+    };
+
+    return this.shared$.pipe(
+      startWith([] as T[]),
+      bufferCount(2, 1),
+      map(([prev, curr]) => {
+        if (prev.length === 0) return curr;
+        return filterDeltas(prev, curr);
+      }),
+      filter((arr) => arr.length > 0)
+    );
   }
 
-  /**
-   * Subscribe pools balances.
-   *
-   * Balances are emitted in 2 phases:
-   *
-   * 1) Initial: all pools with asset balances
-   * 2) Updates: only deltas batched into a single emission
-   *
-   * @param pools - pools
-   * @returns map of pool balances
-   */
+  private subscribeStore(initial: T[]): Observable<T[]> {
+    const valid = initial.filter((pool) => this.hasValidAssets(pool));
+    return defer(() => {
+      const updates$ = this.subscribeUpdates(valid);
+      const balances$ = this.subscribeBalances(valid);
+
+      const sub = new Subscription();
+
+      // 1) Seed once per re-wire with fresh values
+      sub.add(
+        combineLatest([
+          updates$.pipe(take(1)),
+          balances$.pipe(take(1)),
+        ]).subscribe(([poolsNow, balancesNow]) => {
+          const seeded = this.updateSnapshot(poolsNow, balancesNow);
+          this.store$.next(seeded);
+        })
+      );
+
+      // 2) Structural changes (skip the seed emission)
+      sub.add(
+        updates$.pipe(skip(1)).subscribe((next) => {
+          const curr = this.store$.value;
+          // this.store$.next([...next]);
+        })
+      );
+
+      // 3) Balance changes (skip the seed emission)
+      sub.add(
+        balances$.pipe(skip(1)).subscribe((latest) => {
+          const curr = this.store$.value;
+          const next = this.updateSnapshot(curr, latest);
+          this.store$.next(next);
+        })
+      );
+
+      return this.store$.asObservable().pipe(
+        skip(1), // No stale first emission on re-wire, wait for seeded
+        finalize(() => {
+          /**
+           * Kill internal wiring if no subscription active
+           */
+          sub.unsubscribe();
+        })
+      );
+    }).pipe(
+      share({
+        /**
+         * Late subscribers get the latest snapshot immediately
+         * from the connector’s buffer, even if upstream hasn’t
+         * emitted again yet in this ref-count cycle.
+         *
+         * Ensures single wiring for all subscribers.
+         */
+        connector: () => new ReplaySubject<T[]>(1),
+        resetOnRefCountZero: true,
+      })
+    );
+  }
+
   protected subscribeBalances(
     pools: T[]
   ): Observable<Map<string, AssetBalance[]>> {
@@ -159,28 +197,14 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
       return combineLatest(subs).pipe(
         map((balance) => balance.flat()),
-        //this.emitInitialAndDelta,
         map((balances) => [address, balances] as const)
-        //shareReplay({ bufferSize: 1, refCount: true })
       );
     });
 
-    return combineLatest(pool$).pipe(map((entries) => new Map(entries)));
-
-    /*     const initial$ = combineLatest(pool$).pipe(
-      take(1),
+    return combineLatest(pool$).pipe(
+      debounceTime(250),
       map((entries) => new Map(entries))
     );
-
-    const updates$ = from(pool$).pipe(
-      map((s$) => s$.pipe(skip(1))),
-      mergeAll(),
-      bufferTime(250),
-      filter((batch) => batch.length > 0),
-      map((batch) => new Map(batch))
-    );
-
-    return merge(initial$, updates$); */
   }
 
   private hasSystemAsset(pool: T): boolean {
@@ -199,8 +223,8 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     });
   }
 
-  private updatePools = (
-    pools: PoolBase[],
+  private updateSnapshot = (
+    pools: T[],
     balances: Map<string, AssetBalance[]>
   ): T[] => {
     return pools.map((pool) => {

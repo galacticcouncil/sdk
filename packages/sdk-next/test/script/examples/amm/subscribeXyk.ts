@@ -23,8 +23,8 @@ class SubscribeXyk extends PapiExecutor {
     });
 
     return () => {
-      /*  subscription.unsubscribe();
-      client.destroy(); */
+      subscription.unsubscribe();
+      client.destroy();
     };
   }
 }

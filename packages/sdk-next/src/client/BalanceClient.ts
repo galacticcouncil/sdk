@@ -206,7 +206,7 @@ export class BalanceClient extends Papi {
       finalize(() => disconnect?.()),
       pairwise(),
       map(([prev, curr], i) => {
-        if (i === 0) return curr;
+        if (i === 0) return curr.filter((a) => a.balance.transferable > 0n);
         const m = prev.reduce((acc, o) => {
           acc.set(o.id, o.balance);
           return acc;
