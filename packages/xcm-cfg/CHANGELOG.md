@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.13.1
+
+### Patch Changes
+
+- 2eaedb7: fix moonbeams xc balances
+
 ## 10.13.0
 
 ### Minor Changes

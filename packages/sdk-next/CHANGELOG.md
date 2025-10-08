@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.7.1
+
+### Patch Changes
+
+- da47e8b: Add farm distributedRewards field
+
 ## 0.7.0
 
 ### Minor Changes
