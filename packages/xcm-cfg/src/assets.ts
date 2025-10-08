@@ -75,6 +75,11 @@ export const eth = new Asset({
   originSymbol: 'ETH',
 });
 
+export const ena = new Asset({
+  key: 'ena',
+  originSymbol: 'ENA',
+});
+
 export const glmr = new Asset({
   key: 'glmr',
   originSymbol: 'GLMR',
@@ -163,6 +168,11 @@ export const pen = new Asset({
 export const pha = new Asset({
   key: 'pha',
   originSymbol: 'PHA',
+});
+
+export const paxg = new Asset({
+  key: 'paxg',
+  originSymbol: 'PAXG',
 });
 
 export const pink = new Asset({
@@ -340,6 +350,7 @@ export const assets: Asset[] = [
   ded,
   dot,
   dota,
+  ena,
   eth,
   glmr,
   hdx,
@@ -357,6 +368,7 @@ export const assets: Asset[] = [
   myth,
   neuro,
   nodl,
+  paxg,
   pha,
   pen,
   pink,
