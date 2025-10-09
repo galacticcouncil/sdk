@@ -7,6 +7,7 @@ import { karura } from './karura';
 import { kusama } from './kusama';
 import { robonomics } from './robonomics';
 import { tinkernet } from './tinkernet';
+import { xode } from './xode';
 
 export const kusamaChains: AnyChain[] = [
   kusama,
@@ -16,6 +17,7 @@ export const kusamaChains: AnyChain[] = [
   karura,
   robonomics,
   tinkernet,
+  xode,
 ];
 
 export {
@@ -26,4 +28,5 @@ export {
   karura,
   robonomics,
   tinkernet,
+  xode,
 };
