@@ -57,6 +57,8 @@ import {
   weth_mwh,
   wsteth,
   wud,
+  eurc,
+  xlm,
   lbtc,
   susds_mwh,
   susds,
@@ -297,7 +299,11 @@ const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain, 0.1)];
 
 const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx, 0.02)];
 
-const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum, 1.1)];
+const toPendulum: AssetRoute[] = [
+  toTransferTemplate(pen, pendulum, 1.1),
+  toTransferTemplate(eurc, pendulum, 0.09),
+  toTransferTemplate(xlm, pendulum, 0.73),
+];
 
 const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb, 0.205)];
 
