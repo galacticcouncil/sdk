@@ -14,6 +14,8 @@ import {
   is_buy_allowed,
   is_add_liquidity_allowed,
   is_remove_liquidity_allowed,
+  recalculate_asset_fee,
+  recalculate_protocol_fee,
 } from '@galacticcouncil/math-omnipool';
 
 import Big from 'big.js';
@@ -202,15 +204,6 @@ export class OmniMath {
     }
   }
 
-  static verifyAssetCap(
-    assetReserve: string,
-    assetCap: string,
-    hubAdded: string,
-    totalHubReserve: string
-  ): boolean {
-    return verify_asset_cap(assetReserve, assetCap, hubAdded, totalHubReserve);
-  }
-
   static calculateLimitHubIn(
     assetReserve: string,
     assetHubReserve: string,
@@ -239,5 +232,70 @@ export class OmniMath {
 
   static isRemoveLiquidityAllowed(bits: number): boolean {
     return is_remove_liquidity_allowed(bits);
+  }
+
+  static recalculateAssetFee(
+    oracleAmountIn: string,
+    oracleAmountOut: string,
+    oracleLiquidity: string,
+    oraclePeriod: string,
+    currentAssetLiquidity: string,
+    previousFee: string,
+    blocDifference: string,
+    minFee: string,
+    maxFee: string,
+    decay: string,
+    amplification: string
+  ): string {
+    return recalculate_asset_fee(
+      oracleAmountIn,
+      oracleAmountOut,
+      oracleLiquidity,
+      oraclePeriod,
+      currentAssetLiquidity,
+      previousFee,
+      blocDifference,
+      minFee,
+      maxFee,
+      decay,
+      amplification
+    );
+  }
+
+  static recalculateProtocolFee(
+    oracleAmountIn: string,
+    oracleAmountOut: string,
+    oracleLiquidity: string,
+    oraclePeriod: string,
+    currentAssetLiquidity: string,
+    previousFee: string,
+    blocDifference: string,
+    minFee: string,
+    maxFee: string,
+    decay: string,
+    amplification: string
+  ): string {
+    return recalculate_protocol_fee(
+      oracleAmountIn,
+      oracleAmountOut,
+      oracleLiquidity,
+      oraclePeriod,
+      currentAssetLiquidity,
+      previousFee,
+      blocDifference,
+      minFee,
+      maxFee,
+      decay,
+      amplification
+    );
+  }
+
+  static verifyAssetCap(
+    assetReserve: string,
+    assetCap: string,
+    hubAdded: string,
+    totalHubReserve: string
+  ): boolean {
+    return verify_asset_cap(assetReserve, assetCap, hubAdded, totalHubReserve);
   }
 }

@@ -5,3 +5,5 @@ export * as h160 from './h160';
 export * as json from './json';
 export * as math from './math';
 export * as xc from './xc';
+
+export * from './QueryBus';

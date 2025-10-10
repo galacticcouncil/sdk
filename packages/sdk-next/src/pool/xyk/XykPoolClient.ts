@@ -1,6 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { type Observable, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   PoolBase,
@@ -9,6 +9,7 @@ import {
   PoolLimits,
   PoolFees,
   PoolToken,
+  PoolTokenOverride,
 } from '../types';
 import { PoolClient } from '../PoolClient';
 
@@ -42,7 +43,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     );
   }
 
-  async loadPools(): Promise<PoolBase[]> {
+  async loadPools(override: PoolTokenOverride[]): Promise<PoolBase[]> {
     const query = this.api.query.XYK.PoolAssets;
 
     const [entries, limits] = await Promise.all([
@@ -50,6 +51,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       this.getPoolLimits(),
     ]);
 
+    const decimals = new Map(override.map((p) => [p.id, p.decimals]));
     const pools = entries.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const [x, y] = value;
@@ -67,14 +69,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         tokens: [
           {
             id: x,
-            decimals: xMeta?.decimals,
+            decimals: xMeta?.decimals || decimals.get(x),
             existentialDeposit: xMeta?.existential_deposit,
             balance: xBalance.transferable,
             type: xMeta?.asset_type.type,
           } as PoolToken,
           {
             id: y,
-            decimals: yMeta?.decimals,
+            decimals: yMeta?.decimals || decimals.get(y),
             existentialDeposit: yMeta?.existential_deposit,
             balance: yBalance.transferable,
             type: yMeta?.asset_type.type,
@@ -98,7 +100,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     return fee as PoolFee;
   }
 
-  protected subscribeUpdates(pools: PoolBase[]): Observable<PoolBase[]> {
-    return of(pools);
+  protected subscribeUpdates(): Subscription {
+    return Subscription.EMPTY;
   }
 }

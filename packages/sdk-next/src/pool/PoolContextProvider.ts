@@ -13,8 +13,10 @@ import { XykPoolClient } from './xyk';
 import { StableSwapClient } from './stable';
 import {
   IPoolCtxProvider,
+  Pool,
   PoolBase,
   PoolFees,
+  PoolPair,
   PoolTokenOverride,
   PoolType,
 } from './types';
@@ -145,13 +147,10 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     return pools.flat();
   }
 
-  public async getPoolFees(
-    pool: PoolBase,
-    feeAsset: number
-  ): Promise<PoolFees> {
+  public async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
     const client = this.clients.find((c) => c.getPoolType() === pool.type);
     if (client) {
-      return client.getPoolFees(pool, feeAsset);
+      return client.getPoolFees(poolPair, pool.address);
     }
     throw new PoolNotFound(pool.type);
   }

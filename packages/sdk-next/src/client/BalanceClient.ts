@@ -3,7 +3,6 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import {
   type Observable,
-  OperatorFunction,
   Subject,
   bufferCount,
   combineLatest,
@@ -59,7 +58,21 @@ export class BalanceClient extends Papi {
     return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
       debounceTime(250),
       map((balance) => balance.flat()),
-      this.emitInitialAndDelta
+      /**
+       * Trigger synthetic empty previous
+       */
+      startWith([] as AssetBalance[]),
+      /**
+       * Like pairwise, but includes first
+       */
+      bufferCount(2, 1),
+      /**
+       * First return all, then just deltas
+       */
+      map(([prev, curr], i) => {
+        if (i === 0) return curr;
+        return this.getDeltas(prev, curr);
+      })
     );
   }
 
@@ -128,31 +141,6 @@ export class BalanceClient extends Papi {
     );
   }
 
-  subscribeTokensBalanceByQuery(
-    queries: [string, number][]
-  ): Observable<Map<string, AssetBalance[]>> {
-    const query = this.api.query.Tokens.Accounts;
-
-    const streams = queries.map(([address, id]) =>
-      query
-        .watchValue(address, id, 'best')
-        .pipe(map((data) => ({ address, id, data })))
-    );
-
-    return combineLatest(streams).pipe(
-      debounceTime(50),
-      map((items) => {
-        const m = new Map<string, AssetBalance[]>();
-        for (const { address, id, data } of items) {
-          const arr = m.get(address) ?? [];
-          arr.push({ id, balance: this.calculateBalance(data) });
-          m.set(address, arr);
-        }
-        return m;
-      })
-    );
-  }
-
   subscribeErc20Balance(
     address: string,
     includeOnly?: number[]
@@ -207,14 +195,7 @@ export class BalanceClient extends Papi {
       pairwise(),
       map(([prev, curr], i) => {
         if (i === 0) return curr.filter((a) => a.balance.transferable > 0n);
-        const m = prev.reduce((acc, o) => {
-          acc.set(o.id, o.balance);
-          return acc;
-        }, new Map<number, Balance>());
-        const delta = curr.filter(
-          (a) => !areBalancesEqual(a.balance, m.get(a.id))
-        );
-        return delta;
+        return this.getDeltas(prev, curr);
       }),
       distinctUntilChanged((_prev, curr) => curr.length === 0)
     ) as Observable<AssetBalance[]>;
@@ -242,38 +223,23 @@ export class BalanceClient extends Papi {
     };
   }
 
-  /**
-   * Emits the full array of balances first, then only the balances that changed
-   *
-   * @param source$ balance stream
-   * @returns asset balance array
-   */
-  protected emitInitialAndDelta(
-    source$: Observable<AssetBalance[]>
-  ): Observable<AssetBalance[]> {
-    return source$.pipe(
-      startWith([] as AssetBalance[]), // trigger synthetic empty "previous"
-      bufferCount(2, 1), // like pairwise, but includes the first
-      map(([prev, curr], i) => {
-        if (i === 0) return curr;
-        const m = prev.reduce((acc, o) => {
-          acc.set(o.id, o.balance);
-          return acc;
-        }, new Map<number, Balance>());
-        const delta = curr.filter(
-          (a) => !areBalancesEqual(a.balance, m.get(a.id))
-        );
-        return delta;
-      })
-    );
+  protected getDeltas(
+    prev: AssetBalance[],
+    curr: AssetBalance[]
+  ): AssetBalance[] {
+    const areBalancesEqual = (
+      a: Balance | undefined,
+      b: Balance | undefined
+    ): boolean =>
+      a !== undefined &&
+      b !== undefined &&
+      a.transferable === b.transferable &&
+      a.total === b.total;
+
+    const m = prev.reduce((acc, o) => {
+      acc.set(o.id, o.balance);
+      return acc;
+    }, new Map<number, Balance>());
+    return curr.filter((a) => !areBalancesEqual(a.balance, m.get(a.id)));
   }
 }
-
-const areBalancesEqual = (
-  a: Balance | undefined,
-  b: Balance | undefined
-): boolean =>
-  a !== undefined &&
-  b !== undefined &&
-  a.transferable === b.transferable &&
-  a.total === b.total;
