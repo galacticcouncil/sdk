@@ -33,8 +33,14 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private readonly aaveClient: AavePoolClient;
 
   private readonly active: Set<PoolType> = new Set([]);
-  private readonly clients: PoolClient<PoolBase>[] = [];
   private readonly pools: Map<string, PoolBase> = new Map([]);
+  private readonly clients: (
+    | LbpPoolClient
+    | OmniPoolClient
+    | StableSwapClient
+    | XykPoolClient
+    | AavePoolClient
+  )[] = [];
 
   private lbpSub: Subscription = Subscription.EMPTY;
   private omniSub: Subscription = Subscription.EMPTY;
@@ -62,11 +68,11 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     ];
   }
 
-  private subscribe(client: PoolClient<PoolBase>) {
+  private subscribe<T extends PoolBase>(client: PoolClient<T>) {
     return client
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
-      .subscribe((pools: PoolBase[]) => {
+      .subscribe((pools: T[]) => {
         pools.forEach((p) => {
           this.pools.set(p.address, p);
         });

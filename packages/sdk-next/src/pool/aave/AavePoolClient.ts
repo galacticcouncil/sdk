@@ -4,7 +4,7 @@ import { toHex } from '@polkadot-api/utils';
 import { Observable, map, merge, switchMap } from 'rxjs';
 import { decodeEventLog } from 'viem';
 
-import { PoolBase, PoolFees, PoolLimits, PoolType } from '../types';
+import { PoolBase, PoolFees, PoolLimits, PoolPair, PoolType } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { HYDRATION_SS58_PREFIX } from '../../consts';
@@ -91,7 +91,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     } as PoolLimits;
   }
 
-  async getPoolFees(_pool: PoolBase, _feeAsset: number): Promise<PoolFees> {
+  async getPoolFees(pair: PoolPair, address: string): Promise<PoolFees> {
     return {} as PoolFees;
   }
 

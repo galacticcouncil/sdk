@@ -3,7 +3,7 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { type Observable, map, of, switchMap } from 'rxjs';
 
-import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
+import { PoolType, PoolLimits, PoolFees, PoolFee, PoolPair } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { LbpMath } from './LbpMath';
@@ -167,7 +167,11 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     } as PoolLimits;
   }
 
-  async getPoolFees(pool: LbpPoolBase): Promise<PoolFees> {
+  async getPoolFees(_pair: PoolPair, address: string): Promise<PoolFees> {
+    const pool = this.store.pools.find(
+      (pool) => pool.address === address
+    ) as LbpPoolBase;
+
     const repayFee = await this.getRepayFee();
     return {
       repayFee: repayFee,

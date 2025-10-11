@@ -1,11 +1,23 @@
-import { AccountId, CompatibilityLevel, FixedSizeArray } from 'polkadot-api';
+import {
+  AccountId,
+  CompatibilityLevel,
+  FixedSizeArray,
+  PolkadotClient,
+} from 'polkadot-api';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 import { toHex } from '@polkadot-api/utils';
 import { blake2b } from '@noble/hashes/blake2b';
 
-import { type Observable, map, of, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-import { PoolType, PoolFee, PoolLimits, PoolFees, PoolToken } from '../types';
+import {
+  PoolType,
+  PoolFee,
+  PoolLimits,
+  PoolFees,
+  PoolToken,
+  PoolPair,
+} from '../types';
 import { PoolClient } from '../PoolClient';
 
 import {
@@ -14,6 +26,8 @@ import {
   RUNTIME_DECIMALS,
   TRADEABLE_DEFAULT,
 } from '../../consts';
+import { EvmClient } from '../../evm';
+import { MmOracleClient } from '../../oracle';
 import { fmt } from '../../utils';
 
 import { StableMath } from './StableMath';
@@ -25,7 +39,14 @@ type TStableswapPoolPegs = HydrationQueries['Stableswap']['PoolPegs']['Value'];
 const { FeeUtils } = fmt;
 
 export class StableSwapClient extends PoolClient<StableSwapBase> {
+  protected mmOracle: MmOracleClient;
+
   private poolsData: Map<string, TStableswapPool> = new Map([]);
+
+  constructor(client: PolkadotClient, evm: EvmClient) {
+    super(client, evm);
+    this.mmOracle = new MmOracleClient(evm);
+  }
 
   getPoolType(): PoolType {
     return PoolType.Stable;
@@ -152,7 +173,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(pools);
   }
 
-  async getPoolFees(pool: StableSwapBase): Promise<PoolFees> {
+  async getPoolFees(pair: PoolPair, address: string): Promise<PoolFees> {
     return {
       fee: pool.fee as PoolFee,
     } as StableSwapFees;
@@ -257,20 +278,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(latest);
   }
 
-  protected subscribeUpdates(
-    pools: StableSwapBase[]
-  ): Observable<StableSwapBase[]> {
-    return of(pools);
-    return this.api.query.System.Number.watchValue('best').pipe(
-      switchMap((parachainBlock) => {
-        return Promise.all(
-          pools.map(async (pool) => {
+  protected subscribeUpdates(): Subscription {
+    return this.api.query.System.Number.watchValue('best').subscribe(
+      (parachainBlock) => {
+        this.store.update((pools) => {
+          const updated = pools.map(async (pool) => {
             const poolData = this.poolsData.get(pool.address)!;
             const [poolDelta, poolPegs] = await Promise.all([
               this.getPoolDelta(pool.id, poolData, parachainBlock),
               this.getPoolPegs(pool.id, poolData, parachainBlock),
             ]);
-
             const tokens = pool.tokens.map((t) => {
               if (t.id === pool.id) {
                 return {
@@ -280,46 +297,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
               }
               return t;
             });
-
             return {
               ...pool,
               tokens,
               ...poolDelta,
               ...poolPegs,
             } as StableSwapBase;
-          })
-        );
-      })
-    );
-  }
-
-  subscribePoolChange(pool: StableSwapBase): Observable<StableSwapBase> {
-    const query = this.api.query.System.Number;
-    const poolData = this.poolsData.get(pool.address);
-
-    if (!poolData || !pool.id) {
-      return of(pool);
-    }
-
-    return query.watchValue('best').pipe(
-      switchMap((parachainBlock) => {
-        return Promise.all([
-          this.getPoolDelta(pool.id, poolData, parachainBlock),
-          this.getPoolPegs(pool.id, poolData, parachainBlock),
-        ]);
-      }),
-      map(([poolDelta, poolPegs]) => {
-        const tokens = pool.tokens.map((t) => {
-          if (t.id === pool.id) {
-            return {
-              ...t,
-              balance: poolDelta.totalIssuance,
-            };
-          }
-          return t;
+          });
+          return Promise.all(updated);
         });
-        return Object.assign(pool, { tokens: tokens }, poolDelta, poolPegs);
-      })
+      }
     );
   }
 }

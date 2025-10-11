@@ -400,7 +400,7 @@ export class TradeRouter extends Router {
             : amountIn;
       }
 
-      const poolFees = await this.ctx.getPoolFees(pool, poolPair.assetOut);
+      const poolFees = await this.ctx.getPoolFees(poolPair, pool);
       const { amountOut, calculatedOut, feePct, errors } = pool.validateAndSell(
         poolPair,
         aIn,
@@ -750,7 +750,7 @@ export class TradeRouter extends Router {
         aOut = swaps[0].amountIn;
       }
 
-      const poolFees = await this.ctx.getPoolFees(pool, poolPair.assetOut);
+      const poolFees = await this.ctx.getPoolFees(poolPair, pool);
       const { amountIn, calculatedIn, feePct, errors } = pool.validateAndBuy(
         poolPair,
         aOut,
