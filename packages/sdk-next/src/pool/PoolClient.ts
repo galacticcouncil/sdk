@@ -29,26 +29,16 @@ import {
 import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
-import { MmOracleClient } from '../oracle';
 import { AssetBalance } from '../types';
 
-import {
-  PoolBase,
-  PoolFees,
-  PoolPair,
-  PoolTokenOverride,
-  PoolType,
-} from './types';
+import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
 
 export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   protected evm: EvmClient;
-  protected mmOracle: MmOracleClient;
-
   protected store = new PoolStore<T>();
 
   private shared$?: Observable<T[]>;
-  private override: PoolTokenOverride[] = [];
 
   private mem: number = 0;
   private memPoolsCache = new TLRUCache<number, Promise<T[]>>(null, {
@@ -57,27 +47,22 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
   private memPools = memoize1((mem: number) => {
     this.log(this.getPoolType(), 'sync mem pools', mem);
-    return this.loadPools(this.override);
+    return this.loadPools();
   }, this.memPoolsCache);
 
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
-    this.mmOracle = new MmOracleClient(evm);
   }
 
   abstract isSupported(): Promise<boolean>;
   abstract getPoolFees(pair: PoolPair, address: string): Promise<PoolFees>;
   abstract getPoolType(): PoolType;
-  protected abstract loadPools(override: PoolTokenOverride[]): Promise<T[]>;
+  protected abstract loadPools(): Promise<T[]>;
   protected abstract subscribeUpdates(): Subscription;
 
   private async getMemPools(): Promise<T[]> {
     return this.memPools(this.mem);
-  }
-
-  async withOverride(override?: PoolTokenOverride[]) {
-    this.override = override || [];
   }
 
   async getPools(): Promise<T[]> {
@@ -122,8 +107,8 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
          * After store initialized, attach live writers (fire and forget)
          */
         tap(() => {
-          sub.add(this.subscribeBalances());
-          //sub.add(this.subscribeUpdates());
+          //sub.add(this.subscribeBalances());
+          sub.add(this.subscribeUpdates());
         }),
 
         /**

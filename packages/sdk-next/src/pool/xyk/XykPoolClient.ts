@@ -16,8 +16,16 @@ import { PoolClient } from '../PoolClient';
 import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient<PoolBase> {
+  private decimals: Map<number, number> = new Map([]);
+
   getPoolType(): PoolType {
     return PoolType.XYK;
+  }
+
+  async withOverride(override?: PoolTokenOverride[]) {
+    this.decimals = override
+      ? new Map(override.map((p) => [p.id, p.decimals]))
+      : new Map();
   }
 
   private async getPoolLimits(): Promise<PoolLimits> {
@@ -43,7 +51,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     );
   }
 
-  async loadPools(override: PoolTokenOverride[]): Promise<PoolBase[]> {
+  async loadPools(): Promise<PoolBase[]> {
     const query = this.api.query.XYK.PoolAssets;
 
     const [entries, limits] = await Promise.all([
@@ -51,7 +59,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       this.getPoolLimits(),
     ]);
 
-    const decimals = new Map(override.map((p) => [p.id, p.decimals]));
     const pools = entries.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const [x, y] = value;
@@ -69,14 +76,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         tokens: [
           {
             id: x,
-            decimals: xMeta?.decimals || decimals.get(x),
+            decimals: xMeta?.decimals || this.decimals.get(x),
             existentialDeposit: xMeta?.existential_deposit,
             balance: xBalance.transferable,
             type: xMeta?.asset_type.type,
           } as PoolToken,
           {
             id: y,
-            decimals: yMeta?.decimals || decimals.get(y),
+            decimals: yMeta?.decimals || this.decimals.get(y),
             existentialDeposit: yMeta?.existential_deposit,
             balance: yBalance.transferable,
             type: yMeta?.asset_type.type,
