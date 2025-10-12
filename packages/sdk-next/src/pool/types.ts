@@ -42,6 +42,8 @@ export type PoolBase = {
   minTradingLimit: bigint;
 };
 
+export type PoolPegs = string[][];
+
 export interface PoolToken {
   id: number;
   balance: bigint;

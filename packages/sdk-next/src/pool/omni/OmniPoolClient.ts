@@ -35,6 +35,7 @@ import {
   TDynamicFeesConfig,
   TDynamicFeeRange,
   TEmaOracle,
+  TEmaPair,
   TOmnipoolAsset,
   TProtocolFeeParams,
 } from './types';
@@ -48,7 +49,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private queryBus = new QueryBus();
 
   private dynamicFeesConfig = this.queryBus.scope<
-    number,
+    [number],
     TDynamicFeesConfig | undefined
   >(
     'DynamicFees.AssetFeeConfiguration',
@@ -56,17 +57,14 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     (id) => String(id)
   );
 
-  private dynamicFees = this.queryBus.scope<number, TDynamicFees | undefined>(
+  private dynamicFees = this.queryBus.scope<[number], TDynamicFees | undefined>(
     'DynamicFees.AssetFee',
     (id) => this.api.query.DynamicFees.AssetFee.getValue(id),
     (id) => String(id),
     6 * 1000
   );
 
-  private oracles = this.queryBus.scope<
-    FixedSizeArray<2, number>,
-    TEmaOracle | undefined
-  >(
+  private emaOracles = this.queryBus.scope<[TEmaPair], TEmaOracle | undefined>(
     'EmaOracle.Oracles.Short',
     (pair) =>
       this.api.query.EmaOracle.Oracles.getValue(
@@ -89,7 +87,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return AccountId(HYDRATION_SS58_PREFIX).dec(nameHex);
   }
 
-  private getOraclePair(asset: number): FixedSizeArray<2, number> {
+  private getOraclePair(asset: number): TEmaPair {
     return asset === SYSTEM_ASSET_ID
       ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
       : [HUB_ASSET_ID, asset];
@@ -200,8 +198,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
     const [dynamicFee, oracleAssetFee, oracleProtocolFee] = await Promise.all([
       this.dynamicFees.get(feeAsset),
-      this.oracles.get(oracleAfk),
-      this.oracles.get(oraclePfk),
+      this.emaOracles.get(oracleAfk),
+      this.emaOracles.get(oraclePfk),
     ]);
 
     const [assetFeeMin, assetFee, assetFeeMax] = await this.getAssetFee(
@@ -338,7 +336,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return [min_fee, Number(fee) * PERMILL_DENOMINATOR, max_fee];
   }
 
-  private subscribeOracles(): Subscription {
+  private subscribeEmaOracles(): Subscription {
     const [pool] = this.store.pools;
 
     const oraclePairs = pool.tokens
@@ -363,13 +361,13 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return merge(...streams)
       .pipe(
         finalize(() => {
-          this.log(this.getPoolType(), 'unsub oracles');
-          this.oracles.clear();
+          this.log(this.getPoolType(), 'unsub ema oracles');
+          this.emaOracles.clear();
         })
       )
       .subscribe((delta) => {
         const { pair, value } = delta;
-        this.oracles.set(pair, value);
+        this.emaOracles.set(value, pair);
       });
   }
 
@@ -389,7 +387,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       .subscribe(({ deltas }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
-          this.dynamicFees.set(key, delta.value);
+          this.dynamicFees.set(delta.value, key);
         });
       });
   }
@@ -408,7 +406,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       .subscribe(({ deltas }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
-          this.dynamicFeesConfig.set(key, delta.value);
+          this.dynamicFeesConfig.set(delta.value, key);
         });
       });
   }
@@ -452,7 +450,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     sub.add(this.subscribeAssets());
     sub.add(this.subscribeDynamicFees());
     sub.add(this.subscribeDynamicFeesConfig());
-    sub.add(this.subscribeOracles());
+    sub.add(this.subscribeEmaOracles());
 
     return sub;
   }

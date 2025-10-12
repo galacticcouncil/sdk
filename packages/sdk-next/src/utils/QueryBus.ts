@@ -11,10 +11,10 @@ export class QueryBus {
     this.debug && console.log(op, scope, key);
   }
 
-  scope<K, V>(
+  scope<K extends any[], V>(
     name: string,
-    fetch: (k: K) => Promise<V>,
-    toKey: (k: K) => string,
+    fetch: (...args: K) => Promise<V>,
+    toKey: (...args: K) => string,
     ttlMs?: number
   ) {
     const live = new Map<string, V>();
@@ -23,8 +23,8 @@ export class QueryBus {
         ? new TLRUCache<string, Promise<V>>(null, { ttl: ttlMs })
         : new TLRUCache<string, Promise<V>>();
 
-    const get = (k: K): Promise<V> => {
-      const key = toKey(k);
+    const get = (...args: K): Promise<V> => {
+      const key = toKey(...args);
       if (live.has(key)) {
         this.log('[live]', name, key);
         const hit = live.get(key)!;
@@ -37,7 +37,7 @@ export class QueryBus {
       }
 
       this.log('[fetch]', name, key);
-      const p = fetch(k).catch((err) => {
+      const p = fetch(...args).catch((err) => {
         cache.delete(key);
         throw err;
       });
@@ -46,8 +46,8 @@ export class QueryBus {
       return p;
     };
 
-    const set = (k: K, v: V) => {
-      const key = toKey(k);
+    const set = (v: V, ...args: K) => {
+      const key = toKey(...args);
       this.log('[set-live]', name, key);
       live.set(key, v);
     };

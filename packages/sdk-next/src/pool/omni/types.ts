@@ -1,3 +1,5 @@
+import { FixedSizeArray } from 'polkadot-api';
+
 import {
   HydrationConstants,
   HydrationQueries,
@@ -14,4 +16,6 @@ export type TProtocolFeeParams =
   HydrationConstants['DynamicFees']['ProtocolFeeParameters'];
 
 export type TEmaOracle = HydrationQueries['EmaOracle']['Oracles']['Value'];
+export type TEmaPair = FixedSizeArray<2, number>;
+
 export type TOmnipoolAsset = HydrationQueries['Omnipool']['Assets']['Value'];

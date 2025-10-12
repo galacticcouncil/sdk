@@ -6,6 +6,7 @@ import {
   PoolFee,
   PoolFees,
   PoolPair,
+  PoolPegs,
   PoolToken,
   PoolType,
   SellCtx,
@@ -30,11 +31,11 @@ export type StableSwapFees = PoolFees & {
 
 export type StableSwapBase = PoolBase & {
   amplification: bigint;
+  isRampPeriod: boolean;
   id: number;
   fee: PoolFee;
   totalIssuance: bigint;
-  pegs: string[][];
-  pegsFee: PoolFee;
+  pegs: PoolPegs;
 };
 
 export class StableSwap implements Pool {
@@ -45,9 +46,11 @@ export class StableSwap implements Pool {
   maxOutRatio: bigint;
   minTradingLimit: bigint;
   amplification: bigint;
+  isRampPeriod: boolean;
   id: number;
   fee: PoolFee;
   totalIssuance: bigint;
+  pegs: string[][];
 
   static fromPool(pool: StableSwapBase): StableSwap {
     return new StableSwap(
@@ -57,9 +60,11 @@ export class StableSwap implements Pool {
       pool.maxOutRatio,
       pool.minTradingLimit,
       pool.amplification,
+      pool.isRampPeriod,
       pool.id,
       pool.fee,
-      pool.totalIssuance
+      pool.totalIssuance,
+      pool.pegs
     );
   }
 
@@ -70,9 +75,11 @@ export class StableSwap implements Pool {
     maxOutRatio: bigint,
     minTradeLimit: bigint,
     amplification: bigint,
+    isRampPeriod: boolean,
     id: number,
     fee: PoolFee,
-    totalIssuance: bigint
+    totalIssuance: bigint,
+    pegs: PoolPegs
   ) {
     this.type = PoolType.Stable;
     this.address = address;
@@ -81,9 +88,11 @@ export class StableSwap implements Pool {
     this.maxOutRatio = maxOutRatio;
     this.minTradingLimit = minTradeLimit;
     this.amplification = amplification;
+    this.isRampPeriod = isRampPeriod;
     this.id = id;
     this.fee = fee;
     this.totalIssuance = totalIssuance;
+    this.pegs = pegs;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {
@@ -367,8 +376,7 @@ export class StableSwap implements Pool {
   }
 
   private getPegs(): string {
-    const pegs = StableMath.defaultPegs(this.tokens.length - 1);
-    return JSON.stringify(pegs);
+    return JSON.stringify(this.pegs);
   }
 
   private getReserves(): string {
