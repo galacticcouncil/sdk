@@ -51,5 +51,14 @@ export abstract class PolkadotExecutor {
       });
   }
 
+  logTime() {
+    const time = [
+      '-----',
+      new Date().toISOString().replace('T', ' ').replace('Z', ''),
+      '-----',
+    ].join('');
+    console.log(time);
+  }
+
   abstract script(api: ApiPromise): Promise<any>;
 }

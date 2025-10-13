@@ -9,25 +9,22 @@ import {
   PoolFilter,
 } from '../pool';
 
-export type RouterOptions = {
-  filter: PoolFilter;
-};
-
 export class Router {
   private readonly routeSuggester: RouteSuggester;
   private readonly routeProposals: Map<string, RouteProposal[]>;
 
-  protected readonly opts: RouterOptions;
   protected readonly ctx: IPoolCtxProvider;
 
-  constructor(ctx: IPoolCtxProvider, opts?: RouterOptions) {
+  private filter: PoolFilter = {};
+
+  constructor(ctx: IPoolCtxProvider) {
     this.ctx = ctx;
-    this.opts = Object.freeze({
-      filter: {},
-      ...opts,
-    });
     this.routeSuggester = new RouteSuggester();
     this.routeProposals = new Map();
+  }
+
+  async withFilter(filter?: PoolFilter) {
+    this.filter = filter || {};
   }
 
   protected buildRouteKey(
@@ -49,7 +46,7 @@ export class Router {
    * @returns filtered pools
    */
   protected applyPoolFilter(pools: PoolBase[]): PoolBase[] {
-    const { useOnly = [], exclude = [] } = this.opts.filter;
+    const { useOnly = [], exclude = [] } = this.filter;
     const useOnlySet = new Set(useOnly);
     const excludeSet = new Set(exclude);
 

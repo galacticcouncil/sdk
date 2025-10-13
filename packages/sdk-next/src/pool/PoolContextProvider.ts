@@ -26,27 +26,27 @@ import { PoolClient } from './PoolClient';
 export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   readonly evm: EvmClient;
 
-  private readonly lbpClient: LbpPoolClient;
-  private readonly omniClient: OmniPoolClient;
-  private readonly stableClient: StableSwapClient;
-  private readonly xykClient: XykPoolClient;
-  private readonly aaveClient: AavePoolClient;
+  readonly aave: AavePoolClient;
+  readonly omnipool: OmniPoolClient;
+  readonly stableswap: StableSwapClient;
+  readonly xyk: XykPoolClient;
+  readonly lbp: LbpPoolClient;
 
   private readonly active: Set<PoolType> = new Set([]);
   private readonly pools: Map<string, PoolBase> = new Map([]);
   private readonly clients: (
-    | LbpPoolClient
+    | AavePoolClient
     | OmniPoolClient
     | StableSwapClient
     | XykPoolClient
-    | AavePoolClient
+    | LbpPoolClient
   )[] = [];
 
-  private lbpSub: Subscription = Subscription.EMPTY;
+  private aaveSub: Subscription = Subscription.EMPTY;
   private omniSub: Subscription = Subscription.EMPTY;
   private stableSub: Subscription = Subscription.EMPTY;
   private xykSub: Subscription = Subscription.EMPTY;
-  private aaveSub: Subscription = Subscription.EMPTY;
+  private lbpSub: Subscription = Subscription.EMPTY;
 
   private isReady: boolean = false;
   private isDestroyed = new Subject<boolean>();
@@ -54,17 +54,17 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
-    this.lbpClient = new LbpPoolClient(client, evm);
-    this.omniClient = new OmniPoolClient(client, evm);
-    this.stableClient = new StableSwapClient(client, evm);
-    this.xykClient = new XykPoolClient(client, evm);
-    this.aaveClient = new AavePoolClient(client, evm);
+    this.lbp = new LbpPoolClient(client, evm);
+    this.omnipool = new OmniPoolClient(client, evm);
+    this.stableswap = new StableSwapClient(client, evm);
+    this.xyk = new XykPoolClient(client, evm);
+    this.aave = new AavePoolClient(client, evm);
     this.clients = [
-      this.lbpClient,
-      this.omniClient,
-      this.stableClient,
-      this.xykClient,
-      this.aaveClient,
+      this.lbp,
+      this.omnipool,
+      this.stableswap,
+      this.xyk,
+      this.aave,
     ];
   }
 
@@ -81,36 +81,36 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
 
   public withOmnipool(): this {
     this.omniSub.unsubscribe();
-    this.omniSub = this.subscribe(this.omniClient);
+    this.omniSub = this.subscribe(this.omnipool);
     this.active.add(PoolType.Omni);
     return this;
   }
 
   public withStableswap(): this {
     this.stableSub.unsubscribe();
-    this.stableSub = this.subscribe(this.stableClient);
+    this.stableSub = this.subscribe(this.stableswap);
     this.active.add(PoolType.Stable);
     return this;
   }
 
   public withLbp(): this {
     this.lbpSub.unsubscribe();
-    this.lbpSub = this.subscribe(this.lbpClient);
+    this.lbpSub = this.subscribe(this.lbp);
     this.active.add(PoolType.LBP);
     return this;
   }
 
   public withAave(): this {
     this.aaveSub.unsubscribe();
-    this.aaveSub = this.subscribe(this.aaveClient);
+    this.aaveSub = this.subscribe(this.aave);
     this.active.add(PoolType.Aave);
     return this;
   }
 
   public withXyk(override?: PoolTokenOverride[]): this {
-    this.xykClient.withOverride(override);
+    this.xyk.withOverride(override);
     this.xykSub.unsubscribe();
-    this.xykSub = this.subscribe(this.xykClient);
+    this.xykSub = this.subscribe(this.xyk);
     this.active.add(PoolType.XYK);
     return this;
   }
@@ -123,22 +123,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.isReady = false;
   }
 
-  /**
-   * Lazy load & cache pools. By default following amm types are
-   * subscribed:
-   *
-   * 1) aave
-   * 2) omnipool
-   * 3) stableswap
-   * 4) xyk
-   *
-   * @returns active pool context
-   */
   public async getPools(): Promise<PoolBase[]> {
-    if (this.active.size === 0) {
-      this.withAave().withOmnipool().withStableswap().withXyk();
-    }
-
     if (this.isReady) {
       const pools = this.pools.values();
       return Array.from(pools);

@@ -1,4 +1,4 @@
-import { Router, RouterOptions } from './Router';
+import { Router } from './Router';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 import { RouteNotFound } from '../errors';
@@ -25,8 +25,8 @@ export class TradeRouter extends Router {
   private readonly mlr: Map<string, Hop[]>;
   private poolsSnapshot?: PoolBase[];
 
-  constructor(ctx: IPoolCtxProvider, opts?: RouterOptions) {
-    super(ctx, opts);
+  constructor(ctx: IPoolCtxProvider) {
+    super(ctx);
     this.mlr = new Map();
   }
 
