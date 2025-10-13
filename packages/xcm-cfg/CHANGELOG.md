@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.15.0
+
+### Minor Changes
+
+- c0fe128: Change ewt rpc
+
 ## 10.14.0
 
 ### Minor Changes
