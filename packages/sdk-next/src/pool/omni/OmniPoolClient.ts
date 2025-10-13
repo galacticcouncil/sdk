@@ -47,6 +47,7 @@ const ORACLE_PERIOD = Enum('Short');
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private queryBus = new QueryBus();
+  private block: number = 0;
 
   private dynamicFeesConfig = this.queryBus.scope<
     [number],
@@ -204,7 +205,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
     const [assetFeeMin, assetFee, assetFeeMax] = await this.getAssetFee(
       pair,
-      0, // fix
+      this.block,
       dynamicFee,
       oracleAssetFee,
       feeConfiguration?.value.asset_fee_params
@@ -215,7 +216,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         ? [0, 0, 0] // No protocol fee for LRNA sell
         : await this.getProtocolFee(
             pair,
-            0,
+            this.block,
             dynamicFee,
             oracleProtocolFee,
             feeConfiguration?.value.protocol_fee_params
@@ -411,6 +412,18 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       });
   }
 
+  private subscribeBlock(): Subscription {
+    return this.api.query.System.Number.watchValue('best')
+      .pipe(
+        finalize(() => {
+          this.log(this.getPoolType(), 'unsub block change');
+        })
+      )
+      .subscribe((block) => {
+        this.block = block;
+      });
+  }
+
   private subscribeAssets(): Subscription {
     return this.api.query.Omnipool.Assets.watchEntries({
       at: 'best',
@@ -451,6 +464,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     sub.add(this.subscribeDynamicFees());
     sub.add(this.subscribeDynamicFeesConfig());
     sub.add(this.subscribeEmaOracles());
+    sub.add(this.subscribeBlock());
 
     return sub;
   }

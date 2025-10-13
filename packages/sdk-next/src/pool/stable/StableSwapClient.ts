@@ -29,7 +29,7 @@ import { TStableswap, TStableswapPeg } from './types';
 const { FeeUtils } = fmt;
 
 export class StableSwapClient extends PoolClient<StableSwapBase> {
-  protected poolData: Map<number, TStableswap> = new Map([]);
+  protected poolsData: Map<number, TStableswap> = new Map([]);
 
   getPoolType(): PoolType {
     return PoolType.Stable;
@@ -142,7 +142,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         decimals: RUNTIME_DECIMALS,
       } as PoolToken);
 
-      this.poolData.set(id, value);
+      this.poolsData.set(id, value);
       return {
         address: address,
         id: id,
@@ -273,7 +273,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           pools
             .filter((pool) => pool.isRampPeriod)
             .forEach((pool) => {
-              const data = this.poolData.get(pool.id);
+              const data = this.poolsData.get(pool.id);
               if (data) {
                 const amplification = this.getPoolAmplification(data, block);
                 updated.push({

@@ -145,7 +145,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
     );
   }
 
-  private subscribeBalances(): Subscription {
+  protected subscribeBalances(): Subscription {
     const pool$ = this.store.pools.map((pool) => {
       const { address } = pool;
 

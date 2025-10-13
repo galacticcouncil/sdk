@@ -10,18 +10,24 @@ import external from '../../config/external.json';
 class SubscribeXyk extends PapiExecutor {
   async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { XykPoolClient } = pool.xyk;
-    const xykClient = new XykPoolClient(client, evm);
 
     const override = external.map((e) => {
       return { id: Number(e.internalId), decimals: e.decimals };
     });
 
-    xykClient.withOverride(override);
-    const subscription = xykClient.getSubscriber().subscribe((pool) => {
-      console.log(pool);
-      this.logTime();
-    });
+    const xykClient = new XykPoolClient(client, evm);
 
+    // xykClient.withOverride(override);
+
+    const print = (pools: pool.PoolBase[]) => {
+      pools.forEach((pool) => {
+        console.log(pool);
+      });
+      this.logTime();
+    };
+
+    const xykConsumer = xykClient.getSubscriber();
+    const subscription = xykConsumer.subscribe(print);
     return () => {
       subscription.unsubscribe();
       client.destroy();

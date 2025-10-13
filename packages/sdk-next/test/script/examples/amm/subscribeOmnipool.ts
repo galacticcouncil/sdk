@@ -3,18 +3,23 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool, evm } from '../../../../src';
+import { pool, evm, json } from '../../../../src';
 
 class SubscribeOmnipool extends PapiExecutor {
   async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { OmniPoolClient } = pool.omni;
-    const subscription = new OmniPoolClient(client, evm)
-      .getSubscriber()
-      .subscribe((pool) => {
-        console.log(pool);
-        this.logTime();
-      });
 
+    const omniClient = new OmniPoolClient(client, evm);
+
+    const print = (pools: pool.PoolBase[]) => {
+      pools.forEach((pool) => {
+        console.log(pool);
+      });
+      this.logTime();
+    };
+
+    const omniConsumer = omniClient.getSubscriber();
+    const subscription = omniConsumer.subscribe(print);
     return () => {
       subscription.unsubscribe();
       client.destroy();
