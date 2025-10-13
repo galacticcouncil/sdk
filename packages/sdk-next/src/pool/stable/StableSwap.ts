@@ -14,7 +14,7 @@ import {
 import { OmniMath } from '../omni';
 
 import { RUNTIME_DECIMALS, TRADEABLE_DEFAULT } from '../../consts';
-import { fmt, json } from '../../utils';
+import { fmt, json, math } from '../../utils';
 
 import { StableMath } from './StableMath';
 
@@ -130,7 +130,9 @@ export class StableSwap implements Pool {
   ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
-    const feePct = FeeUtils.toPct(fees.fee);
+
+    const feePct =
+      calculatedIn === 0n ? 0 : math.calculateDiffToRef(amountIn, calculatedIn);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -160,7 +162,8 @@ export class StableSwap implements Pool {
   ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
-    const feePct = FeeUtils.toPct(fees.fee);
+
+    const feePct = math.calculateDiffToRef(calculatedOut, amountOut);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
