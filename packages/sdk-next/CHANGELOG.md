@@ -1,5 +1,27 @@
 # @galacticcouncil/sdk-next
 
+## 0.8.0
+
+### Minor Changes
+
+[cabea4a8]: https://github.com/galacticcouncil/sdk/commit/cabea4a8
+[c176078d]: https://github.com/galacticcouncil/sdk/commit/c176078d
+[9729c005]: https://github.com/galacticcouncil/sdk/commit/9729c005
+[d5c1eee6]: https://github.com/galacticcouncil/sdk/commit/d5c1eee6
+[f2722395]: https://github.com/galacticcouncil/sdk/commit/f2722395
+[048fd5ee]: https://github.com/galacticcouncil/sdk/commit/048fd5ee
+[2c3abee8]: https://github.com/galacticcouncil/sdk/commit/2c3abee8
+[23e4fbee]: https://github.com/galacticcouncil/sdk/commit/23e4fbee
+
+- [[#cabea4a8][cabea4a8]] next: fix stableswap fees
+- [[#c176078d][c176078d]] next: bump bfs to max 10
+- [[#9729c005][9729c005]] next: fix aave updates
+- [[#d5c1eee6][d5c1eee6]] next: update stable client
+- [[#f2722395][f2722395]] next: rework pool fees
+- [[#048fd5ee][048fd5ee]] next: move override to xyk
+- [[#2c3abee8][2c3abee8]] next: omni 1.1.0 upgrade
+- [[#23e4fbee][23e4fbee]] ext: rework pool state machine
+
 ## 0.7.1
 
 ### Patch Changes
