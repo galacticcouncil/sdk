@@ -41,13 +41,13 @@ function toXcTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().substrate().assets().account(),
+      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
+        balance: BalanceBuilder().evm().erc20(),
       },
       destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
+        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {

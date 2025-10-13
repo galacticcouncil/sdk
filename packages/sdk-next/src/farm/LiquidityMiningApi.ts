@@ -145,6 +145,7 @@ export class LiquidityMiningApi {
       incentivized_asset: incentivizedAsset,
       reward_currency: rewardCurrency,
       price_adjustment,
+      min_deposit,
     } = globalFarm;
 
     const priceAdjustmentShifted = fmt.shiftNeg(
@@ -158,7 +159,7 @@ export class LiquidityMiningApi {
     );
 
     const periodsPerYear = secondsInYear
-      .div(Big(this.blockTime).times(blocks_per_period))
+      .div(Big(this.blockTime).div(1000).times(blocks_per_period))
       .toString();
 
     let apr: string;
@@ -205,6 +206,10 @@ export class LiquidityMiningApi {
         : periodsLeft.plus(currentPeriod)
     ).toString();
 
+    const estimatedEndBlock = Big(estimatedEndPeriod)
+      .times(blocks_per_period)
+      .toString();
+
     const fullness = Big(total_shares_z.toString())
       .div(
         Big(max_reward_per_period.toString()).div(yield_per_period.toString())
@@ -234,6 +239,7 @@ export class LiquidityMiningApi {
       minApr,
       isDistributed,
       estimatedEndPeriod,
+      estimatedEndBlock,
       maxRewards,
       incentivizedAsset,
       rewardCurrency,
@@ -244,6 +250,9 @@ export class LiquidityMiningApi {
       yieldFarmId: yieldFarm.id,
       globalFarmId: globalFarm.id,
       poolId: id,
+      distributedRewards,
+      plannedYieldingPeriods: planned_yielding_periods,
+      minDeposit: min_deposit,
     };
   }
 

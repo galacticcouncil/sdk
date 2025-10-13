@@ -1,5 +1,17 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.14.0
+
+### Minor Changes
+
+- 1457f6e: Add PAXG and EAN
+
+## 10.13.1
+
+### Patch Changes
+
+- 2eaedb7: fix moonbeams xc balances
+
 ## 10.13.0
 
 ### Minor Changes
