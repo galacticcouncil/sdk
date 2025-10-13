@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.14.0
+
+### Minor Changes
+
+- 1457f6e: Add PAXG and EAN
+
 ## 10.13.1
 
 ### Patch Changes

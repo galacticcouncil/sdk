@@ -20,7 +20,7 @@
     "@acala-network/chopsticks-testing": "1.2.2"
   },
   "dependencies": {
-    "@galacticcouncil/xcm-cfg": "^10.13.1",
+    "@galacticcouncil/xcm-cfg": "^10.14.0",
     "@galacticcouncil/xcm-sdk": "^10.7.0"
   }
 }
