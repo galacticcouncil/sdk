@@ -18,6 +18,7 @@ import {
   ded,
   dot,
   dota,
+  ena,
   eth,
   ewt,
   glmr,
@@ -31,6 +32,7 @@ import {
   ldot,
   link,
   myth,
+  paxg,
   pen,
   pha,
   pink,
@@ -394,6 +396,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: ena,
+      decimals: 18,
+      id: 38,
+      min: 0.037,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x57e114b691db790c35207b2e685d4a43181e6061',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: glmr,
       decimals: 18,
       id: 16,
@@ -605,6 +633,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x514910771af9ca656af840dff83e8264ecf986ca',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: paxg,
+      decimals: 18,
+      id: 39,
+      min: 0.000005,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
               },
             },
           ],
