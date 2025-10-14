@@ -1,6 +1,3 @@
-import { HYDRATION_SS58_PREFIX, SYSTEM_ASSET_ID } from '../consts';
-import { encodeAddress } from '@polkadot/util-crypto';
-import { stringToU8a } from '@polkadot/util';
 import {
   calculate_accumulated_rps,
   calculate_percentage_amount,
@@ -9,31 +6,17 @@ import {
   calculate_rewards,
   sigmoid,
 } from '@galacticcouncil/math-staking';
+
 import Big from 'big.js';
+
+import { BalanceClient } from '../client';
+import { SYSTEM_ASSET_ID } from '../consts';
+import { Balance } from '../types';
+
+import { isConviction, CONVICTIONS, TVote } from './types';
+import { getAccountAddress } from './utils';
+
 import { StakingClient } from './StakingClient';
-import { BalanceClient } from 'client';
-import { Balance } from 'types';
-
-const CONVICTIONS = {
-  none: 0.1,
-  locked1x: 1,
-  locked2x: 2,
-  locked3x: 3,
-  locked4x: 4,
-  locked5x: 5,
-  locked6x: 6,
-} as const satisfies { [key: string]: number };
-
-type Conviction = keyof typeof CONVICTIONS;
-
-const isConviction = (conviction: string): conviction is Conviction =>
-  Object.keys(CONVICTIONS).includes(conviction);
-
-type TVote = {
-  id: number;
-  amount: bigint;
-  conviction: Conviction;
-};
 
 /* constants that might be changed */
 const a = '20000000000000000';
@@ -41,13 +24,6 @@ const b = '2000';
 
 export const BIG_10 = Big(10);
 export const BIG_BILL = Big(BIG_10.pow(12));
-
-function getHydraAccountAddress(seed: string): string {
-  return encodeAddress(
-    stringToU8a(('modl' + seed).padEnd(32, '\0')),
-    HYDRATION_SS58_PREFIX
-  );
-}
 
 export class StakingApi {
   private readonly client: StakingClient;
@@ -60,7 +36,7 @@ export class StakingApi {
 
   async getPotBalance(): Promise<Balance> {
     const palletId = await this.client.getPalletId();
-    const potAddress = getHydraAccountAddress(palletId);
+    const potAddress = getAccountAddress(palletId);
     const balance = await this.balanceClient.getBalance(
       potAddress,
       SYSTEM_ASSET_ID

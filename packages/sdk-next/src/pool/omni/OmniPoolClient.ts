@@ -1,10 +1,4 @@
-import {
-  AccountId,
-  Binary,
-  CompatibilityLevel,
-  Enum,
-  FixedSizeArray,
-} from 'polkadot-api';
+import { AccountId, Binary, CompatibilityLevel, Enum } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import {
