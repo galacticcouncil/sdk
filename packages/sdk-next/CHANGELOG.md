@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk-next
 
+## 0.9.0
+
+### Minor Changes
+
+[56950a6c]: https://github.com/galacticcouncil/sdk/commit/56950a6c
+[48c7ee9c]: https://github.com/galacticcouncil/sdk/commit/48c7ee9c
+
+- [[#56950a6c][56950a6c]] next: remove pjs deps from staking
+- [[#48c7ee9c][48c7ee9c]] next: extend staking API
+
 ## 0.8.0
 
 ### Minor Changes
