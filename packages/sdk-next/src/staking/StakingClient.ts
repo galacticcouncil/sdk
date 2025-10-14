@@ -59,6 +59,24 @@ export class StakingClient extends Papi {
     return value;
   }
 
+  async getTimePointsPerPeriod() {
+    const query = this.api.constants.Staking.TimePointsPerPeriod;
+    const value = await query();
+    return value;
+  }
+
+  async getTimePointsWeight() {
+    const query = this.api.constants.Staking.TimePointsWeight;
+    const value = await query();
+    return value / 1000000;
+  }
+
+  async getActionPointsWeight() {
+    const query = this.api.constants.Staking.ActionPointsWeight;
+    const value = await query();
+    return value / 1000000000;
+  }
+
   async getSixBlockSince() {
     const query = this.api.query.Staking.SixSecBlocksSince;
     const value = await query.getValue();
