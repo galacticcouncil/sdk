@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.10.1
+
+### Patch Changes
+
+[deaf284b]: https://github.com/galacticcouncil/sdk/commit/deaf284b
+
+- [[#deaf284b][deaf284b]] next: fix currencies api fetch (best block)
+
 ## 0.10.0
 
 ### Minor Changes
