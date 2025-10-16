@@ -101,7 +101,7 @@ export class BalanceClient extends Papi {
         (balance) =>
           ({
             id: assetId,
-            balance,
+            balance: this.calculateBalance(balance),
           }) as AssetBalance
       )
     );
@@ -205,7 +205,9 @@ export class BalanceClient extends Papi {
     account: string,
     assetId: number
   ): Promise<Balance> {
-    const data = await this.api.apis.CurrenciesApi.account(assetId, account);
+    const data = await this.api.apis.CurrenciesApi.account(assetId, account, {
+      at: 'best',
+    });
     return this.calculateBalance(data);
   }
 
