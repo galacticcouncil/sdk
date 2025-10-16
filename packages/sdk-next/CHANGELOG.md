@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk-next
 
+## 0.10.0
+
+### Minor Changes
+
+[204407d0]: https://github.com/galacticcouncil/sdk/commit/204407d0
+[70b5b048]: https://github.com/galacticcouncil/sdk/commit/70b5b048
+[436c7309]: https://github.com/galacticcouncil/sdk/commit/436c7309
+
+- [[#204407d0][204407d0]] next: add hsm support
+- [[#70b5b048][70b5b048]] Extend staking API
+- [[#436c7309][436c7309]] Extend farm rewards
+
 ## 0.9.0
 
 ### Minor Changes
