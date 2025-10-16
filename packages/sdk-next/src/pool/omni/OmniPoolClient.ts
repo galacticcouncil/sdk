@@ -48,13 +48,16 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     TDynamicFeesConfig | undefined
   >(
     'DynamicFees.AssetFeeConfiguration',
-    (id) => this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id),
+    (id) =>
+      this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id, {
+        at: 'best',
+      }),
     (id) => String(id)
   );
 
   private dynamicFees = this.queryBus.scope<[number], TDynamicFees | undefined>(
     'DynamicFees.AssetFee',
-    (id) => this.api.query.DynamicFees.AssetFee.getValue(id),
+    (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: 'best' }),
     (id) => String(id),
     6 * 1000
   );
@@ -65,7 +68,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       this.api.query.EmaOracle.Oracles.getValue(
         ORACLE_NAME,
         pair,
-        ORACLE_PERIOD
+        ORACLE_PERIOD,
+        { at: 'best' }
       ),
     (pair) => pair.join(':'),
     6 * 1000
@@ -122,7 +126,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       hubAssetBalance,
       limits,
     ] = await Promise.all([
-      this.api.query.Omnipool.Assets.getEntries(),
+      this.api.query.Omnipool.Assets.getEntries({ at: 'best' }),
       this.api.query.Omnipool.HubAssetTradability.getValue(),
       this.api.query.AssetRegistry.Assets.getValue(hubAssetId),
       this.getBalance(poolAddress, hubAssetId),

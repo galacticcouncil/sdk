@@ -52,10 +52,8 @@ export class XykPoolClient extends PoolClient<PoolBase> {
   }
 
   async loadPools(): Promise<PoolBase[]> {
-    const query = this.api.query.XYK.PoolAssets;
-
     const [entries, limits] = await Promise.all([
-      query.getEntries(),
+      this.api.query.XYK.PoolAssets.getEntries(),
       this.getPoolLimits(),
     ]);
 

@@ -36,13 +36,13 @@ export class BalanceClient extends Papi {
 
   async getSystemBalance(account: string): Promise<Balance> {
     const query = this.api.query.System.Account;
-    const { data } = await query.getValue(account);
+    const { data } = await query.getValue(account, { at: 'best' });
     return this.calculateBalance(data);
   }
 
   async getTokenBalance(account: string, assetId: number): Promise<Balance> {
     const query = this.api.query.Tokens.Accounts;
-    const data = await query.getValue(account, assetId);
+    const data = await query.getValue(account, assetId, { at: 'best' });
     return this.calculateBalance(data);
   }
 
@@ -149,7 +149,9 @@ export class BalanceClient extends Papi {
     const observable = subject.pipe(shareReplay(1));
 
     const getErc20s = async () => {
-      const assets = await this.api.query.AssetRegistry.Assets.getEntries();
+      const assets = await this.api.query.AssetRegistry.Assets.getEntries({
+        at: 'best',
+      });
       return assets
         .filter(({ value }) => {
           const { asset_type } = value;

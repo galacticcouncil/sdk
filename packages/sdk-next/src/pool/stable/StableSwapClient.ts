@@ -115,8 +115,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   protected async loadPools(): Promise<StableSwapBase[]> {
     const [pools, block, poolLimits] = await Promise.all([
-      this.api.query.Stableswap.Pools.getEntries(),
-      this.api.query.System.Number.getValue(),
+      this.api.query.Stableswap.Pools.getEntries({ at: 'best' }),
+      this.api.query.System.Number.getValue({ at: 'best' }),
       this.getPoolLimits(),
     ]);
 
@@ -125,8 +125,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       const address = this.getPoolAddress(id);
       const [tokens, pegs, issuance] = await Promise.all([
         this.getPoolTokens(id, value),
-        this.api.query.Stableswap.PoolPegs.getValue(id),
-        this.api.query.Tokens.TotalIssuance.getValue(id),
+        this.api.query.Stableswap.PoolPegs.getValue(id, { at: 'best' }),
+        this.api.query.Tokens.TotalIssuance.getValue(id, { at: 'best' }),
       ]);
 
       const poolAmplfication = this.getPoolAmplification(value, block);

@@ -91,7 +91,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
     const [hollarLocation, collaterals, stablePools] = await Promise.all([
       this.api.query.AssetRegistry.AssetLocations.getValue(hollarId),
-      this.api.query.HSM.Collaterals.getEntries(),
+      this.api.query.HSM.Collaterals.getEntries({ at: 'best' }),
       this.stableClient.getPools(),
     ]);
 

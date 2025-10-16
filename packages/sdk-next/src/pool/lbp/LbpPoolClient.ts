@@ -68,8 +68,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
 
   protected async loadPools(): Promise<LbpPoolBase[]> {
     const [entries, validationData, limits] = await Promise.all([
-      this.api.query.LBP.PoolData.getEntries(),
-      this.api.query.ParachainSystem.ValidationData.getValue(),
+      this.api.query.LBP.PoolData.getEntries({ at: 'best' }),
+      this.api.query.ParachainSystem.ValidationData.getValue({ at: 'best' }),
       this.getPoolLimits(),
     ]);
 
