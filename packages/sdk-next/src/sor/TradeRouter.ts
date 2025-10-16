@@ -23,15 +23,21 @@ type Ctx = {
 
 export class TradeRouter extends Router {
   private readonly mlr: Map<string, Hop[]>;
-  private poolsSnapshot?: PoolBase[];
 
   constructor(ctx: IPoolCtxProvider) {
     super(ctx);
     this.mlr = new Map();
   }
 
-  private buildCtxSync(assetIn: number, assetOut: number): Ctx {
-    const pools = this.poolsSnapshot!;
+  protected override onFilterChanged(): void {
+    this.mlr.clear();
+  }
+
+  private buildCtxSync(
+    assetIn: number,
+    assetOut: number,
+    pools: PoolBase[]
+  ): Ctx {
     const poolsMap = super.validateInput(assetIn, assetOut, pools);
     const paths = super.getPaths(assetIn, assetOut, pools);
     if (!paths.length) throw new RouteNotFound(assetIn, assetOut);
@@ -43,8 +49,8 @@ export class TradeRouter extends Router {
     assetOut: number,
     fn: (ctx: Ctx) => Promise<T> | T
   ): Promise<T> {
-    if (!this.poolsSnapshot) this.poolsSnapshot = await super.getPools();
-    const ctx = this.buildCtxSync(assetIn, assetOut);
+    const pools = await super.getPools();
+    const ctx = this.buildCtxSync(assetIn, assetOut, pools);
     return fn(ctx);
   }
 

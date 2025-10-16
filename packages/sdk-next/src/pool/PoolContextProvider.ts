@@ -7,6 +7,7 @@ import { EvmClient } from '../evm';
 import { PoolNotFound } from '../errors';
 
 import { AavePoolClient } from './aave';
+import { HsmPoolClient } from './hsm';
 import { LbpPoolClient } from './lbp';
 import { OmniPoolClient } from './omni';
 import { XykPoolClient } from './xyk';
@@ -29,6 +30,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   readonly aave: AavePoolClient;
   readonly omnipool: OmniPoolClient;
   readonly stableswap: StableSwapClient;
+  readonly hsm: HsmPoolClient;
   readonly xyk: XykPoolClient;
   readonly lbp: LbpPoolClient;
 
@@ -38,6 +40,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     | AavePoolClient
     | OmniPoolClient
     | StableSwapClient
+    | HsmPoolClient
     | XykPoolClient
     | LbpPoolClient
   )[] = [];
@@ -45,6 +48,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private aaveSub: Subscription = Subscription.EMPTY;
   private omniSub: Subscription = Subscription.EMPTY;
   private stableSub: Subscription = Subscription.EMPTY;
+  private hsmSub: Subscription = Subscription.EMPTY;
   private xykSub: Subscription = Subscription.EMPTY;
   private lbpSub: Subscription = Subscription.EMPTY;
 
@@ -54,17 +58,19 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
-    this.lbp = new LbpPoolClient(client, evm);
+    this.aave = new AavePoolClient(client, evm);
     this.omnipool = new OmniPoolClient(client, evm);
     this.stableswap = new StableSwapClient(client, evm);
+    this.hsm = new HsmPoolClient(client, evm, this.stableswap);
     this.xyk = new XykPoolClient(client, evm);
-    this.aave = new AavePoolClient(client, evm);
+    this.lbp = new LbpPoolClient(client, evm);
     this.clients = [
-      this.lbp,
+      this.aave,
       this.omnipool,
       this.stableswap,
+      this.hsm,
       this.xyk,
-      this.aave,
+      this.lbp,
     ];
   }
 
@@ -77,6 +83,13 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
           this.pools.set(p.address, p);
         });
       });
+  }
+
+  public withAave(): this {
+    this.aaveSub.unsubscribe();
+    this.aaveSub = this.subscribe(this.aave);
+    this.active.add(PoolType.Aave);
+    return this;
   }
 
   public withOmnipool(): this {
@@ -93,17 +106,10 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     return this;
   }
 
-  public withLbp(): this {
-    this.lbpSub.unsubscribe();
-    this.lbpSub = this.subscribe(this.lbp);
-    this.active.add(PoolType.LBP);
-    return this;
-  }
-
-  public withAave(): this {
-    this.aaveSub.unsubscribe();
-    this.aaveSub = this.subscribe(this.aave);
-    this.active.add(PoolType.Aave);
+  public withHsm(): this {
+    this.hsmSub.unsubscribe();
+    this.hsmSub = this.subscribe(this.hsm);
+    this.active.add(PoolType.HSM);
     return this;
   }
 
@@ -112,6 +118,13 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.xykSub.unsubscribe();
     this.xykSub = this.subscribe(this.xyk);
     this.active.add(PoolType.XYK);
+    return this;
+  }
+
+  public withLbp(): this {
+    this.lbpSub.unsubscribe();
+    this.lbpSub = this.subscribe(this.lbp);
+    this.active.add(PoolType.LBP);
     return this;
   }
 

@@ -24,28 +24,16 @@ export class AavePool implements Pool {
   minTradingLimit: bigint;
 
   static fromPool(pool: PoolBase): AavePool {
-    return new AavePool(
-      pool.address,
-      pool.tokens as AavePoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-    );
+    return new AavePool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: AavePoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint
-  ) {
+  constructor(pool: PoolBase) {
     this.type = PoolType.Aave;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
+    this.address = pool.address;
+    this.tokens = pool.tokens as AavePoolToken[];
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {

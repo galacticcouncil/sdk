@@ -30,28 +30,16 @@ export class XykPool implements Pool {
   minTradingLimit: bigint;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-    );
+    return new XykPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint
-  ) {
+  constructor(pool: PoolBase) {
     this.type = PoolType.XYK;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {

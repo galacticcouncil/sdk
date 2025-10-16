@@ -108,9 +108,13 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   }
 
   private getReserveH160Id(reserve: AavePoolToken) {
-    if (reserve.type === 'Erc20') {
-      const accountKey20 = json.findNestedKey(reserve.location, 'AccountKey20');
-      return accountKey20['AccountKey20'].key;
+    if (reserve.type === 'Erc20' && reserve.location) {
+      const interior = reserve.location.interior;
+      if (interior.type === 'X1' && interior.value.type === 'AccountKey20') {
+        const { value } = interior.value;
+        return value.key.asHex();
+      }
+      throw new Error('Invalid aave reserve multilocation');
     }
     return ERC20.fromAssetId(reserve.id);
   }
@@ -223,7 +227,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
       });
   }
 
-  protected subscribeBalances(): Subscription {
+  protected override subscribeBalances(): Subscription {
     return Subscription.EMPTY;
   }
 

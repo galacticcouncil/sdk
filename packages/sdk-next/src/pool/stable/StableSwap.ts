@@ -53,46 +53,22 @@ export class StableSwap implements Pool {
   pegs: string[][];
 
   static fromPool(pool: StableSwapBase): StableSwap {
-    return new StableSwap(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.amplification,
-      pool.isRampPeriod,
-      pool.id,
-      pool.fee,
-      pool.totalIssuance,
-      pool.pegs
-    );
+    return new StableSwap(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint,
-    amplification: bigint,
-    isRampPeriod: boolean,
-    id: number,
-    fee: PoolFee,
-    totalIssuance: bigint,
-    pegs: PoolPegs
-  ) {
+  constructor(pool: StableSwapBase) {
     this.type = PoolType.Stable;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.amplification = amplification;
-    this.isRampPeriod = isRampPeriod;
-    this.id = id;
-    this.fee = fee;
-    this.totalIssuance = totalIssuance;
-    this.pegs = pegs;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.amplification = pool.amplification;
+    this.isRampPeriod = pool.isRampPeriod;
+    this.id = pool.id;
+    this.fee = pool.fee;
+    this.totalIssuance = pool.totalIssuance;
+    this.pegs = pool.pegs;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {

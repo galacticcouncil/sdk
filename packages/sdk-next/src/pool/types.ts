@@ -11,14 +11,20 @@ export enum PoolType {
   Omni = 'Omnipool',
   Stable = 'Stableswap',
   XYK = 'XYK',
+  HSM = 'HSM',
 }
 
 export enum PoolError {
+  UnknownError = 'UnknownError',
+  FacilitatorCapacityExceeded = 'FacilitatorCapacityExceeded',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
+  InsufficientCollateral = 'InsufficientCollateral',
+  MaxHoldingExceeded = 'MaxHoldingExceeded',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
   TradeNotAllowed = 'TradeNotAllowed',
-  UnknownError = 'UnknownError',
+  MaxBuyBackExceeded = 'MaxBuyBackExceeded',
+  MaxBuyPriceExceeded = 'MaxBuyPriceExceeded',
 }
 
 export interface PoolPair {

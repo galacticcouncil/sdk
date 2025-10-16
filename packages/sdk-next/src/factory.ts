@@ -46,6 +46,7 @@ export async function createSdkContext(
     .withAave()
     .withOmnipool()
     .withStableswap()
+    //.withHsm()
     .withXyk();
 
   // Initialize clients

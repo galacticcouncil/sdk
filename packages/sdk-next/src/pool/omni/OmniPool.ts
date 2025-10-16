@@ -52,31 +52,17 @@ export class OmniPool implements Pool {
   hubAssetId: number;
 
   static fromPool(pool: OmniPoolBase): OmniPool {
-    return new OmniPool(
-      pool.address,
-      pool.tokens as OmniPoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.hubAssetId
-    );
+    return new OmniPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: OmniPoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint,
-    hubAssetId: number
-  ) {
+  constructor(pool: OmniPoolBase) {
     this.type = PoolType.Omni;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.hubAssetId = hubAssetId;
+    this.address = pool.address;
+    this.tokens = pool.tokens as OmniPoolToken[];
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.hubAssetId = pool.hubAssetId;
   }
 
   validatePair(_tokenIn: number, tokenOut: number): boolean {

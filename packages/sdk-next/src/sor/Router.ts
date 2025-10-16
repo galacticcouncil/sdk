@@ -25,7 +25,11 @@ export class Router {
 
   async withFilter(filter?: PoolFilter) {
     this.filter = filter || {};
+    this.routeProposals.clear();
+    this.onFilterChanged();
   }
+
+  protected onFilterChanged(): void {}
 
   protected buildRouteKey(
     assetIn: number,

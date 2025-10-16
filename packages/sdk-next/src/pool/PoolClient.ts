@@ -107,7 +107,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
          * After store initialized, attach live writers (fire and forget)
          */
         tap(() => {
-          //sub.add(this.subscribeBalances());
+          sub.add(this.subscribeBalances());
           sub.add(this.subscribeUpdates());
         }),
 
@@ -184,11 +184,11 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
       );
   }
 
-  private hasSystemAsset(pool: T): boolean {
+  protected hasSystemAsset(pool: T): boolean {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
   }
 
-  private hasErc20Asset(pool: PoolBase) {
+  protected hasErc20Asset(pool: PoolBase) {
     return pool.tokens.some((t) => t.type === 'Erc20');
   }
 

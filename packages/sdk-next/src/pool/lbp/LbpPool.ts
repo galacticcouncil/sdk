@@ -47,34 +47,18 @@ export class LbpPool implements Pool {
   repayFeeApply: boolean;
 
   static fromPool(pool: LbpPoolBase): LbpPool {
-    return new LbpPool(
-      pool.address,
-      pool.tokens as WeightedPoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.fee,
-      pool.repayFeeApply
-    );
+    return new LbpPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: WeightedPoolToken[],
-    maxInRatio: bigint,
-    maxOutRatio: bigint,
-    minTradingLimit: bigint,
-    fee: PoolFee,
-    repayFeeApply: boolean
-  ) {
+  constructor(pool: LbpPoolBase) {
     this.type = PoolType.LBP;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRatio;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradingLimit;
-    this.fee = fee;
-    this.repayFeeApply = repayFeeApply;
+    this.address = pool.address;
+    this.tokens = pool.tokens as WeightedPoolToken[];
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.fee = pool.fee;
+    this.repayFeeApply = pool.repayFeeApply;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {
