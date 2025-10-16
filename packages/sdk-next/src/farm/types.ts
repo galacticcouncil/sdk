@@ -17,8 +17,9 @@ export type OmnipoolYieldFarm =
 export type OmnipoolWarehouseLMDeposit =
   HydrationQueries['OmnipoolWarehouseLM']['Deposit']['Value'];
 
-export type OmnipoolWarehouseLMDepositYieldFarmEntry =
-  OmnipoolWarehouseLMDeposit['yield_farm_entries'][number];
+export type YieldFarmEntry =
+  | OmnipoolWarehouseLMDeposit['yield_farm_entries'][number]
+  | HydrationQueries['XYKWarehouseLM']['Deposit']['Value']['yield_farm_entries'][number];
 
 export type OmnipoolFarm = {
   id: string;
@@ -37,6 +38,8 @@ export type FarmDepositReward = {
   readonly reward: bigint;
   readonly maxReward: bigint;
   readonly assetId: number;
+  readonly yieldFarmId: number;
+  readonly isActiveFarm: boolean;
 };
 
 export type Farm = {

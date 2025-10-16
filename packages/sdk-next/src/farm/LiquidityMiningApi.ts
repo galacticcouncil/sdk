@@ -18,11 +18,7 @@ import { MultiCurrencyContainer } from './MultiCurrencyContainer';
 import { RewardClaimSimulator } from './RewardClaimSimulator';
 
 import { DEFAULT_ORACLE_PRICE, DEFAULT_BLOCK_TIME } from './const';
-import {
-  Farm,
-  OmnipoolFarm,
-  OmnipoolWarehouseLMDepositYieldFarmEntry,
-} from './types';
+import { Farm, OmnipoolFarm, YieldFarmEntry } from './types';
 
 const secondsInYear = Big(365.2425).times(24).times(60).times(60);
 
@@ -409,7 +405,7 @@ export class LiquidityMiningApi {
 
   async getDepositReward(
     poolId: string,
-    farmEntry: OmnipoolWarehouseLMDepositYieldFarmEntry,
+    farmEntry: YieldFarmEntry,
     isXyk: boolean,
     relayChainBlockNumber: number
   ) {

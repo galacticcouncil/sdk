@@ -11,7 +11,7 @@ import {
 import { BN_QUINTILL } from './const';
 import {
   FarmDepositReward,
-  OmnipoolWarehouseLMDepositYieldFarmEntry,
+  YieldFarmEntry,
   GlobalFarm,
   YieldFarm,
 } from './types';
@@ -176,7 +176,7 @@ export class RewardClaimSimulator {
   async claimRewards(
     globalFarm: GlobalFarm,
     yieldFarm: YieldFarm,
-    farmEntry: OmnipoolWarehouseLMDepositYieldFarmEntry,
+    farmEntry: YieldFarmEntry,
     relaychainBlockNumber: number,
     oraclePrice: bigint
   ): Promise<FarmDepositReward | null> {
@@ -250,6 +250,8 @@ export class RewardClaimSimulator {
       reward,
       maxReward,
       assetId: syncedGlobalFarm.reward_currency,
+      yieldFarmId: syncedYieldFarm.id,
+      isActiveFarm: syncedYieldFarm.state.type === 'Active',
     };
   }
 }
