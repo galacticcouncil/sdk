@@ -280,6 +280,24 @@ export class StakingApi {
 
     const payablePercentage = sigmoid(points, a, b);
 
+    const extraPayablePercentage = (() => {
+      if (!activeReferendaIds.length) {
+        return;
+      }
+
+      const extraPoints = calculate_points(
+        enteredAt,
+        currentPeriod,
+        timePointsPerPeriod.toString(),
+        timePointsWeight.toString(),
+        actionPoints.maxActionPoints.toString(),
+        actionPointsWeight.toString(),
+        stakePosition.accumulatedSlashPoints.toString()
+      );
+
+      return sigmoid(extraPoints, a, b);
+    })();
+
     const totalRewards = Big(maxRewards)
       .plus(stakePosition.accumulatedUnpaidRewards.toString())
       .plus(stakePosition.accumulatedLockedRewards.toString());
@@ -287,7 +305,15 @@ export class StakingApi {
     if (
       Big(currentPeriod).minus(enteredAt).lte(unclaimablePeriods.toString())
     ) {
-      return { rewards: '0' };
+      return {
+        rewards: '0',
+        payablePercentage,
+        extraPayablePercentage,
+        constants: {
+          a,
+          b,
+        },
+      };
     }
 
     const userRewards = calculate_percentage_amount(
@@ -310,6 +336,12 @@ export class StakingApi {
         .div(totalRewards)
         .mul(100)
         .toNumber(),
+      payablePercentage,
+      extraPayablePercentage,
+      constants: {
+        a,
+        b,
+      },
     };
   }
 }
