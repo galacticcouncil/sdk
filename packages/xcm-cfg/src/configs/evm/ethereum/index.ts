@@ -1,6 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
 import {
+  cfg_new,
   dai,
   dai_mwh,
   ena,
@@ -99,6 +100,7 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
     tags: [Tag.Snowbridge],
   }),
   toHydrationViaSnowbridgeTemplate(aave, aave),
+  toHydrationViaSnowbridgeTemplate(cfg_new, cfg_new),
   toHydrationViaSnowbridgeTemplate(ena, ena),
   toHydrationViaSnowbridgeTemplate(paxg, paxg),
   toHydrationViaSnowbridgeTemplate(susde, susde),

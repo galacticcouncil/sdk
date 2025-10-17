@@ -7,6 +7,7 @@ import {
   astr,
   bnc,
   cfg,
+  cfg_new,
   cru,
   dai,
   dai_awh,
@@ -319,6 +320,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
   viaSnowbridgeTemplate(aave, aave, ethereum),
+  viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum),
   viaSnowbridgeTemplate(ena, ena, ethereum),
   viaSnowbridgeTemplate(paxg, paxg, ethereum),
   viaSnowbridgeTemplate(susde, susde, ethereum),
