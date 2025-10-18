@@ -335,6 +335,11 @@ export const ztg = new Asset({
   originSymbol: 'ZTG',
 });
 
+export const xon = new Asset({
+  key: 'xon',
+  originSymbol: 'XON',
+});
+
 export const assets: Asset[] = [
   aave,
   aca,
@@ -403,6 +408,7 @@ export const assets: Asset[] = [
   wud,
   xrt,
   ztg,
+  xon,
 ];
 
 export const assetsMap = new Map<string, Asset>(
