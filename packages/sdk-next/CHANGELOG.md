@@ -1,5 +1,22 @@
 # @galacticcouncil/sdk-next
 
+## 0.11.0
+
+### Minor Changes
+
+[88b59157]: https://github.com/galacticcouncil/sdk/commit/88b59157
+[3599e379]: https://github.com/galacticcouncil/sdk/commit/3599e379
+[34bb004a]: https://github.com/galacticcouncil/sdk/commit/34bb004a
+
+- [[#88b59157][88b59157]] next: evm rpc adapter
+- [[#3599e379][3599e379]] next: fix math 0 division
+- [[#34bb004a][34bb004a]] next: bump papi & viem to latest
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.5.0
+
 ## 0.10.1
 
 ### Patch Changes
