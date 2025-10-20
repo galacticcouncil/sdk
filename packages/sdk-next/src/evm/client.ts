@@ -11,6 +11,7 @@ import {
 } from 'viem';
 
 import { createChain } from './chain';
+import { EvmRpcAdapter } from './adapter';
 
 export class EvmClient {
   private client: PolkadotClient;
@@ -56,5 +57,9 @@ export class EvmClient {
       chain: this.chain,
       transport: custom((window as any).ethereum),
     });
+  }
+
+  getRPCAdapter(): EvmRpcAdapter {
+    return new EvmRpcAdapter(this.client);
   }
 }
