@@ -56,6 +56,6 @@
     "@polkadot/api-augment": "^16.4.8",
     "@polkadot/types": "^16.4.8",
     "@polkadot/util-crypto": "^13.5.6",
-    "viem": "^2.23.7"
+    "viem": "^2.38.3"
   }
 }
