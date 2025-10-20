@@ -6,7 +6,7 @@
       "wsUrl": "wss://hydration-rpc.n.dwellir.com",
       "metadata": ".papi/metadata/hydration.scale",
       "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d",
-      "codeHash": "0x5b3789c70537a0508cf6065fcd09ba930a24918afc8f00a49c7e6474eb643af6"
+      "codeHash": "0x252af19a9ac83c621c4f1307ded240c6054fe5c09b40e81c073ba74a3a06d898"
     }
   }
 }
