@@ -65,6 +65,8 @@ export function calculateDiffToRef(vFin: bigint, vRef: bigint): number {
  * @param deltaY - the amount out if the existing nonzero fees are included in the calculation
  */
 export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
+  if (delta0Y === 0n) return 0;
+
   const delta0Yb = Big(delta0Y.toString());
   const deltaYb = Big(deltaY.toString());
 
@@ -81,6 +83,8 @@ export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
  * @param deltaX - the amount in, inclusive of fees
  */
 export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
+  if (delta0X === 0n) return 0;
+
   const delta0Xb = Big(delta0X.toString());
   const deltaXb = Big(deltaX.toString());
 
