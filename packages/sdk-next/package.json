@@ -48,7 +48,7 @@
     "big.js": "^6.2.1"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.16.2",
-    "viem": "^2.23.7"
+    "polkadot-api": "^1.19.0",
+    "viem": "^2.38.3"
   }
 }
