@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise } from '@polkadot/api';
 
 import {
   createPublicClient,
@@ -13,16 +13,21 @@ import {
 import { createChain } from './chain';
 import { pjsWebSocket } from './transport';
 
+import { EvmRpcAdapter } from './adapter';
+
 export class EvmClient {
-  private wsProvider: WsProvider;
+  private api: ApiPromise;
 
   readonly chain: Chain;
 
   constructor(api: ApiPromise) {
-    const { provider } = (api as any)._options;
+    this.api = api;
+    this.chain = createChain(this.provider);
+  }
 
-    this.wsProvider = provider as WsProvider;
-    this.chain = createChain(provider);
+  get provider() {
+    const { provider } = (this.api as any)._options;
+    return provider;
   }
 
   get chainId(): number {
@@ -47,7 +52,7 @@ export class EvmClient {
   getWsProvider(): PublicClient {
     return createPublicClient({
       chain: this.chain,
-      transport: pjsWebSocket(this.wsProvider),
+      transport: pjsWebSocket(this.provider),
     });
   }
 
@@ -57,5 +62,9 @@ export class EvmClient {
       chain: this.chain,
       transport: custom((window as any).ethereum),
     });
+  }
+
+  getRPCAdapter(): EvmRpcAdapter {
+    return new EvmRpcAdapter(this.api);
   }
 }

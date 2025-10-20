@@ -1,6 +1,7 @@
 export enum ApiUrl {
   Local = 'ws://localhost:8000',
   Chopsticks = 'wss://chopsticks.rpc.hydration.cloud',
+  Chopsticks_Node = 'ws://[::]:17777',
   Basilisk = 'wss://rpc.basilisk.cloud',
   Basilisk_UK = 'wss://basilisk-mainnet-rpc-07.basilisk.cloud',
   Basilisk_Rococo = 'wss://rococo-basilisk-rpc.hydration.dev',
