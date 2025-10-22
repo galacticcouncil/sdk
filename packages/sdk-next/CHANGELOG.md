@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.12.0
+
+### Minor Changes
+
+[014b377b]: https://github.com/galacticcouncil/sdk/commit/014b377b
+
+- [[#014b377b][014b377b]] next: legacy provider, bump papi
+
 ## 0.11.0
 
 ### Minor Changes
