@@ -1,16 +1,14 @@
-import { api as papi, pool } from '@galacticcouncil/sdk-next';
+import { api as papi, createSdkContext } from '@galacticcouncil/sdk-next';
 
 const client = await papi.getWs('wss://hydradx-rpc.dwellir.com');
 
-const ctx = new pool.PoolContextProvider(client)
-  .withOmnipool()
-  .withStableswap()
-  .withXyk();
+const sdk = await createSdkContext(client);
+const { ctx } = sdk;
 
-const pools = await ctx.getPools();
+const pools = await ctx.pool.getPools();
 console.log(pools);
 
 setTimeout(() => {
-  ctx.destroy();
+  ctx.pool.destroy();
   console.log('Unsubscribed');
 }, 60000);

@@ -7,6 +7,7 @@ const options = {
   bundle: true,
   sourcemap: true,
   packages: 'external',
+  inject: ['shim.src.js'],
 };
 
 const ctx = await esbuild.context({ ...options, plugins });

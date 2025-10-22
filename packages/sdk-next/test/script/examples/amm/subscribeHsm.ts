@@ -8,7 +8,7 @@ import { pool, evm } from '../../../../src';
 class SubscribeHsm extends PapiExecutor {
   async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { StableSwapClient } = pool.stable;
-    const { HsmPoolClient, HsmPool } = pool.hsm;
+    const { HsmPoolClient } = pool.hsm;
 
     const stableClient = new StableSwapClient(client, evm);
     const hsmClient = new HsmPoolClient(client, evm, stableClient);
@@ -23,8 +23,8 @@ class SubscribeHsm extends PapiExecutor {
     const hsmConsumer = hsmClient.getSubscriber();
     const subscription = hsmConsumer.subscribe(print);
     return () => {
-      /*     subscription.unsubscribe();
-      client.destroy(); */
+      subscription.unsubscribe();
+      client.destroy();
     };
   }
 }
