@@ -21,6 +21,7 @@ import {
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kilt,
   ksm,
   laos,
@@ -335,6 +336,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
 
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [

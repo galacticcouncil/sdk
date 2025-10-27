@@ -11,6 +11,7 @@ import {
   dot,
   glmr,
   hdx,
+  jito_sol,
   pink,
   sol,
   susds_mwh,
@@ -108,6 +109,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: jito_sol,
+      decimals: 9,
+      id: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
               },
             },
           ],

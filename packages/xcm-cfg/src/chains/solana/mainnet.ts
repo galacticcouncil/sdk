@@ -3,7 +3,7 @@ import {
   SolanaChain,
 } from '@galacticcouncil/xcm-core';
 
-import { sol } from '../../assets';
+import { jito_sol, sol } from '../../assets';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -12,6 +12,11 @@ export const solana = new SolanaChain({
   assetsData: [
     {
       asset: sol,
+      decimals: 9,
+    },
+    {
+      asset: jito_sol,
+      id: 'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
       decimals: 9,
     },
   ],

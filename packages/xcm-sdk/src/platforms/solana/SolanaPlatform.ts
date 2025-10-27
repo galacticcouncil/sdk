@@ -81,8 +81,15 @@ export class SolanaPlatform
     const senderFinalBalance = sender?.lamports;
 
     if (senderFinalBalance) {
+      const isSolTransfer =
+        config.module === 'TokenBridge' &&
+        config.func === 'TransferNativeWithPayload';
+
       return feeBalance.copyWith({
-        amount: feeBalance.amount - BigInt(senderFinalBalance) - amount,
+        amount:
+          feeBalance.amount -
+          BigInt(senderFinalBalance) -
+          (isSolTransfer ? amount : 0n),
       });
     }
 
