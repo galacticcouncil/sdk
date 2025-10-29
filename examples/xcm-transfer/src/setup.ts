@@ -11,7 +11,6 @@ import { Parachain } from '@galacticcouncil/xcm-core';
 
 import {
   Wallet,
-  WormholeClient,
   WormholeScan,
   WormholeTransfer,
 } from '@galacticcouncil/xcm-sdk';
@@ -40,7 +39,6 @@ export const wallet = new Wallet({
 
 // Initialize clients
 export const whScan = new WormholeScan();
-export const whClient = new WormholeClient();
 export const whTransfers = new WormholeTransfer(configService, 2034);
 
 // Register external assets
