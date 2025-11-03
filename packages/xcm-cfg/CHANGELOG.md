@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.15.1
+
+### Patch Changes
+
+- dfe64d1: cfg: enable snowbridge swap
+
 ## 10.15.0
 
 ### Minor Changes
