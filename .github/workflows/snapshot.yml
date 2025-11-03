@@ -18,7 +18,7 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.16.1
+          node-version: '22.21.1'
           cache: 'npm'
 
       - name: 🔐 Authenticate with NPM
@@ -93,7 +93,7 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.16.1
+          node-version: '22.21.1'
 
       - name: 🔧 Upgrade hydration-ui sdk packages
         run: |
