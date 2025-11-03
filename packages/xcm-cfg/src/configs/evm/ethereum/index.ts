@@ -162,5 +162,8 @@ const toMoonbeamViaWormhole: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [...toHydrationViaWormhole, ...toHydrationViaSnowbridge],
+  routes: [
+    ...toHydrationViaWormhole,
+    //...toHydrationViaSnowbridge
+  ],
 });

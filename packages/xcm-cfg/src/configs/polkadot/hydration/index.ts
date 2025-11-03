@@ -395,7 +395,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toCrust,
     ...toDarwinia,
-    ...toEthereumViaSnowbridge,
+    //...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toKilt,
