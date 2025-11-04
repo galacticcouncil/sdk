@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.15.2
+
+### Patch Changes
+
+- temp disable dot transfers from paras -> hydration
+
 ## 10.15.1
 
 ### Patch Changes
