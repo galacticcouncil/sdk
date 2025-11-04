@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.15.3
+
+### Patch Changes
+
+- reenable snowfork
+
 ## 10.15.2
 
 ### Patch Changes
