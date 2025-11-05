@@ -1,5 +1,32 @@
 # @galacticcouncil/sdk-next
 
+## 0.12.0
+
+### Minor Changes
+
+[014b377b]: https://github.com/galacticcouncil/sdk/commit/014b377b
+
+- [[#014b377b][014b377b]] next: legacy provider, bump papi
+
+## 0.11.0
+
+### Minor Changes
+
+[88b59157]: https://github.com/galacticcouncil/sdk/commit/88b59157
+[3599e379]: https://github.com/galacticcouncil/sdk/commit/3599e379
+[34bb004a]: https://github.com/galacticcouncil/sdk/commit/34bb004a
+[3921d719]: https://github.com/galacticcouncil/sdk/commit/3921d719
+
+- [[#88b59157][88b59157]] next: evm rpc adapter
+- [[#3599e379][3599e379]] next: fix math 0 division
+- [[#34bb004a][34bb004a]] next: bump papi & viem to latest
+- [[#3921d719][3921d719]] next: extra gas dispatcher
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.5.0
+
 ## 0.10.1
 
 ### Patch Changes

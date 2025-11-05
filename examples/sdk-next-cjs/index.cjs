@@ -1,20 +1,15 @@
 const {
   api: { getWs },
-  pool,
+  createSdkContext,
 } = require('@galacticcouncil/sdk-next');
 
 const main = async () => {
-  const client = await getWs('wss://rpc.hydradx.cloud');
-  const api = client.getUnsafeApi();
+  const client = await getWs('wss://hydradx-rpc.dwellir.com');
+  const sdk = await createSdkContext(client);
 
-  await api.constants.System.Version(); // Removal is fatal
+  const { ctx } = sdk;
 
-  const ctx = new pool.PoolContextProvider(client)
-    .withOmnipool()
-    .withStableswap()
-    .withXyk();
-
-  const pools = await ctx.getPools();
+  const pools = await ctx.pool.getPools();
 
   console.log(pools);
 };

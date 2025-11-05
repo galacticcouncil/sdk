@@ -9,6 +9,7 @@ esbuild
     ...esmConfig,
     bundle: true,
     packages: 'external',
+    inject: ['shim.src.js'],
   })
   .then(({ metafile }) => {
     writeFileSync('build-meta.json', JSON.stringify(metafile));

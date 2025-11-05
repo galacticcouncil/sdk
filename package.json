@@ -21,6 +21,7 @@
     "link": "turbo run link",
     "test": "turbo run test --concurrency=1",
     "changeset": "changeset",
+    "version": "node -e \"console.log('WebSocket in globals:', !!globalThis.WebSocket, process.version)\"",
     "changeset:version": "node ./scripts/changeset-version.mjs",
     "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",
     "prerelease": "npm run build",
@@ -40,8 +41,8 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
-    "tsx": "^3.8.2",
-    "turbo": "^2.0.3",
+    "tsx": "^4.20.6",
+    "turbo": "^2.5.8",
     "typescript": "^5.7.2"
   },
   "optionalDependencies": {
@@ -56,7 +57,7 @@
     "@polkadot/types": "16.4.8",
     "@polkadot/rpc-provider": "16.4.8"
   },
-  "packageManager": "npm@10.7.0",
+  "packageManager": "npm@10.9.1",
   "dependencies": {
     "@wormhole-foundation/sdk-solana": "^3.2.0",
     "@wormhole-foundation/sdk-solana-tokenbridge": "^3.2.0"

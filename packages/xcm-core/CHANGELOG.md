@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.7.0
+
+### Minor Changes
+
+- Upgrade viem to 2.38.3 (latest)
+
 ## 8.6.0
 
 ### Minor Changes

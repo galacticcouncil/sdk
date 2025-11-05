@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/descriptors",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Hydration papi (polkadot-api) descriptors",
   "author": "GalacticCouncil",
   "repository": {
@@ -42,7 +42,7 @@
     "papi:whitelist": "papi --whitelist ./src/whitelist.ts"
   },
   "devDependencies": {
-    "polkadot-api": "^1.16.2"
+    "polkadot-api": "^1.20.0"
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors"

@@ -306,9 +306,14 @@ export function viaSnowbridgeTemplate(
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      })
+    ),
     tags: [Tag.Snowbridge],
   });
 }

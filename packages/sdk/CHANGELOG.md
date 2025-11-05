@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk
 
+## 10.1.0
+
+### Minor Changes
+
+[840813cd]: https://github.com/galacticcouncil/sdk/commit/840813cd
+[96d12c07]: https://github.com/galacticcouncil/sdk/commit/96d12c07
+
+- [[#840813cd][840813cd]] sdk: evm rpc adapter (chopsticks)
+- [[#96d12c07][96d12c07]] sdk: dispatch buy with extra gas
+
 ## 10.0.0
 
 ### Major Changes

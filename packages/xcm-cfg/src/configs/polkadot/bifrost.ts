@@ -77,28 +77,28 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: dot,
-      fee: {
-        amount: 0.1,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
+  // new AssetRoute({
+  //   source: {
+  //     asset: dot,
+  //     balance: BalanceBuilder().substrate().tokens().accounts(),
+  //     fee: {
+  //       asset: bnc,
+  //       balance: BalanceBuilder().substrate().system().account(),
+  //     },
+  //     destinationFee: {
+  //       balance: BalanceBuilder().substrate().tokens().accounts(),
+  //     },
+  //   },
+  //   destination: {
+  //     chain: hydration,
+  //     asset: dot,
+  //     fee: {
+  //       amount: 0.1,
+  //       asset: dot,
+  //     },
+  //   },
+  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  // }),
   new AssetRoute({
     source: {
       asset: astr,

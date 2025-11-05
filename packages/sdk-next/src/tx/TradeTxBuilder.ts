@@ -92,6 +92,12 @@ export class TradeTxBuilder extends TxBuilder {
         route: TradeRouteBuilder.build(swaps) as any,
       });
     }
+
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
+
     return this.wrapTx('RouterBuy', tx);
   }
 
@@ -125,11 +131,9 @@ export class TradeTxBuilder extends TxBuilder {
       });
     }
 
-    if (firstSwap.isWithdraw()) {
-      const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-      if (hasDebt) {
-        tx = await this.dispatchWithExtraGas(tx);
-      }
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
     }
 
     return this.wrapTx('RouterSell', tx);
@@ -153,11 +157,9 @@ export class TradeTxBuilder extends TxBuilder {
       route: TradeRouteBuilder.build(swaps) as any,
     });
 
-    if (firstSwap.isWithdraw()) {
-      const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-      if (hasDebt) {
-        tx = await this.dispatchWithExtraGas(tx);
-      }
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
     }
 
     return this.wrapTx('RouterSellAll', tx);
