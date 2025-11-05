@@ -6,8 +6,6 @@ import {
   DexFactory,
 } from '@galacticcouncil/xcm-core';
 
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-
 import { SubstrateService } from './SubstrateService';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 import { buildXcmDest, buildXcmMessage, getErrorFromDryRun } from './utils';
@@ -73,7 +71,7 @@ export class SubstrateExec {
       transactXcmMessage
     );
 
-    const calls: SubmittableExtrinsic[] = [];
+    const calls: `0x${string}`[] = [];
 
     if (this.#dex) {
       const swapTxHash = await this.#dex.getCalldata(
@@ -84,14 +82,14 @@ export class SubstrateExec {
         10 // swap slippage
       );
       const swapTx = srcApi.tx(swapTxHash);
-      calls.push(swapTx);
+      calls.push(swapTx.toHex());
     }
 
     const transferCall = await transfer(dstFee);
     const transferTx = srcApi.tx(transferCall.data);
 
-    calls.push(transferTx);
-    calls.push(transactTx);
+    calls.push(transferTx.toHex());
+    calls.push(transactTx.toHex());
 
     const batchTx = srcApi.tx.utility.batchAll(calls);
 
