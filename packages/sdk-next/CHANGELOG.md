@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.13.0
+
+### Minor Changes
+
+- 08a8a5d: Calculate health factor after swaping two aTokens
+
 ## 0.12.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.16.0
+
+### Minor Changes
+
+- b5a3f1d: new cfg
+
 ## 10.15.3
 
 ### Patch Changes
