@@ -1,5 +1,3 @@
-process.env.NODE_OPTIONS = '--experimental-vm-modules';
-
 export const config = {
   roots: ['<rootDir>'],
   modulePaths: ['<rootDir>'],

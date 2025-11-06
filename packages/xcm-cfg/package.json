@@ -28,7 +28,7 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "NODE_NO_WARNINGS=1 jest --silent"
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
     "@galacticcouncil/xcm-core": "^8.6.0"

@@ -29,7 +29,7 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "NODE_NO_WARNINGS=1 jest"
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2"
