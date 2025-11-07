@@ -1,7 +1,7 @@
 import { Parachain, addr } from '@galacticcouncil/xcm-core';
 
-import { u8aToHex } from '@polkadot/util';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
+import { toHex } from '@polkadot-api/utils';
 
 const { EvmAddr } = addr;
 
@@ -55,11 +55,13 @@ export function getDestinationMultilocation(
   destination: Parachain
 ): DestinationMultilocation {
   const accountType = EvmAddr.isValid(address) ? '03' : '01';
-  const acc = `0x${accountType}${u8aToHex(
-    decodeAddress(address),
-    -1,
-    false
-  )}00`;
+
+  const info = getSs58AddressInfo(address);
+  if (!info.isValid) {
+    throw new Error(`Invalid SS58 address: ${address}`);
+  }
+
+  const acc = `0x${accountType}${toHex(info.publicKey).slice(2)}00`;
 
   return [
     1,

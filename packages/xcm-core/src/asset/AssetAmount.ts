@@ -1,6 +1,6 @@
 import Big, { RoundingMode } from 'big.js';
 import { Asset, AssetParams } from './Asset';
-import { big } from '../utils';
+import { big } from '@galacticcouncil/common';
 
 Big.NE = -18;
 

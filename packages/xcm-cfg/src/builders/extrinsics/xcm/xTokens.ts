@@ -1,10 +1,10 @@
 import {
-  big,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
+import { big } from '@galacticcouncil/common';
 import { toAsset, toDest } from './xTokens.utils';
 
 import {

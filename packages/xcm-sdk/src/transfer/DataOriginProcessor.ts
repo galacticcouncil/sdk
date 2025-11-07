@@ -1,7 +1,6 @@
 import {
   acc,
   addr,
-  big,
   Asset,
   AssetAmount,
   FeeAmountConfigBuilder,
@@ -12,6 +11,7 @@ import {
   TransactCtx,
   TransactConfig,
 } from '@galacticcouncil/xcm-core';
+import { big } from '@galacticcouncil/common';
 
 import { formatAmount, formatEvmAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';

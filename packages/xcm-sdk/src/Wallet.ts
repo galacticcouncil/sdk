@@ -1,7 +1,6 @@
 import {
   acc,
   addr,
-  big,
   Asset,
   AnyChain,
   AnyParachain,
@@ -16,6 +15,7 @@ import {
   TransferValidation,
   TransferValidationReport,
 } from '@galacticcouncil/xcm-core';
+import { big } from '@galacticcouncil/common';
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 
 import {

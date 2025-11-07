@@ -4,8 +4,6 @@ import {
   ContractConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { isString } from '@polkadot/util';
-
 export function evm() {
   return {
     erc20,
@@ -31,7 +29,7 @@ function erc20(): BalanceConfigBuilder {
   return {
     build: ({ address, asset, chain }) => {
       const assetId = chain.getBalanceAssetId(asset);
-      if (!assetId || !isString(assetId)) {
+      if (!assetId || typeof assetId !== 'string') {
         throw new Error(`Invalid contract address: ${asset}`);
       }
 

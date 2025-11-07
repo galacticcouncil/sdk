@@ -1,12 +1,11 @@
 import {
-  big,
   Abi,
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
   Precompile,
 } from '@galacticcouncil/xcm-core';
-import { isString } from '@polkadot/util';
+import { big } from '@galacticcouncil/common';
 
 import {
   getDestinationMultilocation,
@@ -24,7 +23,7 @@ export function Xtokens() {
           abi: Abi.Xtokens,
           address: Precompile.Xtokens,
           args: [
-            isString(assetId) ? formatAssetIdToERC20(assetId) : asset,
+            typeof assetId === 'string' ? formatAssetIdToERC20(assetId) : asset,
             amount,
             getDestinationMultilocation(
               address,
@@ -53,11 +52,13 @@ export function Xtokens() {
           args: [
             [
               [
-                isString(assetId) ? formatAssetIdToERC20(assetId) : assetId,
+                typeof assetId === 'string'
+                  ? formatAssetIdToERC20(assetId)
+                  : assetId,
                 amount,
               ],
               [
-                isString(feeAssetId)
+                typeof feeAssetId === 'string'
                   ? formatAssetIdToERC20(feeAssetId)
                   : feeAssetId,
                 feeAmount,

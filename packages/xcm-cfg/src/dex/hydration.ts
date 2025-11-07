@@ -9,11 +9,11 @@ import {
 import {
   PoolService,
   PoolType,
-  RUNTIME_DECIMALS,
   TradeRouteBuilder,
   TradeRouter,
   TxBuilderFactory,
 } from '@galacticcouncil/sdk';
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
 import { memoize1 } from '@thi.ng/memoize';
 

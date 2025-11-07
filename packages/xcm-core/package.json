@@ -37,6 +37,7 @@
     "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
+    "@galacticcouncil/common": "^0.1.0",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",
     "@wormhole-foundation/sdk-connect": "3.2.0",
@@ -56,6 +57,7 @@
     "@polkadot/api-augment": "^16.4.8",
     "@polkadot/types": "^16.4.8",
     "@polkadot/util-crypto": "^13.5.6",
+    "polkadot-api": "^1.20.0",
     "viem": "^2.38.3"
   }
 }

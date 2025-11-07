@@ -1,11 +1,11 @@
 import {
   addr,
-  big,
   Asset,
   AssetAmount,
   Parachain,
   TransferConfig,
 } from '@galacticcouncil/xcm-core';
+import { big } from '@galacticcouncil/common';
 
 import { formatEvmAddress } from './utils';
 import { PlatformAdapter, SubstrateService } from '../platforms';

@@ -1,4 +1,5 @@
-import { big, Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
+import { Asset, AssetAmountParams } from '@galacticcouncil/xcm-core';
+import { big } from '@galacticcouncil/common';
 
 import { SubstrateService } from '../SubstrateService';
 
