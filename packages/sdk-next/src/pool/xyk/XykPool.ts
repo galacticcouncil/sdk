@@ -10,7 +10,7 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
-import { RUNTIME_DECIMALS } from '../../consts';
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { fmt } from '../../utils';
 
 import { XykMath } from './XykMath';

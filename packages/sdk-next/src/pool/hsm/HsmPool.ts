@@ -8,8 +8,7 @@ import {
 } from '../types';
 import { StableSwap, StableSwapBase, StableSwapPair } from '../stable';
 
-import { RUNTIME_DECIMALS } from '../../consts';
-import { big } from '@galacticcouncil/common';
+import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { fmt } from '../../utils';
 
 import { HsmMath } from './HsmMath';

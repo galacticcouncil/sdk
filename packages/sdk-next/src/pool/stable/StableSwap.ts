@@ -13,7 +13,8 @@ import {
 } from '../types';
 import { OmniMath } from '../omni';
 
-import { RUNTIME_DECIMALS, TRADEABLE_DEFAULT } from '../../consts';
+import { TRADEABLE_DEFAULT } from '../../consts';
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { fmt, json, math } from '../../utils';
 
 import { StableMath } from './StableMath';
