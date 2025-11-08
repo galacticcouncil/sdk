@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk-next
 
+## 0.14.0
+
+### Minor Changes
+
+[de485c9e]: https://github.com/galacticcouncil/sdk/commit/de485c9e
+[0907b12f]: https://github.com/galacticcouncil/sdk/commit/0907b12f
+[40e57599]: https://github.com/galacticcouncil/sdk/commit/40e57599
+
+- [[#de485c9e][de485c9e]] next: rework current HF calculation
+- [[#0907b12f][0907b12f]] next: configurable WsProvider
+- [[#40e57599][40e57599]] next: common package utils
+
 ## 0.13.0
 
 ### Minor Changes
