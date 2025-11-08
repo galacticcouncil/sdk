@@ -1,7 +1,7 @@
 import { AccountId } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { HYDRATION_SS58_PREFIX } from '../consts';
+import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 export function getAccountAddress(seed: string) {
   const name = ('modl' + seed).padEnd(32, '\0');

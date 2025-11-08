@@ -3,7 +3,7 @@ import Big from 'big.js';
 import { AaveClient } from './AaveClient';
 import { AaveSummary, AaveReserveData } from './types';
 
-import { big, erc20, h160 } from '../utils';
+import { big, erc20, h160 } from '@galacticcouncil/common';
 
 import { EvmClient } from '../evm';
 import { Amount } from '../types';

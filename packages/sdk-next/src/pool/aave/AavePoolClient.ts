@@ -7,8 +7,7 @@ import { decodeEventLog } from 'viem';
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import { HYDRATION_SS58_PREFIX } from '../../consts';
-import { erc20, json } from '../../utils';
+import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { AavePoolToken } from './AavePool';
 import { AAVE_ABI } from './AaveAbi';

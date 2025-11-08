@@ -15,10 +15,10 @@ import { PoolType, PoolLimits, PoolToken, PoolPair } from '../types';
 
 import {
   HUB_ASSET_ID,
-  HYDRATION_SS58_PREFIX,
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
+import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { fmt, QueryBus } from '../../utils';
 
 import { OmniMath } from './OmniMath';

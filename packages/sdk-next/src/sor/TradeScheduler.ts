@@ -17,7 +17,7 @@ import { TradeRouter } from './TradeRouter';
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
-import { big } from '../utils';
+import { big } from '@galacticcouncil/common';
 
 export type TradeSchedulerOptions = {
   blockTime?: number;

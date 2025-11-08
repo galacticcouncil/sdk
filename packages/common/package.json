@@ -1,0 +1,51 @@
+{
+  "name": "@galacticcouncil/common",
+  "version": "0.1.0",
+  "description": "Common utilities shared across Galactic SDK packages",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/common",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydration",
+    "utilities",
+    "common"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build",
+    "src"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/types/index.d.ts",
+      "import": "./build/index.mjs",
+      "require": "./build/index.cjs",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
+    "clean": "rimraf build",
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "dependencies": {
+    "big.js": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/big.js": "^6.2.2"
+  },
+  "peerDependencies": {
+    "polkadot-api": "^1.20.0"
+  }
+}

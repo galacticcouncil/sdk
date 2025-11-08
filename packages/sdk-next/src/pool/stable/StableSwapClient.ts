@@ -15,11 +15,8 @@ import {
 } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import {
-  HYDRATION_SS58_PREFIX,
-  RUNTIME_DECIMALS,
-  TRADEABLE_DEFAULT,
-} from '../../consts';
+import { TRADEABLE_DEFAULT } from '../../consts';
+import { HYDRATION_SS58_PREFIX, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { fmt } from '../../utils';
 
 import { StableMath } from './StableMath';

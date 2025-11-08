@@ -11,7 +11,8 @@ import {
   PoolType,
 } from '../pool';
 import { Amount } from '../types';
-import { big, fmt, math } from '../utils';
+import { big } from '@galacticcouncil/common';
+import { fmt, math } from '../utils';
 
 const { FeeUtils } = fmt;
 
