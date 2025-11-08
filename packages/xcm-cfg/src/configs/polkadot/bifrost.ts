@@ -12,7 +12,11 @@ import {
   ibtc,
 } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -77,28 +81,30 @@ const toHydration: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  // new AssetRoute({
-  //   source: {
-  //     asset: dot,
-  //     balance: BalanceBuilder().substrate().tokens().accounts(),
-  //     fee: {
-  //       asset: bnc,
-  //       balance: BalanceBuilder().substrate().system().account(),
-  //     },
-  //     destinationFee: {
-  //       balance: BalanceBuilder().substrate().tokens().accounts(),
-  //     },
-  //   },
-  //   destination: {
-  //     chain: hydration,
-  //     asset: dot,
-  //     fee: {
-  //       amount: 0.1,
-  //       asset: dot,
-  //     },
-  //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  // }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().tokens().accounts(),
+      fee: {
+        asset: bnc,
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().tokens().accounts(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
+  }),
   new AssetRoute({
     source: {
       asset: astr,

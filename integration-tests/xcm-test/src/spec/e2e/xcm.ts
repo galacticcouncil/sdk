@@ -13,6 +13,8 @@ import {
   Wallet,
 } from '@galacticcouncil/xcm-sdk';
 
+import { jest } from '@jest/globals';
+
 import * as c from 'console';
 
 import { getAccount } from './account';
@@ -161,7 +163,7 @@ const getAssetReserve = (
   route: AssetRoute
 ): number | undefined => {
   if (route.source.asset.key === 'dot') {
-    return 0;
+    return 1000;
   }
 
   const location = chain.getAssetXcmLocation(route.source.asset);
