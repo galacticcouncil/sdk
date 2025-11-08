@@ -1,3 +1,5 @@
+import { big } from '@galacticcouncil/common';
+
 import {
   DEFAULT_BLOCK_TIME,
   DEFAULT_MIN_BUDGET,
@@ -17,7 +19,6 @@ import { TradeRouter } from './TradeRouter';
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
-import { big } from '@galacticcouncil/common';
 
 export type TradeSchedulerOptions = {
   blockTime?: number;

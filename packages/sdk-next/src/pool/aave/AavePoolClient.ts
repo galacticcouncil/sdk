@@ -4,10 +4,10 @@ import { toHex } from '@polkadot-api/utils';
 import { Subscription, filter, finalize, map } from 'rxjs';
 import { decodeEventLog } from 'viem';
 
+import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
+
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../types';
 import { PoolClient } from '../PoolClient';
-
-import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { AavePoolToken } from './AavePool';
 import { AAVE_ABI } from './AaveAbi';

@@ -1,3 +1,5 @@
+import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   PoolError,
@@ -8,7 +10,6 @@ import {
 } from '../types';
 import { StableSwap, StableSwapBase, StableSwapPair } from '../stable';
 
-import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { fmt } from '../../utils';
 
 import { HsmMath } from './HsmMath';
