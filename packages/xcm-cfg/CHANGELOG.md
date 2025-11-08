@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.16.1
+
+### Patch Changes
+
+- re-enable bifrost DOT
+
 ## 10.16.0
 
 ### Minor Changes
@@ -10,7 +16,7 @@
 
 ### Patch Changes
 
-- reenable snowfork
+- re-enable snowfork
 
 ## 10.15.2
 
