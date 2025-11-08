@@ -1,16 +1,19 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { withLogsRecorder } from 'polkadot-api/logs-provider';
 import { withLegacy } from '@polkadot-api/legacy-provider';
-import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider';
 
+type WsProviderConfig = Parameters<typeof getWsProvider>[1];
+
 export const getWs = async (
-  wsUrl: string | string[]
+  wsUrl: string | string[],
+  config: WsProviderConfig = {}
 ): Promise<PolkadotClient> => {
   const endpoints = typeof wsUrl === 'string' ? wsUrl.split(',') : wsUrl;
   const wsProvider = getWsProvider(endpoints, {
     innerEnhancer: withLegacy(),
+    ...config,
   });
-  const provider = withLogsRecorder((line) => console.log(line), wsProvider);
+  withLogsRecorder((line) => console.log(line), wsProvider);
   return createClient(wsProvider);
 };
