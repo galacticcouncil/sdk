@@ -47,7 +47,6 @@ const toHydration: AssetRoute[] = [
     contract: ContractBuilder().Xtokens().transfer(),
   }),
   toHydrationXcTemplate(hdx, 0.6),
-  //toHydrationXcTemplate(dot, 0.1),
   toHydrationXcTemplate(usdt, 0.3),
   toHydrationXcTemplate(usdc, 0.3),
   toHydrationErc20Template(dai_mwh, 0.004),
