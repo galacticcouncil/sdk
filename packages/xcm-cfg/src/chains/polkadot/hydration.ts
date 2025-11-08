@@ -341,7 +341,7 @@ export const hydration = new EvmParachain({
       decimals: 4,
       id: 1000038,
       xcmLocation: {
-        parents: '1',
+        parents: 1,
         interior: {
           X3: [
             {

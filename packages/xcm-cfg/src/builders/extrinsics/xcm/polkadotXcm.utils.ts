@@ -10,6 +10,20 @@ import { getX1Junction, instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
 const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
+const DOT_RESERVE_LOCATION = {
+  parents: 1,
+  interior: {
+    X1: [
+      {
+        Parachain: 1000,
+      },
+    ],
+  },
+};
+
+const isDot = (assetLocation: any) => {
+  return assetLocation.parents === 1 && assetLocation.interior === 'Here';
+};
 
 const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
   const isUnknownConsensus = !source.ecosystem || !destination.ecosystem;
@@ -86,12 +100,12 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
 export const toTransferType = (
   version: XcmVersion,
   type: XcmTransferType,
-  assetLocation: object
+  assetLocation: any
 ) => {
   if (type === XcmTransferType.RemoteReserve) {
     return {
       RemoteReserve: {
-        [version]: assetLocation,
+        [version]: isDot(assetLocation) ? DOT_RESERVE_LOCATION : assetLocation,
       },
     };
   }
