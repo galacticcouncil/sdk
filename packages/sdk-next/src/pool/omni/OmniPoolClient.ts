@@ -10,12 +10,13 @@ import {
   merge,
 } from 'rxjs';
 
+import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
+
 import { PoolClient } from '../PoolClient';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../types';
 
 import {
   HUB_ASSET_ID,
-  HYDRATION_SS58_PREFIX,
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';

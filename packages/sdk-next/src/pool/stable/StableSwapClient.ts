@@ -6,6 +6,11 @@ import { blake2b } from '@noble/hashes/blake2b';
 import { Subscription, distinctUntilChanged, finalize, map, merge } from 'rxjs';
 
 import {
+  HYDRATION_SS58_PREFIX,
+  RUNTIME_DECIMALS,
+} from '@galacticcouncil/common';
+
+import {
   PoolType,
   PoolFee,
   PoolLimits,
@@ -15,11 +20,7 @@ import {
 } from '../types';
 import { PoolClient } from '../PoolClient';
 
-import {
-  HYDRATION_SS58_PREFIX,
-  RUNTIME_DECIMALS,
-  TRADEABLE_DEFAULT,
-} from '../../consts';
+import { TRADEABLE_DEFAULT } from '../../consts';
 import { fmt } from '../../utils';
 
 import { StableMath } from './StableMath';

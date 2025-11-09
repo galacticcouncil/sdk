@@ -35,6 +35,11 @@ export const cfg = new Asset({
   originSymbol: 'CFG',
 });
 
+export const cfg_new = new Asset({
+  key: 'cfg_new',
+  originSymbol: 'CFG',
+});
+
 export const cru = new Asset({
   key: 'cru',
   originSymbol: 'CRU',
@@ -347,6 +352,7 @@ export const assets: Asset[] = [
   astr,
   bsx,
   cfg,
+  cfg_new,
   cru,
   bnc,
   dai,

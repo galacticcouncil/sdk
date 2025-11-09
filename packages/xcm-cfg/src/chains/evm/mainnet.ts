@@ -5,6 +5,7 @@ import {
 
 import {
   aave,
+  cfg_new,
   dai,
   ena,
   eth,
@@ -40,6 +41,11 @@ export const ethereum = new EvmChain({
       asset: aave,
       decimals: 18,
       id: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+    },
+    {
+      asset: cfg_new,
+      decimals: 18,
+      id: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
     },
     {
       asset: weth,

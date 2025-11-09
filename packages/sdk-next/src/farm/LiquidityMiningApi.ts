@@ -2,13 +2,13 @@ import { AccountId, SS58String } from 'polkadot-api';
 
 import Big from 'big.js';
 
-import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
-
 import {
   HYDRATION_SS58_PREFIX,
   RUNTIME_DECIMALS,
-  SYSTEM_ASSET_ID,
-} from '../consts';
+} from '@galacticcouncil/common';
+import { fixed_from_rational } from '@galacticcouncil/math-liquidity-mining';
+
+import { SYSTEM_ASSET_ID } from '../consts';
 import { BalanceClient } from '../client';
 import { Balance } from '../types';
 import { fmt } from '../utils';

@@ -12,6 +12,7 @@ import {
   astr,
   bnc,
   cfg,
+  cfg_new,
   cru,
   dai_awh,
   dai_mwh,
@@ -266,6 +267,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: cfg_new,
+      decimals: 18,
+      id: 41,
+      min: 0.1,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: cru,
       decimals: 12,
       id: 27,
@@ -315,7 +342,7 @@ export const hydration = new EvmParachain({
       decimals: 4,
       id: 1000038,
       xcmLocation: {
-        parents: '1',
+        parents: 1,
         interior: {
           X3: [
             {

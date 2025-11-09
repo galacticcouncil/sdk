@@ -1,9 +1,9 @@
 import Big from 'big.js';
 
+import { big, erc20, h160 } from '@galacticcouncil/common';
+
 import { AaveClient } from './AaveClient';
 import { AaveSummary, AaveReserveData } from './types';
-
-import { big, erc20, h160 } from '../utils';
 
 import { EvmClient } from '../evm';
 import { Amount } from '../types';
@@ -13,6 +13,8 @@ const { H160 } = h160;
 
 const TARGET_WITHDRAW_HF = 1.01;
 const SECONDS_PER_YEAR = 31536000n;
+const LTV_PRECISION = 4;
+const INVALID_HF = -1;
 
 const RAY = 10n ** 27n;
 
@@ -136,16 +138,19 @@ export class AaveUtils {
     const to = H160.fromAny(user);
     const userData = await this.client.getUserAccountData(to);
     const [
-      _totalCollateralBase,
-      _totalDebtBase,
+      totalCollateralBase,
+      totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
-      healthFactor,
+      _healthFactor,
     ] = userData;
 
-    const hf = big.toDecimal(healthFactor, 18);
-    return Number(hf);
+    return this.calculateHealthFactorFromBalances(
+      totalDebtBase,
+      totalCollateralBase,
+      currentLiquidationThreshold
+    );
   }
 
   /**
@@ -234,6 +239,75 @@ export class AaveUtils {
       .toFixed(6, Big.roundDown);
 
     return Number(healthFactor);
+  }
+
+  /**
+   * Estimate health factor after swapping between reserves
+   *
+   * @param user - user address
+   * @param fromAmount - amount to withdraw (decimal)
+   * @param fromReserve - reserve on-chain id (registry) to withdraw from
+   * @param toAmount - amount to supply (decimal)
+   * @param toReserve - reserve on-chain id (registry) to supply to
+   * @returns health factor decimal value after swap
+   */
+  async getHealthFactorAfterSwap(
+    user: string,
+    fromAmount: string,
+    fromReserve: number,
+    toAmount: string,
+    toReserve: number
+  ): Promise<number> {
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+
+    const fromReserveAsset = ERC20.fromAssetId(fromReserve);
+    const toReserveAsset = ERC20.fromAssetId(toReserve);
+
+    const fromReserveCtx = reserves.find(
+      (r) => r.reserveAsset === fromReserveAsset
+    );
+
+    const toReserveCtx = reserves.find(
+      (r) => r.reserveAsset === toReserveAsset
+    );
+
+    if (!fromReserveCtx)
+      throw new Error(`Missing reserve ctx for ${fromReserveAsset}`);
+
+    if (!toReserveCtx) {
+      throw new Error(`Missing reserve ctx for ${toReserveCtx}`);
+    }
+
+    const fromAmountNative = big.toBigInt(fromAmount, fromReserveCtx.decimals);
+    const toAmountNative = big.toBigInt(toAmount, toReserveCtx.decimals);
+
+    const fromValueInRef =
+      (fromAmountNative * fromReserveCtx.priceInRef) /
+      10n ** BigInt(fromReserveCtx.decimals);
+
+    const toValueInRef =
+      (toAmountNative * toReserveCtx.priceInRef) /
+      10n ** BigInt(toReserveCtx.decimals);
+
+    const fromWeightedCollateral = fromReserveCtx.isCollateral
+      ? Big(fromValueInRef.toString()).mul(
+          fromReserveCtx.reserveLiquidationThreshold
+        )
+      : Big(0);
+
+    const toWeightedCollateral = Big(toValueInRef.toString()).mul(
+      toReserveCtx.reserveLiquidationThreshold
+    );
+
+    const weightedCollateralDelta = toWeightedCollateral.minus(
+      fromWeightedCollateral
+    );
+    const hfDelta = weightedCollateralDelta.div(totalDebt.toString());
+    const hfAfterSwap = Big(healthFactor)
+      .plus(hfDelta)
+      .toFixed(6, Big.roundDown);
+
+    return Number(hfAfterSwap);
   }
 
   /**
@@ -343,5 +417,26 @@ export class AaveUtils {
 
     const interest = (liquidityRate * BigInt(delta)) / SECONDS_PER_YEAR;
     return RAY + interest;
+  }
+
+  /**
+   * Original AAVE health factor calculation formula:
+   * @see https://github.com/aave/aave-utilities/blob/432e283b2e76d9793b20d37bd4cb94aca97ed20e/packages/math-utils/src/pool-math.ts#L139
+   */
+  private calculateHealthFactorFromBalances(
+    totalDebt: bigint,
+    totalCollateral: bigint,
+    currentLiquidationThreshold: bigint
+  ): number {
+    if (totalDebt === 0n) {
+      return INVALID_HF;
+    }
+
+    const hfFromBalances =
+      (totalCollateral * currentLiquidationThreshold) / totalDebt;
+
+    const hf = big.toDecimal(hfFromBalances, LTV_PRECISION);
+
+    return Number(hf);
   }
 }

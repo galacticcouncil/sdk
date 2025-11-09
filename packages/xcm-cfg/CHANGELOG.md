@@ -1,5 +1,35 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.16.1
+
+### Patch Changes
+
+- re-enable bifrost DOT
+
+## 10.16.0
+
+### Minor Changes
+
+- b5a3f1d: new cfg
+
+## 10.15.3
+
+### Patch Changes
+
+- re-enable snowfork
+
+## 10.15.2
+
+### Patch Changes
+
+- temp disable dot transfers from paras -> hydration
+
+## 10.15.1
+
+### Patch Changes
+
+- dfe64d1: cfg: enable snowbridge swap
+
 ## 10.15.0
 
 ### Minor Changes

@@ -1,3 +1,5 @@
+import { big } from '@galacticcouncil/common';
+
 import { Router } from './Router';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
@@ -11,7 +13,7 @@ import {
   PoolType,
 } from '../pool';
 import { Amount } from '../types';
-import { big, fmt, math } from '../utils';
+import { fmt, math } from '../utils';
 
 const { FeeUtils } = fmt;
 

@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "0.12.0",
+  "version": "0.14.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -29,12 +29,13 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "NODE_NO_WARNINGS=1 jest"
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
+    "@galacticcouncil/common": "^0.1.0",
     "@galacticcouncil/descriptors": "^1.5.0",
     "@galacticcouncil/math-hsm": "^1.1.0",
     "@galacticcouncil/math-lbp": "^1.2.0",
