@@ -1,11 +1,10 @@
-import { bnToU8a, hexToU8a, stringToU8a, u8aToHex } from '@polkadot/util';
-
 import {
-  blake2AsU8a,
-  decodeAddress,
-  encodeAddress,
-} from '@polkadot/util-crypto';
-import { TypeRegistry } from '@polkadot/types';
+  Blake2256,
+  getSs58AddressInfo,
+  fromBufferToBase58,
+  compactNumber,
+} from '@polkadot-api/substrate-bindings';
+import { toHex, fromHex } from '@polkadot-api/utils';
 
 /**
  * Multilocation-derivative account - an account computed when executing remote calls
@@ -29,9 +28,11 @@ export function getMultilocationDerivatedAccount(
   // Decode address if needed
   let decodedAddress: Uint8Array;
   if (!ethAddress) {
-    decodedAddress = decodeAddress(address);
+    const info = getSs58AddressInfo(address);
+    if (!info.isValid) throw new Error('Invalid SS58 address');
+    decodedAddress = info.publicKey;
   } else {
-    decodedAddress = hexToU8a(address);
+    decodedAddress = fromHex(address.slice(2)); // Remove 0x prefix
   }
 
   // Describe family
@@ -40,23 +41,20 @@ export function getMultilocationDerivatedAccount(
   else if (parents == 1 && !parachainId) family = 'ParentChain';
 
   // Calculate hash component
-  const registry = new TypeRegistry();
+  const compactEncoder = compactNumber.enc;
   let toHash = new Uint8Array([
     ...new TextEncoder().encode(family),
-    ...(parachainId
-      ? registry.createType('Compact<u32>', parachainId).toU8a()
-      : []),
-    ...registry
-      .createType('Compact<u32>', accType.length + (ethAddress ? 20 : 32))
-      .toU8a(),
+    ...(parachainId ? compactEncoder(parachainId) : []),
+    ...compactEncoder(accType.length + (ethAddress ? 20 : 32)),
     ...new TextEncoder().encode(accType),
     ...decodedAddress,
   ]);
 
+  const hash = Blake2256(toHash);
   if (isEthereumStyle) {
-    return u8aToHex(blake2AsU8a(toHash).slice(0, 20));
+    return toHex(hash.slice(0, 20));
   }
-  return encodeAddress(blake2AsU8a(toHash));
+  return fromBufferToBase58(42)(hash); // 42 is the default generic substrate prefix
 }
 
 /**
@@ -69,13 +67,21 @@ export function getMultilocationDerivatedAccount(
  * @returns sovereign account addresses
  */
 export function getSovereignAccounts(parachainId: number) {
-  const paraIdU8a = bnToU8a(parachainId, { bitLength: 32 });
-  const relay = u8aToHex(
-    new Uint8Array([...stringToU8a('para'), ...paraIdU8a])
+  // Convert parachain ID to little-endian 32-bit bytes
+  const paraIdU8a = new Uint8Array(4);
+  new DataView(paraIdU8a.buffer).setUint32(0, parachainId, true); // true = little-endian
+
+  const paraBytes = new TextEncoder().encode('para');
+  const siblBytes = new TextEncoder().encode('sibl');
+
+  const relay = toHex(
+    new Uint8Array([...paraBytes, ...paraIdU8a])
   ).padEnd(66, '0');
-  const generic = u8aToHex(
-    new Uint8Array([...stringToU8a('sibl'), ...paraIdU8a])
+
+  const generic = toHex(
+    new Uint8Array([...siblBytes, ...paraIdU8a])
   ).padEnd(66, '0');
+
   const moonbeam = generic.slice(0, 42);
 
   return {

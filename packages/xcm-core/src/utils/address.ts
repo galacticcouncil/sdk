@@ -1,8 +1,12 @@
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { isHex, hexToU8a, u8aToHex } from '@polkadot/util';
+import {
+  getSs58AddressInfo,
+  fromBufferToBase58,
+} from '@polkadot-api/substrate-bindings';
+import { toHex, fromHex } from '@polkadot-api/utils';
 
 import { PublicKey as SolanaPublicKey } from '@solana/web3.js';
 import { isAddress as isEvmAddress } from 'viem';
+import { hex } from '@galacticcouncil/common';
 
 export interface Addr {
   isValid(address: string): boolean;
@@ -17,18 +21,6 @@ export interface Addr {
 const RE_SUI_ADDR = /^0x[0-9a-fA-F]{64}$/;
 const RE_SS58_BASE58_32 = /^[1-9A-HJ-NP-Za-km-z]{47,48}$/;
 
-function hexNormalize(h: string): string {
-  let s = h.toLowerCase();
-  if (!s.startsWith('0x')) s = '0x' + s;
-  return s;
-}
-
-function assertHexLen(h: string, bytes: number) {
-  if (!/^0x[0-9a-fA-F]+$/.test(h) || h.length - 2 !== bytes * 2) {
-    throw new Error(`Expected 0x hex of ${bytes} bytes`);
-  }
-}
-
 // -------------------- Substrate (SS58) --------------------
 
 export class Ss58Addr {
@@ -40,13 +32,9 @@ export class Ss58Addr {
    * @returns true if strict ss58, otherwise false
    */
   private static isSs58Strict(addr: string): boolean {
-    if (!addr || isHex(addr) || !RE_SS58_BASE58_32.test(addr)) return false;
-    try {
-      const pk = decodeAddress(addr);
-      return pk.length === 32;
-    } catch {
-      return false;
-    }
+    if (!addr || hex.isHex(addr) || !RE_SS58_BASE58_32.test(addr)) return false;
+    const info = getSs58AddressInfo(addr);
+    return info.isValid && info.publicKey.length === 32;
   }
 
   static isValid(address: string): boolean {
@@ -55,13 +43,16 @@ export class Ss58Addr {
 
   static getPubKey(address: string): string {
     if (!this.isSs58Strict(address)) throw new Error('Invalid SS58 address');
-    return u8aToHex(decodeAddress(address));
+    const info = getSs58AddressInfo(address);
+    if (!info.isValid) throw new Error('Invalid SS58 address');
+    return toHex(info.publicKey);
   }
 
   static encodePubKey(pubKey: string, ss58Prefix = 0): string {
-    const hex = hexNormalize(pubKey);
-    assertHexLen(hex, 32);
-    return encodeAddress(hexToU8a(hex), ss58Prefix);
+    const normalized = hex.hexNormalize(pubKey);
+    hex.assertHexLen(normalized, 32);
+    const publicKeyBytes = fromHex(hex.stripHexPrefix(normalized));
+    return fromBufferToBase58(ss58Prefix)(publicKeyBytes);
   }
 }
 
@@ -87,13 +78,14 @@ export class SolanaAddr {
 
   static getPubKey(address: string): string {
     if (!this.isValid(address)) throw new Error('Invalid Solana address');
-    return u8aToHex(new SolanaPublicKey(address).toBytes()); // 32 bytes
+    return toHex(new SolanaPublicKey(address).toBytes()); // 32 bytes
   }
 
   static encodePubKey(pubKey: string): string {
-    const hex = hexNormalize(pubKey);
-    assertHexLen(hex, 32);
-    return new SolanaPublicKey(hexToU8a(hex)).toBase58();
+    const normalized = hex.hexNormalize(pubKey);
+    hex.assertHexLen(normalized, 32);
+    const bytes = fromHex(hex.stripHexPrefix(normalized));
+    return new SolanaPublicKey(bytes).toBase58();
   }
 }
 
