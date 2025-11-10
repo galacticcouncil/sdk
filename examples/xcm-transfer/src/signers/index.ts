@@ -1,8 +1,10 @@
 import { Call } from '@galacticcouncil/xcm-sdk';
 import { AnyChain, CallType } from '@galacticcouncil/xcm-core';
+import { isEvmAccount } from '@galacticcouncil/sdk';
 
 import * as evm from './evm';
 import * as solana from './solana';
+import * as solanaJit from './solanaJit';
 import * as sui from './sui';
 import * as substrate from './substrate';
 
@@ -48,6 +50,12 @@ export async function signSolana(call: Call, chain: AnyChain) {
   );
 }
 
+export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
+  solanaJit.signAndSend(calls, chain, (error) => {
+    console.error(error);
+  });
+}
+
 export async function signSui(call: Call, chain: AnyChain) {
   sui.signAndSend(
     call,
@@ -73,6 +81,10 @@ export async function sign(call: Call, chain: AnyChain) {
       signSui(call, chain);
       break;
     default:
-      signSubstrate(call, chain);
+      if (isEvmAccount(call.from)) {
+        signEvm(call, chain);
+      } else {
+        signSubstrate(call, chain);
+      }
   }
 }

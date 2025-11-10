@@ -10,6 +10,7 @@ import {
   MessageV0,
   PublicKey,
   PublicKeyInitData,
+  SystemProgram,
   TransactionInstruction,
   TransactionMessage,
 } from '@solana/web3.js';
@@ -28,13 +29,17 @@ import {
 import { SolanaCall } from './types';
 import { chunkBySize, ixToHuman, serializeV0 } from './utils';
 
+import { SolanaLilJit } from './SolanaLilJit';
+
 export class SolanaClaim {
   readonly #chain: SolanaChain;
   readonly #connection: Connection;
+  readonly #lilJit: SolanaLilJit;
 
   constructor(chain: SolanaChain) {
     this.#chain = chain;
     this.#connection = chain.connection;
+    this.#lilJit = new SolanaLilJit(chain);
   }
 
   async redeem(from: string, vaaRaw: string): Promise<SolanaCall[]> {
@@ -49,9 +54,6 @@ export class SolanaClaim {
     );
 
     const payer = new PublicKey(from);
-    const mint = new PublicKey(vaa.payload.token.address.toUint8Array());
-    const recipient = new PublicKey(vaa.payload.to.address.toUint8Array());
-
     const calls: SolanaCall[] = [];
 
     const posted = await this.#connection.getAccountInfo(postedVaaAddress);
@@ -107,7 +109,15 @@ export class SolanaClaim {
       payer,
       vaa
     );
-    const completeV0 = await this.getV0Message(payer, [completeIx]);
+
+    const tipAccounts = await this.#lilJit.getTipAccount();
+    const tipIx = SystemProgram.transfer({
+      fromPubkey: payer,
+      toPubkey: new PublicKey(tipAccounts[0]),
+      lamports: 1000,
+    });
+
+    const completeV0 = await this.getV0Message(payer, [completeIx, tipIx]);
     const completeTx = serializeV0(completeV0);
     calls.push({
       from: from,

@@ -2,12 +2,17 @@ import {
   AssetAmount,
   ConfigBuilder,
   Parachain,
+  SolanaChain,
 } from '@galacticcouncil/xcm-core';
-import { SubstrateCall, TransferBuilder } from '@galacticcouncil/xcm-sdk';
+import {
+  SolanaLilJit,
+  SubstrateCall,
+  TransferBuilder,
+} from '@galacticcouncil/xcm-sdk';
 
 import { logAssets, logSrcChains, logDestChains } from './utils';
 import { configService, wallet, whTransfers } from './setup';
-import { sign, signSubstrate } from './signers';
+import { sign, signSubstrate, signSolanaBundle } from './signers';
 
 // Define transfer constraints
 const srcChain = configService.getChain('ethereum');
@@ -87,7 +92,11 @@ async function claimWithdraws(account: string, payer: string) {
       console.log(withdrawal);
       const calls = await withdrawal.redeem(payer);
       const isBatch = Array.isArray(calls);
-      if (isBatch) {
+      if (isBatch && withdrawal.toChain.isSolana()) {
+        // Jito bundle execution
+        await signSolanaBundle(calls, destChain);
+      } else if (isBatch) {
+        // Sequential batch execution
         for (const call of calls) {
           await sign(call, destChain);
         }
