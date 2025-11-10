@@ -58,7 +58,7 @@ export class SubstratePlatform
         }
       : undefined;
 
-    const extrinsic = substrate.getExtrinsic(config);
+    const extrinsic = await substrate.getExtrinsic(config);
     const extrinsicCall = config.module + '.' + config.func;
     return {
       from: account,
@@ -68,7 +68,7 @@ export class SubstratePlatform
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
-              const extrinsic = substrate.getExtrinsic(config);
+              const extrinsic = await substrate.getExtrinsic(config);
               const { executionResult, emittedEvents, forwardedXcms } =
                 await substrate.dryRun(account, extrinsic);
 

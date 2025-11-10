@@ -26,7 +26,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
 
@@ -57,7 +57,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedTeleportAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
 
@@ -94,7 +94,7 @@ const transferAssetsUsingTypeAndThen = (
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssetsUsingTypeAndThen',
-      getArgs: () => {
+      getArgs: async () => {
         const version = XcmVersion.v4;
 
         const ctx = source.chain as Parachain;

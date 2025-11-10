@@ -12,7 +12,7 @@ const transferAll = (keepAlive = false): ExtrinsicConfigBuilder => {
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
+        getArgs: async () => {
           return [address, keepAlive];
         },
       }),

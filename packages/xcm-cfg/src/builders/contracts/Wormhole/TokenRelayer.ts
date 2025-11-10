@@ -8,7 +8,7 @@ import {
 import { parseAssetId } from '../../utils';
 
 const transferTokensWithRelay = (): ContractConfigBuilder => ({
-  build: (params) => {
+  build: async (params) => {
     const { address, amount, asset, source, destination, transact } = params;
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;

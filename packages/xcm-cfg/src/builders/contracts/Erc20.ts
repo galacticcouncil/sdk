@@ -12,7 +12,7 @@ export function Erc20() {
     approve: (
       getSpender: (ctx: Wh) => string | undefined
     ): ContractConfigBuilder => ({
-      build: (params) => {
+      build: async (params) => {
         const { amount, asset, source, transact } = params;
         const ctx = transact ? transact.chain : source.chain;
         const ctxWh = Wh.fromChain(ctx);

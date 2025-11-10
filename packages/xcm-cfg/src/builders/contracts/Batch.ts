@@ -8,8 +8,8 @@ import {
 import { encodeFunctionData } from 'viem';
 
 const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
-  build: (params) => {
-    const contracts = configs.map((c) => c.build(params));
+  build: async (params) => {
+    const contracts = await Promise.all(configs.map((c) => c.build(params)));
     const to = contracts.map((c) => c.address);
     const value = [0, 0];
     const calldata = contracts.map((c) => {
