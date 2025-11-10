@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.17.0
+
+### Minor Changes
+
+[f0174b6d]: https://github.com/galacticcouncil/sdk/commit/f0174b6d
+[107fd3d3]: https://github.com/galacticcouncil/sdk/commit/107fd3d3
+
+- [[#f0174b6d][f0174b6d]] xcm: add jitosol xcm conf
+- [[#107fd3d3][107fd3d3]] xcm: jito ata beneficiary support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.8.0
+
 ## 10.16.1
 
 ### Patch Changes

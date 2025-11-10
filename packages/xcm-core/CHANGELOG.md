@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-core
 
+## 8.8.0
+
+### Minor Changes
+
+[ba2978bc]: https://github.com/galacticcouncil/sdk/commit/ba2978bc
+
+- [[#ba2978bc][ba2978bc]] xcm: async contract & extrinsic builder
+
 ## 8.7.0
 
 ### Minor Changes

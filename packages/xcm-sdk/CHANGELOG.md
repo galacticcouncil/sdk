@@ -1,5 +1,18 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.8.0
+
+### Minor Changes
+
+[d2d86b4c]: https://github.com/galacticcouncil/sdk/commit/d2d86b4c
+
+- [[#d2d86b4c][d2d86b4c]] xcm: wh claim (jito sol)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.8.0
+
 ## 10.7.0
 
 ### Minor Changes
