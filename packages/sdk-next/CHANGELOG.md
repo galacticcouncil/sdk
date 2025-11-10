@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.14.1
+
+### Patch Changes
+
+- fix: add next staking deps
+
 ## 0.14.0
 
 ### Minor Changes
