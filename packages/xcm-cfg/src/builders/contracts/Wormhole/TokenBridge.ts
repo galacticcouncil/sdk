@@ -9,6 +9,9 @@ import {
   Wormhole as Wh,
 } from '@galacticcouncil/xcm-core';
 
+import { PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
+
 import { parseAssetId } from '../../utils';
 
 type TransferMrlOpts = {
@@ -18,7 +21,7 @@ type TransferMrlOpts = {
 const transferTokensWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
-      build: (params) => {
+      build: async (params) => {
         const { address, amount, asset, source, destination } = params;
 
         const ctxWh = Wh.fromChain(source.chain);
@@ -53,7 +56,7 @@ const transferTokensWithPayload = () => {
 const wrapAndTransferETHWithPayload = () => {
   return {
     viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
-      build: (params) => {
+      build: async (params) => {
         const { address, amount, source, destination } = params;
 
         const ctxWh = Wh.fromChain(source.chain);
@@ -85,7 +88,7 @@ const wrapAndTransferETHWithPayload = () => {
 };
 
 const transferTokens = (): ContractConfigBuilder => ({
-  build: (params) => {
+  build: async (params) => {
     const { address, amount, asset, source, destination, transact } = params;
     const ctx = transact ? transact.chain : source.chain;
     const rcv = destination.chain;
@@ -93,10 +96,20 @@ const transferTokens = (): ContractConfigBuilder => ({
     const ctxWh = Wh.fromChain(ctx);
     const rcvWh = Wh.fromChain(rcv);
 
+    let rcvAddress = address;
+    if (rcv.isSolana()) {
+      const tokenId = rcv.getAssetId(asset);
+      const rcvTokenAddress = await getAssociatedTokenAddress(
+        new PublicKey(tokenId),
+        new PublicKey(address)
+      );
+      rcvAddress = rcvTokenAddress.toBase58();
+    }
+
+    const assetId = ctx.getAssetId(asset);
     const arbiterFee = 0;
     const nonce = 0;
 
-    const assetId = ctx.getAssetId(asset);
     return new ContractConfig({
       abi: Abi.TokenBridge,
       address: ctxWh.getTokenBridge(),
@@ -104,7 +117,7 @@ const transferTokens = (): ContractConfigBuilder => ({
         parseAssetId(assetId),
         amount,
         rcvWh.getWormholeId(),
-        rcvWh.normalizeAddress(address),
+        rcvWh.normalizeAddress(rcvAddress),
         arbiterFee,
         nonce,
       ],
@@ -115,7 +128,7 @@ const transferTokens = (): ContractConfigBuilder => ({
 });
 
 const wrapAndTransferETH = (): ContractConfigBuilder => ({
-  build: (params) => {
+  build: async (params) => {
     const { address, amount, source, destination } = params;
 
     const ctxWh = Wh.fromChain(source.chain);

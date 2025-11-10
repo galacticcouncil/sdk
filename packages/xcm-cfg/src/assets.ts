@@ -106,7 +106,7 @@ export const intr = new Asset({
 });
 
 export const jito_sol = new Asset({
-  key: 'jito-sol',
+  key: 'jitoSol',
   originSymbol: 'jitoSOL',
 });
 
