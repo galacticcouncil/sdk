@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.5.1
+
+### Patch Changes
+
+- fix papi again (downgrade to 0.19.x)
+
 ## 1.5.0
 
 ### Minor Changes
