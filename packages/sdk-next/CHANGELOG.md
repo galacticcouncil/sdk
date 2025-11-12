@@ -1,5 +1,21 @@
 # @galacticcouncil/sdk-next
 
+## 0.14.2
+
+### Patch Changes
+
+- fix papi again (downgrade to 0.19.x)
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.5.1
+  - @galacticcouncil/common@0.1.1
+
+## 0.14.1
+
+### Patch Changes
+
+- fix: add next staking deps
+
 ## 0.14.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.9.0
+
+### Minor Changes
+
+[96e72596]: https://github.com/galacticcouncil/sdk/commit/96e72596
+
+- [[#96e72596][96e72596]] xcm: support lil jit
+
 ## 10.8.0
 
 ### Minor Changes
