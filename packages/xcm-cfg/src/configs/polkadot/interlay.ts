@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
+import { hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
 import { hydration, interlay } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 

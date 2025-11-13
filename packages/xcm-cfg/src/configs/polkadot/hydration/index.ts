@@ -84,13 +84,11 @@ import {
   neuroweb,
   nodle,
   pendulum,
-  polkadot,
   phala,
   solana,
   sui_chain,
   unique,
   zeitgeist,
-  polkadotCex,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -212,27 +210,6 @@ const toAstar: AssetRoute[] = [
   toTransferTemplate(vastr, astar, 0.005),
   toTransferTemplate(usdt, astar, 0.3),
   toTransferTemplate(usdc, astar, 0.3),
-  // new AssetRoute({
-  //   source: {
-  //     asset: dot,
-  //     balance: balance(),
-  //     fee: fee(),
-  //     destinationFee: {
-  //       balance: balance(),
-  //     },
-  //   },
-  //   destination: {
-  //     chain: astar,
-  //     asset: dot,
-  //     fee: {
-  //       amount: 0.1,
-  //       asset: dot,
-  //     },
-  //   },
-  //   extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-  //     transferType: XcmTransferType.RemoteReserve,
-  //   }),
-  // }),
 ];
 
 const toBifrost: AssetRoute[] = [
@@ -314,8 +291,6 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamErc20Template(sol),
 ];
 
-const toPolkadot: AssetRoute[] = [toTransferTemplate(dot, polkadot, 0.003)];
-
 const toZeitgeist: AssetRoute[] = [
   toTransferTemplate(ztg, zeitgeist, 0.0093),
   toTransferTemplate(glmr, zeitgeist, 0.002),
@@ -382,46 +357,9 @@ const toSuiViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sui, sui, sui_chain),
 ];
 
-const toCexViaRelay = new AssetRoute({
-  source: {
-    asset: dot,
-    balance: balance(),
-    fee: fee(),
-    destinationFee: {
-      balance: balance(),
-    },
-  },
-  destination: {
-    chain: polkadotCex,
-    asset: dot,
-    fee: {
-      amount: 1.1,
-      asset: dot,
-    },
-  },
-  extrinsic: ExtrinsicBuilder()
-    .utility()
-    .batchAll([
-      ExtrinsicBuilder().xTokens().transfer(),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: 0.01,
-      }),
-    ]),
-  transact: {
-    chain: polkadot,
-    fee: {
-      amount: 0,
-      asset: dot,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().balances().transferAll(),
-  },
-});
-
 const toCex: AssetRoute[] = [
   toHubWithCexFwd2Template(usdt),
   toHubWithCexFwd2Template(usdc),
-  toCexViaRelay,
 ];
 
 export const hydrationConfig = new ChainRoutes({
@@ -447,7 +385,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toNeuroweb,
     ...toNodle,
     ...toPhala,
-    ...toPolkadot,
     ...toPendulum,
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,

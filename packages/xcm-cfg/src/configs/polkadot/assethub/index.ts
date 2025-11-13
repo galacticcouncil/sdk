@@ -19,7 +19,6 @@ import {
   kusamaAssetHub,
   moonbeam,
   mythos,
-  polkadot,
 } from '../../../chains';
 import {
   AssetMinBuilder,
@@ -96,33 +95,6 @@ const toHydration: AssetRoute[] = [
   toHydrationExtTemplate(wud),
 ];
 
-const toPolkadot: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: polkadot,
-      asset: dot,
-      fee: {
-        amount: 0.003,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(),
-  }),
-];
-
 const toKusamaAssethub: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -191,7 +163,6 @@ export const assetHubConfig = new ChainRoutes({
   routes: [
     ...toHydration,
     ...toKusamaAssethub,
-    ...toPolkadot,
     ...toMoonbeam,
     ...toBifrost,
     ...toMythos,

@@ -54,32 +54,7 @@ const toBasilisk: AssetRoute[] = [
   }),
 ];
 
-const toKusama: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: kar,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: kusama,
-      asset: ksm,
-      fee: {
-        amount: 22,
-        asset: bsx,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
-
 export const karuraConfig = new ChainRoutes({
   chain: karura,
-  routes: [...toAssetHub, ...toBasilisk, ...toKusama],
+  routes: [...toAssetHub, ...toBasilisk],
 });
