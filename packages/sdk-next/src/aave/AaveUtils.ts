@@ -42,7 +42,7 @@ export class AaveUtils {
       totalCollateralBase,
       totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
       healthFactor,
     ] = userData;
@@ -109,6 +109,9 @@ export class AaveUtils {
 
     return {
       healthFactor: Number(hf),
+      currentLiquidationThreshold: Number(
+        big.toDecimal(currentLiquidationThreshold, LTV_PRECISION)
+      ),
       totalCollateral: totalCollateralBase,
       totalDebt: totalDebtBase,
       reserves: reserves,
@@ -158,7 +161,7 @@ export class AaveUtils {
    *
    * @param user - user address
    * @param reserve - reserve on-chain id (registry)
-   * @param supplyAmount - aToken withdrawAmount amount (decimal)
+   * @param withdrawAmount - aToken withdrawAmount amount (decimal)
    * @returns health factor decimal value
    */
   async getHealthFactorAfterWithdraw(
@@ -166,8 +169,12 @@ export class AaveUtils {
     reserve: number,
     withdrawAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -189,9 +196,14 @@ export class AaveUtils {
     // HF = 0 if no collateral
     if (adjustedCollateral <= 0n) return 0;
 
+    const weightedLT = Big(totalCollateral.toString())
+      .mul(currentLiquidationThreshold)
+      .minus(Big(withdrawRef.toString()).mul(reserveLiquidationThreshold))
+      .div(adjustedCollateral.toString());
+
     // HF = (C * LT) / B
     const healthFactor = Big(adjustedCollateral.toString())
-      .mul(reserveLiquidationThreshold)
+      .mul(weightedLT)
       .div(totalDebt.toString())
       .toFixed(6, Big.roundDown);
 
@@ -211,8 +223,12 @@ export class AaveUtils {
     reserve: number,
     supplyAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -232,9 +248,14 @@ export class AaveUtils {
     // Avoid division by zero, HF = 0
     if (newCollateral <= 0n) return 0;
 
+    const weightedLT = Big(totalCollateral.toString())
+      .mul(currentLiquidationThreshold)
+      .plus(Big(supplyRef.toString()).mul(reserveLiquidationThreshold))
+      .div(newCollateral.toString());
+
     // HF = (C * LT) / B
     const healthFactor = Big(newCollateral.toString())
-      .mul(reserveLiquidationThreshold)
+      .mul(weightedLT)
       .div(totalDebt.toString())
       .toFixed(6, Big.roundDown);
 
