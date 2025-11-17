@@ -11,6 +11,8 @@ import { Amount } from '../types';
 const RAY = bnum('1e27');
 const TARGET_WITHDRAW_HF = bnum('1.01');
 const SECONDS_PER_YEAR = bnum('31536000');
+const LTV_PRECISION = 4;
+const INVALID_HF = -1;
 
 export class AaveUtils {
   readonly client: AaveClient;
@@ -36,7 +38,7 @@ export class AaveUtils {
       totalCollateralBase,
       totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
       healthFactor,
     ] = userData;
@@ -113,6 +115,9 @@ export class AaveUtils {
 
     return {
       healthFactor: hf.toNumber(),
+      currentLiquidationThreshold: bnum(currentLiquidationThreshold)
+        .dividedBy(10 ** LTV_PRECISION)
+        .toNumber(),
       totalCollateral: totalCollateral,
       totalDebt: totalDebt,
       reserves: reserves,
@@ -142,19 +147,19 @@ export class AaveUtils {
     const to = H160.fromAny(user);
     const userData = await this.client.getUserAccountData(to);
     const [
-      _totalCollateralBase,
-      _totalDebtBase,
+      totalCollateralBase,
+      totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
-      healthFactor,
+      _healthFactor,
     ] = userData;
 
-    const hf = bnum(healthFactor)
-      .dividedBy(1e18)
-      .decimalPlaces(6, BigNumber.ROUND_DOWN);
-
-    return hf.toNumber();
+    return this.calculateHealthFactorFromBalances(
+      bnum(totalDebtBase),
+      bnum(totalCollateralBase),
+      bnum(currentLiquidationThreshold)
+    );
   }
 
   /**
@@ -162,7 +167,7 @@ export class AaveUtils {
    *
    * @param user - user address
    * @param reserve - reserve on-chain id (registry)
-   * @param supplyAmount - aToken withdrawAmount amount (decimal)
+   * @param withdrawAmount - aToken withdrawAmount amount (decimal)
    * @returns health factor decimal value
    */
   async getHealthFactorAfterWithdraw(
@@ -170,8 +175,12 @@ export class AaveUtils {
     reserve: string,
     withdrawAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -184,7 +193,7 @@ export class AaveUtils {
     const withdrawAmountNative = scale(
       bnum(withdrawAmount),
       decimals
-    ).decimalPlaces(0, 1);
+    ).decimalPlaces(0, BigNumber.ROUND_DOWN);
 
     // Convert withdraw amount to reference currency units
     const withdrawRef = isCollateral
@@ -199,9 +208,14 @@ export class AaveUtils {
     // HF = 0 if no collateral
     if (adjustedCollateral.lte(0)) return 0;
 
-    // HF = (C * LT) / D
+    const weightedLT = totalCollateral
+      .multipliedBy(bnum(currentLiquidationThreshold))
+      .minus(withdrawRef.multipliedBy(reserveLiquidationThreshold))
+      .dividedBy(adjustedCollateral);
+
+    // HF = (C * LT) / B
     const healthFactor = adjustedCollateral
-      .multipliedBy(reserveLiquidationThreshold)
+      .multipliedBy(weightedLT)
       .dividedBy(totalDebt)
       .decimalPlaces(6, BigNumber.ROUND_DOWN);
 
@@ -221,8 +235,12 @@ export class AaveUtils {
     reserve: string,
     supplyAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -234,7 +252,7 @@ export class AaveUtils {
     const supplyAmountNative = scale(
       bnum(supplyAmount),
       decimals
-    ).decimalPlaces(0, 1);
+    ).decimalPlaces(0, BigNumber.ROUND_DOWN);
 
     // Convert supply amount to reference currency units
     const supplyRef = supplyAmountNative
@@ -244,16 +262,97 @@ export class AaveUtils {
 
     const newCollateral = totalCollateral.plus(supplyRef);
 
-    // Avoid division by zero
+    // Avoid division by zero, HF = 0
     if (newCollateral.lte(0)) return 0;
+
+    const weightedLT = totalCollateral
+      .multipliedBy(bnum(currentLiquidationThreshold))
+      .plus(supplyRef.multipliedBy(reserveLiquidationThreshold))
+      .dividedBy(newCollateral);
 
     // HF = (C * LT) / B
     const healthFactor = newCollateral
-      .multipliedBy(reserveLiquidationThreshold)
+      .multipliedBy(weightedLT)
       .dividedBy(totalDebt)
       .decimalPlaces(6, BigNumber.ROUND_DOWN);
 
     return healthFactor.toNumber();
+  }
+
+  /**
+   * Estimate health factor after swapping between reserves
+   *
+   * @param user - user address
+   * @param fromAmount - amount to withdraw (decimal)
+   * @param fromReserve - reserve on-chain id (registry) to withdraw from
+   * @param toAmount - amount to supply (decimal)
+   * @param toReserve - reserve on-chain id (registry) to supply to
+   * @returns health factor decimal value after swap
+   */
+  async getHealthFactorAfterSwap(
+    user: string,
+    fromAmount: string,
+    fromReserve: string,
+    toAmount: string,
+    toReserve: string
+  ): Promise<number> {
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+
+    const fromReserveAsset = ERC20.fromAssetId(fromReserve);
+    const toReserveAsset = ERC20.fromAssetId(toReserve);
+
+    const fromReserveCtx = reserves.find(
+      (r) => r.reserveAsset === fromReserveAsset
+    );
+
+    const toReserveCtx = reserves.find(
+      (r) => r.reserveAsset === toReserveAsset
+    );
+
+    if (!fromReserveCtx)
+      throw new Error(`Missing reserve ctx for ${fromReserveAsset}`);
+
+    if (!toReserveCtx) {
+      throw new Error(`Missing reserve ctx for ${toReserveAsset}`);
+    }
+
+    const fromAmountNative = scale(
+      bnum(fromAmount),
+      fromReserveCtx.decimals
+    ).decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+    const toAmountNative = scale(
+      bnum(toAmount),
+      toReserveCtx.decimals
+    ).decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+    const fromValueInRef = fromAmountNative
+      .multipliedBy(fromReserveCtx.priceInRef)
+      .dividedBy(bnum(10).pow(fromReserveCtx.decimals))
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+    const toValueInRef = toAmountNative
+      .multipliedBy(toReserveCtx.priceInRef)
+      .dividedBy(bnum(10).pow(toReserveCtx.decimals))
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+
+    const fromWeightedCollateral = fromReserveCtx.isCollateral
+      ? fromValueInRef.multipliedBy(fromReserveCtx.reserveLiquidationThreshold)
+      : ZERO;
+
+    const toWeightedCollateral = toValueInRef.multipliedBy(
+      toReserveCtx.reserveLiquidationThreshold
+    );
+
+    const weightedCollateralDelta = toWeightedCollateral.minus(
+      fromWeightedCollateral
+    );
+    const hfDelta = weightedCollateralDelta.dividedBy(totalDebt);
+    const hfAfterSwap = bnum(healthFactor)
+      .plus(hfDelta)
+      .decimalPlaces(6, BigNumber.ROUND_DOWN);
+
+    return hfAfterSwap.toNumber();
   }
 
   /**
@@ -368,5 +467,29 @@ export class AaveUtils {
       .decimalPlaces(0, BigNumber.ROUND_DOWN);
 
     return linearAccumulation;
+  }
+
+  /**
+   * Original AAVE health factor calculation formula:
+   * @see https://github.com/aave/aave-utilities/blob/432e283b2e76d9793b20d37bd4cb94aca97ed20e/packages/math-utils/src/pool-math.ts#L139
+   */
+  private calculateHealthFactorFromBalances(
+    totalDebt: BigNumber,
+    totalCollateral: BigNumber,
+    currentLiquidationThreshold: BigNumber
+  ): number {
+    if (totalDebt.lte(0)) {
+      return INVALID_HF;
+    }
+
+    const hfFromBalances = totalCollateral
+      .multipliedBy(currentLiquidationThreshold)
+      .dividedBy(totalDebt);
+
+    const hf = hfFromBalances
+      .dividedBy(bnum(10).pow(LTV_PRECISION))
+      .decimalPlaces(6, BigNumber.ROUND_DOWN);
+
+    return hf.toNumber();
   }
 }
