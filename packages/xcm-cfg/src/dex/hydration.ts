@@ -125,10 +125,17 @@ export class HydrationDex implements Dex {
     asset: Asset,
     amount: bigint
   ): Promise<bigint> {
-    const api = await this.chain.api;
+    const { getTypedApi } = await import('../utils/papi');
+    const client = this.chain.api;
+    const api = getTypedApi(client);
     const id = this.chain.getAssetId(asset);
-    const systemToAssetPrice =
-      await api.query.multiTransactionPayment.acceptedCurrencies(id);
+    const assetIdNum = Number(id);
+    const systemToAssetPrice = await api.query.MultiTransactionPayment.AcceptedCurrencies.getValue(assetIdNum);
+
+    if (!systemToAssetPrice) {
+      throw new Error(`No price found for asset ${asset.originSymbol}`);
+    }
+
     const fallbackPrice = BigInt(systemToAssetPrice.toString()) * amount;
     const base = Math.pow(10, RUNTIME_DECIMALS);
     return fallbackPrice / BigInt(base);

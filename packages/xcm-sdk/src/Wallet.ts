@@ -102,8 +102,9 @@ export class Wallet {
       dst.usesH160Acc
     );
 
+    const dstAsset = await dstSub.getAsset();
     const transfer = await this.transfer(
-      dstSub.asset,
+      dstAsset,
       srcAddress,
       srcChain,
       dstAddress,

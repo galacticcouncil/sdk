@@ -1,21 +1,18 @@
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { HexString } from '@polkadot/util/types';
+import { createClient, PolkadotClient } from 'polkadot-api';
+import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
 
 export class SubstrateApis {
   private static _instance: SubstrateApis = new SubstrateApis();
 
-  private dispose = async (promise: Promise<ApiPromise>, key: string) => {
-    const api = await promise;
+  private dispose = (client: PolkadotClient, key: string) => {
     console.log('Releasing ' + key + ' connection');
-    if (api.isConnected) {
-      api.disconnect();
-    }
+    client.destroy();
   };
 
-  private _cache: LRUCache<string, Promise<ApiPromise>> = new LRUCache<
+  private _cache: LRUCache<string, PolkadotClient> = new LRUCache<
     string,
-    Promise<ApiPromise>
+    PolkadotClient
   >({
     max: 40,
     dispose: this.dispose,
@@ -47,74 +44,33 @@ export class SubstrateApis {
     return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
   }
 
-  public async getPromise(
-    endpoints: string[],
-    maxRetries?: number,
-    metadata?: Record<string, HexString>
-  ): Promise<ApiPromise> {
-    let currentRetry = 0;
-    return new Promise((resolve) => {
-      const provider = new WsProvider(
-        endpoints,
-        2_500, // autoConnect (2.5 seconds)
-        {}, // headers
-        60_000, // request timeout (60 seconds)
-        102400, // cache capacity
-        10 * 60_000 // cache TTL (10 minutes)
-      );
-      provider.on('connected', async () => {
-        const promise = ApiPromise.create({
-          provider,
-          noInitWarn: true,
-          metadata,
-        });
+  public createClient(endpoints: string[]): PolkadotClient {
+    const wsProvider = getWsProvider(endpoints);
+    const client = createClient(wsProvider);
 
-        console.log(`Connected to ${provider.endpoint}.`);
-        this._cache.set(provider.endpoint, promise, { noDisposeOnSet: true });
-        resolve(promise);
-      });
-      provider.on('error', async () => {
-        currentRetry++;
-        console.log(`Could not connect to ${provider.endpoint}, skipping...`);
-        if (maxRetries && currentRetry >= maxRetries) {
-          this._cache.delete(provider.endpoint);
-          provider.disconnect();
-        }
-      });
-    });
+    const cacheKey = this.createCacheKey(endpoints);
+    console.log(`Created PAPI client for ${cacheKey}`);
+    this._cache.set(cacheKey, client, { noDisposeOnSet: true });
+
+    return client;
   }
 
-  public async api(
-    ws: string | string[],
-    maxRetries?: number,
-    metadata?: Record<string, HexString>
-  ): Promise<ApiPromise> {
+  public api(ws: string | string[]): PolkadotClient {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
 
-    let promise: Promise<ApiPromise>;
-
     if (cacheKey) {
-      promise = this._cache.get(cacheKey)!;
-    } else {
-      promise = this.getPromise(endpoints, maxRetries, metadata);
-      this._cache.set(this.createCacheKey(endpoints), promise, {
-        noDisposeOnSet: true,
-      });
+      return this._cache.get(cacheKey)!;
     }
 
-    const api = await promise;
-    await api.isReady;
-    return api;
+    return this.createClient(endpoints);
   }
 
-  public async release() {
-    for (const [key, apiPromise] of this._cache.entries()) {
-      const api = await apiPromise;
-      if (api.isConnected) {
-        await api.disconnect();
-        console.log('Disconnecting from ' + key);
-      }
+  public release() {
+    for (const [key, client] of this._cache.entries()) {
+      console.log('Disconnecting from ' + key);
+      client.destroy();
     }
+    this._cache.clear();
   }
 }

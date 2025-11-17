@@ -9,20 +9,20 @@ import {
   SubstrateQueryConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { QueryableStorage } from '@polkadot/api/types';
-
 import {
   concatMap,
   distinctUntilChanged,
   firstValueFrom,
-  map,
-  switchMap,
   Observable,
-  ReplaySubject,
 } from 'rxjs';
 
 import { SubstrateService } from './SubstrateService';
-import { getErrorFromDryRun, normalizeAssetAmount } from './utils';
+import {
+  getErrorFromDryRun,
+  normalizeAssetAmount,
+  toPalletName,
+  toExtrinsicName,
+} from './utils';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
@@ -40,7 +40,8 @@ export class SubstratePlatform
 
   private async useSignerFee(fee: Asset) {
     const substrate = await this.#substrate;
-    return substrate.chain.usesSignerFee && !substrate.asset.isEqual(fee);
+    const asset = await substrate.getAsset();
+    return substrate.chain.usesSignerFee && !asset.isEqual(fee);
   }
 
   async buildCall(
@@ -60,27 +61,30 @@ export class SubstratePlatform
 
     const extrinsic = substrate.getExtrinsic(config);
     const extrinsicCall = config.module + '.' + config.func;
+
+    const callData = await extrinsic.getEncodedData();
+
     return {
       from: account,
-      data: extrinsic.toHex(),
+      data: callData.asHex(),
       type: CallType.Substrate,
       txOptions: txOptions,
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
               const extrinsic = substrate.getExtrinsic(config);
-              const { executionResult, emittedEvents, forwardedXcms } =
-                await substrate.dryRun(account, extrinsic);
+              const dryRunResult = await substrate.dryRun(account, extrinsic);
 
-              const error = executionResult.isErr
-                ? getErrorFromDryRun(substrate.api, executionResult.asErr)
-                : undefined;
+              const error =
+                dryRunResult.execution_result && !dryRunResult.execution_result.success
+                  ? getErrorFromDryRun(dryRunResult.execution_result.value)
+                  : undefined;
 
               return {
                 call: extrinsicCall,
                 error: error,
-                events: emittedEvents.toHuman(),
-                xcm: forwardedXcms.toHuman(),
+                events: dryRunResult.emitted_events || [],
+                xcm: dryRunResult.forwarded_xcms || [],
               } as SubstrateDryRunResult;
             } catch (e) {
               return {
@@ -103,7 +107,7 @@ export class SubstratePlatform
     const networkFee = await substrate.estimateNetworkFee(account, config);
     const deliveryFee = await substrate.estimateDeliveryFee(account, config);
     const fee = await this.exchangeFee(networkFee + deliveryFee, feeBalance);
-    const params = normalizeAssetAmount(fee, feeBalance, substrate);
+    const params = await normalizeAssetAmount(fee, feeBalance, substrate);
     return feeBalance.copyWith(params);
   }
 
@@ -119,17 +123,33 @@ export class SubstratePlatform
     asset: Asset,
     config: SubstrateQueryConfig
   ): Promise<Observable<AssetAmount>> {
-    const subject = new ReplaySubject<QueryableStorage<'rxjs'>>(1);
     const substrate = await this.#substrate;
-    subject.next(substrate.api.rx.query);
-
     const { module, func, args, transform } = config;
-    return subject.pipe(
-      switchMap((q) => q[module][func](...args)),
-      concatMap((b) => transform(b)),
+
+    const moduleName = toPalletName(module);
+    const funcName = toExtrinsicName(func);
+
+    const queryModule = (substrate.api.query as any)[moduleName];
+    if (!queryModule) {
+      throw new Error(
+        `Query module "${module}" (${moduleName}) not found in runtime`
+      );
+    }
+
+    const queryFunc = queryModule[funcName];
+    if (!queryFunc || typeof queryFunc !== 'function') {
+      throw new Error(
+        `Query function "${func}" (${funcName}) not found in module "${moduleName}"`
+      );
+    }
+
+    const observable$ = queryFunc.watchValue(...args);
+
+    return observable$.pipe(
+      concatMap((b: any) => transform(b)),
       distinctUntilChanged((prev, curr) => prev === curr),
-      map((balance) => {
-        const params = normalizeAssetAmount(balance, asset, substrate);
+      concatMap(async (balance) => {
+        const params = await normalizeAssetAmount(balance as bigint, asset, substrate);
         return AssetAmount.fromAsset(asset, params);
       })
     );
@@ -148,7 +168,9 @@ export class SubstratePlatform
     fee: bigint,
     feeBalance: AssetAmount
   ): Promise<bigint> {
-    const { asset, decimals } = await this.#substrate;
+    const substrate = await this.#substrate;
+    const asset = await substrate.getAsset();
+    const decimals = await substrate.getDecimals();
 
     if (asset.isEqual(feeBalance)) {
       return fee;

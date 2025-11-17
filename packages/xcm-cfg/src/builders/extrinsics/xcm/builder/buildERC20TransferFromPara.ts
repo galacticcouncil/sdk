@@ -20,8 +20,6 @@ export async function buildERC20TransferFromPara(
   asset: Asset,
   chain: Parachain
 ) {
-  const api = await chain.api;
-
   const version = XcmVersion.v4;
   const transferAssetLocation = getExtrinsicAssetLocation(
     locationOrError(chain, asset),
@@ -35,7 +33,7 @@ export async function buildERC20TransferFromPara(
     TOPIC
   );
 
-  return api.createType('XcmVersionedXcm', {
+  return {
     [version]: [
       {
         WithdrawAsset: [
@@ -67,5 +65,5 @@ export async function buildERC20TransferFromPara(
       },
       ...bridgeXcmOnDest[version],
     ],
-  });
+  };
 }

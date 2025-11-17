@@ -10,79 +10,159 @@ import {
   ExtrinsicConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { CallDryRunEffects } from '@polkadot/types/interfaces';
+import { PolkadotClient, Transaction } from 'polkadot-api';
 
-import { hexToU8a, stringToU8a } from '@polkadot/util';
-import { blake2AsHex } from '@polkadot/util-crypto';
+import { Blake2256 } from '@polkadot-api/substrate-bindings';
+import { toHex, fromHex } from '@polkadot-api/utils';
 
-import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
+import {
+  getDeliveryFeeFromDryRun,
+  getErrorFromDryRun,
+  toPalletName,
+  toExtrinsicName,
+} from './utils';
 
 const { Ss58Addr } = addr;
 
 export class SubstrateService {
-  readonly api: ApiPromise;
-
+  readonly client: PolkadotClient;
+  readonly api: ReturnType<PolkadotClient['getUnsafeApi']>;
   readonly chain: AnyParachain;
+  private _chainSpec?: any; // Cache for chain spec data
+  private _asset?: Asset; // Cache for native asset
+  private _decimals?: number; // Cache for native decimals
 
-  constructor(api: ApiPromise, chain: AnyParachain) {
-    this.api = api;
+  constructor(client: PolkadotClient, chain: AnyParachain) {
+    this.client = client;
+    this.api = client.getUnsafeApi();
     this.chain = chain;
   }
 
   static async create(chain: AnyParachain): Promise<SubstrateService> {
-    return new SubstrateService(await chain.api, chain);
+    return new SubstrateService(chain.api, chain);
   }
 
-  get asset(): Asset {
-    const nativeToken = this.api.registry.chainTokens[0];
-    const nativeTokenKey = nativeToken.toLowerCase();
-    const asset = this.chain.getAsset(nativeTokenKey);
-    if (!asset) {
-      throw new Error(`No asset found for key "${nativeTokenKey}"`);
+  private async getChainSpec() {
+    if (!this._chainSpec) {
+      this._chainSpec = await this.client.getChainSpecData();
     }
-    return asset;
+    return this._chainSpec;
   }
 
-  get decimals(): number {
-    return this.api.registry.chainDecimals[0];
+  async getAsset(): Promise<Asset> {
+    if (!this._asset) {
+      const chainSpec = await this.getChainSpec();
+      const symbols = chainSpec.properties?.tokenSymbol || [];
+      const nativeToken = symbols[0];
+      const nativeTokenKey = nativeToken.toLowerCase();
+      const asset = this.chain.getAsset(nativeTokenKey);
+      if (!asset) {
+        throw new Error(`No asset found for key "${nativeTokenKey}"`);
+      }
+      this._asset = asset;
+    }
+    return this._asset;
   }
 
-  get existentialDeposit(): AssetAmount {
-    let ed;
+  async getDecimals(): Promise<number> {
+    if (this._decimals === undefined) {
+      const chainSpec = await this.getChainSpec();
+      const decimalsArray = chainSpec.properties?.tokenDecimals || [];
+      const decimals = decimalsArray[0] || 12;
+      this._decimals = decimals;
+      return decimals;
+    }
+    return this._decimals;
+  }
+
+  async getExistentialDeposit(): Promise<AssetAmount> {
+    let ed: bigint;
     try {
-      ed = this.api.consts.balances.existentialDeposit.toBigInt();
+      const result = await this.api.constants.Balances.ExistentialDeposit();
+      ed = typeof result === 'bigint' ? result : BigInt(String(result));
     } catch {
       ed = 0n;
     }
-    return AssetAmount.fromAsset(this.asset, {
+    const asset = await this.getAsset();
+    const decimals = await this.getDecimals();
+    return AssetAmount.fromAsset(asset, {
       amount: ed,
-      decimals: this.decimals,
+      decimals,
     });
   }
 
   isDryRunSupported(): boolean {
-    return this.api.call.dryRunApi !== undefined;
+    return this.api.apis?.DryRunApi !== undefined;
   }
 
-  getDecimals(asset: Asset): number {
-    return this.chain.getAssetDecimals(asset) ?? this.decimals;
+  async getDecimalsForAsset(asset: Asset): Promise<number> {
+    const chainDecimals = await this.getDecimals();
+    return this.chain.getAssetDecimals(asset) ?? chainDecimals;
   }
 
-  getExtrinsic(config: ExtrinsicConfig): SubmittableExtrinsic {
-    const fn = this.api.tx[config.module][config.func];
-    const args = config.getArgs(fn);
+  getExtrinsic(config: ExtrinsicConfig): Transaction<any, any, any, any> {
+    const moduleName = toPalletName(config.module);
+    const funcName = toExtrinsicName(config.func);
 
-    if (args.length > 1 && config.func === 'batchAll') {
-      const calls = args.map(({ module, func, getArgs }) => {
-        const fn = this.api.tx[module][func];
-        const args = getArgs(fn);
-        return fn(...args);
-      });
-      return fn(calls);
+    const txModule = (this.api.tx as any)[moduleName];
+    if (!txModule) {
+      throw new Error(
+        `Pallet "${config.module}" (${moduleName}) not found in runtime`
+      );
     }
-    return fn(...args);
+
+    const txFunc = txModule[funcName];
+    if (!txFunc || typeof txFunc !== 'function') {
+      throw new Error(
+        `Extrinsic "${config.func}" (${funcName}) not found in pallet "${moduleName}"`
+      );
+    }
+
+    const txData = config.getArgs();
+
+    // Handle batch calls with nested ExtrinsicConfigs
+    if (this.isBatchCall(config.func)) {
+      return this.buildBatchCall(txFunc, txData);
+    }
+
+    return txFunc(txData) as Transaction<any, any, any, any>;
+  }
+
+  /**
+   * Check if extrinsic is a batch call
+   */
+  private isBatchCall(func: string): boolean {
+    return ['batch', 'batchAll', 'forceBatch'].includes(func);
+  }
+
+  /**
+   * Build batch call with recursive ExtrinsicConfig processing
+   */
+  private buildBatchCall(
+    txFunc: Function,
+    txData: any
+  ): Transaction<any, any, any, any> {
+    if (!txData || typeof txData !== 'object') {
+      throw new Error('Batch call requires transaction data');
+    }
+
+    // Handle array of calls (legacy)
+    if (Array.isArray(txData)) {
+      const calls = txData.map((item) =>
+        item instanceof ExtrinsicConfig ? this.getExtrinsic(item) : item
+      );
+      return txFunc({ calls }) as Transaction<any, any, any, any>;
+    }
+
+    // Handle object with calls property
+    if ('calls' in txData && Array.isArray(txData.calls)) {
+      const calls = txData.calls.map((item: any) =>
+        item instanceof ExtrinsicConfig ? this.getExtrinsic(item) : item
+      );
+      return txFunc({ ...txData, calls }) as Transaction<any, any, any, any>;
+    }
+
+    return txFunc(txData) as Transaction<any, any, any, any>;
   }
 
   async buildMessageId(
@@ -91,49 +171,54 @@ export class SubstrateService {
     asset: string,
     beneficiary: string
   ): Promise<string> {
-    const accountNextId = await this.api.rpc.system.accountNextIndex(account);
+    // Use client._request for RPC calls in PAPI
+    const accountNextId = await this.client._request<number>(
+      'system_accountNextIndex',
+      [account]
+    );
+
+    // Convert the number to bytes (u32 little-endian)
+    const accountNextIdBytes = new Uint8Array(4);
+    new DataView(accountNextIdBytes.buffer).setUint32(0, accountNextId, true);
+
+    // Helper to convert string to UTF-8 bytes
+    const stringToU8a = (str: string) => new TextEncoder().encode(str);
+
     const entropy = new Uint8Array([
       ...stringToU8a(this.chain.parachainId.toString()),
-      ...hexToU8a(account),
-      ...accountNextId.toU8a(),
-      ...hexToU8a(asset),
+      ...fromHex(account.startsWith('0x') ? account.slice(2) : account),
+      ...accountNextIdBytes,
+      ...fromHex(asset.startsWith('0x') ? asset.slice(2) : asset),
       ...stringToU8a(beneficiary),
       ...stringToU8a(amount.toString()),
     ]);
-    return blake2AsHex(entropy);
+
+    // Use PAPI's Blake2-256 and convert to hex
+    const hash = Blake2256(entropy);
+    return toHex(hash);
   }
 
   async dryRun(
     account: string,
-    extrinsic: SubmittableExtrinsic
-  ): Promise<CallDryRunEffects> {
-    const dryRunFn = this.api.call.dryRunApi.dryRunCall;
-    const dryRunParams = dryRunFn.meta.params;
-    const dryRun = dryRunFn as (...args: any[]) => Promise<any>;
-    const dryRunArgs = [
-      {
-        System: { Signed: account },
-      },
-      extrinsic.inner.toHex(),
-    ] as any;
-
-    if (dryRunParams.length === 3) {
-      dryRunArgs.push(4);
+    extrinsic: Transaction<any, any, any, any>
+  ): Promise<any> {
+    if (!this.api.apis?.DryRunApi) {
+      throw new Error('DryRunApi not available on this chain');
     }
 
-    let result;
-    try {
-      result = await dryRun(...dryRunArgs);
-    } catch (e) {
-      console.error(e);
-      throw new Error('Dry run execution failed!');
-    }
+    const origin = {
+      System: { Signed: account },
+    };
 
-    if (result.isOk) {
-      return result.asOk;
+    const callData = extrinsic.decodedCall;
+
+    // DryRun API returns result wrapped in { success, value }
+    // Unwrap to get the actual result containing execution_result, emitted_events, forwarded_xcms
+    const result = await this.api.apis.DryRunApi.dry_run_call(origin, callData);
+    if (!result.success) {
+      throw new Error('DryRun call failed');
     }
-    console.log(result.asErr.toHuman());
-    throw new Error('Dry run execution error!');
+    return result.value;
   }
 
   async estimateNetworkFee(
@@ -142,10 +227,8 @@ export class SubstrateService {
   ): Promise<bigint> {
     const extrinsic = this.getExtrinsic(config);
     try {
-      const info = await extrinsic.paymentInfo(account, {
-        nonce: -1,
-      });
-      return info.partialFee.toBigInt();
+      const info = await extrinsic.getPaymentInfo(account);
+      return BigInt(info.partial_fee);
     } catch (e) {
       /**
        * Tx panic for V3 or higher multi-location versions if used
@@ -165,14 +248,14 @@ export class SubstrateService {
 
       try {
         const extrinsic = this.getExtrinsic(config);
-        const { executionResult, emittedEvents } = await this.dryRun(
-          acc,
-          extrinsic
-        );
-        if (executionResult.isOk) {
-          return getDeliveryFeeFromDryRun(emittedEvents);
+        const dryRunResult = await this.dryRun(acc, extrinsic);
+
+        if (dryRunResult.execution_result?.success) {
+          return getDeliveryFeeFromDryRun(dryRunResult.emitted_events || []);
         } else {
-          const error = getErrorFromDryRun(this.api, executionResult.asErr);
+          const error = getErrorFromDryRun(
+            dryRunResult.execution_result?.value
+          );
           console.warn(`Can't estimate delivery fee. Reason:\n ${error}`);
         }
       } catch (e) {}
@@ -185,8 +268,12 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): string {
     if (['xcmPallet', 'polkadotXcm'].includes(config.module)) {
-      const fn = this.api.tx[config.module][config.func];
-      const [dest] = config.getArgs(fn);
+      const args = config.getArgs();
+      if (!args || typeof args !== 'object') return account;
+
+      const dest = 'dest' in args ? args.dest : undefined;
+      if (!dest) return account;
+
       const interior = multiloc.findNestedKey(dest, 'interior');
       const parachain = multiloc.findParachain(dest);
       const consensus = multiloc.findGlobalConsensus(dest);

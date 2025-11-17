@@ -3,9 +3,6 @@ import {
   SubstrateQueryConfig,
 } from '@galacticcouncil/xcm-core';
 
-import { Option } from '@polkadot/types';
-import { PalletAssetsAssetDetails } from '@polkadot/types/lookup';
-
 export function AssetMinBuilder() {
   return {
     assetRegistry,
@@ -22,8 +19,9 @@ function assetRegistry() {
           module: pallet,
           func: 'assetMetadatas',
           args: [asset],
-          transform: async (response: Option<any>): Promise<bigint> =>
-            response.unwrapOrDefault().minimalBalance.toBigInt(),
+          transform: async (response) => {
+            return BigInt(response?.minimalBalance?.toString() ?? '0');
+          },
         }),
     }),
     currencyMetadatas: (): MinConfigBuilder => ({
@@ -32,8 +30,9 @@ function assetRegistry() {
           module: pallet,
           func: 'currencyMetadatas',
           args: [asset],
-          transform: async (response: Option<any>): Promise<bigint> =>
-            response.unwrapOrDefault().minimalBalance.toBigInt(),
+          transform: async (response) => {
+            return BigInt(response?.minimalBalance?.toString() ?? '0');
+          },
         }),
     }),
   };
@@ -47,10 +46,9 @@ function assets() {
           module: 'assets',
           func: 'asset',
           args: [asset],
-          transform: async (
-            response: Option<PalletAssetsAssetDetails>
-          ): Promise<bigint> =>
-            response.unwrapOrDefault().minBalance.toBigInt(),
+          transform: async (response) => {
+            return BigInt(response?.minBalance?.toString() ?? '0');
+          },
         }),
     }),
   };

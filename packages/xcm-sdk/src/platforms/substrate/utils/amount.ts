@@ -12,13 +12,13 @@ import { SubstrateService } from '../SubstrateService';
  * @param substrate - source chain substrate service
  * @returns normalized asset amount if chain decimals used, otherwise default
  */
-export function normalizeAssetAmount(
+export async function normalizeAssetAmount(
   amount: bigint,
   asset: Asset,
   substrate: SubstrateService
-): AssetAmountParams {
-  const chainDecimals = substrate.decimals;
-  const assetDecimals = substrate.getDecimals(asset);
+): Promise<AssetAmountParams> {
+  const chainDecimals = await substrate.getDecimals();
+  const assetDecimals = substrate.chain.getAssetDecimals(asset) ?? chainDecimals;
   const normDecimals = substrate.chain.usesChainDecimals
     ? chainDecimals
     : assetDecimals;

@@ -26,7 +26,7 @@ export abstract class DataProcessor {
 
     if (chain instanceof Parachain) {
       const substrate = await SubstrateService.create(chain);
-      return substrate.existentialDeposit;
+      return substrate.getExistentialDeposit();
     }
     return undefined;
   }

@@ -19,7 +19,6 @@ import {
 import {
   getDerivativeAccount,
   getExtrinsicAccount,
-  getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
   locationOrError,
   shouldFeeAssetPrecede,
@@ -33,11 +32,11 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -97,11 +96,11 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedTeleportAssets',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -124,11 +123,11 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'reserveTransferAssets',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -151,11 +150,11 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssets',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),

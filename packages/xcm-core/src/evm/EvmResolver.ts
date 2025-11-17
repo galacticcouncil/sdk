@@ -1,5 +1,5 @@
-import { ApiPromise } from '@polkadot/api';
+import { PolkadotClient } from 'polkadot-api';
 
 export interface EvmResolver {
-  toH160(ss58Addr: string, api?: ApiPromise): Promise<string>;
+  toH160(ss58Addr: string, api?: PolkadotClient): Promise<string>;
 }

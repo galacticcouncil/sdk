@@ -7,15 +7,7 @@ import {
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 
-import { TypeRegistry } from '@polkadot/types';
-
 import { AssethubClient } from '../clients';
-
-const registry = new TypeRegistry();
-
-const getAssetLocation = (location: any) => {
-  return registry.createType('MultiLocation', location);
-};
 
 export class AssethubDex implements Dex {
   readonly chain: Parachain;
@@ -43,21 +35,23 @@ export class AssethubDex implements Dex {
     const aIn = this.chain.getAssetXcmLocation(assetIn);
     const aOut = this.chain.getAssetXcmLocation(assetOut);
 
-    const aInLocation = getAssetLocation(aIn);
-    const aOutLocation = getAssetLocation(aOut);
+    const client = this.chain.api;
+    const api = client.getUnsafeApi();
 
-    const api = await this.chain.api;
-    const balance =
-      await api.call.assetConversionApi.quotePriceTokensForExactTokens(
-        aInLocation.toU8a(),
-        aOutLocation.toU8a(),
+    const result =
+      await api.apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
+        aIn,
+        aOut,
         amountOut.amount,
         true
       );
 
-    const amountIn = balance.unwrap();
+    if (!result.success) {
+      throw new Error('Failed to get swap quote');
+    }
+
     return {
-      amount: amountIn.toBigInt(),
+      amount: BigInt(result.value),
     } as SwapQuote;
   }
 }

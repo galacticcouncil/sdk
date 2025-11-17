@@ -6,6 +6,8 @@ import {
   DexFactory,
 } from '@galacticcouncil/xcm-core';
 
+import { Binary } from 'polkadot-api';
+
 import { SubstrateService } from './SubstrateService';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 import { buildXcmDest, buildXcmMessage, getErrorFromDryRun } from './utils';
@@ -32,29 +34,28 @@ export class SubstrateExec {
       srcFeeAsset?: Asset;
     } = {}
   ): Promise<SubstrateCall> {
-    const { api: srcApi, asset: srcAsset } = this.#src;
+    const srcApi = this.#src.api;
+    const srcAsset = await this.#src.getAsset();
 
-    const {
-      api: dstApi,
-      asset: dstAsset,
-      chain: dstChain,
-      decimals: dstDecimals,
-    } = this.#dst;
+    const dstApi = this.#dst.api;
+    const dstAsset = await this.#dst.getAsset();
+    const dstChain = this.#dst.chain;
+    const dstDecimals = await this.#dst.getDecimals();
 
     const dstFeeLocation = dstChain.getAssetXcmLocation(dstAsset);
-    const dstExtrinsic = dstApi.tx(dstCall.data);
-    const dstPaymentInfo = await dstExtrinsic.paymentInfo(dstAccount);
+    const dstExtrinsic = await dstApi.txFromCallData(Binary.fromHex(dstCall.data));
+    const dstPaymentInfo = await dstExtrinsic.getPaymentInfo(dstAccount);
 
-    const dstFeeAmount = (dstPaymentInfo.partialFee.toBigInt() * 120n) / 100n;
+    const dstFeeAmount = (BigInt(dstPaymentInfo.partial_fee) * 120n) / 100n;
 
     const dstFee = AssetAmount.fromAsset(dstAsset, {
       amount: dstFeeAmount,
       decimals: dstDecimals,
     });
 
-    const dstRefTime = dstPaymentInfo.weight.refTime.toNumber();
-    const dstProofSize = dstPaymentInfo.weight.proofSize.toString();
-    const dstCallEncoded = dstExtrinsic.method.toHex();
+    const dstRefTime = Number(dstPaymentInfo.weight.ref_time);
+    const dstProofSize = String(dstPaymentInfo.weight.proof_size);
+    const dstCallEncoded = dstCall.data;
 
     const transactXcmDest = buildXcmDest(dstChain);
     const transactXcmMessage = buildXcmMessage(
@@ -66,12 +67,12 @@ export class SubstrateExec {
       dstCallEncoded
     );
 
-    const transactTx = srcApi.tx.polkadotXcm.send(
-      transactXcmDest,
-      transactXcmMessage
-    );
+    const transactTx = (srcApi.tx.PolkadotXcm as any).send({
+      dest: transactXcmDest,
+      message: transactXcmMessage,
+    });
 
-    const calls: `0x${string}`[] = [];
+    const calls: any[] = [];
 
     if (this.#dex) {
       const swapTxHash = await this.#dex.getCalldata(
@@ -81,39 +82,39 @@ export class SubstrateExec {
         dstFee,
         10 // swap slippage
       );
-      const swapTx = srcApi.tx(swapTxHash);
-      calls.push(swapTx.toHex());
+      const swapTx = await srcApi.txFromCallData(Binary.fromHex(swapTxHash));
+      calls.push(swapTx);
     }
 
     const transferCall = await transfer(dstFee);
-    const transferTx = srcApi.tx(transferCall.data);
+    const transferTx = await srcApi.txFromCallData(Binary.fromHex(transferCall.data));
 
-    calls.push(transferTx.toHex());
-    calls.push(transactTx.toHex());
+    calls.push(transferTx);
+    calls.push(transactTx);
 
-    const batchTx = srcApi.tx.utility.batchAll(calls);
+    const batchTx = (srcApi.tx.Utility as any).batch_all({ calls });
 
     return {
       from: srcAccount,
-      data: batchTx.toHex(),
+      data: batchTx.decodedCall as `0x${string}`,
       type: CallType.Substrate,
       dryRun: this.#src.isDryRunSupported()
         ? async () => {
             try {
-              const { executionResult, emittedEvents, forwardedXcms } =
-                await this.#src.dryRun(srcAccount, batchTx);
+              const dryRunResult = await this.#src.dryRun(srcAccount, batchTx);
 
-              console.log(executionResult.asOk.toHuman());
+              console.log(dryRunResult.execution_result);
 
-              const error = executionResult.isErr
-                ? getErrorFromDryRun(this.#src.api, executionResult.asErr)
-                : undefined;
+              const error =
+                dryRunResult.execution_result && !dryRunResult.execution_result.success
+                  ? getErrorFromDryRun(dryRunResult.execution_result.value)
+                  : undefined;
 
               return {
                 call: 'polkadotXcm.send',
                 error: error,
-                events: emittedEvents.toHuman(),
-                xcm: forwardedXcms.toHuman(),
+                events: dryRunResult.emitted_events || [],
+                xcm: dryRunResult.forwarded_xcms || [],
               } as SubstrateDryRunResult;
             } catch (e) {
               return {

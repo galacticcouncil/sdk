@@ -31,9 +31,10 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
+    "@galacticcouncil/common": "^0.1.0",
     "@galacticcouncil/xcm-core": "^8.6.0"
   },
   "peerDependencies": {
-    "@galacticcouncil/sdk": "^10.0.0"
+    "@galacticcouncil/sdk-next": "^0.13.0"
   }
 }

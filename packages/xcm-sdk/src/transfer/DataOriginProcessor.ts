@@ -244,7 +244,7 @@ export class DataOriginProcessor extends DataProcessor {
       chain.usesH160Acc
     );
 
-    const { weight } = await submittable.paymentInfo(mda);
+    const paymentInfo = await submittable.getPaymentInfo(mda);
 
     const [transactFee, transactFeeBalance] = await Promise.all([
       this.getTransactFee(cfg),
@@ -252,13 +252,13 @@ export class DataOriginProcessor extends DataProcessor {
     ]);
 
     return {
-      call: submittable.method.toHex(),
+      call: submittable.decodedCall as any,
       chain: chain,
       fee: transactFee,
       feeBalance: transactFeeBalance,
       weight: {
-        refTime: weight.refTime.toNumber(),
-        proofSize: weight.proofSize.toString(),
+        refTime: Number(paymentInfo.weight.ref_time),
+        proofSize: String(paymentInfo.weight.proof_size),
       },
     } as TransactCtx;
   }

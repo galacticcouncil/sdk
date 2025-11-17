@@ -3,13 +3,6 @@ import {
   Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xcm-core';
-import { Option } from '@polkadot/types';
-import {
-  FrameSystemAccountInfo,
-  OrmlTokensAccountData,
-  PalletBalancesAccountData,
-  PalletAssetsAssetAccount,
-} from '@polkadot/types/lookup';
 
 export function substrate() {
   return {
@@ -30,9 +23,9 @@ function assets() {
           module: 'assets',
           func: 'account',
           args: [assetId, address],
-          transform: async (
-            response: Option<PalletAssetsAssetAccount>
-          ): Promise<bigint> => response.unwrapOrDefault().balance.toBigInt(),
+          transform: async (response) => {
+            return BigInt(response?.balance?.toString() ?? '0');
+          },
         });
       },
     }),
@@ -54,9 +47,9 @@ function foreignAssets() {
           module: 'foreignAssets',
           func: 'account',
           args: [assetLocation, address],
-          transform: async (
-            response: Option<PalletAssetsAssetAccount>
-          ): Promise<bigint> => response.unwrapOrDefault().balance.toBigInt(),
+          transform: async (response) => {
+            return BigInt(response?.balance?.toString() ?? '0');
+          },
         });
       },
     }),
@@ -71,13 +64,11 @@ function system() {
           module: 'system',
           func: 'account',
           args: [address],
-          transform: async (
-            response: FrameSystemAccountInfo
-          ): Promise<bigint> => {
-            const balance = response.data as PalletBalancesAccountData;
-            // @ts-ignore
-            const frozen = balance.miscFrozen ?? balance.frozen;
-            return BigInt(balance.free.sub(frozen).toString());
+          transform: async (response) => {
+            const data = response?.data;
+            const free = BigInt(data?.free?.toString() ?? '0');
+            const frozen = BigInt((data?.miscFrozen ?? data?.frozen)?.toString() ?? '0');
+            return free >= frozen ? free - frozen : 0n;
           },
         }),
     }),
@@ -93,11 +84,11 @@ function tokens() {
           module: 'tokens',
           func: 'accounts',
           args: [address, assetId],
-          transform: async ({
-            free,
-            frozen,
-          }: OrmlTokensAccountData): Promise<bigint> =>
-            BigInt(free.sub(frozen).toString()),
+          transform: async (response) => {
+            const free = BigInt(response?.free?.toString() ?? '0');
+            const frozen = BigInt(response?.frozen?.toString() ?? '0');
+            return free >= frozen ? free - frozen : 0n;
+          },
         });
       },
     }),
@@ -113,11 +104,11 @@ function ormlTokens() {
           module: 'ormlTokens',
           func: 'accounts',
           args: [address, assetId],
-          transform: async ({
-            free,
-            frozen,
-          }: OrmlTokensAccountData): Promise<bigint> =>
-            BigInt(free.sub(frozen).toString()),
+          transform: async (response) => {
+            const free = BigInt(response?.free?.toString() ?? '0');
+            const frozen = BigInt(response?.frozen?.toString() ?? '0');
+            return free >= frozen ? free - frozen : 0n;
+          },
         });
       },
     }),

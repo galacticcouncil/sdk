@@ -6,15 +6,13 @@ import { getExtrinsicAssetLocation, locationOrError } from '../utils';
 import { XcmVersion } from '../types';
 
 export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
-  const api = await chain.api;
-
   const version = XcmVersion.v4;
   const transferAssetLocation = getExtrinsicAssetLocation(
     locationOrError(chain, asset),
     version
   );
 
-  return api.createType('XcmVersionedXcm', {
+  return {
     [version]: [
       {
         ReserveAssetDeposited: [
@@ -70,5 +68,5 @@ export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
         SetTopic: TOPIC,
       },
     ],
-  });
+  };
 }

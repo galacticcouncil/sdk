@@ -10,7 +10,6 @@ import { toAsset, toDest } from './xTokens.utils';
 import {
   getDerivativeAccount,
   getExtrinsicAccount,
-  getExtrinsicArgumentVersion,
   getExtrinsicAssetLocation,
   locationOrError,
   shouldFeeAssetPrecede,
@@ -23,10 +22,11 @@ const transfer = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        // Use destination chain's XCM version since that's where the message will be processed
+        const version = rcv.xcmVersion;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -45,10 +45,10 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMultiasset',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 1);
+      getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -77,11 +77,11 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMultiassets',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
+        const version = rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -138,8 +138,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferMulticurrencies',
-      getArgs: (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
+      getArgs: () => {
         const ctx = source.chain as Parachain;
 
         let rcv = destination.chain as Parachain;
@@ -154,6 +153,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
+        const version = rcv.xcmVersion;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
         return [

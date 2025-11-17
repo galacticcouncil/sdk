@@ -1,9 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xcm-core';
 
-import type { PalletAssetRegistryAssetDetails } from '@polkadot/types/lookup';
-import { Option } from '@polkadot/types';
-
 import { BaseClient } from '../base';
+import { getTypedApi } from '../../utils/papi';
 
 export class HydrationClient extends BaseClient {
   constructor(chain: Parachain) {
@@ -11,28 +9,27 @@ export class HydrationClient extends BaseClient {
   }
 
   async checkIfSufficient(asset: Asset): Promise<boolean> {
-    const api = await this.chain.api;
+    const client = this.chain.api;
+    const api = getTypedApi(client);
     const assetId = this.chain.getAssetId(asset);
-    const response =
-      await api.query.assetRegistry.assets<
-        Option<PalletAssetRegistryAssetDetails>
-      >(assetId);
-    if (response.isEmpty) {
+    const assetIdNum = Number(assetId);
+    const response = await api.query.AssetRegistry.Assets.getValue(assetIdNum);
+
+    if (!response) {
       return true;
     }
-    const details = response.unwrap();
-    return details.isSufficient.isTrue;
+    return response.is_sufficient || false;
   }
 
   async getFeeAsset(address: string): Promise<string> {
-    const api = await this.chain.api;
-    const response =
-      await api.query.multiTransactionPayment.accountCurrencyMap(address);
-    if (response.isEmpty) {
+    const client = this.chain.api;
+    const api = getTypedApi(client);
+    const response = await api.query.MultiTransactionPayment.AccountCurrencyMap.getValue(address);
+
+    if (!response) {
       return '0';
     }
-    const asset = response.unwrap();
-    return asset.toString();
+    return response.toString();
   }
 
   async getAssetBalance(address: string, asset: string): Promise<bigint> {

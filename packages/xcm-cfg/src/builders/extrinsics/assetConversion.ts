@@ -4,8 +4,6 @@ import {
   Parachain,
 } from '@galacticcouncil/xcm-core';
 
-import { getAssetLocation } from './assetConversion.utils';
-
 const pallet = 'assetConversion';
 
 type SwapOpts = {
@@ -38,7 +36,7 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
           const amountOut = aOut.amount;
 
           return [
-            [getAssetLocation(aInLocation), getAssetLocation(aOutLocation)],
+            [aInLocation, aOutLocation],
             amountOut,
             maxAmountIn,
             address,

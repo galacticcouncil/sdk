@@ -94,21 +94,28 @@ export class WormholeClient {
     from: string,
     vaaBytes: string
   ): Promise<SubstrateCall> {
-    const api = await moonchain.api;
+    const client = moonchain.api;
+    const chainSpec = await client.getChainSpecData();
+    const api = client.getTypedApi(chainSpec.genesisHash as any);
+
     const claim = this.redeemMrl(from, vaaBytes);
-    const tx = api.tx.ethereumXcm.transact({
-      ['V2']: {
-        gasLimit: 5_000_000n,
-        action: {
-          Call: claim.to,
+    const tx = (api.tx as any).EthereumXcm.transact({
+      xcm_transaction: {
+        V2: {
+          gas_limit: 5_000_000n,
+          action: {
+            Call: claim.to,
+          },
+          value: 0n,
+          input: claim.data,
         },
-        value: 0n,
-        input: claim.data,
       },
     });
 
+    const callData = await tx.getEncodedData();
+
     return {
-      data: tx.toHex(),
+      data: callData.asHex(),
       from: from,
     } as SubstrateCall;
   }

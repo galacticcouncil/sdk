@@ -1,5 +1,3 @@
-import { AnyJson } from '@polkadot/types-codec/types';
-
 import { XcmVersion } from '../types';
 
 /**
@@ -10,7 +8,7 @@ import { XcmVersion } from '../types';
  * @returns normalized x1 interior if version prior to V4
  */
 export function getExtrinsicAssetLocation(
-  assetLocation: Record<string, AnyJson>,
+  assetLocation: Record<string, any>,
   version: XcmVersion
 ) {
   const normalizedAssetLocation = normalizeInterior(assetLocation, version);
@@ -31,7 +29,7 @@ function getVersionNo(version: XcmVersion) {
 }
 
 function normalizeInterior(
-  assetLocation: Record<string, AnyJson>,
+  assetLocation: Record<string, any>,
   version: XcmVersion
 ) {
   if (getVersionNo(version) < 4) {

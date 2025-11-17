@@ -1,4 +1,4 @@
-import { AnyChain } from 'chain';
+import { AnyChain } from '../chain';
 
 export type SnowbridgeDef = {
   id: number;
