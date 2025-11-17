@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.17.1
+
+### Patch Changes
+
+- 55a0cbf: Update polkadot ws address
+
 ## 10.17.0
 
 ### Minor Changes
