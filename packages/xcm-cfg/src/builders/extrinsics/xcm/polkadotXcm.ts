@@ -54,39 +54,39 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         );
 
         if (asset.key === destination.fee.key) {
-          return [
-            toDest(version, ctx, rcv),
-            toBeneficiary(version, account),
-            {
+          return {
+            dest: toDest(version, ctx, rcv),
+            beneficiary: toBeneficiary(version, account),
+            assets: {
               [version]: [transferAsset],
             },
-            0,
-            'Unlimited',
-          ];
+            fee_asset_item: 0,
+            weight_limit: 'Unlimited',
+          };
         }
 
         // Flip asset order if general index of asset greater than fee asset
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
-          return [
-            toDest(version, ctx, rcv),
-            toBeneficiary(version, account),
-            {
+          return {
+            dest: toDest(version, ctx, rcv),
+            beneficiary: toBeneficiary(version, account),
+            assets: {
               [version]: [transferFee, transferAsset],
             },
-            0,
-            'Unlimited',
-          ];
+            fee_asset_item: 0,
+            weight_limit: 'Unlimited',
+          };
         }
 
-        return [
-          toDest(version, ctx, rcv),
-          toBeneficiary(version, account),
-          {
+        return {
+          dest: toDest(version, ctx, rcv),
+          beneficiary: toBeneficiary(version, account),
+          assets: {
             [version]: [transferAsset, transferFee],
           },
-          1,
-          'Unlimited',
-        ];
+          fee_asset_item: 1,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -113,7 +113,13 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         const assets = {
           [version]: [transferAsset],
         };
-        return [dest, beneficiary, assets, 0, 'Unlimited'];
+        return {
+          dest,
+          beneficiary,
+          assets,
+          fee_asset_item: 0,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -140,7 +146,12 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         const assets = {
           [version]: [transferAsset],
         };
-        return [dest, beneficiary, assets, 0];
+        return {
+          dest,
+          beneficiary,
+          assets,
+          fee_asset_item: 0,
+        };
       },
     }),
 });
@@ -167,7 +178,13 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
         const assets = {
           [version]: [transferAsset],
         };
-        return [dest, beneficiary, assets, 0, 'Unlimited'];
+        return {
+          dest,
+          beneficiary,
+          assets,
+          fee_asset_item: 0,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -254,15 +271,15 @@ const transferAssetsUsingTypeAndThen = (
           customXcmOnDest = toDepositXcmOnDest(version, account);
         }
 
-        return [
+        return {
           dest,
           assets,
-          assetTransferType,
-          remoteFeeId,
-          feesTransferType,
-          customXcmOnDest,
-          'Unlimited',
-        ];
+          assets_transfer_type: assetTransferType,
+          remote_fees_id: remoteFeeId,
+          fees_transfer_type: feesTransferType,
+          custom_xcm_on_dest: customXcmOnDest,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -299,9 +316,9 @@ const send = () => {
             );
             const transactFeeAmount = big.toBigInt(opts.fee, fee.decimals);
 
-            return [
-              toDest(version, ctx, rcv),
-              toTransactMessage(
+            return {
+              dest: toDest(version, ctx, rcv),
+              message: toTransactMessage(
                 version,
                 account,
                 transactFeeLocation,
@@ -309,7 +326,7 @@ const send = () => {
                 transact.call,
                 transact.weight
               ),
-            ];
+            };
           },
         });
       },
@@ -342,9 +359,9 @@ const send = () => {
               amount > fee.amount ? amount - fee.amount : amount;
             const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
 
-            return [
-              toDest(version, ctx, rcv),
-              toTransferMessage(
+            return {
+              dest: toDest(version, ctx, rcv),
+              message: toTransferMessage(
                 version,
                 account,
                 transferAsset,
@@ -352,7 +369,7 @@ const send = () => {
                 transferFeeAmount,
                 receiver
               ),
-            ];
+            };
           },
         });
       },

@@ -38,15 +38,15 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        return [
-          toDest(version, rcv),
-          toBeneficiary(version, account),
-          {
+        return {
+          dest: toDest(version, rcv),
+          beneficiary: toBeneficiary(version, account),
+          assets: {
             [version]: [transferAsset],
           },
-          0,
-          'Unlimited',
-        ];
+          fee_asset_item: 0,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -69,15 +69,15 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
 
-        return [
-          toDest(version, rcv),
-          toBeneficiary(version, account),
-          {
+        return {
+          dest: toDest(version, rcv),
+          beneficiary: toBeneficiary(version, account),
+          assets: {
             [version]: [transferAsset],
           },
-          0,
-          'Unlimited',
-        ];
+          fee_asset_item: 0,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -164,15 +164,15 @@ const transferAssetsUsingTypeAndThen = (
           }
         })();
 
-        return [
+        return {
           dest,
           assets,
-          assetTransferType,
-          remoteFeeId,
-          feesTransferType,
-          customXcmOnDest,
-          'Unlimited',
-        ];
+          assets_transfer_type: assetTransferType,
+          remote_fees_id: remoteFeeId,
+          fees_transfer_type: feesTransferType,
+          custom_xcm_on_dest: customXcmOnDest,
+          weight_limit: 'Unlimited',
+        };
       },
     }),
 });

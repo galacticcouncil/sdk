@@ -35,7 +35,12 @@ const transfer = (): ExtrinsicConfigBuilder => ({
         const account = getExtrinsicAccount(receiver);
 
         const assetId = ctx.getAssetId(asset);
-        return [assetId, amount, toDest(version, rcv, account), 'Unlimited'];
+        return {
+          currency_id: assetId,
+          amount,
+          dest: toDest(version, rcv, account),
+          dest_weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -61,13 +66,13 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
           version
         );
         const transferAsset = toAsset(transferAssetLocation, amount);
-        return [
-          {
+        return {
+          asset: {
             [version]: transferAsset,
           },
-          toDest(version, rcv, account),
-          'Unlimited',
-        ];
+          dest: toDest(version, rcv, account),
+          dest_weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -99,36 +104,36 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         );
 
         if (asset.key === destination.fee.key) {
-          return [
-            {
+          return {
+            assets: {
               [version]: [transferAsset],
             },
-            0,
-            toDest(version, rcv, account),
-            'Unlimited',
-          ];
+            fee_item: 0,
+            dest: toDest(version, rcv, account),
+            dest_weight_limit: 'Unlimited',
+          };
         }
 
         // Flip asset order if general index of asset greater than fee asset
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
-          return [
-            {
+          return {
+            assets: {
               [version]: [transferFee, transferAsset],
             },
-            0,
-            toDest(version, rcv, account),
-            'Unlimited',
-          ];
+            fee_item: 0,
+            dest: toDest(version, rcv, account),
+            dest_weight_limit: 'Unlimited',
+          };
         }
 
-        return [
-          {
+        return {
+          assets: {
             [version]: [transferAsset, transferFee],
           },
-          1,
-          toDest(version, rcv, account),
-          'Unlimited',
-        ];
+          fee_item: 1,
+          dest: toDest(version, rcv, account),
+          dest_weight_limit: 'Unlimited',
+        };
       },
     }),
 });
@@ -156,15 +161,15 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
         const version = rcv.xcmVersion;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
-        return [
-          [
+        return {
+          currencies: [
             [assetId, amount],
             [feeAssetId, feeAmount],
           ],
-          1,
-          toDest(version, rcv, account),
-          'Unlimited',
-        ];
+          fee_item: 1,
+          dest: toDest(version, rcv, account),
+          dest_weight_limit: 'Unlimited',
+        };
       },
     }),
 });

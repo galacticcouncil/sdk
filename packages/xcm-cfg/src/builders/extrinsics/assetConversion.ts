@@ -35,13 +35,13 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
             aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
           const amountOut = aOut.amount;
 
-          return [
-            [aInLocation, aOutLocation],
-            amountOut,
-            maxAmountIn,
-            address,
-            true,
-          ];
+          return {
+            path: [aInLocation, aOutLocation],
+            amount_out: amountOut,
+            amount_in_max: maxAmountIn,
+            send_to: address,
+            keep_alive: true,
+          };
         },
       }),
   };
