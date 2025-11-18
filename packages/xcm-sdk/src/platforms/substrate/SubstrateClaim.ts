@@ -1,5 +1,6 @@
 import {
   Abi,
+  CallType,
   EvmParachain,
   Precompile,
   Wormhole as Wh,
@@ -42,11 +43,12 @@ export class SubstrateClaim {
     from: string,
     vaaBytes: string
   ): Promise<SubstrateCall> {
-    const api = await this.#chain.api;
+    const client = this.#chain.api;
+    const api = client.getUnsafeApi();
     const claim = this.redeemMrl(from, vaaBytes);
-    const tx = api.tx.ethereumXcm.transact({
-      ['V2']: {
-        gasLimit: 5_000_000n,
+    const tx = (api.tx as any).EthereumXcm.transact({
+      V2: {
+        gas_limit: 5_000_000n,
         action: {
           Call: claim.to,
         },
@@ -56,8 +58,11 @@ export class SubstrateClaim {
     });
 
     return {
-      data: tx.toHex(),
+      data: tx.decodedCall,
       from: from,
+      type: CallType.Substrate,
+      dryRun: async () => undefined,
+      txOptions: undefined,
     } as SubstrateCall;
   }
 }

@@ -32,12 +32,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-<<<<<<< HEAD
       getArgs: () => {
-=======
-      getArgs: async (func) => {
-        const version = getExtrinsicArgumentVersion(func, 2);
->>>>>>> origin/master
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
