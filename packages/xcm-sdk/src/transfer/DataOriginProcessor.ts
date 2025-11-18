@@ -232,7 +232,7 @@ export class DataOriginProcessor extends DataProcessor {
     const { chain, extrinsic } = cfg;
     const config = extrinsic.build(ctx);
     const substrate = await SubstrateService.create(chain);
-    const submittable = substrate.getExtrinsic(config);
+    const submittable = await substrate.getExtrinsic(config);
 
     const fromChain = ctx.source.chain as Parachain;
     const fromAddr = ctx.sender;

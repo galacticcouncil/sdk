@@ -7,7 +7,6 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
 export async function signAndSend(
-  address: string,
   call: Call,
   chain: AnyChain,
   onTransactionSend: (hash: string | null) => void,
@@ -15,9 +14,10 @@ export async function signAndSend(
   onError: (error: unknown) => void
 ) {
   const { client } = chain as AnyEvmChain;
+  const account = H160.fromAny(call.from);
 
   const provider = client.getProvider();
-  const signer = client.getSigner(address);
+  const signer = client.getSigner(account);
 
   await signer.switchChain({ id: client.chain.id });
   await signer.request({ method: 'eth_requestAccounts' });
@@ -35,8 +35,6 @@ export async function signAndSend(
 
   if (extrinsic) {
     const data = extrinsic.inner.toHex();
-    const account = H160.toAccount(address);
-
     const [gas, gasPrice] = await Promise.all([
       provider.estimateGas({
         account: account as `0x${string}`,
@@ -49,7 +47,7 @@ export async function signAndSend(
     const gasPriceExtra = gasPrice + (gasPrice / 100n) * 10n;
 
     txHash = await signer.sendTransaction({
-      account: address as `0x${string}`,
+      account: account as `0x${string}`,
       chain: client.chain,
       data: data,
       maxPriorityFeePerGas: gasPriceExtra,
@@ -60,7 +58,7 @@ export async function signAndSend(
   } else {
     const { data, to, value } = call as EvmCall;
     const estGas = await provider.estimateGas({
-      account: address as `0x${string}`,
+      account: account as `0x${string}`,
       data: data as `0x${string}`,
       to: to as `0x${string}`,
       value: value,
@@ -68,7 +66,7 @@ export async function signAndSend(
     console.log('Est gas: ' + estGas);
 
     txHash = await signer.sendTransaction({
-      account: address as `0x${string}`,
+      account: account as `0x${string}`,
       chain: client.chain,
       data: data as `0x${string}`,
       to: to as `0x${string}`,

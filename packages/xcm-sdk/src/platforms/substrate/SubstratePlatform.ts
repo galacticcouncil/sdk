@@ -59,7 +59,7 @@ export class SubstratePlatform
         }
       : undefined;
 
-    const extrinsic = substrate.getExtrinsic(config);
+    const extrinsic = await substrate.getExtrinsic(config);
     const extrinsicCall = config.module + '.' + config.func;
 
     const callData = await extrinsic.getEncodedData();
@@ -76,7 +76,8 @@ export class SubstratePlatform
               const dryRunResult = await substrate.dryRun(account, extrinsic);
 
               const error =
-                dryRunResult.execution_result && !dryRunResult.execution_result.success
+                dryRunResult.execution_result &&
+                !dryRunResult.execution_result.success
                   ? getErrorFromDryRun(dryRunResult.execution_result.value)
                   : undefined;
 
@@ -149,7 +150,11 @@ export class SubstratePlatform
       concatMap((b: any) => transform(b)),
       distinctUntilChanged((prev, curr) => prev === curr),
       concatMap(async (balance) => {
-        const params = await normalizeAssetAmount(balance as bigint, asset, substrate);
+        const params = await normalizeAssetAmount(
+          balance as bigint,
+          asset,
+          substrate
+        );
         return AssetAmount.fromAsset(asset, params);
       })
     );

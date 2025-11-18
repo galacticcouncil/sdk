@@ -105,6 +105,11 @@ export const intr = new Asset({
   originSymbol: 'INTR',
 });
 
+export const jito_sol = new Asset({
+  key: 'jitoSol',
+  originSymbol: 'jitoSOL',
+});
+
 export const kar = new Asset({
   key: 'kar',
   originSymbol: 'KAR',
@@ -369,6 +374,7 @@ export const assets: Asset[] = [
   laos,
   lbtc,
   ewt,
+  jito_sol,
   ldot,
   link,
   myth,

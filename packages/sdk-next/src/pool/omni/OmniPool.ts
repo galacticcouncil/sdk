@@ -1,3 +1,5 @@
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -10,7 +12,6 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
-import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 import { math, fmt } from '../../utils';
 
 import { OmniMath } from './OmniMath';

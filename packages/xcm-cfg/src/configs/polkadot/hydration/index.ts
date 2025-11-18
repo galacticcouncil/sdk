@@ -22,6 +22,7 @@ import {
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kilt,
   ksm,
   laos,
@@ -39,7 +40,6 @@ import {
   sol,
   sui,
   sky,
-  sub,
   susde,
   tbtc,
   trac,
@@ -84,13 +84,11 @@ import {
   neuroweb,
   nodle,
   pendulum,
-  polkadot,
   phala,
   solana,
   sui_chain,
   unique,
   zeitgeist,
-  polkadotCex,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -203,7 +201,6 @@ const toAssetHub: AssetRoute[] = [
 
 const toAstar: AssetRoute[] = [
   toTransferTemplate(astr, astar, 0.00404146544),
-  //toTransferTemplate(dot, astar, 0.1),
   toTransferTemplate(bnc, astar, 0.75),
   toTransferTemplate(glmr, astar, 0.025),
   toTransferTemplate(ibtc, astar, 0.000002),
@@ -219,24 +216,43 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(bnc, bifrost, 0.000563136),
   toTransferTemplate(vdot, bifrost, 0.0000000703),
   toTransferTemplate(vastr, bifrost, 0.000000643),
-  //toTransferTemplate(dot, bifrost, 0.1),
+  toTransferTemplate(dot, bifrost, 0.1),
   toTransferTemplate(astr, bifrost, 0.5),
   toTransferTemplate(glmr, bifrost, 0.1),
   toTransferTemplate(ibtc, bifrost, 0.000005),
   toTransferTemplate(usdt, bifrost, 0.3),
   toTransferTemplate(usdc, bifrost, 0.3),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
+  }),
 ];
 
 const toCentrifuge: AssetRoute[] = [
   toTransferTemplate(cfg, centrifuge, 0.0092696),
-  //toTransferTemplate(dot, centrifuge, 0.1),
   toTransferTemplate(glmr, centrifuge, 0.05),
 ];
 
 const toInterlay: AssetRoute[] = [
   toTransferTemplate(ibtc, interlay, 0.00000062),
   toTransferTemplate(intr, interlay, 0.0019213457),
-  //toTransferTemplate(dot, interlay, 0.1),
   toTransferTemplate(hdx, interlay, 0.5),
   toTransferTemplate(usdt, interlay, 0.3),
   toTransferTemplate(usdc, interlay, 0.3),
@@ -264,7 +280,6 @@ const toInterlay: AssetRoute[] = [
 const toMoonbeam: AssetRoute[] = [
   toTransferTemplate(hdx, moonbeam, 5),
   toTransferTemplate(glmr, moonbeam, 0.01),
-  //toTransferTemplate(dot, moonbeam, 0.1),
   toTransferTemplate(usdt, moonbeam, 0.3),
   toTransferTemplate(usdc, moonbeam, 0.3),
   toMoonbeamErc20Template(dai_mwh),
@@ -275,8 +290,6 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamErc20Template(weth_mwh),
   toMoonbeamErc20Template(sol),
 ];
-
-const toPolkadot: AssetRoute[] = [toTransferTemplate(dot, polkadot, 0.003)];
 
 const toZeitgeist: AssetRoute[] = [
   toTransferTemplate(ztg, zeitgeist, 0.0093),
@@ -337,52 +350,16 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
 
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sui, sui, sui_chain),
 ];
 
-const toCexViaRelay = new AssetRoute({
-  source: {
-    asset: dot,
-    balance: balance(),
-    fee: fee(),
-    destinationFee: {
-      balance: balance(),
-    },
-  },
-  destination: {
-    chain: polkadotCex,
-    asset: dot,
-    fee: {
-      amount: 1.1,
-      asset: dot,
-    },
-  },
-  extrinsic: ExtrinsicBuilder()
-    .utility()
-    .batchAll([
-      ExtrinsicBuilder().xTokens().transfer(),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: 0.01,
-      }),
-    ]),
-  transact: {
-    chain: polkadot,
-    fee: {
-      amount: 0,
-      asset: dot,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().balances().transferAll(),
-  },
-});
-
 const toCex: AssetRoute[] = [
   toHubWithCexFwd2Template(usdt),
   toHubWithCexFwd2Template(usdc),
-  toCexViaRelay,
 ];
 
 export const hydrationConfig = new ChainRoutes({
@@ -408,7 +385,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toNeuroweb,
     ...toNodle,
     ...toPhala,
-    ...toPolkadot,
     ...toPendulum,
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,

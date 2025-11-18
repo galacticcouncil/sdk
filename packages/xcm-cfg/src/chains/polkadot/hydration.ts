@@ -26,6 +26,7 @@ import {
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kilt,
   ksm,
   laos,
@@ -341,7 +342,7 @@ export const hydration = new EvmParachain({
       decimals: 4,
       id: 1000038,
       xcmLocation: {
-        parents: '1',
+        parents: 1,
         interior: {
           X3: [
             {
@@ -505,6 +506,31 @@ export const hydration = new EvmParachain({
               GeneralKey: {
                 length: 2,
                 data: '0x0002000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: jito_sol,
+      decimals: 9,
+      id: 40,
+      min: 0.0000027,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
               },
             },
           ],

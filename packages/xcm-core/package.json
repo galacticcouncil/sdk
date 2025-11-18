@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-core",
-  "version": "8.7.0",
+  "version": "8.8.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -43,6 +43,7 @@
     "@wormhole-foundation/sdk-connect": "3.2.0",
     "@wormhole-foundation/sdk-definitions": "3.2.0",
     "@wormhole-foundation/sdk-solana": "3.2.0",
+    "@wormhole-foundation/sdk-solana-core": "3.2.0",
     "@wormhole-foundation/sdk-solana-tokenbridge": "3.2.0",
     "@wormhole-foundation/sdk-sui": "3.2.0",
     "@wormhole-foundation/sdk-sui-tokenbridge": "3.2.0",

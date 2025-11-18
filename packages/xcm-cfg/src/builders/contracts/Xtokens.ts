@@ -17,7 +17,7 @@ const U_64_MAX = 18446744073709551615n;
 export function Xtokens() {
   return {
     transfer: (weight = U_64_MAX): ContractConfigBuilder => ({
-      build: ({ address, amount, asset, destination, source }) => {
+      build: async ({ address, amount, asset, destination, source }) => {
         const assetId = source.chain.getAssetId(asset);
         return new ContractConfig({
           abi: Abi.Xtokens,
@@ -37,7 +37,7 @@ export function Xtokens() {
       },
     }),
     transferMultiCurrencies: (weight = U_64_MAX): ContractConfigBuilder => ({
-      build: ({ address, amount, asset, destination, source }) => {
+      build: async ({ address, amount, asset, destination, source }) => {
         const assetId = source.chain.getAssetId(asset);
         const feeAssetId = source.chain.getAssetId(
           source.destinationFeeBalance

@@ -24,7 +24,7 @@ const config = {
   ss58Format: 0,
   treasury: '13UVJyLnbVp9RBZYFwFGyDvVd1y27Tt8tkntv6Q7JVPhFsTB',
   usesDeliveryFee: true,
-  ws: 'wss://polkadot-rpc.dwellir.com',
+  ws: 'wss://polkadot-rpc.n.dwellir.com',
 };
 
 export const polkadot = new Parachain({

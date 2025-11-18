@@ -1,14 +1,18 @@
-import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xcm-core';
-import { SubstrateCall, TransferBuilder } from '@galacticcouncil/xcm-sdk';
-
 import {
-  getWormholeChainById,
-  logAssets,
-  logSrcChains,
-  logDestChains,
-} from './utils';
-import { evm, solana, sui, substrate, substrateV2 } from './signers';
-import { configService, wallet, whClient, whScan } from './setup';
+  AssetAmount,
+  ConfigBuilder,
+  Parachain,
+  SolanaChain,
+} from '@galacticcouncil/xcm-core';
+import {
+  SolanaLilJit,
+  SubstrateCall,
+  TransferBuilder,
+} from '@galacticcouncil/xcm-sdk';
+
+import { logAssets, logSrcChains, logDestChains } from './utils';
+import { configService, wallet, whTransfers } from './setup';
+import { sign, signSubstrate, signSolanaBundle } from './signers';
 
 // Define transfer constraints
 const srcChain = configService.getChain('ethereum');
@@ -75,123 +79,64 @@ balanceSubscription.unsubscribe();
 /***************************/
 
 /**
- * Sign substrate transaction
+ * Check hydration withdrawals and claim stucked
  *
- * @param address - signer address
+ * @param account - hydration account (for)
+ * @param payer - claim payer (from)
  */
-async function sign(address: string) {
-  const { txOptions } = call as SubstrateCall;
+async function claimWithdraws(account: string, payer: string) {
+  const withdraws = await whTransfers.getWithdraws(account);
 
-  // Using papi signer as txOptions not working in 14.x pjs
-  if (txOptions) {
-    substrateV2.signAndSend(address, call, srcChain, (event) => {
-      console.log(event);
-    });
-  } else {
-    substrate.signAndSend(
-      address,
-      call,
-      srcChain,
-      ({ status }) => {
-        console.log(status.toHuman());
-      },
-      (error) => {
-        console.error(error);
+  for (const withdrawal of withdraws) {
+    if (withdrawal.redeem) {
+      console.log(withdrawal);
+      const calls = await withdrawal.redeem(payer);
+      const isBatch = Array.isArray(calls);
+      if (isBatch && withdrawal.toChain.isSolana()) {
+        // Jito bundle execution
+        await signSolanaBundle(calls, destChain);
+      } else if (isBatch) {
+        // Sequential batch execution
+        for (const call of calls) {
+          await sign(call, destChain);
+        }
+      } else {
+        await sign(call, destChain);
       }
-    );
+    }
   }
 }
 
 /**
- * Sign EVM transaction
+ * Check hydration deposits and claim stucked
  *
- * @param address - signer address
+ * @param account - hydration account (for)
+ * @param payer - claim payer (from)
  */
-async function signEvm(address: string) {
-  evm.signAndSend(
-    address,
-    call,
-    srcChain,
-    (hash) => {
-      console.log('TxHash: ' + hash);
-    },
-    (receipt) => {
-      console.log(receipt);
-    },
-    (error) => {
-      console.error(error);
-    }
-  );
-}
+async function claimDeposits(account: string, payer: string) {
+  const srcChain = configService.getChain('hydration') as Parachain;
+  const destChain = configService.getChain('moonbeam') as Parachain;
+  const feeAsset = srcChain.findAssetById('10'); // default to system
 
-/**
- * Sign solana transaction
- *
- * @param address - signer address
- */
-async function signSolana() {
-  solana.signAndSend(
-    call,
-    srcChain,
-    (hash) => {
-      console.log('TxHash: ' + hash);
-    },
-    (error) => {
-      console.error(error);
-    }
-  );
-}
+  const deposits = await whTransfers.getDeposits(account);
 
-/**
- * Sign sui transaction
- *
- * @param address - signer address
- */
-async function signSui() {
-  sui.signAndSend(
-    call,
-    srcChain,
-    (hash) => {
-      console.log('TxHash: ' + hash);
-    },
-    (error) => {
-      console.error(error);
-    }
-  );
-}
-
-/**
- * Check transfer status & redeem the funds if VAA emitted
- *
- * @param txHash - wormhole transaction hash
- * @param address - signer address
- */
-async function checkAndRedeem(txHash: string, address: string) {
-  const { id, vaa } = await whScan.getVaaByTxHash(txHash);
-  const { content } = await whScan.getOperation(id);
-  const { payload } = content;
-  const chain = getWormholeChainById(payload.toChain)!;
-  const isCompleted = await whClient.isTransferCompleted(chain, vaa);
-  console.log('Transfer completed: ' + isCompleted);
-
-  // Call redeem if transfer not completed
-  if (!isCompleted) {
-    const call = whScan.isMrlTransfer(payload)
-      ? whClient.redeemMrl(address, vaa)
-      : whClient.redeem(chain, address, vaa);
-    evm.signAndSend(
-      address,
-      call,
-      chain,
-      (hash) => {
-        console.log('TxHash: ' + hash);
-      },
-      (receipt) => {
-        console.log(receipt);
-      },
-      (error) => {
-        console.error(error);
+  for (const deposit of deposits) {
+    if (deposit.redeem) {
+      console.log(deposit);
+      const call = await deposit.redeem(payer);
+      const isBatch = Array.isArray(call);
+      if (isBatch) {
+        throw Error('Batch not supported');
+      } else {
+        const remoteTx = await wallet.remoteXcm(
+          payer,
+          srcChain,
+          destChain,
+          call as SubstrateCall,
+          { srcFeeAsset: feeAsset?.asset }
+        );
+        await signSubstrate(remoteTx, srcChain);
       }
-    );
+    }
   }
 }

@@ -10,6 +10,8 @@ import {
   merge,
 } from 'rxjs';
 
+import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
+
 import { PoolClient } from '../PoolClient';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../types';
 
@@ -18,7 +20,6 @@ import {
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../consts';
-import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { fmt, QueryBus } from '../../utils';
 
 import { OmniMath } from './OmniMath';

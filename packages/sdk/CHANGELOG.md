@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.2.0
+
+### Minor Changes
+
+- b403e40: HF calculation adjustments
+
 ## 10.1.0
 
 ### Minor Changes

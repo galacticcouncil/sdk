@@ -93,7 +93,7 @@ const transferAssetsUsingTypeAndThen = (
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssetsUsingTypeAndThen',
-      getArgs: () => {
+      getArgs: async () => {
         const version = XcmVersion.v4;
 
         const ctx = source.chain as Parachain;

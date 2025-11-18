@@ -14,7 +14,11 @@ import {
   vdot,
 } from '../../assets';
 import { astar, hydration } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -55,7 +59,9 @@ const toHydration: AssetRoute[] = [
   //       asset: dot,
   //     },
   //   },
-  //   extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  //   extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+  //     transferType: XcmTransferType.RemoteReserve,
+  //   }),
   // }),
   new AssetRoute({
     source: {

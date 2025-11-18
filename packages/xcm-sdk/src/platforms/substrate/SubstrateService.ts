@@ -225,7 +225,7 @@ export class SubstrateService {
     account: string,
     config: ExtrinsicConfig
   ): Promise<bigint> {
-    const extrinsic = this.getExtrinsic(config);
+    const extrinsic = await this.getExtrinsic(config);
     try {
       const info = await extrinsic.getPaymentInfo(account);
       return BigInt(info.partial_fee);
@@ -244,7 +244,7 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<bigint> {
     if (this.chain.usesDeliveryFee) {
-      const acc = this.estimateDeliveryFeeWith(account, config);
+      const acc = await this.estimateDeliveryFeeWith(account, config);
 
       try {
         const extrinsic = this.getExtrinsic(config);
@@ -263,10 +263,10 @@ export class SubstrateService {
     return 0n;
   }
 
-  private estimateDeliveryFeeWith(
+  private async estimateDeliveryFeeWith(
     account: string,
     config: ExtrinsicConfig
-  ): string {
+  ): Promise<string> {
     if (['xcmPallet', 'polkadotXcm'].includes(config.module)) {
       const args = config.getArgs();
       if (!args || typeof args !== 'object') return account;

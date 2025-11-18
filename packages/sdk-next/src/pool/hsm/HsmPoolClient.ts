@@ -12,6 +12,8 @@ import {
 } from 'rxjs';
 import { decodeEventLog } from 'viem';
 
+import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
+
 import { PoolClient } from '../PoolClient';
 import { StableSwapClient } from '../stable';
 import { PoolBase, PoolFees, PoolType } from '../types';
@@ -19,7 +21,6 @@ import { PoolBase, PoolFees, PoolType } from '../types';
 import { EvmClient } from '../../evm';
 import { GHO_TOKEN_ABI, GhoTokenClient } from '../../gho';
 import { AssetBalance, XcmV3Multilocation } from '../../types';
-import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { fmt } from '../../utils';
 
 import { HsmPoolBase } from './HsmPool';

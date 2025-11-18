@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/common",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Common utilities shared across Galactic SDK packages",
   "author": "GalacticCouncil",
   "repository": {
@@ -46,6 +46,6 @@
     "@types/big.js": "^6.2.2"
   },
   "peerDependencies": {
-    "polkadot-api": "^1.20.0"
+    "polkadot-api": ">=1.19.2 <1.20.0"
   }
 }

@@ -5,7 +5,7 @@
       "cache": true
     },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^postbuild"],
       "outputs": ["build/**"],
       "inputs": ["src/**", "package.json"]
     },
