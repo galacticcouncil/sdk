@@ -6,42 +6,39 @@ import {
   Parachain,
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
-import {
-  PoolService,
-  PoolType,
-  TradeRouteBuilder,
-  TradeRouter,
-  TxBuilderFactory,
-} from '@galacticcouncil/sdk';
+import { pool, sor, tx } from '@galacticcouncil/sdk-next';
 import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
 import { memoize1 } from '@thi.ng/memoize';
 
 import { HydrationClient } from '../clients';
 
+const { PoolType } = pool;
+const { TradeRouteBuilder, TradeRouter } = sor;
+const { TxBuilderFactory } = tx;
+
+type PoolContext = pool.PoolContextProvider;
+
 export class HydrationDex implements Dex {
   readonly chain: Parachain;
   readonly client: HydrationClient;
-  readonly poolCtx: PoolService;
-  readonly txBuilder: TxBuilderFactory;
+  readonly poolCtx: PoolContext;
+  readonly txBuilder: tx.TxBuilderFactory;
 
   readonly getCtx = memoize1(async (mem: number) => {
     console.log('init swap router', mem, '✅');
-    return new TradeRouter(this.poolCtx, {
-      includeOnly: [
-        PoolType.Aave,
-        PoolType.Omni,
-        PoolType.Stable,
-        PoolType.XYK,
-      ],
+    const router = new TradeRouter(this.poolCtx);
+    router.withFilter({
+      useOnly: [PoolType.Aave, PoolType.Omni, PoolType.Stable, PoolType.XYK],
     });
+    return router;
   });
 
-  constructor(chain: AnyChain, poolCtx: PoolService) {
+  constructor(chain: AnyChain, poolCtx: PoolContext) {
     this.chain = chain as Parachain;
     this.poolCtx = poolCtx;
     this.client = new HydrationClient(this.chain);
-    this.txBuilder = new TxBuilderFactory(poolCtx.api, poolCtx.evm);
+    this.txBuilder = new TxBuilderFactory(poolCtx.client, poolCtx.evm);
   }
 
   async getCalldata(
@@ -51,31 +48,25 @@ export class HydrationDex implements Dex {
     amountOut: AssetAmount,
     slippage = 0
   ): Promise<string> {
-    const aIn = this.chain.getMetadataAssetId(assetIn);
-    const aOut = this.chain.getMetadataAssetId(assetOut);
-    const amount = amountOut.toDecimal(amountOut.decimals);
+    const aIn = Number(this.chain.getMetadataAssetId(assetIn));
+    const aOut = Number(this.chain.getMetadataAssetId(assetOut));
+    const amount = amountOut.amount;
 
     const router = await this.getCtx(1);
 
-    const mostLiquidRoute = await router.getMostLiquidRoute(
-      aIn.toString(),
-      aOut.toString()
-    );
+    const mostLiquidRoute = await router.getMostLiquidRoute(aIn, aOut);
 
-    const trade = await router.getBuy(
-      aIn.toString(),
-      aOut.toString(),
-      amount,
-      mostLiquidRoute
-    );
+    const trade = await router.getBuy(aIn, aOut, amount, mostLiquidRoute);
 
-    const extrinsic = await this.txBuilder
+    const txWrapper = await this.txBuilder
       .trade(trade)
       .withBeneficiary(account)
       .withSlippage(slippage)
       .build();
 
-    return extrinsic.hex;
+    const transaction = txWrapper.get();
+    const encodedData = await transaction.getEncodedData();
+    return encodedData.asHex();
   }
 
   async getQuote(
@@ -84,25 +75,17 @@ export class HydrationDex implements Dex {
     amountOut: AssetAmount,
     fallbackPrice?: boolean
   ): Promise<SwapQuote> {
-    const aIn = this.chain.getMetadataAssetId(assetIn);
-    const aOut = this.chain.getMetadataAssetId(assetOut);
-    const amount = amountOut.toDecimal(amountOut.decimals);
+    const aIn = Number(this.chain.getMetadataAssetId(assetIn));
+    const aOut = Number(this.chain.getMetadataAssetId(assetOut));
+    const amount = amountOut.amount;
 
     const router = await this.getCtx(1);
     try {
-      const mostLiquidRoute = await router.getMostLiquidRoute(
-        aIn.toString(),
-        aOut.toString()
-      );
+      const mostLiquidRoute = await router.getMostLiquidRoute(aIn, aOut);
 
-      const trade = await router.getBuy(
-        aIn.toString(),
-        aOut.toString(),
-        amount,
-        mostLiquidRoute
-      );
+      const trade = await router.getBuy(aIn, aOut, amount, mostLiquidRoute);
 
-      const amountIn = BigInt(trade.amountIn.toNumber());
+      const amountIn = trade.amountIn;
       return {
         amount: amountIn,
         route: TradeRouteBuilder.build(trade.swaps),
@@ -130,7 +113,10 @@ export class HydrationDex implements Dex {
     const api = getTypedApi(client);
     const id = this.chain.getAssetId(asset);
     const assetIdNum = Number(id);
-    const systemToAssetPrice = await api.query.MultiTransactionPayment.AcceptedCurrencies.getValue(assetIdNum);
+    const systemToAssetPrice =
+      await api.query.MultiTransactionPayment.AcceptedCurrencies.getValue(
+        assetIdNum
+      );
 
     if (!systemToAssetPrice) {
       throw new Error(`No price found for asset ${asset.originSymbol}`);
