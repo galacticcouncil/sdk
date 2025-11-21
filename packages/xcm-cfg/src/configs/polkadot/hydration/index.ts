@@ -292,7 +292,9 @@ const toInterlay: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
   }),
 ];
 
