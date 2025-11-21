@@ -288,7 +288,7 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: dot,
       fee: {
-        amount: 0.01,
+        amount: 0.036,
         asset: dot,
       },
     },
