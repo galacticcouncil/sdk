@@ -275,6 +275,25 @@ const toInterlay: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: dot,
+      fee: {
+        amount: 0.01,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  }),
 ];
 
 const toMoonbeam: AssetRoute[] = [
