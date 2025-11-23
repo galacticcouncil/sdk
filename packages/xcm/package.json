@@ -1,0 +1,37 @@
+{
+  "name": "@galacticcouncil/xcm",
+  "version": "0.0.0",
+  "description": "Cross-chain hydradx & basilisk xcm wallet ctx",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xcm",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/xcm.git"
+  },
+  "keywords": [
+    "hydration",
+    "basilisk",
+    "xcm"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@galacticcouncil/xcm-core": "^8.8.0",
+    "@galacticcouncil/xcm-sdk": "^10.9.0",
+    "@galacticcouncil/xcm-cfg": "^10.17.1"
+  }
+}
