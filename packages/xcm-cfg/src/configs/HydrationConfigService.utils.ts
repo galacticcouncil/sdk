@@ -1,4 +1,4 @@
-import { ExternalAsset } from '@galacticcouncil/sdk';
+import { ExternalAsset } from '@galacticcouncil/sdk-next';
 import { Asset, ChainAssetData } from '@galacticcouncil/xcm-core';
 
 export function toAsset(external: ExternalAsset): Asset {

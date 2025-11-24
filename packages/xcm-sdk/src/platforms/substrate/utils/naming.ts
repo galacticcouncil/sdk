@@ -6,25 +6,27 @@
  */
 
 /**
- * Convert pallet/module name to PAPI format
+ * Convert string to PascalCase (first letter uppercase)
+ * Used for pallet names and query function names in PAPI
  * @example
- * toPalletName('balances') // 'Balances'
- * toPalletName('polkadotXcm') // 'PolkadotXcm'
- * toPalletName('multiTransactionPayment') // 'MultiTransactionPayment'
+ * toPascalCase('balances') // 'Balances'
+ * toPascalCase('polkadotXcm') // 'PolkadotXcm'
+ * toPascalCase('multiTransactionPayment') // 'MultiTransactionPayment'
  */
-export function toPalletName(pallet: string): string {
-  return pallet.charAt(0).toUpperCase() + pallet.slice(1);
+export function toPascalCase(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
- * Convert extrinsic/function name to PAPI snake_case format
+ * Convert camelCase string to snake_case
+ * Used for extrinsic/function names in PAPI
  * @example
- * toExtrinsicName('transferAll') // 'transfer_all'
- * toExtrinsicName('batchAll') // 'batch_all'
- * toExtrinsicName('setSufficient') // 'set_sufficient'
+ * toSnakeCase('transferAll') // 'transfer_all'
+ * toSnakeCase('batchAll') // 'batch_all'
+ * toSnakeCase('setSufficient') // 'set_sufficient'
  */
-export function toExtrinsicName(func: string): string {
-  return func
+export function toSnakeCase(str: string): string {
+  return str
     .replace(/([A-Z])/g, '_$1')
     .toLowerCase()
     .replace(/^_/, ''); // Remove leading underscore if present

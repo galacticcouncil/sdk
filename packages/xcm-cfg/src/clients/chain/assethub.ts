@@ -4,6 +4,7 @@ import { Twox128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
+import { XcmEncoder } from '../../utils/xcm-encoder';
 
 export class AssethubClient extends BaseClient {
   constructor(chain: Parachain) {
@@ -92,26 +93,71 @@ export class AssethubClient extends BaseClient {
   async calculateDeliveryFee(xcm: any, destParachainId: number) {
     const client = this.chain.api;
     const api = client.getUnsafeApi();
+
+    const destination = XcmEncoder.encodeVersionedLocationForUnsafeApi({
+      parents: 1,
+      interior: { X1: [{ Parachain: destParachainId }] },
+    });
+
+    const encodedXcm = XcmEncoder.encodeXcmForUnsafeApi(xcm);
+
     const result = await api.apis.XcmPaymentApi.query_delivery_fees(
-      {
-        V4: {
-          parents: 1,
-          interior: { X1: [{ parachain: destParachainId }] },
-        },
-      },
-      xcm
+      destination,
+      encodedXcm
     );
 
     if (!result.success) {
       throw Error(`Can't query XCM delivery fee.`);
     }
 
-    const assets = result.value.V4 || result.value;
+    const assets = result.value.value || result.value.V4 || result.value;
     for (const asset of assets) {
-      if (asset.id.parents === 1 && asset.id.interior?.type === 'Here') {
-        return BigInt(asset.fun.Fungible);
+      const interior = asset.id.interior;
+      const isHere =
+        interior?.type === 'Here' ||
+        interior === 'Here' ||
+        interior === undefined;
+      if (asset.id.parents === 1 && isHere) {
+        return BigInt(asset.fun.value ?? asset.fun.Fungible);
       }
     }
     throw Error(`Can't find XCM delivery fee in DOT.`);
+  }
+
+  async calculateDestinationFee(xcm: any, asset: Asset): Promise<bigint> {
+    try {
+      const client = this.chain.api;
+      const api = client.getUnsafeApi();
+
+      const versionedXcm = XcmEncoder.encodeXcmForUnsafeApi(xcm);
+
+      const weight =
+        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
+
+      if (!weight.success) {
+        throw Error(`Can't query XCM weight.`);
+      }
+
+      const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
+      if (!feeAssetLocation) {
+        throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
+      }
+
+      const versionedAssetId =
+        XcmEncoder.encodeAssetIdForUnsafeApi(feeAssetLocation);
+      const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
+        weight.value,
+        versionedAssetId
+      );
+
+      if (!feeInAsset.success) {
+        throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
+      }
+
+      return BigInt(feeInAsset.value);
+    } catch (error) {
+      console.error('Error in calculateDestinationFee:', error);
+      throw error;
+    }
   }
 }

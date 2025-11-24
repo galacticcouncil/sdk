@@ -18,8 +18,8 @@ import { toHex, fromHex } from '@polkadot-api/utils';
 import {
   getDeliveryFeeFromDryRun,
   getErrorFromDryRun,
-  toPalletName,
-  toExtrinsicName,
+  toPascalCase,
+  toSnakeCase,
 } from './utils';
 
 const { Ss58Addr } = addr;
@@ -52,8 +52,10 @@ export class SubstrateService {
   async getAsset(): Promise<Asset> {
     if (!this._asset) {
       const chainSpec = await this.getChainSpec();
-      const symbols = chainSpec.properties?.tokenSymbol || [];
-      const nativeToken = symbols[0];
+      const tokenSymbol = chainSpec.properties?.tokenSymbol;
+      const nativeToken = Array.isArray(tokenSymbol)
+        ? tokenSymbol[0]
+        : tokenSymbol;
       const nativeTokenKey = nativeToken.toLowerCase();
       const asset = this.chain.getAsset(nativeTokenKey);
       if (!asset) {
@@ -101,8 +103,8 @@ export class SubstrateService {
   }
 
   getExtrinsic(config: ExtrinsicConfig): Transaction<any, any, any, any> {
-    const moduleName = toPalletName(config.module);
-    const funcName = toExtrinsicName(config.func);
+    const moduleName = toPascalCase(config.module);
+    const funcName = toSnakeCase(config.func);
 
     const txModule = (this.api.tx as any)[moduleName];
     if (!txModule) {

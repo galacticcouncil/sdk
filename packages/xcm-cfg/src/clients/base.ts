@@ -1,7 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xcm-core';
-import { Enum } from 'polkadot-api';
 
 import { getTypedApi } from '../utils/papi';
+import { XcmEncoder } from '../utils/xcm-encoder';
 
 export class BaseClient {
   readonly chain: Parachain;
@@ -34,30 +34,39 @@ export class BaseClient {
   }
 
   async calculateDestinationFee(xcm: any, asset: Asset): Promise<bigint> {
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
+    try {
+      const client = this.chain.api;
+      const api = client.getUnsafeApi();
 
-    const weight = await api.apis.XcmPaymentApi.query_xcm_weight(xcm);
+      // Convert plain XCM object to properly encoded PAPI instructions
+      const versionedXcm = XcmEncoder.encodeXcm(xcm);
 
-    if (!weight.success) {
-      throw Error(`Can't query XCM weight.`);
+      const weight =
+        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
+
+      if (!weight.success) {
+        throw Error(`Can't query XCM weight.`);
+      }
+
+      const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
+      if (!feeAssetLocation) {
+        throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
+      }
+
+      const versionedAssetId = XcmEncoder.encodeAssetId(feeAssetLocation);
+      const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
+        weight.value,
+        versionedAssetId
+      );
+
+      if (!feeInAsset.success) {
+        throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
+      }
+
+      return BigInt(feeInAsset.value);
+    } catch (error) {
+      console.error('Error in calculateDestinationFee:', error);
+      throw error;
     }
-
-    const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
-    if (!feeAssetLocation) {
-      throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
-    }
-
-    const versionedAssetId = Enum('V4', feeAssetLocation);
-    const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
-      weight.value,
-      versionedAssetId
-    );
-
-    if (!feeInAsset.success) {
-      throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
-    }
-
-    return BigInt(feeInAsset.value);
   }
 }

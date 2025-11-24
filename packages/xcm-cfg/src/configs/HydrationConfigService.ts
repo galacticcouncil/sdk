@@ -1,4 +1,4 @@
-import { ExternalAsset } from '@galacticcouncil/sdk';
+import { ExternalAsset } from '@galacticcouncil/sdk-next';
 import { ConfigService, Parachain } from '@galacticcouncil/xcm-core';
 
 import { toHydrationExtTemplate } from './polkadot/assethub/templates';
@@ -16,7 +16,7 @@ export class HydrationConfigService extends ConfigService {
     const assethub = this.getChain('assethub') as Parachain;
 
     const isRegistered = (ext: ExternalAsset): boolean => {
-      return !!hydration.findAssetById(ext.internalId);
+      return !!hydration.findAssetById(ext.internalId.toString());
     };
 
     external

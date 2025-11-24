@@ -20,8 +20,7 @@ import { SubstrateService } from './SubstrateService';
 import {
   getErrorFromDryRun,
   normalizeAssetAmount,
-  toPalletName,
-  toExtrinsicName,
+  toPascalCase,
 } from './utils';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 
@@ -127,10 +126,13 @@ export class SubstratePlatform
     const substrate = await this.#substrate;
     const { module, func, args, transform } = config;
 
-    const moduleName = toPalletName(module);
-    const funcName = toExtrinsicName(func);
+    const moduleName = toPascalCase(module);
+    const funcName = toPascalCase(func);
 
-    const queryModule = (substrate.api.query as any)[moduleName];
+    // Use unsafe API for dynamic queries
+    const unsafeApi = substrate.client.getUnsafeApi();
+
+    const queryModule = (unsafeApi.query as any)[moduleName];
     if (!queryModule) {
       throw new Error(
         `Query module "${module}" (${moduleName}) not found in runtime`
@@ -138,7 +140,7 @@ export class SubstratePlatform
     }
 
     const queryFunc = queryModule[funcName];
-    if (!queryFunc || typeof queryFunc !== 'function') {
+    if (!queryFunc) {
       throw new Error(
         `Query function "${func}" (${funcName}) not found in module "${moduleName}"`
       );

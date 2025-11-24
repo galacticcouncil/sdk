@@ -14,3 +14,12 @@ export enum XcmTransferType {
 }
 
 export type Parents = 0 | 1 | 2;
+
+// ============================================================================
+// XCM ENCODER TYPES
+// ============================================================================
+
+/**
+ * Encoding mode for the XcmEncoder (typed API vs unsafe API)
+ */
+export type EncodingMode = 'typed' | 'unsafe';

@@ -1,4 +1,4 @@
-import { createSdkContext } from '@galacticcouncil/sdk';
+import { createSdkContext } from '@galacticcouncil/sdk-next';
 import {
   assetsMap,
   chainsMap,
@@ -26,8 +26,8 @@ export const configService = new HydrationConfigService({
 
 // Init hydration sdk
 const hydration = configService.getChain('hydration') as Parachain;
-const hydrationApi = await hydration.api;
-const hydrationSdk = createSdkContext(hydrationApi);
+const hydrationApi = hydration.api;
+const hydrationSdk = await createSdkContext(hydrationApi);
 
 const { ctx } = hydrationSdk;
 

@@ -1,10 +1,10 @@
-import { ExternalAsset } from '@galacticcouncil/sdk';
+import { ExternalAsset } from '@galacticcouncil/sdk-next';
 
 export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '17',
-    internalId: '1000082',
+    internalId: 1000082,
     name: 'dog wif dots',
     origin: 1000,
     symbol: 'WIFD',
@@ -12,7 +12,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 4,
     id: '18',
-    internalId: '1000038',
+    internalId: 1000038,
     name: 'DOTA',
     origin: 1000,
     symbol: 'DOTA',
@@ -20,7 +20,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '23',
-    internalId: '1000021',
+    internalId: 1000021,
     name: 'PINK',
     origin: 1000,
     symbol: 'PINK',
@@ -28,7 +28,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '30',
-    internalId: '1000019',
+    internalId: 1000019,
     name: 'DED',
     origin: 1000,
     symbol: 'DED',
@@ -36,7 +36,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 20,
     id: '32',
-    internalId: '1000120',
+    internalId: 1000120,
     name: 'ClayOnDot',
     origin: 1000,
     symbol: 'CLAY',
@@ -44,7 +44,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 2,
     id: '420',
-    internalId: '1000036',
+    internalId: 1000036,
     name: 'BEEFY',
     origin: 1000,
     symbol: 'BEEFY',
@@ -52,7 +52,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '8889',
-    internalId: '1000091',
+    internalId: 1000091,
     name: 'BANDIT the CAT',
     origin: 1000,
     symbol: 'BNDT',
@@ -60,7 +60,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '31337',
-    internalId: '1000085',
+    internalId: 1000085,
     name: 'WUD',
     origin: 1000,
     symbol: 'WUD',
@@ -68,7 +68,7 @@ export const externals: ExternalAsset[] = [
   {
     decimals: 10,
     id: '42069',
-    internalId: '1000034',
+    internalId: 1000034,
     name: 'STINK',
     origin: 1000,
     symbol: 'STINK',

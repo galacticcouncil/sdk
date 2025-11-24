@@ -150,7 +150,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -278,7 +278,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -416,7 +416,7 @@ export const hydration = new EvmParachain({
           X1: {
             GlobalConsensus: {
               Ethereum: {
-                chainId: 1,
+                chain_id: 1,
               },
             },
           },
@@ -435,7 +435,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -577,7 +577,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -630,7 +630,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -678,7 +678,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -704,7 +704,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -853,7 +853,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -943,7 +943,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -969,7 +969,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1020,7 +1020,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1046,7 +1046,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1133,7 +1133,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1206,7 +1206,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1276,7 +1276,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1349,7 +1349,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
@@ -1422,7 +1422,7 @@ export const hydration = new EvmParachain({
             {
               GlobalConsensus: {
                 Ethereum: {
-                  chainId: 1,
+                  chain_id: 1,
                 },
               },
             },
