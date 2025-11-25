@@ -76,7 +76,6 @@ export enum TradeOrderError {
 }
 
 export interface TradeDcaOrder extends TradeOrder {
-  frequency: number;
-  frequencyMin: number;
-  frequencyOpt: number;
+  maxTradeCount: number;
+  optTradeCount: number;
 }
