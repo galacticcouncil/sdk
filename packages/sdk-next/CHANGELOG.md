@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.16.0
+
+### Minor Changes
+
+- dca: support no of orders in scheduler api
+
 ## 0.15.0
 
 ### Minor Changes
