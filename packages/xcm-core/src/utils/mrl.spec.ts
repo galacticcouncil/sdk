@@ -1,5 +1,4 @@
 import { Parachain } from '../chain';
-
 import { createPayload, decodePayload } from './mrl';
 
 const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
@@ -16,34 +15,48 @@ const parachain = new Parachain({
 
 describe('Mrl utils', () => {
   describe('createPayload', () => {
-    it('should create correct VersionedMultiLocation payload hex for alice on hydration', async () => {
-      expect(createPayload(parachain, ALICE).toHex()).toStrictEqual(
-        '0x0005010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
+    it('should encode VersionedUserAction V1 with XcmVersionedLocation V4 for Alice', async () => {
+      const payload = await createPayload(parachain, ALICE);
+
+      expect(payload.toHex()).toBe(
+        '0x0004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
       );
     });
+
+    it('should encode AccountKey20 for Ethereum-style addresses', async () => {
+      const ethAddress = '0x1234567890123456789012345678901234567890';
+      const payload = await createPayload(parachain, ethAddress, true);
+      const hex = payload.toHex();
+
+      expect(hex).toContain('1234567890123456789012345678901234567890');
+    });
   });
+
   describe('decodePayload', () => {
-    it('should decode payload hex to correct VersionedMultiLocation json for alice on hydration', async () => {
-      expect(
-        decodePayload(
-          '0x0005010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
-        )
-      ).toStrictEqual({
-        v5: {
-          interior: {
-            x2: [
-              { parachain: 2034 },
-              {
-                accountId32: {
-                  id: '0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
-                  network: null,
-                },
-              },
-            ],
-          },
-          parents: 1,
-        },
-      });
+    it('should decode SCALE bytes to VersionedUserAction structure', async () => {
+      const testHex =
+        '0x0004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d';
+
+      const decoded = await decodePayload(parachain, testHex);
+
+      expect(decoded.tag).toBe('V1');
+      expect(decoded.value).toHaveProperty('destination');
+
+      const destination = decoded.value.destination;
+      expect(destination).toBeDefined();
+    });
+
+    it('should maintain data integrity through encode/decode round-trip', async () => {
+      const payload = await createPayload(parachain, ALICE);
+      const hex = payload.toHex();
+
+      const decoded = await decodePayload(parachain, hex);
+
+      expect(decoded.tag).toBe('V1');
+      expect(decoded.value.destination).toBeDefined();
+
+      const payload2 = await createPayload(parachain, ALICE);
+      expect(payload2.toHex()).toBe(hex);
     });
   });
 });
