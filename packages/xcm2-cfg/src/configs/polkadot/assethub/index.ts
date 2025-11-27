@@ -29,7 +29,7 @@ import {
 
 import {
   toParaStablesTemplate,
-  toParaStablesWithSwapTemplate,
+  toParaReservesWithSwapTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
   extraFee,
@@ -54,7 +54,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: 0.0001,
+        amount: 0.001,
         asset: dot,
       },
     },
@@ -172,7 +172,8 @@ export const assetHubConfig = new ChainRoutes({
 export const assetHubCexConfig = new ChainRoutes({
   chain: assetHubCex,
   routes: [
-    toParaStablesWithSwapTemplate(usdt, hydration, 0.02),
-    toParaStablesWithSwapTemplate(usdc, hydration, 0.02),
+    toParaReservesWithSwapTemplate(usdt, hydration, 0.02),
+    toParaReservesWithSwapTemplate(usdc, hydration, 0.02),
+    toParaReservesWithSwapTemplate(dot, hydration, 0.001),
   ],
 });

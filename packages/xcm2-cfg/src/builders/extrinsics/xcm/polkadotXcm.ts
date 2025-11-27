@@ -355,9 +355,11 @@ const send = () => {
 
             const { fee } = destination;
 
-            const transferAmount =
-              amount > fee.amount ? amount - fee.amount : amount;
             const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
+            const transferAmount =
+              amount > fee.amount
+                ? amount - (fee.amount + transferFeeAmount)
+                : amount;
 
             return {
               dest: toDest(version, ctx, rcv),

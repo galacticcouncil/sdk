@@ -95,7 +95,7 @@ import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 import { balance, fee } from './configs';
 import {
   toHubExtTemplate,
-  toHubWithCexFwd2Template,
+  toHubWithCexFwdTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
   toTransferTemplate,
@@ -275,6 +275,27 @@ const toInterlay: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: dot,
+      fee: {
+        amount: 0.05,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
+  }),
 ];
 
 const toMoonbeam: AssetRoute[] = [
@@ -358,8 +379,23 @@ const toSuiViaWormhole: AssetRoute[] = [
 ];
 
 const toCex: AssetRoute[] = [
-  toHubWithCexFwd2Template(usdt),
-  toHubWithCexFwd2Template(usdc),
+  toHubWithCexFwdTemplate(
+    usdt,
+    0.1,
+    ExtrinsicBuilder().xTokens().transferMultiasset()
+  ),
+  toHubWithCexFwdTemplate(
+    usdc,
+    0.1,
+    ExtrinsicBuilder().xTokens().transferMultiasset()
+  ),
+  toHubWithCexFwdTemplate(
+    dot,
+    0.2,
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
+  ),
 ];
 
 export const hydrationConfig = new ChainRoutes({

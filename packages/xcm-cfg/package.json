@@ -1,0 +1,39 @@
+{
+  "name": "@galacticcouncil/xcm-cfg",
+  "version": "10.18.0",
+  "description": "Cross-chain hydradx & basilisk dapp configuration",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xcm-cfg",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydration",
+    "basilisk",
+    "xcm"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
+  },
+  "dependencies": {
+    "@galacticcouncil/xcm-core": "^8.8.0"
+  },
+  "peerDependencies": {
+    "@galacticcouncil/sdk": "^10.0.0"
+  }
+}
