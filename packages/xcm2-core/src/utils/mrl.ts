@@ -7,7 +7,7 @@ import {
   XcmV3Junction,
   XcmV3Junctions,
   hydration,
-} from '@polkadot-api/descriptors';
+} from '@galacticcouncil/descriptors';
 
 import { Parachain } from '../chain';
 
