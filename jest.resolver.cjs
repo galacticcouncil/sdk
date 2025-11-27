@@ -13,7 +13,7 @@ module.exports = (path, options) => {
     });
   }
 
-  if (path === '@galacticcouncil/xcm-core') {
+  if (path === '@galacticcouncil/xcm2-core') {
     return options.defaultResolver(path, {
       ...options,
       packageFilter: (pkg) => {
@@ -37,7 +37,7 @@ module.exports = (path, options) => {
     });
   }
 
-  if (path === '@galacticcouncil/xcm-cfg') {
+  if (path === '@galacticcouncil/xcm2-cfg') {
     return options.defaultResolver(path, {
       ...options,
       packageFilter: (pkg) => {
@@ -49,7 +49,7 @@ module.exports = (path, options) => {
     });
   }
 
-  if (path === '@galacticcouncil/xcm-sdk') {
+  if (path === '@galacticcouncil/xcm2-sdk') {
     return options.defaultResolver(path, {
       ...options,
       packageFilter: (pkg) => {
