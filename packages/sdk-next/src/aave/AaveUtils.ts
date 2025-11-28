@@ -176,6 +176,8 @@ export class AaveUtils {
       currentLiquidationThreshold,
     } = await this.getSummary(user);
 
+    if (totalDebt === 0n) return INVALID_HF;
+
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
 
@@ -230,6 +232,8 @@ export class AaveUtils {
       currentLiquidationThreshold,
     } = await this.getSummary(user);
 
+    if (totalDebt === 0n) return INVALID_HF;
+
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
 
@@ -280,6 +284,8 @@ export class AaveUtils {
     toReserve: number
   ): Promise<number> {
     const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+
+    if (totalDebt === 0n) return INVALID_HF;
 
     const fromReserveAsset = ERC20.fromAssetId(fromReserve);
     const toReserveAsset = ERC20.fromAssetId(toReserve);
