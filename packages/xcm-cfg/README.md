@@ -10,23 +10,8 @@ Install with [npm](https://www.npmjs.com/):
 
 `npm install @galacticcouncil/xcm-cfg`
 
-## Current Support
+## Supported protocols
 
-Transfer directions and current status ⬇️
-
-- 🧪 Done
-- 🛠 Work in progress
-- ⏳ Planning to build
-
-| From      | To        |     |
-| --------- | --------- | --- |
-| Relay     | Parachain | 🧪  |
-| Parachain | Relay     | 🧪  |
-| Parachain | Parachain | 🧪  |
-| Parachain | Ethereum  | 🧪  |
-| Ethereum  | Parachain | 🧪  |
-
-Supported bridges:
-
+- **XCM**
 - **Wormhole** (via MRL)
 - **Snowbridge**

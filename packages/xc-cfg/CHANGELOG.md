@@ -1,0 +1,1 @@
+# @galacticcouncil/xc-cfg

@@ -1,0 +1,38 @@
+{
+  "name": "@galacticcouncil/xc-sdk",
+  "version": "0.1.0",
+  "description": "Cross-chain sdk",
+  "author": "GalacticCouncil",
+  "type": "module",
+  "repository": {
+    "directory": "packages/xc-sdk",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "evm",
+    "substrate",
+    "wallet",
+    "xcm",
+    "wormhole"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@galacticcouncil/xc-core": "^0.1.0"
+  }
+}
