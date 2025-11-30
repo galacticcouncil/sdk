@@ -22,6 +22,7 @@ import { polkadot, polkadotCex } from './polkadot';
 import { unique } from './unique';
 import { zeitgeist } from './zeitgeist';
 import { energywebx } from './energywebx';
+import { xode } from './xode';
 
 export const polkadotChains: AnyChain[] = [
   acala,
@@ -48,6 +49,7 @@ export const polkadotChains: AnyChain[] = [
   unique,
   zeitgeist,
   energywebx,
+  xode,
 ];
 
 export {
@@ -75,4 +77,5 @@ export {
   unique,
   zeitgeist,
   energywebx,
+  xode,
 };
