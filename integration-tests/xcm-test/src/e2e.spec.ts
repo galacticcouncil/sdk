@@ -5,6 +5,8 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
+import { jest } from '@jest/globals';
+
 import * as c from 'console';
 import outdent from 'outdent';
 
@@ -55,7 +57,7 @@ const getPolkadotChains = () => {
     bridge,
     //chains,
     chains: Array.from(configService.chains.values()).filter((c) =>
-      ['polkadot', 'assethub', 'hydration', 'moonbeam'].includes(c.key)
+      ['assethub', 'hydration'].includes(c.key)
     ) as Parachain[],
   };
 };

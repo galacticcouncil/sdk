@@ -12,7 +12,7 @@ class GetDcaOrder extends PapiExecutor {
 
     const { api, tx } = sdk;
 
-    const order = await api.scheduler.getDcaOrder(10, 0, '50', DAY_MS);
+    const order = await api.scheduler.getDcaOrder(10, 0, '50000', DAY_MS, 37);
     const orderTx = await tx
       .order(order)
       .withBeneficiary(BENEFICIARY)

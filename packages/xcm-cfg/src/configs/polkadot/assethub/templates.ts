@@ -72,7 +72,7 @@ function toParaExtTemplate(
   });
 }
 
-export function toParaStablesWithSwapTemplate(
+export function toParaReservesWithSwapTemplate(
   asset: Asset,
   destination: AnyChain,
   destinationFee: number

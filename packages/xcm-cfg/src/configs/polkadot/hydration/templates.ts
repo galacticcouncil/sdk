@@ -3,6 +3,7 @@ import {
   Asset,
   AssetRoute,
   ContractConfigBuilder,
+  ExtrinsicConfigBuilder,
   ExtrinsicConfigBuilderParams,
   FeeAmountConfigBuilder,
 } from '@galacticcouncil/xcm-core';
@@ -23,7 +24,7 @@ import { balance, fee } from './configs';
 export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
-export const CEX_EXECUTION_FEE = 0.02; // Remote execution fee (< 0.02)
+export const CEX_EXECUTION_FEE = 0.03; // Remote execution fee (< 0.02)
 
 const isDestinationFeeSwapSupported = (
   params: ExtrinsicConfigBuilderParams
@@ -86,7 +87,11 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
   });
 }
 
-export function toHubWithCexFwdTemplate(asset: Asset): AssetRoute {
+export function toHubWithCexFwdTemplate(
+  asset: Asset,
+  hubFee: number,
+  hubTransfer: ExtrinsicConfigBuilder
+): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
@@ -100,56 +105,18 @@ export function toHubWithCexFwdTemplate(asset: Asset): AssetRoute {
       chain: assetHubCex,
       asset: asset,
       fee: {
-        amount: 0.1,
+        amount: hubFee,
         asset: asset,
       },
     },
     extrinsic: ExtrinsicBuilder()
       .utility()
       .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiasset(),
+        hubTransfer,
         ExtrinsicBuilder().polkadotXcm().send().transferAsset({
           fee: CEX_EXECUTION_FEE,
         }),
       ]),
-  });
-}
-
-export function toHubWithCexFwd2Template(asset: Asset): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHubCex,
-      asset: asset,
-      fee: {
-        amount: 0.1,
-        asset: asset,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        ExtrinsicBuilder().xTokens().transferMultiasset(),
-        ExtrinsicBuilder().polkadotXcm().send().transact({
-          fee: CEX_EXECUTION_FEE,
-        }),
-      ]),
-    transact: {
-      chain: assetHub,
-      fee: {
-        amount: 0,
-        asset: asset,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder().assets().transfer(),
-    },
   });
 }
 

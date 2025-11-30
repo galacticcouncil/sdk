@@ -1,5 +1,17 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.18.0
+
+### Minor Changes
+
+- Enable interlay DOT, fix CEX reserve routes
+
+## 10.17.1
+
+### Patch Changes
+
+- 55a0cbf: Update polkadot ws address
+
 ## 10.17.0
 
 ### Minor Changes

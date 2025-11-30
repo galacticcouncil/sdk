@@ -7,6 +7,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { SubstrateService } from './SubstrateService';
+
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 import { buildXcmDest, buildXcmMessage, getErrorFromDryRun } from './utils';
 

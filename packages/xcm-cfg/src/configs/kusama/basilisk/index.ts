@@ -37,31 +37,6 @@ const toAssetHub: AssetRoute[] = [
   }),
 ];
 
-const toKusama: AssetRoute[] = [
-  // Basilisk -> Kusama: DestinationReserve with InitiateTeleport
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: kusama,
-      asset: ksm,
-      fee: {
-        amount: 0.00012,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-];
-
 const toKusamaAssetHub: AssetRoute[] = [
   // Basilisk -> Kusama Asset Hub: DestinationReserve with DepositAsset
   new AssetRoute({
@@ -91,7 +66,6 @@ export const basiliskConfig = new ChainRoutes({
   chain: basilisk,
   routes: [
     ...toAssetHub,
-    ...toKusama,
     ...toKusamaAssetHub,
     toTransferTemplate(bsx, karura, 0.0933),
     toTransferTemplate(teer, integritee, 0.000004),

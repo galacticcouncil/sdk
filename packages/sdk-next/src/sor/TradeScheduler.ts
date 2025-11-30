@@ -51,16 +51,16 @@ export class TradeScheduler {
    * @param assetIn - storage key of assetIn
    * @param assetOut - storage key of assetOut
    * @param amountInTotal - order budget
-   * @param duration - order duration in ms
    * @param frequency - order frequency in ms (opts)
+   * @param noOfTrades - number of orders
    * @returns - dca trade order
    */
   async getDcaOrder(
     assetIn: number,
     assetOut: number,
     amountInTotal: string,
-    duration: number,
-    frequency?: number
+    frequency: number,
+    noOfTrades?: number
   ): Promise<TradeDcaOrder> {
     const [amountInMin, trade] = await Promise.all([
       this.getMinimumOrderBudget(assetIn),
@@ -77,15 +77,9 @@ export class TradeScheduler {
 
     const priceImpact = Math.abs(priceImpactPct);
 
-    const minTradeCount = this.getMinimumTradeCount(amountIn, amountInMin);
+    const maxTradeCount = this.getMaximumTradeCount(amountIn, amountInMin);
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
-    const tradeCount = frequency
-      ? Math.round(duration / frequency)
-      : optTradeCount;
-
-    const minFreq = Math.ceil(duration / minTradeCount);
-    const optFreq = Math.round(duration / optTradeCount);
-    const freq = Math.round(duration / tradeCount);
+    const tradeCount = noOfTrades || optTradeCount;
 
     const amountInPerTrade = amountIn / BigInt(tradeCount);
 
@@ -103,7 +97,7 @@ export class TradeScheduler {
     }
 
     const amountOut = dca.amountOut * BigInt(tradeCount);
-    const tradePeriod = this.toBlockPeriod(freq);
+    const tradePeriod = this.toBlockPeriod(frequency);
     const tradeFee = dca.tradeFee * BigInt(tradeCount);
     const tradeRoute = TradeRouteBuilder.build(swaps);
 
@@ -111,9 +105,8 @@ export class TradeScheduler {
       assetIn: assetIn,
       assetOut: assetOut,
       errors: errors,
-      frequencyMin: minFreq,
-      frequencyOpt: optFreq,
-      frequency: freq,
+      maxTradeCount: maxTradeCount,
+      optTradeCount: optTradeCount,
       tradeCount: tradeCount,
       tradeFee: tradeFee,
       tradeImpactPct: dca.priceImpactPct,
@@ -161,16 +154,16 @@ export class TradeScheduler {
   }
 
   /**
-   * Calculate minimum number of trades for order execution.
+   * Calculate maximum number of trades for dca order execution.
    *
    * Single trade execution amount must be at least 20% of
    * minimum order budget.
    *
    * @param amountIn - entering / given budget
    * @param amountInMin - minimal budget to schedule an order
-   * @returns minimum number of trades to execute the order
+   * @returns maximum number of trades to execute the order
    */
-  private getMinimumTradeCount(amountIn: bigint, amountInMin: bigint): number {
+  private getMaximumTradeCount(amountIn: bigint, amountInMin: bigint): number {
     const minAmountIn = (amountInMin * 2n) / 10n;
 
     if (minAmountIn === 0n) return 0;

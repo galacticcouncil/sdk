@@ -19,7 +19,6 @@ import {
   kusamaAssetHub,
   moonbeam,
   mythos,
-  polkadot,
 } from '../../../chains';
 import {
   AssetMinBuilder,
@@ -30,7 +29,7 @@ import {
 
 import {
   toParaStablesTemplate,
-  toParaStablesWithSwapTemplate,
+  toParaReservesWithSwapTemplate,
   toHydrationExtTemplate,
   toMoonbeamExtTemplate,
   extraFee,
@@ -55,7 +54,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: 0.0001,
+        amount: 0.001,
         asset: dot,
       },
     },
@@ -94,33 +93,6 @@ const toHydration: AssetRoute[] = [
   toHydrationExtTemplate(ded),
   toHydrationExtTemplate(dota),
   toHydrationExtTemplate(wud),
-];
-
-const toPolkadot: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
-      fee: {
-        asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
-        extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
-    },
-    destination: {
-      chain: polkadot,
-      asset: dot,
-      fee: {
-        amount: 0.003,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedTeleportAssets(),
-  }),
 ];
 
 const toKusamaAssethub: AssetRoute[] = [
@@ -191,7 +163,6 @@ export const assetHubConfig = new ChainRoutes({
   routes: [
     ...toHydration,
     ...toKusamaAssethub,
-    ...toPolkadot,
     ...toMoonbeam,
     ...toBifrost,
     ...toMythos,
@@ -201,7 +172,8 @@ export const assetHubConfig = new ChainRoutes({
 export const assetHubCexConfig = new ChainRoutes({
   chain: assetHubCex,
   routes: [
-    toParaStablesWithSwapTemplate(usdt, hydration, 0.02),
-    toParaStablesWithSwapTemplate(usdc, hydration, 0.02),
+    toParaReservesWithSwapTemplate(usdt, hydration, 0.02),
+    toParaReservesWithSwapTemplate(usdc, hydration, 0.02),
+    toParaReservesWithSwapTemplate(dot, hydration, 0.001),
   ],
 });

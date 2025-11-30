@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk-next
 
+## 0.16.0
+
+### Minor Changes
+
+- dca: support no of orders in scheduler api
+
+## 0.15.0
+
+### Minor Changes
+
+- b403e40: HF calculation adjustments
+
 ## 0.14.2
 
 ### Patch Changes
