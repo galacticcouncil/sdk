@@ -63,6 +63,7 @@ import {
   lbtc,
   susds_mwh,
   susds,
+  xon,
 } from '../../../assets';
 import {
   acala,
@@ -89,6 +90,7 @@ import {
   sui_chain,
   unique,
   zeitgeist,
+  xode
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -398,6 +400,10 @@ const toCex: AssetRoute[] = [
   ),
 ];
 
+const toXode: AssetRoute[] = [
+  toTransferTemplate(xon, xode, 0.01)
+];
+
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
@@ -426,5 +432,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toSuiViaWormhole,
     ...toUnique,
     ...toZeitgeist,
+    ...toXode
   ],
 });
