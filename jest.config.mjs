@@ -14,9 +14,5 @@ export const config = {
       },
     ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(polkadot-api|@polkadot-api|@scure|@noble)/)',
-  ],
-  modulePathIgnorePatterns: ['<rootDir>.*/build/'],
   resolver: '<rootDir>/../../jest.resolver.cjs',
 };

@@ -12,6 +12,7 @@
     "sdk-next-cjs",
     "sdk-next-esm",
     "sdk-swapp",
+    "xc-transfer",
     "xcm-transfer",
     "xcm-test"
   ],

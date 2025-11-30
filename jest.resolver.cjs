@@ -1,10 +1,16 @@
-module.exports = (path, options) => {
-  // Force using source files for internal packages during tests
-  if (path === '@galacticcouncil/common') {
+const localPackages = new Set([
+  '@galacticcouncil/common',
+  '@galacticcouncil/sdk-next',
+  '@galacticcouncil/xc-core',
+  '@galacticcouncil/xc-cfg',
+  '@galacticcouncil/xc-sdk',
+]);
+
+function resolver(path, options) {
+  if (localPackages.has(path)) {
     return options.defaultResolver(path, {
       ...options,
-      packageFilter: (pkg) => {
-        // Override to use source files directly
+      packageFilter(pkg) {
         return {
           ...pkg,
           main: './src/index.ts',
@@ -13,54 +19,8 @@ module.exports = (path, options) => {
     });
   }
 
-  if (path === '@galacticcouncil/xcm2-core') {
-    return options.defaultResolver(path, {
-      ...options,
-      packageFilter: (pkg) => {
-        return {
-          ...pkg,
-          main: './src/index.ts',
-        };
-      },
-    });
-  }
-
-  if (path === '@galacticcouncil/sdk-next') {
-    return options.defaultResolver(path, {
-      ...options,
-      packageFilter: (pkg) => {
-        return {
-          ...pkg,
-          main: './src/index.ts',
-        };
-      },
-    });
-  }
-
-  if (path === '@galacticcouncil/xcm2-cfg') {
-    return options.defaultResolver(path, {
-      ...options,
-      packageFilter: (pkg) => {
-        return {
-          ...pkg,
-          main: './src/index.ts',
-        };
-      },
-    });
-  }
-
-  if (path === '@galacticcouncil/xcm2-sdk') {
-    return options.defaultResolver(path, {
-      ...options,
-      packageFilter: (pkg) => {
-        return {
-          ...pkg,
-          main: './src/index.ts',
-        };
-      },
-    });
-  }
-
-  // Use default resolver for everything else
+  // default for everything else
   return options.defaultResolver(path, options);
-};
+}
+
+module.exports = resolver;
