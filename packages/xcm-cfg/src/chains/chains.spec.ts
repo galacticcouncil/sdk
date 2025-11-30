@@ -68,6 +68,7 @@ describe('chains config', () => {
           'unique',
           'zeitgeist',
           'energywebx',
+          'xode',
         ].sort()
       );
     });
