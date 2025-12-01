@@ -14,6 +14,7 @@ import {
   locationOrError,
   shouldFeeAssetPrecede,
 } from './utils';
+import { XcmVersion } from './types';
 
 const pallet = 'XTokens';
 
@@ -25,8 +26,7 @@ const transfer = (): ExtrinsicConfigBuilder => ({
       getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version =
-          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -55,8 +55,7 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
       getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version =
-          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -91,8 +90,7 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version =
-          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -170,8 +168,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
-        const version =
-          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
         return {

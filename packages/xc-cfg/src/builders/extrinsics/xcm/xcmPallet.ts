@@ -30,7 +30,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
 
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -63,7 +63,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
 
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),

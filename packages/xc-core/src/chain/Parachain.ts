@@ -1,5 +1,4 @@
 import { PolkadotClient } from 'polkadot-api';
-import { metadata as metadataCodec } from '@polkadot-api/substrate-bindings';
 
 import { Asset } from '../asset';
 import { SubstrateApis } from '../substrate';
@@ -105,107 +104,6 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.usesH160Acc = usesH160Acc;
     this.ws = ws;
     this.xcmVersion = xcmVersion;
-  }
-
-  /**
-   * Get XCM version for a specific pallet call by inspecting runtime metadata via PAPI
-   * This dynamically detects which XCM versions are supported by the pallet
-   *
-   * @param pallet - Pallet name (e.g., 'xTokens', 'polkadotXcm')
-   * @param method - Method name (e.g., 'transfer', 'transferMultiasset')
-   * @param argIndex - Index of the argument to inspect (usually the dest/beneficiary param)
-   * @returns Promise<XcmVersion> - Detected XCM version
-   */
-  async getXcmVersionForCall(
-    pallet: string,
-    method: string,
-    argIndex: number = 0
-  ): Promise<XcmVersion> {
-    try {
-      const client = this.api;
-      const finalizedBlock = await client.getFinalizedBlock();
-      const metadataRaw = await client.getMetadata(finalizedBlock.hash);
-
-      // Decode metadata from raw bytes
-      const decodedMetadata = metadataCodec.dec(metadataRaw);
-
-      // Extract the actual metadata (handle v14/v15)
-      const metadataValue =
-        decodedMetadata.metadata.tag === 'v14' ||
-        decodedMetadata.metadata.tag === 'v15'
-          ? decodedMetadata.metadata.value
-          : null;
-
-      if (!metadataValue) {
-        throw new Error('Unsupported metadata version');
-      }
-
-      const metadata = metadataValue as any;
-
-      // Find the pallet in metadata
-      const palletMeta = metadata.pallets.find(
-        (p: any) => p.name.toLowerCase() === pallet.toLowerCase()
-      );
-
-      if (!palletMeta?.calls) {
-        throw new Error(`Pallet ${pallet} not found or has no calls`);
-      }
-
-      // Get the call index
-      const callsLookup = metadata.lookup[palletMeta.calls];
-      if (!callsLookup || callsLookup.type !== 'enum') {
-        throw new Error(`Invalid calls structure for pallet ${pallet}`);
-      }
-
-      // Find the specific method
-      const methodKey = Object.keys(callsLookup.value).find(
-        (key) => key.toLowerCase() === method.toLowerCase()
-      );
-
-      if (!methodKey) {
-        throw new Error(`Method ${method} not found in pallet ${pallet}`);
-      }
-
-      const methodDef = callsLookup.value[methodKey];
-
-      if (!methodDef.value || !methodDef.value.length) {
-        // No arguments, default to chain's xcmVersion
-        return this.xcmVersion;
-      }
-
-      // Get the argument type ID
-      const argTypeId = methodDef.value[argIndex];
-      if (argTypeId === undefined) {
-        throw new Error(
-          `Argument index ${argIndex} not found for ${pallet}.${method}`
-        );
-      }
-
-      // Lookup the type definition
-      const argType = metadata.lookup[argTypeId];
-
-      // Check if it's an enum with version variants (V1, V2, V3, V4, V5)
-      if (argType && argType.type === 'enum') {
-        const variants = Object.keys(argType.value);
-
-        // Check for XCM version variants in descending order
-        if (variants.includes('V5')) return XcmVersion.v5;
-        if (variants.includes('V4')) return XcmVersion.v4;
-        if (variants.includes('V3')) return XcmVersion.v3;
-        if (variants.includes('V2')) return XcmVersion.v2;
-        if (variants.includes('V1')) return XcmVersion.v1;
-      }
-
-      // If we can't detect from metadata, use the chain's default
-      return this.xcmVersion;
-    } catch (error) {
-      console.warn(
-        `Failed to detect XCM version for ${pallet}.${method}:`,
-        error
-      );
-      // Fallback to chain's default version
-      return this.xcmVersion;
-    }
   }
 
   get api(): PolkadotClient {
