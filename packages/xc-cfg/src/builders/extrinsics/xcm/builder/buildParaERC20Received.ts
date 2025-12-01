@@ -1,11 +1,8 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
-import { Binary } from 'polkadot-api';
-import { XcmV3Junction, XcmV3Junctions } from '@galacticcouncil/descriptors';
+import { ACCOUNT_SS_58, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
 
-import { ACCOUNT_ID_32, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
-
-import { getExtrinsicAssetLocation, locationOrError } from '../utils';
+import { getExtrinsicAccount, getExtrinsicAssetLocation, locationOrError } from '../utils';
 import { XcmVersion } from '../types';
 
 export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
@@ -18,53 +15,64 @@ export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
   return {
     [version]: [
       {
-        ReserveAssetDeposited: [
+        type: 'ReserveAssetDeposited',
+        value: [
           {
             id: DOT_LOCATION,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
           {
             id: transferAssetLocation,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
         ],
       },
-      { ClearOrigin: null },
       {
-        BuyExecution: {
+        type: 'ClearOrigin',
+      },
+      {
+        type: 'BuyExecution',
+        value: {
           fees: {
             id: DOT_LOCATION,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
-          weightLimit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         },
       },
       {
-        DepositAsset: {
+        type: 'DepositAsset',
+        value: {
           assets: {
-            Wild: {
-              AllCounted: 2,
+            type: 'Wild',
+            value: {
+              type: 'AllCounted',
+              value: 2,
             },
           },
           beneficiary: {
             parents: 0,
-            interior: XcmV3Junctions.X1(
-              XcmV3Junction.AccountId32({
-                id: Binary.fromHex(ACCOUNT_ID_32),
-                network: undefined,
-              })
-            ),
+            interior: {
+              type: 'X1',
+              value: getExtrinsicAccount(ACCOUNT_SS_58),
+            },
           },
         },
       },
       {
-        SetTopic: TOPIC,
+        type: 'SetTopic',
+        value: TOPIC,
       },
     ],
   };

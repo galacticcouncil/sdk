@@ -1,14 +1,18 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { XcmV3Junction, XcmV3Junctions } from '@galacticcouncil/descriptors';
-
 export const toDest = (destination: Parachain, account: any) => {
   return {
     parents: 1,
-    interior: XcmV3Junctions.X2([
-      XcmV3Junction.Parachain(destination.parachainId),
-      account,
-    ]),
+    interior: {
+      type: 'X2',
+      value: [
+        {
+          type: 'Parachain',
+          value: destination.parachainId,
+        },
+        account,
+      ],
+    },
   };
 };
 

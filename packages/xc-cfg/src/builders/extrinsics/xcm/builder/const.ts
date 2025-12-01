@@ -3,7 +3,7 @@ export const TOPIC =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 // Location
-export const DOT_LOCATION = { parents: 1, interior: 'Here' };
+export const DOT_LOCATION = { parents: 1, interior: { type: 'Here' } };
 
 // Polkadot
 export const RELAY_ID = 0;

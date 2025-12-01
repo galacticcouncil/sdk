@@ -1,27 +1,35 @@
-import { Binary } from 'polkadot-api';
-import {
-  XcmV3Junctions,
-  XcmV3Junction,
-  XcmV3JunctionNetworkId,
-} from '@galacticcouncil/descriptors';
-
 export const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+const ethereumNetwork = (ethChainId: number) => ({
+  type: 'GlobalConsensus',
+  value: {
+    type: 'Ethereum',
+    value: {
+      chain_id: ethChainId,
+    },
+  },
+});
 
 export function bridgeLocation(ethChainId: number) {
   return {
     parents: 2,
-    interior: XcmV3Junctions.X1(
-      XcmV3Junction.GlobalConsensus(
-        XcmV3JunctionNetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
-      )
-    ),
+    interior: {
+      type: 'X1',
+      value: ethereumNetwork(ethChainId),
+    },
   };
 }
 
 export function parachainLocation(paraId: number) {
   return {
     parents: 1,
-    interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(paraId)),
+    interior: {
+      type: 'X1',
+      value: {
+        type: 'Parachain',
+        value: paraId,
+      },
+    },
   };
 }
 
@@ -32,15 +40,18 @@ export function erc20Location(ethChainId: number, tokenAddress: string) {
 
   return {
     parents: 2,
-    interior: XcmV3Junctions.X2([
-      XcmV3Junction.GlobalConsensus(
-        XcmV3JunctionNetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
-      ),
-      XcmV3Junction.AccountKey20({
-        key: Binary.fromHex(tokenAddress),
-        network: undefined,
-      }),
-    ]),
+    interior: {
+      type: 'X2',
+      value: [
+        ethereumNetwork(ethChainId),
+        {
+          type: 'AccountKey20',
+          value: {
+            key: tokenAddress,
+          },
+        },
+      ],
+    },
   };
 }
 
@@ -48,17 +59,22 @@ export function erc20LocationReanchored(tokenAddress: string) {
   if (tokenAddress === ETHER_TOKEN_ADDRESS) {
     return {
       parents: 0,
-      interior: XcmV3Junctions.Here(),
+      interior: {
+        type: 'Here',
+      },
     };
   }
 
   return {
     parents: 0,
-    interior: XcmV3Junctions.X1(
-      XcmV3Junction.AccountKey20({
-        key: Binary.fromHex(tokenAddress),
-        network: undefined,
-      })
-    ),
+    interior: {
+      type: 'X1',
+      value: {
+        type: 'AccountKey20',
+        value: {
+          key: tokenAddress,
+        },
+      },
+    },
   };
 }

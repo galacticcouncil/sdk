@@ -39,7 +39,9 @@ const transfer = (): ExtrinsicConfigBuilder => ({
           currency_id: assetId,
           amount,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -72,7 +74,9 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
             [version]: transferAsset,
           },
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -112,7 +116,9 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
-            dest_weight_limit: 'Unlimited',
+            dest_weight_limit: {
+            type: 'Unlimited',
+          },
           };
         }
 
@@ -124,7 +130,9 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
-            dest_weight_limit: 'Unlimited',
+            dest_weight_limit: {
+            type: 'Unlimited',
+          },
           };
         }
 
@@ -134,7 +142,9 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
           },
           fee_item: 1,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -171,7 +181,9 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           ],
           fee_item: 1,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),

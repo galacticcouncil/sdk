@@ -45,7 +45,9 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
             [version]: [transferAsset],
           },
           fee_asset_item: 0,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -76,7 +78,9 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
             [version]: [transferAsset],
           },
           fee_asset_item: 0,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -171,7 +175,9 @@ const transferAssetsUsingTypeAndThen = (
           remote_fees_id: remoteFeeId,
           fees_transfer_type: feesTransferType,
           custom_xcm_on_dest: customXcmOnDest,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),

@@ -1,7 +1,6 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { XcmV3Junction, XcmV3Junctions } from '@galacticcouncil/descriptors';
-
+import { getX1Junction } from './utils';
 import { XcmVersion } from './types';
 
 export const toDest = (
@@ -13,7 +12,10 @@ export const toDest = (
     return {
       [version]: {
         parents: 1,
-        interior: XcmV3Junctions.X1(account),
+        interior: {
+          type: 'X1',
+          value: { type: 'AccountId32', value: account },
+        },
       },
     };
   }
@@ -21,10 +23,16 @@ export const toDest = (
   return {
     [version]: {
       parents: 1,
-      interior: XcmV3Junctions.X2([
-        XcmV3Junction.Parachain(destination.parachainId),
-        account,
-      ]),
+      interior: {
+        type: 'X2',
+        value: [
+          {
+            type: 'Parachain',
+            value: destination.parachainId,
+          },
+          account,
+        ],
+      },
     },
   };
 };
@@ -33,7 +41,8 @@ export const toAsset = (assetLocation: object, amount: any) => {
   return {
     id: assetLocation,
     fun: {
-      Fungible: amount,
+      type: 'Fungible',
+      value: amount,
     },
   };
 };
