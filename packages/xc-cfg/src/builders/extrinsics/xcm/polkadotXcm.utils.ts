@@ -5,20 +5,21 @@ import {
   TxWeight,
 } from '@galacticcouncil/xc-core';
 
+import { Binary } from 'polkadot-api';
+import {
+  XcmV3Junction,
+  XcmV3Junctions,
+  XcmV3JunctionNetworkId,
+} from '@galacticcouncil/descriptors';
+
 import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID, RELAY_ID } from './builder';
-import { getX1Junction, instr } from './utils';
+import { instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
 const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
 const DOT_RESERVE_LOCATION = {
   parents: 1,
-  interior: {
-    X1: [
-      {
-        Parachain: 1000,
-      },
-    ],
-  },
+  interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(1000)),
 };
 
 const isDot = (assetLocation: any) => {
@@ -44,19 +45,18 @@ export const toDest = (
   destination: Parachain
 ) => {
   if (isBridgeHubTransfer(source, destination)) {
+    const networkId =
+      destination.ecosystem === ChainEcosystem.Polkadot
+        ? XcmV3JunctionNetworkId.Polkadot()
+        : XcmV3JunctionNetworkId.Kusama();
+
     return {
       [version]: {
         parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: destination.ecosystem,
-            },
-            {
-              Parachain: destination.parachainId,
-            },
-          ],
-        },
+        interior: XcmV3Junctions.X2([
+          XcmV3Junction.GlobalConsensus(networkId),
+          XcmV3Junction.Parachain(destination.parachainId),
+        ]),
       },
     };
   }
@@ -65,7 +65,7 @@ export const toDest = (
     return {
       [version]: {
         parents: 1,
-        interior: 'Here',
+        interior: XcmV3Junctions.Here(),
       },
     };
   }
@@ -77,11 +77,7 @@ export const toDest = (
   return {
     [version]: {
       parents: 1,
-      interior: {
-        X1: getX1Junction(version, {
-          Parachain: parachain,
-        }),
-      },
+      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(parachain)),
     },
   };
 };
@@ -90,9 +86,7 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
   return {
     [version]: {
       parents: 0,
-      interior: {
-        X1: getX1Junction(version, account),
-      },
+      interior: XcmV3Junctions.X1(account),
     },
   };
 };
@@ -133,9 +127,7 @@ export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
           },
           beneficiary: {
             parents: 0,
-            interior: {
-              X1: getX1Junction(version, account),
-            },
+            interior: XcmV3Junctions.X1(account),
           },
         },
       },
@@ -162,7 +154,7 @@ const toDepositReserveAssetXcmOnDest = (
   // From the destination parachain's perspective, the relay chain asset is at parents 1
   const transferAssetLocation = {
     parents: 1,
-    interior: 'Here',
+    interior: XcmV3Junctions.Here(),
   };
 
   return {
@@ -176,11 +168,9 @@ const toDepositReserveAssetXcmOnDest = (
           },
           dest: {
             parents: 1,
-            interior: {
-              X1: getX1Junction(version, {
-                Parachain: destination.parachainId,
-              }),
-            },
+            interior: XcmV3Junctions.X1(
+              XcmV3Junction.Parachain(destination.parachainId)
+            ),
           },
           xcm: [
             {
@@ -198,9 +188,7 @@ const toDepositReserveAssetXcmOnDest = (
                 },
                 beneficiary: {
                   parents: 0,
-                  interior: {
-                    X1: getX1Junction(version, account),
-                  },
+                  interior: XcmV3Junctions.X1(account),
                 },
               },
             },
@@ -227,7 +215,7 @@ const toInitiateTeleportXcmOnDest = (
   // After teleporting to relay chain, the asset is local
   const transferAssetLocation = {
     parents: 0,
-    interior: 'Here',
+    interior: XcmV3Junctions.Here(),
   };
 
   return {
@@ -241,7 +229,7 @@ const toInitiateTeleportXcmOnDest = (
           },
           dest: {
             parents: 1,
-            interior: 'Here',
+            interior: XcmV3Junctions.Here(),
           },
           xcm: [
             {
@@ -259,9 +247,7 @@ const toInitiateTeleportXcmOnDest = (
                 },
                 beneficiary: {
                   parents: 0,
-                  interior: {
-                    X1: getX1Junction(version, account),
-                  },
+                  interior: XcmV3Junctions.X1(account),
                 },
               },
             },
@@ -300,9 +286,7 @@ export const toBridgeXcmOnDest = (
               assets: { Wild: 'All' },
               beneficiary: {
                 parents: 0,
-                interior: {
-                  X1: getX1Junction(version, sender),
-                },
+                interior: XcmV3Junctions.X1(sender),
               },
             },
           },
@@ -323,7 +307,7 @@ export const toBridgeXcmOnDest = (
             {
               BuyExecution: {
                 fees: {
-                  id: reanchorLocation(version, transferAssetLocation),
+                  id: reanchorLocation(transferAssetLocation),
                   fun: { Fungible: 1 },
                 },
                 weightLimit: 'Unlimited',
@@ -338,9 +322,7 @@ export const toBridgeXcmOnDest = (
                 },
                 beneficiary: {
                   parents: 0,
-                  interior: {
-                    X1: getX1Junction(version, account),
-                  },
+                  interior: XcmV3Junctions.X1(account),
                 },
               },
             },
@@ -357,24 +339,26 @@ export const toBridgeXcmOnDest = (
  * Re-anchor location of transfer asset in case
  * of bridge transfer for "BuyExecution"
  *
- * @param version - XCM Version
  * @param assetLocation asset multilocation
  * @returns fixed location
  */
-const reanchorLocation = (version: XcmVersion, assetLocation: object) => {
+const reanchorLocation = (assetLocation: object) => {
   const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
 
   if (erc20Key) {
     return {
       parents: 0,
-      interior: {
-        X1: getX1Junction(version, { AccountKey20: erc20Key }),
-      },
+      interior: XcmV3Junctions.X1(
+        XcmV3Junction.AccountKey20({
+          key: Binary.fromHex(erc20Key),
+          network: undefined,
+        })
+      ),
     };
   }
   return {
     parents: 0,
-    interior: { Here: null },
+    interior: XcmV3Junctions.Here(),
   };
 };
 
@@ -432,9 +416,7 @@ export const toTransactMessage = (
           assets: { Wild: { AllCounted: 1 } },
           beneficiary: {
             parents: 0,
-            interior: {
-              X1: getX1Junction(version, account),
-            },
+            interior: XcmV3Junctions.X1(account),
           },
         },
       },
@@ -466,9 +448,7 @@ export const toTransferMessage = (
           assets: [toAsset(transferAssetLocation, transferAssetAmount)],
           beneficiary: {
             parents: 0,
-            interior: {
-              X1: getX1Junction(version, receiver),
-            },
+            interior: XcmV3Junctions.X1(receiver),
           },
         },
       },
@@ -480,9 +460,7 @@ export const toTransferMessage = (
           assets: { Wild: { AllCounted: 1 } },
           beneficiary: {
             parents: 0,
-            interior: {
-              X1: getX1Junction(version, account),
-            },
+            interior: XcmV3Junctions.X1(account),
           },
         },
       },

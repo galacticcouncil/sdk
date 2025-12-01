@@ -19,12 +19,15 @@ export function toHubAsset(external: ExternalAsset): ChainAssetData {
     xcmLocation: {
       parents: 0,
       interior: {
-        X2: [
+        type: 'X2',
+        value: [
           {
-            PalletInstance: 50,
+            type: 'PalletInstance',
+            value: 50,
           },
           {
-            GeneralIndex: id,
+            type: 'GeneralIndex',
+            value: id,
           },
         ],
       },
@@ -41,15 +44,19 @@ export function toHydrationAsset(external: ExternalAsset): ChainAssetData {
     xcmLocation: {
       parents: 1,
       interior: {
-        X3: [
+        type: 'X3',
+        value: [
           {
-            Parachain: origin,
+            type: 'Parachain',
+            value: origin,
           },
           {
-            PalletInstance: 50,
+            type: 'PalletInstance',
+            value: 50,
           },
           {
-            GeneralIndex: id,
+            type: 'GeneralIndex',
+            value: id,
           },
         ],
       },

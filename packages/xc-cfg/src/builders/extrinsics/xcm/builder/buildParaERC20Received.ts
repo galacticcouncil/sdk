@@ -1,5 +1,8 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
+import { Binary } from 'polkadot-api';
+import { XcmV3Junction, XcmV3Junctions } from '@galacticcouncil/descriptors';
+
 import { ACCOUNT_ID_32, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
 
 import { getExtrinsicAssetLocation, locationOrError } from '../utils';
@@ -51,16 +54,12 @@ export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
           },
           beneficiary: {
             parents: 0,
-            interior: {
-              X1: [
-                {
-                  AccountId32: {
-                    id: ACCOUNT_ID_32,
-                    network: null,
-                  },
-                },
-              ],
-            },
+            interior: XcmV3Junctions.X1(
+              XcmV3Junction.AccountId32({
+                id: Binary.fromHex(ACCOUNT_ID_32),
+                network: undefined,
+              })
+            ),
           },
         },
       },

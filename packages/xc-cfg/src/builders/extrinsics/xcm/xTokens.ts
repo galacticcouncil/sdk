@@ -25,8 +25,8 @@ const transfer = (): ExtrinsicConfigBuilder => ({
       getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        // Use destination chain's XCM version since that's where the message will be processed
-        const version = rcv.xcmVersion;
+        const version =
+          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -53,7 +53,8 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
       getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version =
+          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -86,7 +87,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version =
+          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -158,7 +160,8 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
-        const version = rcv.xcmVersion;
+        const version =
+          ctx.xcmVersion <= rcv.xcmVersion ? ctx.xcmVersion : rcv.xcmVersion;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
         return {

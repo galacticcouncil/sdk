@@ -1,20 +1,27 @@
-export const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
+import { Binary } from 'polkadot-api';
+import {
+  XcmV3Junctions,
+  XcmV3Junction,
+  XcmV3JunctionNetworkId,
+} from '@galacticcouncil/descriptors';
 
-const ethereumNetwork = (ethChainId: number) => ({
-  GlobalConsensus: { Ethereum: { chain_id: ethChainId } },
-});
+export const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export function bridgeLocation(ethChainId: number) {
   return {
     parents: 2,
-    interior: { X1: [ethereumNetwork(ethChainId)] },
+    interior: XcmV3Junctions.X1(
+      XcmV3Junction.GlobalConsensus(
+        XcmV3JunctionNetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
+      )
+    ),
   };
 }
 
 export function parachainLocation(paraId: number) {
   return {
     parents: 1,
-    interior: { X1: [{ Parachain: paraId }] },
+    interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(paraId)),
   };
 }
 
@@ -22,14 +29,18 @@ export function erc20Location(ethChainId: number, tokenAddress: string) {
   if (tokenAddress === ETHER_TOKEN_ADDRESS) {
     return bridgeLocation(ethChainId);
   }
+
   return {
     parents: 2,
-    interior: {
-      X2: [
-        ethereumNetwork(ethChainId),
-        { AccountKey20: { key: tokenAddress } },
-      ],
-    },
+    interior: XcmV3Junctions.X2([
+      XcmV3Junction.GlobalConsensus(
+        XcmV3JunctionNetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
+      ),
+      XcmV3Junction.AccountKey20({
+        key: Binary.fromHex(tokenAddress),
+        network: undefined,
+      }),
+    ]),
   };
 }
 
@@ -37,11 +48,17 @@ export function erc20LocationReanchored(tokenAddress: string) {
   if (tokenAddress === ETHER_TOKEN_ADDRESS) {
     return {
       parents: 0,
-      interior: { here: null },
+      interior: XcmV3Junctions.Here(),
     };
   }
+
   return {
     parents: 0,
-    interior: { X1: [{ AccountKey20: { key: tokenAddress } }] },
+    interior: XcmV3Junctions.X1(
+      XcmV3Junction.AccountKey20({
+        key: Binary.fromHex(tokenAddress),
+        network: undefined,
+      })
+    ),
   };
 }

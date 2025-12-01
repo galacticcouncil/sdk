@@ -1,6 +1,7 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { getX1Junction } from './utils';
+import { XcmV3Junction, XcmV3Junctions } from '@galacticcouncil/descriptors';
+
 import { XcmVersion } from './types';
 
 export const toDest = (
@@ -12,9 +13,7 @@ export const toDest = (
     return {
       [version]: {
         parents: 1,
-        interior: {
-          X1: getX1Junction(version, account),
-        },
+        interior: XcmV3Junctions.X1(account),
       },
     };
   }
@@ -22,14 +21,10 @@ export const toDest = (
   return {
     [version]: {
       parents: 1,
-      interior: {
-        X2: [
-          {
-            Parachain: destination.parachainId,
-          },
-          account,
-        ],
-      },
+      interior: XcmV3Junctions.X2([
+        XcmV3Junction.Parachain(destination.parachainId),
+        account,
+      ]),
     },
   };
 };
