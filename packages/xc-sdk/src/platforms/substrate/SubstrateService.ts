@@ -16,8 +16,6 @@ import { PolkadotClient, Transaction } from 'polkadot-api';
 import {
   getDeliveryFeeFromDryRun,
   getErrorFromDryRun,
-  toPascalCase,
-  toSnakeCase,
 } from './utils';
 
 const { Ss58Addr } = addr;
@@ -101,20 +99,17 @@ export class SubstrateService {
   }
 
   getExtrinsic(config: ExtrinsicConfig): Transaction<any, any, any, any> {
-    const moduleName = toPascalCase(config.module);
-    const funcName = toSnakeCase(config.func);
-
-    const txModule = (this.api.tx as any)[moduleName];
+    const txModule = (this.api.tx as any)[config.module];
     if (!txModule) {
       throw new Error(
-        `Pallet "${config.module}" (${moduleName}) not found in runtime`
+        `Pallet "${config.module}" not found in runtime`
       );
     }
 
-    const txFunc = txModule[funcName];
+    const txFunc = txModule[config.func];
     if (!txFunc || typeof txFunc !== 'function') {
       throw new Error(
-        `Extrinsic "${config.func}" (${funcName}) not found in pallet "${moduleName}"`
+        `Extrinsic "${config.func}" not found in pallet "${config.module}"`
       );
     }
 
@@ -132,7 +127,7 @@ export class SubstrateService {
    * Check if extrinsic is a batch call
    */
   private isBatchCall(func: string): boolean {
-    return ['batch', 'batchAll', 'forceBatch'].includes(func);
+    return ['batch', 'batch_all', 'force_batch'].includes(func);
   }
 
   /**
@@ -267,7 +262,7 @@ export class SubstrateService {
     account: string,
     config: ExtrinsicConfig
   ): Promise<string> {
-    if (['xcmPallet', 'polkadotXcm'].includes(config.module)) {
+    if (['XcmPallet', 'PolkadotXcm'].includes(config.module)) {
       const args = config.getArgs();
       if (!args || typeof args !== 'object') return account;
 

@@ -18,13 +18,13 @@ import {
 } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
-const pallet = 'xcmPallet';
+const pallet = 'XcmPallet';
 
 const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'limitedReserveTransferAssets',
+      func: 'limited_reserve_transfer_assets',
       getArgs: () => {
         const account = getExtrinsicAccount(address);
 
@@ -57,7 +57,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'limitedTeleportAssets',
+      func: 'limited_teleport_assets',
       getArgs: () => {
         const account = getExtrinsicAccount(address);
 
@@ -96,7 +96,7 @@ const transferAssetsUsingTypeAndThen = (
   build: ({ address, asset, amount, destination, messageId, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferAssetsUsingTypeAndThen',
+      func: 'transfer_assets_using_type_and_then',
       getArgs: async () => {
         const version = XcmVersion.v4;
 

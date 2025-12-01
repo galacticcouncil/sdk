@@ -4,7 +4,7 @@ import {
   ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xc-core';
 
-const pallet = 'router';
+const pallet = 'Router';
 
 type SwapOpts = {
   slippage: number;

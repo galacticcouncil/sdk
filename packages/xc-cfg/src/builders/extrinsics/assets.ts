@@ -4,7 +4,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-const pallet = 'assets';
+const pallet = 'Assets';
 
 const transfer = (): ExtrinsicConfigBuilder => {
   const func = 'transfer';

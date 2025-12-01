@@ -15,7 +15,7 @@ import {
   shouldFeeAssetPrecede,
 } from './utils';
 
-const pallet = 'xTokens';
+const pallet = 'XTokens';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source }) =>
@@ -51,7 +51,7 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMultiasset',
+      func: 'transfer_multiasset',
       getArgs: () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -86,7 +86,7 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMultiassets',
+      func: 'transfer_multiassets',
       getArgs: () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
@@ -154,7 +154,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source, transact }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMulticurrencies',
+      func: 'transfer_multicurrencies',
       getArgs: () => {
         const ctx = source.chain as Parachain;
 

@@ -1,6 +1,5 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { getX1Junction } from './utils';
 import { XcmVersion } from './types';
 
 export const toDest = (

@@ -20,7 +20,6 @@ import { SubstrateService } from './SubstrateService';
 import {
   getErrorFromDryRun,
   normalizeAssetAmount,
-  toPascalCase,
 } from './utils';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 
@@ -127,23 +126,20 @@ export class SubstratePlatform implements Platform<
     const substrate = await this.#substrate;
     const { module, func, args, transform } = config;
 
-    const moduleName = toPascalCase(module);
-    const funcName = toPascalCase(func);
-
     // Use unsafe API for dynamic queries
     const unsafeApi = substrate.client.getUnsafeApi();
 
-    const queryModule = (unsafeApi.query as any)[moduleName];
+    const queryModule = (unsafeApi.query as any)[module];
     if (!queryModule) {
       throw new Error(
-        `Query module "${module}" (${moduleName}) not found in runtime`
+        `Query module "${module}" not found in runtime`
       );
     }
 
-    const queryFunc = queryModule[funcName];
+    const queryFunc = queryModule[func];
     if (!queryFunc) {
       throw new Error(
-        `Query function "${func}" (${funcName}) not found in module "${moduleName}"`
+        `Query function "${func}" not found in module "${module}"`
       );
     }
 

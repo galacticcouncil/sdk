@@ -9,7 +9,7 @@ import { encodeFunctionData } from 'viem';
 
 import { XcmVersion } from './types';
 
-const pallet = 'ethereumXcm';
+const pallet = 'EthereumXcm';
 
 const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
   const func = 'transact';

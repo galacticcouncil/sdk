@@ -1,11 +1,11 @@
 import { XcmVersion } from '../types';
 
 /**
- * Get extrinsic X1 interior
+ * Normalizes an asset location to the specified XCM version format
  *
  * @param assetLocation - asset xcm location
- * @param version - xcm version
- * @returns normalized x1 interior if version prior to V4
+ * @param version - target xcm version
+ * @returns normalized location
  */
 export function getExtrinsicAssetLocation(
   assetLocation: Record<string, any>,
@@ -16,11 +16,6 @@ export function getExtrinsicAssetLocation(
   return versionNo >= 4
     ? normalizedAssetLocation
     : applyConcreteWrapper(normalizedAssetLocation);
-}
-
-export function getX1Junction(version: XcmVersion, junction: any) {
-  const versionNo = getVersionNo(version);
-  return versionNo >= 4 ? [junction] : junction;
 }
 
 function getVersionNo(version: XcmVersion) {
@@ -102,7 +97,7 @@ function normalizeJunction(junction: any): any {
   if (junction && typeof junction === 'object' && junction.type) {
     return {
       type: junction.type,
-      value: normalizeNestedValue(junction.type, junction.value),
+      value: normalizeNestedValue(junction.value),
     };
   }
 
@@ -111,31 +106,28 @@ function normalizeJunction(junction: any): any {
     const [type, value] = Object.entries(junction)[0];
     return {
       type,
-      value: normalizeNestedValue(type, value),
+      value: normalizeNestedValue(value),
     };
   }
 
   return junction;
 }
 
-function normalizeNestedValue(junctionType: string, value: any): any {
-  // For junctions that contain network IDs (like GlobalConsensus with Ethereum)
+function normalizeNestedValue(value: any): any {
   if (
-    junctionType === 'GlobalConsensus' &&
     value &&
-    typeof value === 'object'
+    typeof value === 'object' &&
+    !value.type &&
+    !Array.isArray(value)
   ) {
-    // Check if value is already in new format
-    if (value.type) {
-      return value;
+    const entries = Object.entries(value);
+    if (entries.length === 1) {
+      const [variantType, variantValue] = entries[0];
+      return {
+        type: variantType,
+        value: variantValue,
+      };
     }
-
-    // Convert old format { Ethereum: {...} } to new format { type: 'Ethereum', value: {...} }
-    const [networkType, networkValue] = Object.entries(value)[0];
-    return {
-      type: networkType,
-      value: networkValue,
-    };
   }
 
   return value;

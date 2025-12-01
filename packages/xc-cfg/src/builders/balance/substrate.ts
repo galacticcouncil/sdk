@@ -20,8 +20,8 @@ function assets() {
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
         return new SubstrateQueryConfig({
-          module: 'assets',
-          func: 'account',
+          module: 'Assets',
+          func: 'Account',
           args: [assetId, address],
           transform: async (response) => {
             return BigInt(response?.balance?.toString() ?? '0');
@@ -44,8 +44,8 @@ function foreignAssets() {
         }
 
         return new SubstrateQueryConfig({
-          module: 'foreignAssets',
-          func: 'account',
+          module: 'ForeignAssets',
+          func: 'Account',
           args: [assetLocation, address],
           transform: async (response) => {
             return BigInt(response?.balance?.toString() ?? '0');
@@ -61,8 +61,8 @@ function system() {
     account: (): BalanceConfigBuilder => ({
       build: ({ address }) =>
         new SubstrateQueryConfig({
-          module: 'system',
-          func: 'account',
+          module: 'System',
+          func: 'Account',
           args: [address],
           transform: async (response) => {
             const data = response?.data;
@@ -83,8 +83,8 @@ function tokens() {
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
         return new SubstrateQueryConfig({
-          module: 'tokens',
-          func: 'accounts',
+          module: 'Tokens',
+          func: 'Accounts',
           args: [address, assetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
@@ -103,8 +103,8 @@ function ormlTokens() {
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
         return new SubstrateQueryConfig({
-          module: 'ormlTokens',
-          func: 'accounts',
+          module: 'OrmlTokens',
+          func: 'Accounts',
           args: [address, assetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
