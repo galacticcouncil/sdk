@@ -70,7 +70,8 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
         const transferAsset = toAsset(transferAssetLocation, amount);
         return {
           asset: {
-            [version]: transferAsset,
+            type: version,
+            value: transferAsset,
           },
           dest: toDest(version, rcv, account),
           dest_weight_limit: {
@@ -110,7 +111,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         if (asset.key === destination.fee.key) {
           return {
             assets: {
-              [version]: [transferAsset],
+              type: version,
+              value: [transferAsset],
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
@@ -124,7 +126,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
           return {
             assets: {
-              [version]: [transferFee, transferAsset],
+              type: version,
+              value: [transferFee, transferAsset],
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
@@ -136,7 +139,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
 
         return {
           assets: {
-            [version]: [transferAsset, transferFee],
+            type: version,
+            value: [transferAsset, transferFee],
           },
           fee_item: 1,
           dest: toDest(version, rcv, account),

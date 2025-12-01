@@ -45,7 +45,8 @@ export const toDest = (
 ) => {
   if (isBridgeHubTransfer(source, destination)) {
     return {
-      [version]: {
+      type: version,
+      value: {
         parents: 2,
         interior: {
           type: 'X2',
@@ -66,7 +67,8 @@ export const toDest = (
 
   if (destination.parachainId === RELAY_ID) {
     return {
-      [version]: {
+      type: version,
+      value: {
         parents: 1,
         interior: { type: 'Here' },
       },
@@ -78,7 +80,8 @@ export const toDest = (
     destination.key === 'ethereum' ? ASSET_HUB_ID : destination.parachainId;
 
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 1,
       interior: {
         type: 'X1',
@@ -93,7 +96,8 @@ export const toDest = (
 
 export const toBeneficiary = (version: XcmVersion, account: any) => {
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 0,
       interior: {
         type: 'X1',
@@ -112,7 +116,8 @@ export const toTransferType = (
     return {
       type: 'RemoteReserve',
       value: {
-        [version]: isDot(assetLocation) ? DOT_RESERVE_LOCATION : assetLocation,
+        type: version,
+        value: isDot(assetLocation) ? DOT_RESERVE_LOCATION : assetLocation,
       },
     };
   }
@@ -133,7 +138,8 @@ export const toAsset = (assetLocation: object, amount: any) => {
 
 export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'DepositAsset',
         value: {
@@ -180,7 +186,8 @@ const toDepositReserveAssetXcmOnDest = (
   };
 
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'DepositReserveAsset',
         value: {
@@ -257,7 +264,8 @@ const toInitiateTeleportXcmOnDest = (
   };
 
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'InitiateTeleport',
         value: {
@@ -325,10 +333,11 @@ export const toBridgeXcmOnDest = (
   account: any,
   sender: any,
   transferAssetLocation: object,
-  messageId: string | undefined
+  messageId: any
 ) => {
   return {
-    [version]: [
+    type: version,
+    value: [
     {
       type: 'SetAppendix',
       value: [
@@ -476,7 +485,8 @@ export const toTransactMessage = (
   transactWeight: TxWeight
 ) => {
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'WithdrawAsset',
         value: [toAsset(transactFeeLocation, transactFeeAmount)],
@@ -537,7 +547,8 @@ export const toTransferMessage = (
   receiver: any
 ) => {
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'WithdrawAsset',
         value: [toAsset(transferAssetLocation, transferFeeAmount)],

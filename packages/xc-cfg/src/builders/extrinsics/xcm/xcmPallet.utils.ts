@@ -4,7 +4,8 @@ import { XcmVersion } from './types';
 
 export const toDest = (version: XcmVersion, destination: Parachain) => {
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 0,
       interior: {
         type: 'X1',
@@ -25,7 +26,8 @@ export const toAsset = (assetLocation: object, amount: any) => {
 
 export const toBeneficiary = (version: XcmVersion, account: any) => {
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 0,
       interior: {
         type: 'X1',

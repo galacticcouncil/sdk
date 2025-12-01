@@ -58,7 +58,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
             assets: {
-              [version]: [transferAsset],
+              type: version,
+              value: [transferAsset],
             },
             fee_asset_item: 0,
             weight_limit: {
@@ -73,7 +74,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
             assets: {
-              [version]: [transferFee, transferAsset],
+              type: version,
+              value: [transferFee, transferAsset],
             },
             fee_asset_item: 0,
             weight_limit: {
@@ -86,7 +88,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
           dest: toDest(version, ctx, rcv),
           beneficiary: toBeneficiary(version, account),
           assets: {
-            [version]: [transferAsset, transferFee],
+            type: version,
+            value: [transferAsset, transferFee],
           },
           fee_asset_item: 1,
           weight_limit: {
@@ -117,7 +120,8 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
@@ -152,7 +156,8 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
@@ -184,7 +189,8 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
@@ -244,7 +250,8 @@ const transferAssetsUsingTypeAndThen = (
         const dest = toDest(version, ctx, rcv);
 
         const assets = {
-          [version]: asset.isEqual(destination.fee)
+          type: version,
+          value: asset.isEqual(destination.fee)
             ? [transferAsset]
             : [transferFee, transferAsset],
         };
@@ -256,7 +263,8 @@ const transferAssetsUsingTypeAndThen = (
         );
 
         const remoteFeeId = {
-          [version]: isSufficientPaymentAsset
+          type: version,
+          value: isSufficientPaymentAsset
             ? transferAssetLocation
             : transferFeeLocation,
         };

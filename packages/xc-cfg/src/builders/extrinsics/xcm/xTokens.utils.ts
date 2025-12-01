@@ -9,7 +9,8 @@ export const toDest = (
 ) => {
   if (destination.parachainId === 0) {
     return {
-      [version]: {
+      type: version,
+      value: {
         parents: 1,
         interior: {
           type: 'X1',
@@ -20,7 +21,8 @@ export const toDest = (
   }
 
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 1,
       interior: {
         type: 'X2',

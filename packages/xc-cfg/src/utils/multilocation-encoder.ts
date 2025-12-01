@@ -1,12 +1,7 @@
 import { Binary } from 'polkadot-api';
-import {
-  XcmV3Junctions,
-  XcmV3Junction,
-  XcmV3JunctionNetworkId,
-} from '@galacticcouncil/descriptors';
 
 /**
- * LocationEncoder converts untyped xcmLocation configs to PAPI descriptor constructors
+ * LocationEncoder converts multilocation objects with hex strings to use Binary types
  *
  * Example:
  * ```typescript
@@ -14,179 +9,130 @@ import {
  *   parents: 1,
  *   interior: {
  *     type: 'X1',
- *     value: { type: 'Parachain', value: 1000 }
+ *     value: {
+ *       type: 'AccountId32',
+ *       value: {
+ *         id: '0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
+ *       }
+ *     }
  *   }
  * };
  *
  * const encoded = LocationEncoder.encode(locationConfig);
- * // Returns:
- * // {
- * //   parents: 1,
- * //   interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(1000))
- * // }
+ * // Returns same structure but with Binary objects for hex strings
  * ```
  */
 export class LocationEncoder {
   /**
-   * Encode location from {type, value} config to PAPI descriptors
+   * Encode location by converting hex strings to Binary objects
    *
    * @param location - Plain object from chain.getAssetXcmLocation(asset)
-   * @returns Location with PAPI descriptor constructors
+   * @returns Location with Binary objects for hex string fields
    */
-  static encode(location: any) {
-    const { parents, interior } = location;
+  static encode(location: any): any {
+    if (!location || typeof location !== 'object') {
+      return location;
+    }
 
-    if (!interior || interior === 'Here' || interior.type === 'Here') {
+    // If it's already a Binary object (has asBytes method), return as-is
+    if (typeof location.asBytes === 'function') {
+      return location;
+    }
+
+    // Handle arrays
+    if (Array.isArray(location)) {
+      return location.map((item) => this.encode(item));
+    }
+
+    // Handle location with parents and interior
+    if (location.parents !== undefined && location.interior !== undefined) {
       return {
-        parents,
-        interior: XcmV3Junctions.Here(),
+        parents: location.parents,
+        interior: this.encodeInterior(location.interior),
       };
     }
 
-    const junctionType = interior.type; // 'X1', 'X2', 'X3', or 'X4'
-    const junctionValue = interior.value;
+    // Handle objects with type/value structure
+    if (location.type !== undefined) {
+      return this.encodeTypeValue(location);
+    }
 
-    // Handle X1 (single junction - not array)
-    if (junctionType === 'X1') {
-      const junction = this.encodeJunction(junctionValue);
+    // Handle plain objects (recursively encode all properties)
+    const encoded: any = {};
+    for (const [key, value] of Object.entries(location)) {
+      encoded[key] = this.encode(value);
+    }
+    return encoded;
+  }
+
+  private static encodeInterior(interior: any): any {
+    // Handle "Here" as string
+    if (interior === 'Here') {
+      return { type: 'Here' };
+    }
+
+    // Handle "Here" as object
+    if (interior?.type === 'Here') {
+      return { type: 'Here' };
+    }
+
+    // Handle X1-X8 junctions
+    if (interior?.type && /^X[1-8]$/.test(interior.type)) {
       return {
-        parents,
-        interior: XcmV3Junctions.X1(junction),
+        type: interior.type,
+        value: this.encode(interior.value),
       };
     }
 
-    // Handle X2, X3, X4 (array of junctions)
-    const junctions = junctionValue.map((j: any) => this.encodeJunction(j));
-
-    return {
-      parents,
-      interior: this.encodeInterior(junctionType, junctions),
-    };
+    // Fallback to recursive encoding
+    return this.encode(interior);
   }
 
-  private static encodeInterior(type: string, junctions: any[]) {
-    switch (type) {
-      case 'X2':
-        return XcmV3Junctions.X2(junctions as [any, any]);
-      case 'X3':
-        return XcmV3Junctions.X3(junctions as [any, any, any]);
-      case 'X4':
-        return XcmV3Junctions.X4(junctions as [any, any, any, any]);
-      case 'X5':
-        return XcmV3Junctions.X5(junctions as [any, any, any, any, any]);
-      case 'X6':
-        return XcmV3Junctions.X6(
-          junctions as [any, any, any, any, any, any]
-        );
-      case 'X7':
-        return XcmV3Junctions.X7(
-          junctions as [any, any, any, any, any, any, any]
-        );
-      case 'X8':
-        return XcmV3Junctions.X8(
-          junctions as [any, any, any, any, any, any, any, any]
-        );
-      default:
-        throw new Error(`Unknown junction type: ${type}`);
+  private static encodeTypeValue(obj: any): any {
+    const { type, value } = obj;
+
+    // Special handling for types that contain hex strings that need to be Binary
+    if (type === 'AccountId32' && value?.id) {
+      return {
+        type,
+        value: {
+          id: typeof value.id === 'string' ? Binary.fromHex(value.id) : value.id,
+          network: value.network,
+        },
+      };
     }
-  }
 
-  private static encodeJunction(junction: any) {
-    const { type, value } = junction;
+    if (type === 'AccountKey20' && value?.key) {
+      return {
+        type,
+        value: {
+          key: typeof value.key === 'string' ? Binary.fromHex(value.key) : value.key,
+          network: value.network,
+        },
+      };
+    }
 
-    switch (type) {
-      case 'Parachain':
-        return XcmV3Junction.Parachain(value);
-
-      case 'AccountId32':
-        return XcmV3Junction.AccountId32({
-          id:
-            typeof value.id === 'string' ? Binary.fromHex(value.id) : value.id,
-          network: value.network
-            ? this.encodeNetworkId(value.network)
-            : undefined,
-        });
-
-      case 'AccountKey20':
-        return XcmV3Junction.AccountKey20({
-          key:
-            typeof value.key === 'string'
-              ? Binary.fromHex(value.key)
-              : value.key,
-          network: value.network
-            ? this.encodeNetworkId(value.network)
-            : undefined,
-        });
-
-      case 'GlobalConsensus':
-        return XcmV3Junction.GlobalConsensus(this.encodeNetworkId(value));
-
-      case 'GeneralKey':
-        return XcmV3Junction.GeneralKey({
+    if (type === 'GeneralKey' && value?.data) {
+      return {
+        type,
+        value: {
           length: value.length,
-          data:
-            typeof value.data === 'string'
-              ? Binary.fromHex(value.data)
-              : value.data,
-        });
-
-      case 'GeneralIndex':
-        return XcmV3Junction.GeneralIndex(BigInt(value));
-
-      case 'PalletInstance':
-        return XcmV3Junction.PalletInstance(value);
-
-      default:
-        throw new Error(`Unknown junction type: ${type}`);
-    }
-  }
-
-  private static encodeNetworkId(network: any) {
-    // Handle simple network names (string format)
-    if (typeof network === 'string') {
-      switch (network) {
-        case 'Polkadot':
-          return XcmV3JunctionNetworkId.Polkadot();
-        case 'Kusama':
-          return XcmV3JunctionNetworkId.Kusama();
-        case 'Westend':
-          return XcmV3JunctionNetworkId.Westend();
-        case 'Rococo':
-          return XcmV3JunctionNetworkId.Rococo();
-        default:
-          throw new Error(`Unknown network: ${network}`);
-      }
+          data: typeof value.data === 'string' ? Binary.fromHex(value.data) : value.data,
+        },
+      };
     }
 
-    // Handle {type, value} format
-    if (network.type) {
-      switch (network.type) {
-        case 'Polkadot':
-          return XcmV3JunctionNetworkId.Polkadot();
-        case 'Kusama':
-          return XcmV3JunctionNetworkId.Kusama();
-        case 'Westend':
-          return XcmV3JunctionNetworkId.Westend();
-        case 'Rococo':
-          return XcmV3JunctionNetworkId.Rococo();
-
-        case 'Ethereum':
-          return XcmV3JunctionNetworkId.Ethereum({
-            chain_id: BigInt(network.value.chain_id),
-          });
-
-        case 'ByGenesis':
-          return XcmV3JunctionNetworkId.ByGenesis(
-            typeof network.value === 'string'
-              ? Binary.fromHex(network.value)
-              : network.value
-          );
-
-        default:
-          throw new Error(`Unknown network type: ${network.type}`);
-      }
+    if (type === 'ByGenesis' && typeof value === 'string') {
+      return {
+        type,
+        value: Binary.fromHex(value),
+      };
     }
 
-    throw new Error(`Cannot encode network: ${JSON.stringify(network)}`);
+    // For all other types, recursively encode the value
+    return {
+      type,
+      value: value !== undefined ? this.encode(value) : undefined,
+    };
   }
 }

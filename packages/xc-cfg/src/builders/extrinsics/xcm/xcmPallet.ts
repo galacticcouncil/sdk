@@ -42,7 +42,8 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
           dest: toDest(version, rcv),
           beneficiary: toBeneficiary(version, account),
           assets: {
-            [version]: [transferAsset],
+            type: version,
+            value: [transferAsset],
           },
           fee_asset_item: 0,
           weight_limit: {
@@ -75,7 +76,8 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
           dest: toDest(version, rcv),
           beneficiary: toBeneficiary(version, account),
           assets: {
-            [version]: [transferAsset],
+            type: version,
+            value: [transferAsset],
           },
           fee_asset_item: 0,
           weight_limit: {
@@ -131,7 +133,8 @@ const transferAssetsUsingTypeAndThen = (
         const dest = toDest(version, rcv);
 
         const assets = {
-          [version]: asset.isEqual(destination.fee)
+          type: version,
+          value: asset.isEqual(destination.fee)
             ? [transferAsset]
             : [transferFee, transferAsset],
         };
@@ -143,7 +146,8 @@ const transferAssetsUsingTypeAndThen = (
         );
 
         const remoteFeeId = {
-          [version]: isSufficientPaymentAsset
+          type: version,
+          value: isSufficientPaymentAsset
             ? transferAssetLocation
             : transferFeeLocation,
         };

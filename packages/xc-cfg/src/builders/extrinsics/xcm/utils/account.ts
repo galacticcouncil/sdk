@@ -1,4 +1,5 @@
 import { acc, Parachain } from '@galacticcouncil/xc-core';
+import { Binary } from 'polkadot-api';
 
 import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
@@ -10,7 +11,7 @@ export function getExtrinsicAccount(address: string) {
     return {
       type: 'AccountKey20',
       value: {
-        key: address,
+        key: Binary.fromHex(address),
         network: undefined,
       },
     };
@@ -24,7 +25,7 @@ export function getExtrinsicAccount(address: string) {
   return {
     type: 'AccountId32',
     value: {
-      id: toHex(info.publicKey),
+      id: Binary.fromHex(toHex(info.publicKey)),
       network: undefined,
     },
   };

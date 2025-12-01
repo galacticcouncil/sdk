@@ -1,8 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
 import { getTypedApi } from '../utils/papi';
-import { wrapWithEnum } from '../utils/xcm-papi';
-import { normalizeLocation } from '../builders/extrinsics/xcm/utils/location';
+import { LocationEncoder } from '../utils/multilocation-encoder';
 
 export class BaseClient {
   readonly chain: Parachain;
@@ -41,9 +40,7 @@ export class BaseClient {
 
       const versionedXcm = xcm.value?.custom_xcm_on_dest || xcm;
 
-      const wrappedXcm = wrapWithEnum(versionedXcm);
-
-      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(wrappedXcm);
+      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
       if (!weight.success) {
         throw Error(`Can't query XCM weight.`);
       }
@@ -53,11 +50,12 @@ export class BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const normalizedLocation = normalizeLocation(feeAssetLocation);
+      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
       const versionedAssetId = {
         type: 'V4',
-        value: normalizedLocation,
+        value: encodedLocation,
       };
+
       const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
         weight.value,
         versionedAssetId

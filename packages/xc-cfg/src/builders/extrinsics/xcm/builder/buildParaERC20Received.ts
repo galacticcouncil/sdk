@@ -13,7 +13,8 @@ export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
   );
 
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'ReserveAssetDeposited',
         value: [

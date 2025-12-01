@@ -4,8 +4,7 @@ import { Twox128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
-import { wrapWithEnum } from '../../utils/xcm-papi';
-import { normalizeLocation } from '../../builders/extrinsics/xcm/utils/location';
+import { LocationEncoder } from '../../utils/multilocation-encoder';
 
 export class AssethubClient extends BaseClient {
   constructor(chain: Parachain) {
@@ -95,7 +94,7 @@ export class AssethubClient extends BaseClient {
     const client = this.chain.api;
     const api = client.getUnsafeApi();
 
-    const destination = wrapWithEnum({
+    const destination = {
       type: 'V4',
       value: {
         parents: 1,
@@ -107,13 +106,11 @@ export class AssethubClient extends BaseClient {
           },
         },
       },
-    });
-
-    const encodedXcm = wrapWithEnum(xcm);
+    };
 
     const result = await api.apis.XcmPaymentApi.query_delivery_fees(
       destination,
-      encodedXcm
+      xcm
     );
 
     if (!result.success) {
@@ -139,10 +136,7 @@ export class AssethubClient extends BaseClient {
       const client = this.chain.api;
       const api = client.getUnsafeApi();
 
-      const versionedXcm = wrapWithEnum(xcm);
-
-      const weight =
-        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
+      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(xcm);
 
       if (!weight.success) {
         throw Error(`Can't query XCM weight.`);
@@ -153,11 +147,12 @@ export class AssethubClient extends BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const normalizedLocation = normalizeLocation(feeAssetLocation);
-      const versionedAssetId = wrapWithEnum({
+      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
+      const versionedAssetId = {
         type: 'V4',
-        value: normalizedLocation,
-      });
+        value: encodedLocation,
+      };
+
       const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
         weight.value,
         versionedAssetId

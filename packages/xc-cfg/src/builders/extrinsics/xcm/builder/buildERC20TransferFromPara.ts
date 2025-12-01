@@ -34,7 +34,8 @@ export async function buildERC20TransferFromPara(
   );
 
   return {
-    [version]: [
+    type: version,
+    value: [
       {
         type: 'WithdrawAsset',
         value: [
@@ -72,7 +73,7 @@ export async function buildERC20TransferFromPara(
           },
         },
       },
-      ...bridgeXcmOnDest[version],
+      ...bridgeXcmOnDest.value,
     ],
   };
 }
