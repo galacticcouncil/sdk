@@ -5,6 +5,8 @@ import {
   TxWeight,
 } from '@galacticcouncil/xc-core';
 
+import { Binary } from 'polkadot-api';
+
 import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID, RELAY_ID } from './builder';
 import { instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
@@ -338,92 +340,92 @@ export const toBridgeXcmOnDest = (
   return {
     type: version,
     value: [
-    {
-      type: 'SetAppendix',
-      value: [
-        {
-          type: 'DepositAsset',
-          value: {
-            assets: {
-              type: 'Wild',
-              value: {
-                type: 'All',
-              },
-            },
-            beneficiary: {
-              parents: 0,
-              interior: {
-                type: 'X1',
-                value: sender,
-              },
-            },
-          },
-        },
-      ],
-    },
-    {
-      type: 'InitiateReserveWithdraw',
-      value: {
-        assets: {
-          type: 'Wild',
-          value: {
-            type: 'AllOf',
-            value: {
-              id: transferAssetLocation,
-              fun: {
-                type: 'Fungible',
-              },
-            },
-          },
-        },
-        reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
-        xcm: [
-          {
-            type: 'BuyExecution',
-            value: {
-              fees: {
-                id: reanchorLocation(transferAssetLocation),
-                fun: {
-                  type: 'Fungible',
-                  value: 1,
-                },
-              },
-              weight_limit: {
-                type: 'Unlimited',
-              },
-            },
-          },
+      {
+        type: 'SetAppendix',
+        value: [
           {
             type: 'DepositAsset',
             value: {
               assets: {
                 type: 'Wild',
                 value: {
-                  type: 'AllCounted',
-                  value: 1,
+                  type: 'All',
                 },
               },
               beneficiary: {
                 parents: 0,
                 interior: {
                   type: 'X1',
-                  value: [account],
+                  value: sender,
                 },
               },
             },
           },
-          {
-            type: 'SetTopic',
-            value: messageId,
-          },
         ],
       },
-    },
-    {
-      type: 'SetTopic',
-      value: messageId,
-    },
-  ],
+      {
+        type: 'InitiateReserveWithdraw',
+        value: {
+          assets: {
+            type: 'Wild',
+            value: {
+              type: 'AllOf',
+              value: {
+                id: transferAssetLocation,
+                fun: {
+                  type: 'Fungible',
+                },
+              },
+            },
+          },
+          reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
+          xcm: [
+            {
+              type: 'BuyExecution',
+              value: {
+                fees: {
+                  id: reanchorLocation(transferAssetLocation),
+                  fun: {
+                    type: 'Fungible',
+                    value: 1,
+                  },
+                },
+                weight_limit: {
+                  type: 'Unlimited',
+                },
+              },
+            },
+            {
+              type: 'DepositAsset',
+              value: {
+                assets: {
+                  type: 'Wild',
+                  value: {
+                    type: 'AllCounted',
+                    value: 1,
+                  },
+                },
+                beneficiary: {
+                  parents: 0,
+                  interior: {
+                    type: 'X1',
+                    value: [account],
+                  },
+                },
+              },
+            },
+            {
+              type: 'SetTopic',
+              value: messageId,
+            },
+          ],
+        },
+      },
+      {
+        type: 'SetTopic',
+        value: messageId,
+      },
+    ],
   };
 };
 
@@ -481,7 +483,7 @@ export const toTransactMessage = (
   account: any,
   transactFeeLocation: object,
   transactFeeAmount: any,
-  transactCall: `0x${string}`,
+  transactCall: Binary,
   transactWeight: TxWeight
 ) => {
   return {
@@ -506,10 +508,11 @@ export const toTransactMessage = (
           origin_kind: {
             type: 'SovereignAccount',
           },
-          require_weight_at_most: transactWeight,
-          call: {
-            encoded: transactCall,
+          require_weight_at_most: {
+            ref_time: transactWeight.refTime,
+            proof_size: transactWeight.proofSize,
           },
+          call: transactCall,
         },
       },
       {

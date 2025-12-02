@@ -23,7 +23,7 @@ const transfer = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
-      getArgs: () => {
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
         const version = XcmVersion.v4;
@@ -52,7 +52,7 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer_multiasset',
-      getArgs: () => {
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
         const version = XcmVersion.v4;
@@ -87,7 +87,7 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer_multiassets',
-      getArgs: () => {
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -117,8 +117,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             fee_item: 0,
             dest: toDest(version, rcv, account),
             dest_weight_limit: {
-            type: 'Unlimited',
-          },
+              type: 'Unlimited',
+            },
           };
         }
 
@@ -132,8 +132,8 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             fee_item: 0,
             dest: toDest(version, rcv, account),
             dest_weight_limit: {
-            type: 'Unlimited',
-          },
+              type: 'Unlimited',
+            },
           };
         }
 
@@ -157,7 +157,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer_multicurrencies',
-      getArgs: () => {
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
 
         let rcv = destination.chain as Parachain;

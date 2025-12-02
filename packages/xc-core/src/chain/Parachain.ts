@@ -118,21 +118,18 @@ export class Parachain extends Chain<ParachainAssetData> {
   async getCurrency(): Promise<ChainCurrency> {
     const client = this.api;
     const chainSpec = await client.getChainSpecData();
-    const properties = chainSpec.properties || {};
 
-    const symbols: string[] = properties.tokenSymbol || [];
-    const decimalsArray: number[] = properties.tokenDecimals || [];
+    const { tokenSymbol, tokenDecimals } = chainSpec.properties || {};
 
-    const symbol = symbols[0];
-    const decimals = decimalsArray[0];
+    const symbol = Array.isArray(tokenSymbol) ? tokenSymbol[0] : tokenSymbol;
+    const decimals = Array.isArray(tokenDecimals)
+      ? tokenDecimals[0]
+      : tokenDecimals;
 
-    if (symbol) {
-      const asset = this.getAsset(symbol.toLowerCase());
-      if (asset) {
-        return { asset, decimals } as ChainCurrency;
-      }
+    const asset = this.getAsset(symbol.toLowerCase());
+    if (asset) {
+      return { asset, decimals } as ChainCurrency;
     }
-
     throw Error('Chain currency configuration not found');
   }
 

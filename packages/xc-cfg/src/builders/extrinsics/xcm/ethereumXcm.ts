@@ -5,6 +5,8 @@ import {
   ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xc-core';
 
+import { Binary } from 'polkadot-api';
+
 import { encodeFunctionData } from 'viem';
 
 import { XcmVersion } from './types';
@@ -26,20 +28,26 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
             functionName: contract.func,
             args: contract.args,
           });
-          return [
-            {
+
+          return {
+            xcm_transaction: {
               type: version,
               value: {
-                gasLimit: 5000000n,
-                feePayment: 'Auto',
-                action: {
-                  Call: contract.address,
+                gas_limit: [5_000_000n, 0n, 0n, 0n],
+                fee_payment: {
+                  type: 'Auto',
+                  value: undefined,
                 },
-                value: 0n,
-                input: call,
+                action: {
+                  type: 'Call',
+                  value: Binary.fromHex(contract.address),
+                },
+                value: [0n, 0n, 0n, 0n],
+                input: Binary.fromHex(call),
+                access_list: undefined,
               },
             },
-          ];
+          };
         },
       });
     },

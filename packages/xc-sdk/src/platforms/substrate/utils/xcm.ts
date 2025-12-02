@@ -1,41 +1,33 @@
 import { AnyParachain, AssetAmount } from '@galacticcouncil/xc-core';
+import { xcm } from '@galacticcouncil/common';
+
+import { Binary } from 'polkadot-api';
 
 export function buildBeneficiary(dstAccount: string) {
-  return dstAccount.startsWith('0x')
-    ? {
-        parents: 0,
-        interior: {
-          X1: [
-            {
-              AccountKey20: {
-                key: dstAccount,
-              },
-            },
-          ],
-        },
-      }
-    : {
-        parents: 0,
-        interior: {
-          X1: [
-            {
-              AccountId32: {
-                id: dstAccount,
-              },
-            },
-          ],
-        },
-      };
+  const acc = dstAccount.startsWith('0x')
+    ? xcm.toAccountKey20(dstAccount)
+    : xcm.toAccountId32(dstAccount);
+
+  return {
+    parents: 0,
+    interior: {
+      type: 'X1',
+      value: [acc],
+    },
+  };
 }
 
 export function buildXcmDest(dstChain: AnyParachain) {
   return {
-    V4: {
+    type: 'V4',
+    value: {
       parents: 1,
       interior: {
-        X1: [
+        type: 'X1',
+        value: [
           {
-            Parachain: dstChain.parachainId,
+            type: 'Parachain',
+            value: dstChain.parachainId,
           },
         ],
       },
@@ -43,59 +35,72 @@ export function buildXcmDest(dstChain: AnyParachain) {
   };
 }
 
-export function buildXcmMessage(
+const toAsset = (assetLocation: object, amount: any) => {
+  return {
+    id: xcm.transform(assetLocation),
+    fun: {
+      type: 'Fungible',
+      value: amount,
+    },
+  };
+};
+
+export const buildXcmMessage = (
   dstAccount: string,
   dstFeeLocation: any,
   dstFee: AssetAmount,
-  dstRefTime: number,
-  dstProofSize: string,
-  dstCallEncoded: string
-) {
-  const dstBeneficiary = buildBeneficiary(dstAccount);
+  dstRefTime: bigint,
+  dstProofSize: bigint,
+  dstCallEncoded: Binary
+) => {
+  console.log(dstCallEncoded);
+  const beneficiary = buildBeneficiary(dstAccount);
+
   return {
-    V4: [
+    type: 'V4',
+    value: [
       {
-        WithdrawAsset: [
-          {
-            id: dstFeeLocation,
-            fun: {
-              Fungible: dstFee.amount,
-            },
-          },
-        ],
+        type: 'WithdrawAsset',
+        value: toAsset(dstFeeLocation, dstFee.amount),
       },
       {
-        BuyExecution: {
-          fees: {
-            id: dstFeeLocation,
-            fun: {
-              Fungible: dstFee.amount,
-            },
-          },
-          weightLimit: 'Unlimited',
-        },
-      },
-      {
-        Transact: {
-          originKind: 'SovereignAccount',
-          requireWeightAtMost: {
-            refTime: dstRefTime,
-            proofSize: dstProofSize,
-          },
-          call: {
-            encoded: dstCallEncoded,
+        type: 'BuyExecution',
+        value: {
+          fees: toAsset(dstFeeLocation, dstFee.amount),
+          weight_limit: {
+            type: 'Unlimited',
           },
         },
       },
       {
-        RefundSurplus: {},
+        type: 'Transact',
+        value: {
+          origin_kind: {
+            type: 'SovereignAccount',
+          },
+          require_weight_at_most: {
+            ref_time: dstRefTime,
+            proof_size: dstProofSize,
+          },
+          call: dstCallEncoded,
+        },
       },
       {
-        DepositAsset: {
-          assets: { Wild: { AllCounted: 1 } },
-          beneficiary: dstBeneficiary,
+        type: 'RefundSurplus',
+      },
+      {
+        type: 'DepositAsset',
+        value: {
+          assets: {
+            type: 'Wild',
+            value: {
+              type: 'AllCounted',
+              value: 1,
+            },
+          },
+          beneficiary: beneficiary,
         },
       },
     ],
   };
-}
+};

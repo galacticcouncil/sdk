@@ -34,7 +34,13 @@ const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
           const maxAmountIn =
             aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
 
-          return [assetIn, assetOut, amountOut, maxAmountIn, route];
+          return {
+            asset_in: Number(assetIn),
+            asset_out: Number(assetOut),
+            amount_out: amountOut,
+            max_amount_in: maxAmountIn,
+            route: route,
+          };
         },
       }),
   };

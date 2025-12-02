@@ -32,7 +32,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limited_reserve_transfer_assets',
-      getArgs: () => {
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -105,7 +105,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limited_teleport_assets',
-      getArgs: () => {
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -141,7 +141,7 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'reserve_transfer_assets',
-      getArgs: () => {
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
@@ -174,7 +174,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer_assets',
-      getArgs: () => {
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;

@@ -1,3 +1,5 @@
+import { enums } from '@galacticcouncil/common';
+
 export const getDeliveryFeeFromDryRun = (events: any[]): bigint => {
   const deliveryFees: bigint[] = [];
 
@@ -18,10 +20,13 @@ export const getDeliveryFeeFromDryRun = (events: any[]): bigint => {
   return deliveryFees.reduce((acc, df) => acc + df, 0n);
 };
 
-export const getErrorFromDryRun = (dispatchError: any): string | undefined => {
-  if (dispatchError.type === 'Module') {
-    const { index, error } = dispatchError.value;
-    return `Module error: ${index}:${error}`;
+export const getErrorFromDryRun = (
+  executionResult: any
+): string | undefined => {
+  const error = executionResult.value.error;
+
+  if (error.type === 'Module') {
+    return enums.enumPath(error.value);
   }
-  return JSON.stringify(dispatchError);
+  return JSON.stringify(error.value);
 };
