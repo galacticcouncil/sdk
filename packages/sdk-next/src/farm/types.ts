@@ -61,4 +61,5 @@ export type Farm = {
   distributedRewards: bigint;
   plannedYieldingPeriods: number;
   minDeposit: bigint;
+  blocksPerPeriod: number;
 };

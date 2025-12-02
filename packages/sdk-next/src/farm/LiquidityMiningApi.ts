@@ -103,7 +103,7 @@ export class LiquidityMiningApi {
     const globalRewardPerPeriod = Big(priceAdjustemnt)
       .times(totalSharesZ.toString())
       .times(yieldPerPeriod.toString())
-      .div(RUNTIME_DECIMALS);
+      .div(Math.pow(10, RUNTIME_DECIMALS));
 
     return globalRewardPerPeriod.gte(maxRewardPerPeriod.toString())
       ? maxRewardPerPeriod.toString()
@@ -249,6 +249,7 @@ export class LiquidityMiningApi {
       distributedRewards,
       plannedYieldingPeriods: planned_yielding_periods,
       minDeposit: min_deposit,
+      blocksPerPeriod: blocks_per_period,
     };
   }
 
@@ -502,7 +503,6 @@ export class LiquidityMiningApi {
     for (
       let tokenIdx = 0, nativeIdx = 0;
       tokenIdx + nativeIdx < pairs.length;
-
     ) {
       const idx = tokenIdx + nativeIdx;
       const [, assetId] = pairs[idx];
