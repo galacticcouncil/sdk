@@ -12,7 +12,7 @@ class GetisolatedFarm extends PapiExecutor {
     const { api } = sdk;
 
     const isolatedFarm = await api.farm.getIsolatedFarms(
-      '15L6BQ1sMd9pESapK13dHaXBPPtBYnDnKTVhb2gBeGrrJNBx'
+      '15nzS2D2wJdh52tqZdUJVMeDQqQe7wJfo5NZKL7pUxhwYgwq'
     );
     console.log(isolatedFarm);
 
