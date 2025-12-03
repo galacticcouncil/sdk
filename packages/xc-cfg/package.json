@@ -34,6 +34,6 @@
     "@galacticcouncil/xc-core": "^0.1.0"
   },
   "peerDependencies": {
-    "@galacticcouncil/sdk-next": "^0.16.0"
+    "@galacticcouncil/sdk-next": "^0.17.0"
   }
 }
