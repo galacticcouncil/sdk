@@ -43,7 +43,7 @@
     "papi:whitelist": "papi --whitelist ./src/whitelist.ts"
   },
   "devDependencies": {
-    "polkadot-api": ">=1.19.2 <1.20.0"
+    "polkadot-api": ">=1.19.2"
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors"

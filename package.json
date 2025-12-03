@@ -51,7 +51,7 @@
   },
   "overrides": {
     "cross-spawn": "^7.0.5",
-    "polkadot-api": "1.19.2",
+    "polkadot-api": "1.22.0",
     "@polkadot/api": "16.4.8",
     "@polkadot/api-base": "16.4.8",
     "@polkadot/api-augment": "16.4.8",
