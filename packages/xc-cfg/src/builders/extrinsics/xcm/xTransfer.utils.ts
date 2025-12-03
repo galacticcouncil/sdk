@@ -4,9 +4,11 @@ export const toDest = (destination: Parachain, account: any) => {
   return {
     parents: 1,
     interior: {
-      X2: [
+      type: 'X2',
+      value: [
         {
-          Parachain: destination.parachainId,
+          type: 'Parachain',
+          value: destination.parachainId,
         },
         account,
       ],

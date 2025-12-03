@@ -3,16 +3,16 @@ import {
   ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xc-core';
 
-const pallet = 'balances';
+const pallet = 'Balances';
 
 const transferAll = (keepAlive = false): ExtrinsicConfigBuilder => {
-  const func = 'transferAll';
+  const func = 'transfer_all';
   return {
     build: ({ address }) =>
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
+        getArgs: async () => {
           return {
             dest: address,
             keep_alive: keepAlive,

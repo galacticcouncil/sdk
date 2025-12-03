@@ -4,14 +4,14 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-const pallet = 'assetConversion';
+const pallet = 'AssetConversion';
 
 type SwapOpts = {
   slippage: number;
 };
 
 const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
-  const func = 'swapTokensForExactTokens';
+  const func = 'swap_tokens_for_exact_tokens';
   return {
     build: ({ address, source }) =>
       new ExtrinsicConfig({

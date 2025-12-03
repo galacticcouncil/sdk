@@ -13,7 +13,7 @@ import {
 } from './utils';
 import { XcmVersion } from './types';
 
-const pallet = 'xTransfer';
+const pallet = 'XTransfer';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) => {

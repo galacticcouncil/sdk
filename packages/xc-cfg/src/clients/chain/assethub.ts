@@ -4,7 +4,7 @@ import { Twox128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
-import { XcmEncoder } from '../../utils/xcm-encoder';
+import { LocationEncoder } from '../../utils/multilocation-encoder';
 
 export class AssethubClient extends BaseClient {
   constructor(chain: Parachain) {
@@ -94,16 +94,23 @@ export class AssethubClient extends BaseClient {
     const client = this.chain.api;
     const api = client.getUnsafeApi();
 
-    const destination = XcmEncoder.encodeVersionedLocationForUnsafeApi({
-      parents: 1,
-      interior: { X1: [{ Parachain: destParachainId }] },
-    });
-
-    const encodedXcm = XcmEncoder.encodeXcmForUnsafeApi(xcm);
+    const destination = {
+      type: 'V4',
+      value: {
+        parents: 1,
+        interior: {
+          type: 'X1',
+          value: {
+            type: 'Parachain',
+            value: destParachainId,
+          },
+        },
+      },
+    };
 
     const result = await api.apis.XcmPaymentApi.query_delivery_fees(
       destination,
-      encodedXcm
+      xcm
     );
 
     if (!result.success) {
@@ -129,10 +136,7 @@ export class AssethubClient extends BaseClient {
       const client = this.chain.api;
       const api = client.getUnsafeApi();
 
-      const versionedXcm = XcmEncoder.encodeXcmForUnsafeApi(xcm);
-
-      const weight =
-        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
+      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(xcm);
 
       if (!weight.success) {
         throw Error(`Can't query XCM weight.`);
@@ -143,8 +147,12 @@ export class AssethubClient extends BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const versionedAssetId =
-        XcmEncoder.encodeAssetIdForUnsafeApi(feeAssetLocation);
+      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
+      const versionedAssetId = {
+        type: 'V4',
+        value: encodedLocation,
+      };
+
       const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
         weight.value,
         versionedAssetId

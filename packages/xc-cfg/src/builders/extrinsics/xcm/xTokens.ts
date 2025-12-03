@@ -14,19 +14,19 @@ import {
   locationOrError,
   shouldFeeAssetPrecede,
 } from './utils';
+import { XcmVersion } from './types';
 
-const pallet = 'xTokens';
+const pallet = 'XTokens';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
-      getArgs: () => {
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        // Use destination chain's XCM version since that's where the message will be processed
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -39,7 +39,9 @@ const transfer = (): ExtrinsicConfigBuilder => ({
           currency_id: assetId,
           amount,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -49,11 +51,11 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMultiasset',
-      getArgs: () => {
+      func: 'transfer_multiasset',
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const receiver = rcv.usesCexForwarding
           ? getDerivativeAccount(ctx, sender, rcv)
@@ -68,10 +70,13 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
         const transferAsset = toAsset(transferAssetLocation, amount);
         return {
           asset: {
-            [version]: transferAsset,
+            type: version,
+            value: transferAsset,
           },
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -81,12 +86,12 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMultiassets',
-      getArgs: () => {
+      func: 'transfer_multiassets',
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -106,11 +111,14 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         if (asset.key === destination.fee.key) {
           return {
             assets: {
-              [version]: [transferAsset],
+              type: version,
+              value: [transferAsset],
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
-            dest_weight_limit: 'Unlimited',
+            dest_weight_limit: {
+              type: 'Unlimited',
+            },
           };
         }
 
@@ -118,21 +126,27 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
           return {
             assets: {
-              [version]: [transferFee, transferAsset],
+              type: version,
+              value: [transferFee, transferAsset],
             },
             fee_item: 0,
             dest: toDest(version, rcv, account),
-            dest_weight_limit: 'Unlimited',
+            dest_weight_limit: {
+              type: 'Unlimited',
+            },
           };
         }
 
         return {
           assets: {
-            [version]: [transferAsset, transferFee],
+            type: version,
+            value: [transferAsset, transferFee],
           },
           fee_item: 1,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -142,8 +156,8 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source, transact }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferMulticurrencies',
-      getArgs: () => {
+      func: 'transfer_multicurrencies',
+      getArgs: async () => {
         const ctx = source.chain as Parachain;
 
         let rcv = destination.chain as Parachain;
@@ -158,7 +172,7 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           receiver = getDerivativeAccount(ctx, sender, rcv);
         }
 
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
         return {
@@ -168,7 +182,9 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           ],
           fee_item: 1,
           dest: toDest(version, rcv, account),
-          dest_weight_limit: 'Unlimited',
+          dest_weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),

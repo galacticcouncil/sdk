@@ -11,13 +11,13 @@ export function AssetMinBuilder() {
 }
 
 function assetRegistry() {
-  const pallet = 'assetRegistry';
+  const pallet = 'AssetRegistry';
   return {
     assetMetadatas: (): MinConfigBuilder => ({
       build: ({ asset }) =>
         new SubstrateQueryConfig({
           module: pallet,
-          func: 'assetMetadatas',
+          func: 'AssetMetadatas',
           args: [asset],
           transform: async (response) => {
             return BigInt(response?.minimalBalance?.toString() ?? '0');
@@ -28,7 +28,7 @@ function assetRegistry() {
       build: ({ asset }) =>
         new SubstrateQueryConfig({
           module: pallet,
-          func: 'currencyMetadatas',
+          func: 'CurrencyMetadatas',
           args: [asset],
           transform: async (response) => {
             return BigInt(response?.minimalBalance?.toString() ?? '0');
@@ -43,8 +43,8 @@ function assets() {
     asset: (): MinConfigBuilder => ({
       build: ({ asset }) =>
         new SubstrateQueryConfig({
-          module: 'assets',
-          func: 'asset',
+          module: 'Assets',
+          func: 'Asset',
           args: [asset],
           transform: async (response) => {
             return BigInt(response?.minBalance?.toString() ?? '0');

@@ -17,11 +17,7 @@ import {
 } from 'rxjs';
 
 import { SubstrateService } from './SubstrateService';
-import {
-  getErrorFromDryRun,
-  normalizeAssetAmount,
-  toPascalCase,
-} from './utils';
+import { getErrorFromDryRun, normalizeAssetAmount } from './utils';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
@@ -72,14 +68,14 @@ export class SubstratePlatform implements Platform<
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
-              const extrinsic = substrate.getExtrinsic(config);
+              const extrinsic = await substrate.getExtrinsic(config);
               const dryRunResult = await substrate.dryRun(account, extrinsic);
 
               const error =
                 dryRunResult.execution_result &&
-                !dryRunResult.execution_result.success
-                  ? getErrorFromDryRun(dryRunResult.execution_result.value)
-                  : undefined;
+                dryRunResult.execution_result.success
+                  ? undefined
+                  : getErrorFromDryRun(dryRunResult.execution_result);
 
               return {
                 call: extrinsicCall,
@@ -127,27 +123,8 @@ export class SubstratePlatform implements Platform<
     const substrate = await this.#substrate;
     const { module, func, args, transform } = config;
 
-    const moduleName = toPascalCase(module);
-    const funcName = toPascalCase(func);
-
-    // Use unsafe API for dynamic queries
-    const unsafeApi = substrate.client.getUnsafeApi();
-
-    const queryModule = (unsafeApi.query as any)[moduleName];
-    if (!queryModule) {
-      throw new Error(
-        `Query module "${module}" (${moduleName}) not found in runtime`
-      );
-    }
-
-    const queryFunc = queryModule[funcName];
-    if (!queryFunc) {
-      throw new Error(
-        `Query function "${func}" (${funcName}) not found in module "${moduleName}"`
-      );
-    }
-
-    const observable$ = queryFunc.watchValue(...args);
+    const fn = substrate.client.getUnsafeApi().query[module][func];
+    const observable$ = fn.watchValue(...args);
 
     return observable$.pipe(
       concatMap((b: any) => transform(b)),

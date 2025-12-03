@@ -25,18 +25,18 @@ import {
 } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
-const pallet = 'polkadotXcm';
+const pallet = 'PolkadotXcm';
 
 const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'limitedReserveTransferAssets',
-      getArgs: () => {
+      func: 'limited_reserve_transfer_assets',
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -58,10 +58,13 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
             assets: {
-              [version]: [transferAsset],
+              type: version,
+              value: [transferAsset],
             },
             fee_asset_item: 0,
-            weight_limit: 'Unlimited',
+            weight_limit: {
+              type: 'Unlimited',
+            },
           };
         }
 
@@ -71,10 +74,13 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
             assets: {
-              [version]: [transferFee, transferAsset],
+              type: version,
+              value: [transferFee, transferAsset],
             },
             fee_asset_item: 0,
-            weight_limit: 'Unlimited',
+            weight_limit: {
+              type: 'Unlimited',
+            },
           };
         }
 
@@ -82,10 +88,13 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
           dest: toDest(version, ctx, rcv),
           beneficiary: toBeneficiary(version, account),
           assets: {
-            [version]: [transferAsset, transferFee],
+            type: version,
+            value: [transferAsset, transferFee],
           },
           fee_asset_item: 1,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -95,12 +104,12 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'limitedTeleportAssets',
-      getArgs: () => {
+      func: 'limited_teleport_assets',
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -111,14 +120,17 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
           beneficiary,
           assets,
           fee_asset_item: 0,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -128,12 +140,12 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'reserveTransferAssets',
-      getArgs: () => {
+      func: 'reserve_transfer_assets',
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -144,7 +156,8 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
@@ -160,12 +173,12 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferAssets',
-      getArgs: () => {
+      func: 'transfer_assets',
+      getArgs: async () => {
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
         const rcv = destination.chain as Parachain;
-        const version = rcv.xcmVersion;
+        const version = XcmVersion.v4;
 
         const transferAssetLocation = getExtrinsicAssetLocation(
           locationOrError(ctx, asset),
@@ -176,14 +189,17 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
         const dest = toDest(version, ctx, rcv);
         const beneficiary = toBeneficiary(version, account);
         const assets = {
-          [version]: [transferAsset],
+          type: version,
+          value: [transferAsset],
         };
         return {
           dest,
           beneficiary,
           assets,
           fee_asset_item: 0,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),
@@ -199,7 +215,7 @@ const transferAssetsUsingTypeAndThen = (
   build: ({ address, asset, amount, destination, messageId, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
-      func: 'transferAssetsUsingTypeAndThen',
+      func: 'transfer_assets_using_type_and_then',
       getArgs: async () => {
         const version = XcmVersion.v4;
 
@@ -234,7 +250,8 @@ const transferAssetsUsingTypeAndThen = (
         const dest = toDest(version, ctx, rcv);
 
         const assets = {
-          [version]: asset.isEqual(destination.fee)
+          type: version,
+          value: asset.isEqual(destination.fee)
             ? [transferAsset]
             : [transferFee, transferAsset],
         };
@@ -246,7 +263,8 @@ const transferAssetsUsingTypeAndThen = (
         );
 
         const remoteFeeId = {
-          [version]: isSufficientPaymentAsset
+          type: version,
+          value: isSufficientPaymentAsset
             ? transferAssetLocation
             : transferFeeLocation,
         };
@@ -278,7 +296,9 @@ const transferAssetsUsingTypeAndThen = (
           remote_fees_id: remoteFeeId,
           fees_transfer_type: feesTransferType,
           custom_xcm_on_dest: customXcmOnDest,
-          weight_limit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         };
       },
     }),

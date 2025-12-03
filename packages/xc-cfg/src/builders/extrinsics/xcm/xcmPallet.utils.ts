@@ -1,18 +1,15 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { getX1Junction } from './utils';
 import { XcmVersion } from './types';
 
 export const toDest = (version: XcmVersion, destination: Parachain) => {
-  const toParachain = {
-    Parachain: destination.parachainId,
-  };
-
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 0,
       interior: {
-        X1: getX1Junction(version, toParachain),
+        type: 'X1',
+        value: { type: 'Parachain', value: destination.parachainId },
       },
     },
   };
@@ -29,10 +26,12 @@ export const toAsset = (assetLocation: object, amount: any) => {
 
 export const toBeneficiary = (version: XcmVersion, account: any) => {
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 0,
       interior: {
-        X1: getX1Junction(version, account),
+        type: 'X1',
+        value: { type: 'AccountId32', value: account },
       },
     },
   };

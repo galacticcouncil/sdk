@@ -4,10 +4,10 @@ import {
   ExtrinsicConfigBuilderParams,
 } from '@galacticcouncil/xc-core';
 
-const pallet = 'utility';
+const pallet = 'Utility';
 
 const batchAll = (configs: ExtrinsicConfigBuilder[]) => {
-  const func = 'batchAll';
+  const func = 'batch_all';
   return {
     build: (params: ExtrinsicConfigBuilderParams) => {
       return new ExtrinsicConfig({

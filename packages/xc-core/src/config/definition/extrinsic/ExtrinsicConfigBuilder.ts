@@ -1,3 +1,5 @@
+import { Binary } from 'polkadot-api';
+
 import { AssetAmount } from '../../../asset';
 import { AnyParachain } from '../../../chain';
 
@@ -6,15 +8,15 @@ import { TransferCtx } from '../../types';
 import { ExtrinsicConfig } from './ExtrinsicConfig';
 
 export interface TxWeight {
-  proofSize: string;
-  refTime: number;
+  proofSize: bigint;
+  refTime: bigint;
 }
 
 export interface TransactCtx {
   chain: AnyParachain;
   fee: AssetAmount;
   feeBalance: AssetAmount;
-  call: `0x${string}`;
+  call: Binary;
   weight: TxWeight;
 }
 

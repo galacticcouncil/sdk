@@ -8,7 +8,6 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { AssethubClient } from '../clients';
-import { XcmEncoder } from '../utils/xcm-encoder';
 
 export class AssethubDex implements Dex {
   readonly chain: Parachain;
@@ -39,13 +38,10 @@ export class AssethubDex implements Dex {
     const client = this.chain.api;
     const api = client.getUnsafeApi();
 
-    const encodedIn = XcmEncoder.encodeLocationForUnsafeApi(aIn);
-    const encodedOut = XcmEncoder.encodeLocationForUnsafeApi(aOut);
-
     const result =
       await api.apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
-        encodedIn,
-        encodedOut,
+        aIn,
+        aOut,
         amountOut.amount,
         true
       );

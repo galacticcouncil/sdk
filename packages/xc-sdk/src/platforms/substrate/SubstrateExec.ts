@@ -44,9 +44,9 @@ export class SubstrateExec {
     const dstDecimals = await this.#dst.getDecimals();
 
     const dstFeeLocation = dstChain.getAssetXcmLocation(dstAsset);
-    const dstExtrinsic = await dstApi.txFromCallData(
-      Binary.fromHex(dstCall.data)
-    );
+    const dstCallBinary = Binary.fromHex(dstCall.data);
+
+    const dstExtrinsic = await dstApi.txFromCallData(dstCallBinary);
     const dstPaymentInfo = await dstExtrinsic.getPaymentInfo(dstAccount);
 
     const dstFeeAmount = (BigInt(dstPaymentInfo.partial_fee) * 120n) / 100n;
@@ -56,9 +56,8 @@ export class SubstrateExec {
       decimals: dstDecimals,
     });
 
-    const dstRefTime = Number(dstPaymentInfo.weight.ref_time);
-    const dstProofSize = String(dstPaymentInfo.weight.proof_size);
-    const dstCallEncoded = dstCall.data;
+    const dstRefTime = dstPaymentInfo.weight.ref_time;
+    const dstProofSize = dstPaymentInfo.weight.proof_size;
 
     const transactXcmDest = buildXcmDest(dstChain);
     const transactXcmMessage = buildXcmMessage(
@@ -67,10 +66,10 @@ export class SubstrateExec {
       dstFee,
       dstRefTime,
       dstProofSize,
-      dstCallEncoded
+      dstCallBinary
     );
 
-    const transactTx = (srcApi.tx.PolkadotXcm as any).send({
+    const transactTx = srcApi.tx.PolkadotXcm.send({
       dest: transactXcmDest,
       message: transactXcmMessage,
     });
@@ -85,23 +84,26 @@ export class SubstrateExec {
         dstFee,
         10 // swap slippage
       );
-      const swapTx = await srcApi.txFromCallData(Binary.fromHex(swapTxHash));
+      const swapBinary = Binary.fromHex(swapTxHash);
+      const swapTx = await srcApi.txFromCallData(swapBinary);
       calls.push(swapTx);
     }
 
     const transferCall = await transfer(dstFee);
-    const transferTx = await srcApi.txFromCallData(
-      Binary.fromHex(transferCall.data)
-    );
+    const transferBinary = Binary.fromHex(transferCall.data);
+    const transferTx = await srcApi.txFromCallData(transferBinary);
 
     calls.push(transferTx);
     calls.push(transactTx);
 
-    const batchTx = (srcApi.tx.Utility as any).batch_all({ calls });
+    const decoded = calls.map((c) => c.decodedCall);
+
+    const batchTx = srcApi.tx.Utility.batch_all({ calls: decoded });
+    const batchTxEncoded = await batchTx.getEncodedData();
 
     return {
       from: srcAccount,
-      data: batchTx.decodedCall as `0x${string}`,
+      data: batchTxEncoded.asHex(),
       type: CallType.Substrate,
       dryRun: this.#src.isDryRunSupported()
         ? async () => {
@@ -112,9 +114,9 @@ export class SubstrateExec {
 
               const error =
                 dryRunResult.execution_result &&
-                !dryRunResult.execution_result.success
-                  ? getErrorFromDryRun(dryRunResult.execution_result.value)
-                  : undefined;
+                dryRunResult.execution_result.success
+                  ? undefined
+                  : getErrorFromDryRun(dryRunResult.execution_result);
 
               return {
                 call: 'polkadotXcm.send',

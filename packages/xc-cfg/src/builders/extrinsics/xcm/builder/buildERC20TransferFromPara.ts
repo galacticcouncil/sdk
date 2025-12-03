@@ -34,36 +34,46 @@ export async function buildERC20TransferFromPara(
   );
 
   return {
-    [version]: [
+    type: version,
+    value: [
       {
-        WithdrawAsset: [
+        type: 'WithdrawAsset',
+        value: [
           {
             id: DOT_LOCATION,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
           {
             id: transferAssetLocation,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
         ],
       },
-      { ClearOrigin: null },
       {
-        BuyExecution: {
+        type: 'ClearOrigin',
+      },
+      {
+        type: 'BuyExecution',
+        value: {
           fees: {
             id: DOT_LOCATION,
             fun: {
-              Fungible: AMOUNT_MAX,
+              type: 'Fungible',
+              value: AMOUNT_MAX,
             },
           },
-          weightLimit: 'Unlimited',
+          weight_limit: {
+            type: 'Unlimited',
+          },
         },
       },
-      ...bridgeXcmOnDest[version],
+      ...bridgeXcmOnDest.value,
     ],
   };
 }

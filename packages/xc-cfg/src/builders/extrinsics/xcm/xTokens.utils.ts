@@ -1,6 +1,5 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 
-import { getX1Junction } from './utils';
 import { XcmVersion } from './types';
 
 export const toDest = (
@@ -10,22 +9,27 @@ export const toDest = (
 ) => {
   if (destination.parachainId === 0) {
     return {
-      [version]: {
+      type: version,
+      value: {
         parents: 1,
         interior: {
-          X1: getX1Junction(version, account),
+          type: 'X1',
+          value: { type: 'AccountId32', value: account },
         },
       },
     };
   }
 
   return {
-    [version]: {
+    type: version,
+    value: {
       parents: 1,
       interior: {
-        X2: [
+        type: 'X2',
+        value: [
           {
-            Parachain: destination.parachainId,
+            type: 'Parachain',
+            value: destination.parachainId,
           },
           account,
         ],
@@ -38,7 +42,8 @@ export const toAsset = (assetLocation: object, amount: any) => {
   return {
     id: assetLocation,
     fun: {
-      Fungible: amount,
+      type: 'Fungible',
+      value: amount,
     },
   };
 };
