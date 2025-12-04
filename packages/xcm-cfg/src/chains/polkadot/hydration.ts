@@ -70,6 +70,7 @@ import {
   sol,
   sky,
   tbtc,
+  xon,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -1482,6 +1483,25 @@ export const hydration = new EvmParachain({
                 length: 2,
                 data: '0x0001000000000000000000000000000000000000000000000000000000000000',
               },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: xon,
+      decimals: 12,
+      id: 1001168,
+      min: 10,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 3417,
+            },
+            {
+              GeneralIndex: 0,
             },
           ],
         },
