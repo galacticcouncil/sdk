@@ -61,7 +61,7 @@ export class StakingApi {
         const prevAcc = await acc;
         const id = key;
         const amount = data.amount;
-        const conviction = data.conviction.toString().toLowerCase();
+        const conviction = data.conviction.type.toLowerCase();
 
         const referendaInfo = await this.client.getReferendumInfo(id);
 
@@ -196,7 +196,7 @@ export class StakingApi {
 
   async getRewards(
     account: string,
-    activeReferendaIds: Array<string>,
+    openGovReferendaIds: Array<string>,
     blockNumber: string
   ) {
     const stake = await this.getStake(account);
@@ -265,7 +265,7 @@ export class StakingApi {
       stakePosition.votes,
       stakePosition.actionPoints,
       stakePosition.stake,
-      activeReferendaIds
+      openGovReferendaIds
     );
 
     const points = calculate_points(
@@ -281,7 +281,7 @@ export class StakingApi {
     const payablePercentage = sigmoid(points, a, b);
 
     const extraPayablePercentage = (() => {
-      if (!activeReferendaIds.length) {
+      if (!openGovReferendaIds.length) {
         return;
       }
 
@@ -336,6 +336,7 @@ export class StakingApi {
         .div(totalRewards)
         .mul(100)
         .toNumber(),
+      points,
       payablePercentage,
       extraPayablePercentage,
       constants: {
