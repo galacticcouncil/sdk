@@ -49,7 +49,7 @@ export const polkadotChains: AnyChain[] = [
   unique,
   zeitgeist,
   energywebx,
-  //xode,
+  xode,
 ];
 
 export {
