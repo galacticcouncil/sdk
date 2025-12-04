@@ -1,4 +1,5 @@
 import {
+  addr,
   EvmChain,
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -21,14 +22,16 @@ const teleport = (): ExtrinsicConfigBuilder => ({
 
         const assetId = ctx.getAssetId(asset);
         return [
-          assetId,
-          { Evm: rcv.id },
-          address,
-          amount,
-          0,
-          rcvHb.getGateway(),
-          0,
-          false,
+          {
+            assetId: assetId,
+            destination: { Evm: rcv.id },
+            recepient: addr.h160ToH256(address),
+            amount: amount,
+            timeout: 0,
+            tokenGateway: rcvHb.getGateway(),
+            relayerFee: 0n,
+            redeem: false,
+          },
         ];
       },
     }),

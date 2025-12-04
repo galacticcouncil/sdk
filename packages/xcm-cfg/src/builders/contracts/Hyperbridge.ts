@@ -29,15 +29,17 @@ const teleport = (): ContractConfigBuilder => ({
       abi: Abi.Hyperbridge,
       address: ctxHb.getGateway(),
       args: [
-        amount,
-        0n, // relayer fee
-        assetId,
-        true,
-        to,
-        dest,
-        timeout,
-        nativeCost,
-        '0x',
+        [
+          amount,
+          0n, // relayer fee
+          assetId,
+          true,
+          to,
+          dest,
+          timeout,
+          nativeCost,
+          '0x',
+        ],
       ],
       value: nativeCost,
       func: 'teleport',

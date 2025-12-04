@@ -17,6 +17,7 @@ import {
   dota,
   ena,
   eth,
+  eurc,
   ewt,
   glmr,
   hdx,
@@ -63,8 +64,7 @@ import {
   lbtc,
   susds_mwh,
   susds,
-  xon,
-  eurc,
+  //xon,
 } from '../../../assets';
 import {
   acala,
@@ -92,7 +92,7 @@ import {
   sui_chain,
   unique,
   zeitgeist,
-  xode,
+  //xode,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -407,7 +407,7 @@ const toCex: AssetRoute[] = [
   ),
 ];
 
-const toXode: AssetRoute[] = [toTransferTemplate(xon, xode, 0.01)];
+//const toXode: AssetRoute[] = [toTransferTemplate(xon, xode, 0.01)];
 
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
@@ -438,6 +438,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toSuiViaWormhole,
     ...toUnique,
     ...toZeitgeist,
-    ...toXode,
+    //...toXode,
   ],
 });

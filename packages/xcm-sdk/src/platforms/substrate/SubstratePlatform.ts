@@ -27,9 +27,10 @@ import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
 
-export class SubstratePlatform
-  implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
-{
+export class SubstratePlatform implements Platform<
+  ExtrinsicConfig,
+  SubstrateQueryConfig
+> {
   readonly #substrate: Promise<SubstrateService>;
   readonly #dex: Dex | undefined;
 
