@@ -1,11 +1,17 @@
 # @galacticcouncil/sdk-next
 
+## 0.18.0
+
+### Minor Changes
+
+- 5070a89: Return staking points
+- 65c1c84: Fix liquidity mining apr
+
 ## 0.17.0
 
 ### Minor Changes
 
 - a8e8e01: Return invalid HF when totalDebt is 0
-- 65c1c84: Fix liquidity mining apr
 
 ## 0.16.0
 
