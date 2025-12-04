@@ -284,3 +284,30 @@ export function viaSnowbridgeTemplate(
     tags: [Tag.Snowbridge],
   });
 }
+
+export function viaHyperbridgeTemplate(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: to,
+      asset: assetOut,
+      fee: {
+        amount: 0,
+        asset: assetOut,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().tokenGateway().teleport(),
+    tags: [Tag.Hyperbridge],
+  });
+}

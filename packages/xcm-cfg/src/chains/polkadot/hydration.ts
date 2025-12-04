@@ -21,6 +21,7 @@ import {
   dota,
   ena,
   eth,
+  eurc,
   ewt,
   glmr,
   hdx,
@@ -30,6 +31,7 @@ import {
   kilt,
   ksm,
   laos,
+  lbtc,
   ldo,
   ldot,
   link,
@@ -68,7 +70,6 @@ import {
   sol,
   sky,
   tbtc,
-  lbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -422,6 +423,12 @@ export const hydration = new EvmParachain({
           },
         },
       },
+    },
+    {
+      asset: eurc,
+      decimals: 6,
+      id: 42,
+      min: 0.014,
     },
     {
       asset: ena,

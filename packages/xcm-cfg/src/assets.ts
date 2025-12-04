@@ -75,14 +75,19 @@ export const dota = new Asset({
   originSymbol: 'DOTA',
 });
 
+export const ena = new Asset({
+  key: 'ena',
+  originSymbol: 'ENA',
+});
+
 export const eth = new Asset({
   key: 'eth',
   originSymbol: 'ETH',
 });
 
-export const ena = new Asset({
-  key: 'ena',
-  originSymbol: 'ENA',
+export const eurc = new Asset({
+  key: 'eurc',
+  originSymbol: 'EURC',
 });
 
 export const glmr = new Asset({
@@ -368,6 +373,7 @@ export const assets: Asset[] = [
   dota,
   ena,
   eth,
+  eurc,
   glmr,
   hdx,
   ibtc,
@@ -420,7 +426,7 @@ export const assets: Asset[] = [
   wud,
   xrt,
   ztg,
-  xon
+  xon,
 ];
 
 export const assetsMap = new Map<string, Asset>(

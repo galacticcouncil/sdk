@@ -12,6 +12,7 @@ import { utility } from './extrinsics/utility';
 import {
   ethereumXcm,
   polkadotXcm,
+  tokenGateway,
   xcmPallet,
   xTokens,
   xTransfer,
@@ -26,6 +27,7 @@ export function ExtrinsicBuilder() {
     polkadotXcm,
     router,
     utility,
+    tokenGateway,
     xTokens,
     xTransfer,
     xcmPallet,

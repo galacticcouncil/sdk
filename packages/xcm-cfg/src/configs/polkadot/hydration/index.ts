@@ -64,12 +64,14 @@ import {
   susds_mwh,
   susds,
   xon,
+  eurc,
 } from '../../../assets';
 import {
   acala,
   ajuna,
   assetHub,
   astar,
+  base,
   bifrost,
   centrifuge,
   crust,
@@ -90,7 +92,7 @@ import {
   sui_chain,
   unique,
   zeitgeist,
-  xode
+  xode,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
@@ -104,6 +106,7 @@ import {
   viaSnowbridgeTemplate,
   viaWormholeRelayerTemplate,
   viaWormholeBridgeTemplate,
+  viaHyperbridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -371,6 +374,10 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
 ];
 
+const toEthereumViaHyperbridge: AssetRoute[] = [
+  viaHyperbridgeTemplate(eurc, eurc, base),
+];
+
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
@@ -400,9 +407,7 @@ const toCex: AssetRoute[] = [
   ),
 ];
 
-const toXode: AssetRoute[] = [
-  toTransferTemplate(xon, xode, 0.01)
-];
+const toXode: AssetRoute[] = [toTransferTemplate(xon, xode, 0.01)];
 
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
@@ -416,6 +421,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toCrust,
     ...toDarwinia,
+    ...toEthereumViaHyperbridge,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
@@ -432,6 +438,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toSuiViaWormhole,
     ...toUnique,
     ...toZeitgeist,
-    ...toXode
+    ...toXode,
   ],
 });
