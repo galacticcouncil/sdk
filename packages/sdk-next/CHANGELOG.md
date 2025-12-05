@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.18.1
+
+### Patch Changes
+
+- bump desc package
+
 ## 0.18.0
 
 ### Minor Changes
