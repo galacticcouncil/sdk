@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@galacticcouncil/common": "^0.1.1",
-    "@galacticcouncil/descriptors": "^1.5.1",
+    "@galacticcouncil/descriptors": "^1.6.0",
     "@galacticcouncil/math-hsm": "^1.1.0",
     "@galacticcouncil/math-lbp": "^1.2.0",
     "@galacticcouncil/math-liquidity-mining": "^1.2.0",
