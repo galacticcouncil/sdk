@@ -1,10 +1,10 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { encodeLocation } from '@galacticcouncil/common';
 
 import { Twox128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
-import { LocationEncoder } from '../../utils/multilocation-encoder';
 
 export class AssethubClient extends BaseClient {
   constructor(chain: Parachain) {
@@ -147,7 +147,7 @@ export class AssethubClient extends BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
+      const encodedLocation = encodeLocation(feeAssetLocation);
       const versionedAssetId = {
         type: 'V4',
         value: encodedLocation,

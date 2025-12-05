@@ -1,7 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { encodeLocation } from '@galacticcouncil/common';
 
 import { getTypedApi } from '../utils/papi';
-import { LocationEncoder } from '../utils/multilocation-encoder';
 
 export class BaseClient {
   readonly chain: Parachain;
@@ -50,7 +50,7 @@ export class BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
+      const encodedLocation = encodeLocation(feeAssetLocation);
       const versionedAssetId = {
         type: 'V4',
         value: encodedLocation,
