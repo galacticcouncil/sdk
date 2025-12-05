@@ -3,6 +3,7 @@ import {
   Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
+import { encodeLocation } from '@galacticcouncil/common';
 import { encodeAssetId } from '@galacticcouncil/common';
 
 export function substrate() {
@@ -44,10 +45,12 @@ function foreignAssets() {
           throw new Error('Missing asset xcm location for ' + asset.key);
         }
 
+        const encodedLocation = encodeLocation(assetLocation);
+
         return new SubstrateQueryConfig({
           module: 'ForeignAssets',
           func: 'Account',
-          args: [assetLocation, address],
+          args: [encodedLocation, address],
           transform: async (response) => {
             return BigInt(response?.balance?.toString() ?? '0');
           },
