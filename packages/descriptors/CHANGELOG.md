@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.6.0
+
+### Minor Changes
+
+- disable desc package
+
 ## 1.5.1
 
 ### Patch Changes
