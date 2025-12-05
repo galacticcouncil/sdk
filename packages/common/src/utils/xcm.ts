@@ -165,3 +165,25 @@ export function encodeLocation(location: any): any {
     interior: transform(interior),
   };
 }
+
+export function encodeAssetId(assetId: any): any {
+  // Handle simple types (number, string, bigint) - return as-is
+  if (
+    typeof assetId === 'number' ||
+    typeof assetId === 'string' ||
+    typeof assetId === 'bigint'
+  ) {
+    return assetId;
+  }
+
+  // Handle null/undefined
+  if (assetId === null || assetId === undefined) {
+    return assetId;
+  }
+
+  // Handle object types (e.g., { Token2: 0 }, { Native: "BNC" })
+  if (typeof assetId === 'object' && !Array.isArray(assetId)) {
+    const transformed = transform(assetId);
+    return transformed;
+  }
+}

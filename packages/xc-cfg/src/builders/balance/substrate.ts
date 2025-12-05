@@ -3,6 +3,7 @@ import {
   Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
+import { encodeAssetId } from '@galacticcouncil/common';
 
 export function substrate() {
   return {
@@ -82,10 +83,11 @@ function tokens() {
     accounts: (): BalanceConfigBuilder => ({
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
         return new SubstrateQueryConfig({
           module: 'Tokens',
           func: 'Accounts',
-          args: [address, assetId],
+          args: [address, encodedAssetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
             const frozen = BigInt(response?.frozen?.toString() ?? '0');
@@ -102,10 +104,11 @@ function ormlTokens() {
     accounts: (): BalanceConfigBuilder => ({
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
         return new SubstrateQueryConfig({
           module: 'OrmlTokens',
           func: 'Accounts',
-          args: [address, assetId],
+          args: [address, encodedAssetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
             const frozen = BigInt(response?.frozen?.toString() ?? '0');

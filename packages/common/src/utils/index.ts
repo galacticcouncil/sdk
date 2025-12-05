@@ -6,4 +6,4 @@ export * as hex from './hex';
 export * as xcm from './xcm';
 export * as xc from './xc';
 
-export { encodeLocation, transform } from './xcm';
+export { encodeAssetId, encodeLocation, transform } from './xcm';
