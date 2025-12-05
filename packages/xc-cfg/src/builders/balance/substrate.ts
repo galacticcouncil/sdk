@@ -3,6 +3,7 @@ import {
   Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
+import { encodeAssetId, encodeLocation } from '@galacticcouncil/common';
 
 export function substrate() {
   return {
@@ -43,10 +44,12 @@ function foreignAssets() {
           throw new Error('Missing asset xcm location for ' + asset.key);
         }
 
+        const encodedLocation = encodeLocation(assetLocation);
+
         return new SubstrateQueryConfig({
           module: 'ForeignAssets',
           func: 'Account',
-          args: [assetLocation, address],
+          args: [encodedLocation, address],
           transform: async (response) => {
             return BigInt(response?.balance?.toString() ?? '0');
           },
@@ -82,10 +85,11 @@ function tokens() {
     accounts: (): BalanceConfigBuilder => ({
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
         return new SubstrateQueryConfig({
           module: 'Tokens',
           func: 'Accounts',
-          args: [address, assetId],
+          args: [address, encodedAssetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
             const frozen = BigInt(response?.frozen?.toString() ?? '0');
@@ -102,10 +106,11 @@ function ormlTokens() {
     accounts: (): BalanceConfigBuilder => ({
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
         return new SubstrateQueryConfig({
           module: 'OrmlTokens',
           func: 'Accounts',
-          args: [address, assetId],
+          args: [address, encodedAssetId],
           transform: async (response) => {
             const free = BigInt(response?.free?.toString() ?? '0');
             const frozen = BigInt(response?.frozen?.toString() ?? '0');

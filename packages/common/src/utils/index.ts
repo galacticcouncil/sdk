@@ -5,3 +5,5 @@ export * as h160 from './h160';
 export * as hex from './hex';
 export * as xcm from './xcm';
 export * as xc from './xc';
+
+export { encodeAssetId, encodeLocation, transform } from './xcm';

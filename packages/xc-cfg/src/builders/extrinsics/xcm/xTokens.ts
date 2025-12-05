@@ -4,7 +4,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-import { big } from '@galacticcouncil/common';
+import { big, encodeAssetId } from '@galacticcouncil/common';
 import { toAsset, toDest } from './xTokens.utils';
 
 import {
@@ -35,8 +35,9 @@ const transfer = (): ExtrinsicConfigBuilder => ({
         const account = getExtrinsicAccount(receiver);
 
         const assetId = ctx.getAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
         return {
-          currency_id: assetId,
+          currency_id: encodedAssetId,
           amount,
           dest: toDest(version, rcv, account),
           dest_weight_limit: {
@@ -175,10 +176,12 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
         const version = XcmVersion.v4;
         const account = getExtrinsicAccount(receiver);
         const assetId = ctx.getAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
+        const encodedFeeAssetId = encodeAssetId(feeAssetId);
         return {
           currencies: [
-            [assetId, amount],
-            [feeAssetId, feeAmount],
+            [encodedAssetId, amount],
+            [encodedFeeAssetId, feeAmount],
           ],
           fee_item: 1,
           dest: toDest(version, rcv, account),

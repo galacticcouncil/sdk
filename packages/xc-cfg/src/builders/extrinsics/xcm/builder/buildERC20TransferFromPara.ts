@@ -1,3 +1,8 @@
+import {
+  XcmV4Instruction,
+  XcmV3MultiassetFungibility,
+  XcmV3WeightLimit,
+} from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
 import {
@@ -36,43 +41,24 @@ export async function buildERC20TransferFromPara(
   return {
     type: version,
     value: [
-      {
-        type: 'WithdrawAsset',
-        value: [
-          {
-            id: DOT_LOCATION,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-          {
-            id: transferAssetLocation,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-        ],
-      },
-      {
-        type: 'ClearOrigin',
-      },
-      {
-        type: 'BuyExecution',
-        value: {
-          fees: {
-            id: DOT_LOCATION,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-          weight_limit: {
-            type: 'Unlimited',
-          },
+      XcmV4Instruction.WithdrawAsset([
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
         },
-      },
+        {
+          id: transferAssetLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+        },
+      ]),
+      XcmV4Instruction.ClearOrigin(),
+      XcmV4Instruction.BuyExecution({
+        fees: {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+        },
+        weight_limit: XcmV3WeightLimit.Unlimited(),
+      }),
       ...bridgeXcmOnDest.value,
     ],
   };

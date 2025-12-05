@@ -6,6 +6,18 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
+import {
+  XcmV3Junctions,
+  XcmV3Junction,
+  XcmV3JunctionNetworkId,
+  XcmV3MultiassetFungibility,
+  XcmV4Instruction,
+  XcmV4AssetAssetFilter,
+  XcmV4AssetWildAsset,
+  XcmV3WeightLimit,
+  XcmV2MultiassetWildFungibility,
+  XcmV2OriginKind,
+} from '@galacticcouncil/descriptors';
 
 import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID, RELAY_ID } from './builder';
 import { instr } from './utils';
@@ -14,13 +26,7 @@ import { XcmTransferType, XcmVersion } from './types';
 const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
 const DOT_RESERVE_LOCATION = {
   parents: 1,
-  interior: {
-    type: 'X1',
-    value: {
-      type: 'Parachain',
-      value: 1000,
-    },
-  },
+  interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(1000)),
 };
 
 const isDot = (assetLocation: any) => {
@@ -46,23 +52,19 @@ export const toDest = (
   destination: Parachain
 ) => {
   if (isBridgeHubTransfer(source, destination)) {
+    const networkId =
+      destination.ecosystem === ChainEcosystem.Polkadot
+        ? XcmV3JunctionNetworkId.Polkadot()
+        : XcmV3JunctionNetworkId.Kusama();
+
     return {
       type: version,
       value: {
         parents: 2,
-        interior: {
-          type: 'X2',
-          value: [
-            {
-              type: 'GlobalConsensus',
-              value: destination.ecosystem,
-            },
-            {
-              type: 'Parachain',
-              value: destination.parachainId,
-            },
-          ],
-        },
+        interior: XcmV3Junctions.X2([
+          XcmV3Junction.GlobalConsensus(networkId),
+          XcmV3Junction.Parachain(destination.parachainId),
+        ]),
       },
     };
   }
@@ -72,7 +74,7 @@ export const toDest = (
       type: version,
       value: {
         parents: 1,
-        interior: { type: 'Here' },
+        interior: XcmV3Junctions.Here(),
       },
     };
   }
@@ -85,13 +87,7 @@ export const toDest = (
     type: version,
     value: {
       parents: 1,
-      interior: {
-        type: 'X1',
-        value: {
-          type: 'Parachain',
-          value: parachain,
-        },
-      },
+      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(parachain)),
     },
   };
 };
@@ -101,10 +97,7 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
     type: version,
     value: {
       parents: 0,
-      interior: {
-        type: 'X1',
-        value: account,
-      },
+      interior: XcmV3Junctions.X1(account),
     },
   };
 };
@@ -127,14 +120,10 @@ export const toTransferType = (
     type,
   };
 };
-
 export const toAsset = (assetLocation: object, amount: any) => {
   return {
     id: assetLocation,
-    fun: {
-      type: 'Fungible',
-      value: amount,
-    },
+    fun: XcmV3MultiassetFungibility.Fungible(amount),
   };
 };
 
@@ -142,25 +131,13 @@ export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
   return {
     type: version,
     value: [
-      {
-        type: 'DepositAsset',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 1,
-            },
-          },
-          beneficiary: {
-            parents: 0,
-            interior: {
-              type: 'X1',
-              value: account,
-            },
-          },
+      XcmV4Instruction.DepositAsset({
+        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        beneficiary: {
+          parents: 0,
+          interior: XcmV3Junctions.X1(account),
         },
-      },
+      }),
     ],
   };
 };
@@ -184,64 +161,39 @@ const toDepositReserveAssetXcmOnDest = (
   // From the destination parachain's perspective, the relay chain asset is at parents 1
   const transferAssetLocation = {
     parents: 1,
-    interior: { type: 'Here' },
+    interior: XcmV3Junctions.Here(),
   };
 
   return {
     type: version,
     value: [
-      {
-        type: 'DepositReserveAsset',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 1,
-            },
-          },
-          dest: {
-            parents: 1,
-            interior: {
-              type: 'X1',
-              value: {
-                type: 'Parachain',
-                value: destination.parachainId,
-              },
-            },
-          },
-          xcm: [
-            {
-              type: 'BuyExecution',
-              value: {
-                fees: toAsset(transferAssetLocation, transferFeeAmount),
-                weight_limit: {
-                  type: 'Unlimited',
-                },
-              },
-            },
-            {
-              type: 'DepositAsset',
-              value: {
-                assets: {
-                  type: 'Wild',
-                  value: {
-                    type: 'AllCounted',
-                    value: 1,
-                  },
-                },
-                beneficiary: {
-                  parents: 0,
-                  interior: {
-                    type: 'X1',
-                    value: account,
-                  },
-                },
-              },
-            },
-          ],
+      XcmV4Instruction.DepositReserveAsset({
+        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        dest: {
+          parents: 1,
+          interior: XcmV3Junctions.X1(
+            XcmV3Junction.Parachain(destination.parachainId)
+          ),
         },
-      },
+        xcm: [
+          XcmV4Instruction.BuyExecution({
+            fees: {
+              id: transferAssetLocation,
+              fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
+            },
+            weight_limit: XcmV3WeightLimit.Unlimited(),
+          }),
+          XcmV4Instruction.DepositAsset({
+            assets: XcmV4AssetAssetFilter.Wild(
+              XcmV4AssetWildAsset.AllCounted(1)
+            ),
+            beneficiary: {
+              parents: 0,
+              interior: XcmV3Junctions.X1(account),
+            },
+          }),
+        ],
+      }),
     ],
   };
 };
@@ -262,58 +214,37 @@ const toInitiateTeleportXcmOnDest = (
   // After teleporting to relay chain, the asset is local
   const transferAssetLocation = {
     parents: 0,
-    interior: { type: 'Here' },
+    interior: XcmV3Junctions.Here(),
   };
 
   return {
     type: version,
     value: [
-      {
-        type: 'InitiateTeleport',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 1,
-            },
-          },
-          dest: {
-            parents: 1,
-            interior: { type: 'Here' },
-          },
-          xcm: [
-            {
-              type: 'BuyExecution',
-              value: {
-                fees: toAsset(transferAssetLocation, transferFeeAmount),
-                weight_limit: {
-                  type: 'Unlimited',
-                },
-              },
-            },
-            {
-              type: 'DepositAsset',
-              value: {
-                assets: {
-                  type: 'Wild',
-                  value: {
-                    type: 'AllCounted',
-                    value: 1,
-                  },
-                },
-                beneficiary: {
-                  parents: 0,
-                  interior: {
-                    type: 'X1',
-                    value: account,
-                  },
-                },
-              },
-            },
-          ],
+      XcmV4Instruction.InitiateTeleport({
+        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        dest: {
+          parents: 1,
+          interior: XcmV3Junctions.Here(),
         },
-      },
+        xcm: [
+          XcmV4Instruction.BuyExecution({
+            fees: {
+              id: transferAssetLocation,
+              fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
+            },
+            weight_limit: XcmV3WeightLimit.Unlimited(),
+          }),
+          XcmV4Instruction.DepositAsset({
+            assets: XcmV4AssetAssetFilter.Wild(
+              XcmV4AssetWildAsset.AllCounted(1)
+            ),
+            beneficiary: {
+              parents: 0,
+              interior: XcmV3Junctions.X1(account),
+            },
+          }),
+        ],
+      }),
     ],
   };
 };
@@ -334,97 +265,50 @@ export const toBridgeXcmOnDest = (
   version: XcmVersion,
   account: any,
   sender: any,
-  transferAssetLocation: object,
+  transferAssetLocation: { parents: number; interior: XcmV3Junctions },
   messageId: any
 ) => {
   return {
     type: version,
     value: [
-      {
-        type: 'SetAppendix',
-        value: [
-          {
-            type: 'DepositAsset',
-            value: {
-              assets: {
-                type: 'Wild',
-                value: {
-                  type: 'All',
-                },
-              },
-              beneficiary: {
-                parents: 0,
-                interior: {
-                  type: 'X1',
-                  value: sender,
-                },
-              },
-            },
+      XcmV4Instruction.SetAppendix([
+        XcmV4Instruction.DepositAsset({
+          assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.All()),
+          beneficiary: {
+            parents: 0,
+            interior: XcmV3Junctions.X1(sender),
           },
+        }),
+      ]),
+      XcmV4Instruction.InitiateReserveWithdraw({
+        assets: XcmV4AssetAssetFilter.Wild(
+          XcmV4AssetWildAsset.AllOf({
+            id: transferAssetLocation,
+            fun: XcmV2MultiassetWildFungibility.Fungible(),
+          })
+        ),
+        reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
+        xcm: [
+          XcmV4Instruction.BuyExecution({
+            fees: {
+              id: reanchorLocation(transferAssetLocation),
+              fun: XcmV3MultiassetFungibility.Fungible(1n),
+            },
+            weight_limit: XcmV3WeightLimit.Unlimited(),
+          }),
+          XcmV4Instruction.DepositAsset({
+            assets: XcmV4AssetAssetFilter.Wild(
+              XcmV4AssetWildAsset.AllCounted(1)
+            ),
+            beneficiary: {
+              parents: 0,
+              interior: XcmV3Junctions.X1(account),
+            },
+          }),
+          XcmV4Instruction.SetTopic(messageId),
         ],
-      },
-      {
-        type: 'InitiateReserveWithdraw',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllOf',
-              value: {
-                id: transferAssetLocation,
-                fun: {
-                  type: 'Fungible',
-                },
-              },
-            },
-          },
-          reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
-          xcm: [
-            {
-              type: 'BuyExecution',
-              value: {
-                fees: {
-                  id: reanchorLocation(transferAssetLocation),
-                  fun: {
-                    type: 'Fungible',
-                    value: 1,
-                  },
-                },
-                weight_limit: {
-                  type: 'Unlimited',
-                },
-              },
-            },
-            {
-              type: 'DepositAsset',
-              value: {
-                assets: {
-                  type: 'Wild',
-                  value: {
-                    type: 'AllCounted',
-                    value: 1,
-                  },
-                },
-                beneficiary: {
-                  parents: 0,
-                  interior: {
-                    type: 'X1',
-                    value: [account],
-                  },
-                },
-              },
-            },
-            {
-              type: 'SetTopic',
-              value: messageId,
-            },
-          ],
-        },
-      },
-      {
-        type: 'SetTopic',
-        value: messageId,
-      },
+      }),
+      XcmV4Instruction.SetTopic(messageId),
     ],
   };
 };
@@ -443,20 +327,14 @@ const reanchorLocation = (assetLocation: object) => {
   if (erc20Key) {
     return {
       parents: 0,
-      interior: {
-        type: 'X1',
-        value: {
-          type: 'AccountKey20',
-          value: {
-            key: erc20Key,
-          },
-        },
-      },
+      interior: XcmV3Junctions.X1(
+        XcmV3Junction.AccountKey20({ key: erc20Key })
+      ),
     };
   }
   return {
     parents: 0,
-    interior: { type: 'Here' },
+    interior: XcmV3Junctions.Here(),
   };
 };
 
@@ -481,7 +359,7 @@ const reanchorLocation = (assetLocation: object) => {
 export const toTransactMessage = (
   version: XcmVersion,
   account: any,
-  transactFeeLocation: object,
+  transactFeeLocation: { parents: number; interior: XcmV3Junctions },
   transactFeeAmount: any,
   transactCall: Binary,
   transactWeight: TxWeight
@@ -489,54 +367,35 @@ export const toTransactMessage = (
   return {
     type: version,
     value: [
-      {
-        type: 'WithdrawAsset',
-        value: [toAsset(transactFeeLocation, transactFeeAmount)],
-      },
-      {
-        type: 'BuyExecution',
-        value: {
-          fees: toAsset(transactFeeLocation, transactFeeAmount),
-          weight_limit: {
-            type: 'Unlimited',
-          },
+      XcmV4Instruction.WithdrawAsset([
+        {
+          id: transactFeeLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(transactFeeAmount),
         },
-      },
-      {
-        type: 'Transact',
-        value: {
-          origin_kind: {
-            type: 'SovereignAccount',
-          },
-          require_weight_at_most: {
-            ref_time: transactWeight.refTime,
-            proof_size: transactWeight.proofSize,
-          },
-          call: transactCall,
+      ]),
+      XcmV4Instruction.BuyExecution({
+        fees: {
+          id: transactFeeLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(transactFeeAmount),
         },
-      },
-      {
-        type: 'RefundSurplus',
-      },
-      {
-        type: 'DepositAsset',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 1,
-            },
-          },
-          beneficiary: {
-            parents: 0,
-            interior: {
-              type: 'X1',
-              value: account,
-            },
-          },
+        weight_limit: XcmV3WeightLimit.Unlimited(),
+      }),
+      XcmV4Instruction.Transact({
+        origin_kind: XcmV2OriginKind.SovereignAccount(),
+        require_weight_at_most: {
+          ref_time: transactWeight.refTime,
+          proof_size: transactWeight.proofSize,
         },
-      },
+        call: transactCall,
+      }),
+      XcmV4Instruction.RefundSurplus(),
+      XcmV4Instruction.DepositAsset({
+        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        beneficiary: {
+          parents: 0,
+          interior: XcmV3Junctions.X1(account),
+        },
+      }),
     ],
   };
 };
@@ -544,7 +403,7 @@ export const toTransactMessage = (
 export const toTransferMessage = (
   version: XcmVersion,
   account: any,
-  transferAssetLocation: object,
+  transferAssetLocation: { parents: number; interior: XcmV3Junctions },
   transferAssetAmount: any,
   transferFeeAmount: any,
   receiver: any
@@ -552,54 +411,39 @@ export const toTransferMessage = (
   return {
     type: version,
     value: [
-      {
-        type: 'WithdrawAsset',
-        value: [toAsset(transferAssetLocation, transferFeeAmount)],
-      },
-      {
-        type: 'BuyExecution',
-        value: {
-          fees: toAsset(transferAssetLocation, transferFeeAmount),
-          weight_limit: {
-            type: 'Unlimited',
-          },
+      XcmV4Instruction.WithdrawAsset([
+        {
+          id: transferAssetLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
         },
-      },
-      {
-        type: 'TransferAsset',
-        value: {
-          assets: [toAsset(transferAssetLocation, transferAssetAmount)],
-          beneficiary: {
-            parents: 0,
-            interior: {
-              type: 'X1',
-              value: receiver,
-            },
-          },
+      ]),
+      XcmV4Instruction.BuyExecution({
+        fees: {
+          id: transferAssetLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
         },
-      },
-      {
-        type: 'RefundSurplus',
-      },
-      {
-        type: 'DepositAsset',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 1,
-            },
+        weight_limit: XcmV3WeightLimit.Unlimited(),
+      }),
+      XcmV4Instruction.TransferAsset({
+        assets: [
+          {
+            id: transferAssetLocation,
+            fun: XcmV3MultiassetFungibility.Fungible(transferAssetAmount),
           },
-          beneficiary: {
-            parents: 0,
-            interior: {
-              type: 'X1',
-              value: account,
-            },
-          },
+        ],
+        beneficiary: {
+          parents: 0,
+          interior: XcmV3Junctions.X1(receiver),
         },
-      },
+      }),
+      XcmV4Instruction.RefundSurplus(),
+      XcmV4Instruction.DepositAsset({
+        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        beneficiary: {
+          parents: 0,
+          interior: XcmV3Junctions.X1(account),
+        },
+      }),
     ],
   };
 };

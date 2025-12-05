@@ -82,7 +82,7 @@ export class HydrationMrlFeeValidation extends TransferValidation {
     const feeAssetMin = 1 * Math.pow(10, feeAssetDecimals);
     const feeAssetBalance = await client.getTokensAccountsBalance(
       sender,
-      feeAssetId.toString()
+      feeAssetId
     );
 
     if (feeAssetBalance < BigInt(feeAssetMin)) {

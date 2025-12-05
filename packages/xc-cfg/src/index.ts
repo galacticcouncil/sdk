@@ -9,4 +9,3 @@ export * as dex from './dex';
 export * as tags from './tags';
 
 export { HydrationConfigService } from './configs/HydrationConfigService';
-export { LocationEncoder } from './utils/multilocation-encoder';
