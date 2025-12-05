@@ -1,4 +1,5 @@
 import { Binary } from 'polkadot-api';
+import { XcmV3Junctions } from '@galacticcouncil/descriptors';
 
 export const AMOUNT_MAX = 340282366920938463463374607431768211455n;
 export const TOPIC = Binary.fromHex(
@@ -6,7 +7,7 @@ export const TOPIC = Binary.fromHex(
 );
 
 // Location
-export const DOT_LOCATION = { parents: 1, interior: { type: 'Here' } };
+export const DOT_LOCATION = { parents: 1, interior: XcmV3Junctions.Here() };
 
 // Polkadot
 export const RELAY_ID = 0;

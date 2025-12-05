@@ -159,6 +159,7 @@ export function encodeLocation(location: any): any {
     };
   }
 
+  //transform interior
   return {
     parents,
     interior: transform(interior),
