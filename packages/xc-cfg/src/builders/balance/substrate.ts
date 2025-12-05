@@ -3,8 +3,7 @@ import {
   Parachain,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
-import { encodeLocation } from '@galacticcouncil/common';
-import { encodeAssetId } from '@galacticcouncil/common';
+import { encodeAssetId, encodeLocation } from '@galacticcouncil/common';
 
 export function substrate() {
   return {
