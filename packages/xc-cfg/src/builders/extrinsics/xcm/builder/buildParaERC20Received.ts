@@ -1,3 +1,11 @@
+import {
+  XcmV3Junctions,
+  XcmV4Instruction,
+  XcmV3MultiassetFungibility,
+  XcmV4AssetAssetFilter,
+  XcmV4AssetWildAsset,
+  XcmV3WeightLimit,
+} from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
 import { ACCOUNT_SS_58, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
@@ -12,69 +20,39 @@ export async function buildParaERC20Received(asset: Asset, chain: Parachain) {
     version
   );
 
+  const beneficiaryLocation: { parents: number; interior: ReturnType<typeof XcmV3Junctions.X1> } = {
+    parents: 0,
+    interior: XcmV3Junctions.X1(getExtrinsicAccount(ACCOUNT_SS_58)),
+  };
+
   return {
     type: version,
     value: [
-      {
-        type: 'ReserveAssetDeposited',
-        value: [
-          {
-            id: DOT_LOCATION,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-          {
-            id: transferAssetLocation,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-        ],
-      },
-      {
-        type: 'ClearOrigin',
-      },
-      {
-        type: 'BuyExecution',
-        value: {
-          fees: {
-            id: DOT_LOCATION,
-            fun: {
-              type: 'Fungible',
-              value: AMOUNT_MAX,
-            },
-          },
-          weight_limit: {
-            type: 'Unlimited',
-          },
+      XcmV4Instruction.ReserveAssetDeposited([
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
         },
-      },
-      {
-        type: 'DepositAsset',
-        value: {
-          assets: {
-            type: 'Wild',
-            value: {
-              type: 'AllCounted',
-              value: 2,
-            },
-          },
-          beneficiary: {
-            parents: 0,
-            interior: {
-              type: 'X1',
-              value: getExtrinsicAccount(ACCOUNT_SS_58),
-            },
-          },
+        {
+          id: transferAssetLocation,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
         },
-      },
-      {
-        type: 'SetTopic',
-        value: TOPIC,
-      },
+      ]),
+      XcmV4Instruction.ClearOrigin(),
+      XcmV4Instruction.BuyExecution({
+        fees: {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+        },
+        weight_limit: XcmV3WeightLimit.Unlimited(),
+      }),
+      XcmV4Instruction.DepositAsset({
+        assets: XcmV4AssetAssetFilter.Wild(
+          XcmV4AssetWildAsset.AllCounted(2)
+        ),
+        beneficiary: beneficiaryLocation,
+      }),
+      XcmV4Instruction.SetTopic(TOPIC),
     ],
   };
 }

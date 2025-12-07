@@ -1,7 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { encodeAssetId, encodeLocation } from '@galacticcouncil/common';
 
 import { getTypedApi } from '../utils/papi';
-import { LocationEncoder } from '../utils/multilocation-encoder';
 
 export class BaseClient {
   readonly chain: Parachain;
@@ -20,14 +20,12 @@ export class BaseClient {
     return BigInt(free) - BigInt(frozen);
   }
 
-  async getTokensAccountsBalance(
-    address: string,
-    asset: string
-  ): Promise<bigint> {
+  async getTokensAccountsBalance(address: string, asset: any): Promise<bigint> {
     const client = this.chain.api;
     const api = getTypedApi(client);
 
-    const assetId = Number(asset);
+    const assetId = encodeAssetId(asset);
+
     const response = await api.query.Tokens.Accounts.getValue(address, assetId);
     const { free, frozen } = response;
     return BigInt(free) - BigInt(frozen);
@@ -40,7 +38,8 @@ export class BaseClient {
 
       const versionedXcm = xcm.value?.custom_xcm_on_dest || xcm;
 
-      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
+      const weight =
+        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
       if (!weight.success) {
         throw Error(`Can't query XCM weight.`);
       }
@@ -50,7 +49,7 @@ export class BaseClient {
         throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
       }
 
-      const encodedLocation = LocationEncoder.encode(feeAssetLocation);
+      const encodedLocation = encodeLocation(feeAssetLocation);
       const versionedAssetId = {
         type: 'V4',
         value: encodedLocation,

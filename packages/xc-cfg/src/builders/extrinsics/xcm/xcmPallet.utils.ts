@@ -1,3 +1,8 @@
+import {
+  XcmV3Junctions,
+  XcmV3Junction,
+  XcmV3MultiassetFungibility,
+} from '@galacticcouncil/descriptors';
 import { Parachain } from '@galacticcouncil/xc-core';
 
 import { XcmVersion } from './types';
@@ -7,10 +12,9 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
     type: version,
     value: {
       parents: 0,
-      interior: {
-        type: 'X1',
-        value: { type: 'Parachain', value: destination.parachainId },
-      },
+      interior: XcmV3Junctions.X1(
+        XcmV3Junction.Parachain(destination.parachainId)
+      ),
     },
   };
 };
@@ -18,9 +22,7 @@ export const toDest = (version: XcmVersion, destination: Parachain) => {
 export const toAsset = (assetLocation: object, amount: any) => {
   return {
     id: assetLocation,
-    fun: {
-      Fungible: amount,
-    },
+    fun: XcmV3MultiassetFungibility.Fungible(amount),
   };
 };
 
@@ -29,10 +31,7 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
     type: version,
     value: {
       parents: 0,
-      interior: {
-        type: 'X1',
-        value: { type: 'AccountId32', value: account },
-      },
+      interior: XcmV3Junctions.X1(account),
     },
   };
 };
