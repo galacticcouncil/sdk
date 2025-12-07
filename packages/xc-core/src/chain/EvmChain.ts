@@ -42,7 +42,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
-  get client(): EvmClient {
+  get evmClient(): EvmClient {
     return new EvmClient(this.evmChain, this.rpcs);
   }
 
@@ -51,7 +51,7 @@ export class EvmChain extends Chain<ChainAssetData> {
   }
 
   async getCurrency(): Promise<ChainCurrency> {
-    const { nativeCurrency } = this.client.chain;
+    const { nativeCurrency } = this.evmClient.chain;
     const symbol = nativeCurrency.symbol;
     const decimals = nativeCurrency.decimals;
     const asset = this.getAsset(symbol.toLowerCase());

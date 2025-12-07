@@ -30,7 +30,7 @@ function TokenRelayer() {
 
         const feeAssetId = ctx.getAssetId(feeAsset);
         const feeAssetDecimals = ctx.getAssetDecimals(feeAsset);
-        const relayerFee = await ctx.client.getProvider().readContract({
+        const relayerFee = await ctx.evmClient.getProvider().readContract({
           abi: Abi.TokenRelayer,
           address: ctxWh.getTokenRelayer() as `0x${string}`,
           args: [
@@ -68,7 +68,7 @@ function Snowbridge() {
         const paraClient = new BaseClient(rcv);
         const hubClient = new AssethubClient(opts.hub);
 
-        const xcm = await buildParaERC20Received(feeAsset, rcv);
+        const xcm = buildParaERC20Received(feeAsset, rcv);
 
         const [destinationFee, deliveryFee] = await Promise.all([
           paraClient.calculateDestinationFee(xcm, dot),
@@ -79,7 +79,7 @@ function Snowbridge() {
           deliveryFee + padFeeByPercentage(destinationFee, 25n);
 
         const feeAssetId = ctx.getAssetId(feeAsset);
-        const bridgeFeeInWei = await ctx.client.getProvider().readContract({
+        const bridgeFeeInWei = await ctx.evmClient.getProvider().readContract({
           abi: Abi.Snowbridge,
           address: ctxSb.getGateway() as `0x${string}`,
           args: [feeAssetId as `0x${string}`, rcv.parachainId, bridgeFeeInDot],
@@ -97,11 +97,8 @@ function Snowbridge() {
 
         const client = new AssethubClient(opts.hub);
 
-        const xcm = await buildERC20TransferFromPara(transferAsset, ctx);
-        const returnToSenderXcm = await buildParaERC20Received(
-          transferAsset,
-          ctx
-        );
+        const xcm = buildERC20TransferFromPara(transferAsset, ctx);
+        const returnToSenderXcm = buildParaERC20Received(transferAsset, ctx);
 
         const [
           bridgeDeliveryFee,

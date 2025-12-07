@@ -2,6 +2,7 @@ import {
   XcmV4Instruction,
   XcmV3MultiassetFungibility,
   XcmV3WeightLimit,
+  XcmVersionedXcm,
 } from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
@@ -21,10 +22,10 @@ import {
 } from '../utils';
 import { XcmVersion } from '../types';
 
-export async function buildERC20TransferFromPara(
+export function buildERC20TransferFromPara(
   asset: Asset,
   chain: Parachain
-) {
+): XcmVersionedXcm {
   const version = XcmVersion.v4;
   const transferAssetLocation = getExtrinsicAssetLocation(
     locationOrError(chain, asset),

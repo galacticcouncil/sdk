@@ -5,7 +5,6 @@ import {
   XcmV5Junction,
   XcmVersionedLocation,
   XcmVersionedXcm,
-  XcmVersionedAssetId,
 } from '@galacticcouncil/descriptors';
 import { encodeLocation } from '@galacticcouncil/common';
 
@@ -17,10 +16,6 @@ import { BaseClient } from '../base';
 export class AssethubClient extends BaseClient<typeof hub> {
   constructor(chain: Parachain) {
     super(chain);
-  }
-
-  api() {
-    return this.client.getTypedApi(hub);
   }
 
   async checkIfSufficient(asset: Asset): Promise<boolean> {
@@ -102,7 +97,10 @@ export class AssethubClient extends BaseClient<typeof hub> {
     return leFee;
   }
 
-  async calculateDeliveryFee(xcm: XcmVersionedXcm, destParachainId: number) {
+  async calculateDeliveryFee(
+    xcm: XcmVersionedXcm,
+    destParachainId: number
+  ): Promise<bigint> {
     const destination = XcmVersionedLocation.V5({
       parents: 1,
       interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(destParachainId)),
@@ -122,45 +120,14 @@ export class AssethubClient extends BaseClient<typeof hub> {
       return id && id.parents && id.parents === 1 && 'Here' in id.interior;
     });
 
-    if (dotAsset) {
-      return dotAsset.fun.value;
+    if (!dotAsset) {
+      throw Error(`Can't find XCM delivery fee in DOT.`);
     }
-    throw Error(`Can't find XCM delivery fee in DOT.`);
-  }
 
-  async calculateDestinationFee(
-    xcm: XcmVersionedXcm,
-    asset: Asset
-  ): Promise<bigint> {
-    try {
-      const weight = await this.api().apis.XcmPaymentApi.query_xcm_weight(xcm);
-
-      if (!weight.success) {
-        throw Error(`Can't query XCM weight.`);
-      }
-
-      const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
-      if (!feeAssetLocation) {
-        throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
-      }
-
-      const encodedLocation = encodeLocation(feeAssetLocation);
-      const versionedAssetId = XcmVersionedAssetId.V5(encodedLocation);
-
-      const feeInAsset =
-        await this.api().apis.XcmPaymentApi.query_weight_to_asset_fee(
-          weight.value,
-          versionedAssetId
-        );
-
-      if (!feeInAsset.success) {
-        throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
-      }
-
-      return BigInt(feeInAsset.value);
-    } catch (error) {
-      console.error('Error in calculateDestinationFee:', error);
-      throw error;
+    const val = dotAsset.fun.value;
+    if (typeof val === 'bigint') {
+      return val;
     }
+    throw Error(`Can't parse delivery fee.`);
   }
 }

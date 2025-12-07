@@ -5,15 +5,7 @@ import { BaseClient } from '../base';
 
 export class HydrationClient extends BaseClient<typeof hydration> {
   constructor(chain: Parachain) {
-    super(chain);
-  }
-
-  get client() {
-    return this.chain.client;
-  }
-
-  api() {
-    return this.client.getTypedApi(hydration);
+    super(chain, hydration);
   }
 
   async checkIfSufficient(asset: Asset): Promise<boolean> {
@@ -40,8 +32,8 @@ export class HydrationClient extends BaseClient<typeof hydration> {
     return response.toString();
   }
 
-  async getAssetBalance(address: string, asset: any): Promise<bigint> {
-    if (asset === '0' || asset === 0) {
+  async getAssetBalance(address: string, asset: string): Promise<bigint> {
+    if (asset === '0') {
       return this.getSystemAccountBalance(address);
     }
     return this.getTokensAccountsBalance(address, asset);
