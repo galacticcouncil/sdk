@@ -1,3 +1,8 @@
+import {
+  HydrationWhitelistEntry,
+  HubWhitelistEntry,
+} from '../.papi/descriptors';
+
 export const whitelist: string[] = [
   'api.AaveTradeExecutor.*',
   'api.CurrenciesApi.*',
@@ -51,3 +56,63 @@ export const whitelist: string[] = [
   'tx.Router.sell',
   'tx.Router.sell_all',
 ];
+
+// const hydrationWhitelist: HydrationWhitelistEntry[] = [
+//   'api.AaveTradeExecutor.*',
+//   'api.CurrenciesApi.*',
+//   'api.DryRunApi.*',
+//   'const.Aura.*',
+//   'const.DCA.*',
+//   'const.DynamicFees.*',
+//   'const.LBP.*',
+//   'const.Omnipool.*',
+//   'const.Stableswap.*',
+//   'const.XYK.*',
+//   'const.System.*',
+//   'const.Staking.*',
+//   'event.EVM.Log',
+//   'event.Router.Executed',
+//   'query.AssetRegistry.Assets',
+//   'query.AssetRegistry.AssetLocations',
+//   'query.Bonds.Bonds',
+//   'query.DynamicFees.AssetFee',
+//   'query.LBP.PoolData',
+//   'query.Omnipool.Assets',
+//   'query.Omnipool.HubAssetTradability',
+//   'query.ParachainSystem.ValidationData',
+//   'query.Referenda.ReferendumInfoFor',
+//   'query.Tokens.Accounts',
+//   'query.Tokens.TotalIssuance',
+//   'query.Stableswap.AssetTradability',
+//   'query.Stableswap.Pools',
+//   'query.Stableswap.PoolPegs',
+//   'query.System.Account',
+//   'query.System.Number',
+//   'query.Staking.Positions',
+//   'query.Staking.SixSecBlocksSince',
+//   'query.Staking.Staking',
+//   'query.Staking.Votes',
+//   'query.Uniques.Account',
+//   'query.XYK.PoolAssets',
+//   'query.OmnipoolWarehouseLM.ActiveYieldFarm',
+//   'query.OmnipoolWarehouseLM.GlobalFarm',
+//   'query.OmnipoolWarehouseLM.YieldFarm',
+//   'query.XYKWarehouseLM.ActiveYieldFarm',
+//   'query.XYKWarehouseLM.GlobalFarm',
+//   'query.XYKWarehouseLM.YieldFarm',
+//   'query.EmaOracle.Oracles',
+//   'query.ParachainSystem.ValidationData',
+//   'tx.DCA.*',
+//   'tx.Dispatcher.*',
+//   'tx.Omnipool.buy',
+//   'tx.Omnipool.sell',
+//   'tx.Router.buy',
+//   'tx.Router.sell',
+//   'tx.Router.sell_all',
+// ];
+
+const hydrationWhitelist: HydrationWhitelistEntry[] = ['api.*'];
+
+const hubWhitelist: HubWhitelistEntry[] = ['api.DryRunApi.*'];
+
+//export const whitelist = [...hubWhitelist, ...hydrationWhitelist];
