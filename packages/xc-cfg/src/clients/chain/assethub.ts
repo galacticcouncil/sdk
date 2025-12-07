@@ -1,4 +1,12 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import {
+  hub,
+  XcmV5Junctions,
+  XcmV5Junction,
+  XcmVersionedLocation,
+  XcmVersionedXcm,
+  XcmVersionedAssetId,
+} from '@galacticcouncil/descriptors';
 import { encodeLocation } from '@galacticcouncil/common';
 
 import { Twox128 } from '@polkadot-api/substrate-bindings';
@@ -6,16 +14,19 @@ import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
 
-export class AssethubClient extends BaseClient {
+export class AssethubClient extends BaseClient<typeof hub> {
   constructor(chain: Parachain) {
     super(chain);
   }
 
+  api() {
+    return this.client.getTypedApi(hub);
+  }
+
   async checkIfSufficient(asset: Asset): Promise<boolean> {
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
     const assetId = this.chain.getAssetId(asset);
     const assetLocation = this.chain.getAssetXcmLocation(asset);
+    const encodedLocation = encodeLocation(assetLocation);
 
     if (assetId === 0) {
       return true;
@@ -23,8 +34,8 @@ export class AssethubClient extends BaseClient {
 
     const response =
       assetId === asset.originSymbol
-        ? await api.query.ForeignAssets.Asset.getValue(assetLocation)
-        : await api.query.Assets.Asset.getValue(Number(assetId));
+        ? await this.api().query.ForeignAssets.Asset.getValue(encodedLocation)
+        : await this.api().query.Assets.Asset.getValue(Number(assetId));
 
     if (response) {
       return response.is_sufficient || false;
@@ -34,8 +45,6 @@ export class AssethubClient extends BaseClient {
   }
 
   async checkIfFrozen(address: string, asset: Asset): Promise<boolean> {
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
     const assetId = this.chain.getAssetId(asset);
 
     // If no internal ID (foreign asset) skip
@@ -43,19 +52,22 @@ export class AssethubClient extends BaseClient {
       return false;
     }
 
-    const response = await api.query.Assets.Account.getValue(assetId, address);
+    const response = await this.api().query.Assets.Account.getValue(
+      Number(assetId),
+      address
+    );
     if (!response) {
       return false;
     }
-    return response.status?.Frozen || false;
+    return response.status.type === 'Frozen' || false;
   }
 
   async getAssetMin(asset: Asset): Promise<bigint> {
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
     const assetId = this.chain.getAssetId(asset);
-    const response = await api.query.Assets.Asset.getValue(assetId);
-    return BigInt(response.min_balance);
+    const response = await this.api().query.Assets.Asset.getValue(
+      Number(assetId)
+    );
+    return response?.min_balance || 0n;
   }
 
   async getBridgeDeliveryFee(
@@ -63,12 +75,12 @@ export class AssethubClient extends BaseClient {
       defaultFee: 2_750_872_500_000n,
     }
   ): Promise<bigint> {
-    const client = this.chain.api;
     const keyBytes = new TextEncoder().encode(':BridgeHubEthereumBaseFee:');
     const feeStorageKey = toHex(Twox128(keyBytes));
-    const feeStorageItem = await client._request<string>('state_getStorage', [
-      feeStorageKey,
-    ]);
+    const feeStorageItem = await this.client._request<string>(
+      'state_getStorage',
+      [feeStorageKey]
+    );
 
     if (!feeStorageItem) {
       return options.defaultFee;
@@ -90,25 +102,13 @@ export class AssethubClient extends BaseClient {
     return leFee;
   }
 
-  async calculateDeliveryFee(xcm: any, destParachainId: number) {
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
+  async calculateDeliveryFee(xcm: XcmVersionedXcm, destParachainId: number) {
+    const destination = XcmVersionedLocation.V5({
+      parents: 1,
+      interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(destParachainId)),
+    });
 
-    const destination = {
-      type: 'V4',
-      value: {
-        parents: 1,
-        interior: {
-          type: 'X1',
-          value: {
-            type: 'Parachain',
-            value: destParachainId,
-          },
-        },
-      },
-    };
-
-    const result = await api.apis.XcmPaymentApi.query_delivery_fees(
+    const result = await this.api().apis.XcmPaymentApi.query_delivery_fees(
       destination,
       xcm
     );
@@ -117,26 +117,23 @@ export class AssethubClient extends BaseClient {
       throw Error(`Can't query XCM delivery fee.`);
     }
 
-    const assets = result.value.value || result.value.V4 || result.value;
-    for (const asset of assets) {
-      const interior = asset.id.interior;
-      const isHere =
-        interior?.type === 'Here' ||
-        interior === 'Here' ||
-        interior === undefined;
-      if (asset.id.parents === 1 && isHere) {
-        return BigInt(asset.fun.value ?? asset.fun.Fungible);
-      }
+    const dotAsset = result.value.value.find((a) => {
+      const id = a.id as any;
+      return id && id.parents && id.parents === 1 && 'Here' in id.interior;
+    });
+
+    if (dotAsset) {
+      return dotAsset.fun.value;
     }
     throw Error(`Can't find XCM delivery fee in DOT.`);
   }
 
-  async calculateDestinationFee(xcm: any, asset: Asset): Promise<bigint> {
+  async calculateDestinationFee(
+    xcm: XcmVersionedXcm,
+    asset: Asset
+  ): Promise<bigint> {
     try {
-      const client = this.chain.api;
-      const api = client.getUnsafeApi();
-
-      const weight = await api.apis.XcmPaymentApi.query_xcm_weight(xcm);
+      const weight = await this.api().apis.XcmPaymentApi.query_xcm_weight(xcm);
 
       if (!weight.success) {
         throw Error(`Can't query XCM weight.`);
@@ -148,15 +145,13 @@ export class AssethubClient extends BaseClient {
       }
 
       const encodedLocation = encodeLocation(feeAssetLocation);
-      const versionedAssetId = {
-        type: 'V4',
-        value: encodedLocation,
-      };
+      const versionedAssetId = XcmVersionedAssetId.V5(encodedLocation);
 
-      const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
-        weight.value,
-        versionedAssetId
-      );
+      const feeInAsset =
+        await this.api().apis.XcmPaymentApi.query_weight_to_asset_fee(
+          weight.value,
+          versionedAssetId
+        );
 
       if (!feeInAsset.success) {
         throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);

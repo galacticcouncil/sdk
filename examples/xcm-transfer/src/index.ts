@@ -15,9 +15,9 @@ import { configService, wallet, whTransfers } from './setup';
 import { sign, signSubstrate, signSolanaBundle } from './signers';
 
 // Define transfer constraints
-const srcChain = configService.getChain('ethereum');
+const srcChain = configService.getChain('moonbeam');
 const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const asset = configService.getAsset('glmr');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -32,8 +32,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '0x26f5c2370e563e9f4dda435f03a63d7c109d8d04';
+const destAddr = '5HbftW2XCP77ypjeBEkL2iXHKw5rnRJoqKd3ySZCgxvxbxYj';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
