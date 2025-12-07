@@ -1,6 +1,6 @@
 import { api as papi, createSdkContext } from '@galacticcouncil/sdk-next';
 
-const client = await papi.getWs('wss://hydradx-rpc.dwellir.com');
+const client = await papi.getWs('wss://hydration-rpc.n.dwellir.com');
 
 const sdk = await createSdkContext(client);
 const { ctx } = sdk;
