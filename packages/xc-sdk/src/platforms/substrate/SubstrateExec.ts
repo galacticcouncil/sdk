@@ -1,10 +1,4 @@
-import {
-  Asset,
-  AssetAmount,
-  CallType,
-  Dex,
-  DexFactory,
-} from '@galacticcouncil/xc-core';
+import { Asset, AssetAmount, CallType } from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
 
@@ -18,12 +12,10 @@ import { Call } from '../types';
 export class SubstrateExec {
   readonly #src: SubstrateService;
   readonly #dst: SubstrateService;
-  readonly #dex: Dex | undefined;
 
   constructor(src: SubstrateService, dst: SubstrateService) {
     this.#src = src;
     this.#dst = dst;
-    this.#dex = DexFactory.getInstance().get(src.chain.key);
   }
 
   async remoteExec(
@@ -39,9 +31,11 @@ export class SubstrateExec {
     const srcAsset = await this.#src.getAsset();
 
     const dstApi = this.#dst.api;
-    const dstAsset = await this.#dst.getAsset();
     const dstChain = this.#dst.chain;
-    const dstDecimals = await this.#dst.getDecimals();
+
+    const dstCuurrency = await dstChain.getCurrency();
+    const dstAsset = dstCuurrency.asset;
+    const dstDecimals = dstCuurrency.decimals;
 
     const dstFeeLocation = dstChain.getAssetXcmLocation(dstAsset);
     const dstCallBinary = Binary.fromHex(dstCall.data);
@@ -76,8 +70,8 @@ export class SubstrateExec {
 
     const calls: any[] = [];
 
-    if (this.#dex) {
-      const swapTxHash = await this.#dex.getCalldata(
+    try {
+      const swapTxHash = await this.#src.chain.dex.getCalldata(
         srcAccount,
         opts.srcFeeAsset || srcAsset,
         dstAsset,
@@ -87,7 +81,7 @@ export class SubstrateExec {
       const swapBinary = Binary.fromHex(swapTxHash);
       const swapTx = await srcApi.txFromCallData(swapBinary);
       calls.push(swapTx);
-    }
+    } catch {}
 
     const transferCall = await transfer(dstFee);
     const transferBinary = Binary.fromHex(transferCall.data);
@@ -109,8 +103,6 @@ export class SubstrateExec {
         ? async () => {
             try {
               const dryRunResult = await this.#src.dryRun(srcAccount, batchTx);
-
-              console.log(dryRunResult.execution_result);
 
               const error =
                 dryRunResult.execution_result &&

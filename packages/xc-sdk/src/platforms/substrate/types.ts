@@ -15,9 +15,3 @@ export interface SubstrateDryRunResult extends DryRunResult {
   events: any | undefined;
   xcm: any | undefined;
 }
-
-export interface SubstrateChainSpec {
-  name: string;
-  genesisHash: string;
-  properties: any;
-}

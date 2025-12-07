@@ -36,7 +36,7 @@ export class EvmParachain extends Parachain {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
-  get client(): EvmClient {
+  get evmClient(): EvmClient {
     return new EvmClient(this.evmChain, this.rpcs);
   }
 
@@ -50,8 +50,7 @@ export class EvmParachain extends Parachain {
     }
 
     if (this.evmResolver) {
-      const api = await this.api;
-      return this.evmResolver.toH160(address, api);
+      return this.evmResolver.toH160(address, this.client);
     }
     throw new Error(`No EVM resolver found for ` + this.name);
   }

@@ -7,6 +7,7 @@ import {
   ContractConfig,
   Erc20Client,
   EvmClient,
+  EvmParachain,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -28,7 +29,11 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
   readonly #client: EvmClient;
 
   constructor(chain: AnyEvmChain) {
-    this.#client = chain.client;
+    if (chain instanceof EvmParachain) {
+      this.#client = chain.evmClient;
+    } else {
+      this.#client = chain.client;
+    }
   }
 
   async buildCall(

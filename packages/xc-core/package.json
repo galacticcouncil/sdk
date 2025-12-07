@@ -52,7 +52,7 @@
     "bigint-buffer": "^1.1.5",
     "buffer": "^6.0.3",
     "bs58": "^6.0.0",
-    "lru-cache": "^11.0.0"
+    "lru-cache": "^11.2.2"
   },
   "peerDependencies": {
     "polkadot-api": ">=1.19.2 <1.20.0",

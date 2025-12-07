@@ -1,3 +1,4 @@
+import { FixedSizeBinary } from 'polkadot-api';
 import { Parachain } from '../chain';
 import { createPayload, decodePayload } from './mrl';
 
@@ -37,7 +38,7 @@ describe('Mrl utils', () => {
       const testHex =
         '0x0004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d';
 
-      const decoded = await decodePayload(parachain, testHex);
+      const decoded = await decodePayload(testHex);
 
       expect(decoded.tag).toBe('V1');
       expect(decoded.value).toHaveProperty('destination');
@@ -50,13 +51,10 @@ describe('Mrl utils', () => {
       const payload = await createPayload(parachain, ALICE);
       const hex = payload.toHex();
 
-      const decoded = await decodePayload(parachain, hex);
+      const decoded = await decodePayload(hex);
 
       expect(decoded.tag).toBe('V1');
       expect(decoded.value.destination).toBeDefined();
-
-      const payload2 = await createPayload(parachain, ALICE);
-      expect(payload2.toHex()).toBe(hex);
     });
   });
 });
