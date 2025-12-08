@@ -10,9 +10,9 @@ import { Struct, Enum } from 'scale-ts';
 import { toHex, fromHex } from '@polkadot-api/utils';
 import {
   XcmVersionedLocation,
-  XcmV3Junction,
-  XcmV3Junctions,
-  hydration,
+  XcmV5Junction,
+  XcmV5Junctions,
+  hub,
 } from '@galacticcouncil/descriptors';
 
 import { Parachain } from '../chain';
@@ -35,7 +35,7 @@ interface EncodedPayload {
 async function getVersionedUserActionCodec(): Promise<
   Codec<VersionedUserAction>
 > {
-  const codecs = await getTypedCodecs(hydration);
+  const codecs = await getTypedCodecs(hub);
   const destCodec = codecs.tx.PolkadotXcm.send.inner.dest;
 
   const XcmRoutingUserActionCodec = Struct({
@@ -54,25 +54,25 @@ function createXcmLocation(
   address: string,
   isEthereumStyle: boolean
 ): XcmVersionedLocation {
-  let accountJunction: XcmV3Junction;
+  let accountJunction: XcmV5Junction;
 
   if (isEthereumStyle) {
-    accountJunction = XcmV3Junction.AccountKey20({
+    accountJunction = XcmV5Junction.AccountKey20({
       key: FixedSizeBinary.fromHex(address),
       network: undefined,
     });
   } else {
     const ss58 = AccountId().enc(address);
-    accountJunction = XcmV3Junction.AccountId32({
+    accountJunction = XcmV5Junction.AccountId32({
       id: FixedSizeBinary.fromBytes(ss58),
       network: undefined,
     });
   }
 
-  return XcmVersionedLocation.V4({
+  return XcmVersionedLocation.V5({
     parents: 1,
-    interior: XcmV3Junctions.X2([
-      XcmV3Junction.Parachain(parachain.parachainId),
+    interior: XcmV5Junctions.X2([
+      XcmV5Junction.Parachain(parachain.parachainId),
       accountJunction,
     ]),
   });

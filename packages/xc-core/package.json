@@ -33,12 +33,12 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
-    "@galacticcouncil/descriptors": "^1.5.1",
     "@types/big.js": "^6.2.2",
     "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
     "@galacticcouncil/common": "^0.1.1",
+    "@galacticcouncil/descriptors": "^1.5.1",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",
     "@wormhole-foundation/sdk-connect": "3.2.0",

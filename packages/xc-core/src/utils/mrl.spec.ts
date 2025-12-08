@@ -1,4 +1,3 @@
-import { FixedSizeBinary } from 'polkadot-api';
 import { Parachain } from '../chain';
 import { createPayload, decodePayload } from './mrl';
 
@@ -16,11 +15,11 @@ const parachain = new Parachain({
 
 describe('Mrl utils', () => {
   describe('createPayload', () => {
-    it('should encode VersionedUserAction V1 with XcmVersionedLocation V4 for Alice', async () => {
+    it('should encode VersionedUserAction V1 with XcmVersionedLocation V5 for Alice', async () => {
       const payload = await createPayload(parachain, ALICE);
 
       expect(payload.toHex()).toBe(
-        '0x0004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
+        '0x0005010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'
       );
     });
 
@@ -36,7 +35,7 @@ describe('Mrl utils', () => {
   describe('decodePayload', () => {
     it('should decode SCALE bytes to VersionedUserAction structure', async () => {
       const testHex =
-        '0x0004010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d';
+        '0x0005010200c91f0100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d';
 
       const decoded = await decodePayload(testHex);
 
