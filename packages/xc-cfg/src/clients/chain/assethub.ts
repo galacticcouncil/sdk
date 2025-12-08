@@ -1,19 +1,19 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 import {
-  hub,
   XcmV5Junctions,
   XcmV5Junction,
   XcmVersionedLocation,
   XcmV4Instruction,
+  Hub,
 } from '@galacticcouncil/descriptors';
 import { encodeLocation } from '@galacticcouncil/common';
 
-import { Twox128 } from '@polkadot-api/substrate-bindings';
+import { Twox128, u128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
 import { BaseClient } from '../base';
 
-export class AssethubClient extends BaseClient<typeof hub> {
+export class AssethubClient extends BaseClient<Hub> {
   constructor(chain: Parachain) {
     super(chain);
   }
@@ -81,16 +81,7 @@ export class AssethubClient extends BaseClient<typeof hub> {
       return options.defaultFee;
     }
 
-    // Parse little-endian hex to BigInt
-    const hexValue = feeStorageItem.replace('0x', '');
-    const bytes = new Uint8Array(
-      hexValue.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
-    );
-    let leFee = 0n;
-    for (let i = 0; i < bytes.length; i++) {
-      leFee |= BigInt(bytes[i]) << BigInt(i * 8);
-    }
-
+    const leFee = u128.dec(feeStorageItem);
     if (leFee === 0n) {
       return options.defaultFee;
     }

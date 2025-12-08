@@ -2,7 +2,6 @@ import {
   XcmV4Instruction,
   XcmV3MultiassetFungibility,
   XcmV3WeightLimit,
-  XcmVersionedXcm,
 } from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 

@@ -4,14 +4,13 @@ import { Asset, Parachain } from '@galacticcouncil/xc-core';
 import { encodeLocation } from '@galacticcouncil/common';
 import {
   hub,
-  Hub,
   XcmV4Instruction,
   XcmVersionedAssetId,
 } from '@galacticcouncil/descriptors';
 
 export class BaseClient<C extends ChainDefinition = typeof hub> {
   readonly chain: Parachain;
-  readonly descriptor: C;
+  protected descriptor: C;
 
   constructor(chain: Parachain, descriptor?: C) {
     this.chain = chain;
@@ -22,17 +21,16 @@ export class BaseClient<C extends ChainDefinition = typeof hub> {
     return this.chain.client;
   }
 
-  get unsafeApi() {
-    return this.client.getUnsafeApi();
-  }
-
   api(): TypedApi<C> {
     return this.client.getTypedApi(this.descriptor);
   }
 
+  private get refApi() {
+    return this.api() as TypedApi<typeof hub>;
+  }
+
   async getSystemAccountBalance(address: string): Promise<bigint> {
-    const response =
-      await this.unsafeApi.query.System.Account.getValue(address);
+    const response = await this.refApi.query.System.Account.getValue(address);
     const balance = response.data;
     const { free, frozen } = balance;
     return BigInt(free) - BigInt(frozen);
@@ -42,7 +40,7 @@ export class BaseClient<C extends ChainDefinition = typeof hub> {
     xcm: XcmV4Instruction[],
     asset: Asset
   ): Promise<bigint> {
-    const weight = await this.unsafeApi.apis.XcmPaymentApi.query_xcm_weight({
+    const weight = await this.refApi.apis.XcmPaymentApi.query_xcm_weight({
       type: 'V4',
       value: xcm,
     });
@@ -59,7 +57,7 @@ export class BaseClient<C extends ChainDefinition = typeof hub> {
     const encodedLocation = encodeLocation(feeAssetLocation);
 
     const feeInAsset =
-      await this.unsafeApi.apis.XcmPaymentApi.query_weight_to_asset_fee(
+      await this.refApi.apis.XcmPaymentApi.query_weight_to_asset_fee(
         weight.value,
         XcmVersionedAssetId.V4(encodedLocation)
       );
