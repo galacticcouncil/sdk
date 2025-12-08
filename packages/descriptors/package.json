@@ -33,7 +33,7 @@
   "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
   "scripts": {
-    "prebuild": "npm run papi",
+    "prebuild": "npm run papi:whitelist",
     "build": "npm run clean && npm run copy:dist",
     "clean": "rimraf build",
     "copy:dist": "cp -r .papi/descriptors/dist ./build",
