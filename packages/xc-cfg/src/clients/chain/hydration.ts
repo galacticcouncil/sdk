@@ -1,7 +1,12 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
-import { hydration } from '@galacticcouncil/descriptors';
+import {
+  hydration,
+  XcmV4Instruction,
+  XcmVersionedAssetId,
+} from '@galacticcouncil/descriptors';
 
 import { BaseClient } from '../base';
+import { encodeLocation } from '@galacticcouncil/common';
 
 export class HydrationClient extends BaseClient<typeof hydration> {
   constructor(chain: Parachain) {
@@ -57,5 +62,39 @@ export class HydrationClient extends BaseClient<typeof hydration> {
     );
     const { free, frozen } = response;
     return BigInt(free) - BigInt(frozen);
+  }
+
+  async calculateDestinationFee(
+    xcm: XcmV4Instruction[],
+    asset: Asset
+  ): Promise<bigint> {
+    console.log(this.chain);
+    const weight = await this.api().apis.XcmPaymentApi.query_xcm_weight({
+      type: 'V4',
+      value: xcm,
+    });
+
+    if (!weight.success) {
+      throw Error(`Can't query XCM weight.`);
+    }
+
+    const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
+    if (!feeAssetLocation) {
+      throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
+    }
+
+    const encodedLocation = encodeLocation(feeAssetLocation);
+
+    const feeInAsset =
+      await this.api().apis.XcmPaymentApi.query_weight_to_asset_fee(
+        weight.value,
+        XcmVersionedAssetId.V4(encodedLocation)
+      );
+
+    if (!feeInAsset.success) {
+      throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
+    }
+
+    return BigInt(feeInAsset.value);
   }
 }

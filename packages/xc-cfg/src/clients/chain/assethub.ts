@@ -4,7 +4,7 @@ import {
   XcmV5Junctions,
   XcmV5Junction,
   XcmVersionedLocation,
-  XcmVersionedXcm,
+  XcmV4Instruction,
 } from '@galacticcouncil/descriptors';
 import { encodeLocation } from '@galacticcouncil/common';
 
@@ -98,7 +98,7 @@ export class AssethubClient extends BaseClient<typeof hub> {
   }
 
   async calculateDeliveryFee(
-    xcm: XcmVersionedXcm,
+    xcm: XcmV4Instruction[],
     destParachainId: number
   ): Promise<bigint> {
     const destination = XcmVersionedLocation.V5({
@@ -108,7 +108,7 @@ export class AssethubClient extends BaseClient<typeof hub> {
 
     const result = await this.api().apis.XcmPaymentApi.query_delivery_fees(
       destination,
-      xcm
+      { type: 'V4', value: xcm }
     );
 
     if (!result.success) {
@@ -117,7 +117,9 @@ export class AssethubClient extends BaseClient<typeof hub> {
 
     const dotAsset = result.value.value.find((a) => {
       const id = a.id as any;
-      return id && id.parents && id.parents === 1 && 'Here' in id.interior;
+      return (
+        id && id.parents && id.parents === 1 && id.interior.type === 'Here'
+      );
     });
 
     if (!dotAsset) {
