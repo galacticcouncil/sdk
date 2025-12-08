@@ -131,7 +131,8 @@ export class SubstrateService {
 
     const result = await this.api.apis.DryRunApi.dry_run_call(
       origin,
-      tx.decodedCall
+      tx.decodedCall,
+      4
     );
 
     if (!result.success) {
