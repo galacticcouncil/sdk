@@ -11,15 +11,17 @@ import {
 } from '@galacticcouncil/xc-sdk';
 
 import { logAssets, logSrcChains, logDestChains } from './utils';
-import { configService, wallet, whTransfers } from './setup';
 import { sign, signSubstrate, signSolanaBundle } from './signers';
+import { ctx } from './setup';
+
+const { config, wallet, wormhole } = ctx;
 
 // Define transfer constraints
-const srcChain = configService.getChain('ethereum');
-const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const srcChain = config.getChain('ethereum');
+const destChain = config.getChain('hydration');
+const asset = config.getAsset('eth');
 
-const configBuilder = ConfigBuilder(configService);
+const configBuilder = ConfigBuilder(config);
 const { sourceChains } = configBuilder.assets().asset(asset);
 const { destinationChains } = configBuilder
   .assets()
@@ -85,7 +87,7 @@ balanceSubscription.unsubscribe();
  * @param payer - claim payer (from)
  */
 async function claimWithdraws(account: string, payer: string) {
-  const withdraws = await whTransfers.getWithdraws(account);
+  const withdraws = await wormhole.transfer.getWithdraws(account);
 
   for (const withdrawal of withdraws) {
     if (withdrawal.redeem) {
@@ -114,11 +116,11 @@ async function claimWithdraws(account: string, payer: string) {
  * @param payer - claim payer (from)
  */
 async function claimDeposits(account: string, payer: string) {
-  const srcChain = configService.getChain('hydration') as Parachain;
-  const destChain = configService.getChain('moonbeam') as Parachain;
+  const srcChain = config.getChain('hydration') as Parachain;
+  const destChain = config.getChain('moonbeam') as Parachain;
   const feeAsset = srcChain.findAssetById('10'); // default to system
 
-  const deposits = await whTransfers.getDeposits(account);
+  const deposits = await wormhole.transfer.getDeposits(account);
 
   for (const deposit of deposits) {
     if (deposit.redeem) {
