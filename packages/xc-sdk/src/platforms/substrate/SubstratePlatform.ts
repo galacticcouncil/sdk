@@ -9,8 +9,10 @@ import {
 
 import {
   concatMap,
+  catchError,
   distinctUntilChanged,
   firstValueFrom,
+  throwError,
   Observable,
 } from 'rxjs';
 
@@ -51,7 +53,7 @@ export class SubstratePlatform implements Platform<
         }
       : undefined;
 
-    const extrinsic = await substrate.getExtrinsic(config);
+    const extrinsic = config.getTx(substrate.client);
     const extrinsicCall = config.module + '.' + config.func;
 
     const callData = await extrinsic.getEncodedData();
@@ -64,7 +66,7 @@ export class SubstratePlatform implements Platform<
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
-              const extrinsic = await substrate.getExtrinsic(config);
+              const extrinsic = config.getTx(substrate.client);
               const dryRunResult = await substrate.dryRun(account, extrinsic);
 
               const error =
@@ -132,6 +134,10 @@ export class SubstratePlatform implements Platform<
           substrate
         );
         return AssetAmount.fromAsset(asset, params);
+      }),
+      catchError((err) => {
+        console.error('subscribe fails for:', asset);
+        return throwError(() => err);
       })
     );
   }

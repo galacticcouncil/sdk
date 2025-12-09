@@ -1,16 +1,21 @@
+import { PolkadotClient, Transaction, UnsafeTransaction } from 'polkadot-api';
+
 import { BaseConfig, BaseConfigParams, CallType } from '../base';
 
-export type TxData = Record<string, any> | ExtrinsicConfig[];
+type SafeTx = Transaction<any, string, string, void | undefined>;
+type UnsafeTx = UnsafeTransaction<any, string, string, void | undefined>;
+
+export type Extrinsic = SafeTx | UnsafeTx;
 
 export interface ExtrinsicConfigParams extends Omit<BaseConfigParams, 'type'> {
-  getArgs: (func?: any) => Promise<TxData>;
+  getTx: (client: PolkadotClient) => Extrinsic;
 }
 
 export class ExtrinsicConfig extends BaseConfig {
-  getArgs: (func?: any) => Promise<TxData>;
+  getTx: (client: PolkadotClient) => Extrinsic;
 
-  constructor({ getArgs, ...other }: ExtrinsicConfigParams) {
+  constructor({ getTx, ...other }: ExtrinsicConfigParams) {
     super({ ...other, type: CallType.Substrate });
-    this.getArgs = getArgs;
+    this.getTx = getTx;
   }
 }

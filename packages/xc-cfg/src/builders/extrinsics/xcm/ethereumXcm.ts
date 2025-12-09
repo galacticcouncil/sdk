@@ -16,20 +16,20 @@ const pallet = 'EthereumXcm';
 const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
   const func = 'transact';
   return {
-    build: (params) => {
+    build: async (params) => {
+      const contract = await config.build(params);
+      const version = XcmVersion.v1;
+      const call = encodeFunctionData({
+        abi: Abi[contract.module],
+        functionName: contract.func,
+        args: contract.args,
+      });
+
       return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: async () => {
-          const contract = await config.build(params);
-          const version = XcmVersion.v1;
-          const call = encodeFunctionData({
-            abi: Abi[contract.module],
-            functionName: contract.func,
-            args: contract.args,
-          });
-
-          return {
+        getTx: (client) => {
+          return client.getUnsafeApi().tx[pallet][func]({
             xcm_transaction: {
               type: version,
               value: {
@@ -47,7 +47,7 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
                 access_list: undefined,
               },
             },
-          };
+          });
         },
       });
     },

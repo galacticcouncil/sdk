@@ -1,3 +1,4 @@
+import { hydration } from '@galacticcouncil/descriptors';
 import {
   EvmParachain,
   ExtrinsicConfig,
@@ -13,36 +14,37 @@ type SwapOpts = {
 const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
   const func = 'buy';
   return {
-    build: ({ source }) =>
-      new ExtrinsicConfig({
+    build: async ({ source }) => {
+      const { chain, destinationFeeSwap } = source;
+
+      if (!destinationFeeSwap) {
+        throw new Error('Swap context not found.');
+      }
+
+      const { aIn, aOut, route } = destinationFeeSwap;
+
+      const ctx = chain as EvmParachain;
+      const assetIn = ctx.getMetadataAssetId(aIn);
+      const assetOut = ctx.getMetadataAssetId(aOut);
+
+      const amountOut = aOut.amount;
+      const maxAmountIn =
+        aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
+
+      return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: async () => {
-          const { chain, destinationFeeSwap } = source;
-
-          if (!destinationFeeSwap) {
-            throw new Error('Swap context not found.');
-          }
-
-          const { aIn, aOut, route } = destinationFeeSwap;
-
-          const ctx = chain as EvmParachain;
-          const assetIn = ctx.getMetadataAssetId(aIn);
-          const assetOut = ctx.getMetadataAssetId(aOut);
-
-          const amountOut = aOut.amount;
-          const maxAmountIn =
-            aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;
-
-          return {
+        getTx: (client) => {
+          return client.getTypedApi(hydration).tx.Router.buy({
             asset_in: Number(assetIn),
             asset_out: Number(assetOut),
             amount_out: amountOut,
             max_amount_in: maxAmountIn,
             route: route,
-          };
+          });
         },
-      }),
+      });
+    },
   };
 };
 

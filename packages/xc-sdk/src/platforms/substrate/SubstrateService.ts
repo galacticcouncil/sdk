@@ -5,16 +5,23 @@ import {
   AnyParachain,
   Asset,
   AssetAmount,
-  ExtrinsicConfig,
   ChainCurrency,
+  Extrinsic,
+  ExtrinsicConfig,
 } from '@galacticcouncil/xc-core';
+
+import { enums } from '@galacticcouncil/common';
+import { HubApis } from '@galacticcouncil/descriptors';
 
 import { Blake2256, u32 } from '@polkadot-api/substrate-bindings';
 import { toHex, fromHex } from '@polkadot-api/utils';
 
-import { Enum, UnsafeTransaction } from 'polkadot-api';
+import { Enum } from 'polkadot-api';
 
 import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
+
+type TRawDryRun = HubApis['DryRunApi']['dry_run_call']['Value']['value'];
+type TDryRun = Extract<TRawDryRun, { execution_result: any }>;
 
 const { Ss58Addr } = addr;
 
@@ -75,26 +82,6 @@ export class SubstrateService {
     return this.api.apis?.DryRunApi !== undefined;
   }
 
-  async getExtrinsic(
-    config: ExtrinsicConfig
-  ): Promise<UnsafeTransaction<any, any, any, any>> {
-    const fn = this.api.tx[config.module][config.func];
-    const args = await config.getArgs(fn);
-
-    if (Array.isArray(args) && config.func === 'batch_all') {
-      const batch = args as ExtrinsicConfig[];
-      const callsPromises = batch.map(async ({ module, func, getArgs }) => {
-        const fn = this.api.tx[module][func];
-        const args = await getArgs(fn);
-        return fn(args);
-      });
-      const calls = await Promise.all(callsPromises);
-      const decoded = calls.map((c) => c.decodedCall);
-      return fn({ calls: decoded });
-    }
-    return fn(args);
-  }
-
   async buildMessageId(
     account: string,
     amount: bigint,
@@ -122,32 +109,35 @@ export class SubstrateService {
     return toHex(hash);
   }
 
-  async dryRun(
-    account: string,
-    tx: UnsafeTransaction<any, any, any, any>
-  ): Promise<any> {
+  async dryRun(account: string, tx: Extrinsic): Promise<TDryRun> {
     const rawOrigin = Enum('Signed', account);
     const origin = Enum('system', rawOrigin);
 
-    const result = await this.api.apis.DryRunApi.dry_run_call(
+    const raw = await this.api.apis.DryRunApi.dry_run_call(
       origin,
       tx.decodedCall,
       4
     );
 
-    if (!result.success) {
+    if (!raw.success) {
       throw new Error('DryRun call failed');
     }
-    return result.value;
+
+    const result = raw.value as TRawDryRun;
+    if ('type' in result && 'value' in result) {
+      throw new Error('DryRun call error: ' + enums.enumPath(result.value));
+    }
+
+    return result as TDryRun;
   }
 
   async estimateNetworkFee(
     account: string,
     config: ExtrinsicConfig
   ): Promise<bigint> {
-    const extrinsic = await this.getExtrinsic(config);
+    const tx = config.getTx(this.client);
     try {
-      const info = await extrinsic.getPaymentInfo(account);
+      const info = await tx.getPaymentInfo(account);
       return BigInt(info.partial_fee);
     } catch (e) {
       /**
@@ -167,8 +157,8 @@ export class SubstrateService {
       const acc = await this.estimateDeliveryFeeWith(account, config);
 
       try {
-        const extrinsic = await this.getExtrinsic(config);
-        const dryRunResult = await this.dryRun(acc, extrinsic);
+        const tx = config.getTx(this.client);
+        const dryRunResult = await this.dryRun(acc, tx);
 
         if (dryRunResult.execution_result?.success) {
           return getDeliveryFeeFromDryRun(dryRunResult.emitted_events || []);
@@ -186,7 +176,8 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<string> {
     if (['PolkadotXcm'].includes(config.module)) {
-      const args = await config.getArgs();
+      const extrinsic = config.getTx(this.client).decodedCall;
+      const args = extrinsic.value.value;
       const dest = 'dest' in args ? args.dest : undefined;
       if (!dest) return account;
 

@@ -26,5 +26,5 @@ export interface ExtrinsicConfigBuilderParams extends TransferCtx {
 }
 
 export interface ExtrinsicConfigBuilder {
-  build: (params: ExtrinsicConfigBuilderParams) => ExtrinsicConfig;
+  build: (params: ExtrinsicConfigBuilderParams) => Promise<ExtrinsicConfig>;
 }

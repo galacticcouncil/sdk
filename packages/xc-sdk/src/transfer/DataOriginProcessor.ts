@@ -230,9 +230,9 @@ export class DataOriginProcessor extends DataProcessor {
     ctx: TransferCtx
   ): Promise<TransactCtx> {
     const { chain, extrinsic } = cfg;
-    const config = extrinsic.build(ctx);
+    const config = await extrinsic.build(ctx);
     const substrate = await SubstrateService.create(chain);
-    const submittable = await substrate.getExtrinsic(config);
+    const submittable = config.getTx(substrate.client);
 
     const fromChain = ctx.source.chain as Parachain;
     const fromAddr = ctx.sender;

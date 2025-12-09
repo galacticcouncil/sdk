@@ -46,7 +46,7 @@ export const wallet = new Wallet({
 });
 
 // Register external assets
-configService.registerExternal(externals);
+// configService.registerExternal(externals);
 
 // Register dex-es
 const hydrationDex = new dex.HydrationDex(hydration, ctx.pool);

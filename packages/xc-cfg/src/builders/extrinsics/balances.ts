@@ -8,15 +8,15 @@ const pallet = 'Balances';
 const transferAll = (keepAlive = false): ExtrinsicConfigBuilder => {
   const func = 'transfer_all';
   return {
-    build: ({ address }) =>
+    build: async ({ address }) =>
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: async () => {
-          return {
+        getTx: (client) => {
+          return client.getUnsafeApi().tx[pallet][func]({
             dest: address,
             keep_alive: keepAlive,
-          };
+          });
         },
       }),
   };

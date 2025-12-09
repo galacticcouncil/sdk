@@ -48,6 +48,7 @@ const hubWhitelist: HubWhitelistEntry[] = [
   'query.ForeignAssets.*',
   'query.Assets.*',
   'api.AssetConversionApi.*',
+  'tx.Assets.*',
 ];
 
 export const whitelist: WhitelistEntriesByChain = {

@@ -9,13 +9,7 @@ import { balances } from './extrinsics/balances';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
-import {
-  ethereumXcm,
-  polkadotXcm,
-  xcmPallet,
-  xTokens,
-  xTransfer,
-} from './extrinsics/xcm';
+import { ethereumXcm, polkadotXcm, xTokens, xTransfer } from './extrinsics/xcm';
 
 export function ExtrinsicBuilder() {
   return {
@@ -28,7 +22,6 @@ export function ExtrinsicBuilder() {
     utility,
     xTokens,
     xTransfer,
-    xcmPallet,
   };
 }
 
@@ -39,7 +32,7 @@ export function ExtrinsicDecorator(
   return {
     prior: function (config: ExtrinsicConfigBuilder): ExtrinsicConfigBuilder {
       return {
-        build: (params) => {
+        build: async (params) => {
           if (predicate(params)) {
             return ExtrinsicBuilder()
               .utility()
@@ -54,7 +47,7 @@ export function ExtrinsicDecorator(
       configs: ExtrinsicConfigBuilder[]
     ): ExtrinsicConfigBuilder {
       return {
-        build: (params) => {
+        build: async (params) => {
           if (predicate(params)) {
             return ExtrinsicBuilder()
               .utility()

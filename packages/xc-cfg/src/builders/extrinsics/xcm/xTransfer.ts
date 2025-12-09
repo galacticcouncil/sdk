@@ -16,31 +16,32 @@ import { XcmVersion } from './types';
 const pallet = 'XTransfer';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) => {
+  build: async ({ address, amount, asset, destination, source }) => {
+    const version = XcmVersion.v3;
+    const account = getExtrinsicAccount(address);
+    const ctx = source.chain as Parachain;
+    const rcv = destination.chain as Parachain;
+
+    const transferAssetLocation = getExtrinsicAssetLocation(
+      locationOrError(ctx, asset),
+      version
+    );
+    const transferAsset = toAsset(transferAssetLocation, amount);
+    const dest = toDest(rcv, account);
+
+    const func = 'transfer';
     return new ExtrinsicConfig({
       module: pallet,
-      func: 'transfer',
-      getArgs: async () => {
-        const version = XcmVersion.v3;
-        const account = getExtrinsicAccount(address);
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-
-        const transferAssetLocation = getExtrinsicAssetLocation(
-          locationOrError(ctx, asset),
-          version
-        );
-        const transferAsset = toAsset(transferAssetLocation, amount);
-        const dest = toDest(rcv, account);
-
-        return [
+      func,
+      getTx: (client) => {
+        return client.getUnsafeApi().tx[pallet][func]([
           transferAsset,
           dest,
           {
             refTime: 5_000_000_000,
             proofSize: 0,
           },
-        ];
+        ]);
       },
     });
   },

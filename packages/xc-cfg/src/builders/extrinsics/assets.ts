@@ -1,3 +1,4 @@
+import { hub, MultiAddress } from '@galacticcouncil/descriptors';
 import {
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -9,21 +10,26 @@ const pallet = 'Assets';
 const transfer = (): ExtrinsicConfigBuilder => {
   const func = 'transfer';
   return {
-    build: ({ asset, amount, address, destination }) =>
-      new ExtrinsicConfig({
+    build: async ({ asset, amount, address, destination }) => {
+      const rcv = destination.chain as Parachain;
+
+      const { fee } = destination;
+
+      const amountIn = amount > fee.amount ? amount - fee.amount : amount;
+      const assetIn = rcv.getMetadataAssetId(asset);
+
+      return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: async () => {
-          const rcv = destination.chain as Parachain;
-
-          const { fee } = destination;
-
-          const amountIn = amount > fee.amount ? amount - fee.amount : amount;
-          const assetIn = rcv.getMetadataAssetId(asset);
-
-          return [assetIn, address, amountIn];
+        getTx: (client) => {
+          return client.getTypedApi(hub).tx.Assets.transfer({
+            id: Number(assetIn),
+            target: MultiAddress.Id(address),
+            amount: amountIn,
+          });
         },
-      }),
+      });
+    },
   };
 };
 

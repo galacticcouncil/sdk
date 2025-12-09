@@ -19,57 +19,62 @@ import { XcmVersion } from './types';
 const pallet = 'XTokens';
 
 const transfer = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, sender, source }) =>
-    new ExtrinsicConfig({
+  build: async ({ address, amount, asset, destination, sender, source }) => {
+    const ctx = source.chain as Parachain;
+    const rcv = destination.chain as Parachain;
+    const version = XcmVersion.v4;
+
+    const receiver = rcv.usesCexForwarding
+      ? getDerivativeAccount(ctx, sender, rcv)
+      : address;
+
+    const account = getExtrinsicAccount(receiver);
+
+    const assetId = ctx.getAssetId(asset);
+    const encodedAssetId = encodeAssetId(assetId);
+
+    const func = 'transfer';
+    return new ExtrinsicConfig({
       module: pallet,
-      func: 'transfer',
-      getArgs: async () => {
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-        const version = XcmVersion.v4;
-
-        const receiver = rcv.usesCexForwarding
-          ? getDerivativeAccount(ctx, sender, rcv)
-          : address;
-
-        const account = getExtrinsicAccount(receiver);
-
-        const assetId = ctx.getAssetId(asset);
-        const encodedAssetId = encodeAssetId(assetId);
-        return {
+      func,
+      getTx: (client) => {
+        return client.getUnsafeApi().tx[pallet][func]({
           currency_id: encodedAssetId,
           amount,
           dest: toDest(version, rcv, account),
           dest_weight_limit: {
             type: 'Unlimited',
           },
-        };
+        });
       },
-    }),
+    });
+  },
 });
 
 const transferMultiasset = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, sender, source }) =>
-    new ExtrinsicConfig({
+  build: async ({ address, amount, asset, destination, sender, source }) => {
+    const ctx = source.chain as Parachain;
+    const rcv = destination.chain as Parachain;
+    const version = XcmVersion.v4;
+
+    const receiver = rcv.usesCexForwarding
+      ? getDerivativeAccount(ctx, sender, rcv)
+      : address;
+
+    const account = getExtrinsicAccount(receiver);
+
+    const transferAssetLocation = getExtrinsicAssetLocation(
+      locationOrError(ctx, asset),
+      version
+    );
+    const transferAsset = toAsset(transferAssetLocation, amount);
+
+    const func = 'transfer_multiasset';
+    return new ExtrinsicConfig({
       module: pallet,
-      func: 'transfer_multiasset',
-      getArgs: async () => {
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-        const version = XcmVersion.v4;
-
-        const receiver = rcv.usesCexForwarding
-          ? getDerivativeAccount(ctx, sender, rcv)
-          : address;
-
-        const account = getExtrinsicAccount(receiver);
-
-        const transferAssetLocation = getExtrinsicAssetLocation(
-          locationOrError(ctx, asset),
-          version
-        );
-        const transferAsset = toAsset(transferAssetLocation, amount);
-        return {
+      func,
+      getTx: (client) => {
+        return client.getUnsafeApi().tx[pallet][func]({
           asset: {
             type: version,
             value: transferAsset,
@@ -78,39 +83,40 @@ const transferMultiasset = (): ExtrinsicConfigBuilder => ({
           dest_weight_limit: {
             type: 'Unlimited',
           },
-        };
+        });
       },
-    }),
+    });
+  },
 });
 
 const transferMultiassets = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, source }) =>
-    new ExtrinsicConfig({
+  build: async ({ address, amount, asset, destination, source }) => {
+    const account = getExtrinsicAccount(address);
+    const ctx = source.chain as Parachain;
+    const rcv = destination.chain as Parachain;
+    const version = XcmVersion.v4;
+
+    const transferAssetLocation = getExtrinsicAssetLocation(
+      locationOrError(ctx, asset),
+      version
+    );
+    const transferFeeLocation = getExtrinsicAssetLocation(
+      locationOrError(ctx, destination.fee),
+      version
+    );
+
+    const transferAsset = toAsset(transferAssetLocation, amount);
+    const transferFee = toAsset(transferFeeLocation, destination.fee.amount);
+
+    const func = 'transfer_multiassets';
+    return new ExtrinsicConfig({
       module: pallet,
       func: 'transfer_multiassets',
-      getArgs: async () => {
-        const account = getExtrinsicAccount(address);
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-        const version = XcmVersion.v4;
-
-        const transferAssetLocation = getExtrinsicAssetLocation(
-          locationOrError(ctx, asset),
-          version
-        );
-        const transferFeeLocation = getExtrinsicAssetLocation(
-          locationOrError(ctx, destination.fee),
-          version
-        );
-
-        const transferAsset = toAsset(transferAssetLocation, amount);
-        const transferFee = toAsset(
-          transferFeeLocation,
-          destination.fee.amount
-        );
+      getTx: (client) => {
+        const tx = client.getUnsafeApi().tx[pallet][func];
 
         if (asset.key === destination.fee.key) {
-          return {
+          return tx({
             assets: {
               type: version,
               value: [transferAsset],
@@ -120,12 +126,12 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             dest_weight_limit: {
               type: 'Unlimited',
             },
-          };
+          });
         }
 
         // Flip asset order if general index of asset greater than fee asset
         if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
-          return {
+          return tx({
             assets: {
               type: version,
               value: [transferFee, transferAsset],
@@ -135,10 +141,10 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
             dest_weight_limit: {
               type: 'Unlimited',
             },
-          };
+          });
         }
 
-        return {
+        return tx({
           assets: {
             type: version,
             value: [transferAsset, transferFee],
@@ -148,37 +154,48 @@ const transferMultiassets = (): ExtrinsicConfigBuilder => ({
           dest_weight_limit: {
             type: 'Unlimited',
           },
-        };
+        });
       },
-    }),
+    });
+  },
 });
 
 const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
-  build: ({ address, amount, asset, destination, sender, source, transact }) =>
-    new ExtrinsicConfig({
+  build: async ({
+    address,
+    amount,
+    asset,
+    destination,
+    sender,
+    source,
+    transact,
+  }) => {
+    const ctx = source.chain as Parachain;
+
+    let rcv = destination.chain as Parachain;
+    let feeAmount = destination.fee.amount;
+    let feeAssetId = ctx.getAssetId(destination.fee);
+    let receiver = address;
+
+    if (transact) {
+      rcv = transact.chain as Parachain;
+      feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
+      feeAssetId = ctx.getAssetId(transact.fee);
+      receiver = getDerivativeAccount(ctx, sender, rcv);
+    }
+
+    const version = XcmVersion.v4;
+    const account = getExtrinsicAccount(receiver);
+    const assetId = ctx.getAssetId(asset);
+    const encodedAssetId = encodeAssetId(assetId);
+    const encodedFeeAssetId = encodeAssetId(feeAssetId);
+
+    const func = 'transfer_multicurrencies';
+    return new ExtrinsicConfig({
       module: pallet,
-      func: 'transfer_multicurrencies',
-      getArgs: async () => {
-        const ctx = source.chain as Parachain;
-
-        let rcv = destination.chain as Parachain;
-        let feeAmount = destination.fee.amount;
-        let feeAssetId = ctx.getAssetId(destination.fee);
-        let receiver = address;
-
-        if (transact) {
-          rcv = transact.chain as Parachain;
-          feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
-          feeAssetId = ctx.getAssetId(transact.fee);
-          receiver = getDerivativeAccount(ctx, sender, rcv);
-        }
-
-        const version = XcmVersion.v4;
-        const account = getExtrinsicAccount(receiver);
-        const assetId = ctx.getAssetId(asset);
-        const encodedAssetId = encodeAssetId(assetId);
-        const encodedFeeAssetId = encodeAssetId(feeAssetId);
-        return {
+      func,
+      getTx: (client) => {
+        return client.getUnsafeApi().tx[pallet][func]({
           currencies: [
             [encodedAssetId, amount],
             [encodedFeeAssetId, feeAmount],
@@ -188,9 +205,10 @@ const transferMultiCurrencies = (): ExtrinsicConfigBuilder => ({
           dest_weight_limit: {
             type: 'Unlimited',
           },
-        };
+        });
       },
-    }),
+    });
+  },
 });
 
 export const xTokens = () => {

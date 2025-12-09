@@ -9,11 +9,15 @@ const pallet = 'Utility';
 const batchAll = (configs: ExtrinsicConfigBuilder[]) => {
   const func = 'batch_all';
   return {
-    build: (params: ExtrinsicConfigBuilderParams) => {
+    build: async (params: ExtrinsicConfigBuilderParams) => {
+      const cfgs = await Promise.all(configs.map((c) => c.build(params)));
       return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: async () => configs.map((c) => c.build(params)),
+        getTx: (client) => {
+          const decoded = cfgs.map((c) => c.getTx(client).decodedCall);
+          return client.getUnsafeApi().tx[pallet][func]({ calls: decoded });
+        },
       });
     },
   };

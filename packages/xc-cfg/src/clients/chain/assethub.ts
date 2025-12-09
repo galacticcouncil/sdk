@@ -51,6 +51,7 @@ export class AssethubClient extends BaseClient<Hub> {
       Number(assetId),
       address
     );
+
     if (!response) {
       return false;
     }
