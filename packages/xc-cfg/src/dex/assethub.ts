@@ -8,6 +8,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { AssethubClient } from '../clients';
+import { encodeLocation } from '@galacticcouncil/common';
 
 export class AssethubDex implements Dex {
   readonly chain: Parachain;
@@ -35,23 +36,21 @@ export class AssethubDex implements Dex {
     const aIn = this.chain.getAssetXcmLocation(assetIn);
     const aOut = this.chain.getAssetXcmLocation(assetOut);
 
-    const client = this.chain.api;
-    const api = client.getUnsafeApi();
-
-    const result =
-      await api.apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
-        aIn,
-        aOut,
+    const result = await this.client
+      .api()
+      .apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
+        encodeLocation(aIn),
+        encodeLocation(aOut),
         amountOut.amount,
         true
       );
 
-    if (!result.success) {
+    if (!result) {
       throw new Error('Failed to get swap quote');
     }
 
     return {
-      amount: BigInt(result.value),
+      amount: result,
     } as SwapQuote;
   }
 }

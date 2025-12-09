@@ -1,6 +1,7 @@
 import { acc, Parachain } from '@galacticcouncil/xc-core';
-import { FixedSizeBinary } from 'polkadot-api';
 import { XcmV3Junction } from '@galacticcouncil/descriptors';
+
+import { FixedSizeBinary } from 'polkadot-api';
 
 import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';

@@ -268,6 +268,7 @@ export const toBridgeXcmOnDest = (
   transferAssetLocation: { parents: number; interior: XcmV3Junctions },
   messageId: any
 ) => {
+  const topic = Binary.fromHex(messageId);
   return {
     type: version,
     value: [
@@ -305,10 +306,10 @@ export const toBridgeXcmOnDest = (
               interior: XcmV3Junctions.X1(account),
             },
           }),
-          XcmV4Instruction.SetTopic(messageId),
+          XcmV4Instruction.SetTopic(topic),
         ],
       }),
-      XcmV4Instruction.SetTopic(messageId),
+      XcmV4Instruction.SetTopic(topic),
     ],
   };
 };

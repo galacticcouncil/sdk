@@ -1,11 +1,12 @@
-import { Binary, FixedSizeBinary } from 'polkadot-api';
+import { AccountId, Binary, FixedSizeBinary } from 'polkadot-api';
 
 export const toAccountId32 = (address: string) => {
+  const ss58 = AccountId().enc(address);
   return {
     type: 'AccountId32',
     value: {
       network: undefined,
-      id: FixedSizeBinary.fromHex(address),
+      id: FixedSizeBinary.fromBytes(ss58),
     },
   };
 };

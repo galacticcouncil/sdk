@@ -43,7 +43,7 @@ export class SubstrateClaim {
     from: string,
     vaaBytes: string
   ): Promise<SubstrateCall> {
-    const client = this.#chain.api;
+    const client = this.#chain.client;
     const api = client.getUnsafeApi();
     const claim = this.redeemMrl(from, vaaBytes);
     const tx = (api.tx as any).EthereumXcm.transact({

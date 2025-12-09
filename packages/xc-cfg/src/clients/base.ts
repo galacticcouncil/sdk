@@ -1,73 +1,71 @@
+import { ChainDefinition, TypedApi } from 'polkadot-api';
+
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
-import { encodeAssetId, encodeLocation } from '@galacticcouncil/common';
+import { encodeLocation } from '@galacticcouncil/common';
+import {
+  hub,
+  XcmV4Instruction,
+  XcmVersionedAssetId,
+} from '@galacticcouncil/descriptors';
 
-import { getTypedApi } from '../utils/papi';
-
-export class BaseClient {
+export class BaseClient<C extends ChainDefinition = typeof hub> {
   readonly chain: Parachain;
+  protected descriptor: C;
 
-  constructor(chain: Parachain) {
+  constructor(chain: Parachain, descriptor?: C) {
     this.chain = chain;
+    this.descriptor = descriptor ?? (hub as C);
+  }
+
+  get client() {
+    return this.chain.client;
+  }
+
+  api(): TypedApi<C> {
+    return this.client.getTypedApi(this.descriptor);
+  }
+
+  private get refApi() {
+    return this.api() as TypedApi<typeof hub>;
   }
 
   async getSystemAccountBalance(address: string): Promise<bigint> {
-    const client = this.chain.api;
-    const api = getTypedApi(client);
-
-    const response = await api.query.System.Account.getValue(address);
+    const response = await this.refApi.query.System.Account.getValue(address);
     const balance = response.data;
     const { free, frozen } = balance;
     return BigInt(free) - BigInt(frozen);
   }
 
-  async getTokensAccountsBalance(address: string, asset: any): Promise<bigint> {
-    const client = this.chain.api;
-    const api = getTypedApi(client);
+  async calculateDestinationFee(
+    xcm: XcmV4Instruction[],
+    asset: Asset
+  ): Promise<bigint> {
+    const weight = await this.refApi.apis.XcmPaymentApi.query_xcm_weight({
+      type: 'V4',
+      value: xcm,
+    });
 
-    const assetId = encodeAssetId(asset);
+    if (!weight.success) {
+      throw Error(`Can't query XCM weight.`);
+    }
 
-    const response = await api.query.Tokens.Accounts.getValue(address, assetId);
-    const { free, frozen } = response;
-    return BigInt(free) - BigInt(frozen);
-  }
+    const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
+    if (!feeAssetLocation) {
+      throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
+    }
 
-  async calculateDestinationFee(xcm: any, asset: Asset): Promise<bigint> {
-    try {
-      const client = this.chain.api;
-      const api = client.getUnsafeApi();
+    const encodedLocation = encodeLocation(feeAssetLocation);
 
-      const versionedXcm = xcm.value?.custom_xcm_on_dest || xcm;
-
-      const weight =
-        await api.apis.XcmPaymentApi.query_xcm_weight(versionedXcm);
-      if (!weight.success) {
-        throw Error(`Can't query XCM weight.`);
-      }
-
-      const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
-      if (!feeAssetLocation) {
-        throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
-      }
-
-      const encodedLocation = encodeLocation(feeAssetLocation);
-      const versionedAssetId = {
-        type: 'V4',
-        value: encodedLocation,
-      };
-
-      const feeInAsset = await api.apis.XcmPaymentApi.query_weight_to_asset_fee(
+    const feeInAsset =
+      await this.refApi.apis.XcmPaymentApi.query_weight_to_asset_fee(
         weight.value,
-        versionedAssetId
+        XcmVersionedAssetId.V4(encodedLocation)
       );
 
-      if (!feeInAsset.success) {
-        throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
-      }
-
-      return BigInt(feeInAsset.value);
-    } catch (error) {
-      console.error('Error in calculateDestinationFee:', error);
-      throw error;
+    if (!feeInAsset.success) {
+      throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
     }
+
+    return BigInt(feeInAsset.value);
   }
 }

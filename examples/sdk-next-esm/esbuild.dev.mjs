@@ -16,7 +16,7 @@ const options = {
   metafile: true,
   minify: true,
   splitting: true,
-  sourcemap: true,
+  sourcemap: false,
   outdir: 'out/',
   logLevel: 'info',
 };

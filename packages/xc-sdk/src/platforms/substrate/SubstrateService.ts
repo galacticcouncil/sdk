@@ -6,72 +6,54 @@ import {
   Asset,
   AssetAmount,
   ExtrinsicConfig,
+  ChainCurrency,
 } from '@galacticcouncil/xc-core';
 
 import { Blake2256, u32 } from '@polkadot-api/substrate-bindings';
 import { toHex, fromHex } from '@polkadot-api/utils';
 
-import { Enum, PolkadotClient, UnsafeTransaction } from 'polkadot-api';
+import { Enum, UnsafeTransaction } from 'polkadot-api';
 
 import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
-import { SubstrateChainSpec } from './types';
 
 const { Ss58Addr } = addr;
 
 export class SubstrateService {
-  readonly client: PolkadotClient;
   readonly chain: AnyParachain;
 
-  private _chainSpec?: Promise<SubstrateChainSpec>;
-  private _asset?: Asset;
-  private _decimals?: number;
+  private _currency?: Promise<ChainCurrency>;
 
-  constructor(client: PolkadotClient, chain: AnyParachain) {
-    this.client = client;
+  constructor(chain: AnyParachain) {
     this.chain = chain;
   }
 
   static async create(chain: AnyParachain): Promise<SubstrateService> {
-    return new SubstrateService(chain.api, chain);
+    return new SubstrateService(chain);
+  }
+
+  get client() {
+    return this.chain.client;
   }
 
   get api() {
     return this.client.getUnsafeApi();
   }
 
-  private async getChainSpec() {
-    if (!this._chainSpec) {
-      this._chainSpec = this.client.getChainSpecData();
+  async getCurrency(): Promise<ChainCurrency> {
+    if (!this._currency) {
+      this._currency = this.chain.getCurrency();
     }
-    return this._chainSpec;
+    return this._currency;
   }
 
   async getAsset(): Promise<Asset> {
-    if (!this._asset) {
-      const chainSpec = await this.getChainSpec();
-      const tokenSymbol = chainSpec.properties?.tokenSymbol;
-      const nativeToken = Array.isArray(tokenSymbol)
-        ? tokenSymbol[0]
-        : tokenSymbol;
-      const nativeTokenKey = nativeToken.toLowerCase();
-      const asset = this.chain.getAsset(nativeTokenKey);
-      if (!asset) {
-        throw new Error(`No asset found for key "${nativeTokenKey}"`);
-      }
-      this._asset = asset;
-    }
-    return this._asset;
+    const currency = await this.getCurrency();
+    return currency.asset;
   }
 
   async getDecimals(): Promise<number> {
-    if (this._decimals === undefined) {
-      const chainSpec = await this.getChainSpec();
-      const decimalsArray = chainSpec.properties?.tokenDecimals || [];
-      const decimals = decimalsArray[0] || 12;
-      this._decimals = decimals;
-      return decimals;
-    }
-    return this._decimals;
+    const currency = await this.getCurrency();
+    return currency.decimals;
   }
 
   async getExistentialDeposit(): Promise<AssetAmount> {
@@ -82,8 +64,7 @@ export class SubstrateService {
     } catch {
       ed = 0n;
     }
-    const asset = await this.getAsset();
-    const decimals = await this.getDecimals();
+    const { asset, decimals } = await this.getCurrency();
     return AssetAmount.fromAsset(asset, {
       amount: ed,
       decimals,
@@ -150,7 +131,8 @@ export class SubstrateService {
 
     const result = await this.api.apis.DryRunApi.dry_run_call(
       origin,
-      tx.decodedCall
+      tx.decodedCall,
+      4
     );
 
     if (!result.success) {
@@ -203,7 +185,7 @@ export class SubstrateService {
     account: string,
     config: ExtrinsicConfig
   ): Promise<string> {
-    if (['XcmPallet', 'PolkadotXcm'].includes(config.module)) {
+    if (['PolkadotXcm'].includes(config.module)) {
       const args = await config.getArgs();
       const dest = 'dest' in args ? args.dest : undefined;
       if (!dest) return account;

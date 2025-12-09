@@ -54,7 +54,7 @@ const transfer = await TransferBuilder(wallet)
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const transferAmount = '0.1';
+const transferAmount = '0.01';
 
 const [call, fee] = await Promise.all([
   transfer.buildCall(transferAmount),

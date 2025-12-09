@@ -1,4 +1,4 @@
-import { XcmV3Junctions, XcmV3Junction } from '@polkadot-api/descriptors';
+import { XcmV3Junctions, XcmV3Junction } from '@galacticcouncil/descriptors';
 
 import { AnyParachain, Asset, multiloc } from '@galacticcouncil/xc-core';
 

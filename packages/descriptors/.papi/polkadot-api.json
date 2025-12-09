@@ -7,6 +7,12 @@
       "metadata": ".papi/metadata/hydration.scale",
       "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d",
       "codeHash": "0x252af19a9ac83c621c4f1307ded240c6054fe5c09b40e81c073ba74a3a06d898"
+    },
+    "hub": {
+      "chain": "polkadot_asset_hub",
+      "metadata": ".papi/metadata/hub.scale",
+      "genesis": "0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f",
+      "codeHash": "0x8cada8f706ffc7c9bd0c31985ec4f34520914778edefaa94b624bc6adea48a1c"
     }
   },
   "options": {

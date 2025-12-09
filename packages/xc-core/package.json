@@ -33,12 +33,12 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
-    "@galacticcouncil/descriptors": "^1.5.1",
     "@types/big.js": "^6.2.2",
     "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^0.1.0",
+    "@galacticcouncil/common": "^0.1.1",
+    "@galacticcouncil/descriptors": "^1.5.1",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",
     "@wormhole-foundation/sdk-connect": "3.2.0",
@@ -52,10 +52,10 @@
     "bigint-buffer": "^1.1.5",
     "buffer": "^6.0.3",
     "bs58": "^6.0.0",
-    "lru-cache": "^11.0.0"
+    "lru-cache": "^11.2.2"
   },
   "peerDependencies": {
-    "polkadot-api": ">=1.19.2 <1.20.0",
+    "polkadot-api": "^1.23.0",
     "viem": "^2.38.3"
   }
 }

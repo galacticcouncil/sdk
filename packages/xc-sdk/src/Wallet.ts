@@ -1,3 +1,5 @@
+import { big } from '@galacticcouncil/common';
+
 import {
   acc,
   addr,
@@ -15,7 +17,6 @@ import {
   TransferValidation,
   TransferValidationReport,
 } from '@galacticcouncil/xc-core';
-import { big } from '@galacticcouncil/common';
 
 import { combineLatest, debounceTime, Subscription } from 'rxjs';
 

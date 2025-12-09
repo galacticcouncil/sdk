@@ -21,10 +21,10 @@ import {
 } from '../utils';
 import { XcmVersion } from '../types';
 
-export async function buildERC20TransferFromPara(
+export function buildERC20TransferFromPara(
   asset: Asset,
   chain: Parachain
-) {
+): XcmV4Instruction[] {
   const version = XcmVersion.v4;
   const transferAssetLocation = getExtrinsicAssetLocation(
     locationOrError(chain, asset),
@@ -38,28 +38,25 @@ export async function buildERC20TransferFromPara(
     TOPIC
   );
 
-  return {
-    type: version,
-    value: [
-      XcmV4Instruction.WithdrawAsset([
-        {
-          id: DOT_LOCATION,
-          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
-        },
-        {
-          id: transferAssetLocation,
-          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
-        },
-      ]),
-      XcmV4Instruction.ClearOrigin(),
-      XcmV4Instruction.BuyExecution({
-        fees: {
-          id: DOT_LOCATION,
-          fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
-        },
-        weight_limit: XcmV3WeightLimit.Unlimited(),
-      }),
-      ...bridgeXcmOnDest.value,
-    ],
-  };
+  return [
+    XcmV4Instruction.WithdrawAsset([
+      {
+        id: DOT_LOCATION,
+        fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+      },
+      {
+        id: transferAssetLocation,
+        fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+      },
+    ]),
+    XcmV4Instruction.ClearOrigin(),
+    XcmV4Instruction.BuyExecution({
+      fees: {
+        id: DOT_LOCATION,
+        fun: XcmV3MultiassetFungibility.Fungible(AMOUNT_MAX),
+      },
+      weight_limit: XcmV3WeightLimit.Unlimited(),
+    }),
+    ...bridgeXcmOnDest.value,
+  ];
 }

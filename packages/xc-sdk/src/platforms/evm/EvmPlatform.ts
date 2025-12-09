@@ -28,7 +28,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
   readonly #client: EvmClient;
 
   constructor(chain: AnyEvmChain) {
-    this.#client = chain.client;
+    this.#client = chain.evmClient;
   }
 
   async buildCall(

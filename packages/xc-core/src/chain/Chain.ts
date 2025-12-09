@@ -1,4 +1,5 @@
 import { Asset } from '../asset';
+import { Dex } from './dex';
 
 export type ChainAssetId =
   | string
@@ -72,6 +73,8 @@ export abstract class Chain<T extends ChainAssetData> {
 
   readonly name: string;
 
+  private _dex?: Dex;
+
   constructor({
     assetsData,
     ecosystem,
@@ -90,6 +93,18 @@ export abstract class Chain<T extends ChainAssetData> {
 
   abstract getType(): ChainType;
   abstract getCurrency(): Promise<ChainCurrency>;
+
+  get dex(): Dex {
+    if (!this._dex) {
+      throw new Error(`No DEX attached to chain ${this.key}`);
+    }
+    return this._dex;
+  }
+
+  registerDex(dex: Dex): this {
+    this._dex = dex;
+    return this;
+  }
 
   isSubstrate(): boolean {
     return (

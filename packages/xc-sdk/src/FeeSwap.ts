@@ -1,6 +1,5 @@
 import {
   AssetAmount,
-  DexFactory,
   FeeConfig,
   SwapCtx,
   TransferCtx,
@@ -20,7 +19,7 @@ export class FeeSwap {
 
   get dex() {
     const { source } = this.ctx;
-    return DexFactory.getInstance().get(source.chain.key);
+    return source.chain.dex;
   }
 
   get destFee() {

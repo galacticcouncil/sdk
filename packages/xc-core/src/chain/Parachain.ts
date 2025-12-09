@@ -12,9 +12,9 @@ import {
 } from './Chain';
 
 /**
- * Type for XCM multi-location objects (JSON-serializable)
+ * XCM multi-location objects (JSON-serializable)
  */
-type XcmLocation = Record<string, any>;
+export type XcmLocation = Record<string, any>;
 
 /**
  * XCM Version enum
@@ -25,6 +25,15 @@ export enum XcmVersion {
   v3 = 'V3',
   v4 = 'V4',
   v5 = 'V5',
+}
+
+/**
+ * Parachain spec
+ */
+export interface ParachainSpec {
+  name: string;
+  genesisHash: string;
+  properties: any;
 }
 
 /**
@@ -56,6 +65,8 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
 }
 
 export class Parachain extends Chain<ParachainAssetData> {
+  private _chainSpec?: Promise<ParachainSpec>;
+
   readonly genesisHash: string;
 
   readonly parachainId: number;
@@ -106,7 +117,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.xcmVersion = xcmVersion;
   }
 
-  get api(): PolkadotClient {
+  get client(): PolkadotClient {
     const pool = SubstrateApis.getInstance();
     return pool.api(this.ws);
   }
@@ -115,9 +126,15 @@ export class Parachain extends Chain<ParachainAssetData> {
     return ChainType.Parachain;
   }
 
+  async getSpec(): Promise<ParachainSpec> {
+    if (!this._chainSpec) {
+      this._chainSpec = this.client.getChainSpecData();
+    }
+    return this._chainSpec;
+  }
+
   async getCurrency(): Promise<ChainCurrency> {
-    const client = this.api;
-    const chainSpec = await client.getChainSpecData();
+    const chainSpec = await this.getSpec();
 
     const { tokenSymbol, tokenDecimals } = chainSpec.properties || {};
 

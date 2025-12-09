@@ -3,8 +3,6 @@ import {
   Asset,
   AssetAmount,
   CallType,
-  Dex,
-  DexFactory,
   ExtrinsicConfig,
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
@@ -27,11 +25,9 @@ export class SubstratePlatform implements Platform<
   SubstrateQueryConfig
 > {
   readonly #substrate: Promise<SubstrateService>;
-  readonly #dex: Dex | undefined;
 
   constructor(chain: AnyParachain) {
     this.#substrate = SubstrateService.create(chain);
-    this.#dex = DexFactory.getInstance().get(chain.key);
   }
 
   private async useSignerFee(fee: Asset) {
@@ -161,11 +157,12 @@ export class SubstratePlatform implements Platform<
       return fee;
     }
 
-    if (this.#dex) {
+    try {
+      const dex = substrate.chain.dex;
       const amount = AssetAmount.fromAsset(asset, { amount: fee, decimals });
-      const quote = await this.#dex.getQuote(feeBalance, asset, amount, true);
+      const quote = await dex.getQuote(feeBalance, asset, amount, true);
       return quote.amount;
-    }
+    } catch {}
     return fee;
   }
 }

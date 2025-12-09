@@ -24,10 +24,18 @@ export const configService = new HydrationConfigService({
   routes: routesMap,
 });
 
-// Init hydration sdk
+// Initialize clients
+export const whScan = new WormholeScan();
+export const whTransfers = new WormholeTransfer(configService, 2034);
+
+// Get chain ctx
 const hydration = configService.getChain('hydration') as Parachain;
-const hydrationApi = hydration.api;
-const hydrationSdk = await createSdkContext(hydrationApi);
+const assethub = configService.getChain('assethub') as Parachain;
+const assethubCex = configService.getChain('assethub_cex') as Parachain;
+
+// Init hydration sdk
+const hydrationClient = hydration.client;
+const hydrationSdk = await createSdkContext(hydrationClient);
 
 const { ctx } = hydrationSdk;
 
@@ -37,19 +45,13 @@ export const wallet = new Wallet({
   transferValidations: validations,
 });
 
-// Initialize clients
-export const whScan = new WormholeScan();
-export const whTransfers = new WormholeTransfer(configService, 2034);
-
 // Register external assets
 configService.registerExternal(externals);
 
 // Register dex-es
-const assethub = configService.getChain('assethub');
-const assethubCex = configService.getChain('assethub_cex');
+const hydrationDex = new dex.HydrationDex(hydration, ctx.pool);
+hydration.registerDex(hydrationDex);
 
-wallet.registerDex(
-  new dex.HydrationDex(hydration, ctx.pool),
-  new dex.AssethubDex(assethub),
-  new dex.AssethubDex(assethubCex)
-);
+const assethubDex = new dex.AssethubDex(assethub);
+assethub.registerDex(assethubDex);
+assethubCex.registerDex(assethubDex);
