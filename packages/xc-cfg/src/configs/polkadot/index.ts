@@ -9,10 +9,8 @@ import { hydrationConfig } from './hydration';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { mythosConfig } from './mythos';
-import { nodleConfig } from './nodle';
 import { uniqueConfig } from './unique';
 import { zeitgeistConfig } from './zeitgeist';
-import { phalaConfig } from './phala';
 import { crustConfig } from './crust';
 import { kiltConfig } from './kilt';
 import { pendulumConfig } from './pendulum';
@@ -35,10 +33,8 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   moonbeamConfig,
   mythosConfig,
   neurowebConfig,
-  nodleConfig,
   uniqueConfig,
   zeitgeistConfig,
-  phalaConfig,
   crustConfig,
   kiltConfig,
   pendulumConfig,

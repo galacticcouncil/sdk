@@ -82,9 +82,7 @@ import {
   moonbeam,
   mythos,
   neuroweb,
-  nodle,
   pendulum,
-  phala,
   solana,
   sui_chain,
   unique,
@@ -318,11 +316,7 @@ const toZeitgeist: AssetRoute[] = [
   toZeitgeistErc20Template(usdc_mwh),
 ];
 
-const toPhala: AssetRoute[] = [toTransferTemplate(pha, phala, 0.064296)];
-
 const toMythos: AssetRoute[] = [toTransferTemplate(myth, mythos, 2.5)];
-
-const toNodle: AssetRoute[] = [toTransferTemplate(nodl, nodle, 0.0012)];
 
 const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique, 0)];
 
@@ -419,8 +413,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toMoonbeam,
     ...toMythos,
     ...toNeuroweb,
-    ...toNodle,
-    ...toPhala,
     ...toPendulum,
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,
