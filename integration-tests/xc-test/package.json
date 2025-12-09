@@ -1,0 +1,20 @@
+{
+  "name": "xc-test",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "wallet",
+    "xc",
+    "integration",
+    "test"
+  ],
+  "scripts": {
+    "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^0.18.1",
+    "@galacticcouncil/xc-cfg": "^0.1.0",
+    "@galacticcouncil/xc-core": "^0.1.0",
+    "@galacticcouncil/xc-sdk": "^0.1.0"
+  }
+}
