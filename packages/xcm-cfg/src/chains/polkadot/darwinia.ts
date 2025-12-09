@@ -28,5 +28,5 @@ export const darwinia = new EvmParachain({
   parachainId: 2046,
   ss58Format: 18,
   usesH160Acc: true,
-  ws: 'wss://darwinia-rpc.dwellir.com', // failing for papi
+  ws: 'wss://darwinia-rpc.dwellir.com',
 });

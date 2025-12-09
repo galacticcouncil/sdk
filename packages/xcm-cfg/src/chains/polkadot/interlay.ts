@@ -116,5 +116,5 @@ export const interlay = new Parachain({
   name: 'Interlay',
   parachainId: 2032,
   ss58Format: 2032,
-  ws: 'wss://api.interlay.io/parachain', // not working with papi
+  ws: 'wss://api.interlay.io/parachain',
 });

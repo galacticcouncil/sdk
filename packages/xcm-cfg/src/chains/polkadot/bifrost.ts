@@ -19,7 +19,7 @@ import {
 const rpcWebsocketList = [
   'wss://bifrost-polkadot.ibp.network',
   'wss://eu.bifrost-polkadot-rpc.liebi.com/ws',
-  //'wss://hk.p.bifrost-rpc.liebi.com/ws',
+  'wss://hk.p.bifrost-rpc.liebi.com/ws',
   'wss://bifrost-polkadot.dotters.network',
 ];
 
