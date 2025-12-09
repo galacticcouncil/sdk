@@ -170,7 +170,7 @@ const config = {
   usesDeliveryFee: true,
   ws: [
     'wss://polkadot-asset-hub-rpc.polkadot.io',
-    'wss://asset-hub-polkadot-rpc.dwellir.com',
+    //'wss://asset-hub-polkadot-rpc.dwellir.com',
   ],
 } as Omit<ParachainParams, 'key'>;
 

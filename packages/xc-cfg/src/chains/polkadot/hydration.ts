@@ -89,10 +89,10 @@ const rpcHttpList = [
 
 const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
-  /*   'wss://hydration.dotters.network',
+  'wss://hydration.dotters.network',
   'wss://rpc.helikon.io/hydradx',
   'wss://hydration.ibp.network',
-  'wss://rpc.cay.hydration.cloud',
+  /* 'wss://rpc.cay.hydration.cloud',
   'wss://rpc.parm.hydration.cloud',
   'wss://rpc.roach.hydration.cloud',
   'wss://rpc.zipp.hydration.cloud',
