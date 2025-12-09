@@ -1,0 +1,37 @@
+{
+  "name": "@galacticcouncil/xc",
+  "version": "0.1.0",
+  "description": "Cross-chain ctx",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xcm",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/xc.git"
+  },
+  "keywords": [
+    "hydration",
+    "basilisk",
+    "xc"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@galacticcouncil/xc-core": "^0.2.0",
+    "@galacticcouncil/xc-sdk": "^0.2.0",
+    "@galacticcouncil/xc-cfg": "^0.2.0"
+  }
+}
