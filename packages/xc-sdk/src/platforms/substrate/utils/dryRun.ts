@@ -5,13 +5,13 @@ export const getDeliveryFeeFromDryRun = (events: any[]): bigint => {
 
   for (const e of events) {
     const isXcmEvent =
-      e.type === 'XcmPallet.FeesPaid' || e.type === 'PolkadotXcm.FeesPaid';
+      ['PolkadotXcm'].includes(e.type) && e.value.type === 'FeesPaid';
 
-    if (isXcmEvent && e.value?.fees) {
-      const fees = Array.isArray(e.value.fees) ? e.value.fees : [e.value.fees];
-      for (const feeItem of fees) {
-        if (feeItem.fun?.Fungible) {
-          const plancks = BigInt(feeItem.fun.Fungible);
+    if (isXcmEvent) {
+      const fees = e.value.value.fees;
+      for (const fee of fees) {
+        if (fee.fun.type === 'Fungible') {
+          const plancks = BigInt(fee.fun.value);
           deliveryFees.push(plancks);
         }
       }
