@@ -15,9 +15,7 @@ import { laos_chain } from './laos';
 import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { neuroweb } from './neuroweb';
-import { nodle } from './nodle';
 import { pendulum } from './pendulum';
-import { phala } from './phala';
 import { polkadot, polkadotCex } from './polkadot';
 import { unique } from './unique';
 import { zeitgeist } from './zeitgeist';
@@ -41,9 +39,7 @@ export const polkadotChains: AnyChain[] = [
   interlay,
   moonbeam,
   mythos,
-  nodle,
   pendulum,
-  phala,
   polkadot,
   polkadotCex,
   unique,
@@ -69,9 +65,7 @@ export {
   interlay,
   moonbeam,
   mythos,
-  nodle,
   pendulum,
-  phala,
   polkadot,
   polkadotCex,
   unique,

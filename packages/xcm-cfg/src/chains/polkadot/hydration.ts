@@ -94,12 +94,12 @@ const rpcWebsocketList = [
   'wss://hydration.dotters.network',
   'wss://rpc.helikon.io/hydradx',
   'wss://hydration.ibp.network',
-  'wss://rpc.cay.hydration.cloud',
-  'wss://rpc.parm.hydration.cloud',
-  'wss://rpc.roach.hydration.cloud',
-  'wss://rpc.zipp.hydration.cloud',
-  'wss://rpc.sin.hydration.cloud',
-  'wss://rpc.coke.hydration.cloud',
+  //'wss://rpc.cay.hydration.cloud',
+  //'wss://rpc.parm.hydration.cloud',
+  //'wss://rpc.roach.hydration.cloud',
+  //'wss://rpc.zipp.hydration.cloud',
+  //'wss://rpc.sin.hydration.cloud',
+  //'wss://rpc.coke.hydration.cloud',
 ];
 
 const evmChain: Chain = defineChain({
