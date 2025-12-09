@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk-next
 
+## 0.19.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/descriptors@1.7.0
+
 ## 0.18.1
 
 ### Patch Changes

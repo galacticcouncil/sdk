@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@galacticcouncil/common": "^0.1.1",
-    "@galacticcouncil/descriptors": "^1.5.1",
+    "@galacticcouncil/descriptors": "^1.7.0",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",
     "@wormhole-foundation/sdk-connect": "3.2.0",

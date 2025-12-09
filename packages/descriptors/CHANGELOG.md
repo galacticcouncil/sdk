@@ -1,5 +1,13 @@
 # @galacticcouncil/descriptors
 
+## 1.7.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.23.0), re-build descriptors
+- Add hub descriptors
+- Support chain based whitelist
+
 ## 1.6.0
 
 ### Minor Changes
