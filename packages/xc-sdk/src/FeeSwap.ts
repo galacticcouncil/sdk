@@ -1,6 +1,5 @@
 import {
   AssetAmount,
-  DexFactory,
   FeeConfig,
   SwapCtx,
   TransferCtx,
@@ -21,7 +20,6 @@ export class FeeSwap {
   get dex() {
     const { source } = this.ctx;
     return source.chain.dex;
-    //return DexFactory.getInstance().get(source.chain.key);
   }
 
   get destFee() {
@@ -67,11 +65,9 @@ export class FeeSwap {
    * @returns true if supported, otherwise false
    */
   isSwapSupported(cfg?: FeeConfig) {
-    try {
-      cfg && cfg.swap;
-    } catch {
-      return false;
-    }
+    const isDex = !!this.dex;
+    const isSwapEnabled = cfg && cfg.swap;
+    return isDex && !!isSwapEnabled;
   }
 
   /**
@@ -115,12 +111,9 @@ export class FeeSwap {
    * @returns true if supported, otherwise false
    */
   isDestinationSwapSupported(fee: AssetAmount): boolean {
-    try {
-      const isSwappable = !fee.isSame(this.destFee);
-      const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
-      return isSwappable && !isSufficientAssetTransfer;
-    } catch {
-      return false;
-    }
+    const isDex = !!this.dex;
+    const isSwappable = !fee.isSame(this.destFee);
+    const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
+    return isDex && isSwappable && !isSufficientAssetTransfer;
   }
 }
