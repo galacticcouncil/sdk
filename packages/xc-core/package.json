@@ -37,7 +37,7 @@
     "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^0.1.1",
+    "@galacticcouncil/common": "^0.1.2",
     "@galacticcouncil/descriptors": "^1.7.0",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",

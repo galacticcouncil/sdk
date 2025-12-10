@@ -35,7 +35,7 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^0.1.1",
+    "@galacticcouncil/common": "^0.1.2",
     "@galacticcouncil/descriptors": "^1.7.0",
     "@galacticcouncil/math-hsm": "^1.1.0",
     "@galacticcouncil/math-lbp": "^1.2.0",
