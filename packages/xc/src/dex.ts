@@ -8,12 +8,12 @@ import { XcOpts } from './types';
 type DexBootstrap = (chain: Parachain, opts: XcOpts) => Promise<Dex>;
 
 const bootstrap: Record<string, DexBootstrap> = {
-  hydration: async (chain, { pool }) => {
-    if (!pool) {
+  hydration: async (chain, { poolCtx }) => {
+    if (!poolCtx) {
       const { ctx } = await createSdkContext(chain.client);
       return new dex.HydrationDex(chain, ctx.pool);
     }
-    return new dex.HydrationDex(chain, pool);
+    return new dex.HydrationDex(chain, poolCtx);
   },
 
   assethub: async (chain) => {

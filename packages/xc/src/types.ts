@@ -17,5 +17,5 @@ export type XcCtx = {
 };
 
 export type XcOpts = {
-  pool?: pool.PoolContextProvider;
+  poolCtx?: pool.PoolContextProvider;
 };
