@@ -189,8 +189,8 @@ export class StableSwapClient extends PoolClient {
     const fee = FeeUtils.fromPermill(poolInfo.fee.toNumber());
     const maxPegUpdate = FeeUtils.fromPerbill(pegs.maxPegUpdate.toNumber());
 
-    // @ts-expect-error - updatedAt field exists in new runtime but not in current type definitions
-    const currentPegsUpdatedAt = pegs.updatedAt?.toString() || blockNumber;
+    // @ts-ignore - updatedAt doesn't exist in types until we update api-types
+    const currentPegsUpdatedAt = pegs.updatedAt?.toString();
 
     const [updatedFee, updatedPegs] = StableMath.recalculatePegs(
       JSON.stringify(recentPegs),
