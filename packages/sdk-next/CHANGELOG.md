@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.20.0
+
+### Minor Changes
+
+- bump common to 0.1.2
+
 ## 0.19.0
 
 ### Patch Changes

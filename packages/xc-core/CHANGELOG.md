@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 0.3.0
+
+### Minor Changes
+
+- bump common to 0.1.2
+
 ## 0.2.0
 
 ### Minor Changes
