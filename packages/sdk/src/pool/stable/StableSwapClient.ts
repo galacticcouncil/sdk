@@ -189,8 +189,11 @@ export class StableSwapClient extends PoolClient {
     const fee = FeeUtils.fromPermill(poolInfo.fee.toNumber());
     const maxPegUpdate = FeeUtils.fromPerbill(pegs.maxPegUpdate.toNumber());
 
+    const currentPegsUpdatedAt = pegs.updatedAt.toString();
+
     const [updatedFee, updatedPegs] = StableMath.recalculatePegs(
       JSON.stringify(recentPegs),
+      currentPegsUpdatedAt,
       JSON.stringify(latestPegs),
       blockNumber,
       FeeUtils.toRaw(maxPegUpdate).toString(),
