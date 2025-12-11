@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 0.4.0
+
+### Minor Changes
+
+- rework peer deps
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xc
 
+## 0.3.0
+
+### Minor Changes
+
+- rework peer deps
+
 ## 0.2.0
 
 ### Patch Changes

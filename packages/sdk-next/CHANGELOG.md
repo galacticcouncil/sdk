@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.21.0
+
+### Minor Changes
+
+- rework peer deps
+
 ## 0.20.0
 
 ### Minor Changes
