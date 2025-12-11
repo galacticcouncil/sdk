@@ -196,7 +196,6 @@ export class StableMath {
       maxPegUpdate,
       poolFee
     );
-
     return JSON.parse(pegs);
   }
 }

@@ -29,9 +29,9 @@
     "clean": "rimraf build",
     "link": "npm ln"
   },
-  "peerDependencies": {
-    "@galacticcouncil/xc-core": ">=0.4.0 <1.0.0",
-    "@galacticcouncil/xc-sdk": ">=0.4.0 <1.0.0",
-    "@galacticcouncil/xc-cfg": ">=0.4.0 <1.0.0"
+  "dependencies": {
+    "@galacticcouncil/xc-core": "^0.4.0",
+    "@galacticcouncil/xc-sdk": "^0.4.0",
+    "@galacticcouncil/xc-cfg": "^0.4.0"
   }
 }
