@@ -16,7 +16,7 @@ export class FeeValidation extends TransferValidation {
 
     if (feeBalance.amount < fee.amount) {
       throw new TransferValidationError('Insufficient_Fee_Balance', {
-        amount: fee.toDecimal(fee.decimals),
+        amount: fee.toDecimal(),
         asset: fee.symbol,
         chain: chain.name,
         error: 'fee.insufficientBalance',
@@ -51,7 +51,7 @@ export class DestFeeValidation extends TransferValidation {
 
     if (destinationFeeBalance.amount < minBalance.amount) {
       throw new TransferValidationError('Insufficient_Fee_Balance', {
-        amount: minBalance.toDecimal(minBalance.decimals),
+        amount: minBalance.toDecimal(),
         asset: minBalance.symbol,
         chain: chain.name,
         error: 'destFee.insufficientBalance',

@@ -11,8 +11,7 @@ export interface AssetAmountParams {
 }
 
 export interface AssetAmountConstructorParams
-  extends AssetParams,
-    AssetAmountParams {}
+  extends AssetParams, AssetAmountParams {}
 
 export class AssetAmount extends Asset {
   readonly amount: bigint;
@@ -67,11 +66,11 @@ export class AssetAmount extends Asset {
     return Big(this.amount.toString());
   }
 
-  toBigDecimal(maxDecimal?: number, roundType?: RoundingMode): Big {
-    return Big(this.toDecimal(maxDecimal, roundType));
+  toBigDecimal(roundType?: RoundingMode): Big {
+    return Big(this.toDecimal(roundType));
   }
 
-  toDecimal(maxDecimal?: number, roundType?: RoundingMode): string {
-    return big.toDecimal(this.amount, this.decimals, maxDecimal, roundType);
+  toDecimal(roundType?: RoundingMode): string {
+    return big.toDecimal(this.amount, this.decimals, roundType);
   }
 }
