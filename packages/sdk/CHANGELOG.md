@@ -1,5 +1,16 @@
 # @galacticcouncil/sdk
 
+## 10.3.0
+
+### Minor Changes
+
+- recalculate peg math upgrade (new updateAt ora arg support)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-stableswap@2.4.0
+
 ## 10.2.0
 
 ### Minor Changes
