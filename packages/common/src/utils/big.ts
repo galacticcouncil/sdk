@@ -5,12 +5,11 @@ Big.NE = -18;
 export function toDecimal(
   number: bigint | number | string,
   decimals: number,
-  maxDecimal = 6,
   roundType?: RoundingMode
 ): string {
   const dividend = Big(number.toString().replace(/[^0-9]/g, ''));
   const divisor = Big(10).pow(decimals);
-  const result = dividend.div(divisor).round(maxDecimal, roundType);
+  const result = dividend.div(divisor).round(decimals, roundType);
 
   return result.toString();
 }
@@ -38,7 +37,7 @@ export function convertDecimals(
   decimals: number,
   targetDecimals: number
 ): bigint {
-  const decimalNumber = toDecimal(number, decimals, decimals);
+  const decimalNumber = toDecimal(number, decimals);
 
   return toBigInt(decimalNumber.toString(), targetDecimals);
 }
