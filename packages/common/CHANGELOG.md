@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.1.2
+
+### Patch Changes
+
+- fix package
+
 ## 0.1.1
 
 ### Patch Changes

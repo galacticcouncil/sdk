@@ -65,9 +65,14 @@ export class FeeSwap {
    * @returns true if supported, otherwise false
    */
   isSwapSupported(cfg?: FeeConfig) {
-    const isDex = !!this.dex;
+    try {
+      this.dex;
+    } catch {
+      return false;
+    }
+
     const isSwapEnabled = cfg && cfg.swap;
-    return isDex && !!isSwapEnabled;
+    return !!isSwapEnabled;
   }
 
   /**
@@ -111,9 +116,14 @@ export class FeeSwap {
    * @returns true if supported, otherwise false
    */
   isDestinationSwapSupported(fee: AssetAmount): boolean {
-    const isDex = !!this.dex;
+    try {
+      this.dex;
+    } catch {
+      return false;
+    }
+
     const isSwappable = !fee.isSame(this.destFee);
     const isSufficientAssetTransfer = this.asset.isSame(this.destFee);
-    return isDex && isSwappable && !isSufficientAssetTransfer;
+    return isSwappable && !isSufficientAssetTransfer;
   }
 }
