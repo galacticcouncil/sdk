@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -37,8 +37,6 @@
     "@types/lru-cache": "^7.10.9"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^0.1.2",
-    "@galacticcouncil/descriptors": "^1.7.0",
     "@noble/hashes": "^1.6.1",
     "@wormhole-foundation/sdk-base": "3.2.0",
     "@wormhole-foundation/sdk-connect": "3.2.0",
@@ -55,6 +53,8 @@
     "lru-cache": "^11.2.2"
   },
   "peerDependencies": {
+    "@galacticcouncil/common": ">=0.1.2 <1.0.0",
+    "@galacticcouncil/descriptors": ">=1.7.0 <2.0.0",
     "polkadot-api": "^1.23.0",
     "viem": "^2.38.3"
   }

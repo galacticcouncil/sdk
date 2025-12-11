@@ -29,6 +29,12 @@ import { PoolClient } from '../PoolClient';
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 
+type Peg = {
+  pair: string[];
+  updatedAt: string;
+  source?: string;
+};
+
 export class StableSwapClient extends PoolClient {
   private poolsData: Map<string, PalletStableswapPoolInfo> = new Map([]);
 
@@ -184,13 +190,25 @@ export class StableSwapClient extends PoolClient {
 
     const pegs = poolPegs.unwrap();
 
-    const latestPegs = await this.getLatestPegs(poolInfo, pegs, blockNumber);
+    const latest = await this.getLatestPegs(poolInfo, pegs, blockNumber);
+    const latestPegs = latest.map(({ pair, updatedAt }) => [pair, updatedAt]);
     const recentPegs = this.getRecentPegs(pegs);
     const fee = FeeUtils.fromPermill(poolInfo.fee.toNumber());
     const maxPegUpdate = FeeUtils.fromPerbill(pegs.maxPegUpdate.toNumber());
 
+    const targetPeg = latest.find((p) => p.source);
+
+    const currentPegsUpdatedAt = pegs.updatedAt
+      ? pegs.updatedAt.toString()
+      : targetPeg?.updatedAt;
+
+    if (!currentPegsUpdatedAt) {
+      throw Error(poolId + ' current peg unknown');
+    }
+
     const [updatedFee, updatedPegs] = StableMath.recalculatePegs(
       JSON.stringify(recentPegs),
+      currentPegsUpdatedAt,
       JSON.stringify(latestPegs),
       blockNumber,
       FeeUtils.toRaw(maxPegUpdate).toString(),
@@ -224,7 +242,7 @@ export class StableSwapClient extends PoolClient {
     poolInfo: PalletStableswapPoolInfo,
     poolPegs: PalletStableswapPoolPegInfo,
     blockNumber: string
-  ) {
+  ): Promise<Peg[]> {
     const { source } = poolPegs;
 
     const assets = Array.from(poolInfo.assets.entries()).map(([_, id]) =>
@@ -246,9 +264,12 @@ export class StableSwapClient extends PoolClient {
         const priceNum = price.n.toString();
         const priceDenom = price.d.toString();
 
-        return oracleAsset.toString() === oracleKey[0].toString()
-          ? [[priceNum, priceDenom], updatedAt.toString()]
-          : [[priceDenom, priceNum], updatedAt.toString()];
+        const pair =
+          oracleAsset.toString() === oracleKey[0].toString()
+            ? [priceNum, priceDenom]
+            : [priceDenom, priceNum];
+
+        return { pair, updatedAt: updatedAt.toString(), source: 'ema' };
       } else if (s.isMmOracle) {
         const h160 = s.asMmOracle;
         const { price, decimals, updatedAt } = await this.mmOracle.getData(
@@ -256,12 +277,11 @@ export class StableSwapClient extends PoolClient {
         );
 
         const priceDenom = 10 ** decimals;
-        return [
-          [price.toString(), priceDenom.toString()],
-          updatedAt.toString(),
-        ];
+        const pair = [price.toString(), priceDenom.toString()];
+        return { pair, updatedAt: updatedAt.toString(), source: 'mm' };
       } else if (s.isValue) {
-        return [s.asValue.map((p) => p.toString()), blockNumber];
+        const pair = s.asValue.map((p) => p.toString());
+        return { pair, updatedAt: blockNumber };
       } else {
         throw Error(s.type + ' is not supported');
       }

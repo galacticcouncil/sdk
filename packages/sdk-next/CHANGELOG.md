@@ -1,5 +1,22 @@
 # @galacticcouncil/sdk-next
 
+## 0.22.0
+
+### Minor Changes
+
+- recalculate peg math upgrade (new updateAt ora arg support)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-stableswap@2.4.0
+
+## 0.21.0
+
+### Minor Changes
+
+- rework peer deps
+
 ## 0.20.0
 
 ### Minor Changes

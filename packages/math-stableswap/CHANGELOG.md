@@ -1,5 +1,11 @@
 # @galacticcouncil/math-stableswap
 
+## 2.4.0
+
+### Minor Changes
+
+- recalculate peg math upgrade (new updateAt ora arg support)
+
 ## 2.3.0
 
 ### Minor Changes

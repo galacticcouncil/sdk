@@ -5,7 +5,7 @@ const bnFormatter = (_, nestedValue) => {
 };
 
 const main = async () => {
-  const relaculated = recalculate_peg(
+  const recalculated = recalculate_peg(
     JSON.stringify(
       [
         [85473939039997170n, 57767685517430457n],
@@ -13,19 +13,20 @@ const main = async () => {
       ],
       bnFormatter
     ),
+    '10',
     JSON.stringify(
       [
-        [[85561836215176576n, 57778334052239089n], 79926],
-        [[1, 1], 79926],
+        [[85561836215176576n, 57778334052239089n], 10],
+        [[1, 1], 10],
       ],
       bnFormatter
     ),
-    '80462',
+    '20',
     '0.01',
     '0.02'
   );
 
-  console.log(relaculated);
+  console.log(recalculated);
 };
 
 main()

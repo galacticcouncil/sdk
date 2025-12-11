@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "0.20.0",
+  "version": "0.22.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -35,13 +35,11 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^0.1.2",
-    "@galacticcouncil/descriptors": "^1.7.0",
     "@galacticcouncil/math-hsm": "^1.1.0",
     "@galacticcouncil/math-lbp": "^1.2.0",
     "@galacticcouncil/math-liquidity-mining": "^1.2.0",
     "@galacticcouncil/math-omnipool": "^1.3.0",
-    "@galacticcouncil/math-stableswap": "^2.3.0",
+    "@galacticcouncil/math-stableswap": "^2.4.0",
     "@galacticcouncil/math-staking": "^1.2.0",
     "@galacticcouncil/math-xyk": "^1.2.0",
     "@noble/hashes": "^1.6.1",
@@ -50,6 +48,8 @@
     "big.js": "^6.2.1"
   },
   "peerDependencies": {
+    "@galacticcouncil/common": ">=0.1.2 <1.0.0",
+    "@galacticcouncil/descriptors": ">=1.7.0 <2.0.0",
     "polkadot-api": "^1.23.0",
     "viem": "^2.38.3"
   }

@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 0.4.0
+
+### Minor Changes
+
+- rework peer deps
+
 ## 0.3.0
 
 ### Minor Changes
