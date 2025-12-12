@@ -142,10 +142,9 @@ export class TradeRouter extends Router {
    * Calculate and return sell spot price for assetIn > assetOut
    *
    * @param route - sell route
-   * @param spotDecimals - decimals to use for spot price calculation
    * @returns sell spot price
    */
-  private getSellSpot(route: SellSwap[], spotDecimals: number): bigint {
+  private getSellSpot(route: SellSwap[]): bigint {
     const lastSwap = route[route.length - 1];
 
     if (route.length === 1) {
@@ -159,10 +158,9 @@ export class TradeRouter extends Router {
       .map((s: SellSwap) => s.spotPrice)
       .reduce((a: bigint, b: bigint) => a * b);
 
-    const spotAdjDecimals = cumulativeRouteDecimals - spotDecimals;
-    const spotScalingFactor = BigInt(10) ** BigInt(spotAdjDecimals);
-
-    return cumulativeSpotPrice / spotScalingFactor;
+    const spotAdjDecimals = cumulativeRouteDecimals - lastSwap.assetOutDecimals;
+    const spotScalingFactor = Math.pow(10, spotAdjDecimals);
+    return cumulativeSpotPrice / BigInt(spotScalingFactor);
   }
 
   /**
@@ -238,7 +236,7 @@ export class TradeRouter extends Router {
     const lastSwap = route[route.length - 1];
     const isDirect = this.isDirectTrade(route);
 
-    const spotPrice = this.getSellSpot(route, lastSwap.assetOutDecimals);
+    const spotPrice = this.getSellSpot(route);
 
     const deltaY = lastSwap.amountOut;
     const delta0Y = isDirect
@@ -503,11 +501,8 @@ export class TradeRouter extends Router {
       }
 
       const swaps = await this.toSellSwaps('1', route, poolsMap);
-      const spotPriceDecimals =
-        swaps.length > 1
-          ? Math.max(...swaps.map((s) => s.assetOutDecimals))
-          : swaps[swaps.length - 1].assetOutDecimals;
-      const spotPrice = this.getSellSpot(swaps, spotPriceDecimals);
+      const spotPrice = this.getSellSpot(swaps);
+      const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
       return { amount: spotPrice, decimals: spotPriceDecimals };
     }).catch(() => undefined);
   }
@@ -552,10 +547,9 @@ export class TradeRouter extends Router {
    * Calculate and return buy spot price for assetIn > assetOut
    *
    * @param route - buy route
-   * @param spotDecimals - decimals to use for spot price calculation
    * @returns buy spot price
    */
-  private getBuySpot(route: BuySwap[], spotDecimals: number): bigint {
+  private getBuySpot(route: BuySwap[]): bigint {
     const lastSwap = route[0];
 
     if (route.length === 1) {
@@ -569,9 +563,9 @@ export class TradeRouter extends Router {
       .map((s: BuySwap) => s.spotPrice)
       .reduce((a: bigint, b: bigint) => a * b);
 
-    const spotAdjDecimals = cumulativeRouteDecimals - spotDecimals;
-    const spotScalingFactor = BigInt(10) ** BigInt(spotAdjDecimals);
-    return cumulativeSpotPrice / spotScalingFactor;
+    const spotAdjDecimals = cumulativeRouteDecimals - lastSwap.assetInDecimals;
+    const spotScalingFactor = Math.pow(10, spotAdjDecimals);
+    return cumulativeSpotPrice / BigInt(spotScalingFactor);
   }
 
   /**
@@ -647,7 +641,7 @@ export class TradeRouter extends Router {
     const lastSwap = route[0];
     const isDirect = this.isDirectTrade(route);
 
-    const spotPrice = this.getBuySpot(route, lastSwap.assetInDecimals);
+    const spotPrice = this.getBuySpot(route);
 
     const deltaX = lastSwap.amountIn;
     const delta0X = isDirect
