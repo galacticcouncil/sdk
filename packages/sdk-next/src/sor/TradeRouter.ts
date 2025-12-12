@@ -238,7 +238,11 @@ export class TradeRouter extends Router {
     const lastSwap = route[route.length - 1];
     const isDirect = this.isDirectTrade(route);
 
-    const spotPrice = this.getSellSpot(route, lastSwap.assetOutDecimals);
+    const spotPriceDecimals =
+      route.length > 1
+        ? Math.max(...route.map((s) => s.assetOutDecimals))
+        : lastSwap.assetOutDecimals;
+    const spotPrice = this.getSellSpot(route, spotPriceDecimals);
 
     const deltaY = lastSwap.amountOut;
     const delta0Y = isDirect
@@ -278,7 +282,7 @@ export class TradeRouter extends Router {
             lastSwap.amountOut,
             lastSwap.assetOutDecimals
           ),
-          spotPrice: big.toDecimal(spotPrice, lastSwap.assetOutDecimals),
+          spotPrice: big.toDecimal(spotPrice, spotPriceDecimals),
           tradeFee: big.toDecimal(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
@@ -647,7 +651,11 @@ export class TradeRouter extends Router {
     const lastSwap = route[0];
     const isDirect = this.isDirectTrade(route);
 
-    const spotPrice = this.getBuySpot(route, lastSwap.assetInDecimals);
+    const spotPriceDecimals =
+      route.length > 1
+        ? Math.max(...route.map((s) => s.assetInDecimals))
+        : lastSwap.assetInDecimals;
+    const spotPrice = this.getBuySpot(route, spotPriceDecimals);
 
     const deltaX = lastSwap.amountIn;
     const delta0X = isDirect
@@ -689,7 +697,7 @@ export class TradeRouter extends Router {
             firstSwap.assetOutDecimals
           ),
           amountIn: big.toDecimal(lastSwap.amountIn, lastSwap.assetInDecimals),
-          spotPrice: big.toDecimal(spotPrice, lastSwap.assetInDecimals),
+          spotPrice: big.toDecimal(spotPrice, spotPriceDecimals),
           tradeFee: big.toDecimal(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
