@@ -8,7 +8,7 @@ import {
   BalanceClientV2,
 } from './client';
 import { EvmClient } from './evm';
-import { CachingPoolService, PoolService } from './pool';
+import { CachingPoolService, PoolService, PoolType } from './pool';
 import { RouterOptions, TradeRouter, TradeScheduler } from './sor';
 import { TxBuilderFactory } from './tx';
 
@@ -46,7 +46,9 @@ export function createSdkContext(
   // Initialize APIs
   const aave = new AaveUtils(evm);
   const router = new TradeRouter(poolCtx, opts.router);
-  const scheduler = new TradeScheduler(router, {
+
+  const schedulerRouter = new TradeRouter(poolCtx, { exclude: [PoolType.HSM] });
+  const scheduler = new TradeScheduler(schedulerRouter, {
     blockTime: params.blockTime,
     minBudgetInNative: params.minOrderBudget,
   });
