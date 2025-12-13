@@ -11,7 +11,7 @@
     "node": "^22.12.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^10.3.0",
+    "@galacticcouncil/sdk": "^10.4.0",
     "@galacticcouncil/xcm-sdk": "^10.9.0",
     "@galacticcouncil/xcm-cfg": "^10.18.0"
   }

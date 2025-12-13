@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.4.0
+
+### Minor Changes
+
+- 0d1da84: disable hsm in scheduler
+
 ## 10.3.0
 
 ### Minor Changes
