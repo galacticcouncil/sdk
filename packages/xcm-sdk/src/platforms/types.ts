@@ -11,6 +11,7 @@ export interface Platform<T extends BaseConfig, B extends BaseConfig> {
   buildCall(
     account: string,
     amount: bigint,
+    asset: Asset,
     feeBalance: AssetAmount,
     config: T
   ): Promise<Call>;

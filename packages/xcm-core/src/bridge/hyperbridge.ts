@@ -1,19 +1,26 @@
 import { keccak256, stringToBytes, stringToHex } from 'viem';
 
+import { Asset } from '../asset';
 import { AnyChain, EvmChain, Parachain } from '../chain';
 
 export type HyperbridgeDef = {
   id: number;
   gateway: string;
+  ismpHost: string;
+  feeAsset: Asset;
 };
 
 export class Hyperbridge {
   readonly id: number;
   readonly gateway: string;
+  readonly ismpHost: string;
+  readonly feeAsset: Asset;
 
-  constructor({ id, gateway }: HyperbridgeDef) {
+  constructor({ id, gateway, ismpHost, feeAsset }: HyperbridgeDef) {
     this.id = id;
     this.gateway = gateway;
+    this.ismpHost = ismpHost;
+    this.feeAsset = feeAsset;
   }
 
   static fromChain(chain: AnyChain): Hyperbridge {
@@ -33,6 +40,14 @@ export class Hyperbridge {
 
   getGateway(): string {
     return this.gateway;
+  }
+
+  getIsmpHost(): string {
+    return this.ismpHost;
+  }
+
+  getFeeAsset(): Asset {
+    return this.feeAsset;
   }
 
   getAssetId(symbol: string): `0x${string}` {

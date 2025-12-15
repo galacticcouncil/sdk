@@ -375,7 +375,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
 ];
 
 const toEthereumViaHyperbridge: AssetRoute[] = [
-  viaHyperbridgeTemplate(eurc, eurc, base),
+  viaHyperbridgeTemplate(eurc, eurc, base, base),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [

@@ -15,9 +15,9 @@ import { configService, wallet, whTransfers } from './setup';
 import { sign, signSubstrate, signSolanaBundle } from './signers';
 
 // Define transfer constraints
-const srcChain = configService.getChain('ethereum');
+const srcChain = configService.getChain('base');
 const destChain = configService.getChain('hydration');
-const asset = configService.getAsset('eth');
+const asset = configService.getAsset('eurc');
 
 const configBuilder = ConfigBuilder(configService);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -54,7 +54,7 @@ const transfer = await TransferBuilder(wallet)
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const transferAmount = '0.01';
+const transferAmount = '1';
 
 const [call, fee] = await Promise.all([
   transfer.buildCall(transferAmount),

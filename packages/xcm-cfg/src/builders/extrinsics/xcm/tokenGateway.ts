@@ -5,11 +5,16 @@ import {
   ExtrinsicConfigBuilder,
   Parachain,
   Hyperbridge as Hb,
+  AnyChain,
 } from '@galacticcouncil/xcm-core';
 
 const pallet = 'tokenGateway';
 
-const teleport = (): ExtrinsicConfigBuilder => ({
+type HyperbridgeOpts = {
+  custodialChain: AnyChain;
+};
+
+const teleport = (opts: HyperbridgeOpts): ExtrinsicConfigBuilder => ({
   build: ({ address, amount, asset, destination, sender, source }) =>
     new ExtrinsicConfig({
       module: pallet,
@@ -21,6 +26,7 @@ const teleport = (): ExtrinsicConfigBuilder => ({
         const rcvHb = Hb.fromChain(rcv);
 
         const assetId = ctx.getAssetId(asset);
+        const redeem = opts.custodialChain === rcv;
         return [
           {
             assetId: assetId,
@@ -30,7 +36,7 @@ const teleport = (): ExtrinsicConfigBuilder => ({
             timeout: 0,
             tokenGateway: rcvHb.getGateway(),
             relayerFee: 0n,
-            redeem: false,
+            redeem: redeem,
           },
         ];
       },

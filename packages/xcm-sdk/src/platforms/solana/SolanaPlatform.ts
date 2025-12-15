@@ -25,9 +25,10 @@ import { ixToHuman } from './utils';
 
 import { Platform } from '../types';
 
-export class SolanaPlatform
-  implements Platform<ProgramConfig, SolanaQueryConfig>
-{
+export class SolanaPlatform implements Platform<
+  ProgramConfig,
+  SolanaQueryConfig
+> {
   readonly #connection: Connection;
 
   constructor(chain: SolanaChain) {
@@ -37,6 +38,7 @@ export class SolanaPlatform
   async buildCall(
     account: string,
     _amount: bigint,
+    _asset: Asset,
     _feeBalance: AssetAmount,
     config: ProgramConfig
   ): Promise<SolanaCall> {

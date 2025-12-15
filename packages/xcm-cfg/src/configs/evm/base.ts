@@ -1,8 +1,12 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { eurc, eth } from '../../assets';
+import { eurc, eth, usdc } from '../../assets';
 import { base, hydration } from '../../chains';
-import { BalanceBuilder, ContractBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ContractBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 import { Tag } from '../../tags';
 
 const toHydrationViaHyperbridge: AssetRoute[] = [
@@ -15,19 +19,21 @@ const toHydrationViaHyperbridge: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
-        asset: eurc,
-        balance: BalanceBuilder().evm().erc20(),
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
       chain: hydration,
       asset: eurc,
       fee: {
-        amount: 0,
-        asset: eurc,
+        amount: FeeAmountBuilder().Hyperbridge().calculateNativeFee(),
+        asset: eth,
       },
     },
-    contract: ContractBuilder().Hyperbridge().teleport(),
+    contract: ContractBuilder()
+      .Hyperbridge()
+      .teleport({ custodialChain: base }),
     tags: [Tag.Hyperbridge],
   }),
 ];

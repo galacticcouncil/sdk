@@ -25,6 +25,7 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   hyperbridge?: HyperbridgeDef;
   snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
+  uniswapV2?: string;
 }
 
 export class EvmChain extends Chain<ChainAssetData> {
@@ -34,6 +35,7 @@ export class EvmChain extends Chain<ChainAssetData> {
   readonly hyperbridge?: Hyperbridge;
   readonly snowbridge?: Snowbridge;
   readonly wormhole?: Wormhole;
+  readonly uniswapV2?: string;
 
   constructor({
     evmChain,
@@ -42,6 +44,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     hyperbridge,
     snowbridge,
     wormhole,
+    uniswapV2,
     ...others
   }: EvmChainParams) {
     super({ ...others });
@@ -51,6 +54,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.hyperbridge = hyperbridge && new Hyperbridge(hyperbridge);
     this.snowbridge = snowbridge && new Snowbridge(snowbridge);
     this.wormhole = wormhole && new Wormhole(wormhole);
+    this.uniswapV2 = uniswapV2;
   }
 
   get client(): EvmClient {

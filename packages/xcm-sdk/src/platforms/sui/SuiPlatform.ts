@@ -34,6 +34,7 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
   async buildCall(
     account: string,
     _amount: bigint,
+    _asset: Asset,
     _feeBalance: AssetAmount,
     config: MoveConfig
   ): Promise<SuiCall> {

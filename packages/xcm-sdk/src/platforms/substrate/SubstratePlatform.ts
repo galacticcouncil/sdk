@@ -47,6 +47,7 @@ export class SubstratePlatform implements Platform<
   async buildCall(
     account: string,
     _amount: bigint,
+    _asset: Asset,
     feeBalance: AssetAmount,
     config: ExtrinsicConfig
   ): Promise<SubstrateCall> {

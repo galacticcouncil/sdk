@@ -12,9 +12,11 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
       config.func
     );
 
-  const isHyperbridge = config.module === 'Hyperbridge';
+  return isWormholeNative || isSnowbridgeNative;
+}
 
-  return isWormholeNative || isSnowbridgeNative || isHyperbridge;
+export function isHyperBridge(config: ContractConfig): boolean {
+  return config.module === 'Hyperbridge';
 }
 
 export function isPrecompile(config: ContractConfig): boolean {

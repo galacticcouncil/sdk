@@ -16,7 +16,13 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, assetHubCex, moonbeam, zeitgeist } from '../../../chains';
+import {
+  assetHub,
+  assetHubCex,
+  base,
+  moonbeam,
+  zeitgeist,
+} from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -288,7 +294,8 @@ export function viaSnowbridgeTemplate(
 export function viaHyperbridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
-  to: AnyChain
+  to: AnyChain,
+  custodialTo: AnyChain
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -307,7 +314,9 @@ export function viaHyperbridgeTemplate(
         asset: assetOut,
       },
     },
-    extrinsic: ExtrinsicBuilder().tokenGateway().teleport(),
+    extrinsic: ExtrinsicBuilder()
+      .tokenGateway()
+      .teleport({ custodialChain: custodialTo }),
     tags: [Tag.Hyperbridge],
   });
 }

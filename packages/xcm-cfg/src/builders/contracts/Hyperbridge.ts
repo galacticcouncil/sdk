@@ -6,11 +6,16 @@ import {
   EvmChain,
   Parachain,
   Hyperbridge as Hb,
+  AnyChain,
 } from '@galacticcouncil/xcm-core';
 
 const { Ss58Addr } = addr;
 
-const teleport = (): ContractConfigBuilder => ({
+type HyperbridgeOpts = {
+  custodialChain: AnyChain;
+};
+
+const teleport = (opts: HyperbridgeOpts): ContractConfigBuilder => ({
   build: async (params) => {
     const { address, amount, asset, source, destination } = params;
     const ctx = source.chain as EvmChain;
@@ -21,8 +26,9 @@ const teleport = (): ContractConfigBuilder => ({
     const to = Ss58Addr.getPubKey(address);
     const assetId = ctxHb.getAssetId(asset.originSymbol);
     const dest = ctxHb.getDest(rcv);
+    const redeem = opts.custodialChain === rcv;
 
-    const nativeCost = 19617600110689n;
+    const nativeCost = destination.fee.amount;
     const timeout = 6 * 60 * 60;
 
     return new ContractConfig({
@@ -31,9 +37,9 @@ const teleport = (): ContractConfigBuilder => ({
       args: [
         [
           amount,
-          0n, // relayer fee
+          0n, // relayer fee set to 0 for substrate
           assetId,
-          true,
+          redeem,
           to,
           dest,
           timeout,

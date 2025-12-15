@@ -3,7 +3,7 @@ import {
   EvmChain,
 } from '@galacticcouncil/xcm-core';
 
-import { eth, eurc } from '../../assets';
+import { eth, eurc, usdc } from '../../assets';
 
 import { base as evmChain } from 'viem/chains';
 
@@ -15,12 +15,17 @@ export const base = new EvmChain({
     {
       asset: eth,
       decimals: 18,
-      id: '0x0000000000000000000000000000000000000000',
+      id: '0x4200000000000000000000000000000000000006',
     },
     {
       asset: eurc,
-      decimals: 18,
+      decimals: 6,
       id: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42',
+    },
+    {
+      asset: usdc,
+      decimals: 6,
+      id: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     },
   ],
   ecosystem: Ecosystem.Ethereum,
@@ -30,5 +35,8 @@ export const base = new EvmChain({
   hyperbridge: {
     id: 8453,
     gateway: '0xfd413e3afe560182c4471f4d143a96d3e259b6de',
+    ismpHost: '0x6FFe92e4d7a9D589549644544780e6725E84b248',
+    feeAsset: usdc,
   },
+  uniswapV2: '0x327Df1E6de05895d2ab08513aaDD9313Fe505d86',
 });
