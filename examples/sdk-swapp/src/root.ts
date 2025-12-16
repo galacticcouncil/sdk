@@ -22,7 +22,7 @@ export class Root extends LitElement {
         accountAddress=${'5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'}
         accountProvider=${'polkadot-js'}
         accountName=${'default'}
-        apiAddress="wss://hydradx-rpc.dwellir.com"
+        apiAddress="wss://hydration-rpc.n.dwellir.com"
         assetIn="5"
         assetOut="0"
       ></gc-swapp>

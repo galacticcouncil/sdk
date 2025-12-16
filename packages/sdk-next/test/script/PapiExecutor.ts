@@ -1,4 +1,4 @@
-import { PolkadotClient } from 'polkadot-api';
+import { PolkadotClient, createClient } from 'polkadot-api';
 import { hydration } from '@galacticcouncil/descriptors';
 
 import { ApiUrl } from './types';
@@ -18,7 +18,8 @@ export abstract class PapiExecutor {
 
   async run() {
     console.log('Connecting to:', this.apiUrl);
-    const client = await api.getWs(this.apiUrl);
+    const provider = api.getWs(this.apiUrl);
+    const client = createClient(provider);
     const papi = client.getTypedApi(hydration);
     const { spec_name, spec_version } = await papi.constants.System.Version();
     console.log(`Runtime ready ${spec_name}/${spec_version}`);
