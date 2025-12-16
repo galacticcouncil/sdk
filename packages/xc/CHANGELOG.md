@@ -1,5 +1,11 @@
 # @galacticcouncil/xc
 
+## 0.4.0
+
+### Minor Changes
+
+- switch package to use xc peers
+
 ## 0.3.0
 
 ### Minor Changes
