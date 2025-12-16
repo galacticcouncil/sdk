@@ -47,7 +47,7 @@ describe('Wallet with XC config', () => {
   });
 
   afterAll(async () => {
-    await SubstrateApis.getInstance().release();
+    SubstrateApis.getInstance().release();
   });
 
   it('is defined', () => {
