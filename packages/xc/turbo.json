@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "@galacticcouncil/xc-core#postbuild",
+        "@galacticcouncil/xc-cfg#postbuild",
+        "@galacticcouncil/xc-sdk#postbuild",
+        "^build",
+        "^postbuild"
+      ]
+    },
+    "postbuild": {
+      "dependsOn": ["build"]
+    }
+  }
+}
