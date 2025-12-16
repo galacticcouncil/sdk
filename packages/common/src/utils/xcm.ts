@@ -160,7 +160,6 @@ export function encodeLocation(location: any): any {
     };
   }
 
-  //transform interior
   return {
     parents,
     interior: transform(interior),
@@ -168,17 +167,10 @@ export function encodeLocation(location: any): any {
 }
 
 export function encodeAssetId(assetId: any): any {
+  if (assetId == null) return assetId;
+
   if (typeof assetId === 'string') {
     return BigInt(assetId);
-  }
-
-  if (typeof assetId === 'number' || typeof assetId === 'bigint') {
-    return assetId;
-  }
-
-  // Handle null/undefined
-  if (assetId === null || assetId === undefined) {
-    return assetId;
   }
 
   // Handle object types (e.g., { Token2: 0 }, { Native: "BNC" })
@@ -186,4 +178,6 @@ export function encodeAssetId(assetId: any): any {
     const transformed = transform(assetId);
     return transformed;
   }
+
+  return assetId;
 }
