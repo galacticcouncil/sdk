@@ -20,10 +20,12 @@ function assets() {
     account: (): BalanceConfigBuilder => ({
       build: ({ address, asset, chain }) => {
         const assetId = chain.getBalanceAssetId(asset);
+        const encodedAssetId = encodeAssetId(assetId);
+
         return new SubstrateQueryConfig({
           module: 'Assets',
           func: 'Account',
-          args: [assetId, address],
+          args: [encodedAssetId, address],
           transform: async (response) => {
             return BigInt(response?.balance?.toString() ?? '0');
           },

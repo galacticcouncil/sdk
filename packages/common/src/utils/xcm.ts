@@ -168,12 +168,11 @@ export function encodeLocation(location: any): any {
 }
 
 export function encodeAssetId(assetId: any): any {
-  // Handle simple types (number, string, bigint) - return as-is
-  if (
-    typeof assetId === 'number' ||
-    typeof assetId === 'string' ||
-    typeof assetId === 'bigint'
-  ) {
+  if (typeof assetId === 'string') {
+    return BigInt(assetId);
+  }
+
+  if (typeof assetId === 'number' || typeof assetId === 'bigint') {
     return assetId;
   }
 
