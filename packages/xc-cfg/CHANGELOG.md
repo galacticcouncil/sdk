@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 0.4.1
+
+### Patch Changes
+
+- fix assets.asset balances
+
 ## 0.4.0
 
 ### Minor Changes
