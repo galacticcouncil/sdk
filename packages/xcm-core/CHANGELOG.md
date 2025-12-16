@@ -1,5 +1,15 @@
 # @galacticcouncil/xcm-core
 
+## 8.9.0
+
+### Minor Changes
+
+[4626c650]: https://github.com/galacticcouncil/sdk/commit/4626c650
+[5c9ed0af]: https://github.com/galacticcouncil/sdk/commit/5c9ed0af
+
+- [[#4626c650][4626c650]] xcm: hyperbridge native fee est support, fix approval
+- [[#5c9ed0af][5c9ed0af]] xcm: hyperbridge support
+
 ## 8.8.0
 
 ### Minor Changes
