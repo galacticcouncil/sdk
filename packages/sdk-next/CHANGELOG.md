@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.23.0
+
+### Minor Changes
+
+[12a0d3dd]: https://github.com/galacticcouncil/sdk/commit/12a0d3dd
+
+- [[#12a0d3dd][12a0d3dd]] next: updated getWs function to return provider instead of client
+
 ## 0.22.0
 
 ### Minor Changes

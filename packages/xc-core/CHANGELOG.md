@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-core
 
+## 0.5.0
+
+### Minor Changes
+
+[a3a6285b]: https://github.com/galacticcouncil/sdk/commit/a3a6285b
+
+- [[#a3a6285b][a3a6285b]] xc: updated SubstrateApis to have getWs function and ws in the cache
+
 ## 0.4.0
 
 ### Minor Changes
