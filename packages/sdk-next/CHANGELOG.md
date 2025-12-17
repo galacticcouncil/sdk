@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.24.0
+
+### Minor Changes
+
+- update dca scheduler api - duration based
+
 ## 0.23.0
 
 ### Minor Changes

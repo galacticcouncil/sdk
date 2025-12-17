@@ -51,15 +51,15 @@ export class TradeScheduler {
    * @param assetIn - storage key of assetIn
    * @param assetOut - storage key of assetOut
    * @param amountInTotal - order budget
-   * @param frequency - order frequency in ms (opts)
-   * @param noOfTrades - number of orders
+   * @param duration - order duration in ms
+   * @param noOfTrades - number of trades within the order
    * @returns - dca trade order
    */
   async getDcaOrder(
     assetIn: number,
     assetOut: number,
     amountInTotal: string,
-    frequency: number,
+    duration: number,
     noOfTrades?: number
   ): Promise<TradeDcaOrder> {
     const [amountInMin, trade] = await Promise.all([
@@ -80,6 +80,8 @@ export class TradeScheduler {
     const maxTradeCount = this.getMaximumTradeCount(amountIn, amountInMin);
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
     const tradeCount = noOfTrades || optTradeCount;
+
+    const frequency = Math.round(duration / tradeCount);
 
     const amountInPerTrade = amountIn / BigInt(tradeCount);
 
