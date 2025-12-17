@@ -37,13 +37,14 @@ Use `createSdkContext` to quickly set up all components of the SDK — pool cont
 
 ```ts
 import { api, createSdkContext } from '@galacticcouncil/sdk-next';
+import { createClient } from 'polkadot-api';
 
-const client = await api.getWs('wss://hydradx-rpc.dwellir.com');
+const provider = api.getWs('wss://hydradx-rpc.dwellir.com');
+const client = createClient(provider);
 const sdk = await createSdkContext(client);
 
 // Don't forget to cleanup resources when DONE
 sdk.destroy();
-client.destroy();
 ```
 
 It handles all necessary setup under the hood. Just plug in your PolkadotClient, and you're ready to interact with registry, accounts, pools, router, and more.

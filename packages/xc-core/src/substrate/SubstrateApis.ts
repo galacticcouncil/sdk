@@ -2,20 +2,21 @@ import { createClient, PolkadotClient } from 'polkadot-api';
 import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
 
+type WsProvider = ReturnType<typeof getWsProvider>;
+
+interface CachedConnection {
+  client: PolkadotClient;
+  provider: WsProvider;
+}
+
 export class SubstrateApis {
   private static _instance: SubstrateApis = new SubstrateApis();
 
-  private dispose = (client: PolkadotClient, key: string) => {
-    console.log('Releasing ' + key + ' connection');
-    client.destroy();
-  };
-
-  private _cache: LRUCache<string, PolkadotClient> = new LRUCache<
+  private _cache: LRUCache<string, CachedConnection> = new LRUCache<
     string,
-    PolkadotClient
+    CachedConnection
   >({
     max: 40,
-    dispose: this.dispose,
   });
 
   constructor() {
@@ -50,7 +51,9 @@ export class SubstrateApis {
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
-    this._cache.set(cacheKey, client, { noDisposeOnSet: true });
+
+    const connection: CachedConnection = { client, provider: wsProvider };
+    this._cache.set(cacheKey, connection, { noDisposeOnSet: true });
 
     return client;
   }
@@ -60,17 +63,31 @@ export class SubstrateApis {
     const cacheKey = this.findCacheKey(endpoints);
 
     if (cacheKey) {
-      return this._cache.get(cacheKey)!;
+      const connection = this._cache.get(cacheKey)!;
+      return connection.client;
     }
 
     return this.createClient(endpoints);
   }
 
   public release() {
-    for (const [key, client] of this._cache.entries()) {
-      console.log('Disconnecting from ' + key);
-      client.destroy();
+    const first = this._cache.entries().next().value;
+    if (first) {
+      const [key, connection] = first;
+      console.log('Releasing ' + key);
+      connection.client.destroy();
     }
     this._cache.clear();
+  }
+
+  public getWs(ws: string | string[]): WsProvider | undefined {
+    const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
+    const cacheKey = this.findCacheKey(endpoints);
+
+    if (!cacheKey) {
+      return undefined;
+    }
+
+    return this._cache.get(cacheKey)?.provider;
   }
 }

@@ -1,6 +1,8 @@
 import { api as papi, createSdkContext } from '@galacticcouncil/sdk-next';
+import { createClient } from 'polkadot-api';
 
-const client = await papi.getWs('wss://hydration-rpc.n.dwellir.com');
+const provider = papi.getWs('wss://hydration-rpc.n.dwellir.com');
+const client = createClient(provider);
 
 const sdk = await createSdkContext(client);
 const { ctx } = sdk;

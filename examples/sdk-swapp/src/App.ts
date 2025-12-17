@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { PolkadotClient } from 'polkadot-api';
+import { PolkadotClient, createClient } from 'polkadot-api';
 import { Subscription } from 'rxjs';
 
 import {
@@ -9,11 +9,11 @@ import {
   Amount,
   SdkCtx,
   api as papi,
-  big,
   createSdkContext,
   sor,
 } from '@galacticcouncil/sdk-next';
 
+import { big } from '@galacticcouncil/common';
 import { signAndSend } from './signer';
 import { humanizeAmount } from './utils';
 
@@ -52,7 +52,8 @@ export class Swapp extends LitElement {
   static styles = [formStyles];
 
   override async firstUpdated() {
-    this.client = await papi.getWs(this.apiAddress);
+    const provider = papi.getWs(this.apiAddress);
+    this.client = createClient(provider);
     this.sdk = await createSdkContext(this.client);
     this.onLoad();
   }

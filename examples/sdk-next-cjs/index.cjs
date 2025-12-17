@@ -2,9 +2,11 @@ const {
   api: { getWs },
   createSdkContext,
 } = require('@galacticcouncil/sdk-next');
+const { createClient } = require('polkadot-api');
 
 const main = async () => {
-  const client = await getWs('wss://hydradx-rpc.dwellir.com');
+  const provider = getWs('wss://hydration-rpc.n.dwellir.com');
+  const client = createClient(provider);
   const sdk = await createSdkContext(client);
 
   const { ctx } = sdk;
