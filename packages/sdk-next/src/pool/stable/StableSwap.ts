@@ -250,7 +250,8 @@ export class StableSwap implements Pool {
     );
 
     if (poolPair.assetOut == this.id) {
-      return BigInt(spot);
+      const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
+      return BigInt(spot) * BigInt(base);
     }
 
     if (poolPair.assetIn == this.id) {
@@ -258,8 +259,7 @@ export class StableSwap implements Pool {
       return BigInt(spot) / BigInt(base);
     }
 
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
-    return BigInt(spot) / BigInt(base);
+    return BigInt(spot);
   }
 
   private calculateOut(
@@ -344,7 +344,8 @@ export class StableSwap implements Pool {
     );
 
     if (poolPair.assetIn == this.id) {
-      return BigInt(spot);
+      const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
+      return BigInt(spot) * BigInt(base);
     }
 
     if (poolPair.assetOut == this.id) {
@@ -352,8 +353,7 @@ export class StableSwap implements Pool {
       return BigInt(spot) / BigInt(base);
     }
 
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
-    return BigInt(spot) / BigInt(base);
+    return BigInt(spot);
   }
 
   private getPegs(): string {

@@ -1,7 +1,8 @@
-import { big } from '@galacticcouncil/common';
+import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
 import { Router } from './Router';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
+import { calculateSwapAmount } from './utils';
 
 import { RouteNotFound } from '../errors';
 import {
@@ -151,16 +152,9 @@ export class TradeRouter extends Router {
       return lastSwap.spotPrice;
     }
 
-    const cumulativeRouteDecimals = route
-      .map((s: SellSwap) => s.assetOutDecimals)
-      .reduce((a: number, b: number) => a + b);
-    const cumulativeSpotPrice = route
+    return route
       .map((s: SellSwap) => s.spotPrice)
-      .reduce((a: bigint, b: bigint) => a * b);
-
-    const spotAdjDecimals = cumulativeRouteDecimals - lastSwap.assetOutDecimals;
-    const spotScalingFactor = Math.pow(10, spotAdjDecimals);
-    return cumulativeSpotPrice / BigInt(spotScalingFactor);
+      .reduce((a: bigint, b: bigint) => (a * b) / 10n ** 18n);
   }
 
   /**
@@ -249,9 +243,12 @@ export class TradeRouter extends Router {
       ? lastSwap.tradeFeePct
       : math.calculateSellFee(delta0Y, deltaY);
 
-    const swapScalingFactor = Math.pow(10, firstSwap.assetInDecimals);
-    const swapAmount =
-      (firstSwap.amountIn * spotPrice) / BigInt(swapScalingFactor);
+    const swapAmount = calculateSwapAmount(
+      firstSwap.amountIn,
+      spotPrice,
+      firstSwap.assetInDecimals,
+      lastSwap.assetOutDecimals
+    );
 
     const priceImpactPct = math.calculateDiffToRef(delta0Y, swapAmount);
 
@@ -276,7 +273,7 @@ export class TradeRouter extends Router {
             lastSwap.amountOut,
             lastSwap.assetOutDecimals
           ),
-          spotPrice: big.toDecimal(spotPrice, lastSwap.assetOutDecimals),
+          spotPrice: big.toDecimal(spotPrice, RUNTIME_DECIMALS),
           tradeFee: big.toDecimal(tradeFee, lastSwap.assetOutDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
@@ -417,8 +414,12 @@ export class TradeRouter extends Router {
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
 
-      const swapScalingFactor = Math.pow(10, poolPair.decimalsIn);
-      const swapAmount = (aIn * spotPrice) / BigInt(swapScalingFactor);
+      const swapAmount = calculateSwapAmount(
+        aIn,
+        spotPrice,
+        poolPair.decimalsIn,
+        poolPair.decimalsOut
+      );
 
       const priceImpactPct = math.calculateDiffToRef(calculatedOut, swapAmount);
 
@@ -450,7 +451,7 @@ export class TradeRouter extends Router {
             amountIn: big.toDecimal(aIn, poolPair.decimalsIn),
             amountOut: big.toDecimal(amountOut, poolPair.decimalsOut),
             calculatedOut: big.toDecimal(calculatedOut, poolPair.decimalsOut),
-            spotPrice: big.toDecimal(spotPrice, poolPair.decimalsOut),
+            spotPrice: big.toDecimal(spotPrice, RUNTIME_DECIMALS),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,
@@ -502,8 +503,7 @@ export class TradeRouter extends Router {
 
       const swaps = await this.toSellSwaps('1', route, poolsMap);
       const spotPrice = this.getSellSpot(swaps);
-      const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
-      return { amount: spotPrice, decimals: spotPriceDecimals };
+      return { amount: spotPrice, decimals: RUNTIME_DECIMALS };
     }).catch(() => undefined);
   }
 
@@ -556,16 +556,9 @@ export class TradeRouter extends Router {
       return lastSwap.spotPrice;
     }
 
-    const cumulativeRouteDecimals = route
-      .map((s: BuySwap) => s.assetInDecimals)
-      .reduce((a: number, b: number) => a + b);
-    const cumulativeSpotPrice = route
+    return route
       .map((s: BuySwap) => s.spotPrice)
-      .reduce((a: bigint, b: bigint) => a * b);
-
-    const spotAdjDecimals = cumulativeRouteDecimals - lastSwap.assetInDecimals;
-    const spotScalingFactor = Math.pow(10, spotAdjDecimals);
-    return cumulativeSpotPrice / BigInt(spotScalingFactor);
+      .reduce((a: bigint, b: bigint) => (a * b) / 10n ** 18n);
   }
 
   /**
@@ -654,9 +647,12 @@ export class TradeRouter extends Router {
       ? lastSwap.tradeFeePct
       : math.calculateBuyFee(delta0X, deltaX);
 
-    const swapScalingFactor = Math.pow(10, firstSwap.assetOutDecimals);
-    const swapAmount =
-      (firstSwap.amountOut * spotPrice) / BigInt(swapScalingFactor);
+    const swapAmount = calculateSwapAmount(
+      firstSwap.amountOut,
+      spotPrice,
+      firstSwap.assetOutDecimals,
+      lastSwap.assetInDecimals
+    );
 
     let priceImpactPct: number;
     if (delta0X === 0n) {
@@ -683,7 +679,7 @@ export class TradeRouter extends Router {
             firstSwap.assetOutDecimals
           ),
           amountIn: big.toDecimal(lastSwap.amountIn, lastSwap.assetInDecimals),
-          spotPrice: big.toDecimal(spotPrice, lastSwap.assetInDecimals),
+          spotPrice: big.toDecimal(spotPrice, RUNTIME_DECIMALS),
           tradeFee: big.toDecimal(tradeFee, lastSwap.assetInDecimals),
           tradeFeePct: tradeFeePct,
           tradeFeeRange: tradeFeeRange,
@@ -767,8 +763,12 @@ export class TradeRouter extends Router {
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
 
-      const swapScalingFactor = Math.pow(10, poolPair.decimalsOut);
-      const swapAmount = (aOut * spotPrice) / BigInt(swapScalingFactor);
+      const swapAmount = calculateSwapAmount(
+        aOut,
+        spotPrice,
+        poolPair.decimalsOut,
+        poolPair.decimalsIn
+      );
 
       let priceImpactPct: number;
       if (calculatedIn === 0n) {
@@ -805,7 +805,7 @@ export class TradeRouter extends Router {
             amountOut: big.toDecimal(aOut, poolPair.decimalsOut),
             amountIn: big.toDecimal(amountIn, poolPair.decimalsIn),
             calculatedIn: big.toDecimal(calculatedIn, poolPair.decimalsIn),
-            spotPrice: big.toDecimal(spotPrice, poolPair.decimalsIn),
+            spotPrice: big.toDecimal(spotPrice, RUNTIME_DECIMALS),
             tradeFeePct: feePct,
             tradeFeeRange: feePctRange,
             priceImpactPct: priceImpactPct,

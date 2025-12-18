@@ -1,20 +1,20 @@
 import { XykPool } from './XykPool';
 
-import { xykPool } from '../../../test/data';
+import { xykPoolWud } from '../../../test/data';
 
 describe('Xyk Pool', () => {
-  let pool: XykPool;
+  it('Should return valid reverse spot pairs for assets 1000085 & 0', async () => {
+    const pool = XykPool.fromPool(xykPoolWud);
 
-  beforeEach(() => {
-    pool = XykPool.fromPool(xykPool);
-  });
+    const wudToHdx = pool.parsePair(1000085, 0);
+    const wudToHdxSell = pool.spotPriceOutGivenIn(wudToHdx);
+    const wudToHdxBuy = pool.spotPriceInGivenOut(wudToHdx);
 
-  it('Should return valid PoolPair for assets 1 & 2', async () => {
-    expect(pool).toBeDefined();
-    const result = pool.parsePair(1, 2);
-    expect(result.assetIn).toStrictEqual(xykPool.tokens[0].id);
-    expect(result.balanceIn).toStrictEqual(xykPool.tokens[0].balance);
-    expect(result.assetOut).toStrictEqual(xykPool.tokens[1].id);
-    expect(result.balanceOut).toStrictEqual(xykPool.tokens[1].balance);
+    const hdxToWud = pool.parsePair(0, 1000085);
+    const hdxToWudSell = pool.spotPriceOutGivenIn(hdxToWud);
+    const hdxToWudBuy = pool.spotPriceInGivenOut(hdxToWud);
+
+    expect(wudToHdxSell).toStrictEqual(hdxToWudBuy);
+    expect(wudToHdxBuy).toStrictEqual(hdxToWudSell);
   });
 });
