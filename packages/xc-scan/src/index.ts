@@ -1,4 +1,5 @@
 import { OcelloidsSseClient, OcelloidsHttpClient } from './client';
+import { XcStore } from './store';
 
 const apiUrl = 'https://api.ocelloids.net';
 const apiKey =
@@ -10,9 +11,6 @@ const sseClient = new OcelloidsSseClient(apiUrl);
 const store = new XcStore(httpClient, sseClient);
 
 await store.subscribeByAddress('0x8335459a89A17Ed8ed128aa98F9AF86802DACF30', {
-  onChange(journeys) {
-    console.log('Journeys snapshot:', journeys);
-  },
   onNewJourney(j) {
     console.log('New journey:', j);
   },
