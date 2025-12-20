@@ -60,7 +60,7 @@ jobs:
     outputs:
       upgrade_ui_deps: ${{ steps.verify.outputs.upgrade_ui_deps }}
 
-  upgrade-ui-deps:
+  upgrade-ui:
     needs:
       - release
     if: needs.release.outputs.upgrade_ui_deps == 'yes'
@@ -124,6 +124,95 @@ jobs:
             ![Alt Text](https://media.tenor.com/DNCBqbguizsAAAAM/magic.gif)
           branch: upgrade-sdk-pr${{ env.PR }}
           base: master
+          path: 'hydration-ui'
+          draft: true
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
+      - name: 🧚 Print hydration-ui PR details
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "Pull Request Action - ${{ steps.cpr.outputs.pull-request-operation }}"
+
+      - name: 🧚 Update sdk PR with live preview link
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🧚 Live preview: ${{ steps.cpr.outputs.pull-request-url }}'
+            })
+
+  upgrade-ui-next:
+    needs:
+      - release
+    if: needs.release.outputs.upgrade_ui_deps == 'yes'
+    runs-on: ubuntu-latest
+    environment: upgrade-ui-deps
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: ⬇️ Download release plan
+        uses: actions/download-artifact@v4
+        with:
+          name: release-plan
+
+      - name: 🔐 Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: galacticcouncil
+          repositories: hydration-ui
+
+      - name: 🤘 Checkout hydration-ui repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'galacticcouncil/hydration-ui'
+          token: ${{ steps.generate-token.outputs.token }}
+          path: 'hydration-ui'
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.21.1'
+
+      - name: 🔧 Upgrade hydration-ui sdk packages
+        run: |
+          cd hydration-ui
+          jq -c '.releases[]' ../release-plan.json | while read i; do
+            package_name=$(jq --raw-output '.name' <<< "$i")
+            package_version=$(jq --raw-output '.newVersion' <<< "$i")
+            echo Installing $package_name@$package_version
+            yarn add $package_name@$package_version
+          done
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add package.json yarn.lock
+          git commit -m "$(jq '.releaseMessage' ../release-plan.json)"
+
+      - name: 🧚 Open hydration-ui PR with sdk upgrade (next)
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          title: '🧚 SDK Preview (next): [${{ env.PR_TITLE }}]'
+          body: |
+            This PR was triggered by SDK upgrade no. ${{ env.PR }}
+
+            For details visit: https://github.com/galacticcouncil/sdk/pull/${{ env.PR }}
+
+            ![Alt Text](https://media.tenor.com/DNCBqbguizsAAAAM/magic.gif)
+          branch: upgrade-sdk-pr${{ env.PR }}-next
+          base: next
           path: 'hydration-ui'
           draft: true
         env:
