@@ -1,8 +1,8 @@
 import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
 import { Router } from './Router';
+import { calculateSwapAmount } from './TradeRouter.utils';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
-import { calculateSwapAmount } from './utils';
 
 import { RouteNotFound } from '../errors';
 import {
@@ -124,7 +124,7 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible sell trade for assetIn>assetOut
+   * Calculate and return best possible sell trade for assetIn > assetOut
    *
    * @param {number} assetIn - assetIn id
    * @param {number} assetOut - assetOut id
@@ -152,9 +152,7 @@ export class TradeRouter extends Router {
       return lastSwap.spotPrice;
     }
 
-    return route
-      .map((s: SellSwap) => s.spotPrice)
-      .reduce((a: bigint, b: bigint) => (a * b) / 10n ** 18n);
+    return this.calculateSpot(route);
   }
 
   /**
@@ -223,7 +221,7 @@ export class TradeRouter extends Router {
    *
    * @param poolsMap - pools map
    * @param route - sell route
-   * @returns - sell trade
+   * @returns sell trade
    */
   private buildSell(poolsMap: Map<string, Pool>, route: SellSwap[]) {
     const firstSwap = route[0];
@@ -285,12 +283,26 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate the amount out for best possible trade if fees are zero
+   * Calculate route spot price
+   *
+   * @param route - trade route
+   * @returns spot price
+   */
+  private calculateSpot(route: Swap[]): bigint {
+    return route
+      .map((s: Swap) => s.spotPrice)
+      .reduce(
+        (a: bigint, b: bigint) => (a * b) / 10n ** BigInt(RUNTIME_DECIMALS)
+      );
+  }
+
+  /**
+   * Calculate the output amount of a trade assuming fees are zero
    *
    * @param amountIn - amount of assetIn to sell for assetOut
-   * @param route - best possible trade route (sell)
+   * @param route - trade route
    * @param poolsMap - pools map
-   * @returns the amount out for best possible trade if fees are zero
+   * @returns the amount out if fees are zero
    */
   private calculateDelta0Y(
     amountIn: bigint,
@@ -374,13 +386,12 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return sell swaps for given path
-   * - final amount of previous swap is entry to next one
+   * Calculate and return sell route for given path
    *
    * @param amountIn - amount of assetIn to sell for assetOut
    * @param path - current path
    * @param poolsMap - pools map
-   * @returns sell swaps for given path
+   * @returns sell route for given path with corresponding pool pairs
    */
   private async toSellSwaps(
     amountIn: bigint | string,
@@ -508,10 +519,10 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Find best buy route
+   * Find best buy route without errors
    *
    * @param swaps - buy routes
-   * @returns the most beneficial route without errors, if exist
+   * @returns best buy route if exist, otherwise first one found
    */
   private findBestBuyRoute(swaps: BuySwap[][]): BuySwap[] {
     const sortedResults = swaps.sort((a, b) => {
@@ -556,9 +567,7 @@ export class TradeRouter extends Router {
       return lastSwap.spotPrice;
     }
 
-    return route
-      .map((s: BuySwap) => s.spotPrice)
-      .reduce((a: bigint, b: bigint) => (a * b) / 10n ** 18n);
+    return this.calculateSpot(route);
   }
 
   /**
@@ -627,7 +636,7 @@ export class TradeRouter extends Router {
    *
    * @param poolsMap - pools map
    * @param route - buy route
-   * @returns - buy trade
+   * @returns buy trade
    */
   private buildBuy(poolsMap: Map<string, Pool>, route: BuySwap[]) {
     const firstSwap = route[route.length - 1];
@@ -691,26 +700,27 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate the amount in for best possible trade if fees are zero
+   * Calculates the required input amount for a trade to receive a desired output amount,
+   * assuming fees are zero.
    *
    * @param amountOut - amount of assetOut to buy for assetIn
-   * @param bestRoute - best possible trade route (buy)
+   * @param route - trade route
    * @param poolsMap - pools map
-   * @returns the amount in for best possible trade if fees are zero
+   * @returns the required input amount for a trade if fees are zero
    */
   private calculateDelta0X(
     amountOut: bigint,
-    bestRoute: BuySwap[],
+    route: BuySwap[],
     poolsMap: Map<string, Pool>
   ) {
     const amounts: bigint[] = [];
-    for (let i = bestRoute.length - 1; i >= 0; i--) {
-      const swap = bestRoute[i];
+    for (let i = route.length - 1; i >= 0; i--) {
+      const swap = route[i];
       const pool = poolsMap.get(swap.poolAddress);
       if (pool == null) throw new Error('Pool does not exit');
       const poolPair = pool.parsePair(swap.assetIn, swap.assetOut);
       let aOut: bigint;
-      if (i == bestRoute.length - 1) {
+      if (i == route.length - 1) {
         aOut = amountOut;
       } else {
         aOut = amounts[0];
@@ -722,14 +732,12 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return buy swaps for given path
-   * - final amount of previous swap is entry to next one
-   * - calculation is done backwards (swaps in reversed order)
+   * Calculate and return buy route for given path
    *
    * @param amountOut - amount of assetOut to buy for assetIn
    * @param path - current path
    * @param poolsMap - pools map
-   * @returns buy swaps for given path
+   * @returns buy route for given path
    */
   private async toBuySwaps(
     amountOut: bigint | string,
