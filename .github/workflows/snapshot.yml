@@ -65,7 +65,7 @@ jobs:
       - release
     if: needs.release.outputs.upgrade_ui_deps == 'yes'
     runs-on: ubuntu-latest
-    environment: upgrade-ui-deps
+    environment: upgrade-ui-master
     permissions:
       contents: write
       pull-requests: write
@@ -154,7 +154,7 @@ jobs:
       - release
     if: needs.release.outputs.upgrade_ui_deps == 'yes'
     runs-on: ubuntu-latest
-    environment: upgrade-ui-deps
+    environment: upgrade-ui-next
     permissions:
       contents: write
       pull-requests: write
