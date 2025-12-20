@@ -65,6 +65,7 @@ jobs:
       - release
     if: needs.release.outputs.upgrade_ui_deps == 'yes'
     runs-on: ubuntu-latest
+    environment: upgrade-ui-deps
     permissions:
       contents: write
       pull-requests: write
