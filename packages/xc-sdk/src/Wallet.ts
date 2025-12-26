@@ -118,7 +118,7 @@ export class Wallet {
       dstAddress,
       dstCall,
       (fees) => {
-        const feesFmt = fees.toDecimal(fees.decimals);
+        const feesFmt = fees.toDecimal();
         return transfer.buildCall(feesFmt);
       },
       opts
