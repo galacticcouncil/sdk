@@ -194,7 +194,7 @@ jobs:
             package_name=$(jq --raw-output '.name' <<< "$i")
             package_version=$(jq --raw-output '.newVersion' <<< "$i")
             echo Installing $package_name@$package_version
-            yarn add $package_name@$package_version
+            yarn add $package_name@$package_version -W
           done
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
