@@ -170,7 +170,9 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   }),
   new AssetRoute({
     source: {
@@ -189,7 +191,9 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -271,7 +275,9 @@ const toInterlay: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   }),
   new AssetRoute({
     source: {
@@ -376,12 +382,16 @@ const toCex: AssetRoute[] = [
   toHubWithCexFwdTemplate(
     usdt,
     0.1,
-    ExtrinsicBuilder().xTokens().transferMultiasset()
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
   ),
   toHubWithCexFwdTemplate(
     usdc,
     0.1,
-    ExtrinsicBuilder().xTokens().transferMultiasset()
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
   ),
   toHubWithCexFwdTemplate(
     dot,
