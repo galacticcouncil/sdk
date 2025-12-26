@@ -10,6 +10,10 @@ export const unique = new Parachain({
     {
       asset: unq,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,

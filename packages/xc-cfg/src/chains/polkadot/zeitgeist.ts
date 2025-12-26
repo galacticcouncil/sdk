@@ -10,6 +10,10 @@ export const zeitgeist = new Parachain({
     {
       asset: ztg,
       id: 'Ztg',
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
     {
       asset: usdc_mwh,
