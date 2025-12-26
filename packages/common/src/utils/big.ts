@@ -41,3 +41,8 @@ export function convertDecimals(
 
   return toBigInt(decimalNumber.toString(), targetDecimals);
 }
+
+export function pow10(exp: number): bigint {
+  if (exp < 0) throw new Error(`pow10: negative exp ${exp}`);
+  return 10n ** BigInt(exp);
+}

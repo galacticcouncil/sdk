@@ -1,3 +1,5 @@
+import { RUNTIME_DECIMALS, big } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -166,7 +168,7 @@ export class XykPool implements Pool {
       poolPair.balanceIn.toString()
     );
 
-    return this.normalizeSpotToRuntime(
+    return this.normalizeSpot(
       BigInt(spot),
       poolPair.decimalsOut,
       poolPair.decimalsIn
@@ -179,7 +181,7 @@ export class XykPool implements Pool {
       poolPair.balanceOut.toString()
     );
 
-    return this.normalizeSpotToRuntime(
+    return this.normalizeSpot(
       BigInt(spot),
       poolPair.decimalsIn,
       poolPair.decimalsOut
@@ -195,7 +197,18 @@ export class XykPool implements Pool {
     return BigInt(fee);
   }
 
-  private normalizeSpotToRuntime(
+  /**
+   * Normalize XykMath spot to runtime decimals.
+   *
+   * - if `decimalsIn === decimalsOut`: spot already 18dp
+   * - if `decimalsIn > decimalsOut`: spot in 18 - (decimalsIn - decimalsOut)
+   * - if `decimalsIn < decimalsOut`: spot in 18 + (decimalsOut - decimalsIn)
+   *
+   * @param spotRaw - raw spot
+   * @param decimalsIn - asset in decimals
+   * @param decimalsOut - asset out decimals
+   */
+  private normalizeSpot(
     spot: bigint,
     decimalsIn: number,
     decimalsOut: number
@@ -204,8 +217,7 @@ export class XykPool implements Pool {
 
     if (diff === 0) return spot;
 
-    const factor = 10n ** BigInt(Math.abs(diff));
-
-    return diff > 0 ? spot / factor : spot * factor;
+    const factor = big.pow10(Math.abs(diff));
+    return diff > 0 ? spot * factor : spot / factor;
   }
 }
