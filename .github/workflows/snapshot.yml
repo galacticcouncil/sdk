@@ -90,6 +90,7 @@ jobs:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ steps.generate-token.outputs.token }}
           path: 'hydration-ui'
+          ref: 'master'
 
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
@@ -179,6 +180,7 @@ jobs:
           repository: 'galacticcouncil/hydration-ui'
           token: ${{ steps.generate-token.outputs.token }}
           path: 'hydration-ui'
+          ref: 'next'
 
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
