@@ -10,6 +10,10 @@ export const integritee = new Parachain({
     {
       asset: teer,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Kusama,

@@ -10,6 +10,10 @@ export const basilisk = new Parachain({
     {
       asset: bsx,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
     {
       asset: ksm,

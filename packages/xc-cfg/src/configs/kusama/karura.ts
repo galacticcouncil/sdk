@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { bsx, kar, ksm, usdt } from '../../assets';
 import { basilisk, karura, kusama, kusamaAssetHub } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../builders';
 
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
@@ -25,7 +29,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 
@@ -50,7 +54,9 @@ const toBasilisk: AssetRoute[] = [
         asset: bsx,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   }),
 ];
 

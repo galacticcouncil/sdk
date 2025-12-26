@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { teer } from '../../assets';
 import { basilisk, integritee } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../builders';
 
 const toBasilisk: AssetRoute[] = [
   new AssetRoute({
@@ -21,7 +25,9 @@ const toBasilisk: AssetRoute[] = [
         asset: teer,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   }),
 ];
 

@@ -1,6 +1,6 @@
 import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
-import { ExtrinsicBuilder } from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 
@@ -26,6 +26,8 @@ export function toTransferTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }

@@ -15,6 +15,10 @@ export const centrifuge = new Parachain({
     {
       asset: cfg,
       id: 'Native',
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
     {
       asset: dot,

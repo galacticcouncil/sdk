@@ -10,6 +10,10 @@ export const karura = new Parachain({
     {
       asset: kar,
       id: { Token: kar.originSymbol },
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
     {
       asset: ksm,
