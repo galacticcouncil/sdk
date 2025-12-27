@@ -49,7 +49,7 @@
     "@polkadot/api-augment": "^16.4.8",
     "@polkadot/api-base": "^16.4.8",
     "@polkadot/api-derive": "^16.4.8",
-    "@polkadot/keyring": "^13.5.6",
+    "@polkadot/keyring": "^14.0.1",
     "@polkadot/rpc-augment": "^16.4.8",
     "@polkadot/rpc-core": "^16.4.8",
     "@polkadot/rpc-provider": "^16.4.8",
@@ -58,8 +58,8 @@
     "@polkadot/types-codec": "^16.4.8",
     "@polkadot/types-create": "^16.4.8",
     "@polkadot/types-known": "^16.4.8",
-    "@polkadot/util": "^13.5.6",
-    "@polkadot/util-crypto": "^13.5.6",
+    "@polkadot/util": "^14.0.1",
+    "@polkadot/util-crypto": "^14.0.1",
     "viem": "^2.38.3"
   }
 }
