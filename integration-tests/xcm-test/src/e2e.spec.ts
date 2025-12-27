@@ -5,6 +5,8 @@ import {
 } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
+import { jest } from '@jest/globals';
+
 import * as c from 'console';
 import outdent from 'outdent';
 
@@ -43,8 +45,8 @@ const usage = outdent`
  * @returns chains execution ctx
  */
 const getPolkadotChains = () => {
-  const bridge: string[] = ['ethereum', 'solana'];
-  const skipFor: string[] = bridge.concat(['nodle', 'subsocial']);
+  const bridge: string[] = ['ethereum', 'solana', 'sui'];
+  const skipFor: string[] = bridge.concat(['nodle']);
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
     .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
@@ -55,7 +57,7 @@ const getPolkadotChains = () => {
     bridge,
     //chains,
     chains: Array.from(configService.chains.values()).filter((c) =>
-      ['polkadot', 'assethub', 'hydration'].includes(c.key)
+      ['assethub', 'hydration'].includes(c.key)
     ) as Parachain[],
   };
 };

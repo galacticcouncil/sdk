@@ -38,7 +38,7 @@ export class Wormhole {
     if ('wormhole' in chain && !!chain['wormhole']) {
       return chain.wormhole as Wormhole;
     }
-    throw new Error(chain.name + ' is not supported in Wormhole.');
+    throw new Error(chain.name + ' is not supported.');
   }
 
   static isKnown(chain: AnyChain): boolean {

@@ -44,8 +44,8 @@ export enum ChainType {
  */
 export interface ChainAssetData {
   asset: Asset;
-  balanceId?: ChainAssetId;
   decimals?: number;
+  balanceId?: ChainAssetId;
   id?: ChainAssetId;
   min?: number;
 }

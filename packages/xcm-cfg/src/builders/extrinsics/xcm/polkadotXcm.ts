@@ -33,7 +33,7 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedReserveTransferAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
@@ -97,7 +97,7 @@ const limitedTeleportAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'limitedTeleportAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
@@ -124,7 +124,7 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'reserveTransferAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
@@ -151,7 +151,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssets',
-      getArgs: (func) => {
+      getArgs: async (func) => {
         const version = getExtrinsicArgumentVersion(func, 2);
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;
@@ -184,7 +184,7 @@ const transferAssetsUsingTypeAndThen = (
     new ExtrinsicConfig({
       module: pallet,
       func: 'transferAssetsUsingTypeAndThen',
-      getArgs: () => {
+      getArgs: async () => {
         const version = XcmVersion.v4;
 
         const ctx = source.chain as Parachain;
@@ -241,16 +241,19 @@ const transferAssetsUsingTypeAndThen = (
           transferFeeLocation
         );
 
-        const customXcmOnDest =
-          destination.chain.key === 'ethereum'
-            ? toBridgeXcmOnDest(
-                version,
-                account,
-                from,
-                transferAssetLocation,
-                messageId
-              )
-            : toDepositXcmOnDest(version, account);
+        // Determine custom XCM based on destination and transfer type
+        let customXcmOnDest;
+        if (destination.chain.key === 'ethereum') {
+          customXcmOnDest = toBridgeXcmOnDest(
+            version,
+            account,
+            from,
+            transferAssetLocation,
+            messageId
+          );
+        } else {
+          customXcmOnDest = toDepositXcmOnDest(version, account);
+        }
 
         return [
           dest,
@@ -278,7 +281,7 @@ const send = () => {
         return new ExtrinsicConfig({
           module: pallet,
           func,
-          getArgs: () => {
+          getArgs: async () => {
             const version = XcmVersion.v4;
 
             if (!transact) {
@@ -319,7 +322,7 @@ const send = () => {
         return new ExtrinsicConfig({
           module: pallet,
           func,
-          getArgs: () => {
+          getArgs: async () => {
             const version = XcmVersion.v4;
 
             const ctx = source.chain as Parachain;
@@ -336,9 +339,11 @@ const send = () => {
 
             const { fee } = destination;
 
-            const transferAmount =
-              amount > fee.amount ? amount - fee.amount : amount;
             const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
+            const transferAmount =
+              amount > fee.amount
+                ? amount - (fee.amount + transferFeeAmount)
+                : amount;
 
             return [
               toDest(version, ctx, rcv),

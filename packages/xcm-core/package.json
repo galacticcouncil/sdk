@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xcm-core",
-  "version": "8.4.0",
+  "version": "8.9.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -30,7 +30,7 @@
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
     "link": "npm ln",
-    "test": "NODE_NO_WARNINGS=1 jest"
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2",
@@ -38,13 +38,14 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.6.1",
-    "@wormhole-foundation/sdk-base": "^3.2.0",
-    "@wormhole-foundation/sdk-connect": "^3.2.0",
-    "@wormhole-foundation/sdk-definitions": "^3.2.0",
-    "@wormhole-foundation/sdk-solana": "^3.2.0",
-    "@wormhole-foundation/sdk-solana-tokenbridge": "^3.2.0",
-    "@wormhole-foundation/sdk-sui": "^3.2.0",
-    "@wormhole-foundation/sdk-sui-tokenbridge": "^3.2.0",
+    "@wormhole-foundation/sdk-base": "3.2.0",
+    "@wormhole-foundation/sdk-connect": "3.2.0",
+    "@wormhole-foundation/sdk-definitions": "3.2.0",
+    "@wormhole-foundation/sdk-solana": "3.2.0",
+    "@wormhole-foundation/sdk-solana-core": "3.2.0",
+    "@wormhole-foundation/sdk-solana-tokenbridge": "3.2.0",
+    "@wormhole-foundation/sdk-sui": "3.2.0",
+    "@wormhole-foundation/sdk-sui-tokenbridge": "3.2.0",
     "big.js": "^6.2.1",
     "bigint-buffer": "^1.1.5",
     "buffer": "^6.0.3",
@@ -52,10 +53,10 @@
     "lru-cache": "^11.0.0"
   },
   "peerDependencies": {
-    "@polkadot/api": "^16.1.1",
-    "@polkadot/api-augment": "^16.1.1",
-    "@polkadot/types": "^16.1.1",
-    "@polkadot/util-crypto": "^13.5.1",
-    "viem": "^2.23.7"
+    "@polkadot/api": "^16.4.8",
+    "@polkadot/api-augment": "^16.4.8",
+    "@polkadot/types": "^16.4.8",
+    "@polkadot/util-crypto": "^13.5.6",
+    "viem": "^2.38.3"
   }
 }

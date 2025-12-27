@@ -70,16 +70,17 @@ export class SubstrateService {
     return this.chain.getAssetDecimals(asset) ?? this.decimals;
   }
 
-  getExtrinsic(config: ExtrinsicConfig): SubmittableExtrinsic {
+  async getExtrinsic(config: ExtrinsicConfig): Promise<SubmittableExtrinsic> {
     const fn = this.api.tx[config.module][config.func];
-    const args = config.getArgs(fn);
+    const args = await config.getArgs(fn);
 
     if (args.length > 1 && config.func === 'batchAll') {
-      const calls = args.map(({ module, func, getArgs }) => {
+      const callsPromises = args.map(async ({ module, func, getArgs }) => {
         const fn = this.api.tx[module][func];
-        const args = getArgs(fn);
+        const args = await getArgs(fn);
         return fn(...args);
       });
+      const calls = await Promise.all(callsPromises);
       return fn(calls);
     }
     return fn(...args);
@@ -105,10 +106,8 @@ export class SubstrateService {
 
   async dryRun(
     account: string,
-    config: ExtrinsicConfig
+    extrinsic: SubmittableExtrinsic
   ): Promise<CallDryRunEffects> {
-    const extrinsic = this.getExtrinsic(config);
-
     const dryRunFn = this.api.call.dryRunApi.dryRunCall;
     const dryRunParams = dryRunFn.meta.params;
     const dryRun = dryRunFn as (...args: any[]) => Promise<any>;
@@ -142,7 +141,7 @@ export class SubstrateService {
     account: string,
     config: ExtrinsicConfig
   ): Promise<bigint> {
-    const extrinsic = this.getExtrinsic(config);
+    const extrinsic = await this.getExtrinsic(config);
     try {
       const info = await extrinsic.paymentInfo(account, {
         nonce: -1,
@@ -163,12 +162,13 @@ export class SubstrateService {
     config: ExtrinsicConfig
   ): Promise<bigint> {
     if (this.chain.usesDeliveryFee) {
-      const acc = this.estimateDeliveryFeeWith(account, config);
+      const acc = await this.estimateDeliveryFeeWith(account, config);
 
       try {
+        const extrinsic = await this.getExtrinsic(config);
         const { executionResult, emittedEvents } = await this.dryRun(
           acc,
-          config
+          extrinsic
         );
         if (executionResult.isOk) {
           return getDeliveryFeeFromDryRun(emittedEvents);
@@ -181,13 +181,13 @@ export class SubstrateService {
     return 0n;
   }
 
-  private estimateDeliveryFeeWith(
+  private async estimateDeliveryFeeWith(
     account: string,
     config: ExtrinsicConfig
-  ): string {
+  ): Promise<string> {
     if (['xcmPallet', 'polkadotXcm'].includes(config.module)) {
       const fn = this.api.tx[config.module][config.func];
-      const [dest] = config.getArgs(fn);
+      const [dest] = await config.getArgs(fn);
       const interior = multiloc.findNestedKey(dest, 'interior');
       const parachain = multiloc.findParachain(dest);
       const consensus = multiloc.findGlobalConsensus(dest);

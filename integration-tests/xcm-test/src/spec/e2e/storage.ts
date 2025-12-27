@@ -15,6 +15,8 @@ import { findNestedKey } from '../../utils/json';
 
 const BALANCE = 1000n;
 
+const { Ss58Addr } = addr;
+
 export const initStorage = async (api: ApiPromise, chain: Parachain) => {
   const chainDecimals = api.registry.chainDecimals[0];
   const chainAssets = Array.from(chain.assetsData.values());
@@ -63,7 +65,7 @@ export const initStorage = async (api: ApiPromise, chain: Parachain) => {
     const ksm = chain.getAsset('ksm');
     if (ksm && chain.key === 'assethub') {
       const hydrationSaPub = acc.getSovereignAccounts(2034);
-      const hydrationSa = addr.encodePubKey(
+      const hydrationSa = Ss58Addr.encodePubKey(
         hydrationSaPub.generic,
         chain.ss58Format
       );

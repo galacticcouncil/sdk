@@ -26,19 +26,22 @@ import { Platform } from '../types';
 
 export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
   readonly #client: EvmClient;
+  readonly #chain: AnyEvmChain;
 
   constructor(chain: AnyEvmChain) {
+    this.#chain = chain;
     this.#client = chain.client;
   }
 
   async buildCall(
     account: string,
     amount: bigint,
+    asset: Asset,
     _feeBalance: AssetAmount,
     config: ContractConfig
   ): Promise<EvmCall> {
     const contract = EvmTransferFactory.get(this.#client, config);
-    const { abi, asset, calldata } = contract;
+    const { abi, calldata } = contract;
     const transferCall = {
       abi: JSON.stringify(abi),
       data: calldata as `0x${string}`,
@@ -61,7 +64,8 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       return transferCall;
     }
 
-    const erc20 = new Erc20Client(this.#client, asset);
+    const assetId = this.#chain.getBalanceAssetId(asset).toString();
+    const erc20 = new Erc20Client(this.#client, assetId);
     const allowance = await erc20.allowance(account, config.address);
     if (allowance >= amount) {
       return transferCall;
@@ -73,7 +77,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       allowance: allowance,
       data: approve as `0x${string}`,
       from: account as `0x${string}`,
-      to: asset as `0x${string}`,
+      to: assetId as `0x${string}`,
       type: CallType.Evm,
       dryRun: () => {},
     } as EvmCall;

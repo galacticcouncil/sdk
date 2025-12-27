@@ -8,11 +8,11 @@
   },
   "keywords": [],
   "devDependencies": {
-    "node": "^21.6.0"
+    "node": "^22.12.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^9.13.0",
-    "@galacticcouncil/xcm-sdk": "^10.5.0",
-    "@galacticcouncil/xcm-cfg": "^10.10.0"
+    "@galacticcouncil/sdk": "^10.4.0",
+    "@galacticcouncil/xcm-sdk": "^10.10.0",
+    "@galacticcouncil/xcm-cfg": "^10.19.0"
   }
 }

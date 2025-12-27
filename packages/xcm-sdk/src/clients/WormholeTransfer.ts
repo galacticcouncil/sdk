@@ -3,14 +3,22 @@ import {
   mrl,
   AnyChain,
   ConfigService,
+  ChainType,
+  EvmChain,
+  EvmParachain,
   Parachain,
-  Wormhole,
   Precompile,
+  SolanaChain,
+  Wormhole,
 } from '@galacticcouncil/xcm-core';
 
-import { WormholeClient } from './WormholeClient';
-import { Operation, OperationPayload, WormholeScan } from './WormholeScan';
+import { encoding } from '@wormhole-foundation/sdk-base';
+import { keccak256 } from '@wormhole-foundation/sdk-connect';
+import { deserialize } from '@wormhole-foundation/sdk-definitions';
 
+import { EvmClaim, SolanaClaim, SubstrateClaim } from '../platforms';
+
+import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
 
 const REDEEM_THRESHOLD = 5 * 60 * 1000; // 5 minutes
@@ -20,14 +28,12 @@ export class WormholeTransfer {
   private config: ConfigService;
 
   readonly whScan: WormholeScan;
-  readonly whClient: WormholeClient;
 
   constructor(config: ConfigService, parachainId: number) {
     this.config = config;
     this.parachainId = parachainId;
 
     this.whScan = new WormholeScan();
-    this.whClient = new WormholeClient();
   }
 
   get chains(): AnyChain[] {
@@ -38,7 +44,7 @@ export class WormholeTransfer {
   get filters(): Record<string, string> {
     const toDate = new Date();
     const fromDate = new Date();
-    fromDate.setDate(toDate.getDate() - 3);
+    fromDate.setDate(toDate.getDate() - 6);
 
     const toISO = toDate.toISOString();
     const fromISO = fromDate.toISOString();
@@ -67,20 +73,15 @@ export class WormholeTransfer {
 
     const result = operations.map(async (o) => {
       const { content } = o;
-      const { payload } = content;
-      const { payloadType, parsedPayload } = payload;
+      const { payload, standarizedProperties } = content;
 
-      const asset = this.getTokenAddress(payload);
-      const toAddress =
-        payloadType === 3
-          ? this.toNative(parsedPayload.targetRecipient)
-          : this.toNative(payload.toAddress);
       const status = this.getStatus(o);
 
       const fromChain = this.chains.find(
         (c) => c instanceof Parachain && c.parachainId === this.parachainId
       )!;
 
+      const { toAddress, tokenAddress } = standarizedProperties;
       const toChain = this.chains.find(
         (c) =>
           Wormhole.isKnown(c) &&
@@ -89,17 +90,25 @@ export class WormholeTransfer {
 
       let redeem;
       if (status === WhStatus.VaaEmitted && o.vaa) {
-        const { timestamp } = this.whClient.getVaaHeader(o.vaa.raw);
+        const { timestamp } = this.getVaaHeader(o.vaa.raw);
         const vaaRaw = o.vaa.raw;
 
         if (this.isStuck(timestamp)) {
-          redeem = (from: string) =>
-            this.whClient.redeem(toChain, from, vaaRaw);
+          switch (toChain.getType()) {
+            case ChainType.EvmChain:
+              const evmClaim = new EvmClaim(toChain as EvmChain);
+              redeem = async (from: string) => evmClaim.redeem(from, vaaRaw);
+              break;
+            case ChainType.SolanaChain:
+              const solanaClaim = new SolanaClaim(toChain as SolanaChain);
+              redeem = async (from: string) => solanaClaim.redeem(from, vaaRaw);
+              break;
+          }
         }
       }
 
       return {
-        asset: asset,
+        asset: tokenAddress,
         assetSymbol: o.data.symbol,
         amount: o.data.tokenAmount,
         from: address,
@@ -127,7 +136,8 @@ export class WormholeTransfer {
       return [];
     }
 
-    const payloadHex = mrl.createPayload(toChain as Parachain, address).toHex();
+    const toParachain = toChain as Parachain;
+    const payloadHex = mrl.createPayload(toParachain, address).toHex();
     const result = operations
       .filter((o) => {
         const { content } = o;
@@ -140,10 +150,10 @@ export class WormholeTransfer {
       })
       .map(async (o) => {
         const { content, sourceChain } = o;
-        const { payload } = content;
+        const { payload, standarizedProperties } = content;
 
-        const asset = this.getTokenAddress(payload);
         const status = this.getStatus(o);
+        const { tokenAddress } = standarizedProperties;
 
         const fromChain = this.chains.find(
           (c) =>
@@ -151,20 +161,26 @@ export class WormholeTransfer {
             Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
         )!;
 
+        const viaChain = this.chains.find(
+          (c) =>
+            Wormhole.isKnown(c) &&
+            Wormhole.fromChain(c).getWormholeId() === payload.toChain
+        )!;
+
         let redeem;
         if (status === WhStatus.VaaEmitted && o.vaa) {
-          const { timestamp } = this.whClient.getVaaHeader(o.vaa.raw);
+          const { timestamp } = this.getVaaHeader(o.vaa.raw);
           const vaaRaw = o.vaa.raw;
 
           if (this.isStuck(timestamp)) {
-            redeem = (address: string) => {
-              return this.whClient.redeemMrl(address, vaaRaw);
-            };
+            const claim = new SubstrateClaim(viaChain as EvmParachain);
+            redeem = async (address: string) =>
+              claim.redeemMrlViaXcm(address, vaaRaw);
           }
         }
 
         return {
-          asset: asset,
+          asset: tokenAddress,
           assetSymbol: o.data.symbol,
           amount: o.data.tokenAmount,
           from: sourceChain.from,
@@ -185,6 +201,20 @@ export class WormholeTransfer {
     return now >= emittedAt * 1000 + REDEEM_THRESHOLD;
   }
 
+  private getVaaHeader(vaaRaw: string) {
+    const vaaBytes = encoding.b64.decode(vaaRaw);
+    const vaa = deserialize('Uint8Array', vaaBytes);
+    return {
+      timestamp: vaa.timestamp,
+      emitterChain: vaa.emitterChain,
+      emitterAddress: vaa.emitterAddress.toString(),
+      sequence: vaa.sequence,
+      payload: vaa.payload,
+      hash: vaa.hash,
+      id: keccak256(vaa.hash),
+    };
+  }
+
   private getStatus(operation: Operation) {
     if (operation.vaa) {
       const isCompleted =
@@ -193,17 +223,5 @@ export class WormholeTransfer {
     } else {
       return WhStatus.WaitingForVaa;
     }
-  }
-
-  private getTokenAddress(payload: OperationPayload) {
-    const { tokenAddress } = payload;
-    if (tokenAddress.startsWith('0x')) {
-      return this.toNative(tokenAddress);
-    }
-    return tokenAddress;
-  }
-
-  private toNative(wormholeAddress: string) {
-    return '0x' + wormholeAddress.substring(26);
   }
 }

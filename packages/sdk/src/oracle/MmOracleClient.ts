@@ -1,30 +1,28 @@
-import { PublicClient } from 'viem';
-
 import { AGGREGATOR_V3_ABI } from './abi';
-
-import { EvmClient } from '../evm';
 import { MmOracleEntry } from './types';
 
+import { EvmRpcAdapter, EvmClient } from '../evm';
+
 export class MmOracleClient {
-  private client: PublicClient;
+  private rpcAdapter: EvmRpcAdapter;
 
   constructor(evm: EvmClient) {
-    this.client = evm.getWsProvider();
+    this.rpcAdapter = evm.getRPCAdapter();
   }
 
   async getData(address: string, blockTimeInSec = 6): Promise<MmOracleEntry> {
     const [data, decimals, block] = await Promise.all([
-      this.client.readContract({
+      this.rpcAdapter.readContract({
         abi: AGGREGATOR_V3_ABI,
         address: address as `0x${string}`,
         functionName: 'latestRoundData',
       }),
-      this.client.readContract({
+      this.rpcAdapter.readContract({
         abi: AGGREGATOR_V3_ABI,
         address: address as `0x${string}`,
         functionName: 'decimals',
       }),
-      this.client.getBlock(),
+      this.rpcAdapter.getBlock(),
     ]);
 
     const [_roundId, answer, _startedAt, updatedAt] = data;

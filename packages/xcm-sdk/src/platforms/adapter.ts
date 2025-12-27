@@ -67,12 +67,14 @@ export class PlatformAdapter {
   async buildCall(
     account: string,
     amount: bigint,
+    asset: Asset,
     feeBalance: AssetAmount,
     config: BaseConfig
   ): Promise<Call> {
     return this.platform[config.type].buildCall(
       account,
       amount,
+      asset,
       feeBalance,
       config
     );

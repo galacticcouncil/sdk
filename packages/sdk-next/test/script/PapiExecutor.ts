@@ -1,9 +1,9 @@
-import { PolkadotClient } from 'polkadot-api';
+import { PolkadotClient, createClient } from 'polkadot-api';
 import { hydration } from '@galacticcouncil/descriptors';
 
 import { ApiUrl } from './types';
 
-import { api, json } from '../../src';
+import { api, json, evm } from '../../src';
 
 export abstract class PapiExecutor {
   protected readonly apiUrl: ApiUrl;
@@ -18,7 +18,8 @@ export abstract class PapiExecutor {
 
   async run() {
     console.log('Connecting to:', this.apiUrl);
-    const client = await api.getWs(this.apiUrl);
+    const provider = api.getWs(this.apiUrl);
+    const client = createClient(provider);
     const papi = client.getTypedApi(hydration);
     const { spec_name, spec_version } = await papi.constants.System.Version();
     console.log(`Runtime ready ${spec_name}/${spec_version}`);
@@ -26,7 +27,9 @@ export abstract class PapiExecutor {
     console.log(this.desc);
     console.time('Execution time:');
 
-    this.script(client)
+    const evmClient = new evm.EvmClient(client);
+
+    this.script(client, evmClient)
       .then((output: any) => {
         if (typeof output === 'function') {
           setTimeout(output, 10_000);
@@ -52,7 +55,7 @@ export abstract class PapiExecutor {
       });
   }
 
-  abstract script(client: PolkadotClient): Promise<any>;
+  abstract script(client: PolkadotClient, evm: evm.EvmClient): Promise<any>;
 
   logTime() {
     const time = [

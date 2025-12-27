@@ -1,3 +1,5 @@
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -10,10 +12,11 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
-import { RUNTIME_DECIMALS } from '../../consts';
 import { fmt } from '../../utils';
 
 import { XykMath } from './XykMath';
+
+const { FeeUtils } = fmt;
 
 export type XykPoolFees = PoolFees & {
   exchangeFee: PoolFee;
@@ -28,28 +31,16 @@ export class XykPool implements Pool {
   minTradingLimit: bigint;
 
   static fromPool(pool: PoolBase): XykPool {
-    return new XykPool(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit
-    );
+    return new XykPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint
-  ) {
+  constructor(pool: PoolBase) {
     this.type = PoolType.XYK;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {
@@ -84,7 +75,7 @@ export class XykPool implements Pool {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
 
     const fee = this.calculateTradeFee(calculatedIn, fees);
-    const feePct = fmt.toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountIn = calculatedIn + fee;
 
     const errors: PoolError[] = [];
@@ -120,7 +111,7 @@ export class XykPool implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
 
     const fee = this.calculateTradeFee(calculatedOut, fees);
-    const feePct = fmt.toPct(fees.exchangeFee);
+    const feePct = FeeUtils.toPct(fees.exchangeFee);
     const amountOut = calculatedOut - fee;
 
     const errors: PoolError[] = [];

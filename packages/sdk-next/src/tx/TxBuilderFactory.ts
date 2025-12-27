@@ -10,9 +10,9 @@ export class TxBuilderFactory {
   private client: PolkadotClient;
   private evmClient: EvmClient;
 
-  constructor(client: PolkadotClient, evmClient?: EvmClient) {
+  constructor(client: PolkadotClient, evmClient: EvmClient) {
     this.client = client;
-    this.evmClient = evmClient ?? new EvmClient();
+    this.evmClient = evmClient;
   }
 
   trade(trade: Trade): TradeTxBuilder {

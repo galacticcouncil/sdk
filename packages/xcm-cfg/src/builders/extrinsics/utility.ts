@@ -13,7 +13,7 @@ const batchAll = (configs: ExtrinsicConfigBuilder[]) => {
       return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => configs.map((c) => c.build(params)),
+        getArgs: async () => configs.map((c) => c.build(params)),
       });
     },
   };

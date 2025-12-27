@@ -1,3 +1,5 @@
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -6,16 +8,19 @@ import {
   PoolFee,
   PoolFees,
   PoolPair,
+  PoolPegs,
   PoolToken,
   PoolType,
   SellCtx,
 } from '../types';
 import { OmniMath } from '../omni';
 
-import { RUNTIME_DECIMALS, TRADEABLE_DEFAULT } from '../../consts';
-import { fmt, json } from '../../utils';
+import { TRADEABLE_DEFAULT } from '../../consts';
+import { fmt, json, math } from '../../utils';
 
 import { StableMath } from './StableMath';
+
+const { FeeUtils } = fmt;
 
 export type StableSwapPair = PoolPair & {
   tradeableIn: number;
@@ -28,9 +33,11 @@ export type StableSwapFees = PoolFees & {
 
 export type StableSwapBase = PoolBase & {
   amplification: bigint;
-  id: string;
+  isRampPeriod: boolean;
+  id: number;
   fee: PoolFee;
   totalIssuance: bigint;
+  pegs: PoolPegs;
 };
 
 export class StableSwap implements Pool {
@@ -41,45 +48,29 @@ export class StableSwap implements Pool {
   maxOutRatio: bigint;
   minTradingLimit: bigint;
   amplification: bigint;
+  isRampPeriod: boolean;
   id: number;
   fee: PoolFee;
   totalIssuance: bigint;
+  pegs: string[][];
 
   static fromPool(pool: StableSwapBase): StableSwap {
-    return new StableSwap(
-      pool.address,
-      pool.tokens as PoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.amplification,
-      pool.id,
-      pool.fee,
-      pool.totalIssuance
-    );
+    return new StableSwap(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: PoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint,
-    amplification: bigint,
-    id: number,
-    fee: PoolFee,
-    totalIssuance: bigint
-  ) {
+  constructor(pool: StableSwapBase) {
     this.type = PoolType.Stable;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.amplification = amplification;
-    this.id = id;
-    this.fee = fee;
-    this.totalIssuance = totalIssuance;
+    this.address = pool.address;
+    this.tokens = pool.tokens;
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.amplification = pool.amplification;
+    this.isRampPeriod = pool.isRampPeriod;
+    this.id = pool.id;
+    this.fee = pool.fee;
+    this.totalIssuance = pool.totalIssuance;
+    this.pegs = pool.pegs;
   }
 
   validatePair(_tokenIn: number, _tokenOut: number): boolean {
@@ -117,7 +108,9 @@ export class StableSwap implements Pool {
   ): BuyCtx {
     const calculatedIn = this.calculateInGivenOut(poolPair, amountOut);
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
-    const feePct = fmt.toPct(fees.fee);
+
+    const feePct =
+      calculatedIn === 0n ? 0 : math.calculateDiffToRef(amountIn, calculatedIn);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -147,7 +140,8 @@ export class StableSwap implements Pool {
   ): SellCtx {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
-    const feePct = fmt.toPct(fees.fee);
+
+    const feePct = math.calculateDiffToRef(calculatedOut, amountOut);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -184,7 +178,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountOut.toString(),
       this.amplification.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -202,7 +196,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetIn),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -220,7 +214,7 @@ export class StableSwap implements Pool {
       amountOut.toString(),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -279,7 +273,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       amountIn.toString(),
       this.amplification.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -297,7 +291,7 @@ export class StableSwap implements Pool {
       Number(poolPair.assetOut),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -314,7 +308,7 @@ export class StableSwap implements Pool {
       this.getAssets(poolPair.assetIn, amountIn),
       this.amplification.toString(),
       this.totalIssuance.toString(),
-      fees ? fmt.toDecimals(fees.fee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.fee).toString() : '0',
       this.getPegs()
     );
     const price = BigInt(result);
@@ -363,8 +357,7 @@ export class StableSwap implements Pool {
   }
 
   private getPegs(): string {
-    const pegs = StableMath.defaultPegs(this.tokens.length - 1);
-    return JSON.stringify(pegs);
+    return JSON.stringify(this.pegs);
   }
 
   private getReserves(): string {

@@ -1,24 +1,75 @@
 import { CompatibilityLevel } from 'polkadot-api';
+
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { type Observable, map, of, switchMap } from 'rxjs';
+import { Subscription, distinctUntilChanged, filter } from 'rxjs';
 
-import { PoolType, PoolLimits, PoolFees, PoolFee } from '../types';
+import { PoolType, PoolLimits, PoolFees, PoolFee, PoolPair } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
 type TLbpPoolData = HydrationQueries['LBP']['PoolData']['Value'];
+type TValidationData =
+  HydrationQueries['ParachainSystem']['ValidationData']['Value'];
 
 export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   private readonly MAX_FINAL_WEIGHT = 100_000_000n;
+
   private poolsData: Map<string, TLbpPoolData> = new Map([]);
+
+  getPoolType(): PoolType {
+    return PoolType.LBP;
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.LBP.MaxInRatio(),
+      this.api.constants.LBP.MaxOutRatio(),
+      this.api.constants.LBP.MinTradingLimit(),
+    ]);
+
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  private getPoolWeights(
+    poolEntry: TLbpPoolData,
+    relayBlockNumber: number
+  ): [bigint, bigint] {
+    const { start, end, initial_weight, final_weight } = poolEntry;
+
+    const linearWeight = LbpMath.calculateLinearWeights(
+      start ? start.toString() : '0',
+      end ? end.toString() : '0',
+      initial_weight.toString(),
+      final_weight.toString(),
+      relayBlockNumber.toString()
+    );
+
+    const accumulatedWeight = BigInt(linearWeight);
+    const distributedWeight = this.MAX_FINAL_WEIGHT - BigInt(accumulatedWeight);
+
+    return [accumulatedWeight, distributedWeight];
+  }
+
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.LBP.PoolData;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
 
   protected async loadPools(): Promise<LbpPoolBase[]> {
     const [entries, validationData, limits] = await Promise.all([
-      this.api.query.LBP.PoolData.getEntries(),
-      this.api.query.ParachainSystem.ValidationData.getValue(),
+      this.api.query.LBP.PoolData.getEntries({ at: 'best' }),
+      this.api.query.ParachainSystem.ValidationData.getValue({ at: 'best' }),
       this.getPoolLimits(),
     ]);
 
@@ -53,27 +104,12 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     poolEntry: TLbpPoolData,
     relayBlockNumber: number
   ): Promise<Partial<LbpPoolBase>> {
-    const {
-      start,
-      end,
-      assets,
-      initial_weight,
-      final_weight,
-      repay_target,
-      fee_collector,
-    } = poolEntry;
-
-    const linearWeight = LbpMath.calculateLinearWeights(
-      start ? start.toString() : '0',
-      end ? end.toString() : '0',
-      initial_weight.toString(),
-      final_weight.toString(),
-      relayBlockNumber.toString()
+    const { assets, repay_target, fee_collector } = poolEntry;
+    const [accumulatedWeight, distributedWeight] = this.getPoolWeights(
+      poolEntry,
+      relayBlockNumber
     );
-
     const [accumulated, distributed] = assets;
-    const accumulatedWeight = BigInt(linearWeight);
-    const distributedWeight = this.MAX_FINAL_WEIGHT - BigInt(accumulatedWeight);
 
     const [
       repayFeeApplied,
@@ -100,7 +136,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
           id: accumulated,
           decimals: accumulatedMeta?.decimals,
           existentialDeposit: accumulatedMeta?.existential_deposit,
-          balance: accumulatedBalance,
+          balance: accumulatedBalance.transferable,
           weight: accumulatedWeight,
           type: accumulatedMeta?.asset_type.type,
         } as WeightedPoolToken,
@@ -108,7 +144,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
           id: distributed,
           decimals: distributedMeta?.decimals,
           existentialDeposit: distributedMeta?.existential_deposit,
-          balance: distributedBalance,
+          balance: distributedBalance.transferable,
           weight: distributedWeight,
           type: distributedMeta?.asset_type.type,
         } as WeightedPoolToken,
@@ -141,7 +177,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         feeCollector,
         accumulatedAsset
       );
-      return repayFeeCurrent < repayTarget;
+      return repayFeeCurrent.transferable < repayTarget;
     } catch (err) {
       // Collector account is empty (No trade has been executed yet)
       return true;
@@ -153,21 +189,11 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     return repayFee as PoolFee;
   }
 
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.LBP.MaxInRatio(),
-      this.api.constants.LBP.MaxOutRatio(),
-      this.api.constants.LBP.MinTradingLimit(),
-    ]);
+  async getPoolFees(_pair: PoolPair, address: string): Promise<PoolFees> {
+    const pool = this.store.pools.find(
+      (pool) => pool.address === address
+    ) as LbpPoolBase;
 
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
-  }
-
-  async getPoolFees(pool: LbpPoolBase): Promise<PoolFees> {
     const repayFee = await this.getRepayFee();
     return {
       repayFee: repayFee,
@@ -175,39 +201,58 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     } as LbpPoolFees;
   }
 
-  getPoolType(): PoolType {
-    return PoolType.LBP;
+  private subscribeValidationData(): Subscription {
+    return this.api.query.ParachainSystem.ValidationData.watchValue('best')
+      .pipe(
+        filter((v): v is TValidationData => v !== undefined),
+        distinctUntilChanged(
+          (a, b) => a.relay_parent_number === b.relay_parent_number
+        )
+      )
+      .subscribe(({ relay_parent_number }) => {
+        this.store.update(async (pools) => {
+          const updated: LbpPoolBase[] = [];
+
+          for (const pool of pools) {
+            const poolData = this.poolsData.get(pool.address);
+            if (poolData) {
+              const { assets, repay_target, fee_collector } = poolData;
+
+              const [accumulated] = assets;
+              const [accWeight, distWeight] = this.getPoolWeights(
+                poolData,
+                relay_parent_number
+              );
+
+              const [accAsset, distAsset] = pool.tokens;
+              const tokens = [
+                { ...accAsset, weight: accWeight },
+                { ...distAsset, weight: distWeight },
+              ];
+
+              const repayFeeApplied = await this.isRepayFeeApplied(
+                accumulated,
+                repay_target,
+                fee_collector.toString()
+              );
+
+              updated.push({
+                ...pool,
+                tokens,
+                repayFeeApply: repayFeeApplied,
+              });
+            }
+          }
+          return updated;
+        });
+      });
   }
 
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.LBP.PoolData;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
+  protected subscribeUpdates(): Subscription {
+    const sub = new Subscription();
 
-  subscribePoolChange(pool: LbpPoolBase): Observable<LbpPoolBase> {
-    const query = this.api.query.ParachainSystem.ValidationData;
-    const poolData = this.poolsData.get(pool.address);
+    sub.add(this.subscribeValidationData());
 
-    if (!poolData) {
-      return of(pool);
-    }
-
-    return query.watchValue('best').pipe(
-      switchMap((data) => {
-        if (data) {
-          return this.getPoolDelta(
-            pool.address,
-            poolData,
-            data.relay_parent_number
-          );
-        }
-        return of(pool);
-      }),
-      map((delta) => Object.assign({}, pool, delta))
-    );
+    return sub;
   }
 }

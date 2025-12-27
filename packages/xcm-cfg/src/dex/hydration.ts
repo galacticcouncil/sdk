@@ -7,12 +7,12 @@ import {
   SwapQuote,
 } from '@galacticcouncil/xcm-core';
 import {
-  EvmClient,
   PoolService,
   PoolType,
   RUNTIME_DECIMALS,
   TradeRouteBuilder,
   TradeRouter,
+  TxBuilderFactory,
 } from '@galacticcouncil/sdk';
 
 import { memoize1 } from '@thi.ng/memoize';
@@ -22,24 +22,60 @@ import { HydrationClient } from '../clients';
 export class HydrationDex implements Dex {
   readonly chain: Parachain;
   readonly client: HydrationClient;
-  readonly poolService?: PoolService;
+  readonly poolCtx: PoolService;
+  readonly txBuilder: TxBuilderFactory;
 
   readonly getCtx = memoize1(async (mem: number) => {
     console.log('init swap router', mem, '✅');
-    const api = await this.chain.api;
-    const evm = new EvmClient(api);
-    const poolCtx = this.poolService
-      ? this.poolService
-      : new PoolService(api, evm);
-    return new TradeRouter(poolCtx, {
-      includeOnly: [PoolType.Omni, PoolType.Stable, PoolType.XYK],
+    return new TradeRouter(this.poolCtx, {
+      includeOnly: [
+        PoolType.Aave,
+        PoolType.Omni,
+        PoolType.Stable,
+        PoolType.XYK,
+      ],
     });
   });
 
-  constructor(chain: AnyChain, poolService?: PoolService) {
+  constructor(chain: AnyChain, poolCtx: PoolService) {
     this.chain = chain as Parachain;
+    this.poolCtx = poolCtx;
     this.client = new HydrationClient(this.chain);
-    this.poolService = poolService;
+    this.txBuilder = new TxBuilderFactory(poolCtx.api, poolCtx.evm);
+  }
+
+  async getCalldata(
+    account: string,
+    assetIn: Asset,
+    assetOut: Asset,
+    amountOut: AssetAmount,
+    slippage = 0
+  ): Promise<string> {
+    const aIn = this.chain.getMetadataAssetId(assetIn);
+    const aOut = this.chain.getMetadataAssetId(assetOut);
+    const amount = amountOut.toDecimal(amountOut.decimals);
+
+    const router = await this.getCtx(1);
+
+    const mostLiquidRoute = await router.getMostLiquidRoute(
+      aIn.toString(),
+      aOut.toString()
+    );
+
+    const trade = await router.getBuy(
+      aIn.toString(),
+      aOut.toString(),
+      amount,
+      mostLiquidRoute
+    );
+
+    const extrinsic = await this.txBuilder
+      .trade(trade)
+      .withBeneficiary(account)
+      .withSlippage(slippage)
+      .build();
+
+    return extrinsic.hex;
   }
 
   async getQuote(

@@ -35,6 +35,11 @@ export const cfg = new Asset({
   originSymbol: 'CFG',
 });
 
+export const cfg_new = new Asset({
+  key: 'cfg_new',
+  originSymbol: 'CFG',
+});
+
 export const cru = new Asset({
   key: 'cru',
   originSymbol: 'CRU',
@@ -70,9 +75,19 @@ export const dota = new Asset({
   originSymbol: 'DOTA',
 });
 
+export const ena = new Asset({
+  key: 'ena',
+  originSymbol: 'ENA',
+});
+
 export const eth = new Asset({
   key: 'eth',
   originSymbol: 'ETH',
+});
+
+export const eurc = new Asset({
+  key: 'eurc',
+  originSymbol: 'EURC',
 });
 
 export const glmr = new Asset({
@@ -93,6 +108,11 @@ export const ibtc = new Asset({
 export const intr = new Asset({
   key: 'intr',
   originSymbol: 'INTR',
+});
+
+export const jito_sol = new Asset({
+  key: 'jitoSol',
+  originSymbol: 'jitoSOL',
 });
 
 export const kar = new Asset({
@@ -163,6 +183,11 @@ export const pen = new Asset({
 export const pha = new Asset({
   key: 'pha',
   originSymbol: 'PHA',
+});
+
+export const paxg = new Asset({
+  key: 'paxg',
+  originSymbol: 'PAXG',
 });
 
 export const pink = new Asset({
@@ -325,6 +350,11 @@ export const ztg = new Asset({
   originSymbol: 'ZTG',
 });
 
+export const xon = new Asset({
+  key: 'xon',
+  originSymbol: 'XON',
+});
+
 export const assets: Asset[] = [
   aave,
   aca,
@@ -332,6 +362,7 @@ export const assets: Asset[] = [
   astr,
   bsx,
   cfg,
+  cfg_new,
   cru,
   bnc,
   dai,
@@ -340,7 +371,9 @@ export const assets: Asset[] = [
   ded,
   dot,
   dota,
+  ena,
   eth,
+  eurc,
   glmr,
   hdx,
   ibtc,
@@ -352,11 +385,13 @@ export const assets: Asset[] = [
   laos,
   lbtc,
   ewt,
+  jito_sol,
   ldot,
   link,
   myth,
   neuro,
   nodl,
+  paxg,
   pha,
   pen,
   pink,
@@ -391,6 +426,7 @@ export const assets: Asset[] = [
   wud,
   xrt,
   ztg,
+  xon,
 ];
 
 export const assetsMap = new Map<string, Asset>(

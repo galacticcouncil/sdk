@@ -1,5 +1,89 @@
 # @galacticcouncil/sdk
 
+## 10.4.0
+
+### Minor Changes
+
+- 0d1da84: disable hsm in scheduler
+
+## 10.3.0
+
+### Minor Changes
+
+- recalculate peg math upgrade (new updateAt ora arg support)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-stableswap@2.4.0
+
+## 10.2.0
+
+### Minor Changes
+
+- b403e40: HF calculation adjustments
+
+## 10.1.0
+
+### Minor Changes
+
+[840813cd]: https://github.com/galacticcouncil/sdk/commit/840813cd
+[96d12c07]: https://github.com/galacticcouncil/sdk/commit/96d12c07
+
+- [[#840813cd][840813cd]] sdk: evm rpc adapter (chopsticks)
+- [[#96d12c07][96d12c07]] sdk: dispatch buy with extra gas
+
+## 10.0.0
+
+### Major Changes
+
+- bump pjs to latest
+
+## 9.17.1
+
+### Patch Changes
+
+- Fix: PoolClient share balance sync
+
+## 9.17.0
+
+### Minor Changes
+
+[36fbb472]: https://github.com/galacticcouncil/sdk/commit/36fbb472
+[3e41727f]: https://github.com/galacticcouncil/sdk/commit/3e41727f
+
+- [[#36fbb472][36fbb472]] sdk: wrap with extra gas if any debt
+- [[#3e41727f][3e41727f]] sdk: bump bfs to new max (10)
+
+## 9.16.0
+
+### Minor Changes
+
+- f183193: stable: peg max update type change
+
+### Patch Changes
+
+- Updated dependencies [f183193]
+  - @galacticcouncil/math-stableswap@2.3.0
+
+## 9.15.0
+
+### Minor Changes
+
+- Pool ctx api & evm accessors read-only
+
+## 9.14.0
+
+### Minor Changes
+
+[572718c7]: https://github.com/galacticcouncil/sdk/commit/572718c7
+[5c46abff]: https://github.com/galacticcouncil/sdk/commit/5c46abff
+[fcd4afe1]: https://github.com/galacticcouncil/sdk/commit/fcd4afe1
+
+- [[#572718c7][572718c7]] sdk: upgrade perf, mlr cache, getSpotPrices api, cold starts
+- [[#5c46abff][5c46abff]] sdk: export mm oracle module
+- [[#fcd4afe1][fcd4afe1]] sdk: plength to cache composite key
+
 ## 9.13.0
 
 ### Minor Changes

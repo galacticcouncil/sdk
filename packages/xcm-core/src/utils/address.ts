@@ -29,6 +29,18 @@ function assertHexLen(h: string, bytes: number) {
   }
 }
 
+/**
+ * Convert an H160 hex string into a zero-padded
+ * 32-byte (H256) hex string.
+ *
+ * @param addr - h160 address
+ */
+export function h160ToH256(addr: string): string {
+  let hex = addr.toLowerCase().replace(/^0x/, '');
+  const padded = hex.padStart(64, '0');
+  return '0x' + padded;
+}
+
 // -------------------- Substrate (SS58) --------------------
 
 export class Ss58Addr {

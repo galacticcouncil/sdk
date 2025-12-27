@@ -6,7 +6,11 @@ import {
   Parachain,
   Snowbridge as Sb,
   Wormhole as Wh,
+  Hyperbridge as Hb,
+  AssetAmount,
 } from '@galacticcouncil/xcm-core';
+
+import { toHex } from 'viem';
 
 import {
   BRIDGE_HUB_ID,
@@ -17,6 +21,7 @@ import { padFeeByPercentage } from './utils';
 
 import { dot } from '../assets';
 import { BaseClient, AssethubClient } from '../clients';
+import { UniswapV2Dex } from '../dex';
 
 function TokenRelayer() {
   return {
@@ -139,9 +144,55 @@ function Snowbridge() {
   };
 }
 
+function Hyperbridge() {
+  return {
+    calculateNativeFee: (): FeeAmountConfigBuilder => ({
+      build: async ({ destination, source }) => {
+        const ctx = source as EvmChain;
+        const ctxHb = Hb.fromChain(ctx);
+        const ctxDex = new UniswapV2Dex(ctx);
+
+        const dest = ctxHb.getDest(destination);
+
+        const perByteFee = await ctx.client.getProvider().readContract({
+          address: ctxHb.getIsmpHost() as `0x${string}`,
+          abi: Abi.HyperbridgeIsmpHost,
+          functionName: 'perByteFee',
+          args: [toHex(dest)] as any,
+        });
+
+        /**
+         * Teleport body: (uint256, uint256, bytes32, bool, bytes32, bytes)
+         *
+         * with empty data "0x" it's 224 bytes
+         */
+        const teleportBodyLength = 224;
+
+        const perByte = perByteFee as bigint;
+        const bridgeFeeInUsdc = perByte * BigInt(teleportBodyLength);
+
+        const usdc = ctxHb.getFeeAsset();
+        const weth = await ctx.getCurrency();
+
+        const amount = AssetAmount.fromAsset(usdc, {
+          amount: bridgeFeeInUsdc,
+          decimals: 6,
+        });
+
+        const bridgeFeeInWei = await ctxDex.getQuote(weth.asset, usdc, amount);
+        return {
+          amount: bridgeFeeInWei.amount,
+          breakdown: { bridgeFeeInUsdc: bridgeFeeInUsdc },
+        } as FeeAmount;
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
     Snowbridge,
     Wormhole,
+    Hyperbridge,
   };
 }

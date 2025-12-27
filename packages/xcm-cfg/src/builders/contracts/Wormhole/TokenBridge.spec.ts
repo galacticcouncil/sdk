@@ -29,7 +29,7 @@ describe('TokenBridge contract builder', () => {
     it('should build correct config for erc20 mrl transfer to hydration', async () => {
       const ctx = buildTransferCtx(dai);
       expect(
-        TokenBridge()
+        await TokenBridge()
           .transferTokensWithPayload()
           .viaMrl({ moonchain: moonbeam })
           .build(ctx)
@@ -54,7 +54,7 @@ describe('TokenBridge contract builder', () => {
     it('should build correct config for native eth mrl transfer to hydration', async () => {
       const ctx = buildTransferCtx(eth);
       expect(
-        TokenBridge()
+        await TokenBridge()
           .wrapAndTransferETHWithPayload()
           .viaMrl({ moonchain: moonbeam })
           .build(ctx)

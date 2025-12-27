@@ -11,6 +11,7 @@ import {
   dot,
   glmr,
   hdx,
+  jito_sol,
   pink,
   sol,
   susds_mwh,
@@ -108,6 +109,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: jito_sol,
+      decimals: 9,
+      id: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
               },
             },
           ],
@@ -244,7 +266,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: aca,
       decimals: 12,
-      id: '224821240862170613278369189818311486111',
+      id: '0xffffffffa922fef94566104a6e5a35a4fcddaa9f',
       xcmLocation: {
         parents: 1,
         interior: {
@@ -265,7 +287,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: dot,
       decimals: 10,
-      id: '42259045809535163221576417993425387648',
+      id: '0xffffffff1fcacbd218edc0eba20fc2308c778080',
       xcmLocation: {
         parents: 1,
         interior: 'Here',
@@ -274,7 +296,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: hdx,
       decimals: 12,
-      id: '69606720909260275826784788104880799692',
+      id: '0xffffffff345dc44ddae98df024eb494321e73fcc',
       xcmLocation: {
         parents: 1,
         interior: {
@@ -292,7 +314,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: pink,
       decimals: 10,
-      id: '64174511183114006009298114091987195453',
+      id: '0xffffffff30478fafbe935e466da114e14fb3563d',
       xcmLocation: {
         parents: 1,
         interior: {
@@ -313,7 +335,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: usdc,
       decimals: 6,
-      id: '166377000701797186346254371275954761085',
+      id: '0xffffffff7d2b0b761af01ca8e25242976ac0ad7d',
       xcmLocation: {
         parents: 1,
         interior: {
@@ -334,7 +356,7 @@ export const moonbeam = new EvmParachain({
     {
       asset: usdt,
       decimals: 6,
-      id: '311091173110107856861649819128533077277',
+      id: '0xffffffffea09fb06d082fd1275cd48b191cbcd1d',
       xcmLocation: {
         parents: 1,
         interior: {

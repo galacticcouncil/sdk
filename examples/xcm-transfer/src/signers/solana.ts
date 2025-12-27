@@ -21,7 +21,9 @@ export async function signAndSend(
   const wallet = (window as any).phantom.solana;
   try {
     await wallet.connect();
-    versioned.sign(signers);
+    if (signers) {
+      versioned.sign(signers);
+    }
     const { signature } = await wallet.signAndSendTransaction(versioned);
     onTransactionSend(signature);
     await ctx.connection.getSignatureStatus(signature);

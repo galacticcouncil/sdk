@@ -45,5 +45,5 @@ export const kusamaAssetHub = new Parachain({
   ss58Format: 2,
   treasury: 'HWZmQq6zMMk7TxixHfseFT2ewicT6UofPa68VCn3gkXrdJF',
   usesDeliveryFee: true,
-  ws: 'wss://kusama-asset-hub-rpc.polkadot.io',
+  ws: 'wss://asset-hub-kusama-rpc.n.dwellir.com',
 });

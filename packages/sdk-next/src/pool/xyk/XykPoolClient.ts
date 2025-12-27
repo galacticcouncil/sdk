@@ -1,6 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { type Observable, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   PoolBase,
@@ -9,17 +9,51 @@ import {
   PoolLimits,
   PoolFees,
   PoolToken,
+  PoolTokenOverride,
 } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { XykPoolFees } from './XykPool';
 
 export class XykPoolClient extends PoolClient<PoolBase> {
-  protected async loadPools(): Promise<PoolBase[]> {
-    const query = this.api.query.XYK.PoolAssets;
+  private decimals: Map<number, number> = new Map([]);
 
+  getPoolType(): PoolType {
+    return PoolType.XYK;
+  }
+
+  async withOverride(override?: PoolTokenOverride[]) {
+    this.decimals = override
+      ? new Map(override.map((p) => [p.id, p.decimals]))
+      : new Map();
+  }
+
+  private async getPoolLimits(): Promise<PoolLimits> {
+    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
+      this.api.constants.XYK.MaxInRatio(),
+      this.api.constants.XYK.MaxOutRatio(),
+      this.api.constants.XYK.MinTradingLimit(),
+    ]);
+
+    return {
+      maxInRatio: maxInRatio,
+      maxOutRatio: maxOutRatio,
+      minTradingLimit: minTradingLimit,
+    } as PoolLimits;
+  }
+
+  async isSupported(): Promise<boolean> {
+    const query = this.api.query.XYK.PoolAssets;
+    const compatibilityToken = await this.api.compatibilityToken;
+    return query.isCompatible(
+      CompatibilityLevel.BackwardsCompatible,
+      compatibilityToken
+    );
+  }
+
+  async loadPools(): Promise<PoolBase[]> {
     const [entries, limits] = await Promise.all([
-      query.getEntries(),
+      this.api.query.XYK.PoolAssets.getEntries(),
       this.getPoolLimits(),
     ]);
 
@@ -40,16 +74,16 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         tokens: [
           {
             id: x,
-            decimals: xMeta?.decimals,
+            decimals: xMeta?.decimals || this.decimals.get(x),
             existentialDeposit: xMeta?.existential_deposit,
-            balance: xBalance,
+            balance: xBalance.transferable,
             type: xMeta?.asset_type.type,
           } as PoolToken,
           {
             id: y,
-            decimals: yMeta?.decimals,
+            decimals: yMeta?.decimals || this.decimals.get(y),
             existentialDeposit: yMeta?.existential_deposit,
-            balance: yBalance,
+            balance: yBalance.transferable,
             type: yMeta?.asset_type.type,
           } as PoolToken,
         ],
@@ -59,25 +93,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     return Promise.all(pools);
   }
 
-  private async getExchangeFee(): Promise<PoolFee> {
-    const fee = await this.api.constants.XYK.GetExchangeFee();
-    return fee as PoolFee;
-  }
-
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.XYK.MaxInRatio(),
-      this.api.constants.XYK.MaxOutRatio(),
-      this.api.constants.XYK.MinTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
-  }
-
   async getPoolFees(): Promise<PoolFees> {
     const exchangeFee = await this.getExchangeFee();
     return {
@@ -85,20 +100,12 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     } as XykPoolFees;
   }
 
-  getPoolType(): PoolType {
-    return PoolType.XYK;
+  private async getExchangeFee(): Promise<PoolFee> {
+    const fee = await this.api.constants.XYK.GetExchangeFee();
+    return fee as PoolFee;
   }
 
-  async isSupported(): Promise<boolean> {
-    const query = this.api.query.XYK.PoolAssets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-  }
-
-  subscribePoolChange(pool: PoolBase): Observable<PoolBase> {
-    return of(pool);
+  protected subscribeUpdates(): Subscription {
+    return Subscription.EMPTY;
   }
 }

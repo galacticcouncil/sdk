@@ -15,6 +15,10 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
   return isWormholeNative || isSnowbridgeNative;
 }
 
+export function isHyperBridge(config: ContractConfig): boolean {
+  return config.module === 'Hyperbridge';
+}
+
 export function isPrecompile(config: ContractConfig): boolean {
   const precompiles = Object.entries(Precompile).map(([_, v]) => v);
   return precompiles.includes(config.address);

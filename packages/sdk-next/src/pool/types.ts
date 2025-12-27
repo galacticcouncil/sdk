@@ -1,19 +1,30 @@
 import type { AssetType } from '../types';
 
+export type PoolFilter = {
+  useOnly?: PoolType[];
+  exclude?: PoolType[];
+};
+
 export enum PoolType {
   Aave = 'Aave',
   LBP = 'LBP',
   Omni = 'Omnipool',
   Stable = 'Stableswap',
   XYK = 'XYK',
+  HSM = 'HSM',
 }
 
 export enum PoolError {
+  UnknownError = 'UnknownError',
+  FacilitatorCapacityExceeded = 'FacilitatorCapacityExceeded',
   InsufficientTradingAmount = 'InsufficientTradingAmount',
+  InsufficientCollateral = 'InsufficientCollateral',
+  MaxHoldingExceeded = 'MaxHoldingExceeded',
   MaxInRatioExceeded = 'MaxInRatioExceeded',
   MaxOutRatioExceeded = 'MaxOutRatioExceeded',
   TradeNotAllowed = 'TradeNotAllowed',
-  UnknownError = 'UnknownError',
+  MaxBuyBackExceeded = 'MaxBuyBackExceeded',
+  MaxBuyPriceExceeded = 'MaxBuyPriceExceeded',
 }
 
 export interface PoolPair {
@@ -36,6 +47,8 @@ export type PoolBase = {
   maxOutRatio: bigint;
   minTradingLimit: bigint;
 };
+
+export type PoolPegs = string[][];
 
 export interface PoolToken {
   id: number;
@@ -100,7 +113,7 @@ export interface Pool extends PoolBase {
 
 export interface IPoolCtxProvider {
   getPools(): Promise<PoolBase[]>;
-  getPoolFees(pool: PoolBase, feeAsset: number): Promise<PoolFees>;
+  getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees>;
 }
 
 export type Hop = {

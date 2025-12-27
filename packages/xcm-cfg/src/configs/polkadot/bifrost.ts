@@ -12,7 +12,11 @@ import {
   ibtc,
 } from '../../assets';
 import { assetHub, bifrost, hydration, polkadot } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  XcmTransferType,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -97,7 +101,9 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
   }),
   new AssetRoute({
     source: {
@@ -211,31 +217,6 @@ const toHydration: AssetRoute[] = [
   }),
 ];
 
-const toPolkadot: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: polkadot,
-      asset: dot,
-      fee: {
-        amount: 0.003,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
-  }),
-];
-
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -285,5 +266,5 @@ const toAssetHub: AssetRoute[] = [
 
 export const bifrostConfig = new ChainRoutes({
   chain: bifrost,
-  routes: [...toHydration, ...toPolkadot, ...toAssetHub],
+  routes: [...toHydration, ...toAssetHub],
 });

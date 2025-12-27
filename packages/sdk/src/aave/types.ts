@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 
 export type AaveSummary = {
   healthFactor: number;
+  currentLiquidationThreshold: number;
   totalCollateral: BigNumber;
   totalDebt: BigNumber;
   reserves: AaveReserveData[];

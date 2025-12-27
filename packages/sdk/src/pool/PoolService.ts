@@ -30,8 +30,8 @@ import {
 import { PoolClient } from './PoolClient';
 
 export class PoolService extends PolkadotApiClient implements IPoolService {
-  protected readonly api: ApiPromise;
-  protected readonly evm: EvmClient;
+  readonly api: ApiPromise;
+  readonly evm: EvmClient;
 
   protected readonly assetClient: AssetClient;
 

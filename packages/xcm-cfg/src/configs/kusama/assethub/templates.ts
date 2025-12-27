@@ -5,6 +5,7 @@ import {
   AssetMinBuilder,
   BalanceBuilder,
   ExtrinsicBuilder,
+  XcmTransferType,
 } from '../../../builders';
 
 // const xcmDeliveryFee = 0.0015;
@@ -38,6 +39,8 @@ export function toParaStablesTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }
