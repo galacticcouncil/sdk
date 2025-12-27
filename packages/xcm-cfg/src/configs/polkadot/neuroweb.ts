@@ -1,8 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import {
-  neuro,
-} from '../../assets';
+import { neuro } from '../../assets';
 import { neuroweb, hydration } from '../../chains';
 import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 

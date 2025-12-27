@@ -27,9 +27,10 @@ import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
 
-export class SubstratePlatform
-  implements Platform<ExtrinsicConfig, SubstrateQueryConfig>
-{
+export class SubstratePlatform implements Platform<
+  ExtrinsicConfig,
+  SubstrateQueryConfig
+> {
   readonly #substrate: Promise<SubstrateService>;
   readonly #dex: Dex | undefined;
 
@@ -46,6 +47,7 @@ export class SubstratePlatform
   async buildCall(
     account: string,
     _amount: bigint,
+    _asset: Asset,
     feeBalance: AssetAmount,
     config: ExtrinsicConfig
   ): Promise<SubstrateCall> {
@@ -58,7 +60,7 @@ export class SubstratePlatform
         }
       : undefined;
 
-    const extrinsic = substrate.getExtrinsic(config);
+    const extrinsic = await substrate.getExtrinsic(config);
     const extrinsicCall = config.module + '.' + config.func;
     return {
       from: account,
@@ -68,8 +70,9 @@ export class SubstratePlatform
       dryRun: substrate.isDryRunSupported()
         ? async () => {
             try {
+              const extrinsic = await substrate.getExtrinsic(config);
               const { executionResult, emittedEvents, forwardedXcms } =
-                await substrate.dryRun(account, config);
+                await substrate.dryRun(account, extrinsic);
 
               const error = executionResult.isErr
                 ? getErrorFromDryRun(substrate.api, executionResult.asErr)

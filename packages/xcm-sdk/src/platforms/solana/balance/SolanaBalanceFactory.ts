@@ -3,6 +3,7 @@ import { SolanaQueryConfig } from '@galacticcouncil/xcm-core';
 import { Connection } from '@solana/web3.js';
 
 import { Native } from './Native';
+import { Token } from './Token';
 import { SolanaBalance } from './SolanaBalance';
 
 export class SolanaBalanceFactory {
@@ -10,6 +11,8 @@ export class SolanaBalanceFactory {
     switch (config.module) {
       case 'Native':
         return new Native(connection, config);
+      case 'Token':
+        return new Token(connection, config);
       default: {
         throw new Error('Module ' + config.module + ' is not supported');
       }

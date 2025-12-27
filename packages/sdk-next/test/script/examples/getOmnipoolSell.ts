@@ -3,13 +3,13 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
-import { pool } from '../../../src';
+import { pool, evm } from '../../../src';
 
 class GetOmnipoolSell extends PapiExecutor {
-  async script(client: PolkadotClient) {
+  async script(client: PolkadotClient, evm: evm.EvmClient) {
     const { OmniPoolClient, OmniPool } = pool.omni;
 
-    const omniPoolClient = new OmniPoolClient(client);
+    const omniPoolClient = new OmniPoolClient(client, evm);
     const [omnipool] = await omniPoolClient.getPools();
 
     const omniPool = OmniPool.fromPool(omnipool);

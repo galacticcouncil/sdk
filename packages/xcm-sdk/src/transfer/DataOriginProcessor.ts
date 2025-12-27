@@ -26,9 +26,15 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {
-    const { amount, sender, source } = ctx;
+    const { amount, asset, sender, source } = ctx;
     const transfer = await this.getTransfer(ctx);
-    return this.adapter.buildCall(sender, amount, source.feeBalance, transfer);
+    return this.adapter.buildCall(
+      sender,
+      amount,
+      asset,
+      source.feeBalance,
+      transfer
+    );
   }
 
   async getDestinationFee(): Promise<{
@@ -232,7 +238,7 @@ export class DataOriginProcessor extends DataProcessor {
     const { chain, extrinsic } = cfg;
     const config = extrinsic.build(ctx);
     const substrate = await SubstrateService.create(chain);
-    const submittable = substrate.getExtrinsic(config);
+    const submittable = await substrate.getExtrinsic(config);
 
     const fromChain = ctx.source.chain as Parachain;
     const fromAddr = ctx.sender;

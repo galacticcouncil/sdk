@@ -1,0 +1,18 @@
+{
+  "name": "xc-transfer",
+  "private": true,
+  "type": "module",
+  "main": "out/index.js",
+  "scripts": {
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-wasm": "^1.0.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/xc": "^0.4.0",
+    "@talismn/connect-wallets": "^1.2.8"
+  }
+}

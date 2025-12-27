@@ -1,5 +1,43 @@
 # @galacticcouncil/descriptors
 
+## 1.7.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.23.0), re-build descriptors
+- Add hub descriptors
+- Support chain based whitelist
+
+## 1.6.0
+
+### Minor Changes
+
+- disable desc package
+
+## 1.5.1
+
+### Patch Changes
+
+- fix papi again (downgrade to 0.19.x)
+
+## 1.5.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.19.0), re-build descriptors
+
+## 1.4.0
+
+### Minor Changes
+
+- eb1e3d2: Add stableswap pegs
+
+## 1.3.0
+
+### Minor Changes
+
+- temp whitelist all (dev phase)
+
 ## 1.2.0
 
 ### Minor Changes

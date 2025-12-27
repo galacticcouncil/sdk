@@ -1,7 +1,9 @@
+import Big from 'big.js';
+
+import { big, erc20, h160 } from '@galacticcouncil/common';
+
 import { AaveClient } from './AaveClient';
 import { AaveSummary, AaveReserveData } from './types';
-
-import { big, erc20, h160 } from '../utils';
 
 import { EvmClient } from '../evm';
 import { Amount } from '../types';
@@ -10,27 +12,29 @@ const { ERC20 } = erc20;
 const { H160 } = h160;
 
 const TARGET_WITHDRAW_HF = 1.01;
-const SAFE_MAX_HEALTH_FACTOR = 99999;
+const SECONDS_PER_YEAR = 31536000n;
+const LTV_PRECISION = 4;
+const INVALID_HF = -1;
 
 const RAY = 10n ** 27n;
-const WAD = 10n ** 18n;
 
 export class AaveUtils {
   private client: AaveClient;
 
-  constructor(evmClient?: EvmClient) {
-    const evm = evmClient ?? new EvmClient();
+  constructor(evm: EvmClient) {
     this.client = new AaveClient(evm);
   }
 
   async getSummary(user: string): Promise<AaveSummary> {
     const to = H160.fromAny(user);
 
-    const [poolReserves, userReserves, userData] = await Promise.all([
-      this.client.getReservesData(),
-      this.client.getUserReservesData(to),
-      this.client.getUserAccountData(to),
-    ]);
+    const [poolReserves, userReserves, userData, blockTimestamp] =
+      await Promise.all([
+        this.client.getReservesData(),
+        this.client.getUserReservesData(to),
+        this.client.getUserAccountData(to),
+        this.client.getBlockTimestamp(),
+      ]);
 
     const [pReserves] = poolReserves;
     const [uReserves, userEmodeCategoryId] = userReserves;
@@ -38,7 +42,7 @@ export class AaveUtils {
       totalCollateralBase,
       totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
       healthFactor,
     ] = userData;
@@ -59,12 +63,25 @@ export class AaveUtils {
 
       const scaledABalance = uReserve.scaledATokenBalance;
       const liquidityIndex = pReserve.liquidityIndex;
+      const liquidityRate = pReserve.liquidityRate;
+      const availableLiquidity = pReserve.availableLiquidity;
+
       const priceInRef = pReserve.priceInMarketReferenceCurrency;
 
-      const aTokenBalance = (scaledABalance * liquidityIndex) / RAY;
+      const nextBlockTimestamp = blockTimestamp + 6; // adding 6 sec (blocktime)
+      const linearInterest = this.calculateLinearInterest(
+        liquidityRate,
+        pReserve.lastUpdateTimestamp,
+        nextBlockTimestamp
+      );
+
+      const currLiquidityIndex = (liquidityIndex * linearInterest) / RAY;
+      const aTokenBalance = (scaledABalance * currLiquidityIndex) / RAY;
+
+      const userIsInEmode = userEmodeCategoryId !== 0;
 
       const rawThreshold = Number(
-        userEmodeCategoryId === pReserve.eModeCategoryId
+        userIsInEmode && userEmodeCategoryId === pReserve.eModeCategoryId
           ? pReserve.eModeLiquidationThreshold
           : pReserve.reserveLiquidationThreshold
       );
@@ -80,6 +97,7 @@ export class AaveUtils {
 
       reserves.push({
         aTokenBalance,
+        availableLiquidity,
         decimals: Number(pReserve.decimals),
         isCollateral,
         priceInRef,
@@ -91,6 +109,9 @@ export class AaveUtils {
 
     return {
       healthFactor: Number(hf),
+      currentLiquidationThreshold: Number(
+        big.toDecimal(currentLiquidationThreshold, LTV_PRECISION)
+      ),
       totalCollateral: totalCollateralBase,
       totalDebt: totalDebtBase,
       reserves: reserves,
@@ -120,16 +141,19 @@ export class AaveUtils {
     const to = H160.fromAny(user);
     const userData = await this.client.getUserAccountData(to);
     const [
-      _totalCollateralBase,
-      _totalDebtBase,
+      totalCollateralBase,
+      totalDebtBase,
       _availableBorrowsBase,
-      _currentLiquidationThreshold,
+      currentLiquidationThreshold,
       _ltv,
-      healthFactor,
+      _healthFactor,
     ] = userData;
 
-    const hf = big.toDecimal(healthFactor, 18);
-    return Number(hf);
+    return this.calculateHealthFactorFromBalances(
+      totalDebtBase,
+      totalCollateralBase,
+      currentLiquidationThreshold
+    );
   }
 
   /**
@@ -137,7 +161,7 @@ export class AaveUtils {
    *
    * @param user - user address
    * @param reserve - reserve on-chain id (registry)
-   * @param supplyAmount - aToken withdrawAmount amount (decimal)
+   * @param withdrawAmount - aToken withdrawAmount amount (decimal)
    * @returns health factor decimal value
    */
   async getHealthFactorAfterWithdraw(
@@ -145,8 +169,14 @@ export class AaveUtils {
     reserve: number,
     withdrawAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
+
+    if (totalDebt === 0n) return INVALID_HF;
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -168,12 +198,18 @@ export class AaveUtils {
     // HF = 0 if no collateral
     if (adjustedCollateral <= 0n) return 0;
 
-    // HF = (C * LT) / D
-    return this.calculateHealthFactor(
-      adjustedCollateral,
-      reserveLiquidationThreshold,
-      totalDebt
-    );
+    const weightedLT = Big(totalCollateral.toString())
+      .mul(currentLiquidationThreshold)
+      .minus(Big(withdrawRef.toString()).mul(reserveLiquidationThreshold))
+      .div(adjustedCollateral.toString());
+
+    // HF = (C * LT) / B
+    const healthFactor = Big(adjustedCollateral.toString())
+      .mul(weightedLT)
+      .div(totalDebt.toString())
+      .toFixed(6, Big.roundDown);
+
+    return Number(healthFactor);
   }
 
   /**
@@ -189,8 +225,14 @@ export class AaveUtils {
     reserve: number,
     supplyAmount: string
   ): Promise<number> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const {
+      totalCollateral,
+      totalDebt,
+      reserves,
+      currentLiquidationThreshold,
+    } = await this.getSummary(user);
+
+    if (totalDebt === 0n) return INVALID_HF;
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
@@ -207,15 +249,92 @@ export class AaveUtils {
 
     const newCollateral = totalCollateral + supplyRef;
 
-    // Avoid division by zero
+    // Avoid division by zero, HF = 0
     if (newCollateral <= 0n) return 0;
 
+    const weightedLT = Big(totalCollateral.toString())
+      .mul(currentLiquidationThreshold)
+      .plus(Big(supplyRef.toString()).mul(reserveLiquidationThreshold))
+      .div(newCollateral.toString());
+
     // HF = (C * LT) / B
-    return this.calculateHealthFactor(
-      newCollateral,
-      reserveLiquidationThreshold,
-      totalDebt
+    const healthFactor = Big(newCollateral.toString())
+      .mul(weightedLT)
+      .div(totalDebt.toString())
+      .toFixed(6, Big.roundDown);
+
+    return Number(healthFactor);
+  }
+
+  /**
+   * Estimate health factor after swapping between reserves
+   *
+   * @param user - user address
+   * @param fromAmount - amount to withdraw (decimal)
+   * @param fromReserve - reserve on-chain id (registry) to withdraw from
+   * @param toAmount - amount to supply (decimal)
+   * @param toReserve - reserve on-chain id (registry) to supply to
+   * @returns health factor decimal value after swap
+   */
+  async getHealthFactorAfterSwap(
+    user: string,
+    fromAmount: string,
+    fromReserve: number,
+    toAmount: string,
+    toReserve: number
+  ): Promise<number> {
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+
+    if (totalDebt === 0n) return INVALID_HF;
+
+    const fromReserveAsset = ERC20.fromAssetId(fromReserve);
+    const toReserveAsset = ERC20.fromAssetId(toReserve);
+
+    const fromReserveCtx = reserves.find(
+      (r) => r.reserveAsset === fromReserveAsset
     );
+
+    const toReserveCtx = reserves.find(
+      (r) => r.reserveAsset === toReserveAsset
+    );
+
+    if (!fromReserveCtx)
+      throw new Error(`Missing reserve ctx for ${fromReserveAsset}`);
+
+    if (!toReserveCtx) {
+      throw new Error(`Missing reserve ctx for ${toReserveCtx}`);
+    }
+
+    const fromAmountNative = big.toBigInt(fromAmount, fromReserveCtx.decimals);
+    const toAmountNative = big.toBigInt(toAmount, toReserveCtx.decimals);
+
+    const fromValueInRef =
+      (fromAmountNative * fromReserveCtx.priceInRef) /
+      10n ** BigInt(fromReserveCtx.decimals);
+
+    const toValueInRef =
+      (toAmountNative * toReserveCtx.priceInRef) /
+      10n ** BigInt(toReserveCtx.decimals);
+
+    const fromWeightedCollateral = fromReserveCtx.isCollateral
+      ? Big(fromValueInRef.toString()).mul(
+          fromReserveCtx.reserveLiquidationThreshold
+        )
+      : Big(0);
+
+    const toWeightedCollateral = Big(toValueInRef.toString()).mul(
+      toReserveCtx.reserveLiquidationThreshold
+    );
+
+    const weightedCollateralDelta = toWeightedCollateral.minus(
+      fromWeightedCollateral
+    );
+    const hfDelta = weightedCollateralDelta.div(totalDebt.toString());
+    const hfAfterSwap = Big(healthFactor)
+      .plus(hfDelta)
+      .toFixed(6, Big.roundDown);
+
+    return Number(hfAfterSwap);
   }
 
   /**
@@ -226,15 +345,14 @@ export class AaveUtils {
    * @returns aToken max withdrawable balance
    */
   async getMaxWithdraw(user: string, reserve: number): Promise<Amount> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
 
     const reserveAsset = ERC20.fromAssetId(reserve);
     const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
 
     if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserveAsset);
 
-    return this.calculateWithdrawMax(reserveCtx, totalCollateral, totalDebt);
+    return this.calculateWithdrawMax(reserveCtx, totalDebt, healthFactor);
   }
 
   /**
@@ -244,16 +362,15 @@ export class AaveUtils {
    * @returns aTokens max withdrawable balances
    */
   async getMaxWithdrawAll(user: string): Promise<Record<number, Amount>> {
-    const { totalCollateral, totalDebt, reserves } =
-      await this.getSummary(user);
+    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
 
     const result: Record<number, Amount> = {};
 
     for (const reserve of reserves) {
       const amount = this.calculateWithdrawMax(
         reserve,
-        totalCollateral,
-        totalDebt
+        totalDebt,
+        healthFactor
       );
 
       if (reserve.reserveId) {
@@ -263,69 +380,90 @@ export class AaveUtils {
     return result;
   }
 
-  private calculateHealthFactor(
-    adjustedCollateral: bigint,
-    reserveLiquidationThreshold: number | string,
-    totalDebt: bigint
-  ): number {
-    if (totalDebt === 0n) {
-      return SAFE_MAX_HEALTH_FACTOR;
-    }
-
-    const SCALE = 10n ** 6n; // 6 decimal places
-    const thresholdScaled = big.toBigInt(reserveLiquidationThreshold, 18);
-
-    const numerator = adjustedCollateral * thresholdScaled * SCALE;
-    const denominator = totalDebt * WAD;
-
-    const result = numerator / denominator;
-    return Number(result) / 1e6;
-  }
-
-  private calculateRequiredCollateral(
-    targetHF: number | string,
-    reserveLiquidationThreshold: number | string,
-    totalDebt: bigint
-  ): bigint {
-    const targetHFScaled = big.toBigInt(targetHF, 18);
-    const thresholdScaled = big.toBigInt(reserveLiquidationThreshold, 18);
-
-    const numerator = targetHFScaled * totalDebt;
-    return (numerator + thresholdScaled - 1n) / thresholdScaled;
-  }
-
+  /**
+   * Calculate maxWithdraw using following formula:
+   *
+   * maxWithdraw = (HF - 1.01 x totalDebt) / reserveLT
+   */
   private calculateWithdrawMax(
     reserve: AaveReserveData,
-    totalCollateral: bigint,
-    totalDebt: bigint
+    totalDebt: bigint,
+    currentHF: number
   ) {
-    const { aTokenBalance, decimals, priceInRef, reserveLiquidationThreshold } =
-      reserve;
-
-    const requiredCollateral = this.calculateRequiredCollateral(
-      TARGET_WITHDRAW_HF,
+    const {
+      aTokenBalance,
+      availableLiquidity,
+      decimals,
+      priceInRef,
       reserveLiquidationThreshold,
-      totalDebt
-    );
+      isCollateral,
+    } = reserve;
 
-    const withdrawableRef = totalCollateral - requiredCollateral;
+    let maxWithdrawableTokens = aTokenBalance;
 
-    if (withdrawableRef <= 0n) {
-      return {
-        amount: 0n,
-        decimals: decimals,
-      };
+    // If the asset is used as collateral and user has debt, compute HF-limited max
+    if (isCollateral && totalDebt > 0n) {
+      const excessHF = currentHF - TARGET_WITHDRAW_HF;
+
+      if (excessHF > 0) {
+        const maxCollateralToWithdrawInRef = Big(excessHF)
+          .mul(totalDebt.toString())
+          .div(reserveLiquidationThreshold)
+          .toFixed(0, Big.roundDown);
+
+        const hfCapped = Big(maxCollateralToWithdrawInRef)
+          .div(priceInRef.toString())
+          .mul(10 ** decimals)
+          .toFixed(0, Big.roundDown);
+
+        maxWithdrawableTokens =
+          aTokenBalance < BigInt(hfCapped) ? aTokenBalance : BigInt(hfCapped);
+      } else {
+        maxWithdrawableTokens = 0n;
+      }
     }
 
-    const withdrawableTokens =
-      (withdrawableRef * 10n ** BigInt(decimals)) / priceInRef;
-
-    const maxWithdrawable =
-      aTokenBalance < withdrawableTokens ? aTokenBalance : withdrawableTokens;
+    const maxOrCap =
+      maxWithdrawableTokens < availableLiquidity
+        ? maxWithdrawableTokens
+        : availableLiquidity;
 
     return {
-      amount: maxWithdrawable,
+      amount: maxOrCap,
       decimals,
     } as Amount;
+  }
+
+  private calculateLinearInterest(
+    liquidityRate: bigint,
+    lastUpdateTimestamp: number,
+    currentTimestamp: number
+  ): bigint {
+    const delta = currentTimestamp - lastUpdateTimestamp;
+    if (delta <= 0) return RAY;
+
+    const interest = (liquidityRate * BigInt(delta)) / SECONDS_PER_YEAR;
+    return RAY + interest;
+  }
+
+  /**
+   * Original AAVE health factor calculation formula:
+   * @see https://github.com/aave/aave-utilities/blob/432e283b2e76d9793b20d37bd4cb94aca97ed20e/packages/math-utils/src/pool-math.ts#L139
+   */
+  private calculateHealthFactorFromBalances(
+    totalDebt: bigint,
+    totalCollateral: bigint,
+    currentLiquidationThreshold: bigint
+  ): number {
+    if (totalDebt === 0n) {
+      return INVALID_HF;
+    }
+
+    const hfFromBalances =
+      (totalCollateral * currentLiquidationThreshold) / totalDebt;
+
+    const hf = big.toDecimal(hfFromBalances, LTV_PRECISION);
+
+    return Number(hf);
   }
 }

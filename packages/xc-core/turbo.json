@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "@galacticcouncil/common#postbuild",
+        "@galacticcouncil/descriptors#postbuild",
+        "^build",
+        "^postbuild"
+      ]
+    },
+    "postbuild": {
+      "dependsOn": ["build"]
+    }
+  }
+}

@@ -12,25 +12,31 @@ import {
   astr,
   bnc,
   cfg,
+  cfg_new,
   cru,
   dai_awh,
   dai_mwh,
   ded,
   dot,
   dota,
+  ena,
   eth,
+  eurc,
   ewt,
   glmr,
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kilt,
   ksm,
   laos,
+  lbtc,
   ldo,
   ldot,
   link,
   myth,
+  paxg,
   pen,
   pha,
   pink,
@@ -64,7 +70,7 @@ import {
   sol,
   sky,
   tbtc,
-  lbtc,
+  xon,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -118,7 +124,7 @@ const evmChain: Chain = defineChain({
   blockExplorers: {
     default: {
       name: 'Hydration Explorer',
-      url: 'https://explorer.evm.hydration.cloud',
+      url: 'https://hydration.subscan.io',
     },
   },
   testnet: false,
@@ -263,6 +269,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: cfg_new,
+      decimals: 18,
+      id: 41,
+      min: 0.1,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: cru,
       decimals: 12,
       id: 27,
@@ -312,7 +344,7 @@ export const hydration = new EvmParachain({
       decimals: 4,
       id: 1000038,
       xcmLocation: {
-        parents: '1',
+        parents: 1,
         interior: {
           X3: [
             {
@@ -394,6 +426,38 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: eurc,
+      decimals: 6,
+      id: 42,
+      min: 0.014,
+    },
+    {
+      asset: ena,
+      decimals: 18,
+      id: 38,
+      min: 0.037,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x57e114b691db790c35207b2e685d4a43181e6061',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: glmr,
       decimals: 18,
       id: 16,
@@ -450,6 +514,31 @@ export const hydration = new EvmParachain({
               GeneralKey: {
                 length: 2,
                 data: '0x0002000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: jito_sol,
+      decimals: 9,
+      id: 40,
+      min: 0.0000027,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
               },
             },
           ],
@@ -605,6 +694,32 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x514910771af9ca656af840dff83e8264ecf986ca',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: paxg,
+      decimals: 18,
+      id: 39,
+      min: 0.000005,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
               },
             },
           ],
@@ -1368,6 +1483,25 @@ export const hydration = new EvmParachain({
                 length: 2,
                 data: '0x0001000000000000000000000000000000000000000000000000000000000000',
               },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: xon,
+      decimals: 12,
+      id: 1001168,
+      min: 10,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 3417,
+            },
+            {
+              GeneralIndex: 0,
             },
           ],
         },

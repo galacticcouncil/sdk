@@ -1,20 +1,17 @@
 const {
   api: { getWs },
-  pool,
+  createSdkContext,
 } = require('@galacticcouncil/sdk-next');
+const { createClient } = require('polkadot-api');
 
 const main = async () => {
-  const client = await getWs('wss://rpc.hydradx.cloud');
-  const api = client.getUnsafeApi();
+  const provider = getWs('wss://hydration-rpc.n.dwellir.com');
+  const client = createClient(provider);
+  const sdk = await createSdkContext(client);
 
-  await api.constants.System.Version(); // Removal is fatal
+  const { ctx } = sdk;
 
-  const ctx = new pool.PoolContextProvider(client)
-    .withOmnipool()
-    .withStableswap()
-    .withXyk();
-
-  const pools = await ctx.getPools();
+  const pools = await ctx.pool.getPools();
 
   console.log(pools);
 };

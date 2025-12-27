@@ -1,5 +1,6 @@
 export type AaveSummary = {
   healthFactor: number;
+  currentLiquidationThreshold: number;
   totalCollateral: bigint;
   totalDebt: bigint;
   reserves: AaveReserveData[];
@@ -7,6 +8,7 @@ export type AaveSummary = {
 
 export type AaveReserveData = {
   aTokenBalance: bigint;
+  availableLiquidity: bigint;
   decimals: number;
   isCollateral: boolean;
   priceInRef: bigint;

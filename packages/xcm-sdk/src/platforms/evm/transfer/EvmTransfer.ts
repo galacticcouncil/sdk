@@ -34,12 +34,6 @@ export class EvmTransfer {
     return this.config.abi;
   }
 
-  get asset(): string {
-    const args = this.config.args;
-    const [asset] = args;
-    return asset;
-  }
-
   get calldata(): string {
     return this.config.encodeFunctionData();
   }

@@ -5,9 +5,9 @@ export type Amount = {
   decimals: number;
 };
 
-export interface AssetAmount {
+export interface AssetBalance {
   id: number;
-  amount: bigint;
+  balance: Balance;
 }
 
 export interface AssetMetadata {
@@ -40,6 +40,14 @@ export interface ExternalAsset extends AssetMetadata {
   name: string;
   internalId: number;
   isWhiteListed?: boolean;
+}
+
+export interface Balance {
+  free: bigint;
+  total: bigint;
+  transferable: bigint;
+  reserved: bigint;
+  frozen: bigint;
 }
 
 export type XcmV3Multilocation = {

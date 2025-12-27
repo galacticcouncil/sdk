@@ -20,7 +20,7 @@ const transfer = (): ExtrinsicConfigBuilder => ({
     return new ExtrinsicConfig({
       module: pallet,
       func: 'transfer',
-      getArgs: () => {
+      getArgs: async () => {
         const version = XcmVersion.v3;
         const account = getExtrinsicAccount(address);
         const ctx = source.chain as Parachain;

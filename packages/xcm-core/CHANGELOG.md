@@ -1,10 +1,48 @@
 # @galacticcouncil/xcm-core
 
+## 8.9.0
+
+### Minor Changes
+
+[4626c650]: https://github.com/galacticcouncil/sdk/commit/4626c650
+[5c9ed0af]: https://github.com/galacticcouncil/sdk/commit/5c9ed0af
+
+- [[#4626c650][4626c650]] xcm: hyperbridge native fee est support, fix approval
+- [[#5c9ed0af][5c9ed0af]] xcm: hyperbridge support
+
+## 8.8.0
+
+### Minor Changes
+
+[ba2978bc]: https://github.com/galacticcouncil/sdk/commit/ba2978bc
+
+- [[#ba2978bc][ba2978bc]] xcm: async contract & extrinsic builder
+
+## 8.7.0
+
+### Minor Changes
+
+- Upgrade viem to 2.38.3 (latest)
+
+## 8.6.0
+
+### Minor Changes
+
+- Upgrade pjs to 16.4.8 (latest)
+
+## 8.5.0
+
+### Minor Changes
+
+[77b4fd74]: https://github.com/galacticcouncil/sdk/commit/77b4fd74
+
+- [[#77b4fd74][77b4fd74]] xcm: support calldata in dex
+
 ## 8.4.0
 
 ### Minor Changes
 
-- xcm: fix deposit wh transfers api
+- xcm: move mrl utils
 
 ## 8.3.0
 

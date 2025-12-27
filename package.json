@@ -21,6 +21,7 @@
     "link": "turbo run link",
     "test": "turbo run test --concurrency=1",
     "changeset": "changeset",
+    "version": "node -e \"console.log('WebSocket in globals:', !!globalThis.WebSocket, process.version)\"",
     "changeset:version": "node ./scripts/changeset-version.mjs",
     "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",
     "prerelease": "npm run build",
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
-    "@galacticcouncil/api-augment": "^0.8.1",
+    "@galacticcouncil/api-augment": "^0.9.0",
     "@types/jest": "^29.5.14",
     "esbuild": "^0.25.0",
     "esbuild-plugin-copy": "^2.1.1",
@@ -40,8 +41,8 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
-    "tsx": "^3.8.2",
-    "turbo": "^2.0.3",
+    "tsx": "^4.20.6",
+    "turbo": "^2.5.8",
     "typescript": "^5.7.2"
   },
   "optionalDependencies": {
@@ -50,23 +51,18 @@
   },
   "overrides": {
     "cross-spawn": "^7.0.5",
-    "@acala-network/chopsticks-testing": {
-      "@polkadot/api": "16.1.1",
-      "@polkadot/types": "16.1.1",
-      "@polkadot/api-derive": "16.1.1"
-    },
-    "@acala-network/chopsticks-utils": {
-      "@polkadot/api": "16.1.1",
-      "@polkadot/types": "16.1.1",
-      "@polkadot/api-derive": "16.1.1"
-    },
-    "@acala-network/chopsticks": {
-      "@polkadot/api": "16.1.1"
-    }
+    "@polkadot/api": "16.4.8",
+    "@polkadot/api-base": "16.4.8",
+    "@polkadot/api-augment": "16.4.8",
+    "@polkadot/api-derive": "16.4.8",
+    "@polkadot/rpc-augment": "16.4.8",
+    "@polkadot/rpc-core": "16.4.8",
+    "@polkadot/rpc-provider": "16.4.8",
+    "@polkadot/types": "16.4.8",
+    "@polkadot/types-augment": "16.4.8",
+    "@polkadot/types-codec": "16.4.8",
+    "@polkadot/types-create": "16.4.8",
+    "@polkadot/types-known": "16.4.8"
   },
-  "packageManager": "npm@10.7.0",
-  "dependencies": {
-    "@wormhole-foundation/sdk-solana": "^3.2.0",
-    "@wormhole-foundation/sdk-solana-tokenbridge": "^3.2.0"
-  }
+  "packageManager": "npm@10.9.1"
 }

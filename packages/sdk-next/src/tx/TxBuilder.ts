@@ -1,5 +1,7 @@
 import { Enum, PolkadotClient } from 'polkadot-api';
 
+import { PublicClient } from 'viem';
+
 import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
 import { Papi } from '../api';
 import { BalanceClient } from '../client';
@@ -11,15 +13,18 @@ import { DryRunResult, Transaction, Tx } from './types';
 import { enumPath } from './utils';
 
 export abstract class TxBuilder extends Papi {
-  protected readonly evmClient: EvmClient;
+  protected readonly evm: EvmClient;
+  protected readonly evmClient: PublicClient;
+
   protected readonly balanceClient: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
-  constructor(client: PolkadotClient, evmClient?: EvmClient) {
+  constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
-    this.evmClient = evmClient ?? new EvmClient();
+    this.evm = evm;
+    this.evmClient = evm.getWsProvider();
     this.balanceClient = new BalanceClient(client);
-    this.aaveUtils = new AaveUtils(this.evmClient);
+    this.aaveUtils = new AaveUtils(evm);
   }
 
   protected wrapTx(name: string, tx: Transaction): Tx {

@@ -5,11 +5,25 @@ import {
   TxWeight,
 } from '@galacticcouncil/xcm-core';
 
-import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID } from './builder';
+import { ETHEREUM_CHAIN_ID, ASSET_HUB_ID, RELAY_ID } from './builder';
 import { getX1Junction, instr } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
 
 const BRIDGE_CONSENSUS = [ChainEcosystem.Polkadot, ChainEcosystem.Kusama];
+const DOT_RESERVE_LOCATION = {
+  parents: 1,
+  interior: {
+    X1: [
+      {
+        Parachain: 1000,
+      },
+    ],
+  },
+};
+
+const isDot = (assetLocation: any) => {
+  return assetLocation.parents === 1 && assetLocation.interior === 'Here';
+};
 
 const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
   const isUnknownConsensus = !source.ecosystem || !destination.ecosystem;
@@ -47,8 +61,7 @@ export const toDest = (
     };
   }
 
-  // Relay transfer
-  if (destination.parachainId === 0) {
+  if (destination.parachainId === RELAY_ID) {
     return {
       [version]: {
         parents: 1,
@@ -87,18 +100,12 @@ export const toBeneficiary = (version: XcmVersion, account: any) => {
 export const toTransferType = (
   version: XcmVersion,
   type: XcmTransferType,
-  assetLocation: object
+  assetLocation: any
 ) => {
   if (type === XcmTransferType.RemoteReserve) {
-    const reserveChain = multiloc.findNestedKey(assetLocation, 'Parachain');
     return {
       RemoteReserve: {
-        [version]: {
-          parents: 1,
-          interior: {
-            X1: getX1Junction(version, reserveChain),
-          },
-        },
+        [version]: isDot(assetLocation) ? DOT_RESERVE_LOCATION : assetLocation,
       },
     };
   }
@@ -119,13 +126,146 @@ export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
     [version]: [
       {
         DepositAsset: {
-          assets: { Wild: 'All' },
+          assets: {
+            Wild: {
+              AllCounted: 1,
+            },
+          },
           beneficiary: {
             parents: 0,
             interior: {
               X1: getX1Junction(version, account),
             },
           },
+        },
+      },
+    ],
+  };
+};
+
+/**
+ * Creates DepositReserveAsset XCM instruction for relay chain to parachain
+ * LocalReserve transfers
+ *
+ * @param version - XCM Version
+ * @param account - destination account (receiver)
+ * @param destination - destination parachain
+ * @param transferFeeAmount - fee amount for execution
+ * @returns xcm DepositReserveAsset instruction
+ */
+const toDepositReserveAssetXcmOnDest = (
+  version: XcmVersion,
+  account: any,
+  destination: Parachain,
+  transferFeeAmount: any
+) => {
+  // From the destination parachain's perspective, the relay chain asset is at parents 1
+  const transferAssetLocation = {
+    parents: 1,
+    interior: 'Here',
+  };
+
+  return {
+    [version]: [
+      {
+        DepositReserveAsset: {
+          assets: {
+            Wild: {
+              AllCounted: 1,
+            },
+          },
+          dest: {
+            parents: 1,
+            interior: {
+              X1: getX1Junction(version, {
+                Parachain: destination.parachainId,
+              }),
+            },
+          },
+          xcm: [
+            {
+              BuyExecution: {
+                fees: toAsset(transferAssetLocation, transferFeeAmount),
+                weightLimit: 'Unlimited',
+              },
+            },
+            {
+              DepositAsset: {
+                assets: {
+                  Wild: {
+                    AllCounted: 1,
+                  },
+                },
+                beneficiary: {
+                  parents: 0,
+                  interior: {
+                    X1: getX1Junction(version, account),
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
+};
+
+/**
+ * Creates InitiateTeleport XCM instruction for parachain to relay chain transfers
+ *
+ * @param version - XCM Version
+ * @param account - destination account (receiver)
+ * @param transferFeeAmount - fee amount for execution
+ * @returns xcm InitiateTeleport instruction
+ */
+const toInitiateTeleportXcmOnDest = (
+  version: XcmVersion,
+  account: any,
+  transferFeeAmount: any
+) => {
+  // After teleporting to relay chain, the asset is local
+  const transferAssetLocation = {
+    parents: 0,
+    interior: 'Here',
+  };
+
+  return {
+    [version]: [
+      {
+        InitiateTeleport: {
+          assets: {
+            Wild: {
+              AllCounted: 1,
+            },
+          },
+          dest: {
+            parents: 1,
+            interior: 'Here',
+          },
+          xcm: [
+            {
+              BuyExecution: {
+                fees: toAsset(transferAssetLocation, transferFeeAmount),
+                weightLimit: 'Unlimited',
+              },
+            },
+            {
+              DepositAsset: {
+                assets: {
+                  Wild: {
+                    AllCounted: 1,
+                  },
+                },
+                beneficiary: {
+                  parents: 0,
+                  interior: {
+                    X1: getX1Junction(version, account),
+                  },
+                },
+              },
+            },
+          ],
         },
       },
     ],

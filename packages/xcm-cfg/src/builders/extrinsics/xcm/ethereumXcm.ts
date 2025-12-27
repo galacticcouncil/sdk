@@ -17,8 +17,8 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
       return new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
-          const contract = config.build(params);
+        getArgs: async () => {
+          const contract = await config.build(params);
           const version = XcmVersion.v1;
           const call = encodeFunctionData({
             abi: Abi[contract.module],

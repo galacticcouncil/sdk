@@ -1,6 +1,6 @@
 import {
   ChainEcosystem as Ecosystem,
-  Parachain
+  Parachain,
 } from '@galacticcouncil/xcm-core';
 
 import { ewt } from '../../assets';

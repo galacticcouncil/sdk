@@ -1,3 +1,5 @@
+import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -10,10 +12,11 @@ import {
   PoolType,
   SellCtx,
 } from '../types';
-import { RUNTIME_DECIMALS } from '../../consts';
 import { math, fmt } from '../../utils';
 
 import { OmniMath } from './OmniMath';
+
+const { FeeUtils } = fmt;
 
 export type OmniPoolPair = PoolPair & {
   hubReservesIn: bigint;
@@ -50,31 +53,17 @@ export class OmniPool implements Pool {
   hubAssetId: number;
 
   static fromPool(pool: OmniPoolBase): OmniPool {
-    return new OmniPool(
-      pool.address,
-      pool.tokens as OmniPoolToken[],
-      pool.maxInRatio,
-      pool.maxOutRatio,
-      pool.minTradingLimit,
-      pool.hubAssetId
-    );
+    return new OmniPool(pool);
   }
 
-  constructor(
-    address: string,
-    tokens: OmniPoolToken[],
-    maxInRation: bigint,
-    maxOutRatio: bigint,
-    minTradeLimit: bigint,
-    hubAssetId: number
-  ) {
+  constructor(pool: OmniPoolBase) {
     this.type = PoolType.Omni;
-    this.address = address;
-    this.tokens = tokens;
-    this.maxInRatio = maxInRation;
-    this.maxOutRatio = maxOutRatio;
-    this.minTradingLimit = minTradeLimit;
-    this.hubAssetId = hubAssetId;
+    this.address = pool.address;
+    this.tokens = pool.tokens as OmniPoolToken[];
+    this.maxInRatio = pool.maxInRatio;
+    this.maxOutRatio = pool.maxOutRatio;
+    this.minTradingLimit = pool.minTradingLimit;
+    this.hubAssetId = pool.hubAssetId;
   }
 
   validatePair(_tokenIn: number, tokenOut: number): boolean {
@@ -214,8 +203,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0',
-      fees ? fmt.toDecimals(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -231,7 +220,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -254,8 +243,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0',
-      fees ? fmt.toDecimals(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -271,7 +260,7 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toString(),
-      fees ? fmt.toDecimals(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;

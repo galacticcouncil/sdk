@@ -85,6 +85,7 @@ export class OrderTxBuilder extends TxBuilder {
         max_retries: this.maxRetries,
         total_amount: amountIn,
         slippage: this.slippagePct * 10000,
+        stability_threshold: undefined,
         order: Enum('Sell', {
           asset_in: assetIn,
           asset_out: assetOut,
@@ -120,6 +121,7 @@ export class OrderTxBuilder extends TxBuilder {
         max_retries: this.maxRetries,
         total_amount: amountIn,
         slippage: this.slippagePct * 10000,
+        stability_threshold: undefined,
         order: Enum('Sell', {
           asset_in: assetIn,
           asset_out: assetOut,
@@ -155,6 +157,7 @@ export class OrderTxBuilder extends TxBuilder {
         max_retries: this.maxRetries,
         total_amount: amountIn,
         slippage: this.slippagePct * 10000,
+        stability_threshold: undefined,
         order: Enum('Buy', {
           asset_in: assetIn,
           asset_out: assetOut,

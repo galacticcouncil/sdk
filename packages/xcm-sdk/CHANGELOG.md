@@ -1,5 +1,67 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.10.0
+
+### Minor Changes
+
+[4626c650]: https://github.com/galacticcouncil/sdk/commit/4626c650
+[5c9ed0af]: https://github.com/galacticcouncil/sdk/commit/5c9ed0af
+
+- [[#4626c650][4626c650]] xcm: hyperbridge native fee est support, fix approval
+- [[#5c9ed0af][5c9ed0af]] xcm: hyperbridge support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.9.0
+
+## 10.9.0
+
+### Minor Changes
+
+[96e72596]: https://github.com/galacticcouncil/sdk/commit/96e72596
+
+- [[#96e72596][96e72596]] xcm: support lil jit
+
+## 10.8.0
+
+### Minor Changes
+
+[d2d86b4c]: https://github.com/galacticcouncil/sdk/commit/d2d86b4c
+
+- [[#d2d86b4c][d2d86b4c]] xcm: wh claim (jito sol)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.8.0
+
+## 10.7.0
+
+### Minor Changes
+
+- Upgrade pjs to latest
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.6.0
+
+## 10.6.0
+
+### Minor Changes
+
+[42e29743]: https://github.com/galacticcouncil/sdk/commit/42e29743
+[eef0b7e2]: https://github.com/galacticcouncil/sdk/commit/eef0b7e2
+
+- [[#42e29743][42e29743]] xcm: wallet remote xcm support
+- [[#eef0b7e2][eef0b7e2]] wh: mrl redeem via xcm support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.5.0
+
 ## 10.5.0
 
 ### Minor Changes

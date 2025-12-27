@@ -5,8 +5,13 @@
       "cache": true
     },
     "build": {
+      "dependsOn": ["^build", "^postbuild"],
       "outputs": ["build/**"],
-      "dependsOn": ["^build"]
+      "inputs": ["src/**", "package.json"]
+    },
+    "postbuild": {
+      "dependsOn": ["build"],
+      "outputs": ["build/**/*.d.ts"]
     },
     "build:watch": {
       "cache": false

@@ -1,19 +1,19 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { PolkadotClient } from 'polkadot-api';
+import { PolkadotClient, createClient } from 'polkadot-api';
 import { Subscription } from 'rxjs';
 
 import {
   Asset,
   Amount,
+  SdkCtx,
   api as papi,
-  big,
-  client as c,
-  pool,
+  createSdkContext,
   sor,
 } from '@galacticcouncil/sdk-next';
 
+import { big } from '@galacticcouncil/common';
 import { signAndSend } from './signer';
 import { humanizeAmount } from './utils';
 
@@ -24,12 +24,7 @@ import './element';
 @customElement('gc-swapp')
 export class Swapp extends LitElement {
   private client: PolkadotClient = null;
-  private ctx: pool.PoolContextProvider = null;
-  private router: sor.TradeRouter = null;
-  private txUtils: sor.TradeUtils = null;
-
-  protected assetClient: c.AssetClient = null;
-  protected balanceClient: c.BalanceClient = null;
+  private sdk: SdkCtx = null;
 
   protected balanceSub: Subscription = null;
 
@@ -57,15 +52,9 @@ export class Swapp extends LitElement {
   static styles = [formStyles];
 
   override async firstUpdated() {
-    this.client = await papi.getWs(this.apiAddress);
-    this.assetClient = new c.AssetClient(this.client);
-    this.balanceClient = new c.BalanceClient(this.client);
-    this.ctx = new pool.PoolContextProvider(this.client)
-      .withOmnipool()
-      .withStableswap()
-      .withXyk();
-    this.router = new sor.TradeRouter(this.ctx);
-    this.txUtils = new sor.TradeUtils(this.client);
+    const provider = papi.getWs(this.apiAddress);
+    this.client = createClient(provider);
+    this.sdk = await createSdkContext(this.client);
     this.onLoad();
   }
 
@@ -75,9 +64,10 @@ export class Swapp extends LitElement {
   }
 
   private async init() {
+    const { api, client } = this.sdk;
     const [tradeable, assets] = await Promise.all([
-      this.router.getTradeableAssets(),
-      this.assetClient.getOnChainAssets(),
+      api.router.getTradeableAssets(),
+      client.asset.getOnChainAssets(),
     ]);
 
     const registry = new Map(assets.map((a) => [a.id, a]));
@@ -102,15 +92,16 @@ export class Swapp extends LitElement {
   }
 
   private async subscribe() {
+    const { client } = this.sdk;
     const { balance, registry } = this.assets;
-    this.balanceSub = this.balanceClient
+    this.balanceSub = client.balance
       .subscribeBalance(this.accountAddress)
       .subscribe((balances) => {
-        balances.forEach(({ id, amount }) => {
+        balances.forEach(({ id, balance: amount }) => {
           const asset: Asset = registry.get(id);
           if (asset) {
             const newBalance = {
-              amount: amount,
+              amount: amount.transferable,
               decimals: asset.decimals,
             } as Amount;
             balance.set(id, newBalance);
@@ -131,29 +122,23 @@ export class Swapp extends LitElement {
   }
 
   private async onCtaClick() {
+    const { tx } = this.sdk;
+
     const { current } = this.trade;
 
-    let tx;
+    if (current) {
+      const tradeTx = await tx
+        .trade(current)
+        .withBeneficiary(this.accountAddress)
+        .build();
 
-    if (current && current.type === sor.TradeType.Sell) {
-      tx = await this.txUtils.buildSellTx(current);
-    }
-
-    if (current && current.type === sor.TradeType.Buy) {
-      tx = await this.txUtils.buildBuyTx(current);
-    }
-
-    if (tx) {
       const subscription = await signAndSend(
         this.accountProvider,
         this.accountAddress,
-        this.client,
-        tx,
+        tradeTx.get(),
         (e) => console.log(e)
       );
     }
-
-    console.log('Unknown ops');
   }
 
   private isEmptyAmount(amount: string): boolean {
@@ -169,8 +154,9 @@ export class Swapp extends LitElement {
       return;
     }
 
+    const { api } = this.sdk;
     const { assetIn, assetOut } = this.trade;
-    this.trade.current = await this.router.getBestSell(
+    this.trade.current = await api.router.getBestSell(
       assetIn.id,
       assetOut.id,
       amount
@@ -187,8 +173,9 @@ export class Swapp extends LitElement {
       return;
     }
 
+    const { api } = this.sdk;
     const { assetIn, assetOut } = this.trade;
-    this.trade.current = await this.router.getBestBuy(
+    this.trade.current = await api.router.getBestBuy(
       assetIn.id,
       assetOut.id,
       amount
@@ -208,7 +195,7 @@ export class Swapp extends LitElement {
 
   override disconnectedCallback() {
     this.balanceSub.unsubscribe();
-    this.ctx.destroy();
+    this.sdk.destroy();
     this.client.destroy();
     super.disconnectedCallback();
   }

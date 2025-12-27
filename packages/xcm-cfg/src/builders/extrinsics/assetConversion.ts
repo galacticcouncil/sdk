@@ -19,7 +19,7 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
+        getArgs: async () => {
           const { chain } = source;
 
           const swapCtx = source.destinationFeeSwap || source.feeSwap;

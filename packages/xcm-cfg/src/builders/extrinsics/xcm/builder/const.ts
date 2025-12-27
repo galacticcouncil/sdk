@@ -6,6 +6,7 @@ export const TOPIC =
 export const DOT_LOCATION = { parents: 1, interior: 'Here' };
 
 // Polkadot
+export const RELAY_ID = 0;
 export const ASSET_HUB_ID = 1000;
 export const BRIDGE_HUB_ID = 1002;
 

@@ -1,4 +1,4 @@
-import { AnyChain } from 'chain';
+import { AnyChain } from '../chain';
 
 export type SnowbridgeDef = {
   id: number;
@@ -18,7 +18,7 @@ export class Snowbridge {
     if ('snowbridge' in chain && !!chain['snowbridge']) {
       return chain.snowbridge as Snowbridge;
     }
-    throw new Error(chain.name + ' is not supported in Snowbridge.');
+    throw new Error(chain.name + ' is not supported.');
   }
 
   static isKnown(chain: AnyChain): boolean {

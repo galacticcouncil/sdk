@@ -13,7 +13,7 @@ const transfer = (): ExtrinsicConfigBuilder => {
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
+        getArgs: async () => {
           const rcv = destination.chain as Parachain;
 
           const { fee } = destination;

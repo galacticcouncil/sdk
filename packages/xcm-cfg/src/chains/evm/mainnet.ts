@@ -5,11 +5,14 @@ import {
 
 import {
   aave,
+  cfg_new,
   dai,
+  ena,
   eth,
   lbtc,
   ldo,
   link,
+  paxg,
   sky,
   susde,
   susds,
@@ -40,6 +43,11 @@ export const ethereum = new EvmChain({
       id: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
     },
     {
+      asset: cfg_new,
+      decimals: 18,
+      id: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
+    },
+    {
       asset: weth,
       decimals: 18,
       id: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -48,6 +56,11 @@ export const ethereum = new EvmChain({
       asset: dai,
       decimals: 18,
       id: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    },
+    {
+      asset: ena,
+      decimals: 18,
+      id: '0x57e114b691db790c35207b2e685d4a43181e6061',
     },
     {
       asset: susde,
@@ -93,6 +106,11 @@ export const ethereum = new EvmChain({
       asset: link,
       decimals: 18,
       id: '0x514910771af9ca656af840dff83e8264ecf986ca',
+    },
+    {
+      asset: paxg,
+      decimals: 18,
+      id: '0x45804880de22913dafe09f4980848ece6ecbaf78',
     },
     {
       asset: sky,

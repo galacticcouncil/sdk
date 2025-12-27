@@ -7,6 +7,7 @@ import {
   astr,
   bnc,
   cfg,
+  cfg_new,
   cru,
   dai,
   dai_awh,
@@ -14,12 +15,15 @@ import {
   ded,
   dot,
   dota,
+  ena,
   eth,
+  eurc,
   ewt,
   glmr,
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kilt,
   ksm,
   laos,
@@ -29,6 +33,7 @@ import {
   myth,
   neuro,
   nodl,
+  paxg,
   pen,
   pha,
   pink,
@@ -36,7 +41,6 @@ import {
   sol,
   sui,
   sky,
-  sub,
   susde,
   tbtc,
   trac,
@@ -60,12 +64,14 @@ import {
   lbtc,
   susds_mwh,
   susds,
+  xon,
 } from '../../../assets';
 import {
   acala,
   ajuna,
   assetHub,
   astar,
+  base,
   bifrost,
   centrifuge,
   crust,
@@ -81,27 +87,26 @@ import {
   neuroweb,
   nodle,
   pendulum,
-  polkadot,
   phala,
   solana,
-  subsocial,
   sui_chain,
   unique,
   zeitgeist,
-  polkadotCex,
+  xode,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 import {
   toHubExtTemplate,
-  toHubWithCexFwd2Template,
+  toHubWithCexFwdTemplate,
   toMoonbeamErc20Template,
   toZeitgeistErc20Template,
   toTransferTemplate,
-  withdrawViaSnowbridgeTemplate,
-  withdrawViaWormholeRelayerTemplate,
-  withdrawViaWormholeBridgeTemplate,
+  viaSnowbridgeTemplate,
+  viaWormholeRelayerTemplate,
+  viaWormholeBridgeTemplate,
+  viaHyperbridgeTemplate,
 } from './templates';
 
 const toAcala: AssetRoute[] = [
@@ -201,7 +206,6 @@ const toAssetHub: AssetRoute[] = [
 
 const toAstar: AssetRoute[] = [
   toTransferTemplate(astr, astar, 0.00404146544),
-  toTransferTemplate(dot, astar, 0.1),
   toTransferTemplate(bnc, astar, 0.75),
   toTransferTemplate(glmr, astar, 0.025),
   toTransferTemplate(ibtc, astar, 0.000002),
@@ -223,18 +227,37 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(ibtc, bifrost, 0.000005),
   toTransferTemplate(usdt, bifrost, 0.3),
   toTransferTemplate(usdc, bifrost, 0.3),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: dot,
+      fee: {
+        amount: 0.1,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
+  }),
 ];
 
 const toCentrifuge: AssetRoute[] = [
   toTransferTemplate(cfg, centrifuge, 0.0092696),
-  toTransferTemplate(dot, centrifuge, 0.1),
   toTransferTemplate(glmr, centrifuge, 0.05),
 ];
 
 const toInterlay: AssetRoute[] = [
   toTransferTemplate(ibtc, interlay, 0.00000062),
   toTransferTemplate(intr, interlay, 0.0019213457),
-  toTransferTemplate(dot, interlay, 0.1),
   toTransferTemplate(hdx, interlay, 0.5),
   toTransferTemplate(usdt, interlay, 0.3),
   toTransferTemplate(usdc, interlay, 0.3),
@@ -257,12 +280,32 @@ const toInterlay: AssetRoute[] = [
     },
     extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: interlay,
+      asset: dot,
+      fee: {
+        amount: 0.05,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.RemoteReserve,
+    }),
+  }),
 ];
 
 const toMoonbeam: AssetRoute[] = [
   toTransferTemplate(hdx, moonbeam, 5),
   toTransferTemplate(glmr, moonbeam, 0.01),
-  toTransferTemplate(dot, moonbeam, 0.1),
   toTransferTemplate(usdt, moonbeam, 0.3),
   toTransferTemplate(usdc, moonbeam, 0.3),
   toMoonbeamErc20Template(dai_mwh),
@@ -273,10 +316,6 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamErc20Template(weth_mwh),
   toMoonbeamErc20Template(sol),
 ];
-
-const toPolkadot: AssetRoute[] = [toTransferTemplate(dot, polkadot, 0.003)];
-
-const toSubsocial: AssetRoute[] = [toTransferTemplate(sub, subsocial, 0.064)];
 
 const toZeitgeist: AssetRoute[] = [
   toTransferTemplate(ztg, zeitgeist, 0.0093),
@@ -309,78 +348,66 @@ const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
-  withdrawViaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
-  withdrawViaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
-  withdrawViaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
-  withdrawViaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
-  withdrawViaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
+  viaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
+  viaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
+  viaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
+  viaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
+  viaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
+  viaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
-  withdrawViaSnowbridgeTemplate(eth, eth, ethereum),
-  withdrawViaSnowbridgeTemplate(aave, aave, ethereum),
-  withdrawViaSnowbridgeTemplate(susde, susde, ethereum),
-  withdrawViaSnowbridgeTemplate(tbtc, tbtc, ethereum),
-  withdrawViaSnowbridgeTemplate(trac, trac, ethereum),
-  withdrawViaSnowbridgeTemplate(lbtc, lbtc, ethereum),
-  withdrawViaSnowbridgeTemplate(ldo, ldo, ethereum),
-  withdrawViaSnowbridgeTemplate(link, link, ethereum),
-  withdrawViaSnowbridgeTemplate(sky, sky, ethereum),
-  withdrawViaSnowbridgeTemplate(wsteth, wsteth, ethereum),
-  withdrawViaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
-  withdrawViaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
+  viaSnowbridgeTemplate(eth, eth, ethereum),
+  viaSnowbridgeTemplate(aave, aave, ethereum),
+  viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum),
+  viaSnowbridgeTemplate(ena, ena, ethereum),
+  viaSnowbridgeTemplate(paxg, paxg, ethereum),
+  viaSnowbridgeTemplate(susde, susde, ethereum),
+  viaSnowbridgeTemplate(tbtc, tbtc, ethereum),
+  viaSnowbridgeTemplate(trac, trac, ethereum),
+  viaSnowbridgeTemplate(lbtc, lbtc, ethereum),
+  viaSnowbridgeTemplate(ldo, ldo, ethereum),
+  viaSnowbridgeTemplate(link, link, ethereum),
+  viaSnowbridgeTemplate(sky, sky, ethereum),
+  viaSnowbridgeTemplate(wsteth, wsteth, ethereum),
+  viaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
+  viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
+];
+
+const toEthereumViaHyperbridge: AssetRoute[] = [
+  viaHyperbridgeTemplate(eurc, eurc, base, base),
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [
-  withdrawViaWormholeRelayerTemplate(sui, sui, sui_chain),
+  viaWormholeRelayerTemplate(sui, sui, sui_chain),
 ];
-
-const toCexViaRelay = new AssetRoute({
-  source: {
-    asset: dot,
-    balance: balance(),
-    fee: fee(),
-    destinationFee: {
-      balance: balance(),
-    },
-  },
-  destination: {
-    chain: polkadotCex,
-    asset: dot,
-    fee: {
-      amount: 1.1,
-      asset: dot,
-    },
-  },
-  extrinsic: ExtrinsicBuilder()
-    .utility()
-    .batchAll([
-      ExtrinsicBuilder().xTokens().transfer(),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: 0.01,
-      }),
-    ]),
-  transact: {
-    chain: polkadot,
-    fee: {
-      amount: 0,
-      asset: dot,
-      balance: balance(),
-    },
-    extrinsic: ExtrinsicBuilder().balances().transferAll(),
-  },
-});
 
 const toCex: AssetRoute[] = [
-  toHubWithCexFwd2Template(usdt),
-  toHubWithCexFwd2Template(usdc),
-  toCexViaRelay,
+  toHubWithCexFwdTemplate(
+    usdt,
+    0.1,
+    ExtrinsicBuilder().xTokens().transferMultiasset()
+  ),
+  toHubWithCexFwdTemplate(
+    usdc,
+    0.1,
+    ExtrinsicBuilder().xTokens().transferMultiasset()
+  ),
+  toHubWithCexFwdTemplate(
+    dot,
+    0.2,
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
+  ),
 ];
+
+const toXode: AssetRoute[] = [toTransferTemplate(xon, xode, 0.01)];
 
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
@@ -394,6 +421,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toCrust,
     ...toDarwinia,
+    ...toEthereumViaHyperbridge,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
@@ -405,12 +433,11 @@ export const hydrationConfig = new ChainRoutes({
     ...toNeuroweb,
     ...toNodle,
     ...toPhala,
-    ...toPolkadot,
     ...toPendulum,
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,
-    ...toSubsocial,
     ...toUnique,
     ...toZeitgeist,
+    //...toXode,
   ],
 });

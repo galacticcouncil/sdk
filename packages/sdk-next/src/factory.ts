@@ -3,8 +3,10 @@ import { PolkadotClient } from 'polkadot-api';
 import { AaveUtils } from './aave';
 import { AssetClient, BalanceClient, ChainParams } from './client';
 import { EvmClient } from './evm';
+import { LiquidityMiningApi, LiquidityMiningClient } from './farm';
 import { PoolContextProvider } from './pool';
 import { TradeRouter, TradeScheduler } from './sor';
+import { StakingApi, StakingClient } from './staking';
 
 import { TxBuilderFactory } from './tx';
 
@@ -13,6 +15,8 @@ export type SdkCtx = {
     aave: AaveUtils;
     router: TradeRouter;
     scheduler: TradeScheduler;
+    staking: StakingApi;
+    farm: LiquidityMiningApi;
   };
   client: {
     asset: AssetClient;
@@ -27,23 +31,28 @@ export type SdkCtx = {
 };
 
 export async function createSdkContext(
-  client: PolkadotClient,
-  evmClient?: EvmClient
+  client: PolkadotClient
 ): Promise<SdkCtx> {
   const params = new ChainParams(client);
+  const evm = new EvmClient(client);
+
   const [blockTime, minOrderBudget] = await Promise.all([
     params.getBlockTime(),
     params.getMinOrderBudget(),
   ]);
 
-  const evm = evmClient ?? new EvmClient();
-
   // Initialize pool context
-  const poolCtx = new PoolContextProvider(client)
+  const poolCtx = new PoolContextProvider(client, evm)
     .withAave()
     .withOmnipool()
     .withStableswap()
+    //.withHsm()
     .withXyk();
+
+  // Initialize clients
+  const balance = new BalanceClient(client);
+  const stakingClient = new StakingClient(client);
+  const farmClient = new LiquidityMiningClient(client);
 
   // Initialize APIs
   const aave = new AaveUtils(evm);
@@ -53,15 +62,22 @@ export async function createSdkContext(
     minBudgetInNative: minOrderBudget,
   });
 
+  const staking = new StakingApi(stakingClient, balance);
+  const farm = new LiquidityMiningApi(farmClient, balance, {
+    blockTime: blockTime,
+  });
+
   return {
     api: {
       aave,
       router,
       scheduler,
+      staking,
+      farm,
     },
     client: {
       asset: new AssetClient(client),
-      balance: new BalanceClient(client),
+      balance: balance,
       evm: evm,
     },
     ctx: {

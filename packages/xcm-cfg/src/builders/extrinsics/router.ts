@@ -17,7 +17,7 @@ const buy = (opts: SwapOpts): ExtrinsicConfigBuilder => {
       new ExtrinsicConfig({
         module: pallet,
         func,
-        getArgs: () => {
+        getArgs: async () => {
           const { chain, destinationFeeSwap } = source;
 
           if (!destinationFeeSwap) {

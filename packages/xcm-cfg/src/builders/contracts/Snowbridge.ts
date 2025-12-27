@@ -13,7 +13,7 @@ import { parseAssetId } from '../utils';
 const { Ss58Addr } = addr;
 
 const sendToken = (): ContractConfigBuilder => ({
-  build: (params) => {
+  build: async (params) => {
     const { address, amount, asset, source, destination } = params;
     const ctx = source.chain as EvmChain;
     const rcv = destination.chain as Parachain;

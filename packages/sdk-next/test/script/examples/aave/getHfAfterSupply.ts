@@ -1,18 +1,36 @@
-import { aave } from '../../../../src';
+import { PolkadotClient } from 'polkadot-api';
 
+import { createSdkContext } from '../../../../src';
+
+import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
+import { ApiUrl } from '../../types';
 
-const main = async () => {
-  const api = new aave.AaveUtils();
-  const result = await api.getHealthFactorAfterSupply(
-    BENEFICIARY,
-    15, // vDOT
-    '16' // supply 16 vDOTs
-  );
-  console.log(result);
-};
+class GetHealthFactorAfterSupply extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const sdk = await createSdkContext(client);
 
-main()
-  .then(() => console.log('Get HF after supply complete ✅'))
-  .catch(console.error)
-  .finally(() => process.exit(0));
+    const { api } = sdk;
+
+    const [current, afterSupply] = await Promise.all([
+      api.aave.getHealthFactor(BENEFICIARY),
+      api.aave.getHealthFactorAfterSupply(
+        BENEFICIARY,
+        15, // vDOT
+        '160' // Withdraw 16 avDOTs
+      ),
+    ]);
+
+    console.log(current, ' => ', afterSupply);
+
+    return () => {
+      sdk.destroy();
+      client.destroy();
+    };
+  }
+}
+
+new GetHealthFactorAfterSupply(
+  ApiUrl.Hydration,
+  'Get healthh factor after supply'
+).run();

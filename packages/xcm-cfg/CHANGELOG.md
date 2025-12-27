@@ -1,5 +1,130 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.19.0
+
+### Minor Changes
+
+[4626c650]: https://github.com/galacticcouncil/sdk/commit/4626c650
+[5c9ed0af]: https://github.com/galacticcouncil/sdk/commit/5c9ed0af
+
+- [[#4626c650][4626c650]] xcm: hyperbridge native fee est support, fix approval
+- [[#5c9ed0af][5c9ed0af]] xcm: hyperbridge support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.9.0
+
+## 10.18.0
+
+### Minor Changes
+
+- Enable interlay DOT, fix CEX reserve routes
+
+## 10.17.1
+
+### Patch Changes
+
+- 55a0cbf: Update polkadot ws address
+
+## 10.17.0
+
+### Minor Changes
+
+[f0174b6d]: https://github.com/galacticcouncil/sdk/commit/f0174b6d
+[107fd3d3]: https://github.com/galacticcouncil/sdk/commit/107fd3d3
+
+- [[#f0174b6d][f0174b6d]] xcm: add jitosol xcm conf
+- [[#107fd3d3][107fd3d3]] xcm: jito ata beneficiary support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.8.0
+
+## 10.16.1
+
+### Patch Changes
+
+- re-enable bifrost DOT
+
+## 10.16.0
+
+### Minor Changes
+
+- b5a3f1d: new cfg
+
+## 10.15.3
+
+### Patch Changes
+
+- re-enable snowfork
+
+## 10.15.2
+
+### Patch Changes
+
+- temp disable dot transfers from paras -> hydration
+
+## 10.15.1
+
+### Patch Changes
+
+- dfe64d1: cfg: enable snowbridge swap
+
+## 10.15.0
+
+### Minor Changes
+
+- c0fe128: Change ewt rpc
+
+## 10.14.0
+
+### Minor Changes
+
+- 1457f6e: Add PAXG and EAN
+
+## 10.13.1
+
+### Patch Changes
+
+- 2eaedb7: fix moonbeams xc balances
+
+## 10.13.0
+
+### Minor Changes
+
+[464b7c94]: https://github.com/galacticcouncil/sdk/commit/464b7c94
+
+- [[#464b7c94][464b7c94]] xcm: sdk 1.7.1 upgrade fixes
+
+## 10.12.0
+
+### Minor Changes
+
+- Upgrade pjs to latest
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@10.0.0
+  - @galacticcouncil/xcm-core@8.6.0
+
+## 10.11.0
+
+### Minor Changes
+
+[77b4fd74]: https://github.com/galacticcouncil/sdk/commit/77b4fd74
+[85e1f9b9]: https://github.com/galacticcouncil/sdk/commit/85e1f9b9
+
+- [[#77b4fd74][77b4fd74]] xcm: support calldata in dex
+- [[#85e1f9b9][85e1f9b9]] xcm: cleanup cfg
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.5.0
+
 ## 10.10.0
 
 ### Minor Changes
