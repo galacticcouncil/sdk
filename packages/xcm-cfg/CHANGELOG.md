@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.19.1
+
+### Patch Changes
+
+- fix assethub dwellir rpcs
+
 ## 10.19.0
 
 ### Minor Changes
