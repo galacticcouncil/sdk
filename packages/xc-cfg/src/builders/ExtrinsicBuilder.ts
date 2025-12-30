@@ -9,7 +9,7 @@ import { balances } from './extrinsics/balances';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
-import { ethereumXcm, polkadotXcm, xTokens, xTransfer } from './extrinsics/xcm';
+import { ethereumXcm, polkadotXcm, xTransfer } from './extrinsics/xcm';
 
 export function ExtrinsicBuilder() {
   return {
@@ -20,7 +20,6 @@ export function ExtrinsicBuilder() {
     polkadotXcm,
     router,
     utility,
-    xTokens,
     xTransfer,
   };
 }
