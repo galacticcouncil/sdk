@@ -1,4 +1,4 @@
-import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+import { big } from '@galacticcouncil/common';
 
 import {
   BuyCtx,
@@ -271,23 +271,31 @@ export class OmniPool implements Pool {
       return this.spotPriceLrnaInGivenOut(poolPair);
     }
 
-    const price = OmniMath.calculateSpotPrice(
+    const spot = OmniMath.calculateSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString(),
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString()
     );
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
-    return BigInt(price) / BigInt(base);
+
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.decimalsOut,
+      poolPair.decimalsIn
+    );
   }
 
   spotPriceLrnaInGivenOut(poolPair: OmniPoolPair): bigint {
-    const price = OmniMath.calculateLrnaSpotPrice(
+    const spot = OmniMath.calculateLrnaSpotPrice(
       poolPair.hubReservesOut.toString(),
       poolPair.balanceOut.toString()
     );
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
-    return BigInt(price) / BigInt(base);
+
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.decimalsOut,
+      poolPair.decimalsIn
+    );
   }
 
   spotPriceOutGivenIn(poolPair: OmniPoolPair): bigint {
@@ -295,22 +303,54 @@ export class OmniPool implements Pool {
       return this.spotPriceOutGivenLrnaIn(poolPair);
     }
 
-    const price = OmniMath.calculateSpotPrice(
+    const spot = OmniMath.calculateSpotPrice(
       poolPair.balanceIn.toString(),
       poolPair.hubReservesIn.toString(),
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString()
     );
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
-    return BigInt(price) / BigInt(base);
+
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.decimalsIn,
+      poolPair.decimalsOut
+    );
   }
 
   spotPriceOutGivenLrnaIn(poolPair: OmniPoolPair): bigint {
-    const price = OmniMath.calculateLrnaSpotPrice(
+    const spot = OmniMath.calculateLrnaSpotPrice(
       poolPair.balanceOut.toString(),
       poolPair.hubReservesOut.toString()
     );
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
-    return BigInt(price) / BigInt(base);
+
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.decimalsIn,
+      poolPair.decimalsOut
+    );
+  }
+
+  /**
+   * Normalize OmniMath spot to runtime decimals.
+   *
+   * - if `decimalsIn === decimalsOut`: spot already 18dp
+   * - if `decimalsIn > decimalsOut`: spot in 18 - (decimalsIn - decimalsOut)
+   * - if `decimalsIn < decimalsOut`: spot in 18 + (decimalsOut - decimalsIn)
+   *
+   * @param spotRaw - raw spot
+   * @param decimalsIn - asset in decimals
+   * @param decimalsOut - asset out decimals
+   */
+  private normalizeSpot(
+    spot: bigint,
+    decimalsIn: number,
+    decimalsOut: number
+  ): bigint {
+    const diff = decimalsIn - decimalsOut;
+
+    if (diff === 0) return spot;
+
+    const factor = big.pow10(Math.abs(diff));
+    return diff > 0 ? spot * factor : spot / factor;
   }
 }

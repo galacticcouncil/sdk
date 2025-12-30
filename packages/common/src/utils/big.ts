@@ -5,12 +5,11 @@ Big.NE = -18;
 export function toDecimal(
   number: bigint | number | string,
   decimals: number,
-  maxDecimal = 6,
   roundType?: RoundingMode
 ): string {
   const dividend = Big(number.toString().replace(/[^0-9]/g, ''));
   const divisor = Big(10).pow(decimals);
-  const result = dividend.div(divisor).round(maxDecimal, roundType);
+  const result = dividend.div(divisor).round(decimals, roundType);
 
   return result.toString();
 }
@@ -38,12 +37,12 @@ export function convertDecimals(
   decimals: number,
   targetDecimals: number
 ): bigint {
-  const decimalNumber = toDecimal(number, decimals, decimals);
+  const decimalNumber = toDecimal(number, decimals);
 
   return toBigInt(decimalNumber.toString(), targetDecimals);
 }
 
-export function hasDecimalOverflow(fl: number | string, maxDecimal: number) {
-  const parts = fl.toString().split('.');
-  return parts.length > 1 && parts[1].length > maxDecimal;
+export function pow10(exp: number): bigint {
+  if (exp < 0) throw new Error(`pow10: negative exp ${exp}`);
+  return 10n ** BigInt(exp);
 }
