@@ -2,11 +2,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { ajun } from '../../assets';
 import { hydration, ajuna } from '../../chains';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  XcmTransferType,
-} from '../../builders';
+import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -25,9 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: ajun,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.LocalReserve,
-    }),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

@@ -58,9 +58,7 @@ export function toTransferTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.LocalReserve,
-    }),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   });
 }
 
