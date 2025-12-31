@@ -486,27 +486,26 @@ export class TradeRouter extends Router {
     assetIn: string,
     assetOut: string
   ): Promise<{ price: Amount; route: Hop[] } | undefined> {
-    let context;
-    try {
-      context = await this.loadRouteContext(assetIn, assetOut);
-    } catch {
-      return Promise.resolve(undefined);
-    }
+    return this.withCtx(assetIn, assetOut, async (ctx) => {
+      const { pools, poolsMap } = ctx;
 
-    const { poolsMap } = context;
+      const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
+      let route = this.mlr.get(routeKey);
+      if (!route) {
+        route = await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
+      }
 
-    const route = await this.getMostLiquidRoute(assetIn, assetOut);
-    const swaps = await this.toSellSwaps('1', route, poolsMap);
-
-    const spotPrice = swaps
-      .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
-      .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
-    const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
-    const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
-    return {
-      price: { amount: spotPriceAmount, decimals: spotPriceDecimals },
-      route,
-    };
+      const swaps = await this.toSellSwaps('1', route, poolsMap);
+      const spotPrice = swaps
+        .map((s: SellSwap) => s.spotPrice.shiftedBy(-1 * s.assetOutDecimals))
+        .reduce((a: BigNumber, b: BigNumber) => a.multipliedBy(b));
+      const spotPriceDecimals = swaps[swaps.length - 1].assetOutDecimals;
+      const spotPriceAmount = scale(spotPrice, spotPriceDecimals);
+      return {
+        price: { amount: spotPriceAmount, decimals: spotPriceDecimals },
+        route,
+      };
+    }).catch(() => undefined);
   }
 
   /**

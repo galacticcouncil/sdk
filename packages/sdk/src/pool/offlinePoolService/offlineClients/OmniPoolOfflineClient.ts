@@ -6,10 +6,17 @@ import {
   IOfflinePoolServiceDataSource,
   IPersistentEmaOracleEntryData,
 } from '../types';
-import { PoolFees, PoolPair, PoolType } from '../../types';
-import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../../../consts';
+import { PoolFees, PoolLimits, PoolPair, PoolType } from '../../types';
+import {
+  HUB_ASSET_ID,
+  HYDRADX_SS58_PREFIX,
+  PERMILL_DENOMINATOR,
+  SYSTEM_ASSET_ID,
+} from '../../../consts';
 import { OmniPoolFees, OmniMath } from '../../omni';
 import { FeeUtils } from '../../../utils/fee';
+import { encodeAddress } from '@polkadot/util-crypto';
+import { stringToU8a } from '@polkadot/util';
 
 type OmniPoolFeeRange = [number, number, number];
 
@@ -24,6 +31,19 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
 
   getPoolType(): PoolType {
     return PoolType.Omni;
+  }
+
+  private getPoolId(): string {
+    return encodeAddress(
+      stringToU8a('modlomnipool'.padEnd(32, '\0')),
+      HYDRADX_SS58_PREFIX
+    );
+  }
+
+  private getOracleKey(asset: string): [string, string] {
+    return asset === SYSTEM_ASSET_ID
+      ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
+      : [HUB_ASSET_ID, asset];
   }
 
   async getPoolFees(
@@ -156,14 +176,15 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      FeeUtils.toPct(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      FeeUtils.toPct(feeMin).toString(),
-      FeeUtils.toPct(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee, Number(fee) * 10000, maxFee];
+    // return [minFee, Number(fee) * 10000, maxFee];
+    return [minFee, Number(fee) * PERMILL_DENOMINATOR, maxFee];
   }
 
   private getProtocolFee(
@@ -186,7 +207,7 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
 
     const { protocolFee, timestamp } = dynamicFee;
 
-    const blockDifference = blockNumber - timestamp;
+    const blockDifference = Math.max(1, blockNumber - timestamp);
 
     let oracleAmountIn = oracleEntry.volume.bIn.toString();
     let oracleAmountOut = oracleEntry.volume.bOut.toString();
@@ -205,13 +226,14 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      FeeUtils.toPct(feePrev).toString(),
+      FeeUtils.toRaw(feePrev).toString(),
       blockDifference.toString(),
-      FeeUtils.toPct(feeMin).toString(),
-      FeeUtils.toPct(feeMax).toString(),
+      FeeUtils.toRaw(feeMin).toString(),
+      FeeUtils.toRaw(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee, Number(fee) * 10000, maxFee];
+    return [minFee, Number(fee) * PERMILL_DENOMINATOR, maxFee];
+    // return [minFee, Number(fee) * 10000, maxFee];
   }
 }

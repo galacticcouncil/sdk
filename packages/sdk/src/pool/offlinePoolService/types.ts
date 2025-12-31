@@ -105,6 +105,7 @@ export interface IPersistentStableSwapBase {
   fee: number;
   totalIssuance: string;
   pegs: string[][];
+  pegsUpdatedAtParaBlock?: number;
   maxPegUpdate?: number;
   pegSources?: IPersistentStableSwapBasePegSource[];
 }

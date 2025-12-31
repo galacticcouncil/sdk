@@ -15,6 +15,7 @@ import {
   Pool,
   PoolBase,
   PoolFees,
+  PoolFilter,
   PoolPair,
   PoolType,
 } from '../types';
@@ -68,10 +69,12 @@ export class OfflinePoolService implements IPoolService {
     this.onChainAssets = assets;
   }
 
-  async getPools(includeOnly: PoolType[]): Promise<PoolBase[]> {
+  async getPools(filter: PoolFilter = {}): Promise<PoolBase[]> {
     if (!this.isRegistrySynced) {
       this.syncRegistry();
     }
+
+    const { includeOnly = [], exclude = [] } = filter;
 
     if (includeOnly.length == 0) {
       const pools = this.offlineClients
