@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.5.0
+
+### Minor Changes
+
+- single coherent pjs stack
+
 ## 10.4.0
 
 ### Minor Changes
