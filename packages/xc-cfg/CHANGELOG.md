@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 0.4.3
+
+### Patch Changes
+
+- fix assethub dwellir rpcs
+
 ## 0.4.2
 
 ### Patch Changes

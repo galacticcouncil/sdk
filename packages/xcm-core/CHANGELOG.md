@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-core
 
+## 8.10.0
+
+### Minor Changes
+
+- single coherent pjs stack
+
 ## 8.9.0
 
 ### Minor Changes
