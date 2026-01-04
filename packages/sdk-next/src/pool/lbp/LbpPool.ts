@@ -1,3 +1,5 @@
+import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -239,7 +241,7 @@ export class LbpPool implements Pool {
       poolPair.balanceIn.toString(),
       poolPair.weightOut.toString(),
       poolPair.weightIn.toString(),
-      this.maxOutRatio.toString()
+      big.toBigInt(1, RUNTIME_DECIMALS).toString()
     );
     return BigInt(spot);
   }
@@ -250,7 +252,7 @@ export class LbpPool implements Pool {
       poolPair.balanceOut.toString(),
       poolPair.weightIn.toString(),
       poolPair.weightOut.toString(),
-      this.maxInRatio.toString()
+      big.toBigInt(1, RUNTIME_DECIMALS).toString()
     );
     return BigInt(spot);
   }
