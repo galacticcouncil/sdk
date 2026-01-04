@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.25.0
+
+### Minor Changes
+
+- a7811b7: next: spot always 18 decimals
+
 ## 0.24.0
 
 ### Minor Changes

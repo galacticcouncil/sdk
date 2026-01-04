@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.2.0
+
+### Minor Changes
+
+- c4783e5: add pow helper
+
 ## 0.1.3
 
 ### Patch Changes
