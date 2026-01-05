@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { pen } from '../../assets';
 import { hydration, pendulum } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -17,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: pen,
       fee: {
-        amount: 0.2,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: pen,
       },
     },
