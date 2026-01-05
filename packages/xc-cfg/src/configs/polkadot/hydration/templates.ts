@@ -6,7 +6,6 @@ import {
   ExtrinsicConfigBuilder,
   ExtrinsicConfigBuilderParams,
   FeeAmountConfigBuilder,
-  Parachain,
 } from '@galacticcouncil/xc-core';
 
 import { dot, glmr, usdt } from '../../../assets';
@@ -40,7 +39,7 @@ const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
 export function toTransferTemplate(
   asset: Asset,
   destination: AnyChain,
-  reserve?: Parachain
+  destinationFee: number
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -55,11 +54,7 @@ export function toTransferTemplate(
       chain: destination,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(
-            reserve ? { reserve } : undefined
-          ),
+        amount: destinationFee,
         asset: asset,
       },
     },
@@ -81,9 +76,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       chain: assetHub,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.18,
         asset: usdt,
       },
     },

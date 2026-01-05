@@ -1,22 +1,13 @@
-import {
-  AnyChain,
-  Asset,
-  AssetRoute,
-  Parachain,
-} from '@galacticcouncil/xc-core';
+import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
-import {
-  ExtrinsicBuilder,
-  FeeAmountBuilder,
-  XcmTransferType,
-} from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 
 export function toTransferTemplate(
   asset: Asset,
   destination: AnyChain,
-  reserve?: Parachain
+  destinationFee: number
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -31,11 +22,7 @@ export function toTransferTemplate(
       chain: destination,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(
-            reserve ? { reserve } : undefined
-          ),
+        amount: destinationFee,
         asset: asset,
       },
     },

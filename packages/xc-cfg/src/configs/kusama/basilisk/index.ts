@@ -1,12 +1,11 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { ksm, usdt } from '../../../assets';
-import { basilisk, kusamaAssetHub } from '../../../chains';
 import {
-  ExtrinsicBuilder,
-  FeeAmountBuilder,
-  XcmTransferType,
-} from '../../../builders';
+  basilisk,
+  kusamaAssetHub,
+} from '../../../chains';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { balance, fee } from './configs';
 
@@ -24,9 +23,7 @@ const toAssetHub: AssetRoute[] = [
       chain: kusamaAssetHub,
       asset: usdt,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.0012,
         asset: usdt,
       },
     },
@@ -61,5 +58,8 @@ const toKusamaAssetHub: AssetRoute[] = [
 
 export const basiliskConfig = new ChainRoutes({
   chain: basilisk,
-  routes: [...toAssetHub, ...toKusamaAssetHub],
+  routes: [
+    ...toAssetHub,
+    ...toKusamaAssetHub,
+  ],
 });

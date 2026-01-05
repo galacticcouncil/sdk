@@ -15,7 +15,6 @@ import { assetHub, bifrost, hydration, polkadot } from '../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
-  FeeAmountBuilder,
   XcmTransferType,
 } from '../../builders';
 
@@ -32,9 +31,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: bnc,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.014645,
         asset: bnc,
       },
     },
@@ -56,9 +53,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vdot,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.000555,
         asset: vdot,
       },
     },
@@ -80,9 +75,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vastr,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.0115,
         asset: vastr,
       },
     },
@@ -104,9 +97,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: polkadot }),
+        amount: 0.1,
         asset: dot,
       },
     },
@@ -130,9 +121,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: astr,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.5,
         asset: astr,
       },
     },
@@ -154,9 +143,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: glmr,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.1,
         asset: glmr,
       },
     },
@@ -178,9 +165,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ibtc,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.000002,
         asset: ibtc,
       },
     },
@@ -202,9 +187,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdt,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+        amount: 0.3,
         asset: usdt,
       },
     },
@@ -226,9 +209,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdc,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+        amount: 0.3,
         asset: usdc,
       },
     },
@@ -253,9 +234,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdt,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.18,
         asset: usdt,
       },
     },
@@ -277,9 +256,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdc,
       fee: {
-        amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+        amount: 0.18,
         asset: usdc,
       },
     },
