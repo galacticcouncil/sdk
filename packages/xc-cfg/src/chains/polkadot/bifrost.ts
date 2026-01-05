@@ -28,18 +28,57 @@ export const bifrost = new Parachain({
     {
       asset: bnc,
       id: { Native: bnc.originSymbol },
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: vdot,
       id: { VToken2: 0 },
       decimals: 10,
       min: 0.0001,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0900000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: vastr,
       id: { VToken2: 3 },
       decimals: 18,
       min: 0.01,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0903000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: dot,
