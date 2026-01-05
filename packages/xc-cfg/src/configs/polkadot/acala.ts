@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { aca, dai_awh, ldot, wbtc_awh, weth_awh } from '../../assets';
 import { hydration, acala } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -17,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: aca,
       fee: {
-        amount: 1,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: aca,
       },
     },
@@ -39,7 +43,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dai_awh,
       fee: {
-        amount: 0.002926334210356268,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: dai_awh,
       },
     },
@@ -61,7 +65,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: wbtc_awh,
       fee: {
-        amount: 0.00000006,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: wbtc_awh,
       },
     },
@@ -83,7 +87,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: weth_awh,
       fee: {
-        amount: 0.000000956965470918,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: weth_awh,
       },
     },
@@ -105,7 +109,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ldot,
       fee: {
-        amount: 0.011,
+        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
         asset: ldot,
       },
     },
