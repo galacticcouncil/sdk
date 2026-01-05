@@ -166,7 +166,7 @@ function PolkadotXcm() {
           ]);
 
           const totalFee = reserveFee + destinationFee;
-          const feeWithMargin = padFeeByPercentage(totalFee, 25n);
+          const feeWithMargin = padFeeByPercentage(totalFee, 20n);
           const margin = feeWithMargin - totalFee;
 
           return {
