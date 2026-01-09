@@ -14,7 +14,6 @@ import {
   cfg,
   cfg_new,
   cru,
-  dai_awh,
   dai_mwh,
   ded,
   dot,
@@ -54,10 +53,8 @@ import {
   vastr,
   vdot,
   wbtc,
-  wbtc_awh,
   wbtc_mwh,
   weth,
-  weth_awh,
   weth_mwh,
   wsteth,
   wud,
@@ -353,28 +350,6 @@ export const hydration = new EvmParachain({
             },
             {
               GeneralIndex: 18,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: dai_awh,
-      decimals: 18,
-      id: 2,
-      min: 0.01,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 21,
-                data: '0x0254a37a01cd75b616d63e0ab665bffdb0143c52ae0000000000000000000000',
-              },
             },
           ],
         },
@@ -1291,28 +1266,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: wbtc_awh,
-      decimals: 8,
-      id: 3,
-      min: 0.00000044,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 21,
-                data: '0x02c80084af223c8b598536178d9361dc55bfda68180000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: wbtc_mwh,
       decimals: 8,
       id: 19,
@@ -1357,28 +1310,6 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: weth_awh,
-      decimals: 18,
-      id: 4,
-      min: 0.000005,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 21,
-                data: '0x025a4d6acdc4e3e5ab15717f407afe957f7a2425780000000000000000000000',
               },
             },
           ],

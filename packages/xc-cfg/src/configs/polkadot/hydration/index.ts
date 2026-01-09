@@ -10,7 +10,6 @@ import {
   cfg_new,
   cru,
   dai,
-  dai_awh,
   dai_mwh,
   ded,
   dot,
@@ -54,9 +53,7 @@ import {
   vdot,
   ztg,
   wbtc,
-  wbtc_awh,
   wbtc_mwh,
-  weth_awh,
   weth_mwh,
   wsteth,
   wud,
@@ -103,9 +100,6 @@ import {
 } from './templates';
 
 const toAcala: AssetRoute[] = [
-  toTransferTemplate(dai_awh, acala, 0.00092696),
-  toTransferTemplate(wbtc_awh, acala, 0.00000004),
-  toTransferTemplate(weth_awh, acala, 0.000000687004),
   toTransferTemplate(aca, acala, 1),
   toTransferTemplate(ldot, acala, 0.06),
 ];

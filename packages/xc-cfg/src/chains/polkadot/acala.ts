@@ -5,7 +5,7 @@ import {
 
 import { defineChain, Chain } from 'viem';
 
-import { aca, glmr, dai_awh, ldot, wbtc_awh, weth_awh } from '../../assets';
+import { aca, glmr, ldot } from '../../assets';
 import { AcalaEvmResolver } from '../../resolvers';
 
 const evmResolver = new AcalaEvmResolver();
@@ -72,88 +72,6 @@ export const acala = new EvmParachain({
               GeneralKey: {
                 length: 2,
                 data: '0x0003000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
-    // erc-20 assets
-    {
-      asset: dai_awh,
-      decimals: 18,
-      id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
-      balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
-      min: 0.01,
-      xcmLocation: {
-        parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
-              },
-            },
-            {
-              AccountKey20: {
-                network: null,
-                key: '0x6b175474e89094c44da98b954eedeac495271d0f',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: wbtc_awh,
-      decimals: 8,
-      id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
-      balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
-      min: 0.00000035,
-      xcmLocation: {
-        parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
-              },
-            },
-            {
-              AccountKey20: {
-                network: null,
-                key: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: weth_awh,
-      decimals: 18,
-      id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
-      balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
-      min: 0.000005555555555555,
-      xcmLocation: {
-        parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
-              },
-            },
-            {
-              AccountKey20: {
-                network: null,
-                key: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
               },
             },
           ],

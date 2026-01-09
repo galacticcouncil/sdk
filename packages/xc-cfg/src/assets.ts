@@ -50,11 +50,6 @@ export const dai = new Asset({
   originSymbol: 'DAI',
 });
 
-export const dai_awh = new Asset({
-  ...dai,
-  key: 'dai_awh',
-});
-
 export const dai_mwh = new Asset({
   ...dai,
   key: 'dai_mwh',
@@ -300,11 +295,6 @@ export const weth = new Asset({
   originSymbol: 'WETH',
 });
 
-export const weth_awh = new Asset({
-  ...weth,
-  key: 'weth_awh',
-});
-
 export const weth_mwh = new Asset({
   ...weth,
   key: 'weth_mwh',
@@ -313,11 +303,6 @@ export const weth_mwh = new Asset({
 export const wbtc = new Asset({
   key: 'wbtc',
   originSymbol: 'WBTC',
-});
-
-export const wbtc_awh = new Asset({
-  ...wbtc,
-  key: 'wbtc_awh',
 });
 
 export const wbtc_mwh = new Asset({
@@ -356,7 +341,6 @@ export const assets: Asset[] = [
   cru,
   bnc,
   dai,
-  dai_awh,
   dai_mwh,
   ded,
   dot,
@@ -406,10 +390,8 @@ export const assets: Asset[] = [
   vastr,
   vdot,
   wbtc,
-  wbtc_awh,
   wbtc_mwh,
   weth,
-  weth_awh,
   weth_mwh,
   wsteth,
   wud,
