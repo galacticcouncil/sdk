@@ -79,7 +79,7 @@ function Snowbridge() {
         ]);
 
         const bridgeFeeInDot =
-          deliveryFee + padFeeByPercentage(destinationFee, 20n);
+          deliveryFee + padFeeByPercentage(destinationFee, 25n);
 
         const feeAssetId = ctx.getAssetId(feeAsset);
         const bridgeFeeInWei = await ctx.evmClient.getProvider().readContract({
@@ -166,7 +166,7 @@ function PolkadotXcm() {
           ]);
 
           const totalFee = reserveFee + destinationFee;
-          const feeWithMargin = padFeeByPercentage(totalFee, 25n);
+          const feeWithMargin = padFeeByPercentage(totalFee, 20n);
           const margin = feeWithMargin - totalFee;
 
           return {
