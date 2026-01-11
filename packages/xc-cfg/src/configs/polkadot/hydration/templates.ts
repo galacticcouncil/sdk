@@ -192,7 +192,7 @@ function viaWormholeTemplate(
       swapExtrinsicBuilder
     ).priorMulti([
       ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.LocalReserve,
+        transferType: XcmTransferType.DestinationReserve,
       }),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
