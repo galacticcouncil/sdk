@@ -1,10 +1,11 @@
 import { big } from '@galacticcouncil/common';
 
 import {
+  DCA_TIME_RESERVE,
   DEFAULT_BLOCK_TIME,
   DEFAULT_MIN_BUDGET,
   ORDER_MIN_BLOCK_PERIOD,
-  TWAP_BLOCK_PERIOD,
+  TWAP_EXECUTION_INTERVAL,
   TWAP_MAX_PRICE_IMPACT,
   TWAP_MAX_DURATION,
 } from './const';
@@ -85,7 +86,11 @@ export class TradeScheduler {
       assetInDecimals
     );
 
-    const maxTradeCount = this.getMaximumTradeCount(amountIn, amountInMin);
+    const maxTradeCount = this.getMaximumTradeCount(
+      amountIn,
+      amountInMin,
+      duration
+    );
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
     const tradeCount = noOfTrades || optTradeCount;
 
@@ -148,6 +153,7 @@ export class TradeScheduler {
    * execution.
    *
    * @param asset - assetIn id
+   * @param decimals - assetIn decimals
    * @returns minimum order budget
    */
   async getMinimumOrderBudget(
@@ -178,15 +184,29 @@ export class TradeScheduler {
    *
    * @param amountIn - entering / given budget
    * @param amountInMin - minimal budget to schedule an order
+   * @param duration - order duration in ms
+   *
    * @returns maximum number of trades to execute the order
    */
-  private getMaximumTradeCount(amountIn: bigint, amountInMin: bigint): number {
+  protected getMaximumTradeCount(
+    amountIn: bigint,
+    amountInMin: bigint,
+    duration: number
+  ): number {
     const minAmountIn = (amountInMin * 2n) / 10n;
-
     if (minAmountIn === 0n) return 0;
 
-    const result = amountIn + minAmountIn / 2n;
-    return Number(result / minAmountIn);
+    const maxByBudget = Number(amountIn / minAmountIn);
+    const maxByTimeRaw = Math.floor(duration / this.blockTime);
+
+    console.log(maxByBudget, maxByTimeRaw);
+
+    const maxByTime = Math.max(
+      0,
+      Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
+    );
+
+    return Math.min(maxByBudget, maxByTime);
   }
 
   /**
@@ -198,7 +218,7 @@ export class TradeScheduler {
    * @param priceImpact - price impact of swap execution (single trade)
    * @returns optimal number of trades to execute the order
    */
-  private getOptimalTradeCount(priceImpact: number): number {
+  protected getOptimalTradeCount(priceImpact: number): number {
     const estTradeCount = Math.round(priceImpact * 10) || 1;
     return Math.max(estTradeCount, 3);
   }
@@ -265,7 +285,7 @@ export class TradeScheduler {
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
-      tradePeriod: TWAP_BLOCK_PERIOD,
+      tradePeriod: TWAP_EXECUTION_INTERVAL,
       tradeRoute: tradeRoute,
       type: TradeOrderType.TwapSell,
     } as Partial<TradeOrder>;
@@ -349,7 +369,7 @@ export class TradeScheduler {
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
-      tradePeriod: TWAP_BLOCK_PERIOD,
+      tradePeriod: TWAP_EXECUTION_INTERVAL,
       tradeRoute: tradeRoute,
       type: TradeOrderType.TwapBuy,
     } as Partial<TradeOrder>;
@@ -389,7 +409,7 @@ export class TradeScheduler {
 
     if (executionTime > TWAP_MAX_DURATION) {
       const maxTradeCount =
-        TWAP_MAX_DURATION / (this.blockTime * TWAP_BLOCK_PERIOD);
+        TWAP_MAX_DURATION / (this.blockTime * TWAP_EXECUTION_INTERVAL);
       return Math.round(maxTradeCount);
     }
     return optTradeCount;
@@ -402,7 +422,7 @@ export class TradeScheduler {
    * @returns unix representation of execution time
    */
   getTwapExecutionTime(tradeCount: number): number {
-    return tradeCount * TWAP_BLOCK_PERIOD * this.blockTime;
+    return tradeCount * TWAP_EXECUTION_INTERVAL * this.blockTime;
   }
 
   /**
