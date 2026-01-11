@@ -50,7 +50,7 @@
   "peerDependencies": {
     "@galacticcouncil/common": ">=0.2.0 <1.0.0",
     "@galacticcouncil/descriptors": ">=1.7.0 <2.0.0",
-    "polkadot-api": "^1.23.0",
+    "polkadot-api": "^1.23.2",
     "viem": "^2.38.3"
   }
 }
