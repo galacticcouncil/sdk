@@ -111,14 +111,14 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
 
   private subscribeStore(): Observable<T[]> {
     return defer(() => {
-      const lifetime = new Subscription();
-      lifetime.add(this.startWatchdog());
+      const session = new Subscription();
+      session.add(this.startWatchdog());
 
       this.resync$.next();
 
       return this.resync$.pipe(
         switchMap(() => {
-          const sub = new Subscription();
+          const cycle = new Subscription();
 
           const seed$ = from(
             withTimeout(this.getMemPools(), 30_000, 'getMemPools stalled')
@@ -138,8 +138,8 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
              * After store initialized, attach live writers (fire and forget)
              */
             tap(() => {
-              sub.add(this.subscribeBalances());
-              sub.add(this.subscribeUpdates());
+              cycle.add(this.subscribeBalances());
+              cycle.add(this.subscribeUpdates());
             }),
 
             /**
@@ -157,11 +157,11 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
               /**
                * Kill internal wiring if no subscription active
                */
-              sub.unsubscribe();
+              cycle.unsubscribe();
             })
           );
         }),
-        finalize(() => lifetime.unsubscribe()),
+        finalize(() => session.unsubscribe()),
         /**
          * Ensures single internal wiring for all subscribers
          */

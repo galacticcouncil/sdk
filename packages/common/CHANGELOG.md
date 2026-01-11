@@ -4,7 +4,11 @@
 
 ### Minor Changes
 
-- add log utils
+[dfe1aea3]: https://github.com/galacticcouncil/sdk/commit/dfe1aea3
+[f4c70f0d]: https://github.com/galacticcouncil/sdk/commit/f4c70f0d
+
+- [[#dfe1aea3][dfe1aea3]] common: add logger
+- [[#f4c70f0d][f4c70f0d]] bump papi to latest (1.23.2)
 
 ## 0.2.0
 

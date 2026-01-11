@@ -1,5 +1,17 @@
 # @galacticcouncil/sdk-next
 
+## 0.26.0
+
+### Minor Changes
+
+[00197bf3]: https://github.com/galacticcouncil/sdk/commit/00197bf3
+[64672dfb]: https://github.com/galacticcouncil/sdk/commit/64672dfb
+[f4c70f0d]: https://github.com/galacticcouncil/sdk/commit/f4c70f0d
+
+- [[#00197bf3][00197bf3]] next: pool re-sync support (recovery)
+- [[#64672dfb][64672dfb]] next: calc & async utils
+- [[#f4c70f0d][f4c70f0d]] bump papi to latest (1.23.2)
+
 ## 0.25.0
 
 ### Minor Changes

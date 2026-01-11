@@ -12,9 +12,9 @@
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^0.25.0",
-    "@galacticcouncil/xc-cfg": "^0.4.3",
-    "@galacticcouncil/xc-core": "^0.5.0",
-    "@galacticcouncil/xc-sdk": "^0.4.1"
+    "@galacticcouncil/sdk-next": "^0.26.0",
+    "@galacticcouncil/xc-cfg": "^0.4.4",
+    "@galacticcouncil/xc-core": "^0.6.0",
+    "@galacticcouncil/xc-sdk": "^0.4.2"
   }
 }
