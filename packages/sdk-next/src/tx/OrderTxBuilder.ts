@@ -1,7 +1,7 @@
 import { Enum } from 'polkadot-api';
 
 import { TradeOrder, TradeOrderType } from '../sor';
-import { math } from '../utils';
+import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
 import { Transaction, Tx } from './types';
@@ -111,7 +111,7 @@ export class OrderTxBuilder extends TxBuilder {
       tradeRoute,
     } = this.order;
 
-    const slippage = math.getFraction(tradeAmountOut, this.slippagePct);
+    const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
     const minAmountOut = tradeAmountOut - slippage;
 
     const tx: Transaction = this.api.tx.DCA.schedule({
@@ -147,7 +147,7 @@ export class OrderTxBuilder extends TxBuilder {
       tradeRoute,
     } = this.order;
 
-    const slippage = math.getFraction(tradeAmountIn, this.slippagePct);
+    const slippage = calc.getFraction(tradeAmountIn, this.slippagePct);
     const maxAmountIn = tradeAmountIn + slippage;
 
     const tx: Transaction = this.api.tx.DCA.schedule({

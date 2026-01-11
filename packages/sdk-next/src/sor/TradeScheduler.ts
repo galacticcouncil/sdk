@@ -16,9 +16,11 @@ import {
 } from './types';
 
 import { TradeRouter } from './TradeRouter';
+
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
+import { calc } from '../utils';
 
 export type TradeSchedulerOptions = {
   blockTime?: number;
@@ -62,10 +64,11 @@ export class TradeScheduler {
     duration: number,
     noOfTrades?: number
   ): Promise<TradeDcaOrder> {
-    const [amountInMin, trade] = await Promise.all([
-      this.getMinimumOrderBudget(assetIn),
-      this.router.getBestSell(assetIn, assetOut, amountInTotal),
-    ]);
+    const trade = await this.router.getBestSell(
+      assetIn,
+      assetOut,
+      amountInTotal
+    );
 
     const { amountIn, swaps, priceImpactPct } = trade;
 
@@ -76,6 +79,11 @@ export class TradeScheduler {
     const { assetOutDecimals } = lastSwap;
 
     const priceImpact = Math.abs(priceImpactPct);
+
+    const amountInMin = await this.getMinimumOrderBudget(
+      assetIn,
+      assetInDecimals
+    );
 
     const maxTradeCount = this.getMaximumTradeCount(amountIn, amountInMin);
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
@@ -142,15 +150,22 @@ export class TradeScheduler {
    * @param asset - assetIn id
    * @returns minimum order budget
    */
-  async getMinimumOrderBudget(asset: number): Promise<bigint> {
+  async getMinimumOrderBudget(
+    asset: number,
+    decimals: number
+  ): Promise<bigint> {
     if (SYSTEM_ASSET_ID === asset) {
       return this.minOrderBudget;
     }
 
     const spot = await this.router.getSpotPrice(SYSTEM_ASSET_ID, asset);
-    const scale = 10n ** BigInt(SYSTEM_ASSET_DECIMALS);
     if (spot) {
-      return (this.minOrderBudget * spot.amount) / scale;
+      return calc.mulSpot(
+        this.minOrderBudget,
+        spot.amount,
+        SYSTEM_ASSET_DECIMALS,
+        decimals
+      );
     }
     throw new Error('Unable to calculate order budget');
   }
@@ -201,10 +216,11 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
-    const [amountInMin, sell] = await Promise.all([
-      this.getMinimumOrderBudget(assetIn),
-      this.router.getBestSell(assetIn, assetOut, amountInTotal),
-    ]);
+    const sell = await this.router.getBestSell(
+      assetIn,
+      assetOut,
+      amountInTotal
+    );
 
     const { amountIn, swaps, priceImpactPct } = sell;
 
@@ -219,11 +235,14 @@ export class TradeScheduler {
 
     const amountInPerTrade = amountIn / BigInt(tradeCount);
 
-    const twap = await this.router.getBestSell(
-      firstSwap.assetIn,
-      lastSwap.assetOut,
-      amountInPerTrade
-    );
+    const [amountInMin, twap] = await Promise.all([
+      this.getMinimumOrderBudget(assetIn, assetInDecimals),
+      this.router.getBestSell(
+        firstSwap.assetIn,
+        lastSwap.assetOut,
+        amountInPerTrade
+      ),
+    ]);
 
     const isSingleTrade = tradeCount === 1;
     const isLessThanMinimalAmount = amountIn < amountInMin;
@@ -284,10 +303,7 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
-    const [amountInMin, buy] = await Promise.all([
-      this.getMinimumOrderBudget(assetIn),
-      this.router.getBestBuy(assetIn, assetOut, amountInTotal),
-    ]);
+    const buy = await this.router.getBestBuy(assetIn, assetOut, amountInTotal);
 
     const { amountOut, swaps, priceImpactPct } = buy;
 
@@ -302,11 +318,14 @@ export class TradeScheduler {
 
     const amountOutPerTrade = amountOut / BigInt(tradeCount);
 
-    const twap = await this.router.getBestBuy(
-      firstSwap.assetIn,
-      lastSwap.assetOut,
-      amountOutPerTrade
-    );
+    const [amountInMin, twap] = await Promise.all([
+      this.getMinimumOrderBudget(assetIn, assetInDecimals),
+      this.router.getBestBuy(
+        firstSwap.assetIn,
+        lastSwap.assetOut,
+        amountOutPerTrade
+      ),
+    ]);
 
     const amountIn = twap.amountIn * BigInt(tradeCount);
 
