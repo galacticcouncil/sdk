@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.3.0
+
+### Minor Changes
+
+- add log utils
+
 ## 0.2.0
 
 ### Minor Changes
