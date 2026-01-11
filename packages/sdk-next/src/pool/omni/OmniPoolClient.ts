@@ -8,6 +8,7 @@ import {
   finalize,
   map,
   merge,
+  tap,
 } from 'rxjs';
 
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
@@ -351,7 +352,13 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         'best'
       ).pipe(
         filter((v): v is TEmaOracle => v !== undefined),
-        map((value) => ({
+        map((value, index) => ({ value, index })),
+        tap(({ index }) => {
+          if (index > 0) {
+            this.log.trace('emaOracle.Oracles', pair.join(':'));
+          }
+        }),
+        map(({ value }) => ({
           pair,
           value,
         }))
@@ -360,10 +367,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
     return merge(...streams)
       .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub ema oracles');
-          this.emaOracles.clear();
-        })
+        finalize(() => this.emaOracles.clear()),
+        this.watchGuard('emaOracle.Oracles')
       )
       .subscribe((delta) => {
         const { pair, value } = delta;
@@ -377,14 +382,16 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          finalize(() => {
-            this.log(this.getPoolType(), 'unsub dyn fees');
-            this.dynamicFees.clear();
-          });
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('dynamicFees.AssetFee', value.deltas?.upserted);
+          }
+        }),
+        finalize(() => this.dynamicFees.clear()),
+        this.watchGuard('dynamicFees.AssetFee')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
           this.dynamicFees.set(delta.value, key);
@@ -398,12 +405,19 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub dyn fees config');
-          this.dynamicFeesConfig.clear();
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace(
+              'dynamicFees.AssetFeeConfiguration',
+              value.deltas?.upserted
+            );
+          }
+        }),
+        finalize(() => this.dynamicFeesConfig.clear()),
+        this.watchGuard('dynamicFees.AssetFeeConfiguration')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
           this.dynamicFeesConfig.set(delta.value, key);
@@ -412,12 +426,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   private subscribeBlock(): Subscription {
-    return this.api.query.System.Number.watchValue('best')
-      .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub block change');
-        })
-      )
+    return this.watcher.bestBlock$
+      .pipe(this.watchGuard('watcher.bestBlock'))
       .subscribe((block) => {
         this.block = block;
       });
@@ -429,11 +439,15 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub assets');
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('omnipool.Assets', value.deltas?.upserted);
+          }
+        }),
+        this.watchGuard('omnipool.Assets')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         this.store.update(([pool]) => {
           const changes = deltas?.upserted.reduce((acc, o) => {
             const [key] = o.args;

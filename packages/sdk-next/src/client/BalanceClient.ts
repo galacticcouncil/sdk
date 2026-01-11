@@ -1,19 +1,26 @@
 import { PolkadotClient } from 'polkadot-api';
+
+import { log } from '@galacticcouncil/common';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import {
   type Observable,
   Subject,
-  bufferCount,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  retry,
+  shareReplay,
+} from 'rxjs';
+
+import {
+  bufferCount,
   finalize,
   map,
   pairwise,
-  shareReplay,
   startWith,
-} from 'rxjs';
+  tap,
+} from 'rxjs/operators';
 
 import { Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
@@ -22,6 +29,8 @@ import { AssetBalance, Balance } from '../types';
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
 type TAccount = TSystemAccount['data'] | TTokenAccount;
+
+const { logger } = log;
 
 export class BalanceClient extends Papi {
   constructor(client: PolkadotClient) {
@@ -56,6 +65,10 @@ export class BalanceClient extends Papi {
     const erc20Ob = this.subscribeErc20Balance(address);
 
     return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
+      tap({
+        error: (e) => logger.error('balance', e),
+      }),
+      retry({ delay: 1000 }),
       debounceTime(250),
       map((balance) => balance.flat()),
       /**
@@ -80,6 +93,9 @@ export class BalanceClient extends Papi {
     const query = this.api.query.System.Account;
 
     return query.watchValue(address, 'best').pipe(
+      tap({
+        error: (e) => logger.error('balance(system)', e),
+      }),
       map(
         (balance) =>
           ({
@@ -97,6 +113,9 @@ export class BalanceClient extends Papi {
     const query = this.api.query.Tokens.Accounts;
 
     return query.watchValue(address, assetId, 'best').pipe(
+      tap({
+        error: (e) => logger.error('balance(token)', e),
+      }),
       map(
         (balance) =>
           ({
@@ -111,6 +130,9 @@ export class BalanceClient extends Papi {
     const query = this.api.query.Tokens.Accounts;
 
     return query.watchEntries(address, { at: 'best' }).pipe(
+      tap({
+        error: (e) => logger.error('balance(tokens)', e),
+      }),
       distinctUntilChanged((_, current) => !current.deltas),
       map(({ deltas }) => {
         const result: AssetBalance[] = [];
@@ -182,10 +204,10 @@ export class BalanceClient extends Papi {
       };
 
       await updateBalance();
-      const sub =
-        this.api.query.System.Number.watchValue('best').subscribe(
-          updateBalance
-        );
+      const sub = this.watcher.bestBlock$.subscribe({
+        error: (e) => logger.error('balance(erc20) watcher.bestBlock', e),
+        next: updateBalance,
+      });
       return () => sub.unsubscribe();
     };
 
@@ -193,6 +215,9 @@ export class BalanceClient extends Papi {
     run().then((unsub) => (disconnect = unsub));
 
     return observable.pipe(
+      tap({
+        error: (e) => logger.error('balance(erc20)', e),
+      }),
       finalize(() => disconnect?.()),
       pairwise(),
       map(([prev, curr], i) => {
