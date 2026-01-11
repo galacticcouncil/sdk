@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.27.0
+
+### Minor Changes
+
+[25c02fa8]: https://github.com/galacticcouncil/sdk/commit/25c02fa8
+
+- [[#25c02fa8][25c02fa8]] next: fix DCA max calculation (time contraints)
+
 ## 0.26.0
 
 ### Minor Changes
