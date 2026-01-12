@@ -145,12 +145,13 @@ function PolkadotXcm() {
     calculateLimitedReserveTransferFee: (opts?: {
       reserve?: Parachain;
     }): FeeAmountConfigBuilder => ({
-      build: async ({ feeAsset, destination }) => {
+      build: async ({ feeAsset, source, destination }) => {
+        const src = source as Parachain;
         const rcv = destination as Parachain;
         const reserve = opts?.reserve;
 
         // Validate reserve chain matches asset's xcm location
-        validateReserveChain(feeAsset, rcv, reserve);
+        validateReserveChain(feeAsset, src, rcv, reserve);
 
         // Multi-hop transfer (through reserve chain)
         if (reserve) {
@@ -173,6 +174,17 @@ function PolkadotXcm() {
           const feeWithMargin = padFeeByPercentage(totalFee, 20n);
           const margin = feeWithMargin - totalFee;
 
+          console.log('[FeeAmountBuilder] Multi-hop transfer fee:', {
+            reserveFee: reserveFee.toString(),
+            destinationFee: destinationFee.toString(),
+            totalFee: totalFee.toString(),
+            margin: margin.toString(),
+            feeWithMargin: feeWithMargin.toString(),
+            asset: feeAsset.originSymbol,
+            reserve: reserve.name,
+            destination: rcv.name,
+          });
+
           return {
             amount: feeWithMargin,
             breakdown: {
@@ -189,6 +201,14 @@ function PolkadotXcm() {
         const totalFee = await client.calculateDestinationFee(xcm, feeAsset);
         const feeWithMargin = padFeeByPercentage(totalFee, 20n);
         const margin = feeWithMargin - totalFee;
+
+        console.log('[FeeAmountBuilder] Direct transfer fee:', {
+          totalFee: totalFee.toString(),
+          margin: margin.toString(),
+          feeWithMargin: feeWithMargin.toString(),
+          asset: feeAsset.originSymbol,
+          destination: rcv.name,
+        });
 
         return {
           amount: feeWithMargin,

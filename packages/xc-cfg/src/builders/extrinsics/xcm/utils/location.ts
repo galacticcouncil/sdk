@@ -61,6 +61,7 @@ export function getReserveParachainId(
 
 export function validateReserveChain(
   asset: Asset,
+  source: Parachain,
   destination: Parachain,
   reserve?: Parachain
 ): void {
@@ -84,7 +85,10 @@ export function validateReserveChain(
   }
 
   if (!reserve && expectedReserveId !== undefined) {
-    if (expectedReserveId !== destination.parachainId) {
+    const sourceIsReserve = source.parachainId === expectedReserveId;
+    const destIsReserve = destination.parachainId === expectedReserveId;
+
+    if (!sourceIsReserve && !destIsReserve) {
       throw new Error(
         `Reserve chain required for asset "${asset.originSymbol}" on ${destination.name}: ` +
           `expected parachain ${expectedReserveId}`
