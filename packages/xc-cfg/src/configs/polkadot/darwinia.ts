@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
         asset: ring,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

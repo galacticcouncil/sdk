@@ -58,7 +58,7 @@ export function toTransferTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   });
 }
 
@@ -83,7 +83,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(ExtrinsicBuilder().xTokens().transferMultiassets()),
+    ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
   });
 }
 
@@ -145,7 +145,11 @@ export function toParaErc20Template(
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
+    ).prior(
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.LocalReserve,
+      })
+    ),
   });
 }
 
@@ -187,7 +191,9 @@ function viaWormholeTemplate(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).priorMulti([
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      }),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
       }),

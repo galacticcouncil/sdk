@@ -5,7 +5,7 @@ import {
 
 import { defineChain, Chain } from 'viem';
 
-import { aca, glmr, dai_awh, ldot, wbtc_awh, weth_awh } from '../../assets';
+import { aca, glmr, ldot } from '../../assets';
 import { AcalaEvmResolver } from '../../resolvers';
 
 const evmResolver = new AcalaEvmResolver();
@@ -44,6 +44,19 @@ export const acala = new EvmParachain({
       asset: aca,
       id: { Token: aca.originSymbol },
       metadataId: { NativeAssetId: { Token: aca.originSymbol } },
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: ldot,
@@ -51,28 +64,19 @@ export const acala = new EvmParachain({
       id: { Token: ldot.originSymbol },
       metadataId: { NativeAssetId: { Token: ldot.originSymbol } },
       min: 0.05,
-    },
-    // erc-20 assets
-    {
-      asset: dai_awh,
-      decimals: 18,
-      id: { Erc20: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae' },
-      balanceId: '0x54a37a01cd75b616d63e0ab665bffdb0143c52ae',
-      min: 0.01,
-    },
-    {
-      asset: wbtc_awh,
-      decimals: 8,
-      id: { Erc20: '0xc80084af223c8b598536178d9361dc55bfda6818' },
-      balanceId: '0xc80084af223c8b598536178d9361dc55bfda6818',
-      min: 0.00000035,
-    },
-    {
-      asset: weth_awh,
-      decimals: 18,
-      id: { Erc20: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578' },
-      balanceId: '0x5a4d6acdc4e3e5ab15717f407afe957f7a242578',
-      min: 0.000005555555555555,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x0003000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
+        },
+      },
     },
     // foreign assets
     {

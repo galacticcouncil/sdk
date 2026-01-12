@@ -10,6 +10,10 @@ export const crust = new Parachain({
     {
       asset: cru,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,
