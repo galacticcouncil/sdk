@@ -25,7 +25,7 @@ const toHydration: AssetRoute[] = [
         asset: cfg,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -47,7 +47,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

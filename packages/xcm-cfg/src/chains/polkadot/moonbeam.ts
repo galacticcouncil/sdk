@@ -13,6 +13,7 @@ import {
   hdx,
   jito_sol,
   pink,
+  prime,
   sol,
   susds_mwh,
   sui,
@@ -130,6 +131,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
               },
             },
           ],

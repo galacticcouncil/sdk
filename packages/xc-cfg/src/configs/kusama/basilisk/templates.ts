@@ -39,6 +39,8 @@ export function toTransferTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }

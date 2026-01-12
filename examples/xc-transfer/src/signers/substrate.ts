@@ -16,7 +16,7 @@ export async function signAndSend(
 
   const signer = await getSignerBySource('polkadot-js', from);
 
-  const client = ctx.api;
+  const client = ctx.client;
   const api = client.getUnsafeApi();
 
   const callData = Binary.fromHex(call.data);

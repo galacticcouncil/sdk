@@ -9,7 +9,6 @@ import {
 } from '../../../builders';
 
 import { balance, fee } from './configs';
-import { toTransferTemplate } from './templates';
 
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
@@ -31,7 +30,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

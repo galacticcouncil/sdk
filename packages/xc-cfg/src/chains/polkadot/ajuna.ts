@@ -10,6 +10,10 @@ export const ajuna = new Parachain({
     {
       asset: ajun,
       id: 'AJUN',
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,

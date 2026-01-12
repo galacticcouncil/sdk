@@ -10,7 +10,6 @@ import {
   cfg_new,
   cru,
   dai,
-  dai_awh,
   dai_mwh,
   ded,
   dot,
@@ -54,9 +53,7 @@ import {
   vdot,
   ztg,
   wbtc,
-  wbtc_awh,
   wbtc_mwh,
-  weth_awh,
   weth_mwh,
   wsteth,
   wud,
@@ -108,11 +105,8 @@ import {
 } from './templates';
 
 const toAcala: AssetRoute[] = [
-  toTransferTemplate(dai_awh, acala),
-  toTransferTemplate(wbtc_awh, acala),
-  toTransferTemplate(weth_awh, acala),
-  toTransferTemplate(aca, acala),
-  toTransferTemplate(ldot, acala),
+  toTransferTemplate(aca, acala, 1),
+  toTransferTemplate(ldot, acala, 0.06),
 ];
 
 const toAssetHub: AssetRoute[] = [
@@ -181,7 +175,9 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   }),
   new AssetRoute({
     source: {
@@ -202,7 +198,9 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiasset(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   }),
   toHubExtTemplate(pink),
   toHubExtTemplate(ded),
@@ -288,7 +286,7 @@ const toInterlay: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -395,12 +393,16 @@ const toCex: AssetRoute[] = [
   toHubWithCexFwdTemplate(
     usdt,
     0.1,
-    ExtrinsicBuilder().xTokens().transferMultiasset()
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
   ),
   toHubWithCexFwdTemplate(
     usdc,
     0.1,
-    ExtrinsicBuilder().xTokens().transferMultiasset()
+    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    })
   ),
   toHubWithCexFwdTemplate(
     dot,

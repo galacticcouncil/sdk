@@ -230,16 +230,27 @@ const transferAssetsUsingTypeAndThen = (
     messageId,
     sender,
     source,
+    transact,
   }) => {
     const version = XcmVersion.v4;
 
     const ctx = source.chain as Parachain;
-    const rcv = destination.chain as Parachain;
+
+    let rcv = destination.chain as Parachain;
+    let feeAmount: bigint = destination.fee.amount;
+    let feeAsset = destination.fee;
+
+    if (transact) {
+      rcv = transact.chain as Parachain;
+      feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
+      feeAsset = transact.fee;
+    }
 
     const from = getExtrinsicAccount(sender);
-    const receiver = rcv.usesCexForwarding
-      ? getDerivativeAccount(ctx, sender, rcv)
-      : address;
+    const receiver =
+      transact || rcv.usesCexForwarding
+        ? getDerivativeAccount(ctx, sender, rcv)
+        : address;
     const account = getExtrinsicAccount(receiver);
 
     const { transferType } = opts;
@@ -249,20 +260,20 @@ const transferAssetsUsingTypeAndThen = (
       version
     );
     const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, destination.fee),
+      locationOrError(ctx, feeAsset),
       version
     );
 
     const transferAsset = toAsset(transferAssetLocation, amount);
-    const transferFee = toAsset(transferFeeLocation, destination.fee.amount);
+    const transferFee = toAsset(transferFeeLocation, feeAmount);
 
-    const isSufficientPaymentAsset = asset.isEqual(destination.fee);
+    const isSufficientPaymentAsset = asset.isEqual(feeAsset);
 
     const dest = toDest(version, ctx, rcv);
 
     const assets = {
       type: version,
-      value: asset.isEqual(destination.fee)
+      value: isSufficientPaymentAsset
         ? [transferAsset]
         : [transferFee, transferAsset],
     };
@@ -296,7 +307,11 @@ const transferAssetsUsingTypeAndThen = (
         messageId
       );
     } else {
-      customXcmOnDest = toDepositXcmOnDest(version, account);
+      customXcmOnDest = toDepositXcmOnDest(
+        version,
+        account,
+        assets.value.length
+      );
     }
 
     const func = 'transfer_assets_using_type_and_then';

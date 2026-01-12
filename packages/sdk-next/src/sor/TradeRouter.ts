@@ -1,7 +1,6 @@
 import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
 import { Router } from './Router';
-import { calculateSwapAmount } from './TradeRouter.utils';
 import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
 
 import { RouteNotFound } from '../errors';
@@ -14,7 +13,7 @@ import {
   PoolType,
 } from '../pool';
 import { Amount } from '../types';
-import { fmt, math } from '../utils';
+import { fmt, math, calc } from '../utils';
 
 const { FeeUtils } = fmt;
 
@@ -241,7 +240,7 @@ export class TradeRouter extends Router {
       ? lastSwap.tradeFeePct
       : math.calculateSellFee(delta0Y, deltaY);
 
-    const swapAmount = calculateSwapAmount(
+    const swapAmount = calc.mulSpot(
       firstSwap.amountIn,
       spotPrice,
       firstSwap.assetInDecimals,
@@ -364,7 +363,7 @@ export class TradeRouter extends Router {
       .sort((a, b) => (b < a ? -1 : 1));
 
     const liquidity = assetInLiquidityDesc[0];
-    const liquidityIn = math.getFraction(liquidity, 0.1);
+    const liquidityIn = calc.getFraction(liquidity, 0.1);
 
     const routes = await Promise.all(
       paths.map((path) => this.toSellSwaps(liquidityIn, path, poolsMap))
@@ -425,7 +424,7 @@ export class TradeRouter extends Router {
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
 
-      const swapAmount = calculateSwapAmount(
+      const swapAmount = calc.mulSpot(
         aIn,
         spotPrice,
         poolPair.decimalsIn,
@@ -656,7 +655,7 @@ export class TradeRouter extends Router {
       ? lastSwap.tradeFeePct
       : math.calculateBuyFee(delta0X, deltaX);
 
-    const swapAmount = calculateSwapAmount(
+    const swapAmount = calc.mulSpot(
       firstSwap.amountOut,
       spotPrice,
       firstSwap.assetOutDecimals,
@@ -771,7 +770,7 @@ export class TradeRouter extends Router {
       const feePctRange = this.getPoolFeeRange(poolFees);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
 
-      const swapAmount = calculateSwapAmount(
+      const swapAmount = calc.mulSpot(
         aOut,
         spotPrice,
         poolPair.decimalsOut,

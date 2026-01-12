@@ -38,6 +38,6 @@ describe('Location Utils', () => {
     };
 
     const t = transform(location);
-    console.log(JSON.stringify(t, formatter, 2));
+    //console.log(JSON.stringify(t, formatter, 2));
   });
 });
