@@ -199,8 +199,6 @@ export class TradeScheduler {
     const maxByBudget = Number(amountIn / minAmountIn);
     const maxByTimeRaw = Math.floor(duration / this.blockTime);
 
-    console.log(maxByBudget, maxByTimeRaw);
-
     const maxByTime = Math.max(
       0,
       Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
