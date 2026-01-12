@@ -16,6 +16,7 @@ import {
   buildNestedReserveTransfer,
   buildMultiHopReserveTransfer,
 } from './extrinsics/xcm';
+import { validateReserveChain } from './extrinsics/xcm/utils';
 import { padFeeByPercentage } from './utils';
 
 import { dot } from '../assets';
@@ -147,6 +148,9 @@ function PolkadotXcm() {
       build: async ({ feeAsset, destination }) => {
         const rcv = destination as Parachain;
         const reserve = opts?.reserve;
+
+        // Validate reserve chain matches asset's xcm location
+        validateReserveChain(feeAsset, rcv, reserve);
 
         // Multi-hop transfer (through reserve chain)
         if (reserve) {
