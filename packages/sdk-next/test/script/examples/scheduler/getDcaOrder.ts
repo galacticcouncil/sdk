@@ -3,7 +3,7 @@ import { PolkadotClient } from 'polkadot-api';
 import { createSdkContext } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
-import { BENEFICIARY, DAY_MS, MAX_RETRIES } from '../../const';
+import { BENEFICIARY, DAY_MS, HOUR_MS, MAX_RETRIES } from '../../const';
 import { ApiUrl } from '../../types';
 
 class GetDcaOrder extends PapiExecutor {
@@ -12,7 +12,7 @@ class GetDcaOrder extends PapiExecutor {
 
     const { api, tx } = sdk;
 
-    const order = await api.scheduler.getDcaOrder(10, 0, '5000', DAY_MS, 400);
+    const order = await api.scheduler.getDcaOrder(22, 34, '1000000', DAY_MS);
     const orderTx = await tx
       .order(order)
       .withBeneficiary(BENEFICIARY)

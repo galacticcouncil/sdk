@@ -77,5 +77,4 @@ export enum TradeOrderError {
 
 export interface TradeDcaOrder extends TradeOrder {
   maxTradeCount: number;
-  optTradeCount: number;
 }
