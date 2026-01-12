@@ -105,8 +105,8 @@ import {
 } from './templates';
 
 const toAcala: AssetRoute[] = [
-  toTransferTemplate(aca, acala, 1),
-  toTransferTemplate(ldot, acala, 0.06),
+  toTransferTemplate(aca, acala),
+  toTransferTemplate(ldot, acala),
 ];
 
 const toAssetHub: AssetRoute[] = [
