@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.27.1
+
+### Patch Changes
+
+[d0e266e8]: https://github.com/galacticcouncil/sdk/commit/d0e266e8
+
+- [[#d0e266e8][d0e266e8]] next: cleanup logs
+
 ## 0.27.0
 
 ### Minor Changes
