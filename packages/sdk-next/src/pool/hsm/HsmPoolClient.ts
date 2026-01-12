@@ -6,7 +6,6 @@ import {
   Subscription,
   combineLatest,
   filter,
-  finalize,
   map,
   pairwise,
 } from 'rxjs';
@@ -183,13 +182,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         map(({ payload }) => this.parseEvmLog(payload)),
         filter((v): v is TEvmEvent => v !== undefined),
         filter(({ eventName }) => SYNC_BUCKET_EVENTS.includes(eventName)),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub evm log');
-        })
+        this.watchGuard('evm.Log')
       )
-      .subscribe(({ facilitator, key }) => {
-        this.log(this.getPoolType(), '[evm:Log]', key);
-
+      .subscribe(({ eventName, facilitator }) => {
+        this.log.trace(`evm.Log.${eventName}`, facilitator);
         this.store.update(async (pools) => {
           const updated: HsmPoolBase[] = [];
 
@@ -253,9 +249,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
           map((balance) => balance.flat()),
           pairwise(),
           map(([prev, curr]) => this.getDeltas(prev, curr)),
-          finalize(() => {
-            this.log(this.getPoolType(), 'unsub collateral balance');
-          })
+          this.watchGuard('balances')
         )
         .subscribe((balances) => {
           this.store.update((pools) => {
@@ -265,12 +259,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
             balances.forEach(({ id, balance }) => {
               const pool = poolsMap.get(id);
               if (pool) {
-                this.log(
-                  this.getPoolType(),
-                  '[collateral:Balance]',
-                  id,
-                  balance.transferable
-                );
+                this.log.trace('balances', { id, balance });
                 updated.push({
                   ...pool,
                   collateralBalance: balance.transferable,

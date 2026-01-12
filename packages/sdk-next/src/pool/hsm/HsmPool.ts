@@ -290,12 +290,12 @@ export class HsmPool extends StableSwap {
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): bigint {
-    const amounOut = big.toBigInt(1, poolPair.decimalsOut);
+    const amounOut = big.toBigInt(1, RUNTIME_DECIMALS);
     return this.calculateInGivenOut(poolPair, amounOut);
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): bigint {
-    const amounIn = big.toBigInt(1, poolPair.decimalsIn);
+    const amounIn = big.toBigInt(1, RUNTIME_DECIMALS);
     return this.calculateOutGivenIn(poolPair, amounIn);
   }
 

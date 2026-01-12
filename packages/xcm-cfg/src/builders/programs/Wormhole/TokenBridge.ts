@@ -23,6 +23,7 @@ import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { UniversalAddress } from '@wormhole-foundation/sdk-connect';
 import {
   createApproveAuthoritySignerInstruction,
+  createTransferNativeInstruction,
   createTransferNativeWithPayloadInstruction,
   getWrappedMeta,
 } from '@wormhole-foundation/sdk-solana-tokenbridge';
@@ -216,9 +217,80 @@ const transferTokenWithPayload = () => {
   };
 };
 
+const transferToken = (): ProgramConfigBuilder => {
+  return {
+    build: async (params) => {
+      const { address, amount, asset, source, sender, destination } = params;
+      const ctx = source.chain;
+      const ctxSol = ctx as SolanaChain;
+
+      const ctxWh = Wh.fromChain(ctx);
+      const rcvWh = Wh.fromChain(destination.chain);
+
+      const senderAddress = new PublicKey(sender);
+
+      const tokenId = source.chain.getAssetId(asset);
+      const tokenAddress = new PublicKey(tokenId);
+      const senderTokenAddress = await getAssociatedTokenAddress(
+        tokenAddress,
+        senderAddress
+      );
+
+      const recipientAddress = new UniversalAddress(address);
+      const recipientChainId = rcvWh.getWormholeId();
+
+      const isWrapped = await getWrappedMeta(
+        ctxSol.connection,
+        ctxWh.getTokenBridge(),
+        tokenAddress
+      )
+        .catch((_) => null)
+        .then((meta) => meta != null);
+
+      if (isWrapped) {
+        throw new Error('Wrapped assets not supported yet');
+      }
+
+      const nonce = 0;
+
+      const messageKeypair = Keypair.generate();
+
+      const approvalIx = createApproveAuthoritySignerInstruction(
+        ctxWh.getTokenBridge(),
+        senderTokenAddress,
+        senderAddress,
+        amount
+      );
+
+      const tokenBridgeTransferIx = createTransferNativeInstruction(
+        ctxSol.connection,
+        ctxWh.getTokenBridge(),
+        ctxWh.getCoreBridge(),
+        sender,
+        messageKeypair.publicKey,
+        senderTokenAddress,
+        tokenAddress,
+        nonce,
+        amount,
+        0n,
+        recipientAddress.toUint8Array(),
+        recipientChainId
+      );
+
+      return new ProgramConfig({
+        instructions: [approvalIx, tokenBridgeTransferIx],
+        signers: [messageKeypair],
+        func: 'Transfer',
+        module: 'TokenBridge',
+      });
+    },
+  };
+};
+
 export const TokenBridge = () => {
   return {
     transferNativeWithPayload,
     transferTokenWithPayload,
+    transferToken,
   };
 };

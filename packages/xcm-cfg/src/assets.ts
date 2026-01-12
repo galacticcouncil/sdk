@@ -180,6 +180,11 @@ export const pen = new Asset({
   originSymbol: 'PEN',
 });
 
+export const prime = new Asset({
+  key: 'prime',
+  originSymbol: 'PRIME',
+});
+
 export const pha = new Asset({
   key: 'pha',
   originSymbol: 'PHA',
@@ -374,18 +379,18 @@ export const assets: Asset[] = [
   ena,
   eth,
   eurc,
+  ewt,
   glmr,
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kar,
   kilt,
   ksm,
   ldo,
   laos,
   lbtc,
-  ewt,
-  jito_sol,
   ldot,
   link,
   myth,
@@ -395,6 +400,7 @@ export const assets: Asset[] = [
   pha,
   pen,
   pink,
+  prime,
   ring,
   sky,
   sol,

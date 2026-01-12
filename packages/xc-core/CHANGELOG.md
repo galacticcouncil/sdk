@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-core
 
+## 0.6.0
+
+### Minor Changes
+
+[f4c70f0d]: https://github.com/galacticcouncil/sdk/commit/f4c70f0d
+
+- [[#f4c70f0d][f4c70f0d]] bump papi to latest (1.23.2)
+
 ## 0.5.0
 
 ### Minor Changes

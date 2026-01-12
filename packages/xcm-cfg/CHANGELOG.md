@@ -1,5 +1,19 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.20.0
+
+### Minor Changes
+
+[482130ce]: https://github.com/galacticcouncil/sdk/commit/482130ce
+
+- [[#482130ce][4626c650]] xcm: added prime cfg
+
+## 10.19.1
+
+### Patch Changes
+
+- fix assethub dwellir rpcs
+
 ## 10.19.0
 
 ### Minor Changes

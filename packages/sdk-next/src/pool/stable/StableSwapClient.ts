@@ -3,7 +3,7 @@ import { toHex } from '@polkadot-api/utils';
 
 import { blake2b } from '@noble/hashes/blake2b';
 
-import { Subscription, distinctUntilChanged, finalize, map, merge } from 'rxjs';
+import { Subscription, distinctUntilChanged, map, merge, tap } from 'rxjs';
 
 import {
   HYDRATION_SS58_PREFIX,
@@ -187,7 +187,13 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       .map((p) => p.id)
       .map((id) =>
         this.api.query.Tokens.TotalIssuance.watchValue(id, 'best').pipe(
-          map((value) => ({
+          map((value, index) => ({ value, index })),
+          tap(({ index, value }) => {
+            if (index > 0) {
+              this.log.trace('tokens.TotalIssuance', id, value);
+            }
+          }),
+          map(({ value }) => ({
             id,
             value,
           }))
@@ -195,11 +201,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       );
 
     return merge(...streams)
-      .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub total issuance');
-        })
-      )
+      .pipe(this.watchGuard('tokens.TotalIssuance'))
       .subscribe((delta) => {
         const { id, value } = delta;
 
@@ -235,39 +237,42 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub pool pegs');
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('stableswap.PoolPegs', value.deltas?.upserted);
+          }
+        }),
+        this.watchGuard('stableswap.PoolPegs')
       )
-      .subscribe(({ deltas }) => {
-        this.store.update((pools) => {
-          const updated: StableSwapBase[] = [];
-          const poolsMap = new Map(pools.map((p) => [p.id, p]));
+      .subscribe({
+        error: (e) => this.log.error('stableswap.PoolPegs', e),
+        next: ({ value: { deltas } }) => {
+          this.store.update((pools) => {
+            const updated: StableSwapBase[] = [];
+            const poolsMap = new Map(pools.map((p) => [p.id, p]));
 
-          deltas?.upserted.forEach(({ args, value }) => {
-            const [key] = args;
+            deltas?.upserted.forEach(({ args, value }) => {
+              const [key] = args;
 
-            const pool = poolsMap.get(key);
-            if (pool) {
-              const pegs = this.getRecentPegs(value);
-              updated.push({
-                ...pool,
-                pegs: pegs,
-              });
-            }
+              const pool = poolsMap.get(key);
+              if (pool) {
+                const pegs = this.getRecentPegs(value);
+                updated.push({
+                  ...pool,
+                  pegs: pegs,
+                });
+              }
+            });
+            return updated;
           });
-          return updated;
-        });
+        },
       });
   }
 
   private subscribeBlock(): Subscription {
-    return this.api.query.System.Number.watchValue('best')
-      .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub block change');
-        })
-      )
+    return this.watcher.bestBlock$
+      .pipe(this.watchGuard('watcher.bestBlock'))
       .subscribe((block) => {
         this.store.update((pools) => {
           const updated: StableSwapBase[] = [];

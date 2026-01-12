@@ -207,7 +207,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         filter((v): v is TValidationData => v !== undefined),
         distinctUntilChanged(
           (a, b) => a.relay_parent_number === b.relay_parent_number
-        )
+        ),
+        this.watchGuard('parachainSystem.ValidationData')
       )
       .subscribe(({ relay_parent_number }) => {
         this.store.update(async (pools) => {
