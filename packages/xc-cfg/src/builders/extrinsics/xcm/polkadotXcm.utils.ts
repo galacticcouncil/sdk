@@ -127,12 +127,18 @@ export const toAsset = (assetLocation: object, amount: any) => {
   };
 };
 
-export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
+export const toDepositXcmOnDest = (
+  version: XcmVersion,
+  account: any,
+  assetsCount: number
+) => {
   return {
     type: version,
     value: [
       XcmV4Instruction.DepositAsset({
-        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(2)),
+        assets: XcmV4AssetAssetFilter.Wild(
+          XcmV4AssetWildAsset.AllCounted(assetsCount)
+        ),
         beneficiary: {
           parents: 0,
           interior: XcmV3Junctions.X1(account),

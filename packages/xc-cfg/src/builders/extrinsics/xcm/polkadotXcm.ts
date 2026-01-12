@@ -307,7 +307,11 @@ const transferAssetsUsingTypeAndThen = (
         messageId
       );
     } else {
-      customXcmOnDest = toDepositXcmOnDest(version, account);
+      customXcmOnDest = toDepositXcmOnDest(
+        version,
+        account,
+        assets.value.length
+      );
     }
 
     const func = 'transfer_assets_using_type_and_then';
