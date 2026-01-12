@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.27.2
+
+### Patch Changes
+
+[d758722c]: https://github.com/galacticcouncil/sdk/commit/d758722c
+
+- [[#d758722c][d758722c]] next: fix dca trade count resolution
+
 ## 0.27.1
 
 ### Patch Changes
