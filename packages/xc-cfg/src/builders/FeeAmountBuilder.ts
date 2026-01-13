@@ -174,17 +174,6 @@ function PolkadotXcm() {
           const feeWithMargin = padFeeByPercentage(totalFee, 20n);
           const margin = feeWithMargin - totalFee;
 
-          console.log('[FeeAmountBuilder] Multi-hop transfer fee:', {
-            reserveFee: reserveFee.toString(),
-            destinationFee: destinationFee.toString(),
-            totalFee: totalFee.toString(),
-            margin: margin.toString(),
-            feeWithMargin: feeWithMargin.toString(),
-            asset: feeAsset.originSymbol,
-            reserve: reserve.name,
-            destination: rcv.name,
-          });
-
           return {
             amount: feeWithMargin,
             breakdown: {
@@ -201,14 +190,6 @@ function PolkadotXcm() {
         const totalFee = await client.calculateDestinationFee(xcm, feeAsset);
         const feeWithMargin = padFeeByPercentage(totalFee, 20n);
         const margin = feeWithMargin - totalFee;
-
-        console.log('[FeeAmountBuilder] Direct transfer fee:', {
-          totalFee: totalFee.toString(),
-          margin: margin.toString(),
-          feeWithMargin: feeWithMargin.toString(),
-          asset: feeAsset.originSymbol,
-          destination: rcv.name,
-        });
 
         return {
           amount: feeWithMargin,
