@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { ring } from '../../assets';
 import { hydration, darwinia } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -17,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ring,
       fee: {
-        amount: 2,
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: ring,
       },
     },

@@ -1,4 +1,11 @@
 import { encodeLocation } from '@galacticcouncil/common';
+import {
+  Asset,
+  Parachain,
+  XcmLocation,
+  multiloc,
+} from '@galacticcouncil/xc-core';
+
 import { XcmVersion } from '../types';
 
 /**
@@ -36,4 +43,56 @@ function applyConcreteWrapper(id: object) {
   return {
     Concrete: { ...id },
   };
+}
+
+export function getReserveParachainId(
+  xcmLocation: XcmLocation | undefined
+): number | undefined {
+  if (!xcmLocation) {
+    return undefined;
+  }
+
+  if (xcmLocation.interior === 'Here') {
+    return undefined;
+  }
+
+  return multiloc.findParachain(xcmLocation);
+}
+
+export function validateReserveChain(
+  asset: Asset,
+  source: Parachain,
+  destination: Parachain,
+  reserve?: Parachain
+): void {
+  const xcmLocation = destination.getAssetXcmLocation(asset);
+  const expectedReserveId = getReserveParachainId(xcmLocation);
+
+  if (reserve) {
+    if (expectedReserveId === undefined) {
+      throw new Error(
+        `Reserve chain ${reserve.name} (${reserve.parachainId}) provided for asset "${asset.originSymbol}", ` +
+          `but asset does not require a reserve chain on ${destination.name}`
+      );
+    }
+
+    if (expectedReserveId !== reserve.parachainId) {
+      throw new Error(
+        `Invalid reserve chain for asset "${asset.originSymbol}": ` +
+          `expected parachain ${expectedReserveId}, got ${reserve.name} (${reserve.parachainId})`
+      );
+    }
+  }
+
+  if (!reserve && expectedReserveId !== undefined) {
+    const sourceIsReserve = source.parachainId === expectedReserveId;
+    const destIsReserve = destination.parachainId === expectedReserveId;
+
+    if (!sourceIsReserve && !destIsReserve) {
+      throw new Error(
+        `Reserve chain required for asset "${asset.originSymbol}" on ${destination.name}: ` +
+          `expected parachain ${expectedReserveId}`
+      );
+    }
+  }
 }

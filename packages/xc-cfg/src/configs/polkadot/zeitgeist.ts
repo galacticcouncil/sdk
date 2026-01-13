@@ -2,7 +2,11 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { glmr, usdc_mwh, ztg } from '../../assets';
 import { hydration, zeitgeist } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import {
+  BalanceBuilder,
+  ExtrinsicBuilder,
+  FeeAmountBuilder,
+} from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -17,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ztg,
       fee: {
-        amount: 0.0225,
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: ztg,
       },
     },
@@ -39,7 +43,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: glmr,
       fee: {
-        amount: 0.0035,
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: glmr,
       },
     },
@@ -61,7 +65,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdc_mwh,
       fee: {
-        amount: 0.1,
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: glmr,
       },
     },
