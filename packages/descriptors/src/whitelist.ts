@@ -5,10 +5,11 @@ import {
 } from '../.papi/descriptors';
 
 const hydrationWhitelist: HydrationWhitelistEntry[] = [
+  // runtime
   'api.AaveTradeExecutor.*',
   'api.CurrenciesApi.*',
   'api.EthereumRuntimeRPCApi.*',
-
+  // const
   'const.Aura.*',
   'const.DCA.*',
   'const.DynamicFees.*',
@@ -18,8 +19,10 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'const.Stableswap.*',
   'const.XYK.*',
   'const.Staking.*',
+  // event
   'event.EVM.Log',
   'event.Router.Executed',
+  // query
   'query.AssetRegistry.*',
   'query.Bonds.*',
   'query.DynamicFees.*',
@@ -38,6 +41,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.Uniques.Account',
   'query.XYK.*',
   'query.XYKWarehouseLM.*',
+  // tx
   'tx.DCA.*',
   'tx.Dispatcher.*',
   'tx.Omnipool.*',

@@ -86,16 +86,15 @@ export class TradeScheduler {
       assetInDecimals
     );
 
+    const optTradeCount = this.getOptimalTradeCount(priceImpact);
     const maxTradeCount = this.getMaximumTradeCount(
       amountIn,
       amountInMin,
       duration
     );
-    const optTradeCount = this.getOptimalTradeCount(priceImpact);
-    const tradeCount = noOfTrades || optTradeCount;
+    const tradeCount = noOfTrades || Math.min(optTradeCount, maxTradeCount);
 
     const frequency = Math.round(duration / tradeCount);
-
     const amountInPerTrade = amountIn / BigInt(tradeCount);
 
     const dca = await this.router.getBestSell(
@@ -121,7 +120,6 @@ export class TradeScheduler {
       assetOut: assetOut,
       errors: errors,
       maxTradeCount: maxTradeCount,
-      optTradeCount: optTradeCount,
       tradeCount: tradeCount,
       tradeFee: tradeFee,
       tradeImpactPct: dca.priceImpactPct,
@@ -182,6 +180,8 @@ export class TradeScheduler {
    * Single trade execution amount must be at least 20% of
    * minimum order budget.
    *
+   * Block period can't exceed total duration.
+   *
    * @param amountIn - entering / given budget
    * @param amountInMin - minimal budget to schedule an order
    * @param duration - order duration in ms
@@ -198,8 +198,6 @@ export class TradeScheduler {
 
     const maxByBudget = Number(amountIn / minAmountIn);
     const maxByTimeRaw = Math.floor(duration / this.blockTime);
-
-    console.log(maxByBudget, maxByTimeRaw);
 
     const maxByTime = Math.max(
       0,
