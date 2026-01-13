@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: cfg,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: cfg,
       },
     },
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: glmr,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: glmr,
       },
     },

@@ -140,9 +140,9 @@ function Snowbridge() {
   };
 }
 
-function PolkadotXcm() {
+function XcmPaymentApi() {
   return {
-    calculateLimitedReserveTransferFee: (opts?: {
+    calculateDestFee: (opts?: {
       reserve?: Parachain;
     }): FeeAmountConfigBuilder => ({
       build: async ({ feeAsset, source, destination }) => {
@@ -205,7 +205,7 @@ function PolkadotXcm() {
 
 export function FeeAmountBuilder() {
   return {
-    PolkadotXcm,
+    XcmPaymentApi,
     Snowbridge,
     Wormhole,
   };

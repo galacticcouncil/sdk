@@ -32,8 +32,8 @@ export function toTransferTemplate(
       asset: asset,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(
+          .XcmPaymentApi()
+          .calculateDestFee(
             reserve ? { reserve } : undefined
           ),
         asset: asset,

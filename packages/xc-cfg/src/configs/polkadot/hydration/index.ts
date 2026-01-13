@@ -124,8 +124,8 @@ const toAssetHub: AssetRoute[] = [
       asset: dot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: dot,
       },
     },
@@ -147,8 +147,8 @@ const toAssetHub: AssetRoute[] = [
       asset: ksm,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: ksm,
       },
     },
@@ -170,8 +170,8 @@ const toAssetHub: AssetRoute[] = [
       asset: usdt,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdt,
       },
     },
@@ -193,8 +193,8 @@ const toAssetHub: AssetRoute[] = [
       asset: usdc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdc,
       },
     },
@@ -245,8 +245,8 @@ const toBifrost: AssetRoute[] = [
       asset: dot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: polkadot }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: polkadot }),
         asset: dot,
       },
     },
@@ -281,8 +281,8 @@ const toInterlay: AssetRoute[] = [
       asset: vdot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: dot,
       },
     },
@@ -302,8 +302,8 @@ const toInterlay: AssetRoute[] = [
       asset: dot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: polkadot }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: polkadot }),
         asset: dot,
       },
     },

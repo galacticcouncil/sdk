@@ -33,8 +33,8 @@ const toHydration: AssetRoute[] = [
       asset: bnc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: bnc,
       },
     },
@@ -57,8 +57,8 @@ const toHydration: AssetRoute[] = [
       asset: vdot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: vdot,
       },
     },
@@ -81,8 +81,8 @@ const toHydration: AssetRoute[] = [
       asset: vastr,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: vastr,
       },
     },
@@ -105,8 +105,8 @@ const toHydration: AssetRoute[] = [
       asset: dot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: polkadot }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: polkadot }),
         asset: dot,
       },
     },
@@ -131,8 +131,8 @@ const toHydration: AssetRoute[] = [
       asset: astr,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: astr,
       },
     },
@@ -155,8 +155,8 @@ const toHydration: AssetRoute[] = [
       asset: glmr,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: glmr,
       },
     },
@@ -179,8 +179,8 @@ const toHydration: AssetRoute[] = [
       asset: ibtc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: ibtc,
       },
     },
@@ -203,8 +203,8 @@ const toHydration: AssetRoute[] = [
       asset: usdt,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdt,
       },
     },
@@ -227,8 +227,8 @@ const toHydration: AssetRoute[] = [
       asset: usdc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdc,
       },
     },
@@ -254,8 +254,8 @@ const toAssetHub: AssetRoute[] = [
       asset: usdt,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdt,
       },
     },
@@ -278,8 +278,8 @@ const toAssetHub: AssetRoute[] = [
       asset: usdc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdc,
       },
     },

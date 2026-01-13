@@ -22,8 +22,8 @@ const toHydration: AssetRoute[] = [
       asset: aca,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: aca,
       },
     },
@@ -46,8 +46,8 @@ const toHydration: AssetRoute[] = [
       asset: ldot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: ldot,
       },
     },

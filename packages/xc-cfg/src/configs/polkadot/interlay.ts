@@ -21,7 +21,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: intr,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: intr,
       },
     },
@@ -43,7 +43,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ibtc,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: intr,
       },
     },
@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: hdx,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: hdx,
       },
     },
@@ -88,8 +88,8 @@ const toHydration: AssetRoute[] = [
       asset: vdot,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: bifrost }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: bifrost }),
         asset: vdot,
       },
     },
@@ -112,8 +112,8 @@ const toHydration: AssetRoute[] = [
       asset: usdt,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdt,
       },
     },
@@ -136,8 +136,8 @@ const toHydration: AssetRoute[] = [
       asset: usdc,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee({ reserve: assetHub }),
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdc,
       },
     },
@@ -159,7 +159,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: FeeAmountBuilder().PolkadotXcm().calculateLimitedReserveTransferFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: dot,
       },
     },

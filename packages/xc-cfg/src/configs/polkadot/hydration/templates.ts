@@ -56,8 +56,8 @@ export function toTransferTemplate(
       asset: asset,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(
+          .XcmPaymentApi()
+          .calculateDestFee(
             reserve ? { reserve } : undefined
           ),
         asset: asset,
@@ -82,8 +82,8 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       asset: asset,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdt,
       },
     },

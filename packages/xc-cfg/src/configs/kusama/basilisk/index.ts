@@ -25,8 +25,8 @@ const toAssetHub: AssetRoute[] = [
       asset: usdt,
       fee: {
         amount: FeeAmountBuilder()
-          .PolkadotXcm()
-          .calculateLimitedReserveTransferFee(),
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdt,
       },
     },
