@@ -1,5 +1,17 @@
 # @galacticcouncil/xc-cfg
 
+## 0.6.0
+
+### Minor Changes
+
+[d93e32ec]: https://github.com/galacticcouncil/sdk/commit/d93e32ec
+[b7b675ce]: https://github.com/galacticcouncil/sdk/commit/b7b675ce
+[d814a241]: https://github.com/galacticcouncil/sdk/commit/d814a241
+
+- [[#d93e32ec][d93e32ec]] xc: making buffer consistent to 20%
+- [[#b7b675ce][b7b675ce]] xc: added reserve chain validation
+- [[#b7b675ce][b7b675ce]] xc: removing hardcoded fees and added fee calculation builder
+
 ## 0.5.0
 
 ### Minor Changes

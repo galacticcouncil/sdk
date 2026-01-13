@@ -71,15 +71,13 @@ export function validateReserveChain(
   if (reserve) {
     if (expectedReserveId === undefined) {
       throw new Error(
-        `Reserve chain ${reserve.name} (${reserve.parachainId}) provided for asset "${asset.originSymbol}", ` +
-          `but asset does not require a reserve chain on ${destination.name}`
+        `No reserve chain for "${asset.originSymbol}" on ${destination.name}`
       );
     }
 
     if (expectedReserveId !== reserve.parachainId) {
       throw new Error(
-        `Invalid reserve chain for asset "${asset.originSymbol}": ` +
-          `expected parachain ${expectedReserveId}, got ${reserve.name} (${reserve.parachainId})`
+        `Wrong reserve chain for "${asset.originSymbol}": expected ${expectedReserveId}, got ${reserve.parachainId}`
       );
     }
   }
@@ -90,8 +88,7 @@ export function validateReserveChain(
 
     if (!sourceIsReserve && !destIsReserve) {
       throw new Error(
-        `Reserve chain required for asset "${asset.originSymbol}" on ${destination.name}: ` +
-          `expected parachain ${expectedReserveId}`
+        `Reserve chain ${expectedReserveId} required for "${asset.originSymbol}"`
       );
     }
   }

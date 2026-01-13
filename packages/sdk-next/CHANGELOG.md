@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk-next
 
+## 0.28.0
+
+### Minor Changes
+
+[340f382f]: https://github.com/galacticcouncil/sdk/commit/340f382f
+[daa26158]: https://github.com/galacticcouncil/sdk/commit/daa26158
+
+- [[#340f382f][340f382f]] next: balance client naming fixes
+- [[#daa26158][daa26158]] next: add smoldot provider
+
 ## 0.27.2
 
 ### Patch Changes
