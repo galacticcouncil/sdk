@@ -1,3 +1,4 @@
 export * from './Papi';
-export * from './ChainWatcher';
-export * from './client';
+export * from './Watcher';
+
+export * from './provider';

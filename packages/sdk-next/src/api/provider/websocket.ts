@@ -1,6 +1,7 @@
-import { withLogsRecorder } from 'polkadot-api/logs-provider';
-import { withLegacy } from '@polkadot-api/legacy-provider';
 import { getWsProvider } from 'polkadot-api/ws-provider';
+import { withLogsRecorder } from 'polkadot-api/logs-provider';
+
+import { withLegacy } from '@polkadot-api/legacy-provider';
 
 type WsProviderConfig = Parameters<typeof getWsProvider>[1];
 

@@ -1,2 +1,2 @@
-export * from './smoldot';
 export * from './websocket';
+export * from './smoldot';

@@ -8,8 +8,8 @@ import { connectionProbe$ } from './probe';
 
 const { logger } = log;
 
-export class ChainWatcher {
-  private static instance: ChainWatcher | null = null;
+export class Watcher {
+  private static instance: Watcher | null = null;
 
   readonly bestBlock$;
   readonly finalizedBlock$;
@@ -32,9 +32,9 @@ export class ChainWatcher {
     );
   }
 
-  static getInstance(client: PolkadotClient): ChainWatcher {
+  static getInstance(client: PolkadotClient): Watcher {
     if (!this.instance) {
-      this.instance = new ChainWatcher(client);
+      this.instance = new Watcher(client);
     }
     return this.instance;
   }
