@@ -62,9 +62,9 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       const [x, y] = value;
 
       const [xBalance, xMeta, yBalance, yMeta] = await Promise.all([
-        this.getBalance(id, x),
+        this.balance.getBalance(id, x),
         this.api.query.AssetRegistry.Assets.getValue(x),
-        this.getBalance(id, y),
+        this.balance.getBalance(id, y),
         this.api.query.AssetRegistry.Assets.getValue(y),
       ]);
 

@@ -33,6 +33,7 @@ import {
   throttleTime,
 } from 'rxjs/operators';
 
+import { Papi } from '../api';
 import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
@@ -47,8 +48,10 @@ const { withTimeout } = async;
 
 const RESYNC_THROTTLE = 3_000;
 
-export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
+export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected evm: EvmClient;
+  protected balance: BalanceClient;
+
   protected store = new PoolStore<T>();
   protected log: PoolLog;
 
@@ -71,6 +74,7 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
+    this.balance = new BalanceClient(client);
     this.log = new PoolLog(this.getPoolType());
   }
 
@@ -183,11 +187,11 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
       const { address } = pool;
 
       const subs: Observable<AssetBalance | AssetBalance[]>[] = [
-        this.subscribeTokensBalance(address),
+        this.balance.watchTokensBalance(address),
       ];
 
       if (this.hasSystemAsset(pool)) {
-        const sysSub = this.subscribeSystemBalance(address);
+        const sysSub = this.balance.watchSystemBalance(address);
         subs.push(sysSub);
       }
 
@@ -195,14 +199,14 @@ export abstract class PoolClient<T extends PoolBase> extends BalanceClient {
         const ids = pool.tokens
           .filter((t) => t.type === 'Erc20')
           .map((t) => t.id);
-        const erc20Sub = this.subscribeErc20Balance(address, ids);
+        const erc20Sub = this.balance.watchErc20Balance(address, ids);
         subs.push(erc20Sub);
       }
 
       return combineLatest(subs).pipe(
         map((balance) => balance.flat()),
         pairwise(),
-        map(([prev, curr]) => this.getDeltas(prev, curr)),
+        map(([prev, curr]) => this.balance.getDeltas(prev, curr)),
         filter((d) => d.length > 0),
         map((balances) => [address, balances] as const)
       );

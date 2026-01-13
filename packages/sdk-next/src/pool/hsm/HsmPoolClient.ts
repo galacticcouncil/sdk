@@ -123,7 +123,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       const stablePool = stablePools.find((p) => p.id === pool_id);
       if (stablePool) {
         const address = this.getPoolId(pool_id);
-        const collateralBalance = await this.getBalance(facilitator, id);
+        const collateralBalance = await this.balance.getBalance(
+          facilitator,
+          id
+        );
 
         return {
           ...stablePool,
@@ -234,12 +237,15 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     const subs: Observable<AssetBalance[]>[] = [];
 
     if (tokenCollaterals.length > 0) {
-      const tokenSub = this.subscribeTokensBalance(hsmAddress);
+      const tokenSub = this.balance.watchTokensBalance(hsmAddress);
       subs.push(tokenSub);
     }
 
     if (erc20Collaterals.length > 0) {
-      const erc20Sub = this.subscribeErc20Balance(hsmAddress, erc20Collaterals);
+      const erc20Sub = this.balance.watchErc20Balance(
+        hsmAddress,
+        erc20Collaterals
+      );
       subs.push(erc20Sub);
     }
 
@@ -248,7 +254,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         .pipe(
           map((balance) => balance.flat()),
           pairwise(),
-          map(([prev, curr]) => this.getDeltas(prev, curr)),
+          map(([prev, curr]) => this.balance.getDeltas(prev, curr)),
           this.watchGuard('balances')
         )
         .subscribe((balances) => {

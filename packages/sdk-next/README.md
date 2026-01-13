@@ -126,10 +126,11 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 | Method | Description  |
 | :----- | :----------- |
-| `subscribeSystemBalance(address: string): Observable<AssetAmount>` | Subscribe native account balance. |
-| `subscribeTokenBalance(address: string, assetId: number): Observable<AssetAmount>` | Subscribe token account balance. |
-| `subscribeTokensBalance(address: string): Observable<AssetAmount[]>` | Subscribe tokens account balances. |
-| `subscribeErc20Balance(address: string, includeOnly?: number[]):  Observable<AssetAmount[]>` | Subscribe erc20 assets balances |
+| `watchBalance(address: string): Observable<AssetAmount>` | Subscribe account balance. |
+| `watchSystemBalance(address: string): Observable<AssetAmount>` | Subscribe native account balance. |
+| `watchTokenBalance(address: string, assetId: number): Observable<AssetAmount>` | Subscribe token account balance. |
+| `watchTokensBalance(address: string): Observable<AssetAmount[]>` | Subscribe tokens account balances. |
+| `watchErc20Balance(address: string, includeOnly?: number[]):  Observable<AssetAmount[]>` | Subscribe erc20 assets balances |
 
 ➡️ For type definitions visit [types.ts](src/types.ts)<br />
 
@@ -137,7 +138,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 | Method | Description  |
 | :----- | :----------- |
-| `getOnChainAssets(includeInvalid?: boolean, external?: ExternalAsset[]): Promise<Asset[]>` | Returns assets with metadata from registry. |
+| `getSupported(includeInvalid?: boolean, external?: ExternalAsset[]): Promise<Asset[]>` | Returns assets with metadata from registry. |
 
 ➡️ For type definitions visit [types.ts](src/types.ts)<br />
 
@@ -175,7 +176,7 @@ const { client } = sdk;
 
 const account = "7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1"
 const subscription = client.balance
-  .subscribeBalance(account)
+  .watch(account)
   .subscribe((balances) => {
     console.log(balances);
   });
@@ -188,7 +189,7 @@ Get default on-chain data.
 ```typescript
 const { client } = sdk;
 
-const assets = await client.asset.getOnChainAssets();
+const assets = await client.asset.getSupported();
 console.log(assets);
 ```
 

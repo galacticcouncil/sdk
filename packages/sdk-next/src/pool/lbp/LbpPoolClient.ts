@@ -123,9 +123,9 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         repay_target,
         fee_collector.toString()
       ),
-      this.getBalance(poolAddress, accumulated),
+      this.balance.getBalance(poolAddress, accumulated),
       this.api.query.AssetRegistry.Assets.getValue(accumulated),
-      this.getBalance(poolAddress, distributed),
+      this.balance.getBalance(poolAddress, distributed),
       this.api.query.AssetRegistry.Assets.getValue(distributed),
     ]);
 
@@ -173,7 +173,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     }
 
     try {
-      const repayFeeCurrent = await this.getBalance(
+      const repayFeeCurrent = await this.balance.getBalance(
         feeCollector,
         accumulatedAsset
       );

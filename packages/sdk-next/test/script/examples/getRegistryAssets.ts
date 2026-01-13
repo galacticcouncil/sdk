@@ -8,7 +8,7 @@ import { client as c } from '../../../src';
 class GetAssetsExample extends PapiExecutor {
   async script(client: PolkadotClient): Promise<any> {
     const assetClient = new c.AssetClient(client);
-    return assetClient.getOnChainAssets(false, []);
+    return assetClient.getSupported(false, []);
   }
 }
 

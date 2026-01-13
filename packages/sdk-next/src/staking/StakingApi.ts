@@ -27,20 +27,17 @@ export const BIG_BILL = Big(BIG_10.pow(12));
 
 export class StakingApi {
   private readonly client: StakingClient;
-  private readonly balanceClient: BalanceClient;
+  private readonly balance: BalanceClient;
 
   constructor(client: StakingClient, balanceClient: BalanceClient) {
     this.client = client;
-    this.balanceClient = balanceClient;
+    this.balance = balanceClient;
   }
 
   async getPotBalance(): Promise<Balance> {
     const palletId = await this.client.getPalletId();
     const potAddress = getAccountAddress(palletId);
-    const balance = await this.balanceClient.getBalance(
-      potAddress,
-      SYSTEM_ASSET_ID
-    );
+    const balance = await this.balance.getBalance(potAddress, SYSTEM_ASSET_ID);
     return balance;
   }
 

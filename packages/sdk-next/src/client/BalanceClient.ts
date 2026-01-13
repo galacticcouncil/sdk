@@ -40,29 +40,29 @@ export class BalanceClient extends Papi {
   async getBalance(account: string, assetId: number): Promise<Balance> {
     return assetId === SYSTEM_ASSET_ID
       ? this.getSystemBalance(account)
-      : this.getTokenBalanceData(account, assetId);
+      : this.getBalanceData(account, assetId);
   }
 
   async getSystemBalance(account: string): Promise<Balance> {
     const query = this.api.query.System.Account;
     const { data } = await query.getValue(account, { at: 'best' });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
   async getTokenBalance(account: string, assetId: number): Promise<Balance> {
     const query = this.api.query.Tokens.Accounts;
     const data = await query.getValue(account, assetId, { at: 'best' });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
   async getErc20Balance(account: string, assetId: number): Promise<Balance> {
-    return this.getTokenBalanceData(account, assetId);
+    return this.getBalanceData(account, assetId);
   }
 
-  subscribeBalance(address: string): Observable<AssetBalance[]> {
-    const systemOb = this.subscribeSystemBalance(address);
-    const tokensOb = this.subscribeTokensBalance(address);
-    const erc20Ob = this.subscribeErc20Balance(address);
+  watchBalance(address: string): Observable<AssetBalance[]> {
+    const systemOb = this.watchSystemBalance(address);
+    const tokensOb = this.watchTokensBalance(address);
+    const erc20Ob = this.watchErc20Balance(address);
 
     return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
       tap({
@@ -89,7 +89,7 @@ export class BalanceClient extends Papi {
     );
   }
 
-  subscribeSystemBalance(address: string): Observable<AssetBalance> {
+  watchSystemBalance(address: string): Observable<AssetBalance> {
     const query = this.api.query.System.Account;
 
     return query.watchValue(address, 'best').pipe(
@@ -100,13 +100,13 @@ export class BalanceClient extends Papi {
         (balance) =>
           ({
             id: SYSTEM_ASSET_ID,
-            balance: this.calculateBalance(balance.data),
+            balance: this.getBreakdown(balance.data),
           }) as AssetBalance
       )
     );
   }
 
-  subscribeTokenBalance(
+  watchTokenBalance(
     address: string,
     assetId: number
   ): Observable<AssetBalance> {
@@ -120,13 +120,13 @@ export class BalanceClient extends Papi {
         (balance) =>
           ({
             id: assetId,
-            balance: this.calculateBalance(balance),
+            balance: this.getBreakdown(balance),
           }) as AssetBalance
       )
     );
   }
 
-  subscribeTokensBalance(address: string): Observable<AssetBalance[]> {
+  watchTokensBalance(address: string): Observable<AssetBalance[]> {
     const query = this.api.query.Tokens.Accounts;
 
     return query.watchEntries(address, { at: 'best' }).pipe(
@@ -141,7 +141,7 @@ export class BalanceClient extends Papi {
           const [_, asset] = u.args;
           result.push({
             id: asset,
-            balance: this.calculateBalance({
+            balance: this.getBreakdown({
               free: 0n,
               reserved: 0n,
               frozen: 0n,
@@ -154,7 +154,7 @@ export class BalanceClient extends Papi {
 
           result.push({
             id: asset,
-            balance: this.calculateBalance(u.value),
+            balance: this.getBreakdown(u.value),
           });
         });
 
@@ -163,7 +163,7 @@ export class BalanceClient extends Papi {
     );
   }
 
-  subscribeErc20Balance(
+  watchErc20Balance(
     address: string,
     includeOnly?: number[]
   ): Observable<AssetBalance[]> {
@@ -190,7 +190,7 @@ export class BalanceClient extends Papi {
       const updateBalance = async () => {
         const balances: [number, Balance][] = await Promise.all(
           ids.map(async (id) => {
-            const balance = await this.getTokenBalanceData(address, id);
+            const balance = await this.getBalanceData(address, id);
             return [id, balance];
           })
         );
@@ -228,17 +228,17 @@ export class BalanceClient extends Papi {
     ) as Observable<AssetBalance[]>;
   }
 
-  private async getTokenBalanceData(
+  private async getBalanceData(
     account: string,
     assetId: number
   ): Promise<Balance> {
     const data = await this.api.apis.CurrenciesApi.account(assetId, account, {
       at: 'best',
     });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
-  protected calculateBalance(data: TAccount): Balance {
+  private getBreakdown(data: TAccount): Balance {
     const transferable =
       data.free >= data.frozen ? data.free - data.frozen : 0n;
     const total = data.free + data.reserved;
@@ -252,10 +252,7 @@ export class BalanceClient extends Papi {
     };
   }
 
-  protected getDeltas(
-    prev: AssetBalance[],
-    curr: AssetBalance[]
-  ): AssetBalance[] {
+  getDeltas(prev: AssetBalance[], curr: AssetBalance[]): AssetBalance[] {
     const areBalancesEqual = (
       a: Balance | undefined,
       b: Balance | undefined

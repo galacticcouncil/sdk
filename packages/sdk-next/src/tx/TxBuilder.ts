@@ -16,14 +16,14 @@ export abstract class TxBuilder extends Papi {
   protected readonly evm: EvmClient;
   protected readonly evmClient: PublicClient;
 
-  protected readonly balanceClient: BalanceClient;
+  protected readonly balance: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
     this.evmClient = evm.getWsProvider();
-    this.balanceClient = new BalanceClient(client);
+    this.balance = new BalanceClient(client);
     this.aaveUtils = new AaveUtils(evm);
   }
 

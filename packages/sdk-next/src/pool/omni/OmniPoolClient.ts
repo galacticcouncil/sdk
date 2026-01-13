@@ -131,7 +131,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       this.api.query.Omnipool.Assets.getEntries({ at: 'best' }),
       this.api.query.Omnipool.HubAssetTradability.getValue(),
       this.api.query.AssetRegistry.Assets.getValue(hubAssetId),
-      this.getBalance(poolAddress, hubAssetId),
+      this.balance.getBalance(poolAddress, hubAssetId),
       this.getPoolLimits(),
     ]);
 
@@ -141,7 +141,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
       const [meta, balance] = await Promise.all([
         this.api.query.AssetRegistry.Assets.getValue(id),
-        this.getBalance(poolAddress, id),
+        this.balance.getBalance(poolAddress, id),
       ]);
 
       return {

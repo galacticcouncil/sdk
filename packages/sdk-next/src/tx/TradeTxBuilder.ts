@@ -51,10 +51,7 @@ export class TradeTxBuilder extends TxBuilder {
 
     const { assetIn } = swaps[0];
 
-    const balance = await this.balanceClient.getBalance(
-      this.beneficiary,
-      assetIn
-    );
+    const balance = await this.balance.getBalance(this.beneficiary, assetIn);
     const isMax = amountIn >= balance.transferable - 5n;
 
     if (isMax) {

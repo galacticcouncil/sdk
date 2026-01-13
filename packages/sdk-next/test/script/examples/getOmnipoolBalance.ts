@@ -9,8 +9,8 @@ import { client as c } from '../../../src';
 
 class GetOmnipoolBalance extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const balanceClient = new c.BalanceClient(client);
-    const observable = balanceClient.subscribeBalance(
+    const balance = new c.BalanceClient(client);
+    const observable = balance.watchBalance(
       '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1'
     );
     return firstValueFrom(observable);

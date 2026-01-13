@@ -191,7 +191,7 @@ export class AssetClient extends Papi {
     );
   }
 
-  async getOnChainAssets(
+  async getSupported(
     includeInvalid?: boolean,
     external?: ExternalAsset[]
   ): Promise<Asset[]> {

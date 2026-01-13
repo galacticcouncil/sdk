@@ -89,7 +89,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       const [tradeability, meta, balance] = await Promise.all([
         this.api.query.Stableswap.AssetTradability.getValue(poolId, id),
         this.api.query.AssetRegistry.Assets.getValue(id),
-        this.getBalance(poolAddress, id),
+        this.balance.getBalance(poolAddress, id),
       ]);
 
       return {
