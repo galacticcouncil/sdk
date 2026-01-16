@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.6.1
+
+### Patch Changes
+
+[e0f9309f]: https://github.com/galacticcouncil/sdk/commit/e0f9309f
+
+- [[#e0f9309f][e0f9309f]] xc: fix value.asBytes is not a function
+
 ## 0.6.0
 
 ### Minor Changes
