@@ -57,9 +57,7 @@ export function toTransferTemplate(
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee(
-            reserve ? { reserve } : undefined
-          ),
+          .calculateDestFee(reserve ? { reserve } : undefined),
         asset: asset,
       },
     },
@@ -81,9 +79,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       chain: assetHub,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdt,
       },
     },
@@ -129,8 +125,8 @@ export function toHubWithCexFwdTemplate(
 
 export function toParaErc20Template(
   asset: Asset,
-  destination: AnyChain,
-  destinationFee: number
+  destination: Parachain,
+  transferType: XcmTransferType = XcmTransferType.LocalReserve
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -145,7 +141,9 @@ export function toParaErc20Template(
       chain: destination,
       asset: asset,
       fee: {
-        amount: destinationFee,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: destination }),
         asset: glmr,
       },
     },
@@ -154,18 +152,22 @@ export function toParaErc20Template(
       swapExtrinsicBuilder
     ).prior(
       ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.LocalReserve,
+        transferType,
       })
     ),
   });
 }
 
 export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(asset, moonbeam, 0.08);
+  return toParaErc20Template(
+    asset,
+    moonbeam,
+    XcmTransferType.DestinationReserve
+  );
 }
 
 export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(asset, zeitgeist, 0.1);
+  return toParaErc20Template(asset, zeitgeist);
 }
 
 function viaWormholeTemplate(
