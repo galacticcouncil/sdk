@@ -329,13 +329,13 @@ export const toBridgeXcmOnDest = (
  * @returns fixed location
  */
 const reanchorLocation = (assetLocation: object) => {
-  const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
+  const erc20KeyObj = multiloc.findNestedKey(assetLocation, 'key');
 
-  if (erc20Key) {
+  if (erc20KeyObj.key) {
     return {
       parents: 0,
       interior: XcmV3Junctions.X1(
-        XcmV3Junction.AccountKey20({ key: erc20Key })
+        XcmV3Junction.AccountKey20({ key: erc20KeyObj.key })
       ),
     };
   }
