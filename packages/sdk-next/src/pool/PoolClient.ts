@@ -125,7 +125,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
           const cycle = new Subscription();
 
           const seed$ = from(
-            withTimeout(this.getMemPools(), 30_000, 'getMemPools stalled')
+            withTimeout(this.getMemPools(), 60_000, 'getMemPools stalled')
           ).pipe(
             tap(() => this.log.info('pool_synced', { mem: this.mem })),
             map((pools) => pools.filter((p) => this.hasValidAssets(p))),
