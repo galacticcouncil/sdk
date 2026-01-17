@@ -8,7 +8,6 @@ import { POLKADOT_XCM } from './PolkadotXcm';
 import { SNOWBRIDGE } from './Snowbridge';
 import { TOKEN_BRIDGE } from './TokenBridge';
 import { TOKEN_RELAYER } from './TokenRelayer';
-import { XTOKENS } from './Xtokens';
 
 export const Abi: Record<string, TAbi> = {
   Batch: BATCH,
@@ -19,5 +18,4 @@ export const Abi: Record<string, TAbi> = {
   Snowbridge: SNOWBRIDGE,
   TokenBridge: TOKEN_BRIDGE,
   TokenRelayer: TOKEN_RELAYER,
-  Xtokens: XTOKENS,
 };

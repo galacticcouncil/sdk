@@ -3,7 +3,6 @@ import { Erc20 } from './contracts/Erc20';
 import { PolkadotXcm } from './contracts/PolkadotXcm';
 import { Snowbridge } from './contracts/Snowbridge';
 import { Wormhole } from './contracts/Wormhole';
-import { Xtokens } from './contracts/Xtokens';
 
 export function ContractBuilder() {
   return {
@@ -12,6 +11,5 @@ export function ContractBuilder() {
     PolkadotXcm,
     Snowbridge,
     Wormhole,
-    Xtokens,
   };
 }
