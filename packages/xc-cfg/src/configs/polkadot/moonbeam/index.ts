@@ -44,7 +44,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
   toHydrationXcTemplate(hdx, 0.6),
   toHydrationXcTemplate(usdt, 0.3),
@@ -79,7 +79,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    contract: ContractBuilder().Xtokens().transferMultiCurrencies(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32WithFee(),
   }),
   new AssetRoute({
     source: {
@@ -101,7 +101,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
   new AssetRoute({
     source: {
@@ -123,7 +123,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
 ];
 
