@@ -8,7 +8,7 @@ import {
 } from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
-import { getAssetERC20Address } from '../utils';
+import { getAssetERC20Address } from '../extrinsics/xcm/polkadotXcm.utils';
 
 const { Ss58Addr } = addr;
 
