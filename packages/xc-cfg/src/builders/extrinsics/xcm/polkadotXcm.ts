@@ -298,7 +298,7 @@ const transferAssetsUsingTypeAndThen = (
     );
 
     let customXcmOnDest;
-    if (destination.chain.key === 'ethereum' && !transact) {
+    if (destination.chain.key === 'ethereum') {
       customXcmOnDest = toBridgeXcmOnDest(
         version,
         account,

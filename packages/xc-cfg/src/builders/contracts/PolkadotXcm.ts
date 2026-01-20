@@ -1,6 +1,8 @@
 import {
   addr,
   Abi,
+  AnyChain,
+  Asset,
   ContractConfig,
   ContractConfigBuilder,
   Parachain,
@@ -8,9 +10,24 @@ import {
 } from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
-import { getAssetERC20Address } from '../extrinsics/xcm/polkadotXcm.utils';
-
 const { Ss58Addr } = addr;
+
+function formatAssetIdToERC20(id: string) {
+  if (id.startsWith('0x')) {
+    return id;
+  }
+
+  if (!/^\d{38,39}$/.test(id)) {
+    throw new Error(`Asset id: ${id} must be a string and have 38-39 digits`);
+  }
+
+  return `0xffffffff${BigInt(id).toString(16).padStart(32, '0')}`;
+}
+
+function getAssetERC20Address(chain: AnyChain, asset: Asset) {
+  const assetId = chain.getAssetId(asset);
+  return typeof assetId === 'string' ? formatAssetIdToERC20(assetId) : assetId;
+}
 
 export function PolkadotXcm() {
   return {
