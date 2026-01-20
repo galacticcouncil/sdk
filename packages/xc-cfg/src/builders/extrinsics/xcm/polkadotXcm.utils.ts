@@ -46,6 +46,11 @@ const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
   );
 };
 
+export const isSnowbridgeTransfer = (assetLocation: any) => {
+  const consensus = multiloc.findGlobalConsensus(assetLocation);
+  return consensus && 'Ethereum' in consensus;
+};
+
 export const toDest = (
   version: XcmVersion,
   source: Parachain,
@@ -331,7 +336,7 @@ export const toBridgeXcmOnDest = (
 const reanchorLocation = (assetLocation: object) => {
   const erc20KeyObj = multiloc.findNestedKey(assetLocation, 'key');
 
-  if (erc20KeyObj.key) {
+  if (erc20KeyObj) {
     return {
       parents: 0,
       interior: XcmV3Junctions.X1(
