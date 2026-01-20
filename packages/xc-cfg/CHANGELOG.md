@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.6.2
+
+### Patch Changes
+
+[06a3fd41]: https://github.com/galacticcouncil/sdk/commit/06a3fd41
+
+- [[#06a3fd41][06a3fd41]] xc: fix snowbridge transfers
+
 ## 0.6.1
 
 ### Patch Changes
