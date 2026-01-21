@@ -15,7 +15,8 @@ export async function signAndSend(
   onTransactionReceipt: (receipt: any) => void,
   onError: (error: unknown) => void
 ) {
-  const { client } = chain as AnyEvmChain;
+  const evmChain = chain as AnyEvmChain;
+  const client = evmChain.evmClient;
   const account = H160.fromAny(call.from);
 
   const provider = client.getProvider();
@@ -29,9 +30,9 @@ export async function signAndSend(
 
   if (chain instanceof EvmParachain) {
     try {
-      const client = chain.api;
+      const parachainClient = chain.client;
       const callData = Binary.fromHex(call.data);
-      const api = client.getUnsafeApi();
+      const api = parachainClient.getUnsafeApi();
 
       const tx = await api.txFromCallData(callData);
       console.log(tx);
