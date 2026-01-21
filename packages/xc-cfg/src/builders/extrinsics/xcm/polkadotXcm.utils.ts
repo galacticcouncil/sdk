@@ -47,8 +47,12 @@ const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
 };
 
 export const isSnowbridgeTransfer = (assetLocation: any) => {
-  const consensus = multiloc.findGlobalConsensus(assetLocation);
-  return consensus && 'Ethereum' in consensus;
+  const { interior } = assetLocation;
+
+  if (interior.type === 'X1' && interior.value.type === 'GlobalConsensus') {
+    return interior.value.value.type === 'Ethereum';
+  }
+  return false;
 };
 
 export const toDest = (
@@ -299,7 +303,7 @@ export const toBridgeXcmOnDest = (
             fun: XcmV2MultiassetWildFungibility.Fungible(),
           })
         ),
-        reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
+        reserve: instr.ethereumLocation(ETHEREUM_CHAIN_ID),
         xcm: [
           XcmV4Instruction.BuyExecution({
             fees: {

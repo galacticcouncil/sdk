@@ -12,7 +12,7 @@ const ethereumGlobalConsensus = (ethChainId: number) =>
     XcmV3JunctionNetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
   );
 
-export function bridgeLocation(ethChainId: number) {
+export function ethereumLocation(ethChainId: number) {
   return {
     parents: 2,
     interior: XcmV3Junctions.X1(ethereumGlobalConsensus(ethChainId)),
@@ -28,7 +28,7 @@ export function parachainLocation(paraId: number) {
 
 export function erc20Location(ethChainId: number, tokenAddress: string) {
   if (tokenAddress === ETHER_TOKEN_ADDRESS) {
-    return bridgeLocation(ethChainId);
+    return ethereumLocation(ethChainId);
   }
 
   return {

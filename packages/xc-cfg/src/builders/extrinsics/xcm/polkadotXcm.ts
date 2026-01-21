@@ -256,14 +256,15 @@ const transferAssetsUsingTypeAndThen = (
 
     const { transferType } = opts;
 
-    const assetLocation = locationOrError(ctx, asset);
     const transferAssetLocation = getExtrinsicAssetLocation(
-      assetLocation,
+      locationOrError(ctx, asset),
       version
     );
 
-    const feeLocation = locationOrError(ctx, feeAsset);
-    const transferFeeLocation = getExtrinsicAssetLocation(feeLocation, version);
+    const transferFeeLocation = getExtrinsicAssetLocation(
+      locationOrError(ctx, feeAsset),
+      version
+    );
 
     const transferAsset = toAsset(transferAssetLocation, amount);
     const transferFee = toAsset(transferFeeLocation, feeAmount);
@@ -299,7 +300,7 @@ const transferAssetsUsingTypeAndThen = (
     );
 
     let customXcmOnDest;
-    if (isSnowbridgeTransfer(assetLocation)) {
+    if (isSnowbridgeTransfer(transferAssetLocation)) {
       customXcmOnDest = toBridgeXcmOnDest(
         version,
         account,
