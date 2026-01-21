@@ -6,6 +6,7 @@ import {
 import { big } from '@galacticcouncil/common';
 
 import {
+  isSnowbridgeTransfer,
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
@@ -237,7 +238,7 @@ const transferAssetsUsingTypeAndThen = (
     const ctx = source.chain as Parachain;
 
     let rcv = destination.chain as Parachain;
-    let feeAmount: bigint = destination.fee.amount;
+    let feeAmount = destination.fee.amount;
     let feeAsset = destination.fee;
 
     if (transact) {
@@ -255,14 +256,14 @@ const transferAssetsUsingTypeAndThen = (
 
     const { transferType } = opts;
 
+    const assetLocation = locationOrError(ctx, asset);
     const transferAssetLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, asset),
+      assetLocation,
       version
     );
-    const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, feeAsset),
-      version
-    );
+
+    const feeLocation = locationOrError(ctx, feeAsset);
+    const transferFeeLocation = getExtrinsicAssetLocation(feeLocation, version);
 
     const transferAsset = toAsset(transferAssetLocation, amount);
     const transferFee = toAsset(transferFeeLocation, feeAmount);
@@ -298,7 +299,7 @@ const transferAssetsUsingTypeAndThen = (
     );
 
     let customXcmOnDest;
-    if (destination.chain.key === 'ethereum') {
+    if (isSnowbridgeTransfer(assetLocation)) {
       customXcmOnDest = toBridgeXcmOnDest(
         version,
         account,

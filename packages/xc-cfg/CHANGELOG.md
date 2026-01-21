@@ -1,5 +1,21 @@
 # @galacticcouncil/xc-cfg
 
+## 0.6.2
+
+### Patch Changes
+
+[06a3fd41]: https://github.com/galacticcouncil/sdk/commit/06a3fd41
+
+- [[#06a3fd41][06a3fd41]] xc: fix snowbridge transfers
+
+## 0.6.1
+
+### Patch Changes
+
+[e0f9309f]: https://github.com/galacticcouncil/sdk/commit/e0f9309f
+
+- [[#e0f9309f][e0f9309f]] xc: fix value.asBytes is not a function
+
 ## 0.6.0
 
 ### Minor Changes

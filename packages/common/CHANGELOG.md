@@ -1,5 +1,13 @@
 # @galacticcouncil/common
 
+## 0.4.0
+
+### Minor Changes
+
+[76c36922]: https://github.com/galacticcouncil/sdk/commit/76c36922
+
+- [[#76c36922][76c36922]] common: metadata utils (error decoder)
+
 ## 0.3.0
 
 ### Minor Changes

@@ -66,10 +66,7 @@ const [call, fee] = await Promise.all([
 // Dump transfer info
 console.log(transfer);
 console.log(status);
-console.log(
-  'Estimated fee:',
-  [fee.toDecimal(fee.decimals), fee.originSymbol].join(' ')
-);
+console.log('Estimated fee:', [fee.toDecimal(), fee.originSymbol].join(' '));
 console.log(call);
 console.log('Dry run:', await call.dryRun());
 
