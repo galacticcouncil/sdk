@@ -1,5 +1,12 @@
 # @galacticcouncil/xc-sdk
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.7.0
+
 ## 0.4.2
 
 ### Patch Changes

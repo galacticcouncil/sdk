@@ -1,5 +1,12 @@
 # @galacticcouncil/xc-cfg
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.7.0
+
 ## 0.7.0
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @galacticcouncil/xc-core
 
+## 0.7.0
+
+### Minor Changes
+
+[01ebee31]: https://github.com/galacticcouncil/sdk/commit/01ebee31
+[295aa7bb]: https://github.com/galacticcouncil/sdk/commit/295aa7bb
+
+- [[#01ebee31][01ebee31]] xc: removing xtokens from moonbeam
+- [[#295aa7bb][295aa7bb]] xc: PolkadotXCM moonbeam implementation
+
 ## 0.6.0
 
 ### Minor Changes
