@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@galacticcouncil/xc": "^0.4.0",
+    "@galacticcouncil/xc-scan": "^0.1.0",
     "@talismn/connect-wallets": "^1.2.8"
   }
 }

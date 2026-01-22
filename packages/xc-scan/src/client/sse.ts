@@ -1,4 +1,4 @@
-import { XcJourney, XcJourneyRequest } from './types';
+import { XcJourney, XcJourneyReplaceEvt, XcJourneyRequest } from './types';
 
 export class OcelloidsSseClient {
   private _baseUrl: string;
@@ -12,6 +12,10 @@ export class OcelloidsSseClient {
     opts: {
       onNewJourney(journey: XcJourney, req: XcJourneyRequest): void;
       onUpdateJourney(journey: XcJourney, req: XcJourneyRequest): void;
+      onReplaceJourney(
+        journey: XcJourneyReplaceEvt,
+        req: XcJourneyRequest
+      ): void;
       onOpen(): void;
       onError(error: any): void;
     }
@@ -23,29 +27,45 @@ export class OcelloidsSseClient {
     );
 
     const urlParams = new URLSearchParams(criteria).toString();
-    const eventSource = new EventSource(`${url}?${urlParams}`);
 
-    eventSource.onopen = opts.onOpen;
+    let es: EventSource | null = null;
+    let stopped = false;
 
-    eventSource.addEventListener('update_journey', (e) =>
-      opts.onUpdateJourney(JSON.parse(e.data), request)
-    );
+    const connect = () => {
+      if (stopped) return;
 
-    eventSource.addEventListener('new_journey', (e) =>
-      opts.onNewJourney(JSON.parse(e.data), request)
-    );
+      es = new EventSource(`${url}?${urlParams}`);
 
-    eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
-      opts.onError(error);
+      es.onopen = opts.onOpen;
 
-      if (eventSource.readyState === EventSource.CLOSED) {
-        console.warn('SSE connection closed by server.');
-      }
+      es.addEventListener('update_journey', (e) =>
+        opts.onUpdateJourney(JSON.parse(e.data), request)
+      );
+
+      es.addEventListener('new_journey', (e) =>
+        opts.onNewJourney(JSON.parse(e.data), request)
+      );
+
+      es.addEventListener('replace_journey', (e) =>
+        opts.onReplaceJourney(JSON.parse(e.data), request)
+      );
+
+      es.onerror = (error) => {
+        opts.onError(error);
+
+        if (es && es.readyState === EventSource.CLOSED) {
+          console.log('SSE closed, reconnecting in 5s...');
+          es.close();
+          setTimeout(connect, 5000);
+        }
+      };
     };
 
+    connect();
+
     return () => {
-      eventSource.close();
+      stopped = true;
+      es?.close();
     };
   }
 }

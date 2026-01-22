@@ -1,0 +1,104 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "op": { "type": "string", "const": "journeys.list" },
+        "criteria": {
+          "type": "object",
+          "properties": {
+            "address": { "type": "string", "minLength": 3, "maxLength": 100 },
+            "txHash": { "type": "string", "minLength": 3, "maxLength": 100 },
+            "usdAmountGte": { "type": "number" },
+            "usdAmountLte": { "type": "number" },
+            "sentAtGte": { "type": "number" },
+            "sentAtLte": { "type": "number" },
+            "assets": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "origins": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "urn:ocn:[a-z:0-9]+" },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "destinations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/anyOf/0/properties/criteria/properties/origins/items"
+              },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "networks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/anyOf/0/properties/criteria/properties/origins/items"
+              },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "protocols": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "xcm",
+                  "wh",
+                  "wh_portal",
+                  "wh_relayer",
+                  "snowbridge",
+                  "hyperbridge"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 6
+            },
+            "status": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["sent", "received", "timeout", "failed"]
+              },
+              "minItems": 1,
+              "maxItems": 4
+            },
+            "actions": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "maxItems": 5
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["op"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "op": { "type": "string", "const": "journeys.by_id" },
+        "criteria": {
+          "type": "object",
+          "properties": { "id": { "type": "string" } },
+          "required": ["id"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["op", "criteria"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": { "op": { "type": "string", "const": "assets.list" } },
+      "required": ["op"],
+      "additionalProperties": false
+    }
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

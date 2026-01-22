@@ -1,14 +1,31 @@
 {
-  "name": "xc-scan",
-  "private": true,
-  "type": "module",
-  "main": "out/index.js",
+  "name": "@galacticcouncil/xc-scan",
+  "version": "0.1.0",
+  "description": "Cross-chain scan",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xc-scan",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "scan",
+    "xc"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "module": "./build/index.mjs",
+  "types": "./build/types/index.d.ts",
   "scripts": {
-    "dev": "node ./esbuild.dev.mjs"
-  },
-  "keywords": [],
-  "devDependencies": {
-    "esbuild": "^0.25.0"
-  },
-  "dependencies": {}
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "clean": "rimraf build",
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
+  }
 }

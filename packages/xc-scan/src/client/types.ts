@@ -1,5 +1,9 @@
 export type XcOcnUrn = `urn:ocn:${string}`;
 
+export type XcPagination = {
+  limit: number;
+};
+
 export type XcAssetRole =
   | 'transfer'
   | 'swap_in'
@@ -62,6 +66,11 @@ export interface XcJourneysByIdRequest {
 
 export type XcJourneyRequest = XcJourneysListRequest | XcJourneysByIdRequest;
 
+export type XcJourneyResponse = {
+  items: XcJourney[];
+  pageInfo: { hasNextPage: boolean; endCursor: string };
+};
+
 export type XcJourney = {
   id: number;
   correlationId: string;
@@ -92,4 +101,9 @@ export type XcJourney = {
   outConnectionData?: any;
   totalUsd: number;
   assets: XcAssetOperation;
+};
+
+export type XcJourneyReplaceEvt = {
+  ids: { id: number; correlationId: string };
+  replaces: XcJourney;
 };

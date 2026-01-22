@@ -1,20 +1,12 @@
-import {
-  AssetAmount,
-  ConfigBuilder,
-  Parachain,
-  SolanaChain,
-} from '@galacticcouncil/xc-core';
-import {
-  SolanaLilJit,
-  SubstrateCall,
-  TransferBuilder,
-} from '@galacticcouncil/xc-sdk';
+import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xc-core';
+import { TransferBuilder } from '@galacticcouncil/xc-sdk';
 
+import { claimDeposits, claimWithdraws } from './claims';
+import { sign } from './signers';
+import { ctx, xcStore } from './setup';
 import { logAssets, logSrcChains, logDestChains } from './utils';
-import { sign, signSubstrate, signSolanaBundle } from './signers';
-import { ctx } from './setup';
 
-const { config, wallet, wormhole } = ctx;
+const { config, wallet } = ctx;
 
 // Define transfer constraints
 const srcChain = config.getChain('ethereum');
@@ -77,65 +69,22 @@ balanceSubscription.unsubscribe();
 /**** Helper functions *****/
 /***************************/
 
-/**
- * Check hydration withdrawals and claim stucked
- *
- * @param account - hydration account (for)
- * @param payer - claim payer (from)
- */
-async function claimWithdraws(account: string, payer: string) {
-  const withdraws = await wormhole.transfer.getWithdraws(account);
-
-  for (const withdrawal of withdraws) {
-    if (withdrawal.redeem) {
-      console.log(withdrawal);
-      const calls = await withdrawal.redeem(payer);
-      const isBatch = Array.isArray(calls);
-      if (isBatch && withdrawal.toChain.isSolana()) {
-        // Jito bundle execution
-        await signSolanaBundle(calls, destChain);
-      } else if (isBatch) {
-        // Sequential batch execution
-        for (const call of calls) {
-          await sign(call, destChain);
-        }
-      } else {
-        await sign(call, destChain);
-      }
-    }
-  }
-}
-
-/**
- * Check hydration deposits and claim stucked
- *
- * @param account - hydration account (for)
- * @param payer - claim payer (from)
- */
-async function claimDeposits(account: string, payer: string) {
-  const srcChain = config.getChain('hydration') as Parachain;
-  const destChain = config.getChain('moonbeam') as Parachain;
-  const feeAsset = srcChain.findAssetById('10'); // default to system
-
-  const deposits = await wormhole.transfer.getDeposits(account);
-
-  for (const deposit of deposits) {
-    if (deposit.redeem) {
-      console.log(deposit);
-      const call = await deposit.redeem(payer);
-      const isBatch = Array.isArray(call);
-      if (isBatch) {
-        throw Error('Batch not supported');
-      } else {
-        const remoteTx = await wallet.remoteXcm(
-          payer,
-          srcChain,
-          destChain,
-          call as SubstrateCall,
-          { srcFeeAsset: feeAsset?.asset }
-        );
-        await signSubstrate(remoteTx, srcChain);
-      }
-    }
-  }
+function subscribeStore(address: string) {
+  xcStore.subscribe(address, {
+    onLoad(j) {
+      console.log('History:', j);
+    },
+    onNew(j) {
+      console.log('New:', j);
+    },
+    onUpdate(j, p) {
+      console.log('Updated:', j, p);
+    },
+    onOpen() {
+      console.log('Live stream started...');
+    },
+    onError(err) {
+      console.error('Live stream error', err);
+    },
+  });
 }

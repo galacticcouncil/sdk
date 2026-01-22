@@ -30,12 +30,12 @@ export async function signAndSend(
 
   if (chain instanceof EvmParachain) {
     try {
-      const parachainClient = chain.client;
+      const dotClient = chain.client;
       const callData = Binary.fromHex(call.data);
-      const api = parachainClient.getUnsafeApi();
+      const api = dotClient.getUnsafeApi();
 
-      const tx = await api.txFromCallData(callData);
-      console.log(tx);
+      tx = await api.txFromCallData(callData);
+      console.log(tx.decodedCall);
     } catch (error) {}
   }
 
