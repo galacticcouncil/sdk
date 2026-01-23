@@ -202,7 +202,7 @@ const toAssetHub: AssetRoute[] = [
 const toAstar: AssetRoute[] = [
   toTransferTemplate(astr, astar),
   toTransferTemplate(bnc, astar, bifrost),
-  toTransferTemplate(glmr, astar),
+  toTransferTemplate(glmr, astar, moonbeam),
   toTransferTemplate(ibtc, astar),
   toTransferTemplate(intr, astar),
   toTransferTemplate(pha, astar),
