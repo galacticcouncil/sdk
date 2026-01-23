@@ -59,6 +59,8 @@ export function getReserveParachainId(
   return multiloc.findParachain(xcmLocation);
 }
 
+const ASSET_HUB_ID = 1000;
+
 export function validateReserveChain(
   asset: Asset,
   source: Parachain,
@@ -70,6 +72,11 @@ export function validateReserveChain(
 
   if (reserve) {
     if (expectedReserveId === undefined) {
+      const pointsToParentChain =
+        xcmLocation?.parents === 1 && xcmLocation?.interior === 'Here';
+      if (pointsToParentChain && reserve.parachainId === ASSET_HUB_ID) {
+        return;
+      }
       throw new Error(
         `No reserve chain for "${asset.originSymbol}" on ${destination.name}`
       );

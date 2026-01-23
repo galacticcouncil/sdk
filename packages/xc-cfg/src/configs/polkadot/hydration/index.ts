@@ -80,7 +80,6 @@ import {
   mythos,
   neuroweb,
   pendulum,
-  polkadot,
   solana,
   sui_chain,
   unique,
@@ -123,9 +122,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: dot,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: dot,
       },
     },
@@ -146,9 +143,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: ksm,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: ksm,
       },
     },
@@ -169,9 +164,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdt,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdt,
       },
     },
@@ -192,9 +185,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdc,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdc,
       },
     },
@@ -225,7 +216,6 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(bnc, bifrost),
   toTransferTemplate(vdot, bifrost),
   toTransferTemplate(vastr, bifrost),
-  toTransferTemplate(dot, bifrost),
   toTransferTemplate(astr, bifrost),
   toTransferTemplate(glmr, bifrost),
   toTransferTemplate(ibtc, bifrost),
@@ -246,7 +236,7 @@ const toBifrost: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee({ reserve: polkadot }),
+          .calculateDestFee({ reserve: assetHub }),
         asset: dot,
       },
     },
@@ -280,9 +270,7 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: vdot,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: dot,
       },
     },
@@ -303,7 +291,7 @@ const toInterlay: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee({ reserve: polkadot }),
+          .calculateDestFee({ reserve: assetHub }),
         asset: dot,
       },
     },

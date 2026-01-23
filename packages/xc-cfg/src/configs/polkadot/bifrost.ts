@@ -11,7 +11,7 @@ import {
   glmr,
   ibtc,
 } from '../../assets';
-import { assetHub, bifrost, hydration, polkadot } from '../../chains';
+import { assetHub, bifrost, hydration } from '../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
@@ -106,7 +106,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee({ reserve: polkadot }),
+          .calculateDestFee({ reserve: assetHub }),
         asset: dot,
       },
     },
