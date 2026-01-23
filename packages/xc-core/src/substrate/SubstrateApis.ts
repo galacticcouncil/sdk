@@ -1,12 +1,28 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
+import { Observable, Subscription } from 'rxjs';
+
+import { blockProbe$, ProbeConfig, ProbeState } from './probe';
 
 type WsProvider = ReturnType<typeof getWsProvider>;
+
+type ProbeFactory = (
+  client: PolkadotClient,
+  config?: ProbeConfig
+) => Observable<ProbeState>;
+
+export interface HealthProbeConfig extends ProbeConfig {
+  enabled?: boolean;
+  probe?: ProbeFactory;
+}
 
 interface CachedConnection {
   client: PolkadotClient;
   provider: WsProvider;
+  endpoints: string[];
+  currentEndpointIndex: number;
+  probeSubscription?: Subscription;
 }
 
 export class SubstrateApis {
@@ -45,20 +61,35 @@ export class SubstrateApis {
     return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
   }
 
-  public createClient(endpoints: string[]): PolkadotClient {
+  public createClient(
+    endpoints: string[],
+    probeConfig?: HealthProbeConfig
+  ): PolkadotClient {
     const wsProvider = getWsProvider(endpoints);
     const client = createClient(wsProvider);
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
 
-    const connection: CachedConnection = { client, provider: wsProvider };
+    const connection: CachedConnection = {
+      client,
+      provider: wsProvider,
+      endpoints,
+      currentEndpointIndex: 0,
+    };
     this._cache.set(cacheKey, connection, { noDisposeOnSet: true });
+
+    if (probeConfig?.enabled !== false) {
+      this.startHealthProbe(connection, probeConfig);
+    }
 
     return client;
   }
 
-  public api(ws: string | string[]): PolkadotClient {
+  public api(
+    ws: string | string[],
+    probeConfig?: HealthProbeConfig
+  ): PolkadotClient {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
 
@@ -67,17 +98,75 @@ export class SubstrateApis {
       return connection.client;
     }
 
-    return this.createClient(endpoints);
+    return this.createClient(endpoints, probeConfig);
   }
 
   public release() {
-    const first = this._cache.entries().next().value;
-    if (first) {
-      const [key, connection] = first;
+    for (const [key, connection] of this._cache.entries()) {
+      this.stopHealthProbe(connection);
       console.log('Releasing ' + key);
       connection.client.destroy();
     }
     this._cache.clear();
+  }
+
+  public configureHealthProbe(
+    ws: string | string[],
+    config: HealthProbeConfig
+  ): void {
+    const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
+    const cacheKey = this.findCacheKey(endpoints);
+
+    if (cacheKey) {
+      const connection = this._cache.get(cacheKey)!;
+      this.stopHealthProbe(connection);
+      if (config.enabled !== false) {
+        this.startHealthProbe(connection, config);
+      }
+    }
+  }
+
+  private startHealthProbe(
+    connection: CachedConnection,
+    config: HealthProbeConfig = {}
+  ): void {
+    const probeFactory = config.probe ?? blockProbe$;
+
+    const switchEndpoint = (reason: string) => {
+      if (connection.endpoints.length > 1) {
+        const nextIndex =
+          (connection.currentEndpointIndex + 1) % connection.endpoints.length;
+        const nextEndpoint = connection.endpoints[nextIndex];
+
+        console.log(
+          `${reason} on ${connection.endpoints[connection.currentEndpointIndex]}, switching to ${nextEndpoint}`
+        );
+        connection.provider.switch(nextEndpoint);
+        connection.currentEndpointIndex = nextIndex;
+
+        // Restart probe with fresh state after switch
+        this.stopHealthProbe(connection);
+        this.startHealthProbe(connection, config);
+      }
+    };
+
+    connection.probeSubscription = probeFactory(
+      connection.client,
+      config
+    ).subscribe({
+      next: (state: ProbeState) => {
+        if (state === 'stale') {
+          switchEndpoint('RPC stale');
+        }
+      },
+    });
+  }
+
+  private stopHealthProbe(connection: CachedConnection): void {
+    if (connection.probeSubscription) {
+      connection.probeSubscription.unsubscribe();
+      connection.probeSubscription = undefined;
+    }
   }
 
   public getWs(ws: string | string[]): WsProvider | undefined {
