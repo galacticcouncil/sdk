@@ -45,21 +45,29 @@ function applyConcreteWrapper(id: object) {
   };
 }
 
-export function getReserveParachainId(
-  xcmLocation: XcmLocation | undefined
+const ASSET_HUB_ID = 1000;
+
+function getReserveParachainId(
+  xcmLocation: XcmLocation | undefined,
+  destination: Parachain
 ): number | undefined {
   if (!xcmLocation) {
     return undefined;
   }
 
-  if (xcmLocation.interior === 'Here') {
-    return undefined;
+  // Native to destination (parents: 0) - destination is the reserve
+  if (xcmLocation.parents === 0) {
+    return destination.parachainId;
   }
 
+  // Relay chain native (parents: 1, interior: 'Here') - Asset Hub is reserve
+  if (xcmLocation.parents === 1 && xcmLocation.interior === 'Here') {
+    return ASSET_HUB_ID;
+  }
+
+  // Parachain asset - extract parachain ID from location
   return multiloc.findParachain(xcmLocation);
 }
-
-const ASSET_HUB_ID = 1000;
 
 export function validateReserveChain(
   asset: Asset,
@@ -68,35 +76,30 @@ export function validateReserveChain(
   reserve?: Parachain
 ): void {
   const xcmLocation = destination.getAssetXcmLocation(asset);
-  const expectedReserveId = getReserveParachainId(xcmLocation);
+  const expectedReserveId = getReserveParachainId(xcmLocation, destination);
 
-  if (reserve) {
-    if (expectedReserveId === undefined) {
-      const pointsToParentChain =
-        xcmLocation?.parents === 1 && xcmLocation?.interior === 'Here';
-      if (pointsToParentChain && reserve.parachainId === ASSET_HUB_ID) {
-        return;
-      }
-      throw new Error(
-        `No reserve chain for "${asset.originSymbol}" on ${destination.name}`
-      );
-    }
-
-    if (expectedReserveId !== reserve.parachainId) {
-      throw new Error(
-        `Wrong reserve chain for "${asset.originSymbol}": expected ${expectedReserveId}, got ${reserve.parachainId}`
-      );
-    }
+  if (expectedReserveId === undefined) {
+    throw new Error(
+      `No reserve chain for "${asset.originSymbol}" on ${destination.name}`
+    );
   }
 
-  if (!reserve && expectedReserveId !== undefined) {
-    const sourceIsReserve = source.parachainId === expectedReserveId;
-    const destIsReserve = destination.parachainId === expectedReserveId;
-
-    if (!sourceIsReserve && !destIsReserve) {
+  if (reserve) {
+    if (reserve.parachainId !== expectedReserveId) {
       throw new Error(
-        `Reserve chain ${expectedReserveId} required for "${asset.originSymbol}"`
+        `Wrong reserve for "${asset.originSymbol}": expected chain ${expectedReserveId}, got ${reserve.name} (${reserve.parachainId})`
       );
     }
+    return;
+  }
+
+  // No explicit reserve - source or destination must be the reserve
+  const sourceIsReserve = source.parachainId === expectedReserveId;
+  const destIsReserve = destination.parachainId === expectedReserveId;
+
+  if (!sourceIsReserve && !destIsReserve) {
+    throw new Error(
+      `Reserve chain ${expectedReserveId} required for "${asset.originSymbol}"`
+    );
   }
 }

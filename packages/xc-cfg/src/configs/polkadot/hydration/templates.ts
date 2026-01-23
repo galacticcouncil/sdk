@@ -141,9 +141,7 @@ export function toParaErc20Template(
       chain: destination,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: destination }),
+        amount: MRL_XCM_FEE,
         asset: glmr,
       },
     },
