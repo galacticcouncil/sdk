@@ -43,7 +43,7 @@ type Probe = {
  */
 export function connectionProbe$(
   client: PolkadotClient,
-  { intervalMs = 5_000, rpcTimeoutMs = 15_000 }: Opts = {}
+  { intervalMs = 5_000, rpcTimeoutMs = 10_000 }: Opts = {}
 ): Observable<ConnState> {
   const probeOnce$ = () =>
     defer(() => from(client._request('system_health', [] as unknown[]))).pipe(

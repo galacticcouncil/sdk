@@ -25,7 +25,6 @@
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
     "clean": "rimraf build",
-    "link": "npm ln",
-    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
+    "link": "npm ln"
   }
 }
