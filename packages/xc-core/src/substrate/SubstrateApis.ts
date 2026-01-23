@@ -3,16 +3,16 @@ import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
 import { Observable, Subscription } from 'rxjs';
 
-import { blockProbe$, BlockProbeConfig, ProbeState } from './probe';
+import { blockProbe$, ProbeConfig, ProbeState } from './probe';
 
 type WsProvider = ReturnType<typeof getWsProvider>;
 
 type ProbeFactory = (
   client: PolkadotClient,
-  config?: BlockProbeConfig
+  config?: ProbeConfig
 ) => Observable<ProbeState>;
 
-export interface HealthProbeConfig extends BlockProbeConfig {
+export interface HealthProbeConfig extends ProbeConfig {
   enabled?: boolean;
   probe?: ProbeFactory;
 }

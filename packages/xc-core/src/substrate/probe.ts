@@ -16,43 +16,15 @@ export type ProbeState = 'healthy' | 'stale';
 export type ProbeConfig = {
   intervalMs?: number;
   timeoutMs?: number;
-};
-
-export type BlockProbeConfig = ProbeConfig & {
   staleThreshold?: number;
 };
 
 type ProbeResult = {
   state: ProbeState;
   delayMs: number;
-};
-
-type BlockProbeResult = ProbeResult & {
   blockNumber?: number;
   staleCount: number;
 };
-
-export function connectionProbe$(
-  client: PolkadotClient,
-  { intervalMs = 5000, timeoutMs = 15000 }: ProbeConfig = {}
-): Observable<ProbeState> {
-  const probeOnce$ = () =>
-    defer(() => from(client._request('system_health', []))).pipe(
-      timeout({ first: timeoutMs }),
-      map((): ProbeResult => ({ state: 'healthy', delayMs: intervalMs })),
-      catchError(() => of<ProbeResult>({ state: 'stale', delayMs: intervalMs }))
-    );
-
-  const initial: ProbeResult = { state: 'stale', delayMs: 0 };
-
-  return of(initial).pipe(
-    expand((prev) => timer(prev.delayMs).pipe(switchMap(() => probeOnce$()))),
-    skip(1),
-    map((r) => r.state),
-    distinctUntilChanged(),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-}
 
 export function blockProbe$(
   client: PolkadotClient,
@@ -60,14 +32,14 @@ export function blockProbe$(
     intervalMs = 2000,
     timeoutMs = 6000,
     staleThreshold = 3,
-  }: BlockProbeConfig = {}
+  }: ProbeConfig = {}
 ): Observable<ProbeState> {
-  const probeOnce$ = (prev: BlockProbeResult) =>
+  const probeOnce$ = (prev: ProbeResult) =>
     defer(() =>
       from(client._request<{ number: string }>('chain_getHeader', []))
     ).pipe(
       timeout({ first: timeoutMs }),
-      map((header): BlockProbeResult => {
+      map((header): ProbeResult => {
         const blockNumber = parseInt(header.number, 16);
         const isStale =
           prev.blockNumber !== undefined && blockNumber <= prev.blockNumber;
@@ -77,7 +49,7 @@ export function blockProbe$(
         return { state, blockNumber, staleCount, delayMs: intervalMs };
       }),
       catchError(() =>
-        of<BlockProbeResult>({
+        of<ProbeResult>({
           state: 'stale',
           staleCount: 0,
           delayMs: intervalMs,
@@ -85,7 +57,7 @@ export function blockProbe$(
       )
     );
 
-  const initial: BlockProbeResult = {
+  const initial: ProbeResult = {
     state: 'healthy',
     staleCount: 0,
     delayMs: 0,
