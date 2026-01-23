@@ -122,7 +122,7 @@ export class SubstratePlatform implements Platform<
     const { module, func, args, transform } = config;
 
     const fn = substrate.client.getUnsafeApi().query[module][func];
-    const observable$ = fn.watchValue(...args);
+    const observable$ = fn.watchValue(...args, 'best');
 
     return observable$.pipe(
       concatMap((b: any) => transform(b)),
