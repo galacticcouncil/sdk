@@ -53,9 +53,9 @@
     "lru-cache": "^11.2.2"
   },
   "peerDependencies": {
-    "@galacticcouncil/common": ">=0.3.0 <1.0.0",
+    "@galacticcouncil/common": ">=0.4.0 <1.0.0",
     "@galacticcouncil/descriptors": ">=1.7.0 <2.0.0",
-    "polkadot-api": "^1.23.2",
+    "polkadot-api": "^1.23.3",
     "viem": "^2.38.3"
   }
 }
