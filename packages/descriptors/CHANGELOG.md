@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.9.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.23.3), re-build descriptors
+
 ## 1.8.0
 
 ### Minor Changes

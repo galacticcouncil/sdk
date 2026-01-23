@@ -89,7 +89,6 @@ export class BalanceClient extends Papi {
          * First return all, then just deltas
          */
         map(([prev, curr], i) => {
-          console.log('watchBalance', i, prev.length, curr.length);
           if (i === 0) return curr;
           return this.getDeltas(prev, curr);
         })

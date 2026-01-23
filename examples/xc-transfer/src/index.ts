@@ -9,9 +9,9 @@ import { logAssets, logSrcChains, logDestChains } from './utils';
 const { config, wallet } = ctx;
 
 // Define transfer constraints
-const srcChain = config.getChain('ethereum');
-const destChain = config.getChain('hydration');
-const asset = config.getAsset('eth');
+const srcChain = config.getChain('hydration');
+const destChain = config.getChain('assethub');
+const asset = config.getAsset('dot');
 
 const configBuilder = ConfigBuilder(config);
 const { sourceChains } = configBuilder.assets().asset(asset);
@@ -26,8 +26,8 @@ logDestChains(asset.key, destinationChains);
 logSrcChains(asset.key, sourceChains);
 
 // Define source & dest accounts
-const srcAddr = 'INSERT_ADDRESS';
-const destAddr = 'INSERT_ADDRESS';
+const srcAddr = '12ZuLmUNjTz5HgYneqXpoYh7hVSFNJnwsh6NgivdF2wb9GcH';
+const destAddr = '12ZuLmUNjTz5HgYneqXpoYh7hVSFNJnwsh6NgivdF2wb9GcH';
 
 // Subscribe source chain token balance
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
@@ -48,7 +48,7 @@ const transfer = await TransferBuilder(wallet)
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const transferAmount = '0.1';
+const transferAmount = '0.01';
 
 const [call, fee] = await Promise.all([
   transfer.buildCall(transferAmount),

@@ -1,5 +1,19 @@
 # @galacticcouncil/sdk-next
 
+## 0.29.0
+
+### Minor Changes
+
+[18c303e7]: https://github.com/galacticcouncil/sdk/commit/18c303e7
+[a0275d4e]: https://github.com/galacticcouncil/sdk/commit/a0275d4e
+[96e2eef7]: https://github.com/galacticcouncil/sdk/commit/96e2eef7
+[804aae92]: https://github.com/galacticcouncil/sdk/commit/804aae92
+
+- [[#18c303e7][18c303e7]] next: increase pool client sync timeout to 60s
+- [[#a0275d4e][a0275d4e]] next: fix watchBalance & defer watchers by default
+- [[#96e2eef7][96e2eef7]] next: update probe to expandable
+- [[#804aae92][804aae92]] bump papi to latest (1.23.3)
+
 ## 0.28.0
 
 ### Minor Changes

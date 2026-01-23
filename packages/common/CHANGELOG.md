@@ -1,5 +1,13 @@
 # @galacticcouncil/common
 
+## 0.4.1
+
+### Patch Changes
+
+[804aae92]: https://github.com/galacticcouncil/sdk/commit/804aae92
+
+- [[#804aae92][804aae92]] bump papi to latest (1.23.3)
+
 ## 0.4.0
 
 ### Minor Changes

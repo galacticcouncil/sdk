@@ -28,7 +28,11 @@ type ProbeResult = {
 
 export function blockProbe$(
   client: PolkadotClient,
-  { intervalMs = 2500, timeoutMs = 1000, staleThreshold = 3 }: ProbeConfig = {}
+  {
+    intervalMs = 5_000,
+    timeoutMs = 5_000,
+    staleThreshold = 3,
+  }: ProbeConfig = {}
 ): Observable<ProbeState> {
   const probeOnce$ = (prev: ProbeResult) =>
     defer(() =>

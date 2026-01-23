@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-sdk
 
+## 0.4.4
+
+### Patch Changes
+
+[80475436]: https://github.com/galacticcouncil/sdk/commit/80475436
+
+- [[#80475436][80475436]] xc: substrate balance watcher at best
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.8.0
+
 ## 0.4.3
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @galacticcouncil/xc-core
 
+## 0.8.0
+
+### Minor Changes
+
+[dfd596b5]: https://github.com/galacticcouncil/sdk/commit/dfd596b5
+[804aae92]: https://github.com/galacticcouncil/sdk/commit/804aae92
+
+- [[#dfd596b5][dfd596b5]] xc: substrate apis health probe
+- [[#804aae92][804aae92]] bump papi to latest (1.23.3)
+
 ## 0.7.0
 
 ### Minor Changes
