@@ -24,5 +24,5 @@ export const energywebx = new Parachain({
   name: 'Energy Web X',
   parachainId: 3345,
   ss58Format: 42,
-  ws: 'wss://wnp-rpc.mainnet.energywebx.com',
+  ws: 'wss://public-rpc.mainnet.energywebx.com',
 });
