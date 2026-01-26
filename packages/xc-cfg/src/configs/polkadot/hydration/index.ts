@@ -390,15 +390,75 @@ const toMythos: AssetRoute[] = [
 
 const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique)];
 
-const toCrust: AssetRoute[] = [toTransferTemplate(cru, crust)];
+const toCrust: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: cru,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: crust,
+      asset: cru,
+      fee: {
+        amount: 0.04,
+        asset: cru,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
+];
 
 const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain)];
 
 const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain)];
 
-const toEnergywebx: AssetRoute[] = [toTransferTemplate(ewt, energywebx)];
+const toEnergywebx: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: ewt,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: energywebx,
+      asset: ewt,
+      fee: {
+        amount: 0.02,
+        asset: ewt,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
+];
 
-const toPendulum: AssetRoute[] = [toTransferTemplate(pen, pendulum)];
+const toPendulum: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: pen,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: pendulum,
+      asset: pen,
+      fee: {
+        amount: 1.1,
+        asset: pen,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
+];
 
 const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
 
