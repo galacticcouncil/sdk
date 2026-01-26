@@ -1,6 +1,5 @@
 import { ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { acalaConfig } from './acala';
 import { assetHubConfig, assetHubCexConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
@@ -20,7 +19,6 @@ import { energywebxConfig } from './energywebx';
 import { neurowebConfig } from './neuroweb';
 
 export const polkadotChainsConfig: ChainRoutes[] = [
-  acalaConfig,
   ajunaConfig,
   assetHubConfig,
   assetHubCexConfig,

@@ -16,7 +16,6 @@ const { runXc } = xc;
 
 const getChains = () => {
   const allowedChains: string[] = [
-    'acala',
     'astar',
     'assethub',
     'bifrost',
