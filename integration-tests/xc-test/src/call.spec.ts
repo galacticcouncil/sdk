@@ -20,7 +20,6 @@ const getChains = () => {
     'astar',
     'assethub',
     'bifrost',
-    'centrifuge',
     'crust',
     'laos',
     'energywebx',

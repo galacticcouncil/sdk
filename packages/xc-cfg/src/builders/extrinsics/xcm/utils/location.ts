@@ -47,6 +47,31 @@ function applyConcreteWrapper(id: object) {
 
 const ASSET_HUB_ID = 1000;
 
+/**
+ * Check if Asset Hub is the reserve for the given xcm location.
+ * This includes:
+ * - Relay chain native assets (DOT): parents=1, interior='Here'
+ * - Cross-consensus assets (KSM): parents=2, interior has GlobalConsensus
+ */
+function isAssetHubReserve(xcmLocation: XcmLocation): boolean {
+  const { parents, interior } = xcmLocation;
+
+  // Relay chain native (e.g., DOT)
+  if (parents === 1 && interior === 'Here') {
+    return true;
+  }
+
+  // Cross-consensus (e.g., KSM from Kusama)
+  if (parents === 2 && interior && interior !== 'Here') {
+    const junctions = Object.values(interior).flat();
+    return junctions.some(
+      (j: any) => j && typeof j === 'object' && 'GlobalConsensus' in j
+    );
+  }
+
+  return false;
+}
+
 function getReserveParachainId(
   xcmLocation: XcmLocation | undefined,
   destination: Parachain
@@ -55,13 +80,13 @@ function getReserveParachainId(
     return undefined;
   }
 
-  // Native to destination (parents: 0) - destination is the reserve
+  // Native to destination (parents: 0)
   if (xcmLocation.parents === 0) {
     return destination.parachainId;
   }
 
-  // Relay chain native (parents: 1, interior: 'Here') - Asset Hub is reserve
-  if (xcmLocation.parents === 1 && xcmLocation.interior === 'Here') {
+  // Asset Hub is reserve
+  if (isAssetHubReserve(xcmLocation)) {
     return ASSET_HUB_ID;
   }
 

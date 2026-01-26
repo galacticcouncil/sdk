@@ -6,7 +6,6 @@ import {
   ajun,
   astr,
   bnc,
-  cfg,
   cfg_new,
   cru,
   dai,
@@ -33,7 +32,6 @@ import {
   nodl,
   paxg,
   pen,
-  pha,
   pink,
   ring,
   sol,
@@ -67,7 +65,6 @@ import {
   assetHub,
   astar,
   bifrost,
-  centrifuge,
   crust,
   darwinia,
   energywebx,
@@ -203,11 +200,46 @@ const toAstar: AssetRoute[] = [
   toTransferTemplate(astr, astar),
   toTransferTemplate(bnc, astar, bifrost),
   toTransferTemplate(glmr, astar, moonbeam),
-  toTransferTemplate(ibtc, astar),
-  toTransferTemplate(intr, astar),
-  toTransferTemplate(pha, astar),
+  new AssetRoute({
+    source: {
+      asset: ibtc,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: ibtc,
+      fee: {
+        amount: 0.000002,
+        asset: ibtc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
+  new AssetRoute({
+    source: {
+      asset: intr,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: astar,
+      asset: intr,
+      fee: {
+        amount: 0.01,
+        asset: intr,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
   toTransferTemplate(vdot, astar, bifrost),
-  toTransferTemplate(vastr, astar),
+  toTransferTemplate(vastr, astar, bifrost),
   toTransferTemplate(usdt, astar, assetHub),
   toTransferTemplate(usdc, astar, assetHub),
 ];
@@ -216,9 +248,27 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(bnc, bifrost),
   toTransferTemplate(vdot, bifrost),
   toTransferTemplate(vastr, bifrost),
-  toTransferTemplate(astr, bifrost),
-  toTransferTemplate(glmr, bifrost),
-  toTransferTemplate(ibtc, bifrost),
+  toTransferTemplate(astr, bifrost, astar),
+  toTransferTemplate(glmr, bifrost, moonbeam),
+  new AssetRoute({
+    source: {
+      asset: ibtc,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: bifrost,
+      asset: ibtc,
+      fee: {
+        amount: 0.000005,
+        asset: ibtc,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
   toTransferTemplate(usdt, bifrost, assetHub),
   toTransferTemplate(usdc, bifrost, assetHub),
   new AssetRoute({
@@ -244,11 +294,6 @@ const toBifrost: AssetRoute[] = [
       transferType: XcmTransferType.RemoteReserve,
     }),
   }),
-];
-
-const toCentrifuge: AssetRoute[] = [
-  toTransferTemplate(cfg, centrifuge),
-  toTransferTemplate(glmr, centrifuge),
 ];
 
 const toInterlay: AssetRoute[] = [
@@ -321,7 +366,27 @@ const toZeitgeist: AssetRoute[] = [
   toZeitgeistErc20Template(usdc_mwh),
 ];
 
-const toMythos: AssetRoute[] = [toTransferTemplate(myth, mythos)];
+const toMythos: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: myth,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: mythos,
+      asset: myth,
+      fee: {
+        amount: 2.5,
+        asset: myth,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  }),
+];
 
 const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique)];
 
@@ -409,7 +474,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,
-    ...toCentrifuge,
     ...toCex,
     ...toCrust,
     ...toDarwinia,

@@ -3,17 +3,15 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 import {
   astr,
   bnc,
-  dot,
   glmr,
   ibtc,
   intr,
-  pha,
   usdc,
   usdt,
   vastr,
   vdot,
 } from '../../assets';
-import { assetHub, astar, bifrost, hydration } from '../../chains';
+import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
@@ -105,7 +103,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee(),
+          .calculateDestFee({ reserve: moonbeam }),
         asset: glmr,
       },
     },
@@ -127,9 +125,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ibtc,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: 0.000002,
         asset: ibtc,
       },
     },
@@ -151,34 +147,8 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: intr,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: 0.01,
         asset: intr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: pha,
-      balance: BalanceBuilder().substrate().assets().account(),
-      fee: {
-        asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: pha,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
-        asset: pha,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
@@ -225,7 +195,7 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee(),
+          .calculateDestFee({ reserve: bifrost }),
         asset: vastr,
       },
     },

@@ -4,7 +4,6 @@ import { acalaConfig } from './acala';
 import { assetHubConfig, assetHubCexConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
-import { centrifugeConfig } from './centrifuge';
 import { hydrationConfig } from './hydration';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
@@ -27,7 +26,6 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   assetHubCexConfig,
   astarConfig,
   bifrostConfig,
-  centrifugeConfig,
   hydrationConfig,
   interlayConfig,
   moonbeamConfig,
