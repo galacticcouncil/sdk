@@ -16,11 +16,20 @@ const { runXc } = xc;
 
 const getChains = () => {
   const allowedChains: string[] = [
-    'hydration',
-    'bifrost',
-    'moonbeam',
+    'acala',
+    'astar',
     'assethub',
-    'assethub_cex',
+    'bifrost',
+    'centrifuge',
+    'crust',
+    'laos',
+    'energywebx',
+    'hydration',
+    'moonbeam',
+    'mythos',
+    'neuroweb',
+    'pendulum',
+    'unique',
   ];
 
   const chains: Parachain[] = Array.from(configService.chains.values())
@@ -60,16 +69,10 @@ describe('Wallet with XC config', () => {
 
     for (const route of Array.from(routes.values())) {
       const { destination } = route;
-      const allowedChains = [
-        'hydration',
-        'bifrost',
-        'moonbeam',
-        'assethub',
-        'assethub_cex',
-      ];
+      const allowedDest = ctx.chains.map((c) => c.key);
 
       // Skip routes to chains not in our allowed list
-      if (!allowedChains.includes(destination.chain.key)) {
+      if (!allowedDest.includes(destination.chain.key)) {
         continue;
       }
 

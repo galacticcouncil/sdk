@@ -48,7 +48,7 @@ export const runXc = (
         expect([key, data]).toMatchSnapshot();
       } catch (e) {
         const error = e as Error;
-        c.log('Ups, something went wrong...', error.message);
+        c.log('⨉ ' + name + ' error. ' + error.message);
         return;
       }
     },
