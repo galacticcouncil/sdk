@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk
 
+## 10.6.0
+
+### Minor Changes
+
+[38bfb58c]: https://github.com/galacticcouncil/sdk/commit/38bfb58c
+
+- [[#38bfb58c][38bfb58c]] sdk: fix evm adapter (authorization list support)
+
 ## 10.5.0
 
 ### Minor Changes
