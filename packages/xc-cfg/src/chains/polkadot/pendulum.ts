@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  XcmVersion,
 } from '@galacticcouncil/xc-core';
 
 import { pen } from '../../assets';
@@ -12,7 +13,11 @@ export const pendulum = new Parachain({
       id: 'Native',
       xcmLocation: {
         parents: 0,
-        interior: 'Here',
+        interior: {
+          X1: {
+            PalletInstance: 10,
+          },
+        },
       },
     },
   ],
@@ -24,5 +29,7 @@ export const pendulum = new Parachain({
   name: 'Pendulum',
   parachainId: 2094,
   ss58Format: 56,
+  usesSdkCompat: true,
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
+  xcmVersion: XcmVersion.v3,
 });

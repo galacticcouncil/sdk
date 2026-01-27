@@ -25,6 +25,8 @@ import { balance, fee } from './configs';
 export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
+export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
+
 export const CEX_EXECUTION_FEE = 0.03; // Remote execution fee (< 0.02)
 
 const isDestinationFeeSwapSupported = (
@@ -141,9 +143,7 @@ export function toParaErc20Template(
       chain: destination,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: destination }),
+        amount: GLMR_MIN_DEST_FEE,
         asset: glmr,
       },
     },

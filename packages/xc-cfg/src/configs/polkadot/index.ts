@@ -1,10 +1,8 @@
 import { ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { acalaConfig } from './acala';
 import { assetHubConfig, assetHubCexConfig } from './assethub';
 import { astarConfig } from './astar';
 import { bifrostConfig } from './bifrost';
-import { centrifugeConfig } from './centrifuge';
 import { hydrationConfig } from './hydration';
 import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
@@ -21,13 +19,11 @@ import { energywebxConfig } from './energywebx';
 import { neurowebConfig } from './neuroweb';
 
 export const polkadotChainsConfig: ChainRoutes[] = [
-  acalaConfig,
   ajunaConfig,
   assetHubConfig,
   assetHubCexConfig,
   astarConfig,
   bifrostConfig,
-  centrifugeConfig,
   hydrationConfig,
   interlayConfig,
   moonbeamConfig,

@@ -11,11 +11,33 @@ export const interlay = new Parachain({
       asset: intr,
       decimals: 10,
       id: { Token: intr.originSymbol },
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: {
+            GeneralKey: {
+              length: 2,
+              data: '0x0002000000000000000000000000000000000000000000000000000000000000',
+            },
+          },
+        },
+      },
     },
     {
       asset: ibtc,
       decimals: 8,
       id: { Token: ibtc.originSymbol },
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: {
+            GeneralKey: {
+              length: 2,
+              data: '0x0001000000000000000000000000000000000000000000000000000000000000',
+            },
+          },
+        },
+      },
     },
     {
       asset: dot,
