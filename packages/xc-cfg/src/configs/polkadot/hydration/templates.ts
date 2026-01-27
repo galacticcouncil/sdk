@@ -17,7 +17,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, assetHubCex, moonbeam, zeitgeist } from '../../../chains';
+import { assetHub, assetHubCex, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -164,10 +164,6 @@ export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
     moonbeam,
     XcmTransferType.DestinationReserve
   );
-}
-
-export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(asset, zeitgeist);
 }
 
 function viaWormholeTemplate(

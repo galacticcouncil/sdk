@@ -6,7 +6,6 @@ import {
 import { defineChain, Chain } from 'viem';
 
 import {
-  aca,
   dai_mwh,
   dot,
   glmr,
@@ -263,27 +262,6 @@ export const moonbeam = new EvmParachain({
       },
     },
     // xc-20 assets
-    {
-      asset: aca,
-      decimals: 12,
-      id: '0xffffffffa922fef94566104a6e5a35a4fcddaa9f',
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
     {
       asset: dot,
       decimals: 10,

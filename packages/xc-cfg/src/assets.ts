@@ -5,11 +5,6 @@ export const aave = new Asset({
   originSymbol: 'AAVE',
 });
 
-export const aca = new Asset({
-  key: 'aca',
-  originSymbol: 'ACA',
-});
-
 export const ajun = new Asset({
   key: 'ajun',
   originSymbol: 'AJUN',
@@ -105,16 +100,6 @@ export const jito_sol = new Asset({
   originSymbol: 'jitoSOL',
 });
 
-export const kar = new Asset({
-  key: 'kar',
-  originSymbol: 'KAR',
-});
-
-export const kilt = new Asset({
-  key: 'kilt',
-  originSymbol: 'KILT',
-});
-
 export const ksm = new Asset({
   key: 'ksm',
   originSymbol: 'KSM',
@@ -138,11 +123,6 @@ export const lbtc = new Asset({
 export const ewt = new Asset({
   key: 'ewt',
   originSymbol: 'EWT',
-});
-
-export const ldot = new Asset({
-  key: 'ldot',
-  originSymbol: 'LDOT',
 });
 
 export const link = new Asset({
@@ -183,11 +163,6 @@ export const paxg = new Asset({
 export const pink = new Asset({
   key: 'pink',
   originSymbol: 'PINK',
-});
-
-export const ring = new Asset({
-  key: 'ring',
-  originSymbol: 'RING',
 });
 
 export const sky = new Asset({
@@ -325,14 +300,8 @@ export const xrt = new Asset({
   originSymbol: 'XRT',
 });
 
-export const ztg = new Asset({
-  key: 'ztg',
-  originSymbol: 'ZTG',
-});
-
 export const assets: Asset[] = [
   aave,
-  aca,
   ajun,
   astr,
   bsx,
@@ -351,15 +320,12 @@ export const assets: Asset[] = [
   hdx,
   ibtc,
   intr,
-  kar,
-  kilt,
   ksm,
   ldo,
   laos,
   lbtc,
   ewt,
   jito_sol,
-  ldot,
   link,
   myth,
   neuro,
@@ -368,7 +334,6 @@ export const assets: Asset[] = [
   pha,
   pen,
   pink,
-  ring,
   sky,
   sol,
   sui,
@@ -396,7 +361,6 @@ export const assets: Asset[] = [
   wsteth,
   wud,
   xrt,
-  ztg,
 ];
 
 export const assetsMap = new Map<string, Asset>(

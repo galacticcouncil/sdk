@@ -7,7 +7,6 @@ import { defineChain, Chain } from 'viem';
 
 import {
   aave,
-  aca,
   ajun,
   astr,
   bnc,
@@ -26,18 +25,15 @@ import {
   ibtc,
   intr,
   jito_sol,
-  kilt,
   ksm,
   laos,
   ldo,
-  ldot,
   link,
   myth,
   paxg,
   pen,
   pha,
   pink,
-  ring,
   neuro,
   nodl,
   sub,
@@ -58,7 +54,6 @@ import {
   weth_mwh,
   wsteth,
   wud,
-  ztg,
   susde,
   susds,
   susds_mwh,
@@ -155,28 +150,6 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: aca,
-      decimals: 12,
-      id: 1000099,
-      min: 0.091,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
               },
             },
           ],
@@ -513,20 +486,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: kilt,
-      decimals: 15,
-      id: 28,
-      min: 0.022,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X1: {
-            Parachain: 2086,
-          },
-        },
-      },
-    },
-    {
       asset: ewt,
       decimals: 18,
       id: 252525,
@@ -613,28 +572,6 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x8236a87084f8b84306f72007f36f2618a5634494',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: ldot,
-      decimals: 10,
-      id: 1000100,
-      min: 0.011,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0003000000000000000000000000000000000000000000000000000000000000',
               },
             },
           ],
@@ -791,28 +728,6 @@ export const hydration = new EvmParachain({
           X1: {
             Parachain: 2035,
           },
-        },
-      },
-    },
-    {
-      asset: ring,
-      decimals: 18,
-      id: 31,
-      min: 1,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2030,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0903000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
         },
       },
     },
@@ -1384,28 +1299,6 @@ export const hydration = new EvmParachain({
             },
             {
               GeneralIndex: 31337,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: ztg,
-      decimals: 10,
-      id: 12,
-      min: 0.091,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2092,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
-              },
             },
           ],
         },
