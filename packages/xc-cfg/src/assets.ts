@@ -185,15 +185,6 @@ export const tbtc = new Asset({
   originSymbol: 'tBTC',
 });
 
-export const teer = new Asset({
-  key: 'teer',
-  originSymbol: 'TEER',
-});
-
-export const tnkr = new Asset({
-  key: 'tnkr',
-  originSymbol: 'TNKR',
-});
 
 export const trac = new Asset({
   key: 'trac',
@@ -275,10 +266,6 @@ export const wud = new Asset({
   originSymbol: 'WUD',
 });
 
-export const xrt = new Asset({
-  key: 'xrt',
-  originSymbol: 'XRT',
-});
 
 export const assets: Asset[] = [
   aave,
@@ -317,8 +304,6 @@ export const assets: Asset[] = [
   susde,
   susds,
   susds_mwh,
-  teer,
-  tnkr,
   trac,
   tbtc,
   unq,
@@ -336,7 +321,6 @@ export const assets: Asset[] = [
   weth_mwh,
   wsteth,
   wud,
-  xrt,
 ];
 
 export const assetsMap = new Map<string, Asset>(
