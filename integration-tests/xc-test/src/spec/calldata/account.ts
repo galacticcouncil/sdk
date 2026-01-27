@@ -2,6 +2,8 @@ import { AnyChain, Parachain } from '@galacticcouncil/xc-core';
 
 const SS85_ADDRESS = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'; // Alice
 const H160_ADDRESS = '0x0000000000000000000000000000000000000000'; // Evm default
+const SUI_ADDRESS =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'; // Sui default
 const BASE58_ADDRESS = 'ETnqC8mvPRyUVXyXoph22EQ1GS5sTs1zndkn5eGMYWfs'; // Solana default
 
 const isFullAddressSpace = (chain: AnyChain): boolean => {
@@ -23,6 +25,10 @@ const isSolanaAddressSpaceOnly = (chain: AnyChain): boolean => {
   return chain.isSolana();
 };
 
+const isSuiAddressSpaceOnly = (chain: AnyChain): boolean => {
+  return chain.isSui();
+};
+
 export const getAddress = (chain: AnyChain): string => {
   if (isFullAddressSpace(chain)) {
     return SS85_ADDRESS;
@@ -34,6 +40,10 @@ export const getAddress = (chain: AnyChain): string => {
 
   if (isSolanaAddressSpaceOnly(chain)) {
     return BASE58_ADDRESS;
+  }
+
+  if (isSuiAddressSpaceOnly(chain)) {
+    return SUI_ADDRESS;
   }
 
   return SS85_ADDRESS;

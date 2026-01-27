@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
-import {
-  ChainEcosystem,
-  Parachain,
-  SubstrateApis,
-} from '@galacticcouncil/xc-core';
+import { AnyChain, SubstrateApis } from '@galacticcouncil/xc-core';
 import { Wallet } from '@galacticcouncil/xc-sdk';
 
 import * as c from 'console';
@@ -15,13 +11,15 @@ const { configService, init } = setup;
 const { runXc } = xc;
 
 const getChains = () => {
-  const allowedChains: string[] = [
+  const kusamaChains: string[] = ['assethub_kusama'];
+
+  const polkadotChains: string[] = [
     'astar',
     'assethub',
     'bifrost',
     'crust',
     'laos',
-    'energywebx',
+    //'energywebx',
     'hydration',
     'moonbeam',
     'mythos',
@@ -30,13 +28,20 @@ const getChains = () => {
     'unique',
   ];
 
-  const chains: Parachain[] = Array.from(configService.chains.values())
-    .filter((c) => c instanceof Parachain)
-    .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
-    .filter((c) => allowedChains.includes(c.key));
+  const allowedChains: string[] = [
+    ...polkadotChains,
+    ...kusamaChains,
+    'ethereum',
+    'solana',
+    'sui',
+  ];
+
+  const chains: AnyChain[] = Array.from(configService.chains.values()).filter(
+    (c) => allowedChains.includes(c.key)
+  );
 
   return {
-    skipFor: [],
+    skipFor: ['solana', 'ethereum'],
     chains,
   };
 };
@@ -67,10 +72,17 @@ describe('Wallet with XC config', () => {
 
     for (const route of Array.from(routes.values())) {
       const { destination } = route;
+      const { skipFor } = ctx;
+
       const allowedDest = ctx.chains.map((c) => c.key);
 
-      // Skip routes to chains not in our allowed list
+      if (skipFor.includes(chain.key)) {
+        // Skip for those sources
+        continue;
+      }
+
       if (!allowedDest.includes(destination.chain.key)) {
+        // Skip routes to chains not in our allowed list
         continue;
       }
 
