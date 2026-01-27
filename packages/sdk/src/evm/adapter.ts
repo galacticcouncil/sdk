@@ -37,7 +37,21 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const res = await this.api.call.ethereumRuntimeRPCApi.call(
+    const ethereumRpcCallFn = this.api.call.ethereumRuntimeRPCApi.call;
+    const ethereumRpcCallParams = ethereumRpcCallFn.meta.params;
+
+    const ethereumRpcCallArgs: [
+      string,
+      string,
+      string,
+      number,
+      number,
+      null,
+      null,
+      null,
+      boolean,
+      [],
+    ] = [
       '',
       address as string,
       data as string,
@@ -47,8 +61,15 @@ export class EvmRpcAdapter {
       null,
       null,
       false,
-      []
-    );
+      [],
+    ];
+
+    // Support authorization list (TODO: rebuild spec)
+    if (ethereumRpcCallParams.find((p) => p.name === 'authorization_list')) {
+      ethereumRpcCallArgs.push([]);
+    }
+
+    const res = await ethereumRpcCallFn(...ethereumRpcCallArgs);
 
     if (res.isErr) {
       console.error(functionName, res.asErr.toHuman());
