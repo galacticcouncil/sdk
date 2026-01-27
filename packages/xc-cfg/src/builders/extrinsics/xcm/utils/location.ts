@@ -95,31 +95,16 @@ export function validateReserveChain(
   destination: Parachain,
   reserve?: Parachain
 ): void {
-  const xcmLocation = destination.getAssetXcmLocation(asset);
-  const expectedReserveId = getReserveParachainId(xcmLocation);
+  const xcmLocation = source.getAssetXcmLocation(asset);
 
-  if (expectedReserveId === undefined) {
+  const expectedReserve = getReserveParachainId(xcmLocation);
+  const actualReserve = reserve?.parachainId ?? destination.parachainId;
+
+  if (expectedReserve && actualReserve !== expectedReserve) {
     throw new Error(
-      `No reserve chain for "${asset.originSymbol}" on ${destination.name}`
-    );
-  }
-
-  if (reserve) {
-    if (reserve.parachainId !== expectedReserveId) {
-      throw new Error(
-        `Wrong reserve for "${asset.originSymbol}": expected chain ${expectedReserveId}, got ${reserve.name} (${reserve.parachainId})`
-      );
-    }
-    return;
-  }
-
-  // No explicit reserve - source or destination must be the reserve
-  const sourceIsReserve = source.parachainId === expectedReserveId;
-  const destIsReserve = destination.parachainId === expectedReserveId;
-
-  if (!sourceIsReserve && !destIsReserve) {
-    throw new Error(
-      `Reserve chain ${expectedReserveId} required for "${asset.originSymbol}"`
+      reserve
+        ? `Wrong reserve for "${asset.originSymbol}": expected chain ${expectedReserve}, got ${reserve.name} (${reserve.parachainId})`
+        : `Reserve chain ${expectedReserve} required for "${asset.originSymbol}"`
     );
   }
 }
