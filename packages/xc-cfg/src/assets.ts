@@ -25,11 +25,6 @@ export const bsx = new Asset({
   originSymbol: 'BSX',
 });
 
-export const cfg = new Asset({
-  key: 'cfg',
-  originSymbol: 'CFG',
-});
-
 export const cfg_new = new Asset({
   key: 'cfg_new',
   originSymbol: 'CFG',
@@ -135,11 +130,6 @@ export const myth = new Asset({
   originSymbol: 'MYTH',
 });
 
-export const nodl = new Asset({
-  key: 'nodl',
-  originSymbol: 'NODL',
-});
-
 export const neuro = new Asset({
   key: 'neuro',
   originSymbol: 'NEURO',
@@ -148,11 +138,6 @@ export const neuro = new Asset({
 export const pen = new Asset({
   key: 'pen',
   originSymbol: 'PEN',
-});
-
-export const pha = new Asset({
-  key: 'pha',
-  originSymbol: 'PHA',
 });
 
 export const paxg = new Asset({
@@ -178,11 +163,6 @@ export const sol = new Asset({
 export const sui = new Asset({
   key: 'sui',
   originSymbol: 'SUI',
-});
-
-export const sub = new Asset({
-  key: 'sub',
-  originSymbol: 'SUB',
 });
 
 export const susde = new Asset({
@@ -305,7 +285,6 @@ export const assets: Asset[] = [
   ajun,
   astr,
   bsx,
-  cfg,
   cfg_new,
   cru,
   bnc,
@@ -329,15 +308,12 @@ export const assets: Asset[] = [
   link,
   myth,
   neuro,
-  nodl,
   paxg,
-  pha,
   pen,
   pink,
   sky,
   sol,
   sui,
-  sub,
   susde,
   susds,
   susds_mwh,

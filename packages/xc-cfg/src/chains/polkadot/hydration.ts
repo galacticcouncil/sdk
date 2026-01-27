@@ -10,7 +10,6 @@ import {
   ajun,
   astr,
   bnc,
-  cfg,
   cfg_new,
   cru,
   dai_mwh,
@@ -32,11 +31,8 @@ import {
   myth,
   paxg,
   pen,
-  pha,
   pink,
   neuro,
-  nodl,
-  sub,
   sui,
   trac,
   unq,
@@ -203,28 +199,6 @@ export const hydration = new EvmParachain({
           X2: [
             {
               Parachain: 2030,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0001000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: cfg,
-      decimals: 18,
-      id: 13,
-      min: 0.033,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2031,
             },
             {
               GeneralKey: {
@@ -659,25 +633,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: nodl,
-      decimals: 11,
-      id: 26,
-      min: 1.1,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2026,
-            },
-            {
-              PalletInstance: 2,
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: pen,
       decimals: 12,
       id: 1000081,
@@ -718,20 +673,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: pha,
-      decimals: 12,
-      id: 8,
-      min: 0.055,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X1: {
-            Parachain: 2035,
-          },
-        },
-      },
-    },
-    {
       asset: sky,
       decimals: 18,
       id: 1000795,
@@ -754,20 +695,6 @@ export const hydration = new EvmParachain({
               },
             },
           ],
-        },
-      },
-    },
-    {
-      asset: sub,
-      decimals: 10,
-      id: 24,
-      min: 0.02,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X1: {
-            Parachain: 2101,
-          },
         },
       },
     },
