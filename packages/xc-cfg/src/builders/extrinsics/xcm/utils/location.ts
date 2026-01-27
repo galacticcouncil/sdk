@@ -74,16 +74,10 @@ function isAssetHubReserve(xcmLocation: XcmLocation): boolean {
 }
 
 function getReserveParachainId(
-  xcmLocation: XcmLocation | undefined,
-  destination: Parachain
+  xcmLocation: XcmLocation | undefined
 ): number | undefined {
   if (!xcmLocation) {
     return undefined;
-  }
-
-  // Native to destination (parents: 0)
-  if (xcmLocation.parents === 0) {
-    return destination.parachainId;
   }
 
   // Asset Hub is reserve
@@ -102,7 +96,7 @@ export function validateReserveChain(
   reserve?: Parachain
 ): void {
   const xcmLocation = destination.getAssetXcmLocation(asset);
-  const expectedReserveId = getReserveParachainId(xcmLocation, destination);
+  const expectedReserveId = getReserveParachainId(xcmLocation);
 
   if (expectedReserveId === undefined) {
     throw new Error(
