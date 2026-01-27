@@ -146,7 +146,7 @@ const reserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     const account = getExtrinsicAccount(address);
     const ctx = source.chain as Parachain;
     const rcv = destination.chain as Parachain;
-    const version = XcmVersion.v4;
+    const version = ctx.xcmVersion ?? XcmVersion.v4;
 
     const transferAssetLocation = getExtrinsicAssetLocation(
       locationOrError(ctx, asset),

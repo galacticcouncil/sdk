@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  XcmVersion,
 } from '@galacticcouncil/xc-core';
 
 import { cru } from '../../assets';
@@ -29,4 +30,5 @@ export const crust = new Parachain({
     'wss://crust-parachain.crustnetwork.app',
     'wss://crust-parachain.crustapps.net',
   ],
+  xcmVersion: XcmVersion.v3,
 });

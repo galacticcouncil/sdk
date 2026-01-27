@@ -41,7 +41,8 @@ export function normalizeLocation(
 
 function applyConcreteWrapper(id: object) {
   return {
-    Concrete: { ...id },
+    type: 'Concrete',
+    value: encodeLocation(id),
   };
 }
 
