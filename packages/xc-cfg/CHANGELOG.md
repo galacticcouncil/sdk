@@ -1,5 +1,24 @@
 # @galacticcouncil/xc-cfg
 
+## 0.8.0
+
+### Minor Changes
+
+[1aa7675e]: https://github.com/galacticcouncil/sdk/commit/1aa7675e
+[87a9f5a4]: https://github.com/galacticcouncil/sdk/commit/87a9f5a4
+[c12bb7eb]: https://github.com/galacticcouncil/sdk/commit/c12bb7eb
+[408a4193]: https://github.com/galacticcouncil/sdk/commit/408a4193
+
+- [[#1aa7675e][1aa7675e]] xc: cfg reserve validator fix
+- [[#87a9f5a4][87a9f5a4]] xc: fix pendulum, ewt and crust transfers
+- [[#c12bb7eb][c12bb7eb]] xc: remove acala chain routes
+- [[#408a4193][408a4193]] xc: fixed reserve asset configs, hardcoded fees
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.9.0
+
 ## 0.7.2
 
 ### Patch Changes
