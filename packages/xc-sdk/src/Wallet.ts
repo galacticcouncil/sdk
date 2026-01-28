@@ -212,8 +212,7 @@ export class Wallet {
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
     const srcEd = await src.getEd();
-    const srcRentReserve = src.getRentReserve();
-    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd, srcRentReserve);
+    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
