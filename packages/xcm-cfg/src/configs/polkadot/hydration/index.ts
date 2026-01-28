@@ -36,6 +36,7 @@ import {
   paxg,
   pen,
   pha,
+  prime,
   pink,
   ring,
   sol,
@@ -381,6 +382,7 @@ const toEthereumViaHyperbridge: AssetRoute[] = [
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
+  viaWormholeBridgeTemplate(prime, prime, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [

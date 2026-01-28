@@ -39,6 +39,7 @@ import {
   paxg,
   pen,
   pha,
+  prime,
   pink,
   ring,
   neuro,
@@ -701,32 +702,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: paxg,
-      decimals: 18,
-      id: 39,
-      min: 0.000005,
-      xcmLocation: {
-        parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: {
-                Ethereum: {
-                  chainId: 1,
-                },
-              },
-            },
-            {
-              AccountKey20: {
-                network: null,
-                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: myth,
       decimals: 18,
       id: 30,
@@ -774,6 +749,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: paxg,
+      decimals: 18,
+      id: 39,
+      min: 0.000005,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: pen,
       decimals: 12,
       id: 1000081,
@@ -787,6 +788,31 @@ export const hydration = new EvmParachain({
             },
             {
               PalletInstance: 10,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: 43,
+      min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+              },
             },
           ],
         },

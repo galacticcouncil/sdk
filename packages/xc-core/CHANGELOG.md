@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-core
 
+## 0.9.0
+
+### Minor Changes
+
+[d144fa70]: https://github.com/galacticcouncil/sdk/commit/d144fa70
+
+- [[#d144fa70][d144fa70]] xc: added sdkCompat to parachains not supporting papi fully
+
 ## 0.8.0
 
 ### Minor Changes

@@ -13,6 +13,8 @@ import {
   Wallet,
 } from '@galacticcouncil/xc-sdk';
 
+import { builders } from '@galacticcouncil/xc-cfg';
+
 import * as c from 'console';
 
 import { getAddress } from './account';

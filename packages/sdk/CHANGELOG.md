@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk
 
+## 10.6.1
+
+### Patch Changes
+
+[ad932fb5]: https://github.com/galacticcouncil/sdk/commit/ad932fb5
+
+- [[#ad932fb5][ad932fb5]] sdk: fix opt dryRun xcm version 
+
 ## 10.6.0
 
 ### Minor Changes
