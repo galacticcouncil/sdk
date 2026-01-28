@@ -1,5 +1,17 @@
 # @galacticcouncil/xc-cfg
 
+## 0.9.0
+
+### Minor Changes
+
+[19d18f02]: https://github.com/galacticcouncil/sdk/commit/19d18f02
+[361cee42]: https://github.com/galacticcouncil/sdk/commit/361cee42
+[0a0a6783]: https://github.com/galacticcouncil/sdk/commit/0a0a6783
+
+- [[#19d18f02][19d18f02]] xc: removing teer, tnkr and xrt
+- [[#361cee42][361cee42]] xc: removed pha, cfg, nodl, sub tokens
+- [[#0a0a6783][0a0a6783]] xc: removed acala, zeitgeist, kilt, centrifuge, darwinia
+
 ## 0.8.0
 
 ### Minor Changes
