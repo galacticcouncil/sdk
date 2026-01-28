@@ -8,11 +8,8 @@ import { interlayConfig } from './interlay';
 import { moonbeamConfig } from './moonbeam';
 import { mythosConfig } from './mythos';
 import { uniqueConfig } from './unique';
-import { zeitgeistConfig } from './zeitgeist';
 import { crustConfig } from './crust';
-import { kiltConfig } from './kilt';
 import { pendulumConfig } from './pendulum';
-import { darwiniaConfig } from './darwinia';
 import { ajunaConfig } from './ajuna';
 import { laosConfig } from './laos';
 import { energywebxConfig } from './energywebx';
@@ -30,11 +27,8 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   mythosConfig,
   neurowebConfig,
   uniqueConfig,
-  zeitgeistConfig,
   crustConfig,
-  kiltConfig,
   pendulumConfig,
-  darwiniaConfig,
   laosConfig,
   energywebxConfig,
 ];

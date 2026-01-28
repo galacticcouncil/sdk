@@ -2,7 +2,6 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import {
   aave,
-  aca,
   ajun,
   astr,
   bnc,
@@ -21,19 +20,15 @@ import {
   ibtc,
   intr,
   jito_sol,
-  kilt,
   ksm,
   laos,
   ldo,
-  ldot,
   link,
   myth,
   neuro,
-  nodl,
   paxg,
   pen,
   pink,
-  ring,
   sol,
   sui,
   sky,
@@ -49,7 +44,6 @@ import {
   usdt_eth,
   vastr,
   vdot,
-  ztg,
   wbtc,
   wbtc_mwh,
   weth_mwh,
@@ -60,18 +54,15 @@ import {
   susds,
 } from '../../../assets';
 import {
-  acala,
   ajuna,
   assetHub,
   astar,
   bifrost,
   crust,
-  darwinia,
   energywebx,
   ethereum,
   hydration,
   interlay,
-  kilt_chain,
   laos_chain,
   moonbeam,
   mythos,
@@ -80,7 +71,6 @@ import {
   solana,
   sui_chain,
   unique,
-  zeitgeist,
 } from '../../../chains';
 import {
   ExtrinsicBuilder,
@@ -93,17 +83,11 @@ import {
   toHubExtTemplate,
   toHubWithCexFwdTemplate,
   toMoonbeamErc20Template,
-  toZeitgeistErc20Template,
   toTransferTemplate,
   viaSnowbridgeTemplate,
   viaWormholeRelayerTemplate,
   viaWormholeBridgeTemplate,
 } from './templates';
-
-const toAcala: AssetRoute[] = [
-  toTransferTemplate(aca, acala),
-  toTransferTemplate(ldot, acala),
-];
 
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
@@ -360,12 +344,6 @@ const toMoonbeam: AssetRoute[] = [
   toMoonbeamErc20Template(sol),
 ];
 
-const toZeitgeist: AssetRoute[] = [
-  toTransferTemplate(ztg, zeitgeist),
-  toTransferTemplate(glmr, zeitgeist),
-  toZeitgeistErc20Template(usdc_mwh),
-];
-
 const toMythos: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -411,8 +389,6 @@ const toCrust: AssetRoute[] = [
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
-
-const toKilt: AssetRoute[] = [toTransferTemplate(kilt, kilt_chain)];
 
 const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain)];
 
@@ -461,8 +437,6 @@ const toPendulum: AssetRoute[] = [
 ];
 
 const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
-
-const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
 
@@ -529,18 +503,15 @@ const toCex: AssetRoute[] = [
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
-    ...toAcala,
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,
     ...toCex,
     ...toCrust,
-    ...toDarwinia,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
-    ...toKilt,
     ...toLaos,
     ...toEnergywebx,
     ...toMoonbeam,
@@ -550,6 +521,5 @@ export const hydrationConfig = new ChainRoutes({
     ...toSolanaViaWormhole,
     ...toSuiViaWormhole,
     ...toUnique,
-    ...toZeitgeist,
   ],
 });

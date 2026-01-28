@@ -5,11 +5,6 @@ export const aave = new Asset({
   originSymbol: 'AAVE',
 });
 
-export const aca = new Asset({
-  key: 'aca',
-  originSymbol: 'ACA',
-});
-
 export const ajun = new Asset({
   key: 'ajun',
   originSymbol: 'AJUN',
@@ -28,11 +23,6 @@ export const bnc = new Asset({
 export const bsx = new Asset({
   key: 'bsx',
   originSymbol: 'BSX',
-});
-
-export const cfg = new Asset({
-  key: 'cfg',
-  originSymbol: 'CFG',
 });
 
 export const cfg_new = new Asset({
@@ -105,16 +95,6 @@ export const jito_sol = new Asset({
   originSymbol: 'jitoSOL',
 });
 
-export const kar = new Asset({
-  key: 'kar',
-  originSymbol: 'KAR',
-});
-
-export const kilt = new Asset({
-  key: 'kilt',
-  originSymbol: 'KILT',
-});
-
 export const ksm = new Asset({
   key: 'ksm',
   originSymbol: 'KSM',
@@ -140,11 +120,6 @@ export const ewt = new Asset({
   originSymbol: 'EWT',
 });
 
-export const ldot = new Asset({
-  key: 'ldot',
-  originSymbol: 'LDOT',
-});
-
 export const link = new Asset({
   key: 'link',
   originSymbol: 'LINK',
@@ -153,11 +128,6 @@ export const link = new Asset({
 export const myth = new Asset({
   key: 'myth',
   originSymbol: 'MYTH',
-});
-
-export const nodl = new Asset({
-  key: 'nodl',
-  originSymbol: 'NODL',
 });
 
 export const neuro = new Asset({
@@ -170,11 +140,6 @@ export const pen = new Asset({
   originSymbol: 'PEN',
 });
 
-export const pha = new Asset({
-  key: 'pha',
-  originSymbol: 'PHA',
-});
-
 export const paxg = new Asset({
   key: 'paxg',
   originSymbol: 'PAXG',
@@ -183,11 +148,6 @@ export const paxg = new Asset({
 export const pink = new Asset({
   key: 'pink',
   originSymbol: 'PINK',
-});
-
-export const ring = new Asset({
-  key: 'ring',
-  originSymbol: 'RING',
 });
 
 export const sky = new Asset({
@@ -203,11 +163,6 @@ export const sol = new Asset({
 export const sui = new Asset({
   key: 'sui',
   originSymbol: 'SUI',
-});
-
-export const sub = new Asset({
-  key: 'sub',
-  originSymbol: 'SUB',
 });
 
 export const susde = new Asset({
@@ -230,15 +185,6 @@ export const tbtc = new Asset({
   originSymbol: 'tBTC',
 });
 
-export const teer = new Asset({
-  key: 'teer',
-  originSymbol: 'TEER',
-});
-
-export const tnkr = new Asset({
-  key: 'tnkr',
-  originSymbol: 'TNKR',
-});
 
 export const trac = new Asset({
   key: 'trac',
@@ -320,23 +266,12 @@ export const wud = new Asset({
   originSymbol: 'WUD',
 });
 
-export const xrt = new Asset({
-  key: 'xrt',
-  originSymbol: 'XRT',
-});
-
-export const ztg = new Asset({
-  key: 'ztg',
-  originSymbol: 'ZTG',
-});
 
 export const assets: Asset[] = [
   aave,
-  aca,
   ajun,
   astr,
   bsx,
-  cfg,
   cfg_new,
   cru,
   bnc,
@@ -351,33 +286,24 @@ export const assets: Asset[] = [
   hdx,
   ibtc,
   intr,
-  kar,
-  kilt,
   ksm,
   ldo,
   laos,
   lbtc,
   ewt,
   jito_sol,
-  ldot,
   link,
   myth,
   neuro,
-  nodl,
   paxg,
-  pha,
   pen,
   pink,
-  ring,
   sky,
   sol,
   sui,
-  sub,
   susde,
   susds,
   susds_mwh,
-  teer,
-  tnkr,
   trac,
   tbtc,
   unq,
@@ -395,8 +321,6 @@ export const assets: Asset[] = [
   weth_mwh,
   wsteth,
   wud,
-  xrt,
-  ztg,
 ];
 
 export const assetsMap = new Map<string, Asset>(

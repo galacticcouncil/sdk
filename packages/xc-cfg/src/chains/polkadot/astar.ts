@@ -10,7 +10,6 @@ import {
   glmr,
   ibtc,
   intr,
-  pha,
   usdc,
   usdt,
   vastr,
@@ -160,20 +159,6 @@ export const astar = new Parachain({
               },
             },
           ],
-        },
-      },
-    },
-    {
-      asset: pha,
-      id: '18446744073709551622',
-      decimals: 12,
-      min: 0.01,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X1: {
-            Parachain: 2035,
-          },
         },
       },
     },
