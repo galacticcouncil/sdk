@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.10.0
+
+### Minor Changes
+
+[9e325697]: https://github.com/galacticcouncil/sdk/commit/9e325697
+
+- [[#9e325697][9e325697]] xc: cleanup shitcoins
+
 ## 0.9.0
 
 ### Minor Changes
