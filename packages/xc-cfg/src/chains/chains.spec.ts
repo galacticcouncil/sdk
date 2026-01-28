@@ -54,6 +54,7 @@ describe('chains config', () => {
         [
           'ajuna',
           'assethub',
+          'assethub_cex',
           'astar',
           'bifrost',
           'crust',
