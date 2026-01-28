@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.21.0
+
+### Minor Changes
+
+[62947638]: https://github.com/galacticcouncil/sdk/commit/62947638
+
+- [[#62947638][62947638]] xcm: enable prime 
+
 ## 10.20.0
 
 ### Minor Changes
