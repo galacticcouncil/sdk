@@ -12,7 +12,7 @@ import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { neuroweb } from './neuroweb';
 import { pendulum } from './pendulum';
-import { polkadot, polkadotCex } from './polkadot';
+import { polkadot } from './polkadot';
 import { unique } from './unique';
 import { energywebx } from './energywebx';
 
@@ -31,7 +31,6 @@ export const polkadotChains: AnyChain[] = [
   mythos,
   pendulum,
   polkadot,
-  polkadotCex,
   unique,
   energywebx,
 ];
@@ -51,7 +50,6 @@ export {
   mythos,
   pendulum,
   polkadot,
-  polkadotCex,
   unique,
   energywebx,
 };

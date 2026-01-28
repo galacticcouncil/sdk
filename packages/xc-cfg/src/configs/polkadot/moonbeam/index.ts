@@ -3,11 +3,9 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 import {
   dai,
   dai_mwh,
-  dot,
   eth,
   glmr,
   hdx,
-  pink,
   sol,
   susds_mwh,
   usdc,
@@ -59,28 +57,6 @@ const toHydration: AssetRoute[] = [
 ];
 
 const toAssetHub: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: pink,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: pink,
-      fee: {
-        amount: 0.18,
-        asset: usdt,
-      },
-    },
-    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32WithFee(),
-  }),
   new AssetRoute({
     source: {
       asset: usdt,

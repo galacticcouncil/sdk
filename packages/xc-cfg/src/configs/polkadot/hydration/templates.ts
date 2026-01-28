@@ -3,7 +3,6 @@ import {
   Asset,
   AssetRoute,
   ContractConfigBuilder,
-  ExtrinsicConfigBuilder,
   ExtrinsicConfigBuilderParams,
   FeeAmountConfigBuilder,
   Parachain,
@@ -17,7 +16,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, assetHubCex, moonbeam } from '../../../chains';
+import { assetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -26,8 +25,6 @@ export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
 export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
-
-export const CEX_EXECUTION_FEE = 0.03; // Remote execution fee (< 0.02)
 
 const isDestinationFeeSwapSupported = (
   params: ExtrinsicConfigBuilderParams
@@ -67,6 +64,30 @@ export function toTransferTemplate(
   });
 }
 
+export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: hub,
+      asset,
+      fee: {
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  });
+}
+
 export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
     source: {
@@ -89,39 +110,6 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
-  });
-}
-
-export function toHubWithCexFwdTemplate(
-  asset: Asset,
-  hubFee: number,
-  hubTransfer: ExtrinsicConfigBuilder
-): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHubCex,
-      asset: asset,
-      fee: {
-        amount: hubFee,
-        asset: asset,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        hubTransfer,
-        ExtrinsicBuilder().polkadotXcm().send().transferAsset({
-          fee: CEX_EXECUTION_FEE,
-        }),
-      ]),
   });
 }
 

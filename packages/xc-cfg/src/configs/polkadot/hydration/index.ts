@@ -9,9 +9,7 @@ import {
   cru,
   dai,
   dai_mwh,
-  ded,
   dot,
-  dota,
   ena,
   eth,
   ewt,
@@ -28,7 +26,6 @@ import {
   neuro,
   paxg,
   pen,
-  pink,
   sol,
   sui,
   sky,
@@ -56,6 +53,7 @@ import {
 import {
   ajuna,
   assetHub,
+  assetHubCex,
   astar,
   bifrost,
   crust,
@@ -80,8 +78,8 @@ import {
 
 import { balance, fee } from './configs';
 import {
+  toHubTemplate,
   toHubExtTemplate,
-  toHubWithCexFwdTemplate,
   toMoonbeamErc20Template,
   toTransferTemplate,
   viaSnowbridgeTemplate,
@@ -90,93 +88,10 @@ import {
 } from './templates';
 
 const toAssetHub: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: dot,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: ksm,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: usdt,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: usdc,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    }),
-  }),
-  toHubExtTemplate(pink),
-  toHubExtTemplate(ded),
-  toHubExtTemplate(dota),
+  toHubTemplate(dot, assetHub),
+  toHubTemplate(ksm, assetHub),
+  toHubTemplate(usdt, assetHub),
+  toHubTemplate(usdc, assetHub),
   toHubExtTemplate(wud),
 ];
 
@@ -477,27 +392,9 @@ const toSuiViaWormhole: AssetRoute[] = [
 ];
 
 const toCex: AssetRoute[] = [
-  toHubWithCexFwdTemplate(
-    usdt,
-    0.1,
-    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    })
-  ),
-  toHubWithCexFwdTemplate(
-    usdc,
-    0.1,
-    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    })
-  ),
-  toHubWithCexFwdTemplate(
-    dot,
-    0.2,
-    ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.DestinationReserve,
-    })
-  ),
+  toHubTemplate(dot, assetHubCex),
+  toHubTemplate(usdt, assetHubCex),
+  toHubTemplate(usdc, assetHubCex),
 ];
 
 export const hydrationConfig = new ChainRoutes({

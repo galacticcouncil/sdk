@@ -9,7 +9,6 @@ import {
   dot,
   glmr,
   ibtc,
-  pink,
   usdc,
   usdt,
   vastr,
@@ -129,27 +128,6 @@ export const bifrost = new Parachain({
             },
             {
               GeneralIndex: 1337,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: pink,
-      id: { Token2: 10 },
-      decimals: 10,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 23,
             },
           ],
         },

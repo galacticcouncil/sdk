@@ -11,7 +11,6 @@ import {
   glmr,
   hdx,
   jito_sol,
-  pink,
   sol,
   susds_mwh,
   sui,
@@ -284,27 +283,6 @@ export const moonbeam = new EvmParachain({
             },
             {
               GeneralIndex: 0,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: pink,
-      decimals: 10,
-      id: '0xffffffff30478fafbe935e466da114e14fb3563d',
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 23,
             },
           ],
         },

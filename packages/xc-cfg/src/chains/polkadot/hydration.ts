@@ -13,9 +13,7 @@ import {
   cfg_new,
   cru,
   dai_mwh,
-  ded,
   dot,
-  dota,
   ena,
   eth,
   ewt,
@@ -31,7 +29,6 @@ import {
   myth,
   paxg,
   pen,
-  pink,
   neuro,
   sui,
   trac,
@@ -251,27 +248,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: ded,
-      decimals: 10,
-      id: 1000019,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 30,
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: dot,
       decimals: 10,
       id: 5,
@@ -279,27 +255,6 @@ export const hydration = new EvmParachain({
       xcmLocation: {
         parents: 1,
         interior: 'Here',
-      },
-    },
-    {
-      asset: dota,
-      decimals: 4,
-      id: 1000038,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 18,
-            },
-          ],
-        },
       },
     },
     {
@@ -646,27 +601,6 @@ export const hydration = new EvmParachain({
             },
             {
               PalletInstance: 10,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: pink,
-      decimals: 10,
-      id: 1000021,
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 23,
             },
           ],
         },

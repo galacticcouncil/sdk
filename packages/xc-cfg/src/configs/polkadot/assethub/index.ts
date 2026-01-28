@@ -1,16 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import {
-  ded,
-  dot,
-  dota,
-  ksm,
-  myth,
-  pink,
-  usdc,
-  usdt,
-  wud,
-} from '../../../assets';
+import { dot, ksm, myth, usdc, usdt, wud } from '../../../assets';
 import {
   assetHub,
   assetHubCex,
@@ -28,11 +18,10 @@ import {
 } from '../../../builders';
 
 import {
-  toParaStablesTemplate,
-  toParaReservesWithSwapTemplate,
-  toHydrationExtTemplate,
-  toMoonbeamExtTemplate,
   extraFee,
+  toParaStablesTemplate,
+  toHydrationExtTemplate,
+  toParaReservesWithSwapTemplate,
 } from './templates';
 
 const toHydration: AssetRoute[] = [
@@ -89,9 +78,6 @@ const toHydration: AssetRoute[] = [
   }),
   toParaStablesTemplate(usdt, hydration, 0.02),
   toParaStablesTemplate(usdc, hydration, 0.02),
-  toHydrationExtTemplate(pink),
-  toHydrationExtTemplate(ded),
-  toHydrationExtTemplate(dota),
   toHydrationExtTemplate(wud),
 ];
 
@@ -124,7 +110,6 @@ const toKusamaAssethub: AssetRoute[] = [
 const toMoonbeam: AssetRoute[] = [
   toParaStablesTemplate(usdt, moonbeam, 0.25),
   toParaStablesTemplate(usdc, moonbeam, 0.25),
-  toMoonbeamExtTemplate(pink),
 ];
 
 const toBifrost: AssetRoute[] = [
@@ -158,6 +143,15 @@ const toMythos: AssetRoute[] = [
   }),
 ];
 
+export const assetHubCexConfig = new ChainRoutes({
+  chain: assetHubCex,
+  routes: [
+    toParaReservesWithSwapTemplate(usdt, hydration, 0.02),
+    toParaReservesWithSwapTemplate(usdc, hydration, 0.02),
+    toParaReservesWithSwapTemplate(dot, hydration, 0.001),
+  ],
+});
+
 export const assetHubConfig = new ChainRoutes({
   chain: assetHub,
   routes: [
@@ -166,14 +160,5 @@ export const assetHubConfig = new ChainRoutes({
     ...toMoonbeam,
     ...toBifrost,
     ...toMythos,
-  ],
-});
-
-export const assetHubCexConfig = new ChainRoutes({
-  chain: assetHubCex,
-  routes: [
-    toParaReservesWithSwapTemplate(usdt, hydration, 0.02),
-    toParaReservesWithSwapTemplate(usdc, hydration, 0.02),
-    toParaReservesWithSwapTemplate(dot, hydration, 0.001),
   ],
 });

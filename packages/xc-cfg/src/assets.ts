@@ -45,19 +45,9 @@ export const dai_mwh = new Asset({
   key: 'dai_mwh',
 });
 
-export const ded = new Asset({
-  key: 'ded',
-  originSymbol: 'DED',
-});
-
 export const dot = new Asset({
   key: 'dot',
   originSymbol: 'DOT',
-});
-
-export const dota = new Asset({
-  key: 'dota',
-  originSymbol: 'DOTA',
 });
 
 export const eth = new Asset({
@@ -145,11 +135,6 @@ export const paxg = new Asset({
   originSymbol: 'PAXG',
 });
 
-export const pink = new Asset({
-  key: 'pink',
-  originSymbol: 'PINK',
-});
-
 export const sky = new Asset({
   key: 'sky',
   originSymbol: 'SKY',
@@ -184,7 +169,6 @@ export const tbtc = new Asset({
   key: 'tbtc',
   originSymbol: 'tBTC',
 });
-
 
 export const trac = new Asset({
   key: 'trac',
@@ -266,7 +250,6 @@ export const wud = new Asset({
   originSymbol: 'WUD',
 });
 
-
 export const assets: Asset[] = [
   aave,
   ajun,
@@ -277,9 +260,7 @@ export const assets: Asset[] = [
   bnc,
   dai,
   dai_mwh,
-  ded,
   dot,
-  dota,
   ena,
   eth,
   glmr,
@@ -297,7 +278,6 @@ export const assets: Asset[] = [
   neuro,
   paxg,
   pen,
-  pink,
   sky,
   sol,
   sui,

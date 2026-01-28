@@ -4,7 +4,7 @@ import {
   ParachainParams,
 } from '@galacticcouncil/xc-core';
 
-import { ded, dot, dota, ksm, myth, pink, usdc, usdt, wud } from '../../assets';
+import { dot, ksm, myth, usdc, usdt, wud } from '../../assets';
 
 const config = {
   assetsData: [
@@ -50,60 +50,6 @@ const config = {
             },
             {
               GeneralIndex: 1337,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: pink,
-      decimals: 10,
-      id: 23,
-      xcmLocation: {
-        parents: 0,
-        interior: {
-          X2: [
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 23,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: ded,
-      decimals: 10,
-      id: 30,
-      xcmLocation: {
-        parents: 0,
-        interior: {
-          X2: [
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 30,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: dota,
-      decimals: 4,
-      id: 18,
-      xcmLocation: {
-        parents: 0,
-        interior: {
-          X2: [
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 18,
             },
           ],
         },
@@ -184,7 +130,6 @@ export const assetHubCex = new Parachain({
   ...config,
   key: 'assethub_cex',
   name: 'AssetHub (CEX)',
-  usesCexForwarding: true,
   usesSignerFee: true,
   isTestChain: true,
 });
