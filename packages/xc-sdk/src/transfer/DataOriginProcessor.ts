@@ -6,6 +6,7 @@ import {
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
+  ProgramConfig,
   TransferCtx,
   TransferConfig,
   TransactCtx,
@@ -21,6 +22,8 @@ import { DataProcessor } from './DataProcessor';
 const { EvmAddr } = addr;
 
 export class DataOriginProcessor extends DataProcessor {
+  private _rentReserve: bigint = 0n;
+
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
     super(adapter, config);
   }
@@ -100,6 +103,10 @@ export class DataOriginProcessor extends DataProcessor {
     const { amount, sender, source } = ctx;
 
     const transfer = await this.getTransfer(ctx);
+    if (transfer instanceof ProgramConfig) {
+      this._rentReserve = transfer.rentReserve;
+    }
+
     const address = route.contract
       ? await formatEvmAddress(sender, chain)
       : sender;
@@ -159,6 +166,10 @@ export class DataOriginProcessor extends DataProcessor {
       });
     }
     return feeAssetConfig as Asset;
+  }
+
+  getRentReserve(): bigint {
+    return this._rentReserve;
   }
 
   private async getTransfer(ctx: TransferCtx) {

@@ -22,7 +22,8 @@ export function calculateMax(
   balance: AssetAmount,
   fee: AssetAmount,
   min: AssetAmount,
-  ed?: AssetAmount
+  ed?: AssetAmount,
+  rentReserve?: bigint
 ): AssetAmount {
   let result = balance
     .toBig()
@@ -31,6 +32,10 @@ export function calculateMax(
 
   if (ed) {
     result = result.minus(balance.isSame(ed) ? ed.toBig() : new Big(0));
+  }
+
+  if (rentReserve && rentReserve > 0n) {
+    result = result.minus(new Big(rentReserve.toString()));
   }
 
   return balance.copyWith({
