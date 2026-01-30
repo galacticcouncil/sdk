@@ -1,5 +1,20 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.11.0
+
+### Minor Changes
+
+[f2b52124]: https://github.com/galacticcouncil/sdk/commit/f2b52124
+[9424cbdd]: https://github.com/galacticcouncil/sdk/commit/9424cbdd
+
+- [[#f2b52124][f2b52124]] xc: moved rentReserve to feeCalc
+- [[#9424cbdd][9424cbdd]] xc: fix calculateMax function for solana (rentReserve fee)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.11.0
+
 ## 10.10.0
 
 ### Minor Changes

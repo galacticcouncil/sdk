@@ -132,6 +132,7 @@ const transferNativeWithPayload = () => {
           signers: [messageKeypair, ancillaryKeypair],
           func: 'TransferNativeWithPayload',
           module: 'TokenBridge',
+          rentReserve: BigInt(rentBalance),
         });
       },
     }),
