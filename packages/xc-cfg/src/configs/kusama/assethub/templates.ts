@@ -8,7 +8,7 @@ import {
   XcmTransferType,
 } from '../../../builders';
 
-export const extraFee = 0;
+export const extraFee = 0.0015; // xcmDeliveryFee
 
 export function toParaStablesTemplate(
   asset: Asset,
