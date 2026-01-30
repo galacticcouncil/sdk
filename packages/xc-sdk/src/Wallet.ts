@@ -166,7 +166,7 @@ export class Wallet {
 
     const ctx: TransferCtx = {
       address: dstAddress,
-      amount: 1n, // Use 1 satoshi as init amount
+      amount: 10n, // Use 10 satoshi as init amount
       asset: source.asset,
       destination: {
         balance: dstBalance,
