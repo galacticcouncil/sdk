@@ -166,7 +166,7 @@ export class Wallet {
 
     const ctx: TransferCtx = {
       address: dstAddress,
-      amount: 1n, // Use 1 satoshi as init amount
+      amount: srcBalance.amount || 1n, // Use actual balance for fee calibration (EVM contracts revert on dust amounts)
       asset: source.asset,
       destination: {
         balance: dstBalance,
