@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.10.0
+
+### Minor Changes
+
+- 9b8bfe2: Extend descriptors whitelist
+
 ## 1.9.0
 
 ### Minor Changes

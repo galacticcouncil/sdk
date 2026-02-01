@@ -1,5 +1,15 @@
 # @galacticcouncil/xc-sdk
 
+## 0.5.1
+
+### Patch Changes
+
+[e6217edd]: https://github.com/galacticcouncil/sdk/commit/e6217edd
+[0eb8017a]: https://github.com/galacticcouncil/sdk/commit/0eb8017a
+
+- [[#e6217edd][e6217edd]] xc: fix max transfer from SUI
+- [[#0eb8017a][0eb8017a]] xc: changed init amount in transfer to 10 satoshis
+
 ## 0.5.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.11.1
+
+### Patch Changes
+
+[162300b1]: https://github.com/galacticcouncil/sdk/commit/162300b1
+
+- [[#162300b1][162300b1]] xc: added kusama xcmDeliveryFee
+
 ## 0.11.0
 
 ### Minor Changes
