@@ -38,5 +38,10 @@ export const base = new EvmChain({
     ismpHost: '0x6FFe92e4d7a9D589549644544780e6725E84b248',
     feeAsset: usdc,
   },
+  wormhole: {
+    id: 30,
+    coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',
+    tokenBridge: '0x8d2de8d2f73F1F4cAB472AC9A881C9b123C79627',
+  },
   uniswapV2: '0x327Df1E6de05895d2ab08513aaDD9313Fe505d86',
 });
