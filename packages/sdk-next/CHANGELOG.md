@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.30.0
+
+### Minor Changes
+
+[22616cd9]: https://github.com/galacticcouncil/sdk/commit/22616cd9
+
+- [[#22616cd9][22616cd9]] next: enable hsm
+
 ## 0.29.0
 
 ### Minor Changes
