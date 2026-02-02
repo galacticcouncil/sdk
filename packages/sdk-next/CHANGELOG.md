@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.30.1
+
+### Patch Changes
+
+[fde55e89]: https://github.com/galacticcouncil/sdk/commit/fde55e89
+
+- [[#fde55e89][fde55e89]] next: fix hsm factory
+
 ## 0.30.0
 
 ### Minor Changes
