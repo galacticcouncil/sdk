@@ -21,6 +21,7 @@ import { TradeRouter } from './TradeRouter';
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
 import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
+import { IPoolCtxProvider, PoolType } from '../pool';
 import { calc } from '../utils';
 
 export type TradeSchedulerOptions = {
@@ -30,10 +31,12 @@ export type TradeSchedulerOptions = {
 
 export class TradeScheduler {
   private readonly schedulerOptions: TradeSchedulerOptions;
+
   protected readonly router: TradeRouter;
 
-  constructor(router: TradeRouter, options: TradeSchedulerOptions = {}) {
-    this.router = router;
+  constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions = {}) {
+    this.router = new TradeRouter(ctx);
+    this.router.withFilter({ exclude: [PoolType.HSM] });
     this.schedulerOptions = Object.freeze({
       blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
       minBudgetInNative: options.minBudgetInNative ?? DEFAULT_MIN_BUDGET,

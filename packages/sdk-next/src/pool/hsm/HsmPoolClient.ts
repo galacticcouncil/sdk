@@ -217,7 +217,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       });
   }
 
-  protected override subscribeBalances(): Subscription {
+  private subscribeCollateralBalance(): Subscription {
     const tokenCollaterals: number[] = [];
     const erc20Collaterals: number[] = [];
 
@@ -279,9 +279,45 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     return Subscription.EMPTY;
   }
 
+  private subscribeStableswapUpdates(): Subscription {
+    return this.stableClient
+      .getSubscriber()
+      .pipe(this.watchGuard('stableswap.updates'))
+      .subscribe((stablePools) => {
+        const stableMap = new Map(stablePools.map((p) => [p.id, p]));
+
+        this.store.update((hsmPools) => {
+          const updated: HsmPoolBase[] = [];
+
+          for (const hsmPool of hsmPools) {
+            const stablePool = stableMap.get(hsmPool.id);
+            if (stablePool) {
+              updated.push({
+                ...hsmPool,
+                // Merge updated stableswap properties
+                fee: stablePool.fee,
+                tokens: stablePool.tokens.filter((t) => t.id !== hsmPool.id),
+                totalIssuance: stablePool.totalIssuance,
+                pegs: stablePool.pegs,
+                amplification: stablePool.amplification,
+                isRampPeriod: stablePool.isRampPeriod,
+              });
+            }
+          }
+          return updated;
+        });
+      });
+  }
+
+  protected override subscribeBalances(): Subscription {
+    return Subscription.EMPTY;
+  }
+
   protected subscribeUpdates(): Subscription {
     const sub = new Subscription();
 
+    sub.add(this.subscribeCollateralBalance());
+    sub.add(this.subscribeStableswapUpdates());
     sub.add(this.subscribeEvmLog());
 
     return sub;
