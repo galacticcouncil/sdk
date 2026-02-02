@@ -23,6 +23,7 @@ import {
   usdt_mwh,
   wbtc_mwh,
   weth_mwh,
+  eurc,
 } from '../../assets';
 
 const evmChain: Chain = defineChain({
@@ -89,6 +90,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x06e605775296e851ff43b4daa541bb0984e9d6fd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: eurc,
+      decimals: 6,
+      id: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
               },
             },
           ],
