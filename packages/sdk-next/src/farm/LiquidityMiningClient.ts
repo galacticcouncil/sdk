@@ -34,7 +34,7 @@ export class LiquidityMiningClient extends Papi {
 
   async getOmnipoolGlobalFarm(id: number) {
     const query = this.api.query.OmnipoolWarehouseLM.GlobalFarm;
-    const value = query.getValue(id);
+    const value = query.getValue(id, { at: 'best' });
     return value;
   }
 
@@ -44,7 +44,7 @@ export class LiquidityMiningClient extends Papi {
     yieldFarmId: number
   ) {
     const query = this.api.query.OmnipoolWarehouseLM.YieldFarm;
-    const value = query.getValue(id, globalFarmId, yieldFarmId);
+    const value = query.getValue(id, globalFarmId, yieldFarmId, { at: 'best' });
     return value;
   }
 
@@ -62,7 +62,7 @@ export class LiquidityMiningClient extends Papi {
 
   async getIsolatedGlobalFarm(id: number) {
     const query = this.api.query.XYKWarehouseLM.GlobalFarm;
-    const value = query.getValue(id);
+    const value = query.getValue(id, { at: 'best' });
     return value;
   }
 
@@ -72,7 +72,7 @@ export class LiquidityMiningClient extends Papi {
     yieldFarmId: number
   ) {
     const query = this.api.query.XYKWarehouseLM.YieldFarm;
-    const value = query.getValue(id, globalFarmId, yieldFarmId);
+    const value = query.getValue(id, globalFarmId, yieldFarmId, { at: 'best' });
     return value;
   }
 
