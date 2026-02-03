@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk-next
 
+## 0.30.2
+
+### Patch Changes
+
+[d91d0720]: https://github.com/galacticcouncil/sdk/commit/d91d0720
+[0fb53f38]: https://github.com/galacticcouncil/sdk/commit/0fb53f38
+
+- [[#d91d0720][d91d0720]] next: fix hsm factory
+- [[#0fb53f38][0fb53f38]] next: farm queries to best block
+
 ## 0.30.1
 
 ### Patch Changes
