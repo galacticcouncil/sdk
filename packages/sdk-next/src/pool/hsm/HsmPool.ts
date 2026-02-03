@@ -272,9 +272,10 @@ export class HsmPool extends StableSwap {
     amountIn: bigint,
     amountOut: bigint
   ): bigint {
-    const aIn = amountOut * 10n ** BigInt(poolPair.decimalsIn);
-    const aOut = amountIn * 10n ** BigInt(poolPair.decimalsOut);
-    return aOut / aIn;
+    const base = big.pow10(
+      poolPair.decimalsIn + RUNTIME_DECIMALS - poolPair.decimalsOut
+    );
+    return (amountOut * base) / amountIn;
   }
 
   private calculateMaxPrice(poolPair: PoolPair): bigint {
@@ -285,7 +286,7 @@ export class HsmPool extends StableSwap {
     );
     const [maxNom, maxDenom] = JSON.parse(maxPrice);
 
-    const base = 10n ** BigInt(RUNTIME_DECIMALS - poolPair.decimalsOut);
+    const base = big.pow10(RUNTIME_DECIMALS - poolPair.decimalsOut);
     return (BigInt(maxNom) * base) / BigInt(maxDenom);
   }
 
