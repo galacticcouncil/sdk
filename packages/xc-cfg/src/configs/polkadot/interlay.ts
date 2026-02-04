@@ -25,7 +25,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -47,7 +47,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -69,7 +69,7 @@ const toHydration: AssetRoute[] = [
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -93,7 +93,7 @@ const toHydration: AssetRoute[] = [
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -117,7 +117,7 @@ const toHydration: AssetRoute[] = [
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -141,7 +141,7 @@ const toHydration: AssetRoute[] = [
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -163,7 +163,7 @@ const toHydration: AssetRoute[] = [
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
   }),
 ];
 
