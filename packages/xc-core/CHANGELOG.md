@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-core
 
+## 0.11.0
+
+### Minor Changes
+
+[f151df14]: https://github.com/galacticcouncil/sdk/commit/f151df14
+
+- [[#f151df14][f151df14]] xc: changed withSdkCompat to legacyEnhancer
+
 ## 0.10.0
 
 ### Minor Changes
