@@ -1,6 +1,6 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { getWsProvider } from 'polkadot-api/ws-provider';
-import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
+import { withLegacy } from '@polkadot-api/legacy-provider';
 import { LRUCache } from 'lru-cache';
 import { Observable, Subscription } from 'rxjs';
 
@@ -65,13 +65,13 @@ export class SubstrateApis {
   public createClient(
     endpoints: string[],
     probeConfig?: HealthProbeConfig,
-    useSdkCompat?: boolean
+    useLegacyEnhancer?: boolean
   ): PolkadotClient {
-    const wsProvider = getWsProvider(endpoints);
-    const provider = useSdkCompat
-      ? withPolkadotSdkCompat(wsProvider)
-      : wsProvider;
-    const client = createClient(provider);
+    const wsProvider = getWsProvider(
+      endpoints,
+      useLegacyEnhancer ? { innerEnhancer: withLegacy() } : undefined
+    );
+    const client = createClient(wsProvider);
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
@@ -94,7 +94,7 @@ export class SubstrateApis {
   public api(
     ws: string | string[],
     probeConfig?: HealthProbeConfig,
-    useSdkCompat?: boolean
+    useLegacyEnhancer?: boolean
   ): PolkadotClient {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
@@ -104,7 +104,7 @@ export class SubstrateApis {
       return connection.client;
     }
 
-    return this.createClient(endpoints, probeConfig, useSdkCompat);
+    return this.createClient(endpoints, probeConfig, useLegacyEnhancer);
   }
 
   public release() {

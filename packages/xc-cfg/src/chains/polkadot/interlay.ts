@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  XcmVersion,
 } from '@galacticcouncil/xc-core';
 
 import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
@@ -138,5 +139,7 @@ export const interlay = new Parachain({
   name: 'Interlay',
   parachainId: 2032,
   ss58Format: 2032,
-  ws: 'wss://api.interlay.io/parachain', //failing for papi
+  ws: 'wss://api.interlay.io/parachain',
+  usesLegacyEnhancer: true,
+  xcmVersion: XcmVersion.v3,
 });

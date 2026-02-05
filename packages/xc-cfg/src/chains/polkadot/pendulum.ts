@@ -29,7 +29,7 @@ export const pendulum = new Parachain({
   name: 'Pendulum',
   parachainId: 2094,
   ss58Format: 56,
-  usesSdkCompat: true,
+  usesLegacyEnhancer: true,
   ws: 'wss://rpc-pendulum.prd.pendulumchain.tech',
   xcmVersion: XcmVersion.v3,
 });
