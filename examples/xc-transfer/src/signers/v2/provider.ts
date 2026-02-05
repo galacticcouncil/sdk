@@ -1,5 +1,4 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
-import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 
 export const getWs = async (
   wsUrl: string | string[]
@@ -11,5 +10,5 @@ export const getWs = async (
     : (await import('polkadot-api/ws-provider/web')).getWsProvider;
 
   const wsProvider = getWsProvider(endpoints);
-  return createClient(withPolkadotSdkCompat(wsProvider));
+  return createClient(wsProvider);
 };
