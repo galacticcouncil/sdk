@@ -65,7 +65,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: hdx,
       fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        amount: 0.5,
         asset: hdx,
       },
     },
@@ -159,7 +159,9 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: dot,
       },
     },
