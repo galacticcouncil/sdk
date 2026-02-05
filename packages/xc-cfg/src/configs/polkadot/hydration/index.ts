@@ -209,11 +209,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: ibtc,
       fee: {
-        amount: 0.000002,
+        amount: 0.00000062,
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -228,11 +228,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: intr,
       fee: {
-        amount: 0.01,
+        amount: 0.0019213457,
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -247,11 +247,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: hdx,
       fee: {
-        amount: 0.06,
+        amount: 0.5,
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -266,11 +266,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: usdt,
       fee: {
-        amount: 0.02,
+        amount: 0.3,
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -285,11 +285,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: usdc,
       fee: {
-        amount: 0.02,
+        amount: 0.3,
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -304,11 +304,11 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: vdot,
       fee: {
-        amount: 0.001,
+        amount: 0.01,
         asset: dot,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().reserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -323,7 +323,7 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: dot,
       fee: {
-        amount: 0.001,
+        amount: 0.05,
         asset: dot,
       },
     },
