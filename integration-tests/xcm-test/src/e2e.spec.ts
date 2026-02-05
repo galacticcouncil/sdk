@@ -36,9 +36,21 @@ const getChains = () => {
     'polkadot',
     'assethub',
     //'bifrost',
+    'crust',
+    'laos',
     'hydration',
     'moonbeam',
     'mythos',
+    'neuroweb',
+    'pendulum',
+    'unique',
+  ];
+
+  const polkadotChains2: string[] = [
+    'polkadot',
+    'assethub',
+    'hydration',
+    'bifrost',
   ];
 
   const allowedChains: string[] = [...polkadotChains];

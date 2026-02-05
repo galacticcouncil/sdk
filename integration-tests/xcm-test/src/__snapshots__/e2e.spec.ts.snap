@@ -84,6 +84,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Crust network -> Hydration CRU [cru] transfer 1`] = `
+[
+  "crust-hydration-cru",
+  "0xf4047d000000a0724e18090000000000000000000003010200c91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> AssetHub Polkadot DED [ded] transfer 1`] = `
 [
   "hydration-assethub-ded",
@@ -137,6 +144,27 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 [
   "hydration-assethub-wud",
   "0x51010489050408010300a10f043205011f0082fc0a00010300a10f043205a6e90100000700e87648170000000004010200a10f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost DOT [dot] transfer 1`] = `
+[
+  "hydration-bifrost-dot",
+  "0x4101046b0d04010100b91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Crust network CRU [cru] transfer 1`] = `
+[
+  "hydration-crust-cru",
+  "0x01010489001b00000000a0724e18090000000000000000000004010200611f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Laos LAOS [laos] transfer 1`] = `
+[
+  "hydration-laos-laos",
+  "0xd00489002a0d00000000e8890423c78a000000000000000004010200a9340300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac00",
 ]
 `;
 
@@ -224,6 +252,34 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Neuroweb NEURO [neuro] transfer 1`] = `
+[
+  "hydration-neuroweb-neuro",
+  "0x01010489002400000000a0724e18090000000000000000000004010200ed1f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Pendulum PEN [pen] transfer 1`] = `
+[
+  "hydration-pendulum-pen",
+  "0x010104890091420f0000a0724e18090000000000000000000004010200b920010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Unique network UNQ [unq] transfer 1`] = `
+[
+  "hydration-unique-unq",
+  "0x0101048900190000000000e8890423c78a000000000000000004010200d51f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Laos -> Hydration LAOS [laos] transfer 1`] = `
+[
+  "laos-hydration-laos",
+  "0x1d01041f0d04010100c91f0404000000130000e8890423c78a010400000104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Mythos -> AssetHub Polkadot MYTH [myth] transfer 1`] = `
 [
   "mythos-assethub-myth",
@@ -235,5 +291,26 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Myt
 [
   "mythos-hydration-myth",
   "0x1d01041f0d04010100c91f0404000000130000e8890423c78a010400000104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Neuroweb -> Hydration NEURO [neuro] transfer 1`] = `
+[
+  "neuroweb-hydration-neuro",
+  "0x0101041f0204010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee04040001040a000b00a0724e180900000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Pendulum -> Hydration PEN [pen] transfer 1`] = `
+[
+  "pendulum-hydration-pen",
+  "0xf40436000000a0724e18090000000000000000000003010200c91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Unique network -> Hydration UNQ [unq] transfer 1`] = `
+[
+  "unique-hydration-unq",
+  "0x0101042600000000000000e8890423c78a000000000000000004010200c91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
