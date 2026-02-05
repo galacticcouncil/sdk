@@ -81,6 +81,7 @@ import {
   toHubTemplate,
   toHubExtTemplate,
   toMoonbeamErc20Template,
+  toParaTemplate,
   toTransferTemplate,
   viaSnowbridgeTemplate,
   viaWormholeRelayerTemplate,
@@ -196,101 +197,11 @@ const toBifrost: AssetRoute[] = [
 ];
 
 const toInterlay: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: ibtc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: ibtc,
-      fee: {
-        amount: 0.00000062,
-        asset: ibtc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: intr,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: intr,
-      fee: {
-        amount: 0.0019213457,
-        asset: intr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: hdx,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: hdx,
-      fee: {
-        amount: 0.5,
-        asset: hdx,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: usdt,
-      fee: {
-        amount: 0.3,
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: interlay,
-      asset: usdc,
-      fee: {
-        amount: 0.3,
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
+  toParaTemplate(ibtc, interlay, 0.00000062),
+  toParaTemplate(intr, interlay, 0.0019213457),
+  toParaTemplate(hdx, interlay, 0.5),
+  toParaTemplate(usdt, interlay, 0.3),
+  toParaTemplate(usdc, interlay, 0.3),
   new AssetRoute({
     source: {
       asset: vdot,
