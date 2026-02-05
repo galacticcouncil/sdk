@@ -272,10 +272,19 @@ export class HsmPool extends StableSwap {
     amountIn: bigint,
     amountOut: bigint
   ): bigint {
+    const buyPrice = HsmMath.calculateBuybackPriceWithFee(
+      amountOut.toString(),
+      amountIn.toString(),
+      FeeUtils.toRaw(this.buyBackFee).toString()
+    );
+
+    const [buyNom, buyDenom] = JSON.parse(buyPrice);
+
     const base = big.pow10(
       poolPair.decimalsIn + RUNTIME_DECIMALS - poolPair.decimalsOut
     );
-    return (amountOut * base) / amountIn;
+
+    return (BigInt(buyNom) * base) / BigInt(buyDenom);
   }
 
   private calculateMaxPrice(poolPair: PoolPair): bigint {
@@ -287,6 +296,7 @@ export class HsmPool extends StableSwap {
     const [maxNom, maxDenom] = JSON.parse(maxPrice);
 
     const base = big.pow10(RUNTIME_DECIMALS - poolPair.decimalsOut);
+
     return (BigInt(maxNom) * base) / BigInt(maxDenom);
   }
 

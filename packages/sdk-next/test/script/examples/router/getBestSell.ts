@@ -12,7 +12,7 @@ class GetBestSell extends PapiExecutor {
 
     const { api, tx } = sdk;
 
-    const trade = await api.router.getBestSell(222, 10, '50');
+    const trade = await api.router.getBestSell(1000795, 22, '10');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());
