@@ -1,8 +1,4 @@
-import {
-  ChainEcosystem,
-  Parachain,
-  SubstrateApis,
-} from '@galacticcouncil/xcm-core';
+import { AnyChain, Parachain, SubstrateApis } from '@galacticcouncil/xcm-core';
 import { Wallet } from '@galacticcouncil/xcm-sdk';
 
 import { jest } from '@jest/globals';
@@ -35,30 +31,25 @@ const usage = outdent`
     npm run test:e2e -- -chain hydration
 `;
 
-/**
- * Supported polkadot consensus ctx.
- *
- * Constraints:
- * 1) Bridge transfers are not executed.
- * 2) Nodle is skipped (unstable rpc's).
- *
- * @returns chains execution ctx
- */
-const getPolkadotChains = () => {
-  const bridge: string[] = ['ethereum', 'solana', 'sui'];
-  const skipFor: string[] = bridge.concat(['nodle']);
-  const chains: Parachain[] = Array.from(configService.chains.values())
-    .filter((c) => c instanceof Parachain)
-    .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
-    .filter((c) => !skipFor.includes(c.key));
+const getChains = () => {
+  const polkadotChains: string[] = [
+    'polkadot',
+    'assethub',
+    //'bifrost',
+    'hydration',
+    'moonbeam',
+    'mythos',
+  ];
+
+  const allowedChains: string[] = [...polkadotChains];
+
+  const chains: AnyChain[] = Array.from(configService.chains.values()).filter(
+    (c) => allowedChains.includes(c.key)
+  );
 
   return {
-    skipFor,
-    bridge,
-    //chains,
-    chains: Array.from(configService.chains.values()).filter((c) =>
-      ['assethub', 'hydration'].includes(c.key)
-    ) as Parachain[],
+    skipFor: [],
+    chains,
   };
 };
 
@@ -76,10 +67,10 @@ describe('Wallet with XCM config', () => {
   let networks: SetupCtx[] = [];
 
   const reportCtx = loadExisting(DB);
-  const polkadot = getPolkadotChains();
+  const { chains, skipFor } = getChains();
 
   beforeAll(async () => {
-    networks = await createNetworks(polkadot.chains);
+    networks = await createNetworks(chains as Parachain[]);
     const ctx = networks.find((n) => n.config.key === 'hydration')!;
     wallet = await initWithCtx(ctx);
   });
@@ -94,18 +85,19 @@ describe('Wallet with XCM config', () => {
     expect(configService).toBeDefined();
   });
 
-  describe.each(polkadot.chains)(
+  describe.each(chains.filter((c) => c.key !== 'polkadot'))(
     'should result in valid Polkadot transfer for',
     (c) => {
       const config = configService.getChainRoutes(c);
       const { chain, routes } = config;
 
       for (const route of Array.from(routes.values())) {
-        const { skipFor } = polkadot;
         const { source, destination } = route;
         const { asset } = source;
 
-        if (skipFor.includes(destination.chain.key)) {
+        const allowedDest = chains.map((c) => c.key);
+
+        if (!allowedDest.includes(destination.chain.key)) {
           continue;
         }
 
