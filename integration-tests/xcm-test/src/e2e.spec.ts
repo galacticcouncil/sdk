@@ -46,13 +46,6 @@ const getChains = () => {
     'unique',
   ];
 
-  const polkadotChains2: string[] = [
-    'polkadot',
-    'assethub',
-    'hydration',
-    'bifrost',
-  ];
-
   const allowedChains: string[] = [...polkadotChains];
 
   const chains: AnyChain[] = Array.from(configService.chains.values()).filter(

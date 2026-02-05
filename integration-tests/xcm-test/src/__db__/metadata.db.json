@@ -152,11 +152,11 @@
     }
   },
   "bifrost-hydration-dot": {
-    "updated": 1741722763998,
+    "updated": 1770299143860,
     "destination": {
-      "fee": "0.0444666685",
+      "fee": "0.03174637",
       "feeAsset": "DOT",
-      "feeNative": "444666685"
+      "feeNative": "317463700"
     }
   },
   "bifrost-polkadot-dot": {

@@ -84,6 +84,13 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration DOT [dot] transfer 1`] = `
+[
+  "bifrost-hydration-dot",
+  "0x410104290d04010100c91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Crust network -> Hydration CRU [cru] transfer 1`] = `
 [
   "crust-hydration-cru",
