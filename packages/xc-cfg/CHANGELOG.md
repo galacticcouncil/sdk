@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.12.1
+
+### Patch Changes
+
+[c12bc0d4]: https://github.com/galacticcouncil/sdk/commit/c12bc0d4
+
+- [[#c12bc0d4][c12bc0d4]] xc: fix erc20 snowbridge transfers 
+
 ## 0.12.0
 
 ### Minor Changes

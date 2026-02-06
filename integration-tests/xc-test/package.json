@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@galacticcouncil/sdk-next": "^0.30.3",
-    "@galacticcouncil/xc-cfg": "^0.12.0",
+    "@galacticcouncil/xc-cfg": "^0.12.1",
     "@galacticcouncil/xc-core": "^0.11.0",
     "@galacticcouncil/xc-sdk": "^0.5.2"
   }
