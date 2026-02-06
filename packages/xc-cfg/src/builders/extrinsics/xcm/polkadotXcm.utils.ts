@@ -49,9 +49,19 @@ const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
 export const isSnowbridgeTransfer = (assetLocation: any) => {
   const { interior } = assetLocation;
 
+  // Native ETH: X1(GlobalConsensus(Ethereum))
   if (interior.type === 'X1' && interior.value.type === 'GlobalConsensus') {
     return interior.value.value.type === 'Ethereum';
   }
+
+  // ERC20 tokens: X2([GlobalConsensus(Ethereum), AccountKey20])
+  if (interior.type === 'X2' && Array.isArray(interior.value)) {
+    const first = interior.value[0];
+    return (
+      first.type === 'GlobalConsensus' && first.value.type === 'Ethereum'
+    );
+  }
+
   return false;
 };
 
