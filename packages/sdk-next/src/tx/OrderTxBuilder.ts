@@ -68,7 +68,7 @@ export class OrderTxBuilder extends TxBuilder {
     }
   }
 
-  private buildDcaTx(): Tx {
+  private async buildDcaTx(): Promise<Tx> {
     const {
       amountIn,
       assetIn,
@@ -78,7 +78,7 @@ export class OrderTxBuilder extends TxBuilder {
       tradeRoute,
     } = this.order;
 
-    const tx: Transaction = this.api.tx.DCA.schedule({
+    let tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -97,10 +97,15 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
+
     return this.wrapTx('DcaSchedule', tx);
   }
 
-  private buildTwapSellTx(): Tx {
+  private async buildTwapSellTx(): Promise<Tx> {
     const {
       amountIn,
       assetIn,
@@ -114,7 +119,7 @@ export class OrderTxBuilder extends TxBuilder {
     const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
     const minAmountOut = tradeAmountOut - slippage;
 
-    const tx: Transaction = this.api.tx.DCA.schedule({
+    let tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -133,10 +138,15 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
+
     return this.wrapTx('DcaSchedule.twapSell', tx);
   }
 
-  private buildTwapBuyTx(): Tx {
+  private async buildTwapBuyTx(): Promise<Tx> {
     const {
       amountIn,
       assetIn,
@@ -150,7 +160,7 @@ export class OrderTxBuilder extends TxBuilder {
     const slippage = calc.getFraction(tradeAmountIn, this.slippagePct);
     const maxAmountIn = tradeAmountIn + slippage;
 
-    const tx: Transaction = this.api.tx.DCA.schedule({
+    let tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -168,6 +178,11 @@ export class OrderTxBuilder extends TxBuilder {
       },
       start_execution_block: undefined,
     });
+
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
 
     return this.wrapTx('DcaSchedule.twapBuy', tx);
   }
