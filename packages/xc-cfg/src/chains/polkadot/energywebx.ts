@@ -25,7 +25,7 @@ export const energywebx = new Parachain({
   name: 'Energy Web X',
   parachainId: 3345,
   ss58Format: 42,
-  usesSdkCompat: true,
+  usesLegacyEnhancer: true,
   ws: 'wss://wnp-rpc.mainnet.energywebx.com',
   xcmVersion: XcmVersion.v3,
 });

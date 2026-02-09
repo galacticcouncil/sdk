@@ -1,5 +1,21 @@
 # @galacticcouncil/sdk-next
 
+## 0.30.4
+
+### Patch Changes
+
+[538a9228]: https://github.com/galacticcouncil/sdk/commit/538a9228
+
+- [[#538a9228][538a9228]] next: fix hsm spot decimals
+
+## 0.30.3
+
+### Patch Changes
+
+[b5b9982d]: https://github.com/galacticcouncil/sdk/commit/b5b9982d
+
+- [[#b5b9982d][b5b9982d]] next: fix buy price calc
+
 ## 0.30.2
 
 ### Patch Changes

@@ -1,5 +1,28 @@
 # @galacticcouncil/xc-cfg
 
+## 0.12.1
+
+### Patch Changes
+
+[c12bc0d4]: https://github.com/galacticcouncil/sdk/commit/c12bc0d4
+
+- [[#c12bc0d4][c12bc0d4]] xc: fix erc20 snowbridge transfers 
+
+## 0.12.0
+
+### Minor Changes
+
+[ff0cdd58]: https://github.com/galacticcouncil/sdk/commit/ff0cdd58
+[fca6bf5b]: https://github.com/galacticcouncil/sdk/commit/fca6bf5b
+
+- [[#ff0cdd58][ff0cdd58]] xc: use xTokens for interlay transfers
+- [[#fca6bf5b][fca6bf5b]] xc: update fees and transfer types
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.11.0
+
 ## 0.11.1
 
 ### Patch Changes

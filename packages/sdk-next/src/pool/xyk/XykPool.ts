@@ -198,7 +198,7 @@ export class XykPool implements Pool {
   }
 
   /**
-   * Normalize XykMath spot to runtime decimals.
+   * Normalize spot to runtime decimals.
    *
    * - if `decimalsIn === decimalsOut`: spot already 18dp
    * - if `decimalsIn > decimalsOut`: spot in 18 - (decimalsIn - decimalsOut)

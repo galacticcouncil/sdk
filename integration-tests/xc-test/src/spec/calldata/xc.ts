@@ -4,6 +4,7 @@ import {
   Asset,
   AssetRoute,
   Erc20Client,
+  EvmClient,
 } from '@galacticcouncil/xc-core';
 import {
   FeeSwap,
@@ -13,7 +14,9 @@ import {
   Wallet,
 } from '@galacticcouncil/xc-sdk';
 
-import { builders } from '@galacticcouncil/xc-cfg';
+import { builders, clients } from '@galacticcouncil/xc-cfg';
+
+const { BaseClient, AssethubClient } = clients;
 
 import * as c from 'console';
 
@@ -118,6 +121,25 @@ const getTransfer = async (
       const assetBalance = BALANCE ** assetDecimals;
       return BigInt(assetBalance);
     });
+
+  // Mock destination fee builders for deterministic calldata
+  jest
+    .spyOn(BaseClient.prototype, 'calculateDestinationFee')
+    .mockImplementation(async () => 1_000_000_000n);
+  jest
+    .spyOn(AssethubClient.prototype, 'calculateDeliveryFee')
+    .mockImplementation(async () => 500_000_000n);
+  jest
+    .spyOn(AssethubClient.prototype, 'getBridgeDeliveryFee')
+    .mockImplementation(async () => 2_750_872_500_000n);
+
+  // Mock EVM provider for Snowbridge inbound fee (quoteSendTokenFee)
+  jest.spyOn(EvmClient.prototype, 'getProvider').mockImplementation(
+    () =>
+      ({
+        readContract: async () => 100_000_000_000_000n,
+      }) as any
+  );
 
   const xTransfer = await TransferBuilder(wallet)
     .withAsset(source.asset)

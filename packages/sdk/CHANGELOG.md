@@ -1,12 +1,20 @@
 # @galacticcouncil/sdk
 
+## 10.6.2
+
+### Patch Changes
+
+[b5b9982d]: https://github.com/galacticcouncil/sdk/commit/b5b9982d
+
+- [[#b5b9982d][b5b9982d]] sdk: fix buy price calc
+
 ## 10.6.1
 
 ### Patch Changes
 
 [ad932fb5]: https://github.com/galacticcouncil/sdk/commit/ad932fb5
 
-- [[#ad932fb5][ad932fb5]] sdk: fix opt dryRun xcm version 
+- [[#ad932fb5][ad932fb5]] sdk: fix opt dryRun xcm version
 
 ## 10.6.0
 

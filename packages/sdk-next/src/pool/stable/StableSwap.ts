@@ -374,7 +374,7 @@ export class StableSwap implements Pool {
   }
 
   /**
-   * Normalize StableMath spot to runtime decimals.
+   * Normalize spot to runtime decimals.
    *
    * - if `neither arg is share`: spot already 18dp
    * - if `argIn is share`: spot in decimalsIn

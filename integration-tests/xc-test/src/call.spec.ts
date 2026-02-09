@@ -14,12 +14,15 @@ const getChains = () => {
   const kusamaChains: string[] = ['assethub_kusama'];
 
   const polkadotChains: string[] = [
+    'ajuna',
     'astar',
     'assethub',
+    'assethub_cex',
     'bifrost',
     'crust',
+    'interlay',
     'laos',
-    //'energywebx',
+    'energywebx',
     'hydration',
     'moonbeam',
     'mythos',
@@ -41,7 +44,7 @@ const getChains = () => {
   );
 
   return {
-    skipFor: ['solana', 'ethereum'],
+    skipFor: ['solana'],
     chains,
   };
 };

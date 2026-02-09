@@ -81,6 +81,7 @@ import {
   toHubTemplate,
   toHubExtTemplate,
   toMoonbeamErc20Template,
+  toParaTemplate,
   toTransferTemplate,
   viaSnowbridgeTemplate,
   viaWormholeRelayerTemplate,
@@ -196,11 +197,11 @@ const toBifrost: AssetRoute[] = [
 ];
 
 const toInterlay: AssetRoute[] = [
-  toTransferTemplate(ibtc, interlay),
-  toTransferTemplate(intr, interlay),
-  toTransferTemplate(hdx, interlay),
-  toTransferTemplate(usdt, interlay, assetHub),
-  toTransferTemplate(usdc, interlay, assetHub),
+  toParaTemplate(ibtc, interlay, 0.00000062),
+  toParaTemplate(intr, interlay, 0.0019213457),
+  toParaTemplate(hdx, interlay, 0.5),
+  toParaTemplate(usdt, interlay, 0.3),
+  toParaTemplate(usdc, interlay, 0.3),
   new AssetRoute({
     source: {
       asset: vdot,
@@ -214,7 +215,7 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: vdot,
       fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        amount: 0.01,
         asset: dot,
       },
     },
@@ -233,9 +234,7 @@ const toInterlay: AssetRoute[] = [
       chain: interlay,
       asset: dot,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: assetHub }),
+        amount: 0.05,
         asset: dot,
       },
     },

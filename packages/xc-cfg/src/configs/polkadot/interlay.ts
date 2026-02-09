@@ -1,4 +1,4 @@
-import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
+import { Asset, AssetRoute, ChainRoutes, Parachain } from '@galacticcouncil/xc-core';
 
 import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
 import { assetHub, bifrost, hydration, interlay } from '../../chains';
@@ -7,6 +7,35 @@ import {
   ExtrinsicBuilder,
   FeeAmountBuilder,
 } from '../../builders';
+
+const balance = () => BalanceBuilder().substrate().tokens().accounts();
+
+function toHydrationTemplate(asset: Asset, reserve: Parachain): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: {
+        asset: intr,
+        balance: balance(),
+      },
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: asset,
+      fee: {
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve }),
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+  });
+}
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
@@ -25,7 +54,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -47,7 +76,7 @@ const toHydration: AssetRoute[] = [
         asset: intr,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
   new AssetRoute({
     source: {
@@ -65,106 +94,16 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: hdx,
       fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        amount: 0.5,
         asset: hdx,
       },
     },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
   }),
-  new AssetRoute({
-    source: {
-      asset: vdot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: vdot,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: bifrost }),
-        asset: vdot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: usdt,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: assetHub }),
-        asset: usdt,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: usdc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: usdc,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: assetHub }),
-        asset: usdc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      fee: {
-        asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: dot,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
+  toHydrationTemplate(vdot, bifrost),
+  toHydrationTemplate(usdt, assetHub),
+  toHydrationTemplate(usdc, assetHub),
+  toHydrationTemplate(dot, assetHub),
 ];
 
 export const interlayConfig = new ChainRoutes({

@@ -272,10 +272,19 @@ export class HsmPool extends StableSwap {
     amountIn: bigint,
     amountOut: bigint
   ): bigint {
+    const buyPrice = HsmMath.calculateBuybackPriceWithFee(
+      amountOut.toString(),
+      amountIn.toString(),
+      FeeUtils.toRaw(this.buyBackFee).toString()
+    );
+
+    const [buyNom, buyDenom] = JSON.parse(buyPrice);
+
     const base = big.pow10(
       poolPair.decimalsIn + RUNTIME_DECIMALS - poolPair.decimalsOut
     );
-    return (amountOut * base) / amountIn;
+
+    return (BigInt(buyNom) * base) / BigInt(buyDenom);
   }
 
   private calculateMaxPrice(poolPair: PoolPair): bigint {
@@ -287,17 +296,26 @@ export class HsmPool extends StableSwap {
     const [maxNom, maxDenom] = JSON.parse(maxPrice);
 
     const base = big.pow10(RUNTIME_DECIMALS - poolPair.decimalsOut);
+
     return (BigInt(maxNom) * base) / BigInt(maxDenom);
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): bigint {
-    const amounOut = big.toBigInt(1, RUNTIME_DECIMALS);
-    return this.calculateInGivenOut(poolPair, amounOut);
+    const amounOut = big.toBigInt(1, poolPair.decimalsOut);
+    return this.normalizeSpotPrice(
+      this.calculateInGivenOut(poolPair, amounOut),
+      poolPair.decimalsOut,
+      poolPair.decimalsIn
+    );
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): bigint {
-    const amounIn = big.toBigInt(1, RUNTIME_DECIMALS);
-    return this.calculateOutGivenIn(poolPair, amounIn);
+    const amounIn = big.toBigInt(1, poolPair.decimalsIn);
+    return this.normalizeSpotPrice(
+      this.calculateOutGivenIn(poolPair, amounIn),
+      poolPair.decimalsIn,
+      poolPair.decimalsOut
+    );
   }
 
   private getCollateralPeg(): string[] {
@@ -321,5 +339,29 @@ export class HsmPool extends StableSwap {
     return (
       Array.isArray(peg) && peg.length === 2 && pegNum === '1' && pegDen === '1'
     );
+  }
+
+  /**
+   * Normalize spot to runtime decimals.
+   *
+   * - if `decimalsIn === decimalsOut`: spot already 18dp
+   * - if `decimalsIn > decimalsOut`: spot in 18 - (decimalsIn - decimalsOut)
+   * - if `decimalsIn < decimalsOut`: spot in 18 + (decimalsOut - decimalsIn)
+   *
+   * @param spotRaw - raw spot
+   * @param decimalsIn - asset in decimals
+   * @param decimalsOut - asset out decimals
+   */
+  private normalizeSpotPrice(
+    spot: bigint,
+    decimalsIn: number,
+    decimalsOut: number
+  ): bigint {
+    const diff = decimalsIn - decimalsOut;
+
+    if (diff === 0) return spot;
+
+    const factor = big.pow10(Math.abs(diff));
+    return diff > 0 ? spot * factor : spot / factor;
   }
 }

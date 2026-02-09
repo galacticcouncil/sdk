@@ -64,6 +64,32 @@ export function toTransferTemplate(
   });
 }
 
+export function toParaTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  feeAmount: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: feeAmount,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  });
+}
+
 export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
   return new AssetRoute({
     source: {
