@@ -1,15 +1,11 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xcm-core';
 
-import { eurc, eth, usdc } from '../../assets';
-import { base, hydration } from '../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../builders';
+import { eurc, eurc_mwh, eth } from '../../assets';
+import { base, hydration, moonbeam } from '../../chains';
+import { BalanceBuilder, ContractBuilder } from '../../builders';
 import { Tag } from '../../tags';
 
-const toHydrationViaHyperbridge: AssetRoute[] = [
+const toHydrationViaWormholeMrl: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eurc,
@@ -19,26 +15,28 @@ const toHydrationViaHyperbridge: AssetRoute[] = [
         balance: BalanceBuilder().evm().native(),
       },
       destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
+        asset: eurc,
+        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
       chain: hydration,
-      asset: eurc,
+      asset: eurc_mwh,
       fee: {
-        amount: FeeAmountBuilder().Hyperbridge().calculateNativeFee(),
-        asset: eth,
+        amount: 0,
+        asset: eurc_mwh,
       },
     },
     contract: ContractBuilder()
-      .Hyperbridge()
-      .teleport({ custodialChain: base }),
-    tags: [Tag.Hyperbridge],
+      .Wormhole()
+      .TokenBridge()
+      .transferTokensWithPayload()
+      .viaMrl({ moonchain: moonbeam }),
+    tags: [Tag.Mrl, Tag.Wormhole],
   }),
 ];
 
 export const baseConfig = new ChainRoutes({
   chain: base,
-  routes: [...toHydrationViaHyperbridge],
+  routes: [...toHydrationViaWormholeMrl],
 });

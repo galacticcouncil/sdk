@@ -22,6 +22,7 @@ import {
   ena,
   eth,
   eurc,
+  eurc_mwh,
   ewt,
   glmr,
   hdx,
@@ -431,6 +432,27 @@ export const hydration = new EvmParachain({
       decimals: 6,
       id: 42,
       min: 0.014,
+    },
+    {
+      asset: eurc_mwh,
+      decimals: 6,
+      id: 44,
+      min: 0.014,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            { Parachain: 2004 },
+            { PalletInstance: 110 },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+              },
+            },
+          ],
+        },
+      },
     },
     {
       asset: ena,
