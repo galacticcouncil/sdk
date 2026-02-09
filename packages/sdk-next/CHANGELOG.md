@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.30.4
+
+### Patch Changes
+
+[538a9228]: https://github.com/galacticcouncil/sdk/commit/538a9228
+
+- [[#538a9228][538a9228]] next: fix hsm spot decimals
+
 ## 0.30.3
 
 ### Patch Changes
