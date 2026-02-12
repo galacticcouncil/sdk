@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 0.31.0
+
+### Minor Changes
+
+[038f1929]: https://github.com/galacticcouncil/sdk/commit/038f1929
+
+- [[#038f1929][038f1929]] next: support open budget DCA
+
 ## 0.30.4
 
 ### Patch Changes

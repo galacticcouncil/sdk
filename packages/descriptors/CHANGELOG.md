@@ -1,5 +1,13 @@
 # @galacticcouncil/descriptors
 
+## 1.11.0
+
+### Minor Changes
+
+[4032250]: https://github.com/galacticcouncil/sdk/commit/4032250
+
+- [[#4032250][4032250]] re-build descriptors to latest
+
 ## 1.10.0
 
 ### Minor Changes
