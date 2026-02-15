@@ -1,21 +1,21 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { getWsProvider } from 'polkadot-api/ws-provider';
-import { withLegacy } from '@polkadot-api/legacy-provider';
 import { LRUCache } from 'lru-cache';
-import { Observable, Subscription } from 'rxjs';
 
-import { blockProbe$, ProbeConfig, ProbeState } from './probe';
+import { blockProbe$, HealthProbeConfig, ProbeState } from './probe';
+
+export interface MetadataCache {
+  getMetadata: (codeHash: string) => Promise<Uint8Array | null>;
+  setMetadata: (codeHash: string, metadata: Uint8Array) => void;
+}
 
 type WsProvider = ReturnType<typeof getWsProvider>;
 
-type ProbeFactory = (
-  client: PolkadotClient,
-  config?: ProbeConfig
-) => Observable<ProbeState>;
+export type WsProviderOpts = Parameters<typeof getWsProvider>[1];
 
-export interface HealthProbeConfig extends ProbeConfig {
-  enabled?: boolean;
-  probe?: ProbeFactory;
+export interface ApiOptions {
+  wsProviderOpts?: WsProviderOpts;
+  probeConfig?: HealthProbeConfig;
 }
 
 interface CachedConnection {
@@ -23,7 +23,7 @@ interface CachedConnection {
   provider: WsProvider;
   endpoints: string[];
   currentEndpointIndex: number;
-  probeSubscription?: Subscription;
+  probeSubscription?: { unsubscribe: () => void };
 }
 
 export class SubstrateApis {
@@ -36,6 +36,8 @@ export class SubstrateApis {
     max: 40,
   });
 
+  private _metadataCache?: MetadataCache;
+
   constructor() {
     if (SubstrateApis._instance) {
       throw new Error('Use SubstrateApis.getInstance() instead of new.');
@@ -45,6 +47,10 @@ export class SubstrateApis {
 
   public static getInstance(): SubstrateApis {
     return SubstrateApis._instance;
+  }
+
+  public configureMetadataCache(cache: MetadataCache): void {
+    this._metadataCache = cache;
   }
 
   public createCacheKey(endpoints: string[]) {
@@ -64,14 +70,18 @@ export class SubstrateApis {
 
   public createClient(
     endpoints: string[],
-    probeConfig?: HealthProbeConfig,
-    useLegacyEnhancer?: boolean
+    opts?: ApiOptions
   ): PolkadotClient {
-    const wsProvider = getWsProvider(
-      endpoints,
-      useLegacyEnhancer ? { innerEnhancer: withLegacy() } : undefined
+    const wsProvider = getWsProvider(endpoints, opts?.wsProviderOpts);
+    const client = createClient(
+      wsProvider,
+      this._metadataCache
+        ? {
+            getMetadata: this._metadataCache.getMetadata,
+            setMetadata: this._metadataCache.setMetadata,
+          }
+        : undefined
     );
-    const client = createClient(wsProvider);
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
@@ -84,8 +94,8 @@ export class SubstrateApis {
     };
     this._cache.set(cacheKey, connection, { noDisposeOnSet: true });
 
-    if (probeConfig?.enabled !== false) {
-      this.startHealthProbe(connection, probeConfig);
+    if (opts?.probeConfig?.enabled !== false) {
+      this.startHealthProbe(connection, opts?.probeConfig);
     }
 
     return client;
@@ -93,8 +103,7 @@ export class SubstrateApis {
 
   public api(
     ws: string | string[],
-    probeConfig?: HealthProbeConfig,
-    useLegacyEnhancer?: boolean
+    opts?: ApiOptions
   ): PolkadotClient {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
@@ -104,7 +113,7 @@ export class SubstrateApis {
       return connection.client;
     }
 
-    return this.createClient(endpoints, probeConfig, useLegacyEnhancer);
+    return this.createClient(endpoints, opts);
   }
 
   public release() {

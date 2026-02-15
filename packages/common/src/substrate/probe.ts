@@ -26,6 +26,16 @@ type ProbeResult = {
   staleCount: number;
 };
 
+export type ProbeFactory = (
+  client: PolkadotClient,
+  config?: ProbeConfig
+) => Observable<ProbeState>;
+
+export interface HealthProbeConfig extends ProbeConfig {
+  enabled?: boolean;
+  probe?: ProbeFactory;
+}
+
 export function blockProbe$(
   client: PolkadotClient,
   {
