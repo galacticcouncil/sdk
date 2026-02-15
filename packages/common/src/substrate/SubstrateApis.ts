@@ -1,6 +1,7 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
 import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
+import { Subscription } from 'rxjs';
 
 import { blockProbe$, HealthProbeConfig, ProbeState } from './probe';
 
@@ -23,7 +24,7 @@ interface CachedConnection {
   provider: WsProvider;
   endpoints: string[];
   currentEndpointIndex: number;
-  probeSubscription?: { unsubscribe: () => void };
+  probeSubscription?: Subscription;
 }
 
 export class SubstrateApis {
@@ -73,15 +74,7 @@ export class SubstrateApis {
     opts?: ApiOptions
   ): PolkadotClient {
     const wsProvider = getWsProvider(endpoints, opts?.wsProviderOpts);
-    const client = createClient(
-      wsProvider,
-      this._metadataCache
-        ? {
-            getMetadata: this._metadataCache.getMetadata,
-            setMetadata: this._metadataCache.setMetadata,
-          }
-        : undefined
-    );
+    const client = createClient(wsProvider, this._metadataCache);
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
@@ -145,8 +138,6 @@ export class SubstrateApis {
     connection: CachedConnection,
     config: HealthProbeConfig = {}
   ): void {
-    const probeFactory = config.probe ?? blockProbe$;
-
     const switchEndpoint = (reason: string) => {
       if (connection.endpoints.length > 1) {
         const nextIndex =
@@ -165,7 +156,7 @@ export class SubstrateApis {
       }
     };
 
-    connection.probeSubscription = probeFactory(
+    connection.probeSubscription = blockProbe$(
       connection.client,
       config
     ).subscribe({
