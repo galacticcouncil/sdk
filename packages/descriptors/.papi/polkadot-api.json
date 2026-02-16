@@ -8,6 +8,9 @@
       "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d",
       "codeHash": "0xffc1c3dfc71fa367b6d44f90b34e1db81bb56cd484788c68c3101f5bfd1ca32a"
     },
+    "hydrationNext": {
+      "metadata": ".papi/metadata/hydrationNext.scale"
+    },
     "hub": {
       "chain": "polkadot_asset_hub",
       "metadata": ".papi/metadata/hub.scale",
