@@ -12,6 +12,8 @@ import {
   dot,
   ena,
   eth,
+  eurc,
+  eurc_mwh,
   ewt,
   glmr,
   hdx,
@@ -55,6 +57,7 @@ import {
   assetHub,
   assetHubCex,
   astar,
+  base,
   bifrost,
   crust,
   energywebx,
@@ -354,6 +357,10 @@ const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
 
+const toBaseViaWormhole: AssetRoute[] = [
+  viaWormholeBridgeTemplate(eurc_mwh, eurc, base),
+];
+
 const toEthereumViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
   viaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
@@ -402,6 +409,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,
+    ...toBaseViaWormhole,
     ...toBifrost,
     ...toCex,
     ...toCrust,
