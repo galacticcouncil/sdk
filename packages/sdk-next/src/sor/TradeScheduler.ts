@@ -225,6 +225,77 @@ export class TradeScheduler {
   }
 
   /**
+   * Build an open budget DCA (Dollar Cost Averaging) order.
+   *
+   * @param assetIn - storage key of assetIn
+   * @param assetOut - storage key of assetOut
+   * @param amountIn - per-trade amount
+   * @param periodMs - interval between trades in ms
+   * @returns - dca trade order with amountIn = 0 (open budget)
+   */
+  async getOpenBudgetDcaOrder(
+    assetIn: number,
+    assetOut: number,
+    amountIn: string,
+    periodMs: number
+  ): Promise<TradeDcaOrder> {
+    const trade = await this.router.getBestSell(assetIn, assetOut, amountIn);
+
+    const { swaps } = trade;
+
+    const firstSwap = swaps[0];
+    const lastSwap = swaps[swaps.length - 1];
+
+    const { assetInDecimals } = firstSwap;
+    const { assetOutDecimals } = lastSwap;
+
+    const amountInMin = await this.getMinimumOrderBudget(
+      assetIn,
+      assetInDecimals
+    );
+
+    const isLessThanMinimalAmount = trade.amountIn < amountInMin;
+
+    const errors: TradeOrderError[] = [];
+    if (isLessThanMinimalAmount) {
+      errors.push(TradeOrderError.OrderTooSmall);
+    }
+
+    const tradePeriod = this.toBlockPeriod(periodMs);
+    const tradeRoute = TradeRouteBuilder.build(swaps);
+
+    const order = {
+      assetIn: assetIn,
+      assetOut: assetOut,
+      errors: errors,
+      maxTradeCount: 0,
+      tradeCount: 0,
+      tradeFee: trade.tradeFee,
+      tradeImpactPct: trade.priceImpactPct,
+      tradePeriod: tradePeriod,
+      tradeRoute: tradeRoute,
+      type: TradeOrderType.Dca,
+    } as Partial<TradeDcaOrder>;
+
+    return {
+      ...order,
+      amountIn: 0n,
+      amountOut: 0n,
+      tradeAmountIn: trade.amountIn,
+      tradeAmountOut: trade.amountOut,
+      toHuman() {
+        return {
+          ...order,
+          amountIn: '0',
+          amountOut: '0',
+          tradeAmountIn: big.toDecimal(trade.amountIn, assetInDecimals),
+          tradeAmountOut: big.toDecimal(trade.amountOut, assetOutDecimals),
+        };
+      },
+    } as TradeDcaOrder;
+  }
+
+  /**
    * Build a TWAP (Time-Weighted Average Price) sell order
    *
    * @param assetIn - assetIn id

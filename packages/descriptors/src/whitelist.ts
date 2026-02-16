@@ -79,7 +79,6 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'tx.XYKLiquidityMining.*',
 ];
 
-
 const hubWhitelist: HubWhitelistEntry[] = [
   'query.ForeignAssets.*',
   'query.Assets.*',
@@ -95,6 +94,7 @@ export const whitelist: WhitelistEntriesByChain = {
     'query.System.*',
     'tx.PolkadotXcm.*',
   ],
+  hydrationNext: hydrationWhitelist,
   hydration: hydrationWhitelist,
   hub: hubWhitelist,
 };
