@@ -6,19 +6,30 @@ import {
   TypedApi,
 } from 'polkadot-api';
 
-import { hydration } from '@galacticcouncil/descriptors';
+import {
+  hydration,
+  hydrationNext,
+  HydrationApis,
+  HydrationNextApis,
+} from '@galacticcouncil/descriptors';
 
 import type { PublicClient, ReadContractParameters } from 'viem';
 
 import { encodeFunctionData, decodeFunctionResult } from 'viem';
 
+type ResultPayload =
+  | HydrationApis['EthereumRuntimeRPCApi']['call']['Value']
+  | HydrationNextApis['EthereumRuntimeRPCApi']['call']['Value'];
+
 const GAS_LIMIT = 10_000_000n;
 
 export class EvmRpcAdapter {
   private api: TypedApi<typeof hydration>;
+  private apiNext: TypedApi<typeof hydrationNext>;
 
   constructor(client: PolkadotClient) {
     this.api = client.getTypedApi(hydration);
+    this.apiNext = client.getTypedApi(hydrationNext);
   }
 
   async getBlock(): Promise<{ timestamp: bigint; number: bigint }> {
@@ -47,36 +58,48 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const query = this.api.apis.EthereumRuntimeRPCApi.call;
-    const compatibilityToken = await this.api.compatibilityToken;
-    const isComp = query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const isNext = await this.apiNext.constants.System.Version.isCompatible(
+      CompatibilityLevel.Partial
     );
 
-    console.log(isComp);
+    let result: ResultPayload;
+    if (isNext) {
+      result = await this.apiNext.apis.EthereumRuntimeRPCApi.call(
+        FixedSizeBinary.fromText(''),
+        FixedSizeBinary.fromHex(address as `0x${string}`),
+        Binary.fromHex(data),
+        [0n, 0n, 0n, 0n] as const,
+        [GAS_LIMIT, 0n, 0n, 0n] as const,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        [],
+        []
+      );
+    } else {
+      result = await this.api.apis.EthereumRuntimeRPCApi.call(
+        FixedSizeBinary.fromText(''),
+        FixedSizeBinary.fromHex(address as `0x${string}`),
+        Binary.fromHex(data),
+        [0n, 0n, 0n, 0n] as const,
+        [GAS_LIMIT, 0n, 0n, 0n] as const,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        []
+      );
+    }
 
-    const res = await this.api.apis.EthereumRuntimeRPCApi.call(
-      FixedSizeBinary.fromText(''),
-      FixedSizeBinary.fromHex(address as `0x${string}`),
-      Binary.fromHex(data),
-      [0n, 0n, 0n, 0n] as const,
-      [GAS_LIMIT, 0n, 0n, 0n] as const,
-      undefined,
-      undefined,
-      undefined,
-      false,
-      []
-    );
+    console.log(result);
 
-    console.log(res);
-
-    if (!res.success) {
-      console.error(functionName, res.value.type);
+    if (!result.success) {
+      console.error(functionName, result.value.type);
       throw new Error('Contract read failure');
     }
 
-    const { exit_reason, value, used_gas } = res.value;
+    const { exit_reason, value, used_gas } = result.value;
 
     console.log(used_gas);
 
