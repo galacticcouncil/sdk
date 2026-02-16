@@ -1,5 +1,21 @@
 # @galacticcouncil/sdk-next
 
+## 0.32.0
+
+### Minor Changes
+
+[a10aafae]: https://github.com/galacticcouncil/sdk/commit/a10aafae
+
+- [[#a10aafae][a10aafae]] support rt upgrade 392
+
+## 0.31.0
+
+### Minor Changes
+
+[038f1929]: https://github.com/galacticcouncil/sdk/commit/038f1929
+
+- [[#038f1929][038f1929]] next: support open budget DCA
+
 ## 0.30.4
 
 ### Patch Changes

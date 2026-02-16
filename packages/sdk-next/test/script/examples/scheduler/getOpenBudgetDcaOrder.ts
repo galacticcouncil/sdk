@@ -1,0 +1,43 @@
+import { PolkadotClient } from 'polkadot-api';
+
+import { createSdkContext } from '../../../../src';
+
+import { PapiExecutor } from '../../PapiExecutor';
+import { BENEFICIARY, HOUR_MS, MAX_RETRIES } from '../../const';
+import { ApiUrl } from '../../types';
+
+class GetOpenBudgetDcaOrder extends PapiExecutor {
+  async script(client: PolkadotClient) {
+    const sdk = await createSdkContext(client);
+
+    const { api, tx } = sdk;
+
+    const order = await api.scheduler.getOpenBudgetDcaOrder(
+      0,
+      10,
+      '1000',
+      HOUR_MS
+    );
+    const orderTx = await tx
+      .order(order)
+      .withBeneficiary(BENEFICIARY)
+      .withMaxRetries(MAX_RETRIES)
+      .build();
+    const orderCall = await orderTx.get().getEncodedData();
+    console.log(order.toHuman());
+    console.log('Transaction hash: ' + orderCall.asHex());
+
+    const dryRun = await orderTx.dryRun(BENEFICIARY);
+    if (dryRun.success) {
+      const { execution_result, emitted_events } = dryRun.value;
+      console.log('Transaction status: ' + execution_result.success);
+    }
+
+    return () => {
+      sdk.destroy();
+      client.destroy();
+    };
+  }
+}
+
+new GetOpenBudgetDcaOrder(ApiUrl.Hydration, 'Get open budget DCA order').run();

@@ -35,7 +35,7 @@ const getChains = () => {
   const polkadotChains: string[] = [
     'polkadot',
     'assethub',
-    //'bifrost',
+    'bifrost',
     'crust',
     'laos',
     'hydration',
@@ -114,6 +114,7 @@ describe('Wallet with XCM config', () => {
 
         const isContractTransfer = !!route.contract;
         const isAcalaErc20Transfer = asset.key.endsWith('_awh');
+        const isMissingReserveChain = ['astr', 'ibtc'].includes(asset.key);
 
         runXcm(
           `${info} transfer`,
@@ -136,7 +137,8 @@ describe('Wallet with XCM config', () => {
               isKeyConstraint ||
               isChainConstraint ||
               isContractTransfer ||
-              isAcalaErc20Transfer,
+              isAcalaErc20Transfer ||
+              isMissingReserveChain,
             sync: true,
             snapshot: true,
           }

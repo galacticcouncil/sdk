@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Bifrost USDC [usdc] transfer 1`] = `
+[
+  "assethub-bifrost-usdc",
+  "0x3101041f0d04010100b91f04040002043205e51400025a620201040002043205e5140104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Bifrost USDT [usdt] transfer 1`] = `
+[
+  "assethub-bifrost-usdt",
+  "0x3101041f0d04010100b91f04040002043205011f00025a620201040002043205011f0104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Hydration DED [ded] transfer 1`] = `
 [
   "assethub-hydration-ded",
@@ -23,8 +37,8 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 
 exports[`Wallet with XCM config should result in valid Polkadot transfer for AssetHub Polkadot -> Hydration KSM [ksm] transfer 1`] = `
 [
-  "assethub-hydration-ksm",
-  "0x2501041f0d04010100c91f040402010903000b00a0724e18090104020109030104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+  "assethub-hydration-dot",
+  "0x1101041f0d04010100c91f04040100000700e8764817010401000104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 
@@ -84,10 +98,66 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Ass
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> AssetHub Polkadot USDC [usdc] transfer 1`] = `
+[
+  "bifrost-assethub-usdc",
+  "0x110104290804010100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404010300a10f043205e51400025a62020000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> AssetHub Polkadot USDT [usdt] transfer 1`] = `
+[
+  "bifrost-assethub-usdt",
+  "0x110104290804010100a10f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404010300a10f043205011f00025a62020000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration BNC [bnc] transfer 1`] = `
+[
+  "bifrost-hydration-bnc",
+  "0x850104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000106020001000000000000000000000000000000000000000000000000000000000000000b00a0724e18090000000000",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration DOT [dot] transfer 1`] = `
 [
   "bifrost-hydration-dot",
   "0x410104290d04010100c91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration GLMR [glmr] transfer 1`] = `
+[
+  "bifrost-hydration-glmr",
+  "0x190104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404010200511f040a00130000e8890423c78a0000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration USDC [usdc] transfer 1`] = `
+[
+  "bifrost-hydration-usdc",
+  "0x110104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404010300a10f043205e51400025a62020000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration USDT [usdt] transfer 1`] = `
+[
+  "bifrost-hydration-usdt",
+  "0x110104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404010300a10f043205011f00025a62020000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration vASTR [vastr] transfer 1`] = `
+[
+  "bifrost-hydration-vastr",
+  "0x8d0104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee040400010602090300000000000000000000000000000000000000000000000000000000000000130000e8890423c78a0000000000",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Bifrost -> Hydration vDOT [vdot] transfer 1`] = `
+[
+  "bifrost-hydration-vdot",
+  "0x810104290804010100c91f040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee0404000106020900000000000000000000000000000000000000000000000000000000000000000700e87648170000000000",
 ]
 `;
 
@@ -154,10 +224,52 @@ exports[`Wallet with XCM config should result in valid Polkadot transfer for Hyd
 ]
 `;
 
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost BNC [bnc] transfer 1`] = `
+[
+  "hydration-bifrost-bnc",
+  "0x01010489000e00000000a0724e18090000000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
 exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost DOT [dot] transfer 1`] = `
 [
   "hydration-bifrost-dot",
   "0x4101046b0d04010100b91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost GLMR [glmr] transfer 1`] = `
+[
+  "hydration-bifrost-glmr",
+  "0x0101048900100000000000e8890423c78a000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost USDC [usdc] transfer 1`] = `
+[
+  "hydration-bifrost-usdc",
+  "0x0101048900160000008096980000000000000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost USDT [usdt] transfer 1`] = `
+[
+  "hydration-bifrost-usdt",
+  "0x01010489000a0000008096980000000000000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost vASTR [vastr] transfer 1`] = `
+[
+  "hydration-bifrost-vastr",
+  "0x0101048900210000000000e8890423c78a000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XCM config should result in valid Polkadot transfer for Hydration -> Bifrost vDOT [vdot] transfer 1`] = `
+[
+  "hydration-bifrost-vdot",
+  "0x01010489000f00000000e8764817000000000000000000000004010200b91f010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 
