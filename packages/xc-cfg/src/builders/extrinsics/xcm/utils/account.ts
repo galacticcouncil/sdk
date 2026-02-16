@@ -1,4 +1,5 @@
-import { acc, Parachain } from '@galacticcouncil/xc-core';
+import { acc } from '@galacticcouncil/common';
+import { Parachain } from '@galacticcouncil/xc-core';
 import { XcmV3Junction } from '@galacticcouncil/descriptors';
 
 import { FixedSizeBinary } from 'polkadot-api';

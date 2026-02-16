@@ -300,7 +300,10 @@ const transferAssetsUsingTypeAndThen = (
     );
 
     let customXcmOnDest;
-    if (isSnowbridgeTransfer(transferAssetLocation)) {
+    if (
+      isSnowbridgeTransfer(transferAssetLocation) &&
+      destination.chain.isEvmChain()
+    ) {
       customXcmOnDest = toBridgeXcmOnDest(
         version,
         account,
