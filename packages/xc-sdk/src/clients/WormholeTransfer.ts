@@ -1,5 +1,5 @@
+import { acc } from '@galacticcouncil/common';
 import {
-  acc,
   mrl,
   AnyChain,
   ConfigService,

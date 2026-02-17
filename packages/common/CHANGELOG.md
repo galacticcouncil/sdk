@@ -1,5 +1,15 @@
 # @galacticcouncil/common
 
+## 0.5.0
+
+### Minor Changes
+
+[3d12d2fb]: https://github.com/galacticcouncil/sdk/commit/3d12d2fb
+[ac327f5d]: https://github.com/galacticcouncil/sdk/commit/ac327f5d
+
+- [[#3d12d2fb][3d12d2fb]] added substrateApis to common
+- [[#ac327f5d][ac327f5d]] added account utils to common
+
 ## 0.4.1
 
 ### Patch Changes

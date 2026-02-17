@@ -1,7 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
+import { withLegacy } from '@polkadot-api/legacy-provider';
+
+import { SubstrateApis } from '@galacticcouncil/common';
 
 import { Asset } from '../asset';
-import { SubstrateApis } from '../substrate';
 import {
   Chain,
   ChainAssetData,
@@ -124,7 +126,11 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   get client(): PolkadotClient {
     const pool = SubstrateApis.getInstance();
-    return pool.api(this.ws, undefined, this.usesLegacyEnhancer);
+    return pool.api(this.ws, {
+      wsProviderOpts: this.usesLegacyEnhancer
+        ? { innerEnhancer: withLegacy() }
+        : undefined,
+    });
   }
 
   getType(): ChainType {
