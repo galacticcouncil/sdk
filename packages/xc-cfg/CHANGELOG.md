@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.14.0
+
+### Minor Changes
+
+[b3e71f84]: https://github.com/galacticcouncil/sdk/commit/b3e71f84
+
+- [[#b3e71f84][b3e71f84]] xc: added PRIME
+
 ## 0.13.0
 
 ### Minor Changes
