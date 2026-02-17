@@ -1,35 +1,23 @@
 import {
   Binary,
-  CompatibilityLevel,
   FixedSizeBinary,
   PolkadotClient,
   TypedApi,
 } from 'polkadot-api';
 
-import {
-  hydration,
-  hydrationNext,
-  HydrationApis,
-  HydrationNextApis,
-} from '@galacticcouncil/descriptors';
+import { hydration } from '@galacticcouncil/descriptors';
 
 import type { PublicClient, ReadContractParameters } from 'viem';
 
 import { encodeFunctionData, decodeFunctionResult } from 'viem';
 
-type ResultPayload =
-  | HydrationApis['EthereumRuntimeRPCApi']['call']['Value']
-  | HydrationNextApis['EthereumRuntimeRPCApi']['call']['Value'];
-
 const GAS_LIMIT = 10_000_000n;
 
 export class EvmRpcAdapter {
   private api: TypedApi<typeof hydration>;
-  private apiNext: TypedApi<typeof hydrationNext>;
 
   constructor(client: PolkadotClient) {
     this.api = client.getTypedApi(hydration);
-    this.apiNext = client.getTypedApi(hydrationNext);
   }
 
   async getBlock(): Promise<{ timestamp: bigint; number: bigint }> {
@@ -58,41 +46,19 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const isNext = await this.apiNext.constants.System.Version.isCompatible(
-      CompatibilityLevel.Partial
+    const result = await this.api.apis.EthereumRuntimeRPCApi.call(
+      FixedSizeBinary.fromText(''),
+      FixedSizeBinary.fromHex(address as `0x${string}`),
+      Binary.fromHex(data),
+      [0n, 0n, 0n, 0n] as const,
+      [GAS_LIMIT, 0n, 0n, 0n] as const,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      [],
+      []
     );
-
-    let result: ResultPayload;
-    if (isNext) {
-      result = await this.apiNext.apis.EthereumRuntimeRPCApi.call(
-        FixedSizeBinary.fromText(''),
-        FixedSizeBinary.fromHex(address as `0x${string}`),
-        Binary.fromHex(data),
-        [0n, 0n, 0n, 0n] as const,
-        [GAS_LIMIT, 0n, 0n, 0n] as const,
-        undefined,
-        undefined,
-        undefined,
-        false,
-        [],
-        []
-      );
-    } else {
-      result = await this.api.apis.EthereumRuntimeRPCApi.call(
-        FixedSizeBinary.fromText(''),
-        FixedSizeBinary.fromHex(address as `0x${string}`),
-        Binary.fromHex(data),
-        [0n, 0n, 0n, 0n] as const,
-        [GAS_LIMIT, 0n, 0n, 0n] as const,
-        undefined,
-        undefined,
-        undefined,
-        false,
-        []
-      );
-    }
-
-    console.log(result);
 
     if (!result.success) {
       console.error(functionName, result.value.type);
