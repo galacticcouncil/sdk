@@ -1,7 +1,6 @@
-import { CompatibilityLevel, PolkadotClient, createClient } from 'polkadot-api';
+import { PolkadotClient, createClient } from 'polkadot-api';
 import {
   hydration,
-  hydrationNext,
   HydrationConstants,
   HydrationNextConstants,
 } from '@galacticcouncil/descriptors';
@@ -30,18 +29,8 @@ export abstract class PapiExecutor {
     const provider = api.getWs(this.apiUrl);
     const client = createClient(provider);
     const papi = client.getTypedApi(hydration);
-    const papiNext = client.getTypedApi(hydrationNext);
 
-    const isNext = await papiNext.constants.System.Version.isCompatible(
-      CompatibilityLevel.Partial
-    );
-
-    let version: SystemVersion;
-    if (isNext) {
-      version = await papiNext.constants.System.Version();
-    } else {
-      version = await papi.constants.System.Version();
-    }
+    const version = await papi.constants.System.Version();
 
     console.log(`Runtime ready ${version.spec_name}/${version.spec_version}`);
     console.log('Running script...');

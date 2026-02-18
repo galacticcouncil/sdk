@@ -135,6 +135,11 @@ export const paxg = new Asset({
   originSymbol: 'PAXG',
 });
 
+export const prime = new Asset({
+  key: 'prime',
+  originSymbol: 'PRIME',
+});
+
 export const sky = new Asset({
   key: 'sky',
   originSymbol: 'SKY',
@@ -278,6 +283,7 @@ export const assets: Asset[] = [
   neuro,
   paxg,
   pen,
+  prime,
   sky,
   sol,
   sui,

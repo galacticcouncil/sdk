@@ -26,6 +26,7 @@ import {
   neuro,
   paxg,
   pen,
+  prime,
   sol,
   sui,
   sky,
@@ -384,6 +385,7 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
+  viaWormholeBridgeTemplate(prime, prime, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [
