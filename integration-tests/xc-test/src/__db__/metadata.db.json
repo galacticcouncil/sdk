@@ -1,0 +1,314 @@
+{
+  "assethub-hydration-dot": {
+    "updated": 1771440193362,
+    "destination": {
+      "fee": "0.0001585375",
+      "feeAsset": "DOT",
+      "feeNative": "1585375"
+    }
+  },
+  "assethub-hydration-ksm": {
+    "updated": 1771440225628,
+    "destination": {
+      "fee": "0.000045035316",
+      "feeAsset": "KSM",
+      "feeNative": "45035316"
+    }
+  },
+  "assethub-hydration-usdt": {
+    "updated": 1771440242950,
+    "destination": {
+      "fee": "0.00021",
+      "feeAsset": "USDT",
+      "feeNative": "210"
+    }
+  },
+  "assethub-hydration-usdc": {
+    "updated": 1771440264563,
+    "destination": {
+      "fee": "0.00021",
+      "feeAsset": "USDC",
+      "feeNative": "210"
+    }
+  },
+  "assethub-moonbeam-usdt": {
+    "updated": 1771440277155,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "USDT",
+      "feeNative": "10000000000000000000"
+    }
+  },
+  "assethub-moonbeam-usdc": {
+    "updated": 1771440285131,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "USDC",
+      "feeNative": "10000000000000000000"
+    }
+  },
+  "assethub-bifrost-usdt": {
+    "updated": 1771440300656,
+    "destination": {
+      "fee": "0.00556",
+      "feeAsset": "USDT",
+      "feeNative": "5560"
+    }
+  },
+  "assethub-bifrost-usdc": {
+    "updated": 1771440308057,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "USDC",
+      "feeNative": "10000000"
+    }
+  },
+  "bifrost-hydration-bnc": {
+    "updated": 1771440328412,
+    "destination": {
+      "fee": "0.004702605338",
+      "feeAsset": "BNC",
+      "feeNative": "4702605338"
+    }
+  },
+  "bifrost-hydration-vdot": {
+    "updated": 1771440345039,
+    "destination": {
+      "fee": "0.0000991595",
+      "feeAsset": "vDOT",
+      "feeNative": "991595"
+    }
+  },
+  "bifrost-hydration-vastr": {
+    "updated": 1771440360926,
+    "destination": {
+      "fee": "0.020302590496894092",
+      "feeAsset": "vASTR",
+      "feeNative": "20302590496894092"
+    }
+  },
+  "bifrost-hydration-dot": {
+    "updated": 1771440380686,
+    "destination": {
+      "fee": "0.0451333335",
+      "feeAsset": "DOT",
+      "feeNative": "451333335"
+    }
+  },
+  "bifrost-hydration-glmr": {
+    "updated": 1771440399982,
+    "destination": {
+      "fee": "0.020806692938270931",
+      "feeAsset": "GLMR",
+      "feeNative": "20806692938270931"
+    }
+  },
+  "bifrost-hydration-usdt": {
+    "updated": 1771440420597,
+    "destination": {
+      "fee": "0.043551",
+      "feeAsset": "USDT",
+      "feeNative": "43551"
+    }
+  },
+  "bifrost-hydration-usdc": {
+    "updated": 1771440438059,
+    "destination": {
+      "fee": "0.043279",
+      "feeAsset": "USDC",
+      "feeNative": "43279"
+    }
+  },
+  "bifrost-assethub-usdt": {
+    "updated": 1771440444215,
+    "destination": {
+      "fee": "0.001321",
+      "feeAsset": "USDT",
+      "feeNative": "1321"
+    }
+  },
+  "bifrost-assethub-usdc": {
+    "updated": 1771440450351,
+    "destination": {
+      "fee": "0.001313",
+      "feeAsset": "USDC",
+      "feeNative": "1313"
+    }
+  },
+  "hydration-assethub-dot": {
+    "updated": 1771440462557,
+    "destination": {
+      "fee": "0.0009648989",
+      "feeAsset": "DOT",
+      "feeNative": "9648989"
+    }
+  },
+  "hydration-assethub-ksm": {
+    "updated": 1771440475005,
+    "destination": {
+      "fee": "0.000268820965",
+      "feeAsset": "KSM",
+      "feeNative": "268820965"
+    }
+  },
+  "hydration-assethub-usdt": {
+    "updated": 1771440487614,
+    "destination": {
+      "fee": "0.001321",
+      "feeAsset": "USDT",
+      "feeNative": "1321"
+    }
+  },
+  "hydration-assethub-usdc": {
+    "updated": 1771440499750,
+    "destination": {
+      "fee": "0.001313",
+      "feeAsset": "USDC",
+      "feeNative": "1313"
+    }
+  },
+  "hydration-bifrost-bnc": {
+    "updated": 1771440510781,
+    "destination": {
+      "fee": "0.263045757293",
+      "feeAsset": "BNC",
+      "feeNative": "263045757293"
+    }
+  },
+  "hydration-bifrost-vdot": {
+    "updated": 1771440521458,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "vDOT",
+      "feeNative": "100000000000"
+    }
+  },
+  "hydration-bifrost-vastr": {
+    "updated": 1771440531997,
+    "destination": {
+      "fee": "0.187296799375",
+      "feeAsset": "vASTR",
+      "feeNative": "187296799375000000"
+    }
+  },
+  "hydration-bifrost-glmr": {
+    "updated": 1771440544006,
+    "destination": {
+      "fee": "0.029644943536956522",
+      "feeAsset": "GLMR",
+      "feeNative": "29644943536956522"
+    }
+  },
+  "hydration-bifrost-usdt": {
+    "updated": 1771440556313,
+    "destination": {
+      "fee": "0.048906",
+      "feeAsset": "USDT",
+      "feeNative": "48906"
+    }
+  },
+  "hydration-bifrost-usdc": {
+    "updated": 1771440568586,
+    "destination": {
+      "fee": "0.048636",
+      "feeAsset": "USDC",
+      "feeNative": "48636"
+    }
+  },
+  "hydration-bifrost-dot": {
+    "updated": 1771440581247,
+    "destination": {
+      "fee": "0.0491470571",
+      "feeAsset": "DOT",
+      "feeNative": "491470571"
+    }
+  },
+  "hydration-moonbeam-hdx": {
+    "updated": 1771440592214,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "HDX",
+      "feeNative": "10000000000000000000"
+    }
+  },
+  "hydration-moonbeam-glmr": {
+    "updated": 1771440604014,
+    "destination": {
+      "fee": "0.00991044625",
+      "feeAsset": "GLMR",
+      "feeNative": "9910446250000000"
+    }
+  },
+  "hydration-moonbeam-usdt": {
+    "updated": 1771440619801,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "USDT",
+      "feeNative": "10000000000000000000"
+    }
+  },
+  "hydration-moonbeam-usdc": {
+    "updated": 1771440635604,
+    "destination": {
+      "fee": "10",
+      "feeAsset": "USDC",
+      "feeNative": "10000000000000000000"
+    }
+  },
+  "hydration-moonbeam-dai_mwh": {
+    "updated": 1771440648428,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-susds_mwh": {
+    "updated": 1771440660837,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-usdc_mwh": {
+    "updated": 1771440673194,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-usdt_mwh": {
+    "updated": 1771440685536,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-wbtc_mwh": {
+    "updated": 1771440698311,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-weth_mwh": {
+    "updated": 1771440710759,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  },
+  "hydration-moonbeam-sol": {
+    "updated": 1771440723487,
+    "destination": {
+      "fee": "1",
+      "feeAsset": "GLMR",
+      "feeNative": "1000000000000000000"
+    }
+  }
+}

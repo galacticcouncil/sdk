@@ -6,10 +6,19 @@
     "wallet",
     "xc",
     "integration",
+    "e2e",
+    "chopsticks",
     "test"
   ],
   "scripts": {
-    "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts"
+    "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
+    "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts"
+  },
+  "devDependencies": {
+    "@acala-network/chopsticks": "^1.2.4",
+    "@acala-network/chopsticks-testing": "^1.2.4",
+    "@polkadot-labs/hdkd": "^0.0.19",
+    "@polkadot-labs/hdkd-helpers": "^0.0.19"
   },
   "dependencies": {
     "@galacticcouncil/sdk-next": "^0.32.0",
