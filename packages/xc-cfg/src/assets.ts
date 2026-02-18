@@ -60,6 +60,16 @@ export const ena = new Asset({
   originSymbol: 'ENA',
 });
 
+export const eurc = new Asset({
+  key: 'eurc',
+  originSymbol: 'EURC',
+});
+
+export const eurc_mwh = new Asset({
+  ...eurc,
+  key: 'eurc_mwh',
+});
+
 export const glmr = new Asset({
   key: 'glmr',
   originSymbol: 'GLMR',
@@ -267,6 +277,8 @@ export const assets: Asset[] = [
   dai_mwh,
   dot,
   ena,
+  eurc,
+  eurc_mwh,
   eth,
   glmr,
   hdx,

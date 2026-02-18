@@ -18,6 +18,7 @@ import {
   ena,
   eth,
   eurc,
+  eurc_mwh,
   ewt,
   glmr,
   hdx,
@@ -379,6 +380,10 @@ const toEthereumViaHyperbridge: AssetRoute[] = [
   viaHyperbridgeTemplate(eurc, eurc, base, base),
 ];
 
+const toBaseViaWormhole: AssetRoute[] = [
+  viaWormholeBridgeTemplate(eurc_mwh, eurc, base),
+];
+
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeRelayerTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
@@ -418,6 +423,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,
+    ...toBaseViaWormhole,
     ...toBifrost,
     ...toCentrifuge,
     ...toCex,
