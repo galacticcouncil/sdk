@@ -24,11 +24,8 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {
-    const { chain, route } = this.config;
-    const { amount, sender, source } = ctx;
-    const transfer = await this.getTransfer(ctx);
-    const callType = route.contract ? CallType.Evm : CallType.Substrate;
-    const account = await resolveAddress(sender, chain, callType);
+    const { amount, source } = ctx;
+    const { transfer, account } = await this.getTransfer(ctx);
     return this.adapter.buildCall(account, amount, source.feeBalance, transfer);
   }
 
@@ -94,21 +91,18 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getFee(ctx: TransferCtx): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { amount, sender, source } = ctx;
+    const { amount, source } = ctx;
 
-    const transfer = await this.getTransfer(ctx);
-    const feeCallType = route.contract ? CallType.Evm : CallType.Substrate;
-    const address = await resolveAddress(sender, chain, feeCallType);
+    const { transfer, account } = await this.getTransfer(ctx);
 
     const networkFee = await this.adapter.estimateFee(
-      address,
+      account,
       amount,
       source.feeBalance,
       transfer
     );
 
-    const { fee } = route.source;
+    const { fee } = this.config.route.source;
     const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
     const totalFee = networkFee.amount + extraFee;
     return networkFee.copyWith({ amount: totalFee });
@@ -166,28 +160,25 @@ export class DataOriginProcessor extends DataProcessor {
     if (extrinsic) {
       const { address, amount, asset, sender } = ctx;
       const substrate = await SubstrateService.create(chain as Parachain);
-      const resolvedSender = await resolveAddress(
-        sender,
-        chain,
-        CallType.Substrate
-      );
+      const account = await resolveAddress(sender, chain, CallType.Substrate);
       const messageId = await substrate.buildMessageId(
-        resolvedSender,
+        account,
         amount,
         asset.originSymbol,
         address
       );
-      return extrinsic.build({
+      const transfer = await extrinsic.build({
         ...ctx,
         messageId: messageId,
       });
+      return { transfer, account };
     }
 
     const callable = contract || program || move;
     if (callable) {
-      return callable.build({
-        ...ctx,
-      });
+      const transfer = await callable.build({ ...ctx });
+      const account = await resolveAddress(ctx.sender, chain, transfer.type);
+      return { transfer, account };
     }
 
     throw new Error(
