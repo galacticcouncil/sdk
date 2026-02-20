@@ -1,5 +1,13 @@
 # @galacticcouncil/xcm-sdk
 
+## 10.11.1
+
+### Patch Changes
+
+[d77a9896]: https://github.com/galacticcouncil/sdk/commit/d77a9896
+
+- [[#d77a9896][d77a9896]] xcm: fixed encoding of the remote call
+
 ## 10.11.0
 
 ### Minor Changes

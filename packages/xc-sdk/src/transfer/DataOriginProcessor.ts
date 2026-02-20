@@ -1,5 +1,5 @@
 import {
-  acc,
+  addr,
   Asset,
   AssetAmount,
   CallType,
@@ -11,7 +11,7 @@ import {
   TransactCtx,
   TransactConfig,
 } from '@galacticcouncil/xc-core';
-import { big } from '@galacticcouncil/common';
+import { acc, big } from '@galacticcouncil/common';
 
 import { buildBalanceConfig, formatAmount, resolveAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';

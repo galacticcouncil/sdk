@@ -83,14 +83,14 @@ export class SubstrateExec {
         10 // swap slippage
       );
       const swapTx = srcApi.tx(swapTxHash);
-      calls.push(swapTx.toHex());
+      calls.push(swapTx.method.toHex());
     }
 
     const transferCall = await transfer(dstFee);
     const transferTx = srcApi.tx(transferCall.data);
 
-    calls.push(transferTx.toHex());
-    calls.push(transactTx.toHex());
+    calls.push(transferTx.method.toHex());
+    calls.push(transactTx.method.toHex());
 
     const batchTx = srcApi.tx.utility.batchAll(calls);
 

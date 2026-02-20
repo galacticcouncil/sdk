@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/common",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Common utilities shared across Galactic SDK packages",
   "author": "GalacticCouncil",
   "repository": {
@@ -31,7 +31,8 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
-    "big.js": "^6.2.1"
+    "big.js": "^6.2.1",
+    "lru-cache": "^11.2.2"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2"

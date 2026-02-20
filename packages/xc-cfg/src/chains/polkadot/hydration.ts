@@ -29,6 +29,7 @@ import {
   myth,
   paxg,
   pen,
+  prime,
   neuro,
   sui,
   trac,
@@ -408,6 +409,31 @@ export const hydration = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: 43,
+      min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
               },
             },
           ],

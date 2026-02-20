@@ -1,5 +1,19 @@
 # @galacticcouncil/sdk-next
 
+## 0.34.0
+
+### Minor Changes
+
+- b270643: Wrap order tx with extra gas
+
+## 0.33.0
+
+### Minor Changes
+
+[c89ea896]: https://github.com/galacticcouncil/sdk/commit/c89ea896
+
+- [[#c89ea896][c89ea896]] next: disable hsm
+
 ## 0.32.0
 
 ### Minor Changes

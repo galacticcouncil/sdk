@@ -1,7 +1,7 @@
-import { big } from '@galacticcouncil/common';
+import { acc, big } from '@galacticcouncil/common';
 
 import {
-  acc,
+  addr,
   Asset,
   AnyChain,
   AnyParachain,
