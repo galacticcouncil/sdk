@@ -12,7 +12,7 @@ export function buildBeneficiary(dstAccount: string) {
     parents: 0,
     interior: {
       type: 'X1',
-      value: [acc],
+      value: acc,
     },
   };
 }
@@ -24,12 +24,10 @@ export function buildXcmDest(dstChain: AnyParachain) {
       parents: 1,
       interior: {
         type: 'X1',
-        value: [
-          {
-            type: 'Parachain',
-            value: dstChain.parachainId,
-          },
-        ],
+        value: {
+          type: 'Parachain',
+          value: dstChain.parachainId,
+        },
       },
     },
   };
@@ -55,18 +53,19 @@ export const buildXcmMessage = (
 ) => {
   console.log(dstCallEncoded);
   const beneficiary = buildBeneficiary(dstAccount);
+  const feeAsset = toAsset(dstFeeLocation, dstFee.amount);
 
   return {
     type: 'V4',
     value: [
       {
         type: 'WithdrawAsset',
-        value: toAsset(dstFeeLocation, dstFee.amount),
+        value: [feeAsset],
       },
       {
         type: 'BuyExecution',
         value: {
-          fees: toAsset(dstFeeLocation, dstFee.amount),
+          fees: feeAsset,
           weight_limit: {
             type: 'Unlimited',
           },
@@ -87,6 +86,7 @@ export const buildXcmMessage = (
       },
       {
         type: 'RefundSurplus',
+        value: undefined,
       },
       {
         type: 'DepositAsset',
