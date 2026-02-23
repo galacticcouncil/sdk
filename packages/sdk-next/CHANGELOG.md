@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.35.0
+
+### Minor Changes
+
+- fd4b920: Fix farm apr calculation
+
 ## 0.34.0
 
 ### Minor Changes
