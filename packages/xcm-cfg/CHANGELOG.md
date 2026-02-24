@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.24.0
+
+### Minor Changes
+
+- ab3015c: add eurc
+
 ## 10.23.0
 
 ### Minor Changes
