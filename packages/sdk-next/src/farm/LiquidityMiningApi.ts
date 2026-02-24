@@ -164,6 +164,7 @@ export class LiquidityMiningApi {
       apr = Big(multiplierShifted)
         .times(yield_per_period.toString())
         .times(periodsPerYear)
+        .div(Math.pow(10, RUNTIME_DECIMALS))
         .toString();
     } else {
       const globalRewardPerPeriod = this.getGlobalRewardPerPeriod(

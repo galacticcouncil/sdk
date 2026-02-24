@@ -1,3 +1,4 @@
+export * as acc from './account';
 export * as big from './big';
 export * as enums from './enums';
 export * as erc20 from './erc20';

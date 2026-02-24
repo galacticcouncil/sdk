@@ -1,12 +1,33 @@
 # @galacticcouncil/xc-cfg
 
+## 0.14.0
+
+### Minor Changes
+
+[b3e71f84]: https://github.com/galacticcouncil/sdk/commit/b3e71f84
+
+- [[#b3e71f84][b3e71f84]] xc: added PRIME
+
+## 0.13.0
+
+### Minor Changes
+
+[dfa205b2]: https://github.com/galacticcouncil/sdk/commit/dfa205b2
+
+- [[#dfa205b2][dfa205b2]] xc: isEVMChain check in the snowbridge transfer builder
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.12.0
+
 ## 0.12.1
 
 ### Patch Changes
 
 [c12bc0d4]: https://github.com/galacticcouncil/sdk/commit/c12bc0d4
 
-- [[#c12bc0d4][c12bc0d4]] xc: fix erc20 snowbridge transfers 
+- [[#c12bc0d4][c12bc0d4]] xc: fix erc20 snowbridge transfers
 
 ## 0.12.0
 

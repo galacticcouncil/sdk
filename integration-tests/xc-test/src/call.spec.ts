@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
-import { AnyChain, SubstrateApis } from '@galacticcouncil/xc-core';
+import { AnyChain } from '@galacticcouncil/xc-core';
+import { SubstrateApis } from '@galacticcouncil/common';
 import { Wallet } from '@galacticcouncil/xc-sdk';
 
 import * as c from 'console';

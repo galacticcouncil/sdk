@@ -1,5 +1,18 @@
 # @galacticcouncil/xc-sdk
 
+## 0.6.0
+
+### Minor Changes
+
+[ac327f5d]: https://github.com/galacticcouncil/sdk/commit/ac327f5d
+
+- [[#ac327f5d][ac327f5d]] xc: move account utils to common
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.12.0
+
 ## 0.5.2
 
 ### Patch Changes

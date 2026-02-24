@@ -1,5 +1,13 @@
 # @galacticcouncil/descriptors
 
+## 1.13.0
+
+### Minor Changes
+
+[16dc11cc]: https://github.com/galacticcouncil/sdk/commit/16dc11cc
+
+- [[#16dc11cc][16dc11cc]] desc: update hydration descriptor to latest metadata
+
 ## 1.12.0
 
 ### Minor Changes
