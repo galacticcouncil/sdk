@@ -5,6 +5,8 @@ import {
   dai_mwh,
   dot,
   eth,
+  eurc,
+  eurc_mwh,
   glmr,
   hdx,
   pink,
@@ -17,7 +19,7 @@ import {
   wbtc_mwh,
   weth_mwh,
 } from '../../../assets';
-import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
+import { assetHub, base, ethereum, hydration, moonbeam } from '../../../chains';
 import {
   BalanceBuilder,
   ContractBuilder,
@@ -56,6 +58,7 @@ const toHydration: AssetRoute[] = [
   toHydrationErc20Template(wbtc_mwh, 0.0000001),
   toHydrationErc20Template(weth_mwh, 0.000002),
   toHydrationErc20Template(sol, 0.00002),
+  toHydrationErc20Template(eurc_mwh, 0.004),
 ];
 
 const toAssetHub: AssetRoute[] = [
