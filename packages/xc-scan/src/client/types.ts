@@ -32,7 +32,13 @@ export type XcJourneyProtocol =
 
 export type XcJourneyAction = 'query' | 'transact' | 'swap' | 'transfer';
 
-export type XcJourneyStatus = 'sent' | 'received' | 'failed';
+export type XcJourneyStatus =
+  | 'received'
+  | 'failed'
+  | 'timeout'
+  | 'sent'
+  | 'waiting'
+  | 'unknown';
 
 export interface XcJourneysCriteria {
   address?: string;
@@ -50,6 +56,32 @@ export interface XcJourneysCriteria {
   protocols?: string[];
   status?: string[];
   actions?: string[];
+}
+
+export interface XcJourneyWhVAAInstruction {
+  type: 'WormholeVAA';
+  value: {
+    raw: string;
+    guardianSetIndex: number;
+    isDuplicated: boolean;
+  };
+}
+export interface XcJourneyWhStop {
+  type: 'wormhole';
+  from: object;
+  to: object;
+  relay?: object;
+  instructions: XcJourneyWhVAAInstruction;
+  messageId?: string;
+}
+
+export interface XcJourneyStop {
+  type: string;
+  from: object;
+  to: object;
+  relay?: object;
+  instructions: object[];
+  messageId?: string;
 }
 
 export interface XcJourneysListRequest {
@@ -88,7 +120,7 @@ export type XcJourney = {
   sentAt?: number;
   recvAt?: number;
   createdAt: number;
-  stops: any;
+  stops: XcJourneyStop[] | XcJourneyWhStop[];
   instructions: any;
   transactCalls: any[];
   originTxPrimary?: string;
@@ -100,7 +132,7 @@ export type XcJourney = {
   outConnectionFk?: number;
   outConnectionData?: any;
   totalUsd: number;
-  assets: XcAssetOperation;
+  assets: XcAssetOperation[];
 };
 
 export type XcJourneyReplaceEvt = {
