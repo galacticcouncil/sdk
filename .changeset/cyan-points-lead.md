@@ -1,5 +1,5 @@
 ---
-'@galacticcouncil/xc-cfg': minor
+'@galacticcouncil/xcm-cfg': minor
 ---
 
 add eurc
