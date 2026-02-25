@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.14.1
+
+### Patch Changes
+
+[738a944d]: https://github.com/galacticcouncil/sdk/commit/738a944d
+
+- [[#738a944d][738a944d]] xc: fix hydration to interlay dot transfer
+
 ## 0.14.0
 
 ### Minor Changes
