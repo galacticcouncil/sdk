@@ -8,6 +8,7 @@ import { defineChain, Chain } from 'viem';
 import {
   dai_mwh,
   dot,
+  eurc_mwh,
   glmr,
   hdx,
   jito_sol,
@@ -87,6 +88,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0x06e605775296e851ff43b4daa541bb0984e9d6fd',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: eurc_mwh,
+      decimals: 6,
+      id: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
               },
             },
           ],
