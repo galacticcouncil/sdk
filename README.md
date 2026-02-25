@@ -65,7 +65,6 @@ npm i @galacticcouncil/sdk
 npm i @galacticcouncil/xcm-sdk @galacticcouncil/xcm-cfg
 ```
 
----
 
 ## General
 
@@ -95,7 +94,6 @@ Core packages providing shared utilities, chain metadata, and trading functional
 | [`@galacticcouncil/sdk`](./packages/sdk) | [![sdk_v]][sdk_npm] | [changelog][sdk_log] | Trade router & pool utilities (`@polkadot/api`) |
 | [`@galacticcouncil/sdk-next`](./packages/sdk-next) | [![sdk-next_v]][sdk-next_npm] | [changelog][sdk-next_log] | Next-gen trade router & pool utilities (`polkadot-api`) |
 
----
 
 ## XC (Cross-Chain)
 
@@ -139,7 +137,6 @@ Next-generation cross-chain transfer toolkit built on `polkadot-api`. Modular ar
 └── @galacticcouncil/xc-core ← Core types, chain & asset definitions
 ```
 
----
 
 ## XCM (Cross-Chain Legacy)
 
@@ -172,7 +169,6 @@ Stable cross-chain transfer toolkit built on `@polkadot/api`. Production-proven 
 @galacticcouncil/xcm-core ← Core types, chain & asset definitions
 ```
 
----
 
 ## Math
 
@@ -224,7 +220,6 @@ WebAssembly math modules compiled from Rust. Each module provides high-performan
 
 > **Note:** You typically don't need to install math packages directly — they are dependencies of `sdk` and `sdk-next`.
 
----
 
 ## Examples
 
@@ -239,7 +234,6 @@ Ready-to-run examples are available in the [`examples/`](./examples) directory:
 | [`xc-transfer`](./examples/xc-transfer) | XC cross-chain transfer |
 | [`xcm-transfer`](./examples/xcm-transfer) | XCM cross-chain transfer |
 
----
 
 ## Contributing
 
