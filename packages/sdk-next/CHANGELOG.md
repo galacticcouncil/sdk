@@ -1,5 +1,22 @@
 # @galacticcouncil/sdk-next
 
+## 0.36.0
+
+### Minor Changes
+
+- support latest wasm-pack build
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.3.0
+  - @galacticcouncil/math-stableswap@2.5.0
+  - @galacticcouncil/math-omnipool@1.4.0
+  - @galacticcouncil/math-staking@1.3.0
+  - @galacticcouncil/math-hsm@1.2.0
+  - @galacticcouncil/math-lbp@1.3.0
+  - @galacticcouncil/math-xyk@1.3.0
+
 ## 0.35.0
 
 ### Minor Changes

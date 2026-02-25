@@ -30,7 +30,9 @@ const DOT_RESERVE_LOCATION = {
 };
 
 const isDot = (assetLocation: any) => {
-  return assetLocation.parents === 1 && assetLocation.interior === 'Here';
+  const { parents, interior } = assetLocation;
+  if (parents !== 1) return false;
+  return interior === 'Here' || interior?.type === 'Here';
 };
 
 const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {

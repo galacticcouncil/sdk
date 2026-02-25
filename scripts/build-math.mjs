@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import { parseArgs } from './common.mjs';
 
@@ -16,6 +16,7 @@ const BUILD_MATRIX = [
   ['bundler', 'hydra_dx_wasm_bg.wasm', 'hydra_dx_wasm_bg.wasm'],
   ['bundler', 'hydra_dx_wasm_bg.wasm.d.ts', 'hydra_dx_wasm_bg.wasm.d.ts'],
   ['nodejs', 'hydra_dx_wasm.js', 'index.cjs'],
+  ['nodejs', 'hydra_dx_wasm_bg.wasm', 'hydra_dx_wasm_bg_nodejs.wasm'],
 ];
 const BUILD_FOLDER = 'build';
 
@@ -59,6 +60,17 @@ const main = async () => {
     writeFileSync(outPath.join('/'), file);
     console.log(`${input} [${confSha.slice(0, 8)}] fetched`);
   }
+
+  // Patch CJS entry to use the nodejs-target wasm file
+  const cjsPath = [BUILD_FOLDER, 'index.cjs'].join('/');
+  const cjsContent = readFileSync(cjsPath, 'utf-8');
+  const patchedCjs = cjsContent.replace(
+    'hydra_dx_wasm_bg.wasm',
+    'hydra_dx_wasm_bg_nodejs.wasm'
+  );
+  writeFileSync(cjsPath, patchedCjs);
+  console.log('index.cjs patched to use nodejs wasm');
+
   console.log(`Math ${mathParam} ready ✅`);
 };
 
