@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 0.15.0
+
+### Minor Changes
+
+- 72d8734: add eurc support
+
 ## 0.14.1
 
 ### Patch Changes
