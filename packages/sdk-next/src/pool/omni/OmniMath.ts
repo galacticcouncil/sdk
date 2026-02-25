@@ -62,7 +62,8 @@ export class OmniMath {
       assetOutShares,
       amountOut,
       assetFee,
-      protocolFee
+      protocolFee,
+      '0'
     );
   }
 
@@ -78,7 +79,8 @@ export class OmniMath {
       assetOutHubReserve,
       assetOutShares,
       amountOut,
-      assetFee
+      assetFee,
+      '0'
     );
   }
 
@@ -102,7 +104,8 @@ export class OmniMath {
       assetOutShares,
       amountIn,
       assetFee,
-      protocolFee
+      protocolFee,
+      '0'
     );
   }
 
@@ -118,7 +121,8 @@ export class OmniMath {
       assetOutHubReserve,
       assetOutShares,
       amountOut,
-      assetFee
+      assetFee,
+      '0'
     );
   }
 
