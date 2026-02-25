@@ -2,9 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xc-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xc-sdk)
 
-Wallet interface for asset multi-platform transfer supporting fee swaps & bridging.
+Wallet interface for executing cross-chain asset transfers. Supports Substrate, EVM, Sui, and Solana platforms, fee swaps, and bridge integrations.
 
-Wallet does not perform any signing rather provide transfer data to maintain loose coupling & interoperability with 3rd party code.
+Wallet does not perform any signing — it provides transfer data to maintain loose coupling & interoperability with 3rd party code.
 
 ## Installation
 
@@ -55,15 +55,6 @@ const wallet = new Wallet({
   configService: configService,
   transferValidations: validations,
 });
-
-// Register dex-es
-const hydration = configService.getChain('hydration');
-const assethub = configService.getChain('assethub');
-
-wallet.registerDex(
-  new dex.HydrationDex(hydration),
-  new dex.AssethubDex(assethub)
-);
 
 // Define transfer
 const srcChain = configService.getChain('ethereum');
