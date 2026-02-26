@@ -8,8 +8,6 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
-  Dex,
-  DexFactory,
   TransferConfigs,
   TransferCtx,
   TransferValidator,
@@ -51,10 +49,6 @@ export class Wallet {
   constructor({ configService, transferValidations }: WalletOptions) {
     this.config = configService;
     this.validations = transferValidations || [];
-  }
-
-  registerDex(...dex: Dex[]) {
-    dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
   async transfer(
