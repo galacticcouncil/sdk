@@ -2,11 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk-next.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk-next)
 
-Next gen hydration sdk build on top of [Polkadot API (Papi)](https://papi.how/).
-
-⚠️ **Disclaimer:** Next is not prod ready yet. Official `1.x` release coming soon.
-
-Missing functionality & progress tracked [here](https://github.com/galacticcouncil/sdk/issues/119)
+Next gen Hydration SDK built on top of [Polkadot API (Papi)](https://papi.how/).
 
 Table of contents:
 
@@ -118,7 +114,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 | :----- | :----------- |
 | `getDcaOrder(assetIn: number, assetOut: number, amountInTotal: string, duration: number): TradeDcaOrder` | Calculate DCA order. |
 | `getTwapBuyOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
-| `getTwapSellOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
+| `getTwapSellOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP sell order. |
 
 ➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />
 
@@ -144,7 +140,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 ## Examples
 
-All examples assume sdk have been initialized [see](#usage)
+All examples assume SDK has been initialized, [see](#usage)
 
 ### TradeRouter
 
