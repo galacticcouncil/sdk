@@ -1,5 +1,4 @@
 import {
-  addr,
   Asset,
   AssetAmount,
   Parachain,
@@ -7,10 +6,8 @@ import {
 } from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
-import { formatEvmAddress } from './utils';
+import { buildBalanceConfig } from './utils';
 import { PlatformAdapter, SubstrateService } from '../platforms';
-
-const { EvmAddr } = addr;
 
 export abstract class DataProcessor {
   readonly adapter: PlatformAdapter;
@@ -36,17 +33,12 @@ export abstract class DataProcessor {
     const { source } = route;
 
     const asset = source.asset;
-
-    const assetId = chain.getBalanceAssetId(asset);
-    const account = EvmAddr.isValid(assetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const balanceConfig = route.source.balance.build({
-      address: account,
-      asset: asset,
-      chain: chain,
-    });
-
+    const balanceConfig = await buildBalanceConfig(
+      route.source.balance,
+      address,
+      asset,
+      chain
+    );
     return this.adapter.getBalance(asset, balanceConfig);
   }
 

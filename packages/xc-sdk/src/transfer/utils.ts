@@ -1,4 +1,11 @@
-import { AnyChain, AssetAmount, EvmParachain } from '@galacticcouncil/xc-core';
+import {
+  AnyChain,
+  Asset,
+  AssetAmount,
+  BalanceConfigBuilder,
+  CallType,
+  EvmParachain,
+} from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
 import Big from 'big.js';
@@ -74,21 +81,45 @@ export function calculateMin(
 }
 
 /**
- * Return h160 derivated address in case of Evm parachain
+ * Resolve address to the format required by the given CallType
+ * on dual-address-space (EvmParachain) chains.
+ *
  *
  * @param address - h160 or ss58 address format
  * @param chain - transfer chain ctx
- * @returns - derivated address if evm resolver defined, fallback to default
+ * @param callType - target format needed (Evm or Substrate)
+ * @returns address in the correct format
  */
-export async function formatEvmAddress(
+export async function resolveAddress(
   address: string,
-  chain: AnyChain
+  chain: AnyChain,
+  callType: CallType
 ): Promise<string> {
   if (chain.isEvmParachain()) {
     const evmParachain = chain as EvmParachain;
-    return evmParachain.getDerivatedAddress(address);
+    return callType === CallType.Evm
+      ? evmParachain.getDerivatedAddress(address)
+      : evmParachain.getSubstrateAddress(address);
   }
   return address;
+}
+
+/**
+ * Build a balance config with the address resolved to the format
+ * required by the config's CallType.
+ */
+export async function buildBalanceConfig(
+  builder: BalanceConfigBuilder,
+  address: string,
+  asset: Asset,
+  chain: AnyChain
+) {
+  const config = builder.build({ address, asset, chain });
+  const account = await resolveAddress(address, chain, config.type);
+  if (account === address) {
+    return config;
+  }
+  return builder.build({ address: account, asset, chain });
 }
 
 /**
