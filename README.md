@@ -19,16 +19,27 @@ Collection of SDK(s) crafted to ease [Hydration](https://hydration.net) chain in
 ## Overview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      Your dApp                          │
-├──────────────────┬──────────────────┬───────────────────┤
-│    sdk / sdk-next│    xc / xcm-sdk  │     math-*        │
-│    Trade routing │    Cross-chain   │     Pool math     │
-│    Pool queries  │    Transfers     │     (WASM)        │
-├──────────────────┼──────────────────┼───────────────────┤
-│     common       │   descriptors    │  polkadot-api /   │
-│     Shared utils │   Chain metadata │  @polkadot/api    │
-└──────────────────┴──────────────────┴───────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                         Your dApp                          │
+├────────────────────────────────┬───────────────────────────┤
+│       « sdk / sdk-next »       │     « xc / xcm-sdk »      │
+│       ··················       │     ················      │
+│       Trade routing            │     Cross-chain           │
+│       Pool queries             │     Transfers             │
+│             │                  │                           │
+│        ┌────┴──────┐           │                           │
+│        │  math-*   │           │                           │
+│        │ Pool math │           │                           │
+│        │ (WASM)    │           │                           │
+│        └───────────┘           │                           │
+├───────────────────┬────────────┴───────────────────────────┤
+│  « common »       │  « descriptors »                       │
+│  ···········      │  ················                      │
+│  Shared utils     │  Chain metadata                        │
+├───────────────────┴────────────────────────────────────────┤
+│             polkadot-api  /  @polkadot/api                 │
+│                   Substrate SDKs                           │
+└────────────────────────────────────────────────────────────┘
 ```
 
 **Two generations of packages coexist:**
@@ -44,7 +55,7 @@ The next-gen packages (`sdk-next`, `xc-*`) are built on the modern [Polkadot API
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 23+
 - npm 10+
 
 ### Installation
