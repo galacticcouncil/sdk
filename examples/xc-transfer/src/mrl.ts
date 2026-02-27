@@ -1,13 +1,20 @@
-import { EvmCall, SubstrateClaim } from '@galacticcouncil/xc-sdk';
+import { EvmCall, EvmClaim, SubstrateClaim } from '@galacticcouncil/xc-sdk';
+import { EvmChain, EvmParachain } from '@galacticcouncil/xc-core';
+
 import { ctx } from './setup';
-import { EvmParachain } from '@galacticcouncil/xc-core';
 
 const { config } = ctx;
 
 const moonbeam = config.getChain('moonbeam') as EvmParachain;
+const ethereum = config.getChain('ethereum') as EvmChain;
 
-const claim = new SubstrateClaim(moonbeam);
+const claimMrl = new SubstrateClaim(moonbeam);
+const claim = new EvmClaim(ethereum);
+
+export function redeemMrl(address: string, vaa: string): EvmCall {
+  return claimMrl.redeemMrl(address, vaa);
+}
 
 export function redeem(address: string, vaa: string): EvmCall {
-  return claim.redeemMrl(address, vaa);
+  return claim.redeem(address, vaa);
 }
