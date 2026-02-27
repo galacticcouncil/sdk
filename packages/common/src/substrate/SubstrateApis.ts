@@ -69,10 +69,7 @@ export class SubstrateApis {
     return this._cache.has(compositeCacheKey) ? compositeCacheKey : null;
   }
 
-  public createClient(
-    endpoints: string[],
-    opts?: ApiOptions
-  ): PolkadotClient {
+  public createClient(endpoints: string[], opts?: ApiOptions): PolkadotClient {
     const wsProvider = getWsProvider(endpoints, opts?.wsProviderOpts);
     const client = createClient(wsProvider, this._metadataCache);
 
@@ -94,10 +91,7 @@ export class SubstrateApis {
     return client;
   }
 
-  public api(
-    ws: string | string[],
-    opts?: ApiOptions
-  ): PolkadotClient {
+  public api(ws: string | string[], opts?: ApiOptions): PolkadotClient {
     const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
     const cacheKey = this.findCacheKey(endpoints);
 
@@ -150,9 +144,13 @@ export class SubstrateApis {
         connection.provider.switch(nextEndpoint);
         connection.currentEndpointIndex = nextIndex;
 
-        // Restart probe with fresh state after switch
+        // Stop the current probe before restarting, otherwise the old
+        // subscription remains active alongside the new one (leak + double switching).
         this.stopHealthProbe(connection);
-        this.startHealthProbe(connection, config);
+        this.startHealthProbe(connection, {
+          ...config,
+          initialDelayMs: config.intervalMs ?? 5_000,
+        });
       }
     };
 
