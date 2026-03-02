@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.5.1
+
+### Patch Changes
+
+- 02e589b: fix health probe switching rpcs
+
 ## 0.5.0
 
 ### Minor Changes
