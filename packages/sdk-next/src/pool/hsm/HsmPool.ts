@@ -74,10 +74,13 @@ export class HsmPool extends StableSwap {
   validateTradeHollarIn(
     poolPair: PoolPair,
     amountIn: bigint,
-    amountOut: bigint,
     errors: PoolError[]
   ) {
-    const buybackLimit = this.calculateBuybackLimit(poolPair);
+    // Runtime HSM validation using stableswap simulateIn (buy) to calculate collateral amount
+    const reversedPair = this.parsePair(poolPair.assetOut, poolPair.assetIn);
+    const collateralAmount = super.calculateInGivenOut(reversedPair, amountIn, {
+      fee: this.fee,
+    });
 
     /**
      * Check if the requested amount exceeds the buyback limit
@@ -85,12 +88,17 @@ export class HsmPool extends StableSwap {
      * amountIn = the amount of Hollar the user is trying to sell to HSM
      * buybackLimit = how much Hollar can be bought back
      */
+    const buybackLimit = this.calculateBuybackLimit(poolPair);
     if (amountIn > buybackLimit) {
       errors.push(PoolError.MaxBuyBackExceeded);
     }
 
-    const buyPrice = this.calculateBuyPrice(poolPair, amountIn, amountOut);
     const maxPrice = this.calculateMaxPrice(poolPair);
+    const buyPrice = this.calculateBuyPrice(
+      poolPair,
+      amountIn,
+      collateralAmount
+    );
 
     /**
      * Check if buy price less than max price
@@ -102,7 +110,7 @@ export class HsmPool extends StableSwap {
     /**
      * Check if HSM has enough collateral
      */
-    if (amountOut > this.collateralBalance) {
+    if (collateralAmount > this.collateralBalance) {
       errors.push(PoolError.InsufficientCollateral);
     }
 
@@ -141,7 +149,7 @@ export class HsmPool extends StableSwap {
 
     // Validate Hollar coming into HSM in exchange for collateral
     if (poolPair.assetIn === this.hollarId) {
-      return this.validateTradeHollarIn(poolPair, amountIn, amountOut, errors);
+      return this.validateTradeHollarIn(poolPair, amountIn, errors);
     }
 
     // Validate Hollar going out from HSM in exchange for collateral coming in
