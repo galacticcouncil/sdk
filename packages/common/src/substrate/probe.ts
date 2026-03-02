@@ -17,6 +17,7 @@ export type ProbeConfig = {
   intervalMs?: number;
   timeoutMs?: number;
   staleThreshold?: number;
+  initialDelayMs?: number;
 };
 
 type ProbeResult = {
@@ -36,6 +37,7 @@ export function blockProbe$(
     intervalMs = 5_000,
     timeoutMs = 5_000,
     staleThreshold = 3,
+    initialDelayMs = 0,
   }: ProbeConfig = {}
 ): Observable<ProbeState> {
   const probeOnce$ = (prev: ProbeResult) =>
@@ -52,19 +54,20 @@ export function blockProbe$(
           staleCount >= staleThreshold ? 'stale' : 'healthy';
         return { state, blockNumber, staleCount, delayMs: intervalMs };
       }),
-      catchError(() =>
-        of<ProbeResult>({
-          state: 'stale',
-          staleCount: 0,
+      catchError(() => {
+        const staleCount = prev.staleCount + 1;
+        return of<ProbeResult>({
+          state: staleCount >= staleThreshold ? 'stale' : 'healthy',
+          staleCount,
           delayMs: intervalMs,
-        })
-      )
+        });
+      })
     );
 
   const initial: ProbeResult = {
     state: 'healthy',
     staleCount: 0,
-    delayMs: 0,
+    delayMs: initialDelayMs,
   };
 
   return of(initial).pipe(
