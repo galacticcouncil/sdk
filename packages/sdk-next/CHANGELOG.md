@@ -1,10 +1,16 @@
 # @galacticcouncil/sdk-next
 
+## 0.36.2
+
+### Patch Changes
+
+- 0c44bba5: fix internal pool client wiring outside defer
+
 ## 0.36.1
 
 ### Patch Changes
 
-- fix hsm hollar sell validation
+- e7e7f724: fix hsm hollar sell validation
 
 ## 0.36.0
 
@@ -27,13 +33,13 @@
 
 ### Minor Changes
 
-- fd4b920: Fix farm apr calculation
+- fd4b920: fix farm apr calculation
 
 ## 0.34.0
 
 ### Minor Changes
 
-- b270643: Wrap order tx with extra gas
+- b270643: wrap order tx with extra gas
 
 ## 0.33.0
 
