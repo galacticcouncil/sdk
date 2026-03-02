@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.36.1
+
+### Patch Changes
+
+- fix hsm hollar sell validation
+
 ## 0.36.0
 
 ### Minor Changes
