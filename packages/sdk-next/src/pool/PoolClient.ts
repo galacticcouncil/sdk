@@ -165,21 +165,22 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
             })
           );
         }),
-        finalize(() => session.unsubscribe()),
-        /**
-         * Ensures single internal wiring for all subscribers
-         */
-        share({
-          /**
-           * Late subscribers get the latest snapshot immediately from the
-           * connector’s buffer, even if upstream hasn’t emitted again yet
-           * in this ref-count cycle
-           */
-          connector: () => new ReplaySubject<T[]>(1),
-          resetOnRefCountZero: true,
-        })
+        finalize(() => session.unsubscribe())
       );
-    });
+    }).pipe(
+      /**
+       * Ensures single internal wiring for all subscribers.
+       */
+      share({
+        /**
+         * Late subscribers get the latest snapshot immediately from the
+         * connector's buffer, even if upstream hasn't emitted again yet
+         * in this ref-count cycle
+         */
+        connector: () => new ReplaySubject<T[]>(1),
+        resetOnRefCountZero: true,
+      })
+    );
   }
 
   protected subscribeBalances(): Subscription {

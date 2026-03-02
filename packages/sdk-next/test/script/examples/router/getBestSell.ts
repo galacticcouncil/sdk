@@ -10,9 +10,11 @@ class GetBestSell extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
 
-    const { api, tx } = sdk;
+    const { api, tx, ctx } = sdk;
 
-    const trade = await api.router.getBestSell(222, 1113, '0.01');
+    ctx.pool.withHsm();
+
+    const trade = await api.router.getBestSell(222, 1002, '1');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());
