@@ -65,6 +65,30 @@ export function mulSpot(
 }
 
 /**
+ * Divide a value by a spot price and rescale the result
+ * to the desired target decimals.
+ *
+ * Inverse of `mulSpot` — equivalent to multiplying
+ * by the reciprocal (1 / spot).
+ *
+ * @param value - base value (native bigint)
+ * @param spot - spot price (scaled by RUNTIME_DECIMALS)
+ * @param valueDecimals - decimals of the base value
+ * @param targetDecimals - desired decimals of the result
+ * @returns scaled division result
+ */
+export function divSpot(
+  value: bigint,
+  spot: bigint,
+  valueDecimals: number,
+  targetDecimals: number
+): bigint {
+  if (spot === 0n) return 0n;
+  const scale = BigInt(10) ** BigInt(RUNTIME_DECIMALS + targetDecimals - valueDecimals);
+  return (value * scale) / spot;
+}
+
+/**
  * Get % fraction from native value
  *
  * @param value - native amount
