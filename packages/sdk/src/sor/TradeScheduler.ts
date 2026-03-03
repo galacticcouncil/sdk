@@ -158,6 +158,18 @@ export class TradeScheduler {
         .div(bnum(10).pow(SYSTEM_ASSET_DECIMALS))
         .decimalPlaces(0, 1);
     }
+
+    const reverseSpot = await this.router.getBestSpotPrice(
+      asset,
+      SYSTEM_ASSET_ID
+    );
+    if (reverseSpot) {
+      return this.minOrderBudget
+        .times(bnum(10).pow(SYSTEM_ASSET_DECIMALS))
+        .div(reverseSpot.amount)
+        .decimalPlaces(0, 1);
+    }
+
     throw new Error('Unable to calculate order budget');
   }
 
