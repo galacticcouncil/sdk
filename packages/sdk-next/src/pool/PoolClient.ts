@@ -132,7 +132,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
             tap((valid) => this.store.set(valid)),
             catchError(() => {
               this.log.error('pool_seed_error', { mem: this.mem });
-              this.requestResync(true);
+              this.requestResync();
               return EMPTY;
             })
           );

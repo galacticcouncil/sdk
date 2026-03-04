@@ -14,14 +14,18 @@ class GetBestSell extends PapiExecutor {
 
     ctx.pool.withHsm();
 
-    const trade = await api.router.getBestSell(222, 1002, '1');
+    const trade = await api.router.getBestBuy(222, 1003, '3');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());
     console.log('Transaction hash: ' + tradeCall.asHex());
 
-    const result = await tradeTx.dryRun(BENEFICIARY);
-    console.log(result);
+    try {
+      const result = await tradeTx.dryRun(BENEFICIARY);
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    }
 
     return () => {
       sdk.destroy();
