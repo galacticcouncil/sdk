@@ -29,11 +29,11 @@ export async function signAndSend(
     const simulation = await lilJit.simulateBundle(encoded);
     console.log(simulation);
 
-    const bundleId = await lilJit.sendBundle(encoded);
-    console.log(bundleId);
+    // const bundleId = await lilJit.sendBundle(encoded);
+    // console.log(bundleId);
 
-    const status = await lilJit.getInflightBundleStatuses([bundleId]);
-    console.log(status);
+    // const status = await lilJit.getInflightBundleStatuses([bundleId]);
+    // console.log(status);
   } catch (err) {
     onError(err);
   }

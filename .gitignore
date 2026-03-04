@@ -10,8 +10,8 @@ packages/*/build-meta.json
 !packages/math-*/build
 
 # examples compile folders
-examples/*/out
-examples/*/build-meta.json
+examples/**/out
+examples/**/build-meta.json
 
 # examples public folders (js|wasm)
 examples/*/public/**/*.js

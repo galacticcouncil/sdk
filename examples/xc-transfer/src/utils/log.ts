@@ -1,5 +1,4 @@
-import { chainsMap } from '@galacticcouncil/xc-cfg';
-import { AnyChain, Wormhole } from '@galacticcouncil/xc-core';
+import { AnyChain } from '@galacticcouncil/xc-core';
 
 export function logSrcChains(asset: string, chains: AnyChain[]) {
   const srcChains = chains.map((chain) => chain.name);
@@ -16,10 +15,4 @@ export function logDestChains(asset: string, chains: AnyChain[]) {
 export function logAssets(chain: AnyChain) {
   const assets = [...chain.assetsData.values()].map((a) => a.asset.key);
   console.log(`The supported ${chain.name} assets are: ${assets}`);
-}
-
-export function getWormholeChainById(id: number): AnyChain | undefined {
-  return Array.from(chainsMap.values()).find(
-    (c) => Wormhole.isKnown(c) && Wormhole.fromChain(c).getWormholeId() === id
-  );
 }
