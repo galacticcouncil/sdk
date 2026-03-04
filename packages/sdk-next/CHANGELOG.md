@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.36.3
+
+### Patch Changes
+
+- d327ae29: fix: hsm spot calc
+
 ## 0.36.2
 
 ### Patch Changes
