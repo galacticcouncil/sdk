@@ -213,7 +213,7 @@ export class BalanceClient extends Papi {
         ),
         pairwise(),
         map(([prev, curr], i) => {
-          if (i === 0) return curr.filter((a) => a.balance.transferable > 0n);
+          if (i === 0) return curr.filter((a) => a.balance.total > 0n);
           return this.getDeltas(prev, curr);
         }),
         distinctUntilChanged((_prev, curr) => curr.length === 0),
