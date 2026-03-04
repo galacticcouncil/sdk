@@ -46,6 +46,8 @@ export class SolanaClaim {
     const ctxWh = Wh.fromChain(this.#chain);
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
+    // We don't check for TokenBridge:TransferWithPayload because claim (complete_wrapped_with_payload)
+    // must be called via CPI from the redeemer program only if using TokenRelayer
     const vaa = deserialize('TokenBridge:Transfer', vaaBytes);
     const vaaU8a = deserialize('Uint8Array', vaaBytes);
     const postedVaaAddress = this.derivePostedVaaKey(
