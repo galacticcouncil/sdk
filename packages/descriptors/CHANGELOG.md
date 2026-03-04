@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.13.1
+
+### Patch Changes
+
+- 69124d1: whitelist proxy pallet
+
 ## 1.13.0
 
 ### Minor Changes

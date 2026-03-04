@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.7.1
+
+### Patch Changes
+
+- 7ff3934: fix the H20 -> tokens dca bug
+
 ## 10.7.0
 
 ### Minor Changes

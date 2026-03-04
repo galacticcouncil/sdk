@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk-next
 
+## 0.36.4
+
+### Patch Changes
+
+- b139d4d: fix the H20 -> tokens dca bug
+- 2e3b193: fix fetching erc20 balances
+
 ## 0.36.3
 
 ### Patch Changes
