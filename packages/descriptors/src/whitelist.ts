@@ -22,6 +22,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'const.Omnipool.*',
   'const.OmnipoolLiquidityMining.*',
   'const.OTC.*',
+  'const.Proxy.*',
   'const.Referenda.*',
   'const.Stableswap.*',
   'const.Staking.*',
@@ -29,6 +30,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'const.XYKLiquidityMining.*',
   // event
   'event.EVM.Log',
+  'event.Proxy.PureCreated',
   'event.Router.Executed',
   'event.Stableswap.*',
   // query
