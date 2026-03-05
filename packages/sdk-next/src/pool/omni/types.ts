@@ -1,6 +1,7 @@
 import { FixedSizeArray } from 'polkadot-api';
 
 import {
+  HydrationNextQueries,
   HydrationConstants,
   HydrationQueries,
 } from '@galacticcouncil/descriptors';
@@ -9,6 +10,8 @@ export type TDynamicFees = HydrationQueries['DynamicFees']['AssetFee']['Value'];
 export type TDynamicFeesConfig =
   HydrationQueries['DynamicFees']['AssetFeeConfiguration']['Value'];
 export type TDynamicFeeRange = [number, number, number];
+
+export type TSlipFee = HydrationNextQueries['Omnipool']['SlipFee']['Value'];
 
 export type TAssetFeeParams =
   HydrationConstants['DynamicFees']['AssetFeeParameters'];

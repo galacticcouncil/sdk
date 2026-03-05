@@ -37,6 +37,7 @@ export type OmniPoolToken = PoolToken & {
 export type OmniPoolFees = PoolFees & {
   assetFee: PoolFee;
   protocolFee: PoolFee;
+  maxSlipFee: PoolFee;
 };
 
 export type OmniPoolBase = PoolBase & {
@@ -204,7 +205,8 @@ export class OmniPool implements Pool {
       poolPair.sharesOut.toString(),
       amountOut.toString(),
       fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
-      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -220,7 +222,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toString(),
-      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -244,7 +247,8 @@ export class OmniPool implements Pool {
       poolPair.sharesOut.toString(),
       amountIn.toString(),
       fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
-      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
@@ -260,7 +264,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toString(),
-      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0'
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : '0',
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : '0'
     );
     const price = BigInt(result);
     return price < 0n ? 0n : price;
