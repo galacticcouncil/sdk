@@ -209,7 +209,7 @@ export class Wallet {
 
     // Re-estimate fee with real max amount (max + fee ≈ balance)
     if (max.amount > 0n) {
-      ctx.amount = max.amount + srcFee.amount;
+      ctx.amount = max.amount;
       srcFee = await src.getFee(ctx);
       max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
     }
