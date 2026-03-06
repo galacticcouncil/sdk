@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.14.0
+
+### Minor Changes
+
+- c9797aa support v45.0.0 types
+
 ## 1.13.1
 
 ### Patch Changes
