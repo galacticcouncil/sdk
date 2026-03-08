@@ -75,7 +75,11 @@ const wallet = new Wallet({
   configService: configService,
   transferValidations: validations,
 });
+```
 
+## Transfer
+
+```typescript
 // Define transfer
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');

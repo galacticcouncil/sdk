@@ -23,7 +23,7 @@ const { config, wallet } = ctx;
 
 It handles all necessary setup under the hood. Just call the factory and you're ready to build transfers, subscribe balances, and more.
 
-### Transfer
+## Transfer
 
 ```typescript
 // Define transfer
