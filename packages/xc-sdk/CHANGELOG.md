@@ -1,10 +1,12 @@
 # @galacticcouncil/xc-sdk
 
-## 0.6.1
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
-- fix
+[d36a2dbb]: https://github.com/galacticcouncil/sdk/commit/d36a2dbb
+
+- [[#d36a2dbb][d36a2dbb]] xc: add platform signers to sdk
 
 ## 0.6.0
 
