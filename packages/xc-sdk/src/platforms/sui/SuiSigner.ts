@@ -37,19 +37,15 @@ export class SuiSigner {
         return;
       }
 
-      const transaction = Transaction.from(data);
-      const params = {
-        transaction: await transaction.toJSON(),
+      const signed = await this.#wallet.signTransaction({
+        transaction: data,
         address: from,
-        networkID: 'SuiMainnet',
-      };
-
-      const signed = await this.#wallet.signTransaction(params);
-      const { transaction: txBytesB64, signature } = signed;
+        networkID: 'sui:mainnet',
+      });
 
       const exec = await client.executeTransactionBlock({
-        transactionBlock: txBytesB64,
-        signature,
+        transactionBlock: signed.transaction,
+        signature: signed.signature,
         options: {
           showEffects: true,
           showEvents: true,

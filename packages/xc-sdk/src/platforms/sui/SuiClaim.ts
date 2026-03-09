@@ -3,7 +3,6 @@ import { CallType, SuiChain, Wormhole as Wh } from '@galacticcouncil/xc-core';
 import { Transaction } from '@mysten/sui/transactions';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
 import { toBase64 } from '@mysten/bcs';
-
 import {
   encoding,
   serialize,
