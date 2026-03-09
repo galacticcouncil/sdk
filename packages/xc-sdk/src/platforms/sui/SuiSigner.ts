@@ -3,22 +3,9 @@ import { SuiChain } from '@galacticcouncil/xc-core';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
 
-import { SuiCall } from './types';
+import { SuiCall, SuiWallet, SuiTxObserver } from './types';
 
 import { Call } from '../types';
-
-export interface SuiWallet {
-  signTransaction(params: {
-    transaction: string;
-    address: string;
-    networkID: string;
-  }): Promise<{ transaction: string; signature: string }>;
-}
-
-export interface SuiSignerObserver {
-  onTransactionSend: (hash: string) => void;
-  onError: (error: unknown) => void;
-}
 
 export class SuiSigner {
   readonly #chain: SuiChain;
@@ -29,7 +16,7 @@ export class SuiSigner {
     this.#wallet = wallet;
   }
 
-  async signAndSend(call: Call, observer: SuiSignerObserver) {
+  async signAndSend(call: Call, observer: SuiTxObserver) {
     const { from, data } = call as SuiCall;
     const client = this.#chain.client;
 
