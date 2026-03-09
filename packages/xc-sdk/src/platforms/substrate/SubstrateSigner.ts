@@ -2,13 +2,7 @@ import { multiloc, AnyParachain, Asset } from '@galacticcouncil/xc-core';
 
 import { Binary, Enum, PolkadotSigner, TxEvent } from 'polkadot-api';
 
-import { SubstrateCall } from './types';
-
-export interface SubstrateSignerObserver {
-  onTransactionSend: (hash: string) => void;
-  onFinalized: (event: TxEvent) => void;
-  onError: (error: unknown) => void;
-}
+import { SubstrateCall, SubstrateTxObserver } from './types';
 
 export class SubstrateSigner {
   readonly #chain: AnyParachain;
@@ -19,7 +13,7 @@ export class SubstrateSigner {
     this.#signer = signer;
   }
 
-  signAndSend(call: SubstrateCall, observer: SubstrateSignerObserver) {
+  signAndSend(call: SubstrateCall, observer: SubstrateTxObserver) {
     const client = this.#chain.client;
     const api = client.getUnsafeApi();
 

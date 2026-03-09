@@ -5,32 +5,9 @@ import { Keypair, MessageV0, VersionedTransaction } from '@solana/web3.js';
 import { Buffer } from 'buffer';
 
 import { SolanaLilJit } from './SolanaLilJit';
-import { SolanaCall } from './types';
+import { SolanaCall, SolanaWallet, SolanaTxObserver } from './types';
 
 import { Call } from '../types';
-
-export interface SolanaWallet {
-  connect(): Promise<void>;
-  signAndSendTransaction(
-    transaction: VersionedTransaction
-  ): Promise<{ signature: string }>;
-  signAllTransactions(
-    transactions: VersionedTransaction[]
-  ): Promise<VersionedTransaction[]>;
-}
-
-export interface SolanaSignerObserver {
-  onTransactionSend: (hash: string) => void;
-  onStatus?: (status: any) => void;
-  onBundleStatus?: (
-    status: Array<{
-      bundle_id: string;
-      landed_slot: number;
-      status: string;
-    }>
-  ) => void;
-  onError: (error: unknown) => void;
-}
 
 export class SolanaSigner {
   readonly #chain: SolanaChain;
@@ -43,7 +20,7 @@ export class SolanaSigner {
     this.#lilJit = new SolanaLilJit(chain);
   }
 
-  async signAndSend(call: Call, observer: SolanaSignerObserver) {
+  async signAndSend(call: Call, observer: SolanaTxObserver) {
     const { data, signers } = call as SolanaCall;
     const versioned = this.toVersioned(data, signers);
 
@@ -73,7 +50,7 @@ export class SolanaSigner {
     }
   }
 
-  async signAndSendAll(calls: Call[], observer: SolanaSignerObserver) {
+  async signAndSendAll(calls: Call[], observer: SolanaTxObserver) {
     const versioned = calls.map((c) => {
       const { data, signers } = c as SolanaCall;
       return this.toVersioned(data, signers);
@@ -99,7 +76,7 @@ export class SolanaSigner {
       const simulation = await this.#lilJit.simulateBundle(encoded);
       if (simulation.value.summary !== 'succeeded') {
         throw new Error(
-          'Bundle simulation failed: ' + JSON.stringify(simulation)
+          'Bundle simulation failed! ' + JSON.stringify(simulation, null, 2)
         );
       }
 

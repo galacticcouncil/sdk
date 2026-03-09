@@ -15,6 +15,19 @@ import {
   TransactionMessage,
 } from '@solana/web3.js';
 
+import {
+  ACCOUNT_SIZE,
+  NATIVE_MINT,
+  TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountIdempotentInstruction,
+  createCloseAccountInstruction,
+  createInitializeAccountInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddressSync,
+  getMinimumBalanceForRentExemptAccount,
+  getMint,
+} from '@solana/spl-token';
+
 import { utils as tutils } from '@wormhole-foundation/sdk-solana';
 import { utils as cutils } from '@wormhole-foundation/sdk-solana-core';
 
@@ -100,17 +113,9 @@ export class SolanaClaim {
       } as SolanaCall);
     }
 
-    const createCompleteTransferInstruction =
-      vaa.payload.token.chain === 'Solana'
-        ? createCompleteTransferNativeInstruction
-        : createCompleteTransferWrappedInstruction;
-    const completeIx = createCompleteTransferInstruction(
-      this.#connection,
-      ctxWh.getTokenBridge(),
-      ctxWh.getCoreBridge(),
-      payer,
-      vaa
-    );
+    const isNative = vaa.payload.token.chain === 'Solana';
+    const mint = new PublicKey(vaa.payload.token.address.toUint8Array());
+    const isNativeSol = isNative && mint.equals(NATIVE_MINT);
 
     const tipAccounts = await this.#lilJit.getTipAccount();
     const tipIx = SystemProgram.transfer({
@@ -119,15 +124,131 @@ export class SolanaClaim {
       lamports: 1000,
     });
 
-    const completeV0 = await this.getV0Message(payer, [completeIx, tipIx]);
-    const completeTx = serializeV0(completeV0);
-    calls.push({
-      from: from,
-      data: completeTx,
-      ix: ixToHuman([completeIx]),
-      type: CallType.Solana,
-    } as SolanaCall);
+    if (isNativeSol) {
+      const completeCall = await this.redeemAndUnwrap(
+        payer,
+        vaa,
+        ctxWh,
+        tipIx
+      );
+      calls.push(completeCall);
+    } else {
+      const createCompleteTransferInstruction = isNative
+        ? createCompleteTransferNativeInstruction
+        : createCompleteTransferWrappedInstruction;
+      const completeIx = createCompleteTransferInstruction(
+        this.#connection,
+        ctxWh.getTokenBridge(),
+        ctxWh.getCoreBridge(),
+        payer,
+        vaa
+      );
+
+      const ata = getAssociatedTokenAddressSync(mint, payer);
+      const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
+        payer,
+        ata,
+        payer,
+        mint
+      );
+
+      const completeV0 = await this.getV0Message(payer, [
+        createAtaIx,
+        completeIx,
+        tipIx,
+      ]);
+      const completeTx = serializeV0(completeV0);
+      calls.push({
+        from: payer.toBase58(),
+        data: completeTx,
+        ix: ixToHuman([createAtaIx, completeIx]),
+        type: CallType.Solana,
+      } as SolanaCall);
+    }
+
     return calls;
+  }
+
+  private async redeemAndUnwrap(
+    payer: PublicKey,
+    vaa: any,
+    ctxWh: any,
+    tipIx: TransactionInstruction
+  ): Promise<SolanaCall> {
+    const targetPublicKey = new PublicKey(
+      vaa.payload.to.address.toUint8Array()
+    );
+    const mintInfo = await getMint(this.#connection, NATIVE_MINT);
+    const targetAmount =
+      vaa.payload.token.amount *
+      BigInt(Math.pow(10, mintInfo.decimals - 8));
+    const rentBalance = await getMinimumBalanceForRentExemptAccount(
+      this.#connection
+    );
+
+    const ancillaryKeypair = Keypair.generate();
+
+    const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
+      payer,
+      targetPublicKey,
+      payer,
+      NATIVE_MINT
+    );
+
+    const completeIx = createCompleteTransferNativeInstruction(
+      this.#connection,
+      ctxWh.getTokenBridge(),
+      ctxWh.getCoreBridge(),
+      payer,
+      vaa
+    );
+
+    const createAncillaryIx = SystemProgram.createAccount({
+      fromPubkey: payer,
+      newAccountPubkey: ancillaryKeypair.publicKey,
+      lamports: rentBalance,
+      space: ACCOUNT_SIZE,
+      programId: TOKEN_PROGRAM_ID,
+    });
+
+    const initAncillaryIx = createInitializeAccountInstruction(
+      ancillaryKeypair.publicKey,
+      NATIVE_MINT,
+      payer
+    );
+
+    const transferIx = createTransferInstruction(
+      targetPublicKey,
+      ancillaryKeypair.publicKey,
+      payer,
+      targetAmount
+    );
+
+    const closeIx = createCloseAccountInstruction(
+      ancillaryKeypair.publicKey,
+      payer,
+      payer
+    );
+
+    const ixs = [
+      createAtaIx,
+      completeIx,
+      createAncillaryIx,
+      initAncillaryIx,
+      transferIx,
+      closeIx,
+      tipIx,
+    ];
+
+    const completeV0 = await this.getV0Message(payer, ixs);
+    const completeTx = serializeV0(completeV0);
+    return {
+      from: payer.toBase58(),
+      data: completeTx,
+      ix: ixToHuman(ixs),
+      signers: [ancillaryKeypair],
+      type: CallType.Solana,
+    } as SolanaCall;
   }
 
   private derivePostedVaaKey(
