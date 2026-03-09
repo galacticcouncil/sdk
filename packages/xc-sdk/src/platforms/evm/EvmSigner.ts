@@ -1,19 +1,16 @@
 import { AnyEvmChain, EvmClient, EvmParachain } from '@galacticcouncil/xc-core';
+import { h160 } from '@galacticcouncil/common';
 
 import { Binary } from 'polkadot-api';
 import { WalletClient } from 'viem';
 
-import { EvmCall } from './types';
+import { EvmCall, EvmTxObserver } from './types';
 
 import { Call } from '../types';
 
 export const DISPATCH_ADDRESS = '0x0000000000000000000000000000000000000401';
 
-export interface EvmSignerObserver {
-  onTransactionSend: (hash: string) => void;
-  onTransactionReceipt: (receipt: any) => void;
-  onError: (error: unknown) => void;
-}
+const { H160 } = h160;
 
 export class EvmSigner {
   readonly #chain: AnyEvmChain;
@@ -26,7 +23,8 @@ export class EvmSigner {
     this.#signer = signer;
   }
 
-  async signAndSend(call: Call, observer: EvmSignerObserver) {
+  async signAndSend(call: Call, observer: EvmTxObserver) {
+    const account = H160.fromAny(call.from);
     const provider = this.#client.getProvider();
 
     let isDispatch = false;
@@ -45,7 +43,7 @@ export class EvmSigner {
     if (isDispatch) {
       const [gas, gasPrice] = await Promise.all([
         provider.estimateGas({
-          account: call.from as `0x${string}`,
+          account: account as `0x${string}`,
           data: call.data as `0x${string}`,
           to: DISPATCH_ADDRESS as `0x${string}`,
         }),
@@ -55,7 +53,7 @@ export class EvmSigner {
       const gasPriceExtra = gasPrice + (gasPrice / 100n) * 10n;
 
       txHash = await this.#signer.sendTransaction({
-        account: call.from as `0x${string}`,
+        account: account as `0x${string}`,
         chain: this.#client.chain,
         data: call.data as `0x${string}`,
         maxPriorityFeePerGas: gasPriceExtra,
@@ -66,7 +64,7 @@ export class EvmSigner {
     } else {
       const { data, to, value } = call as EvmCall;
       txHash = await this.#signer.sendTransaction({
-        account: call.from as `0x${string}`,
+        account: account as `0x${string}`,
         chain: this.#client.chain,
         data: data as `0x${string}`,
         to: to as `0x${string}`,

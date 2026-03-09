@@ -18,7 +18,7 @@ import { h160 } from '@galacticcouncil/common';
 
 import { pjs } from './extension';
 
-const { isEvmAccount } = h160;
+const { isEvmAccount, H160 } = h160;
 
 export async function signSubstrate(call: Call, chain: AnyChain) {
   const ctx = chain as AnyParachain;
@@ -39,7 +39,10 @@ export async function signSubstrate(call: Call, chain: AnyChain) {
 export async function signEvm(call: Call, chain: AnyChain) {
   const ctx = chain as AnyEvmChain;
   const client = ctx.evmClient;
-  const wallet = client.getSigner(call.from);
+
+  const account = H160.fromAny(call.from);
+
+  const wallet = client.getSigner(account);
   await wallet.switchChain({ id: client.chain.id });
   await wallet.request({ method: 'eth_requestAccounts' });
 
