@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.37.0
+
+### Minor Changes
+
+- d0ed76d: slip fee support
+
 ## 0.36.4
 
 ### Patch Changes
