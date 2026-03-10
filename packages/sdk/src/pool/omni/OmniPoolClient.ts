@@ -65,6 +65,10 @@ export class OmniPoolClient extends PoolClient {
     return this.api.query.dynamicFees.assetFeeConfiguration(key);
   }, this.memQueryCache);
 
+  private memSlipFeeQuery = memoize1((_key: string) => {
+    return this.api.query.omnipool.slipFee();
+  }, this.memQueryCache);
+
   getPoolType(): PoolType {
     return PoolType.Omni;
   }
@@ -184,6 +188,18 @@ export class OmniPoolClient extends PoolClient {
     ];
   }
 
+  isSlipFeeSupported(): boolean {
+    return this.api.query.omnipool.slipFee !== undefined;
+  }
+
+  private async getMaxSlipFee(): Promise<number> {
+    if (!this.isSlipFeeSupported()) {
+      return 0;
+    }
+    const slipFee = await this.memSlipFeeQuery('slipFee');
+    return Number(slipFee.toString()) || 0;
+  }
+
   async getPoolFees(
     block: number,
     poolPair: PoolPair,
@@ -191,6 +207,8 @@ export class OmniPoolClient extends PoolClient {
   ): Promise<OmniPoolFees> {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
+
+    const maxSlipFee = await this.getMaxSlipFee();
 
     let feeConfiguration;
     if (this.isAssetConfigSupported()) {
@@ -206,6 +224,7 @@ export class OmniPoolClient extends PoolClient {
       return {
         assetFee: FeeUtils.fromPermill(assetFee),
         protocolFee: FeeUtils.fromPermill(protocolFee),
+        maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       };
     }
 
@@ -244,6 +263,7 @@ export class OmniPoolClient extends PoolClient {
     return {
       assetFee: FeeUtils.fromPermill(assetFee),
       protocolFee: FeeUtils.fromPermill(protocolFee),
+      maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     };
