@@ -32,6 +32,9 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
+      - name: 🧩 Re-resolve workspace links
+        run: npm install --ignore-scripts
+
       - name: 🛠️ Build SDK
         run: npm run build
 
