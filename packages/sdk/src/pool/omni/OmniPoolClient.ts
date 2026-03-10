@@ -197,7 +197,10 @@ export class OmniPoolClient extends PoolClient {
       return 0;
     }
     const slipFee = await this.memSlipFeeQuery('slipFee');
-    return Number(slipFee.toString()) || 0;
+    if (slipFee.isNone) {
+      return 0;
+    }
+    return slipFee.unwrap().maxSlipFee.toNumber();
   }
 
   async getPoolFees(
