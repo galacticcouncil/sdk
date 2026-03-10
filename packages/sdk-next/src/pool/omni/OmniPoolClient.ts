@@ -34,6 +34,7 @@ import {
   TEmaPair,
   TOmnipoolAsset,
   TProtocolFeeParams,
+  TSlipFee,
 } from './types';
 
 const { FeeUtils } = fmt;
@@ -62,6 +63,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: 'best' }),
     (id) => String(id),
     6 * 1000
+  );
+
+  private maxSlipFee = this.queryBus.scope<[], TSlipFee | undefined>(
+    'Omnipool.SlipFee',
+    () => this.apiNext.query.Omnipool.SlipFee.getValue({ at: 'best' }),
+    () => String('slipFee')
   );
 
   private emaOracles = this.queryBus.scope<[TEmaPair], TEmaOracle | undefined>(
@@ -114,6 +121,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return query.isCompatible(
       CompatibilityLevel.BackwardsCompatible,
       compatibilityToken
+    );
+  }
+
+  async isSlipFeeSupported(): Promise<boolean> {
+    return this.apiNext.query.Omnipool.SlipFee.isCompatible(
+      CompatibilityLevel.Partial
     );
   }
 
@@ -185,12 +198,21 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const feeAsset = pair.assetOut;
     const protocolAsset = pair.assetIn;
 
+    let maxSlipFee = 0;
+
+    const isSlipFeeSupported = await this.isSlipFeeSupported();
+    if (isSlipFeeSupported) {
+      const slipFee = await this.maxSlipFee.get();
+      maxSlipFee = slipFee ?? 0;
+    }
+
     const feeConfiguration = await this.dynamicFeesConfig.get(feeAsset);
     if (feeConfiguration?.type === 'Fixed') {
       const { asset_fee, protocol_fee } = feeConfiguration.value;
       return {
         assetFee: FeeUtils.fromPermill(asset_fee),
         protocolFee: FeeUtils.fromPermill(protocol_fee),
+        maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       };
     }
 
@@ -228,6 +250,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return {
       assetFee: FeeUtils.fromPermill(assetFee),
       protocolFee: FeeUtils.fromPermill(protocolFee),
+      maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     };

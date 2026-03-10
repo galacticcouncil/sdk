@@ -1,4 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
+import type { AugmentedCall } from '@polkadot/api-base/types';
+import type { DispatchError } from '@polkadot/types/interfaces/system';
+import type { EvmCallInfoV2 } from '@polkadot/types/interfaces/evm';
+import type { Result } from '@polkadot/types-codec';
 
 import type { PublicClient, ReadContractParameters } from 'viem';
 
@@ -37,8 +41,8 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const ethereumRpcCallFn = this.api.call.ethereumRuntimeRPCApi.call;
-    const ethereumRpcCallParams = ethereumRpcCallFn.meta.params;
+    const ethereumRpcCallFn = this.api.call.ethereumRuntimeRPCApi
+      .call as AugmentedCall<'promise'>;
 
     const ethereumRpcCallArgs: [
       string,
@@ -51,6 +55,7 @@ export class EvmRpcAdapter {
       null,
       boolean,
       [],
+      [],
     ] = [
       '',
       address as string,
@@ -62,14 +67,12 @@ export class EvmRpcAdapter {
       null,
       false,
       [],
+      [],
     ];
 
-    // Support authorization list (TODO: rebuild spec)
-    if (ethereumRpcCallParams.find((p) => p.name === 'authorization_list')) {
-      ethereumRpcCallArgs.push([]);
-    }
-
-    const res = await ethereumRpcCallFn(...ethereumRpcCallArgs);
+    const res = await ethereumRpcCallFn<Result<EvmCallInfoV2, DispatchError>>(
+      ...ethereumRpcCallArgs
+    );
 
     if (res.isErr) {
       console.error(functionName, res.asErr.toHuman());

@@ -113,11 +113,14 @@ export class TradeRouter extends Router {
    * @returns min & max fee range if swapping through the pool with
    * dynamic fees support
    */
-  private getPoolFeeRange(fees: PoolFees): [number, number] | undefined {
+  private getPoolFeeRange(
+    fees: PoolFees,
+    feePct: number
+  ): [number, number] | undefined {
     const feeMin = fees.min ? FeeUtils.toPct(fees.min) : undefined;
     const feeMax = fees.max ? FeeUtils.toPct(fees.max) : undefined;
     if (feeMin && feeMax) {
-      return [feeMin, feeMax];
+      return [feeMin, Math.max(feeMax, feePct)];
     }
     return undefined;
   }
@@ -421,7 +424,7 @@ export class TradeRouter extends Router {
         aIn,
         poolFees
       );
-      const feePctRange = this.getPoolFeeRange(poolFees);
+      const feePctRange = this.getPoolFeeRange(poolFees, feePct);
       const spotPrice = pool.spotPriceOutGivenIn(poolPair);
 
       const swapAmount = calc.mulSpot(
@@ -767,7 +770,7 @@ export class TradeRouter extends Router {
         aOut,
         poolFees
       );
-      const feePctRange = this.getPoolFeeRange(poolFees);
+      const feePctRange = this.getPoolFeeRange(poolFees, feePct);
       const spotPrice = pool.spotPriceInGivenOut(poolPair);
 
       const swapAmount = calc.mulSpot(

@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk
 
+## 10.8.0
+
+### Minor Changes
+
+- 6abf00c: slip fee support
+
 ## 10.7.1
 
 ### Patch Changes
