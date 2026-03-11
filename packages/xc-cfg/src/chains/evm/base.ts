@@ -30,6 +30,9 @@ export const base = new EvmChain({
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
   explorer: 'https://basescan.org/',
+  instaBridge: {
+    address: '0x73bab4cec782e1530117932cef8492ebe64e112e',
+  },
   rpcs: ['https://stylish-quick-firefly.base-mainnet.quiknode.pro/'],
   wormhole: {
     id: 30,
