@@ -27,6 +27,14 @@ function toHydrationPrecompile(assetId: number): `0x${string}` {
   return ('0x' + Buffer.from(bytes).toString('hex')) as `0x${string}`;
 }
 
+/**
+ * Pad H160 address to bytes32 (left-pad with zeros).
+ */
+function toBytes32(h160: `0x${string}`): `0x${string}` {
+  const addr = h160.replace('0x', '').toLowerCase();
+  return `0x${'0'.repeat(24)}${addr}` as `0x${string}`;
+}
+
 type BridgeViaWormholeOpts = {
   destChain: EvmParachain;
   destAsset: Asset;
@@ -56,7 +64,7 @@ const bridgeViaWormhole = (opts: BridgeViaWormholeOpts): ContractConfigBuilder =
         amount,
         rcvWh.getWormholeId(),
         toHydrationPrecompile(destAssetId as number),
-        H160.fromAccount(address),
+        toBytes32(H160.fromAccount(address) as `0x${string}`),
       ],
       func: 'bridgeViaWormhole',
       module: 'InstaBridge',
