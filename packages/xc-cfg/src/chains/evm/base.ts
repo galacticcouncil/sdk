@@ -31,7 +31,7 @@ export const base = new EvmChain({
   evmChain: evmChain,
   explorer: 'https://basescan.org/',
   instaBridge: {
-    address: '0x0000000000000000000000000000000000000000', // TBD
+    address: '0x73bab4cec782e1530117932cef8492ebe64e112e',
   },
   rpcs: ['https://stylish-quick-firefly.base-mainnet.quiknode.pro/'],
   wormhole: {
