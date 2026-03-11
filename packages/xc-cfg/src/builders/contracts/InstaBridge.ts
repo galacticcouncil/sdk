@@ -1,5 +1,4 @@
 import {
-  addr,
   Abi,
   Asset,
   ContractConfig,
@@ -10,8 +9,9 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { parseAssetId } from '../utils';
+import { h160 } from '@galacticcouncil/common';
 
-const { Ss58Addr } = addr;
+const { H160 } = h160;
 
 /**
  * Encode Hydration asset ID to EVM precompile address.
@@ -56,7 +56,7 @@ const bridgeViaWormhole = (opts: BridgeViaWormholeOpts): ContractConfigBuilder =
         amount,
         rcvWh.getWormholeId(),
         toHydrationPrecompile(destAssetId as number),
-        Ss58Addr.getPubKey(address) as `0x${string}`,
+        H160.fromAccount(address),
       ],
       func: 'bridgeViaWormhole',
       module: 'InstaBridge',
