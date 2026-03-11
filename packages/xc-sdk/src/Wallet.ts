@@ -25,17 +25,15 @@ import {
   SubstrateService,
 } from './platforms';
 import {
+  buildBalanceConfig,
   calculateMax,
   calculateMin,
-  formatEvmAddress,
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
-
-const { EvmAddr } = addr;
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -258,15 +256,12 @@ export class Wallet {
       .getUniqueRoutes()
       .map(async ({ source }) => {
         const { asset, balance } = source;
-        const assetId = chainRoutes.chain.getBalanceAssetId(asset);
-        const account = EvmAddr.isValid(assetId.toString())
-          ? await formatEvmAddress(address, chainRoutes.chain)
-          : address;
-        const balanceConfig = balance.build({
-          address: account,
-          asset: asset,
-          chain: chainRoutes.chain,
-        });
+        const balanceConfig = await buildBalanceConfig(
+          balance,
+          address,
+          asset,
+          chainRoutes.chain
+        );
         return adapter.subscribeBalance(asset, balanceConfig);
       });
 
