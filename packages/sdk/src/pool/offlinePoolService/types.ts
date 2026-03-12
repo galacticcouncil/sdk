@@ -118,6 +118,7 @@ export interface IPersistentOmniPoolBase {
   maxOutRatio: number;
   minTradingLimit: number;
   hubAssetId: string;
+  maxSlipFee: number;
 }
 
 export type PersistentDynamicFeesAssetFeeParams = {
@@ -157,6 +158,13 @@ export interface IPersistentConstants {
 
   dynamicFeesAssetFeeParameters: PersistentDynamicFeesAssetFeeParams;
   dynamicFeesProtocolFeeParameters: PersistentDynamicFeesAssetFeeParams;
+}
+
+export interface IPersistentOmnipoolExtras {
+  maxSlipFee: number;
+}
+export interface IPersistentExtras {
+  omnipool: IPersistentOmnipoolExtras;
 }
 
 export type EmaOracleSource = string;
@@ -224,6 +232,7 @@ export interface IOfflinePoolServiceDataSource {
     omnipool: Array<OmniPoolBase>;
     aave: Array<PoolBase>;
   };
+  extras: IPersistentExtras;
   constants: IPersistentConstants;
   emaOracle: Array<IPersistentEmaOracleEntry>;
   mmOracle: Array<IPersistentMmOracleEntry>;

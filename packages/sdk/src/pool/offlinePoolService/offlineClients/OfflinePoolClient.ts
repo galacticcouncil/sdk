@@ -6,6 +6,7 @@ import {
   IOfflinePoolServiceDataSource,
   IPersistentConstants,
   IPersistentEmaOracleEntryData,
+  IPersistentExtras,
   IPersistentMetaData,
   PersistentAsset,
 } from '../types';
@@ -15,6 +16,7 @@ export abstract class OfflinePoolClient {
   protected pools: PoolBase[] = [];
   private assets: Map<string, PersistentAsset> = new Map([]);
   protected constants: IPersistentConstants;
+  protected extras: IPersistentExtras;
   protected emaOracleEntries: Map<
     EmaOracleSource,
     Map<EmaOraclePeriod, Map<string, IPersistentEmaOracleEntryData>>
@@ -37,6 +39,7 @@ export abstract class OfflinePoolClient {
       dataSource.pools[poolType.toLowerCase() as keyof typeof dataSource.pools];
     this.constants = dataSource.constants;
     this.dataSourceMeta = dataSource.meta;
+    this.extras = dataSource.extras;
     this.emaOracleEntries = OfflinePoolUtils.decorateEmaOraclesPersistentData(
       dataSource.emaOracle
     );

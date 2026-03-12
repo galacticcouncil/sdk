@@ -6,10 +6,12 @@ import {
   IPersistentDataInput,
   IPersistentEmaOracleEntry,
   IPersistentEmaOracleEntryData,
+  IPersistentExtras,
   IPersistentLbpPoolBase,
   IPersistentMetaData,
   IPersistentMmOracleEntry,
   IPersistentOmniPoolBase,
+  IPersistentOmnipoolExtras,
   IPersistentOmniPoolToken,
   IPersistentPoolBase,
   IPersistentPoolToken,
@@ -68,10 +70,24 @@ export class OfflinePoolUtils {
           OfflinePoolUtils.decorateBasePoolPersistentData
         ),
       },
+      extras: OfflinePoolUtils.decorateExtrasPersistentData(persistentData),
       constants: persistentData.constants,
       emaOracle: persistentData.emaOracle,
       mmOracle: persistentData.mmOracle,
       meta: persistentData.meta,
+    };
+  }
+
+  static decorateExtrasPersistentData(
+    src: IPersistentDataInput
+  ): IPersistentExtras {
+    const omnipool = src.pools.omnipool[0];
+
+    const omnipoolExtras: IPersistentOmnipoolExtras = {
+      maxSlipFee: omnipool ? omnipool.maxSlipFee : 0,
+    };
+    return {
+      omnipool: omnipoolExtras,
     };
   }
 
