@@ -11,10 +11,11 @@ import {
   glmr,
   ibtc,
 } from '../../assets';
-import { assetHub, bifrost, hydration, polkadot } from '../../chains';
+import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
+  FeeAmountBuilder,
   XcmTransferType,
 } from '../../builders';
 
@@ -31,11 +32,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: bnc,
       fee: {
-        amount: 0.014645,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: bnc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -53,11 +56,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vdot,
       fee: {
-        amount: 0.000555,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: vdot,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -75,11 +80,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vastr,
       fee: {
-        amount: 0.0115,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: vastr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -97,7 +104,9 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: dot,
       fee: {
-        amount: 0.1,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: dot,
       },
     },
@@ -121,11 +130,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: astr,
       fee: {
-        amount: 0.5,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: astar }),
         asset: astr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -143,11 +154,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: glmr,
       fee: {
-        amount: 0.1,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: moonbeam }),
         asset: glmr,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -165,11 +178,11 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: ibtc,
       fee: {
-        amount: 0.000002,
+        amount: 0.00000625,
         asset: ibtc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -187,11 +200,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdt,
       fee: {
-        amount: 0.3,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -209,11 +224,13 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: usdc,
       fee: {
-        amount: 0.3,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee({ reserve: assetHub }),
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 
@@ -234,11 +251,13 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdt,
       fee: {
-        amount: 0.18,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdt,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
@@ -256,11 +275,13 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdc,
       fee: {
-        amount: 0.18,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(),
         asset: usdc,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transferMultiassets(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
 ];
 

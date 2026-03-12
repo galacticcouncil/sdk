@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  XcmVersion,
 } from '@galacticcouncil/xc-core';
 
 import { cru } from '../../assets';
@@ -10,6 +11,10 @@ export const crust = new Parachain({
     {
       asset: cru,
       id: 0,
+      xcmLocation: {
+        parents: 0,
+        interior: 'Here',
+      },
     },
   ],
   ecosystem: Ecosystem.Polkadot,
@@ -20,8 +25,10 @@ export const crust = new Parachain({
   name: 'Crust network',
   parachainId: 2008,
   ss58Format: 88,
+  usesLegacyEnhancer: true,
   ws: [
     'wss://crust-parachain.crustnetwork.app',
     'wss://crust-parachain.crustapps.net',
   ],
+  xcmVersion: XcmVersion.v3,
 });

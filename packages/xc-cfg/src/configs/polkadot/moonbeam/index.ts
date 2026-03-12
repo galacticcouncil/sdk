@@ -3,11 +3,9 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 import {
   dai,
   dai_mwh,
-  dot,
   eth,
   glmr,
   hdx,
-  pink,
   sol,
   susds_mwh,
   usdc,
@@ -44,7 +42,7 @@ const toHydration: AssetRoute[] = [
         asset: glmr,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
   toHydrationXcTemplate(hdx, 0.6),
   toHydrationXcTemplate(usdt, 0.3),
@@ -61,28 +59,6 @@ const toHydration: AssetRoute[] = [
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
-      asset: pink,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: assetHub,
-      asset: pink,
-      fee: {
-        amount: 0.18,
-        asset: usdt,
-      },
-    },
-    contract: ContractBuilder().Xtokens().transferMultiCurrencies(),
-  }),
-  new AssetRoute({
-    source: {
       asset: usdt,
       balance: BalanceBuilder().evm().erc20(),
       fee: {
@@ -101,7 +77,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdt,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
   new AssetRoute({
     source: {
@@ -123,7 +99,7 @@ const toAssetHub: AssetRoute[] = [
         asset: usdc,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   }),
 ];
 

@@ -90,6 +90,11 @@ export const eurc = new Asset({
   originSymbol: 'EURC',
 });
 
+export const eurc_mwh = new Asset({
+  ...eurc,
+  key: 'eurc_mwh',
+});
+
 export const glmr = new Asset({
   key: 'glmr',
   originSymbol: 'GLMR',
@@ -178,6 +183,11 @@ export const neuro = new Asset({
 export const pen = new Asset({
   key: 'pen',
   originSymbol: 'PEN',
+});
+
+export const prime = new Asset({
+  key: 'prime',
+  originSymbol: 'PRIME',
 });
 
 export const pha = new Asset({
@@ -374,18 +384,19 @@ export const assets: Asset[] = [
   ena,
   eth,
   eurc,
+  eurc_mwh,
+  ewt,
   glmr,
   hdx,
   ibtc,
   intr,
+  jito_sol,
   kar,
   kilt,
   ksm,
   ldo,
   laos,
   lbtc,
-  ewt,
-  jito_sol,
   ldot,
   link,
   myth,
@@ -395,6 +406,7 @@ export const assets: Asset[] = [
   pha,
   pen,
   pink,
+  prime,
   ring,
   sky,
   sol,

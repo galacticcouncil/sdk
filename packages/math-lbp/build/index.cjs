@@ -326,7 +326,7 @@ module.exports.calculate_pool_trade_fee = function(a, fee_numerator, fee_denomin
     }
 };
 
-const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
+const path = require('path').join(__dirname, 'hydra_dx_wasm_bg_nodejs.wasm');
 const bytes = require('fs').readFileSync(path);
 
 const wasmModule = new WebAssembly.Module(bytes);

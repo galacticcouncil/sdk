@@ -1,4 +1,4 @@
-import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
+import { RUNTIME_DECIMALS, big } from '@galacticcouncil/common';
 
 import {
   BuyCtx,
@@ -110,7 +110,7 @@ export class StableSwap implements Pool {
     const amountIn = this.calculateInGivenOut(poolPair, amountOut, fees);
 
     const feePct =
-      calculatedIn === 0n ? 0 : math.calculateDiffToRef(amountIn, calculatedIn);
+      calculatedIn === 0n ? 0 : math.calculateBuyFee(calculatedIn, amountIn);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -141,7 +141,7 @@ export class StableSwap implements Pool {
     const calculatedOut = this.calculateOutGivenIn(poolPair, amountIn);
     const amountOut = this.calculateOutGivenIn(poolPair, amountIn, fees);
 
-    const feePct = math.calculateDiffToRef(calculatedOut, amountOut);
+    const feePct = math.calculateSellFee(calculatedOut, amountOut);
 
     const errors: PoolError[] = [];
     const isSellAllowed = OmniMath.isSellAllowed(poolPair.tradeableIn);
@@ -249,17 +249,13 @@ export class StableSwap implements Pool {
       this.getPegs()
     );
 
-    if (poolPair.assetOut == this.id) {
-      return BigInt(spot);
-    }
-
-    if (poolPair.assetIn == this.id) {
-      const base = Math.pow(10, poolPair.decimalsIn - poolPair.decimalsOut);
-      return BigInt(spot) / BigInt(base);
-    }
-
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsIn);
-    return BigInt(spot) / BigInt(base);
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.assetOut === this.id,
+      poolPair.assetIn === this.id,
+      poolPair.decimalsOut,
+      poolPair.decimalsIn
+    );
   }
 
   private calculateOut(
@@ -343,17 +339,13 @@ export class StableSwap implements Pool {
       this.getPegs()
     );
 
-    if (poolPair.assetIn == this.id) {
-      return BigInt(spot);
-    }
-
-    if (poolPair.assetOut == this.id) {
-      const base = Math.pow(10, poolPair.decimalsOut - poolPair.decimalsIn);
-      return BigInt(spot) / BigInt(base);
-    }
-
-    const base = Math.pow(10, RUNTIME_DECIMALS - poolPair.decimalsOut);
-    return BigInt(spot) / BigInt(base);
+    return this.normalizeSpot(
+      BigInt(spot),
+      poolPair.assetIn === this.id,
+      poolPair.assetOut === this.id,
+      poolPair.decimalsIn,
+      poolPair.decimalsOut
+    );
   }
 
   private getPegs(): string {
@@ -379,5 +371,36 @@ export class StableSwap implements Pool {
       amount: amount.toString(),
     };
     return JSON.stringify([asset], json.jsonFormatter);
+  }
+
+  /**
+   * Normalize spot to runtime decimals.
+   *
+   * - if `neither arg is share`: spot already 18dp
+   * - if `argIn is share`: spot in decimalsIn
+   * - if `argOut is share`: spot in 18 + (decimalsOut - decimalsIn)
+   *
+   * @param spotRaw - raw spot
+   * @param isInShare - whether the first arg is share
+   * @param isOutShare - whether the second arg is share
+   * @param decimalsIn - asset in decimals
+   * @param decimalsOut - asset out decimals
+   */
+  private normalizeSpot(
+    spot: bigint,
+    isInShare: boolean,
+    isOutShare: boolean,
+    decimalsIn: number,
+    decimalsOut: number
+  ): bigint {
+    if (isInShare) {
+      return spot * big.pow10(RUNTIME_DECIMALS - decimalsOut);
+    }
+
+    if (isOutShare) {
+      return spot / big.pow10(decimalsOut - decimalsIn);
+    }
+
+    return spot;
   }
 }

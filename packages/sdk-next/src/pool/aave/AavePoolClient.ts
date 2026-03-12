@@ -1,7 +1,7 @@
 import { AccountId } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Subscription, filter, finalize, map } from 'rxjs';
+import { Subscription, filter, map } from 'rxjs';
 import { decodeEventLog } from 'viem';
 
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
@@ -169,12 +169,10 @@ export class AavePoolClient extends PoolClient<PoolBase> {
           ({ assetIn, assetOut }) =>
             aTokens.includes(assetIn) || aTokens.includes(assetOut)
         ),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub router executed');
-        })
+        this.watchGuard('router.Execute')
       )
       .subscribe(({ assetIn, assetOut, key }) => {
-        this.log(this.getPoolType(), '[router:Executed]', key);
+        this.log.trace('router.Executed', key);
 
         this.store.update(async (pools) => {
           const updated: PoolBase[] = [];
@@ -201,12 +199,10 @@ export class AavePoolClient extends PoolClient<PoolBase> {
         map(({ payload }) => this.parseEvmLog(payload)),
         filter((v): v is TEvmEvent => v !== undefined),
         filter(({ eventName }) => SYNC_MM_EVENTS.includes(eventName)),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub evm log');
-        })
+        this.watchGuard('evm.Log')
       )
-      .subscribe(({ reserve: evtReserve, key }) => {
-        this.log(this.getPoolType(), '[evm:Log]', key);
+      .subscribe(({ reserve: evtReserve, eventName }) => {
+        this.log.trace(`evm.Log.${eventName}`, evtReserve);
 
         this.store.update(async (pools) => {
           const updated: PoolBase[] = [];

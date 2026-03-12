@@ -15,7 +15,12 @@ import { initStorage } from './storage';
 import { SetupCtx } from './types';
 
 export async function createNetwork(parachain: Parachain): Promise<SetupCtx> {
-  const config = createConfig({ endpoint: parachain.ws });
+  const wasm = 'wasm/hydradx_runtime.xcmV5.wasm';
+
+  const config =
+    parachain.key === 'hydration'
+      ? createConfig({ endpoint: parachain.ws, wasmOverride: wasm })
+      : createConfig({ endpoint: parachain.ws });
   const { chain, addr, close } = await setupWithServer(config);
 
   const url = `ws://${addr}`;
@@ -46,6 +51,9 @@ export async function createNetwork(parachain: Parachain): Promise<SetupCtx> {
       },
     },
   });
+
+  const { specVersion } = api.consts.system.version;
+  c.log(`🥢 ${parachain.name} spec: ${specVersion}`);
 
   const ctx = {
     url,

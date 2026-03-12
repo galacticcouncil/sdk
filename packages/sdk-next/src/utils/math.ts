@@ -90,20 +90,3 @@ export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
 
   return deltaXb.div(delta0Xb).minus(1).mul(100).round(2).toNumber();
 }
-
-/**
- * Get % fraction from native value
- *
- * @param value - native amount
- * @param pct - percentage value
- * @param dp - safe decimals margin (2dp = 0.01%)
- * @returns fraction of given amount
- */
-export function getFraction(value: bigint, pct: number, dp = 2): bigint {
-  if (pct < 0.01 || pct > 100) {
-    new Error('Supported range is from 0.01% - 100%');
-  }
-  const denominator = Math.pow(10, dp);
-  const percentage = BigInt(pct * denominator);
-  return (value * percentage) / BigInt(100 * denominator);
-}

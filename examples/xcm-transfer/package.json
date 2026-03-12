@@ -12,9 +12,9 @@
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk": "^10.4.0",
-    "@galacticcouncil/xcm-cfg": "^10.19.0",
-    "@galacticcouncil/xcm-sdk": "^10.10.0",
+    "@galacticcouncil/sdk": "^10.8.0",
+    "@galacticcouncil/xcm-cfg": "^10.24.0",
+    "@galacticcouncil/xcm-sdk": "^10.11.1",
     "@talismn/connect-wallets": "^1.2.8"
   }
 }

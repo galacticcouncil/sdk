@@ -22,6 +22,7 @@ import {
   ena,
   eth,
   eurc,
+  eurc_mwh,
   ewt,
   glmr,
   hdx,
@@ -39,6 +40,7 @@ import {
   paxg,
   pen,
   pha,
+  prime,
   pink,
   ring,
   neuro,
@@ -432,6 +434,27 @@ export const hydration = new EvmParachain({
       min: 0.014,
     },
     {
+      asset: eurc_mwh,
+      decimals: 6,
+      id: 44,
+      min: 0.014,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            { Parachain: 2004 },
+            { PalletInstance: 110 },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: ena,
       decimals: 18,
       id: 38,
@@ -701,32 +724,6 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: paxg,
-      decimals: 18,
-      id: 39,
-      min: 0.000005,
-      xcmLocation: {
-        parents: 2,
-        interior: {
-          X2: [
-            {
-              GlobalConsensus: {
-                Ethereum: {
-                  chainId: 1,
-                },
-              },
-            },
-            {
-              AccountKey20: {
-                network: null,
-                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: myth,
       decimals: 18,
       id: 30,
@@ -774,6 +771,32 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: paxg,
+      decimals: 18,
+      id: 39,
+      min: 0.000005,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chainId: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: pen,
       decimals: 12,
       id: 1000081,
@@ -787,6 +810,31 @@ export const hydration = new EvmParachain({
             },
             {
               PalletInstance: 10,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: 43,
+      min: 0.01,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X3: [
+            {
+              Parachain: 2004,
+            },
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+              },
             },
           ],
         },

@@ -1,5 +1,12 @@
 # @galacticcouncil/math-omnipool
 
+## 1.4.0
+
+### Minor Changes
+
+- support latest wasm-pack build
+- support slip based fees
+
 ## 1.3.0
 
 ### Minor Changes

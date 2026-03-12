@@ -419,7 +419,7 @@ module.exports.calculate_global_farm_rewards = function(total_shares_z, price_ad
     }
 };
 
-const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
+const path = require('path').join(__dirname, 'hydra_dx_wasm_bg_nodejs.wasm');
 const bytes = require('fs').readFileSync(path);
 
 const wasmModule = new WebAssembly.Module(bytes);

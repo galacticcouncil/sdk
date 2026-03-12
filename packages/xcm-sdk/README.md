@@ -2,9 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-sdk)
 
-Wallet interface for asset multi-platform transfer supporting fee swaps & bridging.
+High-level wallet interface for cross-chain asset transfers. Supports Substrate, EVM, Sui, and Solana platforms, fee swaps, and Wormhole bridging.
 
-Wallet does not perform any signing rather provide transfer data to maintain loose coupling & interoperability with 3rd party code.
+Wallet does not perform any signing — it provides transfer data to maintain loose coupling & interoperability with 3rd party code.
 
 ## Installation
 

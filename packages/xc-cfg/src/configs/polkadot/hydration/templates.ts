@@ -3,9 +3,9 @@ import {
   Asset,
   AssetRoute,
   ContractConfigBuilder,
-  ExtrinsicConfigBuilder,
   ExtrinsicConfigBuilderParams,
   FeeAmountConfigBuilder,
+  Parachain,
 } from '@galacticcouncil/xc-core';
 
 import { dot, glmr, usdt } from '../../../assets';
@@ -16,7 +16,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, assetHubCex, moonbeam, zeitgeist } from '../../../chains';
+import { assetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -24,7 +24,7 @@ import { balance, fee } from './configs';
 export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
-export const CEX_EXECUTION_FEE = 0.03; // Remote execution fee (< 0.02)
+export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
 
 const isDestinationFeeSwapSupported = (
   params: ExtrinsicConfigBuilderParams
@@ -39,7 +39,7 @@ const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
 export function toTransferTemplate(
   asset: Asset,
   destination: AnyChain,
-  destinationFee: number
+  reserve?: Parachain
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -54,11 +54,63 @@ export function toTransferTemplate(
       chain: destination,
       asset: asset,
       fee: {
-        amount: destinationFee,
+        amount: FeeAmountBuilder()
+          .XcmPaymentApi()
+          .calculateDestFee(reserve ? { reserve } : undefined),
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicBuilder().xTokens().transfer(),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  });
+}
+
+export function toParaTemplate(
+  asset: Asset,
+  destination: AnyChain,
+  feeAmount: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: destination,
+      asset: asset,
+      fee: {
+        amount: feeAmount,
+        asset: asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
+  });
+}
+
+export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: hub,
+      asset,
+      fee: {
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
   });
 }
 
@@ -76,54 +128,21 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       chain: assetHub,
       asset: asset,
       fee: {
-        amount: 0.18,
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdt,
       },
     },
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(ExtrinsicBuilder().xTokens().transferMultiassets()),
-  });
-}
-
-export function toHubWithCexFwdTemplate(
-  asset: Asset,
-  hubFee: number,
-  hubTransfer: ExtrinsicConfigBuilder
-): AssetRoute {
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      balance: balance(),
-      fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
-    },
-    destination: {
-      chain: assetHubCex,
-      asset: asset,
-      fee: {
-        amount: hubFee,
-        asset: asset,
-      },
-    },
-    extrinsic: ExtrinsicBuilder()
-      .utility()
-      .batchAll([
-        hubTransfer,
-        ExtrinsicBuilder().polkadotXcm().send().transferAsset({
-          fee: CEX_EXECUTION_FEE,
-        }),
-      ]),
+    ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
   });
 }
 
 export function toParaErc20Template(
   asset: Asset,
-  destination: AnyChain,
-  destinationFee: number
+  destination: Parachain,
+  transferType: XcmTransferType = XcmTransferType.LocalReserve
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -138,23 +157,27 @@ export function toParaErc20Template(
       chain: destination,
       asset: asset,
       fee: {
-        amount: destinationFee,
+        amount: GLMR_MIN_DEST_FEE,
         asset: glmr,
       },
     },
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(ExtrinsicBuilder().xTokens().transferMultiCurrencies()),
+    ).prior(
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType,
+      })
+    ),
   });
 }
 
 export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(asset, moonbeam, 0.08);
-}
-
-export function toZeitgeistErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(asset, zeitgeist, 0.1);
+  return toParaErc20Template(
+    asset,
+    moonbeam,
+    XcmTransferType.DestinationReserve
+  );
 }
 
 function viaWormholeTemplate(
@@ -187,7 +210,9 @@ function viaWormholeTemplate(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).priorMulti([
-      ExtrinsicBuilder().xTokens().transferMultiCurrencies(),
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      }),
       ExtrinsicBuilder().polkadotXcm().send().transact({
         fee: MRL_EXECUTION_FEE,
       }),

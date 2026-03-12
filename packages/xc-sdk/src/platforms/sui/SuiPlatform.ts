@@ -81,8 +81,7 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
 
     const computation = BigInt(gasUsed.computationCost);
     const storage = BigInt(gasUsed.storageCost);
-    const rebate = BigInt(gasUsed.storageRebate);
-    const mist = computation + storage - rebate;
+    const mist = computation + storage;
 
     return feeBalance.copyWith({ amount: mist });
   }

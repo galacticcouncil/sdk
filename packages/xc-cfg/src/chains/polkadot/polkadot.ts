@@ -31,11 +31,3 @@ export const polkadot = new Parachain({
   ...config,
   key: 'polkadot',
 });
-
-export const polkadotCex = new Parachain({
-  ...config,
-  key: 'polkadot_cex',
-  name: 'Polkadot (CEX)',
-  usesCexForwarding: true,
-  isTestChain: true,
-});

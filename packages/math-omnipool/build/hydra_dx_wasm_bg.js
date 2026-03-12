@@ -71,15 +71,6 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
-let cachedDataViewMemory0 = null;
-
-function getDataViewMemory0() {
-    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
-        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
-    }
-    return cachedDataViewMemory0;
-}
-
 const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
 
 let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
@@ -101,7 +92,6 @@ export function calculate_shares(asset_reserve, asset_hub_reserve, asset_shares,
     let deferred5_0;
     let deferred5_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -110,14 +100,11 @@ export function calculate_shares(asset_reserve, asset_hub_reserve, asset_shares,
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        wasm.calculate_shares(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred5_0 = r0;
-        deferred5_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_shares(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
+        deferred5_0 = ret[0];
+        deferred5_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 }
@@ -132,21 +119,17 @@ export function calculate_withdrawal_fee(spot_price, oracle_price, min_withdrawa
     let deferred4_0;
     let deferred4_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(spot_price, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(oracle_price, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
         const ptr2 = passStringToWasm0(min_withdrawal_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        wasm.calculate_withdrawal_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred4_0 = r0;
-        deferred4_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_withdrawal_fee(ptr0, len0, ptr1, len1, ptr2, len2);
+        deferred4_0 = ret[0];
+        deferred4_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 }
@@ -166,7 +149,6 @@ export function calculate_liquidity_out(asset_reserve, asset_hub_reserve, asset_
     let deferred9_0;
     let deferred9_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -183,14 +165,11 @@ export function calculate_liquidity_out(asset_reserve, asset_hub_reserve, asset_
         const len6 = WASM_VECTOR_LEN;
         const ptr7 = passStringToWasm0(withdrawal_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len7 = WASM_VECTOR_LEN;
-        wasm.calculate_liquidity_out(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred9_0 = r0;
-        deferred9_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_liquidity_out(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
+        deferred9_0 = ret[0];
+        deferred9_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
 }
@@ -210,7 +189,6 @@ export function calculate_liquidity_lrna_out(asset_reserve, asset_hub_reserve, a
     let deferred9_0;
     let deferred9_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -227,14 +205,11 @@ export function calculate_liquidity_lrna_out(asset_reserve, asset_hub_reserve, a
         const len6 = WASM_VECTOR_LEN;
         const ptr7 = passStringToWasm0(withdrawal_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len7 = WASM_VECTOR_LEN;
-        wasm.calculate_liquidity_lrna_out(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred9_0 = r0;
-        deferred9_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_liquidity_lrna_out(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7);
+        deferred9_0 = ret[0];
+        deferred9_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
 }
@@ -257,7 +232,6 @@ export function recalculate_asset_fee(oracle_amount_in, oracle_amount_out, oracl
     let deferred12_0;
     let deferred12_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(oracle_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(oracle_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -280,14 +254,11 @@ export function recalculate_asset_fee(oracle_amount_in, oracle_amount_out, oracl
         const len9 = WASM_VECTOR_LEN;
         const ptr10 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len10 = WASM_VECTOR_LEN;
-        wasm.recalculate_asset_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred12_0 = r0;
-        deferred12_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.recalculate_asset_fee(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
+        deferred12_0 = ret[0];
+        deferred12_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
 }
@@ -310,7 +281,6 @@ export function recalculate_protocol_fee(oracle_amount_in, oracle_amount_out, or
     let deferred12_0;
     let deferred12_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(oracle_amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(oracle_amount_out, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -333,14 +303,11 @@ export function recalculate_protocol_fee(oracle_amount_in, oracle_amount_out, or
         const len9 = WASM_VECTOR_LEN;
         const ptr10 = passStringToWasm0(amplification, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len10 = WASM_VECTOR_LEN;
-        wasm.recalculate_protocol_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred12_0 = r0;
-        deferred12_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.recalculate_protocol_fee(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, ptr10, len10);
+        deferred12_0 = ret[0];
+        deferred12_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
 }
@@ -355,13 +322,13 @@ export function recalculate_protocol_fee(oracle_amount_in, oracle_amount_out, or
  * @param {string} amount_in
  * @param {string} asset_fee
  * @param {string} protocol_fee
+ * @param {string} max_slip_fee
  * @returns {string}
  */
-export function calculate_out_given_in(asset_in_reserve, asset_in_hub_reserve, asset_in_shares, asset_out_reserve, asset_out_hub_reserve, asset_out_shares, amount_in, asset_fee, protocol_fee) {
-    let deferred10_0;
-    let deferred10_1;
+export function calculate_out_given_in(asset_in_reserve, asset_in_hub_reserve, asset_in_shares, asset_out_reserve, asset_out_hub_reserve, asset_out_shares, amount_in, asset_fee, protocol_fee, max_slip_fee) {
+    let deferred11_0;
+    let deferred11_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_in_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_in_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -380,15 +347,14 @@ export function calculate_out_given_in(asset_in_reserve, asset_in_hub_reserve, a
         const len7 = WASM_VECTOR_LEN;
         const ptr8 = passStringToWasm0(protocol_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len8 = WASM_VECTOR_LEN;
-        wasm.calculate_out_given_in(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred10_0 = r0;
-        deferred10_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ptr9 = passStringToWasm0(max_slip_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len9 = WASM_VECTOR_LEN;
+        const ret = wasm.calculate_out_given_in(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9);
+        deferred11_0 = ret[0];
+        deferred11_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
+        wasm.__wbindgen_free(deferred11_0, deferred11_1, 1);
     }
 }
 
@@ -398,13 +364,13 @@ export function calculate_out_given_in(asset_in_reserve, asset_in_hub_reserve, a
  * @param {string} asset_shares
  * @param {string} amount_in
  * @param {string} asset_fee
+ * @param {string} max_slip_fee
  * @returns {string}
  */
-export function calculate_out_given_lrna_in(asset_reserve, asset_hub_reserve, asset_shares, amount_in, asset_fee) {
-    let deferred6_0;
-    let deferred6_1;
+export function calculate_out_given_lrna_in(asset_reserve, asset_hub_reserve, asset_shares, amount_in, asset_fee, max_slip_fee) {
+    let deferred7_0;
+    let deferred7_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -415,15 +381,14 @@ export function calculate_out_given_lrna_in(asset_reserve, asset_hub_reserve, as
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        wasm.calculate_out_given_lrna_in(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred6_0 = r0;
-        deferred6_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ptr5 = passStringToWasm0(max_slip_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len5 = WASM_VECTOR_LEN;
+        const ret = wasm.calculate_out_given_lrna_in(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        deferred7_0 = ret[0];
+        deferred7_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
+        wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 }
 
@@ -437,13 +402,13 @@ export function calculate_out_given_lrna_in(asset_reserve, asset_hub_reserve, as
  * @param {string} amount_out
  * @param {string} asset_fee
  * @param {string} protocol_fee
+ * @param {string} max_slip_fee
  * @returns {string}
  */
-export function calculate_in_given_out(asset_in_reserve, asset_in_hub_reserve, asset_in_shares, asset_out_reserve, asset_out_hub_reserve, asset_out_shares, amount_out, asset_fee, protocol_fee) {
-    let deferred10_0;
-    let deferred10_1;
+export function calculate_in_given_out(asset_in_reserve, asset_in_hub_reserve, asset_in_shares, asset_out_reserve, asset_out_hub_reserve, asset_out_shares, amount_out, asset_fee, protocol_fee, max_slip_fee) {
+    let deferred11_0;
+    let deferred11_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_in_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_in_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -462,15 +427,14 @@ export function calculate_in_given_out(asset_in_reserve, asset_in_hub_reserve, a
         const len7 = WASM_VECTOR_LEN;
         const ptr8 = passStringToWasm0(protocol_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len8 = WASM_VECTOR_LEN;
-        wasm.calculate_in_given_out(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred10_0 = r0;
-        deferred10_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ptr9 = passStringToWasm0(max_slip_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len9 = WASM_VECTOR_LEN;
+        const ret = wasm.calculate_in_given_out(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9);
+        deferred11_0 = ret[0];
+        deferred11_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
+        wasm.__wbindgen_free(deferred11_0, deferred11_1, 1);
     }
 }
 
@@ -480,13 +444,13 @@ export function calculate_in_given_out(asset_in_reserve, asset_in_hub_reserve, a
  * @param {string} asset_shares
  * @param {string} amount_out
  * @param {string} asset_fee
+ * @param {string} max_slip_fee
  * @returns {string}
  */
-export function calculate_lrna_in_given_out(asset_reserve, asset_hub_reserve, asset_shares, amount_out, asset_fee) {
-    let deferred6_0;
-    let deferred6_1;
+export function calculate_lrna_in_given_out(asset_reserve, asset_hub_reserve, asset_shares, amount_out, asset_fee, max_slip_fee) {
+    let deferred7_0;
+    let deferred7_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -497,15 +461,14 @@ export function calculate_lrna_in_given_out(asset_reserve, asset_hub_reserve, as
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len4 = WASM_VECTOR_LEN;
-        wasm.calculate_lrna_in_given_out(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred6_0 = r0;
-        deferred6_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ptr5 = passStringToWasm0(max_slip_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len5 = WASM_VECTOR_LEN;
+        const ret = wasm.calculate_lrna_in_given_out(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        deferred7_0 = ret[0];
+        deferred7_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_free(deferred6_0, deferred6_1, 1);
+        wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 }
 
@@ -520,7 +483,6 @@ export function calculate_spot_price(asset_a_reserve, asset_a_hub_reserve, asset
     let deferred5_0;
     let deferred5_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_a_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_a_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -529,14 +491,11 @@ export function calculate_spot_price(asset_a_reserve, asset_a_hub_reserve, asset
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(asset_b_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        wasm.calculate_spot_price(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred5_0 = r0;
-        deferred5_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_spot_price(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
+        deferred5_0 = ret[0];
+        deferred5_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 }
@@ -554,7 +513,6 @@ export function calculate_spot_price_with_fee(asset_a_reserve, asset_a_hub_reser
     let deferred7_0;
     let deferred7_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_a_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_a_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -567,14 +525,11 @@ export function calculate_spot_price_with_fee(asset_a_reserve, asset_a_hub_reser
         const len4 = WASM_VECTOR_LEN;
         const ptr5 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len5 = WASM_VECTOR_LEN;
-        wasm.calculate_spot_price_with_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred7_0 = r0;
-        deferred7_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_spot_price_with_fee(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        deferred7_0 = ret[0];
+        deferred7_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 }
@@ -588,19 +543,15 @@ export function calculate_lrna_spot_price(asset_reserve, asset_hub_reserve) {
     let deferred3_0;
     let deferred3_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
-        wasm.calculate_lrna_spot_price(retptr, ptr0, len0, ptr1, len1);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred3_0 = r0;
-        deferred3_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_lrna_spot_price(ptr0, len0, ptr1, len1);
+        deferred3_0 = ret[0];
+        deferred3_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 }
@@ -615,21 +566,17 @@ export function calculate_lrna_spot_price_with_fee(asset_reserve, asset_hub_rese
     let deferred4_0;
     let deferred4_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
         const ptr2 = passStringToWasm0(asset_fee, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len2 = WASM_VECTOR_LEN;
-        wasm.calculate_lrna_spot_price_with_fee(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred4_0 = r0;
-        deferred4_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_lrna_spot_price_with_fee(ptr0, len0, ptr1, len1, ptr2, len2);
+        deferred4_0 = ret[0];
+        deferred4_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
     }
 }
@@ -645,7 +592,6 @@ export function calculate_cap_difference(asset_reserve, asset_hub_reserve, asset
     let deferred5_0;
     let deferred5_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -654,14 +600,11 @@ export function calculate_cap_difference(asset_reserve, asset_hub_reserve, asset
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(total_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        wasm.calculate_cap_difference(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred5_0 = r0;
-        deferred5_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_cap_difference(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
+        deferred5_0 = ret[0];
+        deferred5_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 }
@@ -699,7 +642,6 @@ export function calculate_tvl_cap_difference(asset_reserve, asset_hub_reserve, s
     let deferred7_0;
     let deferred7_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -712,14 +654,11 @@ export function calculate_tvl_cap_difference(asset_reserve, asset_hub_reserve, s
         const len4 = WASM_VECTOR_LEN;
         const ptr5 = passStringToWasm0(total_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len5 = WASM_VECTOR_LEN;
-        wasm.calculate_tvl_cap_difference(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred7_0 = r0;
-        deferred7_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_tvl_cap_difference(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        deferred7_0 = ret[0];
+        deferred7_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred7_0, deferred7_1, 1);
     }
 }
@@ -735,7 +674,6 @@ export function calculate_liquidity_hub_in(asset_reserve, asset_hub_reserve, ass
     let deferred5_0;
     let deferred5_1;
     try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(asset_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(asset_hub_reserve, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -744,14 +682,11 @@ export function calculate_liquidity_hub_in(asset_reserve, asset_hub_reserve, ass
         const len2 = WASM_VECTOR_LEN;
         const ptr3 = passStringToWasm0(amount_in, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len3 = WASM_VECTOR_LEN;
-        wasm.calculate_liquidity_hub_in(retptr, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        deferred5_0 = r0;
-        deferred5_1 = r1;
-        return getStringFromWasm0(r0, r1);
+        const ret = wasm.calculate_liquidity_hub_in(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
+        deferred5_0 = ret[0];
+        deferred5_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
     } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
         wasm.__wbindgen_free(deferred5_0, deferred5_1, 1);
     }
 }
@@ -791,4 +726,15 @@ export function is_remove_liquidity_allowed(bits) {
     const ret = wasm.is_remove_liquidity_allowed(bits);
     return ret !== 0;
 }
+
+export function __wbindgen_init_externref_table() {
+    const table = wasm.__wbindgen_export_0;
+    const offset = table.grow(4);
+    table.set(0, undefined);
+    table.set(offset + 0, undefined);
+    table.set(offset + 1, null);
+    table.set(offset + 2, true);
+    table.set(offset + 3, false);
+    ;
+};
 

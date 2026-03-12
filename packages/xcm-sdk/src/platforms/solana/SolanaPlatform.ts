@@ -91,12 +91,13 @@ export class SolanaPlatform implements Platform<
         amount:
           feeBalance.amount -
           BigInt(senderFinalBalance) -
-          (isSolTransfer ? amount : 0n),
+          (isSolTransfer ? amount : 0n) +
+          config.rentReserve,
       });
     }
 
     return feeBalance.copyWith({
-      amount: fee,
+      amount: fee + config.rentReserve,
     });
   }
 

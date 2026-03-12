@@ -1,5 +1,5 @@
 import { Trade, TradeRouteBuilder, TradeType } from '../sor';
-import { math } from '../utils';
+import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
 import { Transaction, Tx } from './types';
@@ -51,10 +51,7 @@ export class TradeTxBuilder extends TxBuilder {
 
     const { assetIn } = swaps[0];
 
-    const balance = await this.balanceClient.getBalance(
-      this.beneficiary,
-      assetIn
-    );
+    const balance = await this.balance.getBalance(this.beneficiary, assetIn);
     const isMax = amountIn >= balance.transferable - 5n;
 
     if (isMax) {
@@ -68,7 +65,7 @@ export class TradeTxBuilder extends TxBuilder {
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
-    const slippage = math.getFraction(amountIn, this.slippagePct);
+    const slippage = calc.getFraction(amountIn, this.slippagePct);
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;
@@ -106,7 +103,7 @@ export class TradeTxBuilder extends TxBuilder {
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
-    const slippage = math.getFraction(amountOut, this.slippagePct);
+    const slippage = calc.getFraction(amountOut, this.slippagePct);
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;
@@ -144,7 +141,7 @@ export class TradeTxBuilder extends TxBuilder {
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
-    const slippage = math.getFraction(amountOut, this.slippagePct);
+    const slippage = calc.getFraction(amountOut, this.slippagePct);
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;

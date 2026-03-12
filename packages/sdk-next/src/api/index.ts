@@ -1,2 +1,4 @@
 export * from './Papi';
-export * from './client';
+export * from './Watcher';
+
+export * from './provider';

@@ -1,19 +1,24 @@
 import { PolkadotClient } from 'polkadot-api';
+
+import { log } from '@galacticcouncil/common';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
+import { type Observable, combineLatest, concat, defer, from } from 'rxjs';
+
 import {
-  type Observable,
-  Subject,
   bufferCount,
-  combineLatest,
-  debounceTime,
   distinctUntilChanged,
-  finalize,
+  debounceTime,
   map,
   pairwise,
-  shareReplay,
+  retry,
   startWith,
-} from 'rxjs';
+  switchMap,
+  tap,
+  take,
+  skip,
+  connect,
+} from 'rxjs/operators';
 
 import { Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
@@ -23,6 +28,8 @@ type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
 type TAccount = TSystemAccount['data'] | TTokenAccount;
 
+const { logger } = log;
+
 export class BalanceClient extends Papi {
   constructor(client: PolkadotClient) {
     super(client);
@@ -31,86 +38,114 @@ export class BalanceClient extends Papi {
   async getBalance(account: string, assetId: number): Promise<Balance> {
     return assetId === SYSTEM_ASSET_ID
       ? this.getSystemBalance(account)
-      : this.getTokenBalanceData(account, assetId);
+      : this.getBalanceData(account, assetId);
   }
 
   async getSystemBalance(account: string): Promise<Balance> {
     const query = this.api.query.System.Account;
     const { data } = await query.getValue(account, { at: 'best' });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
   async getTokenBalance(account: string, assetId: number): Promise<Balance> {
     const query = this.api.query.Tokens.Accounts;
     const data = await query.getValue(account, assetId, { at: 'best' });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
   async getErc20Balance(account: string, assetId: number): Promise<Balance> {
-    return this.getTokenBalanceData(account, assetId);
+    return this.getBalanceData(account, assetId);
   }
 
-  subscribeBalance(address: string): Observable<AssetBalance[]> {
-    const systemOb = this.subscribeSystemBalance(address);
-    const tokensOb = this.subscribeTokensBalance(address);
-    const erc20Ob = this.subscribeErc20Balance(address);
+  watchBalance(address: string): Observable<AssetBalance[]> {
+    return defer(() => {
+      const systemOb = this.watchSystemBalance(address);
+      const tokensOb = this.watchTokensBalance(address);
+      const erc20Ob = this.watchErc20Balance(address);
 
-    return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
-      debounceTime(250),
-      map((balance) => balance.flat()),
       /**
-       * Trigger synthetic empty previous
+       * First emission AS-IS, then debounced
        */
-      startWith([] as AssetBalance[]),
-      /**
-       * Like pairwise, but includes first
-       */
-      bufferCount(2, 1),
-      /**
-       * First return all, then just deltas
-       */
-      map(([prev, curr], i) => {
-        if (i === 0) return curr;
-        return this.getDeltas(prev, curr);
-      })
-    );
+      return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
+        connect((shared$) =>
+          concat(
+            shared$.pipe(take(1)),
+            shared$.pipe(skip(1), debounceTime(250))
+          )
+        )
+      );
+    })
+      .pipe(
+        map((balance) => balance.flat()),
+        /**
+         * Trigger synthetic empty previous
+         */
+        startWith([] as AssetBalance[]),
+        /**
+         * Like pairwise, but includes first
+         */
+        bufferCount(2, 1),
+        /**
+         * First return all, then just deltas
+         */
+        map(([prev, curr], i) => {
+          if (i === 0) return curr;
+          return this.getDeltas(prev, curr);
+        })
+      )
+      .pipe(
+        tap({
+          subscribe: () => logger.debug('balance: subscribe', address),
+          error: (e) => logger.error('balance', e),
+        }),
+        retry({ delay: 1000 })
+      );
   }
 
-  subscribeSystemBalance(address: string): Observable<AssetBalance> {
+  watchSystemBalance(address: string): Observable<AssetBalance> {
     const query = this.api.query.System.Account;
 
-    return query.watchValue(address, 'best').pipe(
+    return defer(() => query.watchValue(address, 'best')).pipe(
       map(
         (balance) =>
           ({
             id: SYSTEM_ASSET_ID,
-            balance: this.calculateBalance(balance.data),
+            balance: this.getBreakdown(balance.data),
           }) as AssetBalance
-      )
+      ),
+      tap({
+        error: (e) => logger.error('balance(system)', e),
+      })
     );
   }
 
-  subscribeTokenBalance(
+  watchTokenBalance(
     address: string,
     assetId: number
   ): Observable<AssetBalance> {
     const query = this.api.query.Tokens.Accounts;
 
-    return query.watchValue(address, assetId, 'best').pipe(
+    return defer(() => query.watchValue(address, assetId, 'best')).pipe(
       map(
         (balance) =>
           ({
             id: assetId,
-            balance: this.calculateBalance(balance),
+            balance: this.getBreakdown(balance),
           }) as AssetBalance
-      )
+      ),
+      tap({
+        error: (e) => logger.error('balance(token)', e),
+      })
     );
   }
 
-  subscribeTokensBalance(address: string): Observable<AssetBalance[]> {
+  watchTokensBalance(address: string): Observable<AssetBalance[]> {
     const query = this.api.query.Tokens.Accounts;
 
-    return query.watchEntries(address, { at: 'best' }).pipe(
+    return defer(() => query.watchEntries(address, { at: 'best' })).pipe(
+      /**
+       * Don't emit if no deltas = no balance change
+       */
       distinctUntilChanged((_, current) => !current.deltas),
       map(({ deltas }) => {
         const result: AssetBalance[] = [];
@@ -119,7 +154,7 @@ export class BalanceClient extends Papi {
           const [_, asset] = u.args;
           result.push({
             id: asset,
-            balance: this.calculateBalance({
+            balance: this.getBreakdown({
               free: 0n,
               reserved: 0n,
               frozen: 0n,
@@ -132,88 +167,74 @@ export class BalanceClient extends Papi {
 
           result.push({
             id: asset,
-            balance: this.calculateBalance(u.value),
+            balance: this.getBreakdown(u.value),
           });
         });
-
         return result;
+      }),
+      tap({
+        error: (e) => logger.error('balance(tokens)', e),
       })
     );
   }
 
-  subscribeErc20Balance(
+  watchErc20Balance(
     address: string,
     includeOnly?: number[]
   ): Observable<AssetBalance[]> {
-    const subject = new Subject<AssetBalance[]>();
-    const observable = subject.pipe(shareReplay(1));
-
     const getErc20s = async () => {
       const assets = await this.api.query.AssetRegistry.Assets.getEntries({
         at: 'best',
       });
       return assets
-        .filter(({ value }) => {
-          const { asset_type } = value;
-          return asset_type.type === 'Erc20';
-        })
+        .filter(({ value }) => value.asset_type.type === 'Erc20')
         .map(({ keyArgs }) => {
           const [id] = keyArgs;
-          return id;
+          return id as number;
         });
     };
 
-    const run = async () => {
-      const ids = includeOnly ? includeOnly : await getErc20s();
-      const updateBalance = async () => {
-        const balances: [number, Balance][] = await Promise.all(
-          ids.map(async (id) => {
-            const balance = await this.getTokenBalanceData(address, id);
-            return [id, balance];
-          })
-        );
-        const balance = balances.map(([id, balance]) => {
-          return {
-            id: id,
-            balance: balance,
-          } as AssetBalance;
-        });
-        subject.next(balance);
-      };
-
-      await updateBalance();
-      const sub =
-        this.api.query.System.Number.watchValue('best').subscribe(
-          updateBalance
-        );
-      return () => sub.unsubscribe();
+    const fetchBalance = async (ids: number[]) => {
+      const balances: [number, Balance][] = await Promise.all(
+        ids.map(
+          async (id) => [id, await this.getBalanceData(address, id)] as const
+        )
+      );
+      return balances.map(([id, balance]) => ({ id, balance }) as AssetBalance);
     };
 
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      pairwise(),
-      map(([prev, curr], i) => {
-        if (i === 0) return curr.filter((a) => a.balance.transferable > 0n);
-        return this.getDeltas(prev, curr);
-      }),
-      distinctUntilChanged((_prev, curr) => curr.length === 0)
-    ) as Observable<AssetBalance[]>;
+    return defer(() =>
+      from(includeOnly ? Promise.resolve(includeOnly) : getErc20s()).pipe(
+        switchMap((ids) =>
+          this.watcher.bestBlock$.pipe(
+            startWith(null),
+            switchMap(() => from(fetchBalance(ids)))
+          )
+        ),
+        pairwise(),
+        map(([prev, curr], i) => {
+          if (i === 0) return curr.filter((a) => a.balance.total > 0n);
+          return this.getDeltas(prev, curr);
+        }),
+        distinctUntilChanged((_prev, curr) => curr.length === 0),
+        tap({
+          error: (e) => logger.error('balance(erc20)', e),
+        })
+      )
+    );
   }
 
-  private async getTokenBalanceData(
+  private async getBalanceData(
     account: string,
     assetId: number
   ): Promise<Balance> {
     const data = await this.api.apis.CurrenciesApi.account(assetId, account, {
       at: 'best',
     });
-    return this.calculateBalance(data);
+    return this.getBreakdown(data);
   }
 
-  protected calculateBalance(data: TAccount): Balance {
+  private getBreakdown(data: TAccount): Balance {
     const transferable =
       data.free >= data.frozen ? data.free - data.frozen : 0n;
     const total = data.free + data.reserved;
@@ -227,10 +248,7 @@ export class BalanceClient extends Papi {
     };
   }
 
-  protected getDeltas(
-    prev: AssetBalance[],
-    curr: AssetBalance[]
-  ): AssetBalance[] {
+  getDeltas(prev: AssetBalance[], curr: AssetBalance[]): AssetBalance[] {
     const areBalancesEqual = (
       a: Balance | undefined,
       b: Balance | undefined

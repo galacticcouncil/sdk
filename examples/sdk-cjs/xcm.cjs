@@ -2,10 +2,11 @@ const {
   assetsMap,
   chainsMap,
   routesMap,
-  swaps,
+  dex,
 } = require('@galacticcouncil/xcm-cfg');
-const { ConfigService, Parachain } = require('@galacticcouncil/xcm-core');
+const { ConfigService } = require('@galacticcouncil/xcm-core');
 const { Wallet } = require('@galacticcouncil/xcm-sdk');
+const { createSdkContext } = require('@galacticcouncil/sdk');
 
 const main = async () => {
   // Initialize config
@@ -15,23 +16,24 @@ const main = async () => {
     routes: routesMap,
   });
 
+  const hydration = configService.getChain('hydration');
+  const hydrationApi = await hydration.api;
+  const hydrationSdk = createSdkContext(hydrationApi);
+
+  const { ctx } = hydrationSdk;
+
   // Initialize wallet
   const wallet = new Wallet({
     configService: configService,
   });
 
-  // Register chain swaps
-  const hydration = configService.getChain('hydration');
-  const assethub = configService.getChain('assethub');
-
-  wallet.registerSwaps(
-    new swaps.HydrationSwap(hydration),
-    new swaps.AssethubSwap(assethub)
-  );
+  // Register dexes
+  const hydrationDex = new dex.HydrationDex(hydration, ctx.pool);
+  wallet.registerDex(hydrationDex);
 
   // Define transfer
   const srcChain = configService.getChain('hydration');
-  const destChain = configService.getChain('polkadot');
+  const destChain = configService.getChain('assethub');
   const asset = configService.getAsset('dot');
 
   // Define source & dest accounts

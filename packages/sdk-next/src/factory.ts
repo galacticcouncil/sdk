@@ -46,7 +46,6 @@ export async function createSdkContext(
     .withAave()
     .withOmnipool()
     .withStableswap()
-    //.withHsm()
     .withXyk();
 
   // Initialize clients
@@ -57,7 +56,7 @@ export async function createSdkContext(
   // Initialize APIs
   const aave = new AaveUtils(evm);
   const router = new TradeRouter(poolCtx);
-  const scheduler = new TradeScheduler(router, {
+  const scheduler = new TradeScheduler(poolCtx, {
     blockTime: blockTime,
     minBudgetInNative: minOrderBudget,
   });

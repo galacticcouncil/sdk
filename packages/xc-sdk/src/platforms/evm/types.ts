@@ -1,3 +1,5 @@
+import { TransactionReceipt } from 'viem';
+
 import { Call, DryRunResult } from '../types';
 
 export interface EvmCall extends Call {
@@ -19,4 +21,10 @@ export interface EvmEventLog {
 export interface EvmDryRunResult extends DryRunResult {
   error: string | undefined;
   events: EvmEventLog[] | undefined;
+}
+
+export interface EvmTxObserver {
+  onTransactionSend: (hash: string) => void;
+  onTransactionReceipt: (receipt: TransactionReceipt) => void;
+  onError: (error: unknown) => void;
 }

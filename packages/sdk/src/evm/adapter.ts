@@ -1,4 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
+import type { AugmentedCall } from '@polkadot/api-base/types';
+import type { DispatchError } from '@polkadot/types/interfaces/system';
+import type { EvmCallInfoV2 } from '@polkadot/types/interfaces/evm';
+import type { Result } from '@polkadot/types-codec';
 
 import type { PublicClient, ReadContractParameters } from 'viem';
 
@@ -37,7 +41,22 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const res = await this.api.call.ethereumRuntimeRPCApi.call(
+    const ethereumRpcCallFn = this.api.call.ethereumRuntimeRPCApi
+      .call as AugmentedCall<'promise'>;
+
+    const ethereumRpcCallArgs: [
+      string,
+      string,
+      string,
+      number,
+      number,
+      null,
+      null,
+      null,
+      boolean,
+      [],
+      [],
+    ] = [
       '',
       address as string,
       data as string,
@@ -47,7 +66,12 @@ export class EvmRpcAdapter {
       null,
       null,
       false,
-      []
+      [],
+      [],
+    ];
+
+    const res = await ethereumRpcCallFn<Result<EvmCallInfoV2, DispatchError>>(
+      ...ethereumRpcCallArgs
     );
 
     if (res.isErr) {

@@ -8,6 +8,7 @@ import {
   finalize,
   map,
   merge,
+  tap,
 } from 'rxjs';
 
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
@@ -33,6 +34,7 @@ import {
   TEmaPair,
   TOmnipoolAsset,
   TProtocolFeeParams,
+  TSlipFee,
 } from './types';
 
 const { FeeUtils } = fmt;
@@ -61,6 +63,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: 'best' }),
     (id) => String(id),
     6 * 1000
+  );
+
+  private maxSlipFee = this.queryBus.scope<[], TSlipFee | undefined>(
+    'Omnipool.SlipFee',
+    () => this.apiNext.query.Omnipool.SlipFee.getValue({ at: 'best' }),
+    () => String('slipFee')
   );
 
   private emaOracles = this.queryBus.scope<[TEmaPair], TEmaOracle | undefined>(
@@ -116,6 +124,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     );
   }
 
+  async isSlipFeeSupported(): Promise<boolean> {
+    return this.apiNext.query.Omnipool.SlipFee.isCompatible(
+      CompatibilityLevel.Partial
+    );
+  }
+
   protected async loadPools(): Promise<OmniPoolBase[]> {
     const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
     const poolAddress = this.getPoolAddress();
@@ -130,7 +144,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       this.api.query.Omnipool.Assets.getEntries({ at: 'best' }),
       this.api.query.Omnipool.HubAssetTradability.getValue(),
       this.api.query.AssetRegistry.Assets.getValue(hubAssetId),
-      this.getBalance(poolAddress, hubAssetId),
+      this.balance.getBalance(poolAddress, hubAssetId),
       this.getPoolLimits(),
     ]);
 
@@ -140,7 +154,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
       const [meta, balance] = await Promise.all([
         this.api.query.AssetRegistry.Assets.getValue(id),
-        this.getBalance(poolAddress, id),
+        this.balance.getBalance(poolAddress, id),
       ]);
 
       return {
@@ -184,12 +198,21 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const feeAsset = pair.assetOut;
     const protocolAsset = pair.assetIn;
 
+    let maxSlipFee = 0;
+
+    const isSlipFeeSupported = await this.isSlipFeeSupported();
+    if (isSlipFeeSupported) {
+      const slipFee = await this.maxSlipFee.get();
+      maxSlipFee = slipFee ?? 0;
+    }
+
     const feeConfiguration = await this.dynamicFeesConfig.get(feeAsset);
     if (feeConfiguration?.type === 'Fixed') {
       const { asset_fee, protocol_fee } = feeConfiguration.value;
       return {
         assetFee: FeeUtils.fromPermill(asset_fee),
         protocolFee: FeeUtils.fromPermill(protocol_fee),
+        maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       };
     }
 
@@ -227,6 +250,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return {
       assetFee: FeeUtils.fromPermill(assetFee),
       protocolFee: FeeUtils.fromPermill(protocolFee),
+      maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     };
@@ -351,7 +375,13 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         'best'
       ).pipe(
         filter((v): v is TEmaOracle => v !== undefined),
-        map((value) => ({
+        map((value, index) => ({ value, index })),
+        tap(({ index }) => {
+          if (index > 0) {
+            this.log.trace('emaOracle.Oracles', pair.join(':'));
+          }
+        }),
+        map(({ value }) => ({
           pair,
           value,
         }))
@@ -360,10 +390,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
     return merge(...streams)
       .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub ema oracles');
-          this.emaOracles.clear();
-        })
+        finalize(() => this.emaOracles.clear()),
+        this.watchGuard('emaOracle.Oracles')
       )
       .subscribe((delta) => {
         const { pair, value } = delta;
@@ -377,14 +405,16 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          finalize(() => {
-            this.log(this.getPoolType(), 'unsub dyn fees');
-            this.dynamicFees.clear();
-          });
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('dynamicFees.AssetFee', value.deltas?.upserted);
+          }
+        }),
+        finalize(() => this.dynamicFees.clear()),
+        this.watchGuard('dynamicFees.AssetFee')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
           this.dynamicFees.set(delta.value, key);
@@ -398,12 +428,19 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub dyn fees config');
-          this.dynamicFeesConfig.clear();
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace(
+              'dynamicFees.AssetFeeConfiguration',
+              value.deltas?.upserted
+            );
+          }
+        }),
+        finalize(() => this.dynamicFeesConfig.clear()),
+        this.watchGuard('dynamicFees.AssetFeeConfiguration')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         deltas?.upserted.forEach((delta) => {
           const [key] = delta.args;
           this.dynamicFeesConfig.set(delta.value, key);
@@ -412,12 +449,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   private subscribeBlock(): Subscription {
-    return this.api.query.System.Number.watchValue('best')
-      .pipe(
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub block change');
-        })
-      )
+    return this.watcher.bestBlock$
+      .pipe(this.watchGuard('watcher.bestBlock'))
       .subscribe((block) => {
         this.block = block;
       });
@@ -429,11 +462,15 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     })
       .pipe(
         distinctUntilChanged((_, current) => !current.deltas),
-        finalize(() => {
-          this.log(this.getPoolType(), 'unsub assets');
-        })
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('omnipool.Assets', value.deltas?.upserted);
+          }
+        }),
+        this.watchGuard('omnipool.Assets')
       )
-      .subscribe(({ deltas }) => {
+      .subscribe(({ value: { deltas } }) => {
         this.store.update(([pool]) => {
           const changes = deltas?.upserted.reduce((acc, o) => {
             const [key] = o.args;

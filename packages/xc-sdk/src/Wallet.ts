@@ -1,7 +1,6 @@
-import { big } from '@galacticcouncil/common';
+import { acc, big } from '@galacticcouncil/common';
 
 import {
-  acc,
   addr,
   Asset,
   AnyChain,
@@ -9,8 +8,6 @@ import {
   AssetAmount,
   ConfigBuilder,
   ConfigService,
-  Dex,
-  DexFactory,
   TransferConfigs,
   TransferCtx,
   TransferValidator,
@@ -52,10 +49,6 @@ export class Wallet {
   constructor({ configService, transferValidations }: WalletOptions) {
     this.config = configService;
     this.validations = transferValidations || [];
-  }
-
-  registerDex(...dex: Dex[]) {
-    dex.forEach((x) => DexFactory.getInstance().register(x));
   }
 
   async transfer(
@@ -118,7 +111,7 @@ export class Wallet {
       dstAddress,
       dstCall,
       (fees) => {
-        const feesFmt = fees.toDecimal(fees.decimals);
+        const feesFmt = fees.toDecimal();
         return transfer.buildCall(feesFmt);
       },
       opts
@@ -166,7 +159,7 @@ export class Wallet {
 
     const ctx: TransferCtx = {
       address: dstAddress,
-      amount: 1n, // Use 1 satoshi as init amount
+      amount: 10n, // Use 10 satoshi as init amount
       asset: source.asset,
       destination: {
         balance: dstBalance,

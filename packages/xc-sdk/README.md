@@ -2,9 +2,29 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xc-sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/xc-sdk)
 
-Wallet interface for asset multi-platform transfer supporting fee swaps & bridging.
+Wallet interface for executing cross-chain asset transfers. Supports Substrate, EVM, Sui, and Solana platforms, fee swaps, and bridge integrations.
 
-Wallet does not perform any signing rather provide transfer data to maintain loose coupling & interoperability with 3rd party code.
+Wallet does not perform any signing — it provides transfer data to maintain loose coupling & interoperability with 3rd party code.
+
+For convenience, the SDK also ships built-in platform signers that can sign & submit the transfer calls.
+
+| Platform | Signer | Wallet / Signer |
+| --- | --- | --- |
+| Substrate | `SubstrateSigner` | `PolkadotSigner` (polkadot-api) |
+| EVM | `EvmSigner` | `WalletClient` (viem) |
+| Solana | `SolanaSigner` | `SolanaWallet` or `Keypair` |
+| Sui | `SuiSigner` | `SuiWallet` or `Ed25519Keypair` |
+
+```typescript
+import { SubstrateSigner } from '@galacticcouncil/xc-sdk';
+
+const signer = new SubstrateSigner(chain, polkadotSigner);
+signer.signAndSend(call, {
+  onTransactionSend: (hash) => console.log('TxHash:', hash),
+  onFinalized: (event) => console.log('Finalized:', event),
+  onError: (error) => console.error(error),
+});
+```
 
 ## Installation
 
@@ -55,16 +75,11 @@ const wallet = new Wallet({
   configService: configService,
   transferValidations: validations,
 });
+```
 
-// Register dex-es
-const hydration = configService.getChain('hydration');
-const assethub = configService.getChain('assethub');
+## Transfer
 
-wallet.registerDex(
-  new dex.HydrationDex(hydration),
-  new dex.AssethubDex(assethub)
-);
-
+```typescript
 // Define transfer
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');

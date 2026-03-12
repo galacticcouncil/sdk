@@ -2,5 +2,6 @@ export * from './SubstrateClaim';
 export * from './SubstrateExec';
 export * from './SubstratePlatform';
 export * from './SubstrateService';
+export * from './SubstrateSigner';
 
 export * from './types';

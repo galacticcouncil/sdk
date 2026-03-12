@@ -12,7 +12,11 @@ import {
   BRIDGE_HUB_ID,
   buildERC20TransferFromPara,
   buildParaERC20Received,
+  buildReserveTransfer,
+  buildNestedReserveTransfer,
+  buildMultiHopReserveTransfer,
 } from './extrinsics/xcm';
+import { validateReserveChain } from './extrinsics/xcm/utils';
 import { padFeeByPercentage } from './utils';
 
 import { dot } from '../assets';
@@ -136,8 +140,72 @@ function Snowbridge() {
   };
 }
 
+function XcmPaymentApi() {
+  return {
+    calculateDestFee: (opts?: {
+      reserve?: Parachain;
+    }): FeeAmountConfigBuilder => ({
+      build: async ({ feeAsset, source, destination }) => {
+        const src = source as Parachain;
+        const rcv = destination as Parachain;
+        const reserve = opts?.reserve;
+
+        // Validate reserve chain matches asset's xcm location
+        validateReserveChain(feeAsset, src, rcv, reserve);
+
+        // Multi-hop transfer (through reserve chain)
+        if (reserve) {
+          const rcvClient = new BaseClient(rcv);
+          const reserveClient = new BaseClient(reserve);
+
+          const nestedXcm = buildNestedReserveTransfer(feeAsset, rcv);
+          const multiHopXcm = buildMultiHopReserveTransfer(
+            feeAsset,
+            reserve,
+            rcv
+          );
+
+          const [destinationFee, reserveFee] = await Promise.all([
+            rcvClient.calculateDestinationFee(nestedXcm, feeAsset),
+            reserveClient.calculateDestinationFee(multiHopXcm, feeAsset),
+          ]);
+
+          const totalFee = reserveFee + destinationFee;
+          const feeWithMargin = padFeeByPercentage(totalFee, 20n);
+          const margin = feeWithMargin - totalFee;
+
+          return {
+            amount: feeWithMargin,
+            breakdown: {
+              reserveFee: reserveFee,
+              destinationFee: destinationFee,
+              margin: margin,
+            },
+          } as FeeAmount;
+        }
+
+        // Direct reserve transfer
+        const client = new BaseClient(rcv);
+        const xcm = buildReserveTransfer(feeAsset, rcv);
+        const totalFee = await client.calculateDestinationFee(xcm, feeAsset);
+        const feeWithMargin = padFeeByPercentage(totalFee, 20n);
+        const margin = feeWithMargin - totalFee;
+
+        return {
+          amount: feeWithMargin,
+          breakdown: {
+            totalFee: totalFee,
+            margin: margin,
+          },
+        } as FeeAmount;
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
+    XcmPaymentApi,
     Snowbridge,
     Wormhole,
   };

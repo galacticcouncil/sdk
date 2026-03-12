@@ -3,7 +3,7 @@ import {
   SolanaChain,
 } from '@galacticcouncil/xcm-core';
 
-import { jito_sol, sol } from '../../assets';
+import { jito_sol, prime, sol } from '../../assets';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -18,6 +18,11 @@ export const solana = new SolanaChain({
       asset: jito_sol,
       id: 'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
       decimals: 9,
+    },
+    {
+      asset: prime,
+      id: '3b8X44fLF9ooXaUm3hhSgjpmVs6rZZ3pPoGnGahc3Uu7',
+      decimals: 6,
     },
   ],
   ecosystem: Ecosystem.Solana,

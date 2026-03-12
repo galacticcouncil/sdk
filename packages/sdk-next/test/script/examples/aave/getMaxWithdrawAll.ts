@@ -1,6 +1,8 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { createSdkContext, big } from '../../../../src';
+import { big } from '@galacticcouncil/common';
+
+import { createSdkContext } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';

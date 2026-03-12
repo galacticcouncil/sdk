@@ -30,7 +30,9 @@ const DOT_RESERVE_LOCATION = {
 };
 
 const isDot = (assetLocation: any) => {
-  return assetLocation.parents === 1 && assetLocation.interior === 'Here';
+  const { parents, interior } = assetLocation;
+  if (parents !== 1) return false;
+  return interior === 'Here' || interior?.type === 'Here';
 };
 
 const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
@@ -44,6 +46,25 @@ const isBridgeHubTransfer = (source: Parachain, destination: Parachain) => {
     BRIDGE_CONSENSUS.includes(destination.ecosystem) &&
     source.ecosystem !== destination.ecosystem
   );
+};
+
+export const isSnowbridgeTransfer = (assetLocation: any) => {
+  const { interior } = assetLocation;
+
+  // Native ETH: X1(GlobalConsensus(Ethereum))
+  if (interior.type === 'X1' && interior.value.type === 'GlobalConsensus') {
+    return interior.value.value.type === 'Ethereum';
+  }
+
+  // ERC20 tokens: X2([GlobalConsensus(Ethereum), AccountKey20])
+  if (interior.type === 'X2' && Array.isArray(interior.value)) {
+    const first = interior.value[0];
+    return (
+      first.type === 'GlobalConsensus' && first.value.type === 'Ethereum'
+    );
+  }
+
+  return false;
 };
 
 export const toDest = (
@@ -127,12 +148,18 @@ export const toAsset = (assetLocation: object, amount: any) => {
   };
 };
 
-export const toDepositXcmOnDest = (version: XcmVersion, account: any) => {
+export const toDepositXcmOnDest = (
+  version: XcmVersion,
+  account: any,
+  assetsCount: number
+) => {
   return {
     type: version,
     value: [
       XcmV4Instruction.DepositAsset({
-        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
+        assets: XcmV4AssetAssetFilter.Wild(
+          XcmV4AssetWildAsset.AllCounted(assetsCount)
+        ),
         beneficiary: {
           parents: 0,
           interior: XcmV3Junctions.X1(account),
@@ -288,7 +315,7 @@ export const toBridgeXcmOnDest = (
             fun: XcmV2MultiassetWildFungibility.Fungible(),
           })
         ),
-        reserve: instr.bridgeLocation(ETHEREUM_CHAIN_ID),
+        reserve: instr.ethereumLocation(ETHEREUM_CHAIN_ID),
         xcm: [
           XcmV4Instruction.BuyExecution({
             fees: {
@@ -323,13 +350,13 @@ export const toBridgeXcmOnDest = (
  * @returns fixed location
  */
 const reanchorLocation = (assetLocation: object) => {
-  const erc20Key = multiloc.findNestedKey(assetLocation, 'key');
+  const erc20KeyObj = multiloc.findNestedKey(assetLocation, 'key');
 
-  if (erc20Key) {
+  if (erc20KeyObj) {
     return {
       parents: 0,
       interior: XcmV3Junctions.X1(
-        XcmV3Junction.AccountKey20({ key: erc20Key })
+        XcmV3Junction.AccountKey20({ key: erc20KeyObj.key })
       ),
     };
   }

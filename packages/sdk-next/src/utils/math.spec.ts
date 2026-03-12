@@ -3,7 +3,6 @@ import {
   calculateDiffToAvg,
   calculateDiffToRef,
   calculateSellFee,
-  getFraction,
 } from './math';
 
 describe('Calculate Percentage Difference', () => {
@@ -45,10 +44,5 @@ describe('Calculate Percentage Difference', () => {
   it('Calculate buy fee should be 10%', () => {
     const result = calculateBuyFee(1_000n, 1_100n);
     expect(result).toStrictEqual(10);
-  });
-
-  it('Calculate 0.1% from given amount should be 1000000n', () => {
-    const result = getFraction(1_000_000_000n, 0.1);
-    expect(result).toStrictEqual(1_000_000n);
   });
 });

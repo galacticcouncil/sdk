@@ -38,11 +38,15 @@ class GetBestSellExample extends PolkadotExecutor {
     const { api, ctx, tx } = createSdkContext(apiPromise);
 
     await ctx.pool.syncRegistry(external);
-    const trade = await api.router.getBestSell('1007', '69', '50');
+    const trade = await api.router.getBestSell('1000795', '22', '1');
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     console.log('Transaction hash: ' + tradeTx.hex);
 
     const { executionResult } = await tradeTx.dryRun(BENEFICIARY);
+
+    if (executionResult.isErr) {
+      console.log(humanizeError(apiPromise, executionResult.asErr));
+    }
     console.log('Transaction status: ' + executionResult.isOk);
     return trade;
   }

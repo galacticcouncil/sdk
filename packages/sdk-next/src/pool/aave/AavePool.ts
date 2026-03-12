@@ -1,3 +1,5 @@
+import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
+
 import {
   BuyCtx,
   Pool,
@@ -110,14 +112,12 @@ export class AavePool implements Pool {
     return amountIn;
   }
 
-  spotPriceInGivenOut(poolPair: PoolPair): bigint {
-    const spot = Math.pow(10, poolPair.decimalsOut);
-    return BigInt(spot);
+  spotPriceInGivenOut(_poolPair: PoolPair): bigint {
+    return big.toBigInt(1, RUNTIME_DECIMALS);
   }
 
-  spotPriceOutGivenIn(poolPair: PoolPair): bigint {
-    const spot = Math.pow(10, poolPair.decimalsIn);
-    return BigInt(spot);
+  spotPriceOutGivenIn(_poolPair: PoolPair): bigint {
+    return big.toBigInt(1, RUNTIME_DECIMALS);
   }
 
   calculateTradeFee(_amount: bigint, _fees: PoolFees): bigint {

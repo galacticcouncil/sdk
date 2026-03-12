@@ -28,8 +28,8 @@ describe('TradeRouter with mocked pool ctx', () => {
 
   it('Should return best spot price between token 1 & 2', async () => {
     const bestSpotPrice = await sor.getSpotPrice(1, 2);
-    expect(bestSpotPrice?.amount).toStrictEqual(46707792958579n);
-    expect(bestSpotPrice?.decimals).toStrictEqual(12);
+    expect(bestSpotPrice?.amount).toStrictEqual(46707793025305313609n);
+    expect(bestSpotPrice?.decimals).toStrictEqual(18);
   });
 
   it('Should throw error if token pair identical', async () => {

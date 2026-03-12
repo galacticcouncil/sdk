@@ -12,7 +12,7 @@ class SubscribeErc20Balance extends PapiExecutor {
   async script(client: PolkadotClient) {
     const balanceClient = new c.BalanceClient(client);
     const subscription = balanceClient
-      .subscribeErc20Balance(G_POOL_ADDRESS, G_POOL_ERC20)
+      .watchErc20Balance(G_POOL_ADDRESS, G_POOL_ERC20)
       .subscribe((balances) => {
         console.log(balances);
         this.logTime();
