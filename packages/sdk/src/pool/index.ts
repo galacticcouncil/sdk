@@ -1,6 +1,7 @@
 export { CachingPoolService } from './CachingPoolService';
 export { PoolFactory } from './PoolFactory';
 export { PoolService } from './PoolService';
+export * from './offlinePoolService';
 
 export * from './aave';
 export * from './xyk';
