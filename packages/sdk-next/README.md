@@ -2,11 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk-next.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk-next)
 
-Next gen hydration sdk build on top of [Polkadot API (Papi)](https://papi.how/).
-
-⚠️ **Disclaimer:** Next is not prod ready yet. Official `1.x` release coming soon.
-
-Missing functionality & progress tracked [here](https://github.com/galacticcouncil/sdk/issues/119)
+Next gen Hydration SDK built on top of [Polkadot API (Papi)](https://papi.how/).
 
 Table of contents:
 
@@ -118,7 +114,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 | :----- | :----------- |
 | `getDcaOrder(assetIn: number, assetOut: number, amountInTotal: string, duration: number): TradeDcaOrder` | Calculate DCA order. |
 | `getTwapBuyOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
-| `getTwapSellOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
+| `getTwapSellOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP sell order. |
 
 ➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />
 
@@ -126,10 +122,11 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 | Method | Description  |
 | :----- | :----------- |
-| `subscribeSystemBalance(address: string): Observable<AssetAmount>` | Subscribe native account balance. |
-| `subscribeTokenBalance(address: string, assetId: number): Observable<AssetAmount>` | Subscribe token account balance. |
-| `subscribeTokensBalance(address: string): Observable<AssetAmount[]>` | Subscribe tokens account balances. |
-| `subscribeErc20Balance(address: string, includeOnly?: number[]):  Observable<AssetAmount[]>` | Subscribe erc20 assets balances |
+| `watchBalance(address: string): Observable<AssetAmount>` | Subscribe account balance. |
+| `watchSystemBalance(address: string): Observable<AssetAmount>` | Subscribe native account balance. |
+| `watchTokenBalance(address: string, assetId: number): Observable<AssetAmount>` | Subscribe token account balance. |
+| `watchTokensBalance(address: string): Observable<AssetAmount[]>` | Subscribe tokens account balances. |
+| `watchErc20Balance(address: string, includeOnly?: number[]):  Observable<AssetAmount[]>` | Subscribe erc20 assets balances |
 
 ➡️ For type definitions visit [types.ts](src/types.ts)<br />
 
@@ -137,13 +134,13 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 | Method | Description  |
 | :----- | :----------- |
-| `getOnChainAssets(includeInvalid?: boolean, external?: ExternalAsset[]): Promise<Asset[]>` | Returns assets with metadata from registry. |
+| `getSupported(includeInvalid?: boolean, external?: ExternalAsset[]): Promise<Asset[]>` | Returns assets with metadata from registry. |
 
 ➡️ For type definitions visit [types.ts](src/types.ts)<br />
 
 ## Examples
 
-All examples assume sdk have been initialized [see](#usage)
+All examples assume SDK has been initialized, [see](#usage)
 
 ### TradeRouter
 
@@ -175,7 +172,7 @@ const { client } = sdk;
 
 const account = "7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1"
 const subscription = client.balance
-  .subscribeBalance(account)
+  .watch(account)
   .subscribe((balances) => {
     console.log(balances);
   });
@@ -188,7 +185,7 @@ Get default on-chain data.
 ```typescript
 const { client } = sdk;
 
-const assets = await client.asset.getOnChainAssets();
+const assets = await client.asset.getSupported();
 console.log(assets);
 ```
 

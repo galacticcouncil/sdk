@@ -303,7 +303,7 @@ module.exports.calculate_percentage_amount = function(amount, percentage) {
     }
 };
 
-const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
+const path = require('path').join(__dirname, 'hydra_dx_wasm_bg_nodejs.wasm');
 const bytes = require('fs').readFileSync(path);
 
 const wasmModule = new WebAssembly.Module(bytes);

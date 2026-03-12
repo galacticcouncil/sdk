@@ -1,5 +1,4 @@
 import {
-  acc,
   addr,
   multiloc,
   AnyParachain,
@@ -10,7 +9,7 @@ import {
   ExtrinsicConfig,
 } from '@galacticcouncil/xc-core';
 
-import { enums } from '@galacticcouncil/common';
+import { acc, enums } from '@galacticcouncil/common';
 import { HubApis } from '@galacticcouncil/descriptors';
 
 import { Blake2256, u32 } from '@polkadot-api/substrate-bindings';

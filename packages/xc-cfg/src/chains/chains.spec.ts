@@ -34,7 +34,7 @@ describe('chains config', () => {
           .filter((c) => fullAddressSpace(c))
           .map((c) => c.key)
           .sort()
-      ).toEqual(['acala', 'hydration'].sort());
+      ).toEqual(['hydration']);
     });
     it('should match given chains with evm only address space support', async () => {
       expect(
@@ -42,7 +42,7 @@ describe('chains config', () => {
           .filter((c) => h160AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()
-      ).toEqual(['darwinia', 'laos', 'moonbeam', 'mythos'].sort());
+      ).toEqual(['laos', 'moonbeam', 'mythos'].sort());
     });
     it('should match given chains with substrate only address space support', async () => {
       expect(
@@ -54,17 +54,15 @@ describe('chains config', () => {
         [
           'ajuna',
           'assethub',
+          'assethub_cex',
           'astar',
           'bifrost',
-          'centrifuge',
           'crust',
           'interlay',
-          'kilt',
           'neuroweb',
           'pendulum',
           'polkadot',
           'unique',
-          'zeitgeist',
           'energywebx',
         ].sort()
       );

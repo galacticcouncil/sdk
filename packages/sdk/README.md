@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/sdk.svg)](https://www.npmjs.com/package/@galacticcouncil/sdk)
 
-Hydration sdk build on top of [@polkadot{.js} (Pjs)](https://polkadot.js.org/).
+Hydration SDK built on top of [@polkadot{.js} (Pjs)](https://polkadot.js.org/).
 
 Table of contents:
 
@@ -138,7 +138,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 | :----- | :----------- |
 | `getDcaOrder(assetIn: string, assetOut: string, amountInTotal: string, duration: number): TradeDcaOrder` | Calculate DCA order. |
 | `getTwapBuyOrder(assetIn: string, assetOut: string, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
-| `getTwapSellOrder(assetIn: string, assetOut: string, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
+| `getTwapSellOrder(assetIn: string, assetOut: string, amountInTotal: string): TradeOrder` | Calculate TWAP sell order. |
 
 ➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />
 
@@ -152,7 +152,7 @@ Gracefully cleans up SDK resources. Always call before exiting to avoid memory l
 
 ## Examples
 
-All examples assume sdk have been initialized [see](#usage)
+All examples assume SDK has been initialized, [see](#usage)
 
 ### TradeRouter
 

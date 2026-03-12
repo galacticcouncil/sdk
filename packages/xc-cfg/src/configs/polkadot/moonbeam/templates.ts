@@ -29,7 +29,7 @@ function toErc20Template(
         asset: asset,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   });
 }
 
@@ -58,7 +58,7 @@ function toXcTemplate(
         asset: asset,
       },
     },
-    contract: ContractBuilder().Xtokens().transfer(),
+    contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
   });
 }
 

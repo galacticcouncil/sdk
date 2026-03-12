@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
-import {
-  ChainEcosystem,
-  Parachain,
-  SubstrateApis,
-} from '@galacticcouncil/xc-core';
+import { AnyChain } from '@galacticcouncil/xc-core';
+import { SubstrateApis } from '@galacticcouncil/common';
 import { Wallet } from '@galacticcouncil/xc-sdk';
 
 import * as c from 'console';
@@ -15,21 +12,40 @@ const { configService, init } = setup;
 const { runXc } = xc;
 
 const getChains = () => {
-  const allowedChains: string[] = [
-    'hydration',
-    'bifrost',
-    'moonbeam',
+  const kusamaChains: string[] = ['assethub_kusama'];
+
+  const polkadotChains: string[] = [
+    'ajuna',
+    'astar',
     'assethub',
     'assethub_cex',
+    'bifrost',
+    'crust',
+    'interlay',
+    'laos',
+    'energywebx',
+    'hydration',
+    'moonbeam',
+    'mythos',
+    'neuroweb',
+    'pendulum',
+    'unique',
   ];
 
-  const chains: Parachain[] = Array.from(configService.chains.values())
-    .filter((c) => c instanceof Parachain)
-    .filter((c) => c.ecosystem === ChainEcosystem.Polkadot)
-    .filter((c) => allowedChains.includes(c.key));
+  const allowedChains: string[] = [
+    ...polkadotChains,
+    ...kusamaChains,
+    'ethereum',
+    'solana',
+    'sui',
+  ];
+
+  const chains: AnyChain[] = Array.from(configService.chains.values()).filter(
+    (c) => allowedChains.includes(c.key)
+  );
 
   return {
-    skipFor: [],
+    skipFor: ['solana'],
     chains,
   };
 };
@@ -60,16 +76,17 @@ describe('Wallet with XC config', () => {
 
     for (const route of Array.from(routes.values())) {
       const { destination } = route;
-      const allowedChains = [
-        'hydration',
-        'bifrost',
-        'moonbeam',
-        'assethub',
-        'assethub_cex',
-      ];
+      const { skipFor } = ctx;
 
-      // Skip routes to chains not in our allowed list
-      if (!allowedChains.includes(destination.chain.key)) {
+      const allowedDest = ctx.chains.map((c) => c.key);
+
+      if (skipFor.includes(chain.key)) {
+        // Skip for those sources
+        continue;
+      }
+
+      if (!allowedDest.includes(destination.chain.key)) {
+        // Skip routes to chains not in our allowed list
         continue;
       }
 

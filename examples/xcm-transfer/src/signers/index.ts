@@ -21,7 +21,7 @@ export async function signSubstrate(call: Call, chain: AnyChain) {
   );
 }
 
-async function signEvm(call: Call, chain: AnyChain) {
+export async function signEvm(call: Call, chain: AnyChain) {
   evm.signAndSend(
     call,
     chain,

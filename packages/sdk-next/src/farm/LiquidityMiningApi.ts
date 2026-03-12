@@ -27,8 +27,8 @@ export type LiquidityMiningOptions = {
 };
 
 export class LiquidityMiningApi {
+  private readonly balance: BalanceClient;
   private readonly client: LiquidityMiningClient;
-  private readonly balanceClient: BalanceClient;
   private readonly options: LiquidityMiningOptions;
 
   constructor(
@@ -37,7 +37,7 @@ export class LiquidityMiningApi {
     options: LiquidityMiningOptions = {}
   ) {
     this.client = client;
-    this.balanceClient = balanceClient;
+    this.balance = balanceClient;
     this.options = Object.freeze({
       blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
     });
@@ -164,6 +164,7 @@ export class LiquidityMiningApi {
       apr = Big(multiplierShifted)
         .times(yield_per_period.toString())
         .times(periodsPerYear)
+        .div(Math.pow(10, RUNTIME_DECIMALS))
         .toString();
     } else {
       const globalRewardPerPeriod = this.getGlobalRewardPerPeriod(
@@ -306,7 +307,7 @@ export class LiquidityMiningApi {
           incentivizedAsset
         );
 
-        const balance = await this.balanceClient.getBalance(
+        const balance = await this.balance.getBalance(
           farmAddress,
           rewardCurrency
         );
@@ -381,7 +382,7 @@ export class LiquidityMiningApi {
           incentivizedAsset
         );
 
-        const balance = await this.balanceClient.getBalance(
+        const balance = await this.balance.getBalance(
           farmAddress,
           rewardCurrency
         );
@@ -489,13 +490,13 @@ export class LiquidityMiningApi {
         pairs
           .filter(([_, assetId]) => assetId !== SYSTEM_ASSET_ID)
           .map(([account, assetId]) =>
-            this.balanceClient.getTokenBalance(account, assetId)
+            this.balance.getTokenBalance(account, assetId)
           )
       ),
       Promise.all(
         pairs
           .filter(([_, assetId]) => assetId === SYSTEM_ASSET_ID)
-          .map(([account]) => this.balanceClient.getSystemBalance(account))
+          .map(([account]) => this.balance.getSystemBalance(account))
       ),
     ]);
 

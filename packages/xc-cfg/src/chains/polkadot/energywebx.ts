@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  XcmVersion,
 } from '@galacticcouncil/xc-core';
 
 import { ewt } from '../../assets';
@@ -24,5 +25,7 @@ export const energywebx = new Parachain({
   name: 'Energy Web X',
   parachainId: 3345,
   ss58Format: 42,
+  usesLegacyEnhancer: true,
   ws: 'wss://wnp-rpc.mainnet.energywebx.com',
+  xcmVersion: XcmVersion.v3,
 });

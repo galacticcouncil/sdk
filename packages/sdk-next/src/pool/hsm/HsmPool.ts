@@ -74,10 +74,13 @@ export class HsmPool extends StableSwap {
   validateTradeHollarIn(
     poolPair: PoolPair,
     amountIn: bigint,
-    amountOut: bigint,
     errors: PoolError[]
   ) {
-    const buybackLimit = this.calculateBuybackLimit(poolPair);
+    // Runtime HSM validation using stableswap simulateIn (buy) to calculate collateral amount
+    const reversedPair = this.parsePair(poolPair.assetOut, poolPair.assetIn);
+    const collateralAmount = super.calculateInGivenOut(reversedPair, amountIn, {
+      fee: this.fee,
+    });
 
     /**
      * Check if the requested amount exceeds the buyback limit
@@ -85,12 +88,17 @@ export class HsmPool extends StableSwap {
      * amountIn = the amount of Hollar the user is trying to sell to HSM
      * buybackLimit = how much Hollar can be bought back
      */
+    const buybackLimit = this.calculateBuybackLimit(poolPair);
     if (amountIn > buybackLimit) {
       errors.push(PoolError.MaxBuyBackExceeded);
     }
 
-    const buyPrice = this.calculateBuyPrice(poolPair, amountIn, amountOut);
     const maxPrice = this.calculateMaxPrice(poolPair);
+    const buyPrice = this.calculateBuyPrice(
+      poolPair,
+      amountIn,
+      collateralAmount
+    );
 
     /**
      * Check if buy price less than max price
@@ -102,7 +110,7 @@ export class HsmPool extends StableSwap {
     /**
      * Check if HSM has enough collateral
      */
-    if (amountOut > this.collateralBalance) {
+    if (collateralAmount > this.collateralBalance) {
       errors.push(PoolError.InsufficientCollateral);
     }
 
@@ -141,7 +149,7 @@ export class HsmPool extends StableSwap {
 
     // Validate Hollar coming into HSM in exchange for collateral
     if (poolPair.assetIn === this.hollarId) {
-      return this.validateTradeHollarIn(poolPair, amountIn, amountOut, errors);
+      return this.validateTradeHollarIn(poolPair, amountIn, errors);
     }
 
     // Validate Hollar going out from HSM in exchange for collateral coming in
@@ -272,9 +280,19 @@ export class HsmPool extends StableSwap {
     amountIn: bigint,
     amountOut: bigint
   ): bigint {
-    const aIn = amountOut * 10n ** BigInt(poolPair.decimalsIn);
-    const aOut = amountIn * 10n ** BigInt(poolPair.decimalsOut);
-    return aOut / aIn;
+    const buyPrice = HsmMath.calculateBuybackPriceWithFee(
+      amountOut.toString(),
+      amountIn.toString(),
+      FeeUtils.toRaw(this.buyBackFee).toString()
+    );
+
+    const [buyNom, buyDenom] = JSON.parse(buyPrice);
+
+    const base = big.pow10(
+      poolPair.decimalsIn + RUNTIME_DECIMALS - poolPair.decimalsOut
+    );
+
+    return (BigInt(buyNom) * base) / BigInt(buyDenom);
   }
 
   private calculateMaxPrice(poolPair: PoolPair): bigint {
@@ -285,18 +303,31 @@ export class HsmPool extends StableSwap {
     );
     const [maxNom, maxDenom] = JSON.parse(maxPrice);
 
-    const base = 10n ** BigInt(RUNTIME_DECIMALS - poolPair.decimalsOut);
+    const base = big.pow10(RUNTIME_DECIMALS - poolPair.decimalsOut);
+
     return (BigInt(maxNom) * base) / BigInt(maxDenom);
   }
 
   spotPriceInGivenOut(poolPair: PoolPair): bigint {
     const amounOut = big.toBigInt(1, poolPair.decimalsOut);
-    return this.calculateInGivenOut(poolPair, amounOut);
+    const raw = this.calculateInGivenOut(poolPair, amounOut);
+    const scaled = raw * big.pow10(RUNTIME_DECIMALS - poolPair.decimalsOut);
+    return this.normalizeSpotPrice(
+      scaled,
+      poolPair.decimalsOut,
+      poolPair.decimalsIn
+    );
   }
 
   spotPriceOutGivenIn(poolPair: PoolPair): bigint {
     const amounIn = big.toBigInt(1, poolPair.decimalsIn);
-    return this.calculateOutGivenIn(poolPair, amounIn);
+    const raw = this.calculateOutGivenIn(poolPair, amounIn);
+    const scaled = raw * big.pow10(RUNTIME_DECIMALS - poolPair.decimalsIn);
+    return this.normalizeSpotPrice(
+      scaled,
+      poolPair.decimalsIn,
+      poolPair.decimalsOut
+    );
   }
 
   private getCollateralPeg(): string[] {
@@ -320,5 +351,29 @@ export class HsmPool extends StableSwap {
     return (
       Array.isArray(peg) && peg.length === 2 && pegNum === '1' && pegDen === '1'
     );
+  }
+
+  /**
+   * Normalize spot to runtime decimals.
+   *
+   * - if `decimalsIn === decimalsOut`: spot already 18dp
+   * - if `decimalsIn > decimalsOut`: spot in 18 - (decimalsIn - decimalsOut)
+   * - if `decimalsIn < decimalsOut`: spot in 18 + (decimalsOut - decimalsIn)
+   *
+   * @param spotRaw - raw spot
+   * @param decimalsIn - asset in decimals
+   * @param decimalsOut - asset out decimals
+   */
+  private normalizeSpotPrice(
+    spot: bigint,
+    decimalsIn: number,
+    decimalsOut: number
+  ): bigint {
+    const diff = decimalsIn - decimalsOut;
+
+    if (diff === 0) return spot;
+
+    const factor = big.pow10(Math.abs(diff));
+    return diff > 0 ? spot * factor : spot / factor;
   }
 }

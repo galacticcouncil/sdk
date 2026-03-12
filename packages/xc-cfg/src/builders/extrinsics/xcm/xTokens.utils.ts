@@ -1,8 +1,4 @@
-import {
-  XcmV3Junctions,
-  XcmV3Junction,
-  XcmV3MultiassetFungibility,
-} from '@galacticcouncil/descriptors';
+import { XcmV3Junctions, XcmV3Junction } from '@galacticcouncil/descriptors';
 import { Parachain } from '@galacticcouncil/xc-core';
 
 import { XcmVersion } from './types';
@@ -31,12 +27,5 @@ export const toDest = (
         account,
       ]),
     },
-  };
-};
-
-export const toAsset = (assetLocation: object, amount: any) => {
-  return {
-    id: assetLocation,
-    fun: XcmV3MultiassetFungibility.Fungible(amount),
   };
 };

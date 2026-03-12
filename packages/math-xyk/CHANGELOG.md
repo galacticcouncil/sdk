@@ -1,5 +1,11 @@
 # @galacticcouncil/math-xyk
 
+## 1.3.0
+
+### Minor Changes
+
+- support latest wasm-pack build
+
 ## 1.2.0
 
 ### Minor Changes

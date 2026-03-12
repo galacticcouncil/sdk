@@ -1,67 +1,104 @@
-import { Call } from '@galacticcouncil/xc-sdk';
-import { AnyChain, CallType } from '@galacticcouncil/xc-core';
+import {
+  Call,
+  SubstrateCall,
+  SubstrateSigner,
+  EvmSigner,
+  SolanaSigner,
+  SuiSigner,
+} from '@galacticcouncil/xc-sdk';
+import {
+  AnyChain,
+  AnyEvmChain,
+  AnyParachain,
+  CallType,
+  SolanaChain,
+  SuiChain,
+} from '@galacticcouncil/xc-core';
 import { h160 } from '@galacticcouncil/common';
 
-import * as evm from './evm';
-import * as solana from './solana';
-import * as solanaJit from './solanaJit';
-import * as sui from './sui';
-import * as substrate from './substrate';
+import { pjs } from './extension';
 
-const { isEvmAccount } = h160;
+const { isEvmAccount, H160 } = h160;
 
 export async function signSubstrate(call: Call, chain: AnyChain) {
-  substrate.signAndSend(call, chain, ({ type }) => {
-    console.log(type);
+  const ctx = chain as AnyParachain;
+  const signer = await pjs.getSignerBySource('polkadot-js', call.from);
+  new SubstrateSigner(ctx, signer).signAndSend(call as SubstrateCall, {
+    onTransactionSend: (hash) => {
+      console.log('TxHash: ' + hash);
+    },
+    onFinalized: (event) => {
+      console.log('Finalized:', event);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }
 
-async function signEvm(call: Call, chain: AnyChain) {
-  evm.signAndSend(
-    call,
-    chain,
-    (hash) => {
+export async function signEvm(call: Call, chain: AnyChain) {
+  const ctx = chain as AnyEvmChain;
+  const client = ctx.evmClient;
+
+  const account = H160.fromAny(call.from);
+
+  const wallet = client.getSigner(account);
+  await wallet.switchChain({ id: client.chain.id });
+  await wallet.request({ method: 'eth_requestAccounts' });
+
+  new EvmSigner(ctx, wallet).signAndSend(call, {
+    onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
-    (receipt) => {
+    onTransactionReceipt: (receipt) => {
       console.log(receipt);
     },
-    (error) => {
+    onError: (error) => {
       console.error(error);
-    }
-  );
+    },
+  });
 }
 
 export async function signSolana(call: Call, chain: AnyChain) {
-  solana.signAndSend(
-    call,
-    chain,
-    (hash) => {
+  const wallet = (window as any).phantom.solana;
+  new SolanaSigner(chain as SolanaChain, wallet).signAndSend(call, {
+    onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
-    (error) => {
+    onStatus: (status) => {
+      console.log(status);
+    },
+    onError: (error) => {
       console.error(error);
-    }
-  );
+    },
+  });
 }
 
 export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
-  solanaJit.signAndSend(calls, chain, (error) => {
-    console.error(error);
+  const wallet = (window as any).phantom.solana;
+  new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
+    onTransactionSend: (bundleId) => {
+      console.log('BundleId: ' + bundleId);
+    },
+    onBundleStatus: (status) => {
+      console.log(status);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }
 
 export async function signSui(call: Call, chain: AnyChain) {
-  sui.signAndSend(
-    call,
-    chain,
-    (hash) => {
+  const wallet = (window as any).phantom.sui;
+  new SuiSigner(chain as SuiChain, wallet).signAndSend(call, {
+    onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
-    (error) => {
+    onError: (error) => {
       console.error(error);
-    }
-  );
+    },
+  });
 }
 
 export async function sign(call: Call, chain: AnyChain) {

@@ -1,5 +1,63 @@
 # @galacticcouncil/sdk
 
+## 10.8.0
+
+### Minor Changes
+
+- 6abf00c: slip fee support
+
+## 10.7.1
+
+### Patch Changes
+
+- 7ff3934: fix the H20 -> tokens dca bug
+
+## 10.7.0
+
+### Minor Changes
+
+- support latest wasm-pack build
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.3.0
+  - @galacticcouncil/math-stableswap@2.5.0
+  - @galacticcouncil/math-omnipool@1.4.0
+  - @galacticcouncil/math-hsm@1.2.0
+  - @galacticcouncil/math-lbp@1.3.0
+  - @galacticcouncil/math-xyk@1.3.0
+
+## 10.6.2
+
+### Patch Changes
+
+[b5b9982d]: https://github.com/galacticcouncil/sdk/commit/b5b9982d
+
+- [[#b5b9982d][b5b9982d]] sdk: fix buy price calc
+
+## 10.6.1
+
+### Patch Changes
+
+[ad932fb5]: https://github.com/galacticcouncil/sdk/commit/ad932fb5
+
+- [[#ad932fb5][ad932fb5]] sdk: fix opt dryRun xcm version
+
+## 10.6.0
+
+### Minor Changes
+
+[38bfb58c]: https://github.com/galacticcouncil/sdk/commit/38bfb58c
+
+- [[#38bfb58c][38bfb58c]] sdk: fix evm adapter (authorization list support)
+
+## 10.5.0
+
+### Minor Changes
+
+- single coherent pjs stack
+
 ## 10.4.0
 
 ### Minor Changes

@@ -1,5 +1,7 @@
 import { PolkadotClient } from 'polkadot-api';
 
+import { log } from '@galacticcouncil/common';
+
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { Papi } from '../api';
@@ -23,6 +25,8 @@ import {
 } from './types';
 
 import { PoolClient } from './PoolClient';
+
+const { logger } = log;
 
 export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   readonly evm: EvmClient;
@@ -107,6 +111,11 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   }
 
   public withHsm(): this {
+    if (!this.active.has(PoolType.Stable)) {
+      logger.info('[PoolContextProvider] auto-activating stableswap');
+      this.withStableswap();
+    }
+
     this.hsmSub.unsubscribe();
     this.hsmSub = this.subscribe(this.hsm);
     this.active.add(PoolType.HSM);

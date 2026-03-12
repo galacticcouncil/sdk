@@ -1,5 +1,56 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.24.0
+
+### Minor Changes
+
+- ab3015c: add eurc
+
+## 10.23.0
+
+### Minor Changes
+
+[768b018b]: https://github.com/galacticcouncil/sdk/commit/768b018b
+
+- [[#768b018b][768b018b]] xcm: updated bifrost to polkadotXCM pallet
+
+## 10.22.0
+
+### Minor Changes
+
+[f2b52124]: https://github.com/galacticcouncil/sdk/commit/f2b52124
+[9424cbdd]: https://github.com/galacticcouncil/sdk/commit/9424cbdd
+
+- [[#f2b52124][f2b52124]] xcm: moved rentReserve to feeCalc
+- [[#9424cbdd][9424cbdd]] xcm: fix calculateMax function for solana (rentReserve fee)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.11.0
+
+## 10.21.0
+
+### Minor Changes
+
+[62947638]: https://github.com/galacticcouncil/sdk/commit/62947638
+
+- [[#62947638][62947638]] xcm: enable prime
+
+## 10.20.0
+
+### Minor Changes
+
+[482130ce]: https://github.com/galacticcouncil/sdk/commit/482130ce
+
+- [[#482130ce][4626c650]] xcm: added prime cfg
+
+## 10.19.1
+
+### Patch Changes
+
+- fix assethub dwellir rpcs
+
 ## 10.19.0
 
 ### Minor Changes

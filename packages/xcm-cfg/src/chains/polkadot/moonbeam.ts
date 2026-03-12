@@ -13,6 +13,7 @@ import {
   hdx,
   jito_sol,
   pink,
+  prime,
   sol,
   susds_mwh,
   sui,
@@ -22,6 +23,8 @@ import {
   usdt_mwh,
   wbtc_mwh,
   weth_mwh,
+  eurc,
+  eurc_mwh,
 } from '../../assets';
 
 const evmChain: Chain = defineChain({
@@ -95,6 +98,48 @@ export const moonbeam = new EvmParachain({
       },
     },
     {
+      asset: eurc,
+      decimals: 6,
+      id: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: eurc_mwh,
+      decimals: 6,
+      id: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: sol,
       decimals: 9,
       id: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
@@ -130,6 +175,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
               },
             },
           ],

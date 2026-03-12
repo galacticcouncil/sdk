@@ -6,13 +6,13 @@ import {
 import { defineChain, Chain } from 'viem';
 
 import {
-  aca,
   dai_mwh,
   dot,
+  eurc_mwh,
   glmr,
   hdx,
   jito_sol,
-  pink,
+  prime,
   sol,
   susds_mwh,
   sui,
@@ -95,6 +95,27 @@ export const moonbeam = new EvmParachain({
       },
     },
     {
+      asset: eurc_mwh,
+      decimals: 6,
+      id: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x3f9610A50630Bc7D4530736942ee2bC9e00E8De8',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: sol,
       decimals: 9,
       id: '0x99Fec54a5Ad36D50A4Bba3a41CAB983a5BB86A7d',
@@ -130,6 +151,27 @@ export const moonbeam = new EvmParachain({
               AccountKey20: {
                 network: null,
                 key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: prime,
+      decimals: 6,
+      id: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X2: [
+            {
+              PalletInstance: 110,
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
               },
             },
           ],
@@ -264,27 +306,6 @@ export const moonbeam = new EvmParachain({
     },
     // xc-20 assets
     {
-      asset: aca,
-      decimals: 12,
-      id: '0xffffffffa922fef94566104a6e5a35a4fcddaa9f',
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X2: [
-            {
-              Parachain: 2000,
-            },
-            {
-              GeneralKey: {
-                length: 2,
-                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
-              },
-            },
-          ],
-        },
-      },
-    },
-    {
       asset: dot,
       decimals: 10,
       id: '0xffffffff1fcacbd218edc0eba20fc2308c778080',
@@ -306,27 +327,6 @@ export const moonbeam = new EvmParachain({
             },
             {
               GeneralIndex: 0,
-            },
-          ],
-        },
-      },
-    },
-    {
-      asset: pink,
-      decimals: 10,
-      id: '0xffffffff30478fafbe935e466da114e14fb3563d',
-      xcmLocation: {
-        parents: 1,
-        interior: {
-          X3: [
-            {
-              Parachain: 1000,
-            },
-            {
-              PalletInstance: 50,
-            },
-            {
-              GeneralIndex: 23,
             },
           ],
         },

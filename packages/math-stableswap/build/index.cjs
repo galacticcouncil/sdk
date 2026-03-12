@@ -453,7 +453,7 @@ module.exports.recalculate_peg = function(current_pegs, current_pegs_updated_at,
     }
 };
 
-const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
+const path = require('path').join(__dirname, 'hydra_dx_wasm_bg_nodejs.wasm');
 const bytes = require('fs').readFileSync(path);
 
 const wasmModule = new WebAssembly.Module(bytes);

@@ -51,7 +51,8 @@ export class OmniMath {
     assetOutShares: string,
     amountOut: string,
     assetFee: string,
-    protocolFee: string
+    protocolFee: string,
+    maxSlipFee: string
   ): string {
     return calculate_in_given_out(
       assetInBalance,
@@ -62,7 +63,8 @@ export class OmniMath {
       assetOutShares,
       amountOut,
       assetFee,
-      protocolFee
+      protocolFee,
+      maxSlipFee
     );
   }
 
@@ -71,14 +73,16 @@ export class OmniMath {
     assetOutHubReserve: string,
     assetOutShares: string,
     amountOut: string,
-    assetFee: string
+    assetFee: string,
+    maxSlipFee: string
   ): string {
     return calculate_lrna_in_given_out(
       assetOutBalance,
       assetOutHubReserve,
       assetOutShares,
       amountOut,
-      assetFee
+      assetFee,
+      maxSlipFee
     );
   }
 
@@ -91,7 +95,8 @@ export class OmniMath {
     assetOutShares: string,
     amountIn: string,
     assetFee: string,
-    protocolFee: string
+    protocolFee: string,
+    maxSlipFee: string
   ): string {
     return calculate_out_given_in(
       assetInBalance,
@@ -102,7 +107,8 @@ export class OmniMath {
       assetOutShares,
       amountIn,
       assetFee,
-      protocolFee
+      protocolFee,
+      maxSlipFee
     );
   }
 
@@ -111,14 +117,16 @@ export class OmniMath {
     assetOutHubReserve: string,
     assetOutShares: string,
     amountOut: string,
-    assetFee: string
+    assetFee: string,
+    maxSlipFee: string
   ): string {
     return calculate_out_given_lrna_in(
       assetOutBalance,
       assetOutHubReserve,
       assetOutShares,
       amountOut,
-      assetFee
+      assetFee,
+      maxSlipFee
     );
   }
 

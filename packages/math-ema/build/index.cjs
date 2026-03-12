@@ -171,7 +171,7 @@ module.exports.iterated_balance_ema = function(iterations, prev, incoming, smoot
     }
 };
 
-const path = require('path').join(__dirname, 'hydra_dx_wasm_bg.wasm');
+const path = require('path').join(__dirname, 'hydra_dx_wasm_bg_nodejs.wasm');
 const bytes = require('fs').readFileSync(path);
 
 const wasmModule = new WebAssembly.Module(bytes);

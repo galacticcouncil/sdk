@@ -1,5 +1,102 @@
 # @galacticcouncil/xc-sdk
 
+## 0.8.0
+
+### Minor Changes
+
+[9996c4c9]: https://github.com/galacticcouncil/sdk/commit/9996c4c9
+[f381a24c]: https://github.com/galacticcouncil/sdk/commit/f381a24c
+[dee4c0fa]: https://github.com/galacticcouncil/sdk/commit/dee4c0fa
+
+- [[#9996c4c9][9996c4c9]] xc: evm signer fix
+- [[#f381a24c][f381a24c]] xc: support sui claim
+- [[#dee4c0fa][dee4c0fa]] xc: fix sui signer
+
+## 0.7.0
+
+### Minor Changes
+
+[d36a2dbb]: https://github.com/galacticcouncil/sdk/commit/d36a2dbb
+
+- [[#d36a2dbb][d36a2dbb]] xc: add platform signers to sdk
+
+## 0.6.0
+
+### Minor Changes
+
+[ac327f5d]: https://github.com/galacticcouncil/sdk/commit/ac327f5d
+
+- [[#ac327f5d][ac327f5d]] xc: move account utils to common
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.12.0
+
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.11.0
+
+## 0.5.1
+
+### Patch Changes
+
+[e6217edd]: https://github.com/galacticcouncil/sdk/commit/e6217edd
+[0eb8017a]: https://github.com/galacticcouncil/sdk/commit/0eb8017a
+
+- [[#e6217edd][e6217edd]] xc: fix max transfer from SUI
+- [[#0eb8017a][0eb8017a]] xc: changed init amount in transfer to 10 satoshis
+
+## 0.5.0
+
+### Minor Changes
+
+[f2b52124]: https://github.com/galacticcouncil/sdk/commit/f2b52124
+[9424cbdd]: https://github.com/galacticcouncil/sdk/commit/9424cbdd
+
+- [[#f2b52124][f2b52124]] xc: moved rentReserve to feeCalc
+- [[#9424cbdd][9424cbdd]] xc: fix calculateMax function for solana (rentReserve fee)
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.10.0
+
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.9.0
+
+## 0.4.4
+
+### Patch Changes
+
+[80475436]: https://github.com/galacticcouncil/sdk/commit/80475436
+
+- [[#80475436][80475436]] xc: substrate balance watcher at best
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.8.0
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.7.0
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.6.0
+
 ## 0.4.1
 
 ### Patch Changes

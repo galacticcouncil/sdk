@@ -11,7 +11,7 @@ class SubscribeBalance extends PapiExecutor {
   async script(client: PolkadotClient) {
     const balanceClient = new c.BalanceClient(client);
     const subscription = balanceClient
-      .subscribeBalance(TRSRY_ADDRESS)
+      .watchBalance(TRSRY_ADDRESS)
       .subscribe((balances) => {
         console.log(balances);
         this.logTime();

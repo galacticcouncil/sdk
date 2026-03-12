@@ -6,7 +6,7 @@ const wasmOverride = 'hydradx_runtime.pegs.wasm';
 
 const main = async () => {
   const ctx = await setupContext({
-    endpoint: 'wss://hydradx-rpc.dwellir.com',
+    endpoint: 'wss://hydration-rpc.n.dwellir.com',
     port: 17777,
     //wasmOverride: ['wasm', wasmOverride].join('/'),
   });

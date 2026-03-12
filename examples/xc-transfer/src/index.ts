@@ -1,20 +1,12 @@
-import {
-  AssetAmount,
-  ConfigBuilder,
-  Parachain,
-  SolanaChain,
-} from '@galacticcouncil/xc-core';
-import {
-  SolanaLilJit,
-  SubstrateCall,
-  TransferBuilder,
-} from '@galacticcouncil/xc-sdk';
+import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xc-core';
+import { TransferBuilder } from '@galacticcouncil/xc-sdk';
 
-import { logAssets, logSrcChains, logDestChains } from './utils';
-import { sign, signSubstrate, signSolanaBundle } from './signers';
+import { sign } from './signers';
 import { ctx } from './setup';
+import { log } from './utils';
 
-const { config, wallet, wormhole } = ctx;
+const { logAssets, logSrcChains, logDestChains } = log;
+const { config, wallet } = ctx;
 
 // Define transfer constraints
 const srcChain = config.getChain('ethereum');
@@ -66,79 +58,9 @@ const [call, fee] = await Promise.all([
 // Dump transfer info
 console.log(transfer);
 console.log(status);
-console.log(
-  'Estimated fee:',
-  [fee.toDecimal(fee.decimals), fee.originSymbol].join(' ')
-);
+console.log('Estimated fee:', [fee.toDecimal(), fee.originSymbol].join(' '));
 console.log(call);
 console.log('Dry run:', await call.dryRun());
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
-
-/***************************/
-/**** Helper functions *****/
-/***************************/
-
-/**
- * Check hydration withdrawals and claim stucked
- *
- * @param account - hydration account (for)
- * @param payer - claim payer (from)
- */
-async function claimWithdraws(account: string, payer: string) {
-  const withdraws = await wormhole.transfer.getWithdraws(account);
-
-  for (const withdrawal of withdraws) {
-    if (withdrawal.redeem) {
-      console.log(withdrawal);
-      const calls = await withdrawal.redeem(payer);
-      const isBatch = Array.isArray(calls);
-      if (isBatch && withdrawal.toChain.isSolana()) {
-        // Jito bundle execution
-        await signSolanaBundle(calls, destChain);
-      } else if (isBatch) {
-        // Sequential batch execution
-        for (const call of calls) {
-          await sign(call, destChain);
-        }
-      } else {
-        await sign(call, destChain);
-      }
-    }
-  }
-}
-
-/**
- * Check hydration deposits and claim stucked
- *
- * @param account - hydration account (for)
- * @param payer - claim payer (from)
- */
-async function claimDeposits(account: string, payer: string) {
-  const srcChain = config.getChain('hydration') as Parachain;
-  const destChain = config.getChain('moonbeam') as Parachain;
-  const feeAsset = srcChain.findAssetById('10'); // default to system
-
-  const deposits = await wormhole.transfer.getDeposits(account);
-
-  for (const deposit of deposits) {
-    if (deposit.redeem) {
-      console.log(deposit);
-      const call = await deposit.redeem(payer);
-      const isBatch = Array.isArray(call);
-      if (isBatch) {
-        throw Error('Batch not supported');
-      } else {
-        const remoteTx = await wallet.remoteXcm(
-          payer,
-          srcChain,
-          destChain,
-          call as SubstrateCall,
-          { srcFeeAsset: feeAsset?.asset }
-        );
-        await signSubstrate(remoteTx, srcChain);
-      }
-    }
-  }
-}

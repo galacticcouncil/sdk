@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xc-cfg.svg)](https://www.npmjs.com/package/@galacticcouncil/xc-cfg)
 
-Cross-chain routes configuration & validation.
+Pre-configured routes and DEX implementations for Hydration. Maps assets to chains and defines how transfers are executed.
 
 ## Installation
 

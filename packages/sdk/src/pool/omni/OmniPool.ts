@@ -36,6 +36,7 @@ export type OmniPoolToken = PoolToken & {
 export type OmniPoolFees = PoolFees & {
   assetFee: PoolFee;
   protocolFee: PoolFee;
+  maxSlipFee: PoolFee;
 };
 
 export type OmniPoolBase = PoolBase & {
@@ -216,7 +217,8 @@ export class OmniPool implements Pool {
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
       fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -232,7 +234,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountOut.toFixed(0),
-      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -256,7 +259,8 @@ export class OmniPool implements Pool {
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
       fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
-      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.protocolFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;
@@ -272,7 +276,8 @@ export class OmniPool implements Pool {
       poolPair.hubReservesOut.toString(),
       poolPair.sharesOut.toString(),
       amountIn.toFixed(0),
-      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString()
+      fees ? FeeUtils.toRaw(fees.assetFee).toString() : ZERO.toString(),
+      fees ? FeeUtils.toRaw(fees.maxSlipFee).toString() : ZERO.toString()
     );
     const priceBN = bnum(price);
     return priceBN.isNegative() ? ZERO : priceBN;

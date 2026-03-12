@@ -1,5 +1,197 @@
 # @galacticcouncil/sdk-next
 
+## 0.37.0
+
+### Minor Changes
+
+- d0ed76d: slip fee support
+
+## 0.36.4
+
+### Patch Changes
+
+- b139d4d: fix the H20 -> tokens dca bug
+- 2e3b193: fix fetching erc20 balances
+
+## 0.36.3
+
+### Patch Changes
+
+- d327ae29: fix: hsm spot calc
+
+## 0.36.2
+
+### Patch Changes
+
+- 0c44bba5: fix internal pool client wiring outside defer
+
+## 0.36.1
+
+### Patch Changes
+
+- e7e7f724: fix hsm hollar sell validation
+
+## 0.36.0
+
+### Minor Changes
+
+- support latest wasm-pack build
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.3.0
+  - @galacticcouncil/math-stableswap@2.5.0
+  - @galacticcouncil/math-omnipool@1.4.0
+  - @galacticcouncil/math-staking@1.3.0
+  - @galacticcouncil/math-hsm@1.2.0
+  - @galacticcouncil/math-lbp@1.3.0
+  - @galacticcouncil/math-xyk@1.3.0
+
+## 0.35.0
+
+### Minor Changes
+
+- fd4b920: fix farm apr calculation
+
+## 0.34.0
+
+### Minor Changes
+
+- b270643: wrap order tx with extra gas
+
+## 0.33.0
+
+### Minor Changes
+
+[c89ea896]: https://github.com/galacticcouncil/sdk/commit/c89ea896
+
+- [[#c89ea896][c89ea896]] next: disable hsm
+
+## 0.32.0
+
+### Minor Changes
+
+[a10aafae]: https://github.com/galacticcouncil/sdk/commit/a10aafae
+
+- [[#a10aafae][a10aafae]] support rt upgrade 392
+
+## 0.31.0
+
+### Minor Changes
+
+[038f1929]: https://github.com/galacticcouncil/sdk/commit/038f1929
+
+- [[#038f1929][038f1929]] next: support open budget DCA
+
+## 0.30.4
+
+### Patch Changes
+
+[538a9228]: https://github.com/galacticcouncil/sdk/commit/538a9228
+
+- [[#538a9228][538a9228]] next: fix hsm spot decimals
+
+## 0.30.3
+
+### Patch Changes
+
+[b5b9982d]: https://github.com/galacticcouncil/sdk/commit/b5b9982d
+
+- [[#b5b9982d][b5b9982d]] next: fix buy price calc
+
+## 0.30.2
+
+### Patch Changes
+
+[d91d0720]: https://github.com/galacticcouncil/sdk/commit/d91d0720
+[0fb53f38]: https://github.com/galacticcouncil/sdk/commit/0fb53f38
+
+- [[#d91d0720][d91d0720]] next: fix hsm factory
+- [[#0fb53f38][0fb53f38]] next: farm queries to best block
+
+## 0.30.1
+
+### Patch Changes
+
+[fde55e89]: https://github.com/galacticcouncil/sdk/commit/fde55e89
+
+- [[#fde55e89][fde55e89]] next: fix hsm factory
+
+## 0.30.0
+
+### Minor Changes
+
+[22616cd9]: https://github.com/galacticcouncil/sdk/commit/22616cd9
+
+- [[#22616cd9][22616cd9]] next: enable hsm
+
+## 0.29.0
+
+### Minor Changes
+
+[18c303e7]: https://github.com/galacticcouncil/sdk/commit/18c303e7
+[a0275d4e]: https://github.com/galacticcouncil/sdk/commit/a0275d4e
+[96e2eef7]: https://github.com/galacticcouncil/sdk/commit/96e2eef7
+[804aae92]: https://github.com/galacticcouncil/sdk/commit/804aae92
+
+- [[#18c303e7][18c303e7]] next: increase pool client sync timeout to 60s
+- [[#a0275d4e][a0275d4e]] next: fix watchBalance & defer watchers by default
+- [[#96e2eef7][96e2eef7]] next: update probe to expandable
+- [[#804aae92][804aae92]] bump papi to latest (1.23.3)
+
+## 0.28.0
+
+### Minor Changes
+
+[340f382f]: https://github.com/galacticcouncil/sdk/commit/340f382f
+[daa26158]: https://github.com/galacticcouncil/sdk/commit/daa26158
+
+- [[#340f382f][340f382f]] next: balance client naming fixes
+- [[#daa26158][daa26158]] next: add smoldot provider
+
+## 0.27.2
+
+### Patch Changes
+
+[d758722c]: https://github.com/galacticcouncil/sdk/commit/d758722c
+
+- [[#d758722c][d758722c]] next: fix dca trade count resolution
+
+## 0.27.1
+
+### Patch Changes
+
+[d0e266e8]: https://github.com/galacticcouncil/sdk/commit/d0e266e8
+
+- [[#d0e266e8][d0e266e8]] next: cleanup logs
+
+## 0.27.0
+
+### Minor Changes
+
+[25c02fa8]: https://github.com/galacticcouncil/sdk/commit/25c02fa8
+
+- [[#25c02fa8][25c02fa8]] next: fix DCA max calculation (time contraints)
+
+## 0.26.0
+
+### Minor Changes
+
+[00197bf3]: https://github.com/galacticcouncil/sdk/commit/00197bf3
+[64672dfb]: https://github.com/galacticcouncil/sdk/commit/64672dfb
+[f4c70f0d]: https://github.com/galacticcouncil/sdk/commit/f4c70f0d
+
+- [[#00197bf3][00197bf3]] next: pool re-sync support (recovery)
+- [[#64672dfb][64672dfb]] next: calc & async utils
+- [[#f4c70f0d][f4c70f0d]] bump papi to latest (1.23.2)
+
+## 0.25.0
+
+### Minor Changes
+
+- a7811b7: next: spot always 18 decimals
+
 ## 0.24.0
 
 ### Minor Changes

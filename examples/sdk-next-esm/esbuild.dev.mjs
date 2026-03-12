@@ -14,9 +14,9 @@ const options = {
   preserveSymlinks: true,
   treeShaking: true,
   metafile: true,
-  minify: true,
-  splitting: true,
-  sourcemap: false,
+  minify: false,
+  splitting: false,
+  sourcemap: true,
   outdir: 'out/',
   logLevel: 'info',
 };

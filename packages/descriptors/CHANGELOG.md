@@ -1,5 +1,59 @@
 # @galacticcouncil/descriptors
 
+## 1.14.0
+
+### Minor Changes
+
+- c9797aa support v45.0.0 types
+
+## 1.13.1
+
+### Patch Changes
+
+- 69124d1: whitelist proxy pallet
+
+## 1.13.0
+
+### Minor Changes
+
+[16dc11cc]: https://github.com/galacticcouncil/sdk/commit/16dc11cc
+
+- [[#16dc11cc][16dc11cc]] desc: update hydration descriptor to latest metadata
+
+## 1.12.0
+
+### Minor Changes
+
+[cd826f3f]: https://github.com/galacticcouncil/sdk/commit/cd826f3f
+
+- [[#cd826f3f][cd826f3f]] desc: add next runtime support 392
+
+## 1.11.0
+
+### Minor Changes
+
+[4032250]: https://github.com/galacticcouncil/sdk/commit/4032250
+
+- [[#4032250][4032250]] re-build descriptors to latest
+
+## 1.10.0
+
+### Minor Changes
+
+- 9b8bfe2: Extend descriptors whitelist
+
+## 1.9.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.23.3), re-build descriptors
+
+## 1.8.0
+
+### Minor Changes
+
+- Bump polkadot-api to latest (1.23.2), re-build descriptors
+
 ## 1.7.0
 
 ### Minor Changes

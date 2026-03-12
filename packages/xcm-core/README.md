@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@galacticcouncil/xcm-core.svg)](https://www.npmjs.com/package/@galacticcouncil/xcm-core)
 
-Cross-chain core definitions & types. Backbone for sdk & config module.
+Core definitions and types for cross-chain operations — chain definitions, asset types, and bridge configurations. Backbone for `xcm-sdk` and `xcm-cfg` modules.
 
 ## Installation
 

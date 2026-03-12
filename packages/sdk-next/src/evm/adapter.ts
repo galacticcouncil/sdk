@@ -1,6 +1,5 @@
 import {
   Binary,
-  CompatibilityLevel,
   FixedSizeBinary,
   PolkadotClient,
   TypedApi,
@@ -47,16 +46,7 @@ export class EvmRpcAdapter {
       args: args,
     });
 
-    const query = this.api.apis.EthereumRuntimeRPCApi.call;
-    const compatibilityToken = await this.api.compatibilityToken;
-    const isComp = query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
-    );
-
-    console.log(isComp);
-
-    const res = await this.api.apis.EthereumRuntimeRPCApi.call(
+    const result = await this.api.apis.EthereumRuntimeRPCApi.call(
       FixedSizeBinary.fromText(''),
       FixedSizeBinary.fromHex(address as `0x${string}`),
       Binary.fromHex(data),
@@ -66,17 +56,16 @@ export class EvmRpcAdapter {
       undefined,
       undefined,
       false,
+      [],
       []
     );
 
-    console.log(res);
-
-    if (!res.success) {
-      console.error(functionName, res.value.type);
+    if (!result.success) {
+      console.error(functionName, result.value.type);
       throw new Error('Contract read failure');
     }
 
-    const { exit_reason, value, used_gas } = res.value;
+    const { exit_reason, value, used_gas } = result.value;
 
     console.log(used_gas);
 
