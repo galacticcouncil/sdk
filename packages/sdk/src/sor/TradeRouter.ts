@@ -487,15 +487,20 @@ export class TradeRouter extends Router {
   }
   async getBestSpotPriceWitRoute(
     assetIn: string,
-    assetOut: string
-  ): Promise<{ price: Amount; route: Hop[] } | undefined> {
+    assetOut: string,
+    cachedMlr?: Map<string, Hop[]>
+  ): Promise<{ price: Amount; route: Hop[]; routeKey: string } | undefined> {
     return this.withCtx(assetIn, assetOut, async (ctx) => {
       const { pools, poolsMap } = ctx;
 
       const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
-      let route = this.mlr.get(routeKey);
+      let route = cachedMlr?.get(routeKey);
+
+      if (!route) {
+        route = this.mlr.get(routeKey);
       if (!route) {
         route = await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
+      }
       }
 
       const swaps = await this.toSellSwaps('1', route, poolsMap);
@@ -507,6 +512,7 @@ export class TradeRouter extends Router {
       return {
         price: { amount: spotPriceAmount, decimals: spotPriceDecimals },
         route,
+        routeKey,
       };
     }).catch(() => undefined);
   }
