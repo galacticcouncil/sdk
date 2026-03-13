@@ -1,11 +1,11 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xc-core';
 import { TransferBuilder } from '@galacticcouncil/xc-sdk';
 
-import { claimDeposits, claimWithdraws } from './claims';
 import { sign } from './signers';
-import { ctx, xcStore } from './setup';
-import { logAssets, logSrcChains, logDestChains } from './utils';
+import { ctx } from './setup';
+import { log } from './utils';
 
+const { logAssets, logSrcChains, logDestChains } = log;
 const { config, wallet } = ctx;
 
 // Define transfer constraints
@@ -48,7 +48,7 @@ const transfer = await TransferBuilder(wallet)
 const status = await transfer.validate();
 
 // Construct calldata with transfer amount
-const transferAmount = '0.01';
+const transferAmount = '0.1';
 
 const [call, fee] = await Promise.all([
   transfer.buildCall(transferAmount),
@@ -64,27 +64,3 @@ console.log('Dry run:', await call.dryRun());
 
 // Unsubscribe source chain balance
 balanceSubscription.unsubscribe();
-
-/***************************/
-/**** Helper functions *****/
-/***************************/
-
-function subscribeStore(address: string) {
-  xcStore.subscribe(address, {
-    onLoad(j) {
-      console.log('History:', j);
-    },
-    onNew(j) {
-      console.log('New:', j);
-    },
-    onUpdate(j, p) {
-      console.log('Updated:', j, p);
-    },
-    onOpen() {
-      console.log('Live stream started...');
-    },
-    onError(err) {
-      console.error('Live stream error', err);
-    },
-  });
-}

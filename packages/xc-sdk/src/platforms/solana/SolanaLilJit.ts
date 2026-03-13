@@ -67,11 +67,10 @@ export class SolanaLilJit {
   async simulateBundle(
     encoded: string[]
   ): Promise<JitoBundleSimulationResponse> {
-    const { result } = await (this.#connection as any)._rpcRequest(
-      'simulateBundle',
-      [[encoded]]
-    );
-    return result;
+    const res = await (this.#connection as any)._rpcRequest('simulateBundle', [
+      [encoded],
+    ]);
+    return res.result;
   }
 
   async getInflightBundleStatuses(

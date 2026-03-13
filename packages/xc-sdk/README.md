@@ -6,6 +6,26 @@ Wallet interface for executing cross-chain asset transfers. Supports Substrate, 
 
 Wallet does not perform any signing — it provides transfer data to maintain loose coupling & interoperability with 3rd party code.
 
+For convenience, the SDK also ships built-in platform signers that can sign & submit the transfer calls.
+
+| Platform | Signer | Wallet / Signer |
+| --- | --- | --- |
+| Substrate | `SubstrateSigner` | `PolkadotSigner` (polkadot-api) |
+| EVM | `EvmSigner` | `WalletClient` (viem) |
+| Solana | `SolanaSigner` | `SolanaWallet` or `Keypair` |
+| Sui | `SuiSigner` | `SuiWallet` or `Ed25519Keypair` |
+
+```typescript
+import { SubstrateSigner } from '@galacticcouncil/xc-sdk';
+
+const signer = new SubstrateSigner(chain, polkadotSigner);
+signer.signAndSend(call, {
+  onTransactionSend: (hash) => console.log('TxHash:', hash),
+  onFinalized: (event) => console.log('Finalized:', event),
+  onError: (error) => console.error(error),
+});
+```
+
 ## Installation
 
 Install with [npm](https://www.npmjs.com/):
@@ -55,7 +75,11 @@ const wallet = new Wallet({
   configService: configService,
   transferValidations: validations,
 });
+```
 
+## Transfer
+
+```typescript
 // Define transfer
 const srcChain = configService.getChain('ethereum');
 const destChain = configService.getChain('hydration');

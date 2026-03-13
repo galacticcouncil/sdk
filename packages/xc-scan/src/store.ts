@@ -44,7 +44,9 @@ export class XcStore {
       .address(address)
       .build({ validate: true });
 
-    const res = await this.http.queryCrosschain(req, { limit: 25 });
+    const res = await this.http.queryCrosschain(req, {
+      limit: 100,
+    });
     for (const j of res.items) {
       this.store.set(j.correlationId, j);
     }

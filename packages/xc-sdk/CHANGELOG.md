@@ -1,10 +1,24 @@
 # @galacticcouncil/xc-sdk
 
-## 0.6.1
+## 0.8.0
 
-### Patch Changes
+### Minor Changes
 
-- fix
+[9996c4c9]: https://github.com/galacticcouncil/sdk/commit/9996c4c9
+[f381a24c]: https://github.com/galacticcouncil/sdk/commit/f381a24c
+[dee4c0fa]: https://github.com/galacticcouncil/sdk/commit/dee4c0fa
+
+- [[#9996c4c9][9996c4c9]] xc: evm signer fix
+- [[#f381a24c][f381a24c]] xc: support sui claim
+- [[#dee4c0fa][dee4c0fa]] xc: fix sui signer
+
+## 0.7.0
+
+### Minor Changes
+
+[d36a2dbb]: https://github.com/galacticcouncil/sdk/commit/d36a2dbb
+
+- [[#d36a2dbb][d36a2dbb]] xc: add platform signers to sdk
 
 ## 0.6.0
 

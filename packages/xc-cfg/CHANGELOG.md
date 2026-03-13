@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 0.16.0
+
+### Minor Changes
+
+[9996c4c9]: https://github.com/galacticcouncil/sdk/commit/9996c4c9
+
+- [[#9996c4c9][9996c4c9]] xc: support solana native mint
+
 ## 0.15.0
 
 ### Minor Changes

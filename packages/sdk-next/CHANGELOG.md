@@ -1,5 +1,24 @@
 # @galacticcouncil/sdk-next
 
+## 0.37.0
+
+### Minor Changes
+
+- d0ed76d: slip fee support
+
+## 0.36.4
+
+### Patch Changes
+
+- b139d4d: fix the H20 -> tokens dca bug
+- 2e3b193: fix fetching erc20 balances
+
+## 0.36.3
+
+### Patch Changes
+
+- d327ae29: fix: hsm spot calc
+
 ## 0.36.2
 
 ### Patch Changes

@@ -174,6 +174,17 @@ export class TradeScheduler {
         decimals
       );
     }
+
+    const reverseSpot = await this.router.getSpotPrice(asset, SYSTEM_ASSET_ID);
+    if (reverseSpot) {
+      return calc.divSpot(
+        this.minOrderBudget,
+        reverseSpot.amount,
+        SYSTEM_ASSET_DECIMALS,
+        decimals
+      );
+    }
+
     throw new Error('Unable to calculate order budget');
   }
 

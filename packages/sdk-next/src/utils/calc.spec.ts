@@ -1,4 +1,4 @@
-import { mulScaled, mulSpot, getFraction } from './calc';
+import { mulScaled, mulSpot, divSpot, getFraction } from './calc';
 
 describe('calc bigint helpers', () => {
   describe('mulScaled', () => {
@@ -61,6 +61,30 @@ describe('calc bigint helpers', () => {
 
       const out = mulSpot(value, spot, 6, 18);
       expect(out).toBe(6n * 10n ** 18n);
+    });
+  });
+
+  describe('divSpot', () => {
+    it('is the inverse of mulSpot with same decimals', () => {
+      // 10.0 (12dp) / 2.0 (18dp) -> target 12dp => 5.0 (12dp)
+      const value = 10n * 10n ** 12n;
+      const spot = 2n * 10n ** 18n;
+
+      const out = divSpot(value, spot, 12, 12);
+      expect(out).toBe(5n * 10n ** 12n);
+    });
+
+    it('divSpot scaling up to 18 decimals', () => {
+      // 6.0 (6dp) / 3.0 (18dp) -> target 18dp => 2.0 (18dp)
+      const value = 6n * 10n ** 6n;
+      const spot = 3n * 10n ** 18n;
+
+      const out = divSpot(value, spot, 6, 18);
+      expect(out).toBe(2n * 10n ** 18n);
+    });
+
+    it('returns zero when spot is zero', () => {
+      expect(divSpot(10n * 10n ** 12n, 0n, 12, 12)).toBe(0n);
     });
   });
 

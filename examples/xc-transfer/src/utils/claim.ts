@@ -1,8 +1,8 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 import { SubstrateCall } from '@galacticcouncil/xc-sdk';
 
-import { sign, signSubstrate, signSolanaBundle } from './signers';
-import { ctx } from './setup';
+import { sign, signSubstrate, signSolanaBundle } from '../signers';
+import { ctx } from '../setup';
 
 const { config, wallet, wormhole } = ctx;
 
