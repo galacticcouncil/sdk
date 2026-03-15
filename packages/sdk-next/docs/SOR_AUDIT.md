@@ -35,7 +35,9 @@
 ### B1: `PoolFactory.get()` called per-pool on every trade query
 
 **Location:** `Router.toPoolsMap()` (line 227-230) and `Router.validateInput()` -> `getPaths()` chain
+
 **Impact:** Medium. Every `withCtx()` call creates `Pool` value objects for *all* pools, not just those in the matched routes.
+
 **Current cost:** N pool allocations + constructor work per trade query.
 
 **Suggestion:** Cache the `Pool` map keyed on pool address + a generation counter that increments when `PoolStore` changes. The `Pool` objects are pure projections of `PoolBase` data, so they can be safely cached until the underlying data changes.
@@ -61,6 +63,7 @@ private toPoolsMap(pools: PoolBase[]): Map<string, Pool> {
 ### B2: `getPaths()` calls `toPoolsMap()` separately from `validateInput()`
 
 **Location:** `Router.getPaths()` line 167 and `Router.validateInput()` line 139
+
 **Impact:** Low-Medium. `toPoolsMap()` is called twice: once in `validateInput` and once inside `getPaths()` via `validPath()`.
 
 **Suggestion:** `buildCtxSync` already calls `validateInput` which returns the map. Pass it through to `getPaths` instead of rebuilding:
@@ -77,6 +80,7 @@ private buildCtxSync(assetIn: number, assetOut: number, pools: PoolBase[]): Ctx 
 ### B3: `getPoolFees()` is async and called sequentially per hop in `toSellSwaps`/`toBuySwaps`
 
 **Location:** `TradeRouter.toSellSwaps()` line 421, `TradeRouter.toBuySwaps()` line 767
+
 **Impact:** Medium-High for multi-hop routes. Each hop awaits `getPoolFees()` before proceeding to the next because the output amount feeds the next input. However, the *fee fetch itself* is independent of amounts.
 
 **Suggestion:** Pre-fetch fees for all hops in a route before the sequential calculation loop:
@@ -105,6 +109,7 @@ private async toSellSwaps(amountIn, path, poolsMap): Promise<SellSwap[]> {
 ### B4: `PoolContextProvider.getPools()` creates a new array on every call
 
 **Location:** `PoolContextProvider.getPools()` line 148-161
+
 **Impact:** Low. `Array.from(this.pools.values())` allocates on each call. Given this is called per-trade, it adds GC pressure.
 
 **Suggestion:** Maintain a cached array that invalidates when `pools` map changes:
@@ -130,6 +135,7 @@ public async getPools(): Promise<PoolBase[]> {
 ### B5: MLR cache invalidation is coarse-grained
 
 **Location:** `TradeRouter.onFilterChanged()` clears entire `mlr` map
+
 **Impact:** Low. The MLR key includes pool count (`${assetIn}->${assetOut}::${pools.length}`), but doesn't account for *which* pools changed. A balance update that doesn't change pool composition still invalidates MLR if pool count changes (e.g., a pool becomes invalid due to zero balance).
 
 **Suggestion:** Acceptable for now. A more granular approach (e.g., including a content hash) would add complexity without significant benefit since MLR recalculation is infrequent.
@@ -137,6 +143,7 @@ public async getPools(): Promise<PoolBase[]> {
 ### B6: `PoolContextProvider.getPoolFees()` does a linear scan
 
 **Location:** `PoolContextProvider.getPoolFees()` line 164
+
 **Impact:** Low. `this.clients.find(c => c.getPoolType() === pool.type)` is O(6) at most. Negligible.
 
 **Suggestion:** Replace with a `Map<PoolType, PoolClient>` for O(1) lookup. Marginal improvement but cleaner:
