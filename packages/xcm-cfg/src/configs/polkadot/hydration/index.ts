@@ -106,7 +106,6 @@ import {
   toZeitgeistErc20Template,
   toTransferTemplate,
   viaSnowbridgeTemplate,
-  viaWormholeRelayerTemplate,
   viaWormholeBridgeTemplate,
   viaHyperbridgeTemplate,
 } from './templates';
@@ -350,11 +349,11 @@ const toDarwinia: AssetRoute[] = [toTransferTemplate(ring, darwinia, 4)];
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna, 0.001)];
 
 const toEthereumViaWormhole: AssetRoute[] = [
-  viaWormholeRelayerTemplate(dai_mwh, dai, ethereum),
-  viaWormholeRelayerTemplate(weth_mwh, eth, ethereum),
-  viaWormholeRelayerTemplate(wbtc_mwh, wbtc, ethereum),
-  viaWormholeRelayerTemplate(usdt_mwh, usdt, ethereum),
-  viaWormholeRelayerTemplate(usdc_mwh, usdc, ethereum),
+  viaWormholeBridgeTemplate(dai_mwh, dai, ethereum),
+  viaWormholeBridgeTemplate(weth_mwh, eth, ethereum),
+  viaWormholeBridgeTemplate(wbtc_mwh, wbtc, ethereum),
+  viaWormholeBridgeTemplate(usdt_mwh, usdt, ethereum),
+  viaWormholeBridgeTemplate(usdc_mwh, usdc, ethereum),
   viaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
 ];
 
@@ -385,13 +384,13 @@ const toBaseViaWormhole: AssetRoute[] = [
 ];
 
 const toSolanaViaWormhole: AssetRoute[] = [
-  viaWormholeRelayerTemplate(sol, sol, solana),
+  viaWormholeBridgeTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
   viaWormholeBridgeTemplate(prime, prime, solana),
 ];
 
 const toSuiViaWormhole: AssetRoute[] = [
-  viaWormholeRelayerTemplate(sui, sui, sui_chain),
+  viaWormholeBridgeTemplate(sui, sui, sui_chain),
 ];
 
 const toCex: AssetRoute[] = [
@@ -429,7 +428,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toCrust,
     ...toDarwinia,
-    ...toEthereumViaHyperbridge,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
