@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 0.17.0
+
+### Minor Changes
+
+- get rid of xLabs
+
 ## 0.16.0
 
 ### Minor Changes

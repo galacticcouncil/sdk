@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- get rid of xLabs
+
 ## 0.8.0
 
 ### Minor Changes

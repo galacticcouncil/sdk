@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.25.0
+
+### Minor Changes
+
+- get rid of xLabs
+
 ## 10.24.0
 
 ### Minor Changes
