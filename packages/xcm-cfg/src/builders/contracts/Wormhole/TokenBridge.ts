@@ -10,7 +10,7 @@ import {
 } from '@galacticcouncil/xcm-core';
 
 import { PublicKey } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { getAssociatedTokenAddress, NATIVE_MINT } from '@solana/spl-token';
 
 import { parseAssetId } from '../../utils';
 
@@ -96,11 +96,16 @@ const transferTokens = (): ContractConfigBuilder => ({
     const ctxWh = Wh.fromChain(ctx);
     const rcvWh = Wh.fromChain(rcv);
 
+    const tokenId = rcv.getAssetId(asset);
+
     let rcvAddress = address;
+
     if (rcv.isSolana()) {
-      const tokenId = rcv.getAssetId(asset);
+      const tokenMint =
+        tokenId === 'SOL' ? NATIVE_MINT : new PublicKey(tokenId);
+
       const rcvTokenAddress = await getAssociatedTokenAddress(
-        new PublicKey(tokenId),
+        tokenMint,
         new PublicKey(address)
       );
       rcvAddress = rcvTokenAddress.toBase58();
