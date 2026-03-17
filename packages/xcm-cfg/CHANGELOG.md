@@ -1,5 +1,11 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.25.1
+
+### Patch Changes
+
+- fix native sol mint cfg
+
 ## 10.25.0
 
 ### Minor Changes
