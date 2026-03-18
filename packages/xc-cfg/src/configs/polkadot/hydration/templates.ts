@@ -16,6 +16,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
+import { buildSnowbridgeOutboundMessage } from '../../../builders/extrinsics/xcm';
 import { assetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
@@ -302,9 +303,7 @@ export function viaSnowbridgeTemplate(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).prior(
-      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      })
+      ExtrinsicBuilder().polkadotXcm().execute(buildSnowbridgeOutboundMessage())
     ),
     tags: [Tag.Snowbridge],
   });

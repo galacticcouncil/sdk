@@ -11,6 +11,8 @@ import { encodeLocation } from '@galacticcouncil/common';
 import { Twox128, u128 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
+type AssetLocation = { parents: number; interior: any };
+
 import { BaseClient } from '../base';
 
 export class AssethubClient extends BaseClient<Hub> {
@@ -123,5 +125,41 @@ export class AssethubClient extends BaseClient<Hub> {
       return val;
     }
     throw Error(`Can't parse delivery fee.`);
+  }
+
+  async quoteDotToEther(
+    etherLocation: AssetLocation,
+    dotAmount: bigint
+  ): Promise<bigint> {
+    const dotLocation = { parents: 1, interior: XcmV5Junctions.Here() };
+    const result =
+      await this.api().apis.AssetConversionApi.quote_price_exact_tokens_for_tokens(
+        dotLocation,
+        etherLocation,
+        dotAmount,
+        true
+      );
+    if (result === undefined) {
+      throw Error(`Can't quote DOT to Ether conversion.`);
+    }
+    return result;
+  }
+
+  async quoteEtherForDot(
+    etherLocation: AssetLocation,
+    dotAmount: bigint
+  ): Promise<bigint> {
+    const dotLocation = { parents: 1, interior: XcmV5Junctions.Here() };
+    const result =
+      await this.api().apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
+        etherLocation,
+        dotLocation,
+        dotAmount,
+        true
+      );
+    if (result === undefined) {
+      throw Error(`Can't quote Ether for DOT conversion.`);
+    }
+    return result;
   }
 }
