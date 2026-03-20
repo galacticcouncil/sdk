@@ -302,9 +302,7 @@ export function viaSnowbridgeTemplate(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).prior(
-      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      })
+      ExtrinsicBuilder().polkadotXcm().execute().viaSnowbridge()
     ),
     tags: [Tag.Snowbridge],
   });
