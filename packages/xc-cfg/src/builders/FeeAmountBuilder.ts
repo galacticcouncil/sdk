@@ -25,6 +25,10 @@ import { padFeeByPercentage } from './utils';
 import { dot } from '../assets';
 import { BaseClient, AssethubClient, HydrationClient } from '../clients';
 
+// Snowbridge Gateway contract gas limits
+const SNOWBRIDGE_DELIVERY_GAS = 80_000n;
+const SNOWBRIDGE_BASE_DELIVERY_GAS = 120_000n;
+
 function TokenRelayer() {
   return {
     calculateRelayerFee: (): FeeAmountConfigBuilder => ({
@@ -160,8 +164,9 @@ function Snowbridge() {
       },
     }),
     calculateOutboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
-      build: async ({ transferAsset, feeAsset, source }) => {
+      build: async ({ transferAsset, feeAsset, source, destination }) => {
         const ctx = source as Parachain;
+        const dest = destination as EvmChain;
 
         const hubClient = new AssethubClient(opts.hub);
         const etherLoc = etherLocation(ETHEREUM_CHAIN_ID);
@@ -183,12 +188,10 @@ function Snowbridge() {
           hubClient.calculateDestinationFee(returnToSenderXcm, feeAsset),
         ]);
 
-        // Hardcoded BridgeHub extrinsic fee
-        const extrinsicFeeDot = 250_000_000n;
-
-        const etherFeeAmount = await hubClient.quoteDotToEther(
-          etherLoc,
-          extrinsicFeeDot
+        const gasPrice = await dest.evmClient.getProvider().getGasPrice();
+        const etherFeeAmount = padFeeByPercentage(
+          gasPrice * (SNOWBRIDGE_DELIVERY_GAS + SNOWBRIDGE_BASE_DELIVERY_GAS),
+          33n
         );
 
         // DOT for AssetHub execution + downstream deliveries (remote_fees)
@@ -200,7 +203,10 @@ function Snowbridge() {
           padFeeByPercentage(returnToSenderDestinationFee, 25n);
 
         // DOT to swap for Ether on AssetHub (padded for AMM slippage)
-        const dotToEtherSwapAmount = padFeeByPercentage(extrinsicFeeDot, 20n);
+        const dotToEtherSwapAmount = padFeeByPercentage(
+          await hubClient.quoteDotForExactEther(etherLoc, etherFeeAmount),
+          20n
+        );
 
         // Query source chain XCM execution fee dynamically
         const sourceClient = new HydrationClient(ctx);
@@ -215,6 +221,7 @@ function Snowbridge() {
           etherFeeAmount: 1_000_000_000n,
           topic: '0x' + '00'.repeat(32),
         });
+
         const sourceExecutionFee = padFeeByPercentage(
           await sourceClient.calculateDestinationFeeV5(dummyOutboundXcm, dot),
           33n

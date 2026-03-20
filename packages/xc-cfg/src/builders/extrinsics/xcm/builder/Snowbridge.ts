@@ -480,49 +480,48 @@ export function buildSnowbridgeOutboundXcm(
 // Message builder for polkadotXcm.execute (used in route templates)
 // ---------------------------------------------------------------------------
 
-export function buildSnowbridgeOutboundMessage() {
-  return (params: ExtrinsicConfigBuilderParams) => {
-    const { address, amount, asset, sender, source, destination, messageId } =
-      params;
-    const ctx = source.chain as Parachain;
+export function snowbridgeOutboundMessage(
+  params: ExtrinsicConfigBuilderParams
+) {
+  const { address, amount, asset, sender, source, destination, messageId } =
+    params;
+  const ctx = source.chain as Parachain;
 
-    const senderInfo = getSs58AddressInfo(sender);
-    if (!senderInfo.isValid) {
-      throw new Error(`Invalid SS58 address: ${sender}`);
-    }
-    const senderPubKey = toHex(senderInfo.publicKey);
+  const senderInfo = getSs58AddressInfo(sender);
+  if (!senderInfo.isValid) {
+    throw new Error(`Invalid SS58 address: ${sender}`);
+  }
+  const senderPubKey = toHex(senderInfo.publicKey);
 
-    // Extract ERC20 token address from the transfer asset's XCM location
-    const assetLocation = ctx.getAssetXcmLocation(asset);
-    const erc20KeyObj = assetLocation
-      ? multiloc.findNestedKey(assetLocation, 'key')
-      : undefined;
-    const tokenAddress = erc20KeyObj
-      ? (erc20KeyObj.key as string)
-      : ETHER_TOKEN_ADDRESS;
+  const assetLocation = ctx.getAssetXcmLocation(asset);
+  const erc20KeyObj = assetLocation
+    ? multiloc.findNestedKey(assetLocation, 'key')
+    : undefined;
+  const tokenAddress = erc20KeyObj
+    ? (erc20KeyObj.key as string)
+    : ETHER_TOKEN_ADDRESS;
 
-    const feeBreakdown = destination.feeBreakdown;
-    const sourceExecutionFee = feeBreakdown['sourceExecutionFee'] ?? 0n;
-    const dotRemoteFee = feeBreakdown['dotRemoteFee'] ?? 0n;
-    const dotToEtherSwapAmount = feeBreakdown['dotToEtherSwapAmount'] ?? 0n;
-    const etherFeeAmount = feeBreakdown['etherFeeAmount'] ?? 0n;
+  const feeBreakdown = destination.feeBreakdown;
+  const sourceExecutionFee = feeBreakdown['sourceExecutionFee'] ?? 0n;
+  const dotRemoteFee = feeBreakdown['dotRemoteFee'] ?? 0n;
+  const dotToEtherSwapAmount = feeBreakdown['dotToEtherSwapAmount'] ?? 0n;
+  const etherFeeAmount = feeBreakdown['etherFeeAmount'] ?? 0n;
 
-    const topic =
-      messageId ??
-      '0x0000000000000000000000000000000000000000000000000000000000000000';
+  const topic =
+    messageId ??
+    '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-    const xcmInstructions = buildSnowbridgeOutboundXcm({
-      tokenAddress,
-      senderPubKey,
-      beneficiaryHex: address,
-      tokenAmount: amount,
-      sourceExecutionFee,
-      dotRemoteFee,
-      dotToEtherSwapAmount,
-      etherFeeAmount,
-      topic,
-    });
+  const xcmInstructions = buildSnowbridgeOutboundXcm({
+    tokenAddress,
+    senderPubKey,
+    beneficiaryHex: address,
+    tokenAmount: amount,
+    sourceExecutionFee,
+    dotRemoteFee,
+    dotToEtherSwapAmount,
+    etherFeeAmount,
+    topic,
+  });
 
-    return XcmVersionedXcm.V5(xcmInstructions);
-  };
+  return XcmVersionedXcm.V5(xcmInstructions);
 }

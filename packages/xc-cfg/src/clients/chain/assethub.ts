@@ -70,10 +70,10 @@ export class AssethubClient extends BaseClient<Hub> {
 
   async getBridgeDeliveryFee(
     options = {
-      defaultFee: 2_750_872_500_000n,
+      defaultFee: 150_000_000_000n,
     }
   ): Promise<bigint> {
-    const keyBytes = new TextEncoder().encode(':BridgeHubEthereumBaseFee:');
+    const keyBytes = new TextEncoder().encode(':BridgeHubEthereumBaseFeeV2:');
     const feeStorageKey = toHex(Twox128(keyBytes));
     const feeStorageItem = await this.client._request<string>(
       'state_getStorage',
@@ -159,6 +159,24 @@ export class AssethubClient extends BaseClient<Hub> {
       );
     if (result === undefined) {
       throw Error(`Can't quote Ether for DOT conversion.`);
+    }
+    return result;
+  }
+
+  async quoteDotForExactEther(
+    etherLocation: AssetLocation,
+    etherAmount: bigint
+  ): Promise<bigint> {
+    const dotLocation = { parents: 1, interior: XcmV5Junctions.Here() };
+    const result =
+      await this.api().apis.AssetConversionApi.quote_price_tokens_for_exact_tokens(
+        dotLocation,
+        etherLocation,
+        etherAmount,
+        true
+      );
+    if (result === undefined) {
+      throw Error(`Can't quote DOT for Ether conversion.`);
     }
     return result;
   }
