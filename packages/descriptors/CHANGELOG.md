@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.15.0
+
+### Minor Changes
+
+- bump to latest metadata (upgrade 2.1.1)
+
 ## 1.14.0
 
 ### Minor Changes

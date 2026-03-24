@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 0.18.0
+
+### Minor Changes
+
+- fix hub delivery fee calc
+
 ## 0.17.0
 
 ### Minor Changes
