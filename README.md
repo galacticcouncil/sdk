@@ -5,13 +5,14 @@
 
 Collection of SDK(s) crafted to ease [Hydration](https://hydration.net) chain integration. This monorepo contains everything you need to build on Hydration — from low-level pool math to high-level trading SDKs and cross-chain transfer tooling.
 
+**Note:** The previous `@polkadot/api`-based toolkit (`sdk`, `xcm-core`, `xcm-cfg`, `xcm-sdk`) has been moved to [galacticcouncil/sdk-legacy](https://github.com/galacticcouncil/sdk-legacy).
+
 ## Table of Contents
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
-- [General](#general) — common, descriptors, sdk, sdk-next
+- [General](#general) — common, descriptors, sdk-next
 - [XC (Cross-Chain)](#xc-cross-chain) — xc, xc-core, xc-cfg, xc-sdk, xc-scan
-- [XCM (Cross-Chain Legacy)](#xcm-cross-chain-legacy) — xcm-core, xcm-cfg, xcm-sdk
 - [Math](#math) — WASM pool math modules
 - [Examples](#examples)
 - [Contributing](#contributing)
@@ -22,34 +23,27 @@ Collection of SDK(s) crafted to ease [Hydration](https://hydration.net) chain in
 ┌────────────────────────────────────────────────────────────┐
 │                         Your dApp                          │
 ├────────────────────────────────┬───────────────────────────┤
-│       « sdk / sdk-next »       │     « xc / xcm-sdk »      │
-│       ··················       │     ················      │
-│       Trade routing            │     Cross-chain           │
-│       Pool queries             │     Transfers             │
-│             │                  │                           │
-│        ┌────┴──────┐           │                           │
-│        │  math-*   │           │                           │
-│        │ Pool math │           │                           │
-│        │ (WASM)    │           │                           │
-│        └───────────┘           │                           │
+│         « sdk-next »           │         « xc »            │
+│         ··············         │         ·······           │
+│         Trade routing          │         Cross-chain       │
+│         Pool queries           │         Transfers         │
+│               │                │                           │
+│          ┌────┴──────┐         │                           │
+│          │  math-*   │         │                           │
+│          │ Pool math │         │                           │
+│          │ (WASM)    │         │                           │
+│          └───────────┘         │                           │
 ├───────────────────┬────────────┴───────────────────────────┤
 │  « common »       │  « descriptors »                       │
 │  ···········      │  ················                      │
 │  Shared utils     │  Chain metadata                        │
 ├───────────────────┴────────────────────────────────────────┤
-│             polkadot-api  /  @polkadot/api                 │
-│                   Substrate SDKs                           │
+│                      polkadot-api                          │
+│                    Substrate SDK                           │
 └────────────────────────────────────────────────────────────┘
 ```
 
-**Two generations of packages coexist:**
-
-| | Trading SDK | Cross-Chain SDK | Chain API |
-|---|---|---|---|
-| **Current (stable)** | `@galacticcouncil/sdk` | `@galacticcouncil/xcm-sdk` | `@polkadot/api` |
-| **Next-gen** | `@galacticcouncil/sdk-next` | `@galacticcouncil/xc-sdk` | `polkadot-api` (papi) |
-
-The next-gen packages (`sdk-next`, `xc-*`) are built on the modern [Polkadot API (papi)](https://papi.how/) and are the recommended path for new integrations.
+All packages are built on the modern [Polkadot API (papi)](https://papi.how/).
 
 ## Getting Started
 
@@ -63,17 +57,11 @@ The next-gen packages (`sdk-next`, `xc-*`) are built on the modern [Polkadot API
 Pick the packages you need:
 
 ```bash
-# Next-gen trading SDK (recommended for new projects)
+# Trading SDK
 npm i @galacticcouncil/sdk-next
 
-# Next-gen cross-chain transfers
+# Cross-chain transfers
 npm i @galacticcouncil/xc
-
-# Stable trading SDK (Polkadot.js based)
-npm i @galacticcouncil/sdk
-
-# Stable cross-chain transfers (Polkadot.js based)
-npm i @galacticcouncil/xcm-sdk @galacticcouncil/xcm-cfg
 ```
 
 
@@ -82,10 +70,6 @@ npm i @galacticcouncil/xcm-sdk @galacticcouncil/xcm-cfg
 Core packages providing shared utilities, chain metadata, and trading functionality.
 
 <!-- link refs: general -->
-[sdk_v]: https://img.shields.io/npm/v/@galacticcouncil/sdk.svg
-[sdk_npm]: https://www.npmjs.com/package/@galacticcouncil/sdk
-[sdk_log]: ./packages/sdk/CHANGELOG.md
-
 [sdk-next_v]: https://img.shields.io/npm/v/@galacticcouncil/sdk-next.svg
 [sdk-next_npm]: https://www.npmjs.com/package/@galacticcouncil/sdk-next
 [sdk-next_log]: ./packages/sdk-next/CHANGELOG.md
@@ -102,13 +86,12 @@ Core packages providing shared utilities, chain metadata, and trading functional
 |:---|:---|:---|:---|
 | [`@galacticcouncil/common`](./packages/common) | [![common_v]][common_npm] | [changelog][common_log] | Shared utilities (helpers, evm, xcm) |
 | [`@galacticcouncil/descriptors`](./packages/descriptors) | [![descriptors_v]][descriptors_npm] | [changelog][descriptors_log] | Hydration papi type-safe metadata descriptors |
-| [`@galacticcouncil/sdk`](./packages/sdk) | [![sdk_v]][sdk_npm] | [changelog][sdk_log] | Trade router & pool utilities (`@polkadot/api`) |
-| [`@galacticcouncil/sdk-next`](./packages/sdk-next) | [![sdk-next_v]][sdk-next_npm] | [changelog][sdk-next_log] | Next-gen trade router & pool utilities (`polkadot-api`) |
+| [`@galacticcouncil/sdk-next`](./packages/sdk-next) | [![sdk-next_v]][sdk-next_npm] | [changelog][sdk-next_log] | Trade router & pool utilities (`polkadot-api`) |
 
 
 ## XC (Cross-Chain)
 
-Next-generation cross-chain transfer toolkit built on `polkadot-api`. Modular architecture with clean separation between core types, configuration, and wallet interface.
+Cross-chain transfer toolkit built on `polkadot-api`. Modular architecture with clean separation between core types, configuration, and wallet interface.
 
 <!-- link refs: xc -->
 [xc_v]: https://img.shields.io/npm/v/@galacticcouncil/xc.svg
@@ -142,42 +125,10 @@ Next-generation cross-chain transfer toolkit built on `polkadot-api`. Modular ar
 ### Architecture
 
 ```
-@galacticcouncil/xc          ← Start here (context factory, DEX factory)
-├── @galacticcouncil/xc-sdk  ← Wallet, transfers, fee swaps
-├── @galacticcouncil/xc-cfg  ← Route configs, DEX implementations
-└── @galacticcouncil/xc-core ← Core types, chain & asset definitions
-```
-
-
-## XCM (Cross-Chain Legacy)
-
-Stable cross-chain transfer toolkit built on `@polkadot/api`. Production-proven with extensive route coverage.
-
-<!-- link refs: xcm -->
-[xcm-core_v]: https://img.shields.io/npm/v/@galacticcouncil/xcm-core.svg
-[xcm-core_npm]: https://www.npmjs.com/package/@galacticcouncil/xcm-core
-[xcm-core_log]: ./packages/xcm-core/CHANGELOG.md
-
-[xcm-cfg_v]: https://img.shields.io/npm/v/@galacticcouncil/xcm-cfg.svg
-[xcm-cfg_npm]: https://www.npmjs.com/package/@galacticcouncil/xcm-cfg
-[xcm-cfg_log]: ./packages/xcm-cfg/CHANGELOG.md
-
-[xcm-sdk_v]: https://img.shields.io/npm/v/@galacticcouncil/xcm-sdk.svg
-[xcm-sdk_npm]: https://www.npmjs.com/package/@galacticcouncil/xcm-sdk
-[xcm-sdk_log]: ./packages/xcm-sdk/CHANGELOG.md
-
-| Package | Version | Changelog | Description |
-|:---|:---|:---|:---|
-| [`@galacticcouncil/xcm-core`](./packages/xcm-core) | [![xcm-core_v]][xcm-core_npm] | [changelog][xcm-core_log] | Core types, chain & asset definitions |
-| [`@galacticcouncil/xcm-cfg`](./packages/xcm-cfg) | [![xcm-cfg_v]][xcm-cfg_npm] | [changelog][xcm-cfg_log] | Pre-built route configs & DEX integrations |
-| [`@galacticcouncil/xcm-sdk`](./packages/xcm-sdk) | [![xcm-sdk_v]][xcm-sdk_npm] | [changelog][xcm-sdk_log] | Wallet interface for cross-chain transfers |
-
-### Architecture
-
-```
-@galacticcouncil/xcm-sdk  ← Wallet, transfers, fee swaps
-@galacticcouncil/xcm-cfg  ← Route configs, DEX implementations
-@galacticcouncil/xcm-core ← Core types, chain & asset definitions
+@galacticcouncil/xc          <- Start here (context factory, DEX factory)
+├── @galacticcouncil/xc-sdk  <- Wallet, transfers, fee swaps
+├── @galacticcouncil/xc-cfg  <- Route configs, DEX implementations
+└── @galacticcouncil/xc-core <- Core types, chain & asset definitions
 ```
 
 
@@ -229,7 +180,7 @@ WebAssembly math modules compiled from Rust. Each module provides high-performan
 | [`@galacticcouncil/math-staking`](./packages/math-staking) | [![math-stake_v]][math-stake_npm] | [changelog][math-stake_log] | Staking reward calculations |
 | [`@galacticcouncil/math-liquidity-mining`](./packages/math-liquidity-mining) | [![math-lm_v]][math-lm_npm] | [changelog][math-lm_log] | Liquidity mining reward calculations |
 
-> **Note:** You typically don't need to install math packages directly — they are dependencies of `sdk` and `sdk-next`.
+> **Note:** You typically don't need to install math packages directly — they are dependencies of `sdk-next`.
 
 
 ## Examples
@@ -238,12 +189,9 @@ Ready-to-run examples are available in the [`examples/`](./examples) directory:
 
 | Example | Description |
 |:---|:---|
-| [`sdk-cjs`](./examples/sdk-cjs) | SDK usage with CommonJS |
-| [`sdk-esm`](./examples/sdk-esm) | SDK usage with ES Modules |
 | [`sdk-next-cjs`](./examples/sdk-next-cjs) | SDK-Next usage with CommonJS |
 | [`sdk-next-esm`](./examples/sdk-next-esm) | SDK-Next usage with ES Modules |
 | [`xc-transfer`](./examples/xc-transfer) | XC cross-chain transfer |
-| [`xcm-transfer`](./examples/xcm-transfer) | XCM cross-chain transfer |
 
 
 ## Contributing
