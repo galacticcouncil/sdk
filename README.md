@@ -11,6 +11,7 @@ Collection of SDK(s) crafted to ease [Hydration](https://hydration.net) chain in
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
+- [Quick Start](#quick-start) — factories for sdk-next & xc
 - [General](#general) — common, descriptors, sdk-next
 - [XC (Cross-Chain)](#xc-cross-chain) — xc, xc-core, xc-cfg, xc-sdk, xc-scan
 - [Math](#math) — WASM pool math modules
@@ -64,6 +65,45 @@ npm i @galacticcouncil/sdk-next
 npm i @galacticcouncil/xc
 ```
 
+
+## Quick Start
+
+### Solo Trading (sdk-next)
+
+```ts
+import { api, createSdkContext } from '@galacticcouncil/sdk-next';
+import { createClient } from 'polkadot-api';
+
+const provider = api.getWs('wss://hydradx-rpc.dwellir.com');
+const client = createClient(provider);
+const sdk = await createSdkContext(client);
+```
+
+[Full docs & API reference →](./packages/sdk-next)
+
+### Solo Cross-Chain (xc)
+
+```ts
+import { createXcContext } from '@galacticcouncil/xc';
+
+const xc = await createXcContext();
+```
+
+[Full docs & API reference →](./packages/xc)
+
+### Combo (sdk-next + xc)
+
+```ts
+import { api, createSdkContext } from '@galacticcouncil/sdk-next';
+import { createXcContext } from '@galacticcouncil/xc';
+import { createClient } from 'polkadot-api';
+
+const provider = api.getWs('wss://hydradx-rpc.dwellir.com');
+const client = createClient(provider);
+const sdk = await createSdkContext(client);
+// Shared pool context
+const xc = await createXcContext(sdk.ctx.pool);
+```
 
 ## General
 
