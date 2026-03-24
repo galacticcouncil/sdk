@@ -109,7 +109,6 @@ export class AssethubClient extends BaseClient<Hub> {
       { type: 'V5', value: xcm },
       dot
     );
-
     if (!result.success) {
       throw Error(`Can't query XCM delivery fee.`);
     }
