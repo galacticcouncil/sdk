@@ -8,6 +8,7 @@ import {
   Erc20Client,
   EvmClient,
 } from '@galacticcouncil/xc-core';
+import { big } from '@galacticcouncil/common';
 
 import {
   distinctUntilChanged,
@@ -62,12 +63,19 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
     }
 
     const erc20 = new Erc20Client(this.#client, asset);
+
+    let approveAmount = amount;
+    if (config.module === 'TokenBridge') {
+      const decimals = await erc20.decimals();
+      approveAmount = big.truncateAmount(amount, decimals, 8);
+    }
+
     const allowance = await erc20.allowance(account, config.address);
-    if (allowance >= amount) {
+    if (allowance >= approveAmount) {
       return transferCall;
     }
 
-    const approve = erc20.approve(config.address, amount);
+    const approve = erc20.approve(config.address, approveAmount);
     return {
       abi: JSON.stringify(Abi.Erc20),
       allowance: allowance,

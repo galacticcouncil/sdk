@@ -12,44 +12,66 @@ import {
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, NATIVE_MINT } from '@solana/spl-token';
 
+import { big } from '@galacticcouncil/common';
+
 import { parseAssetId } from '../../utils';
+
+const WORMHOLE_MAX_DECIMALS = 8;
 
 type TransferMrlOpts = {
   moonchain: EvmParachain;
 };
 
+function withNormalizedAmount(
+  builder: ContractConfigBuilder
+): ContractConfigBuilder {
+  return {
+    build: async (params) => {
+      const ctx = params.transact ? params.transact.chain : params.source.chain;
+      const decimals = ctx.getAssetDecimals(params.asset) ?? 18;
+      const amount = big.truncateAmount(
+        params.amount,
+        decimals,
+        WORMHOLE_MAX_DECIMALS
+      );
+      return builder.build({ ...params, amount });
+    },
+  };
+}
+
 const transferTokensWithPayload = () => {
   return {
-    viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder => ({
-      build: async (params) => {
-        const { address, amount, asset, source, destination } = params;
+    viaMrl: (opts: TransferMrlOpts): ContractConfigBuilder =>
+      withNormalizedAmount({
+        build: async (params) => {
+          const { address, amount, asset, source, destination } = params;
 
-        const ctxWh = Wh.fromChain(source.chain);
-        const rcvWh = Wh.fromChain(opts.moonchain);
+          const ctxWh = Wh.fromChain(source.chain);
+          const rcvWh = Wh.fromChain(opts.moonchain);
 
-        const recipient = Precompile.Bridge;
-        const assetId = source.chain.getAssetId(asset);
-        const nonce = 0;
-        const payload = await mrl.createPayload(
-          destination.chain as Parachain,
-          address
-        );
-        return new ContractConfig({
-          abi: Abi.TokenBridge,
-          address: ctxWh.getTokenBridge(),
-          args: [
-            parseAssetId(assetId),
-            amount,
-            rcvWh.getWormholeId(),
-            rcvWh.normalizeAddress(recipient),
-            nonce,
-            payload.toHex(),
-          ],
-          func: 'transferTokensWithPayload',
-          module: 'TokenBridge',
-        });
-      },
-    }),
+          const recipient = Precompile.Bridge;
+          const assetId = source.chain.getAssetId(asset);
+          const nonce = 0;
+          const payload = await mrl.createPayload(
+            destination.chain as Parachain,
+            address
+          );
+          return new ContractConfig({
+            abi: Abi.TokenBridge,
+            address: ctxWh.getTokenBridge(),
+            args: [
+              parseAssetId(assetId),
+              amount,
+              rcvWh.getWormholeId(),
+              rcvWh.normalizeAddress(recipient),
+              nonce,
+              payload.toHex(),
+            ],
+            func: 'transferTokensWithPayload',
+            module: 'TokenBridge',
+          });
+        },
+      }),
   };
 };
 
@@ -87,50 +109,51 @@ const wrapAndTransferETHWithPayload = () => {
   };
 };
 
-const transferTokens = (): ContractConfigBuilder => ({
-  build: async (params) => {
-    const { address, amount, asset, source, destination, transact } = params;
-    const ctx = transact ? transact.chain : source.chain;
-    const rcv = destination.chain;
+const transferTokens = (): ContractConfigBuilder =>
+  withNormalizedAmount({
+    build: async (params) => {
+      const { address, amount, asset, source, destination, transact } = params;
+      const ctx = transact ? transact.chain : source.chain;
+      const rcv = destination.chain;
 
-    const ctxWh = Wh.fromChain(ctx);
-    const rcvWh = Wh.fromChain(rcv);
+      const ctxWh = Wh.fromChain(ctx);
+      const rcvWh = Wh.fromChain(rcv);
 
-    const tokenId = rcv.getAssetId(asset);
+      const tokenId = rcv.getAssetId(asset);
 
-    let rcvAddress = address;
+      let rcvAddress = address;
 
-    if (rcv.isSolana()) {
-      const tokenMint =
-        tokenId === 'SOL' ? NATIVE_MINT : new PublicKey(tokenId);
+      if (rcv.isSolana()) {
+        const tokenMint =
+          tokenId === 'SOL' ? NATIVE_MINT : new PublicKey(tokenId);
 
-      const rcvTokenAddress = await getAssociatedTokenAddress(
-        tokenMint,
-        new PublicKey(address)
-      );
-      rcvAddress = rcvTokenAddress.toBase58();
-    }
+        const rcvTokenAddress = await getAssociatedTokenAddress(
+          tokenMint,
+          new PublicKey(address)
+        );
+        rcvAddress = rcvTokenAddress.toBase58();
+      }
 
-    const assetId = ctx.getAssetId(asset);
-    const arbiterFee = 0;
-    const nonce = 0;
+      const assetId = ctx.getAssetId(asset);
+      const arbiterFee = 0;
+      const nonce = 0;
 
-    return new ContractConfig({
-      abi: Abi.TokenBridge,
-      address: ctxWh.getTokenBridge(),
-      args: [
-        parseAssetId(assetId),
-        amount,
-        rcvWh.getWormholeId(),
-        rcvWh.normalizeAddress(rcvAddress),
-        arbiterFee,
-        nonce,
-      ],
-      func: 'transferTokens',
-      module: 'TokenBridge',
-    });
-  },
-});
+      return new ContractConfig({
+        abi: Abi.TokenBridge,
+        address: ctxWh.getTokenBridge(),
+        args: [
+          parseAssetId(assetId),
+          amount,
+          rcvWh.getWormholeId(),
+          rcvWh.normalizeAddress(rcvAddress),
+          arbiterFee,
+          nonce,
+        ],
+        func: 'transferTokens',
+        module: 'TokenBridge',
+      });
+    },
+  });
 
 const wrapAndTransferETH = (): ContractConfigBuilder => ({
   build: async (params) => {

@@ -46,3 +46,15 @@ export function pow10(exp: number): bigint {
   if (exp < 0) throw new Error(`pow10: negative exp ${exp}`);
   return 10n ** BigInt(exp);
 }
+
+export function truncateAmount(
+  amount: bigint,
+  decimals: number,
+  maxDecimals: number
+): bigint {
+  if (decimals > maxDecimals) {
+    const factor = pow10(decimals - maxDecimals);
+    return (amount / factor) * factor;
+  }
+  return amount;
+}
