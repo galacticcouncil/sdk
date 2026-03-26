@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/common",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Common utilities shared across Galactic SDK packages",
   "author": "GalacticCouncil",
   "repository": {
