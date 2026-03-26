@@ -1,4 +1,4 @@
-# Query Hydration Router
+# Query Router
 
 Run SDK router queries (spot price, most liquid route, best sell/buy, routes) against a live Hydration RPC. No files written — runs inline via `npx tsx -e`.
 
@@ -23,50 +23,16 @@ When you need to query on-chain trading data: spot prices between assets, find r
 
 ## Workflow
 
-Run from `packages/sdk-next/` using `npx tsx -e` with an inline script. Imports directly from source — no build step needed.
-
-### Simple query (spot price, routes, most liquid route)
+Read the example scripts in `packages/sdk-next/test/script/examples/router/` and adapt the pattern for the user's query. All examples extend `PapiExecutor` which handles connection, logging, and cleanup. Run from `packages/sdk-next/` — no build step needed.
 
 ```sh
-cd packages/sdk-next && npx tsx -e "
-import { createClient } from 'polkadot-api';
-import { createSdkContext, api } from './src/index.ts';
-
-const client = createClient(api.getWs('RPC_URL'));
-
-async function run() {
-  const sdk = await createSdkContext(client);
-  const result = await sdk.api.router.QUERY_METHOD(ASSET_IN, ASSET_OUT);
-  console.log(result);
-  sdk.destroy();
-  client.destroy();
-}
-
-run().catch((e) => { console.error(e); process.exit(1); });
-"
+cd packages/sdk-next && npx tsx test/script/examples/router/<script>.ts
 ```
 
-Replace `RPC_URL`, `QUERY_METHOD`, `ASSET_IN`, `ASSET_OUT` with actual values.
-
-### Trade query (sell/buy with tx building)
+To run a custom query, write an inline script adapting the example pattern:
 
 ```sh
-cd packages/sdk-next && npx tsx -e "
-import { createClient } from 'polkadot-api';
-import { createSdkContext, api } from './src/index.ts';
-
-const client = createClient(api.getWs('RPC_URL'));
-
-async function run() {
-  const sdk = await createSdkContext(client);
-  const trade = await sdk.api.router.getBestSell(ASSET_IN, ASSET_OUT, 'AMOUNT');
-  console.log(trade.toHuman());
-  sdk.destroy();
-  client.destroy();
-}
-
-run().catch((e) => { console.error(e); process.exit(1); });
-"
+cd packages/sdk-next && npx tsx -e "<inline script>"
 ```
 
 ## Available Router API Methods
