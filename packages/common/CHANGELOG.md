@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.6.0
+
+### Minor Changes
+
+- 3a79607: added legacy rpc check
+
 ## 0.5.1
 
 ### Patch Changes
