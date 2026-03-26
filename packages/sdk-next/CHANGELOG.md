@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.38.0
+
+### Minor Changes
+
+- Bump peer deps
+
 ## 0.37.0
 
 ### Minor Changes
