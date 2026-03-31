@@ -4,4 +4,4 @@
 '@galacticcouncil/xc-sdk': patch
 ---
 
-instabridge base eurc
+basejump base eurc

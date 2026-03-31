@@ -25,26 +25,26 @@ const bridgeViaWormhole = (): ContractConfigBuilder => ({
 
     const assetId = ctx.getAssetId(asset);
 
-    const instaBridgeAddress = ctx.getInstaBridge();
-    if (!instaBridgeAddress) {
-      throw new Error(`InstaBridge not configured for ${ctx.name}`);
+    const basejumpAddress = ctx.getBasejump();
+    if (!basejumpAddress) {
+      throw new Error(`Basejump not configured for ${ctx.name}`);
     }
 
     return new ContractConfig({
-      abi: Abi.InstaBridge,
-      address: instaBridgeAddress,
+      abi: Abi.Basejump,
+      address: basejumpAddress,
       args: [
         parseAssetId(assetId),
         amount,
         toBytes32(H160.fromAccount(address) as `0x${string}`),
       ],
       func: 'bridgeViaWormhole',
-      module: 'InstaBridge',
+      module: 'Basejump',
     });
   },
 });
 
-export const InstaBridge = () => {
+export const Basejump = () => {
   return {
     bridgeViaWormhole,
   };

@@ -39,7 +39,7 @@ export function toHydrationViaWormholeTemplate(
   });
 }
 
-export function toHydrationViaInstaBridgeTemplate(
+export function toHydrationViaBasejumpTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -65,8 +65,8 @@ export function toHydrationViaInstaBridgeTemplate(
       },
     },
     contract: ContractBuilder()
-      .InstaBridge()
+      .Basejump()
       .bridgeViaWormhole(),
-    tags: [Tag.InstaBridge],
+    tags: [Tag.Basejump],
   });
 }

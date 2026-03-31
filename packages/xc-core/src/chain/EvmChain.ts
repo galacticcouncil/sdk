@@ -11,7 +11,7 @@ import {
 import { Snowbridge, SnowbridgeDef, Wormhole, WormholeDef } from '../bridge';
 import { EvmClient } from '../evm';
 
-export type InstaBridgeDef = {
+export type BasejumpDef = {
   address: string;
 };
 
@@ -19,7 +19,7 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
-  instaBridge?: InstaBridgeDef;
+  basejump?: BasejumpDef;
   snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
 }
@@ -28,7 +28,7 @@ export class EvmChain extends Chain<ChainAssetData> {
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
-  readonly instaBridge?: InstaBridgeDef;
+  readonly basejump?: BasejumpDef;
   readonly snowbridge?: Snowbridge;
   readonly wormhole?: Wormhole;
 
@@ -36,7 +36,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     evmChain,
     id,
     rpcs,
-    instaBridge,
+    basejump,
     snowbridge,
     wormhole,
     ...others
@@ -45,13 +45,13 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.evmChain = evmChain;
     this.id = id;
     this.rpcs = rpcs;
-    this.instaBridge = instaBridge;
+    this.basejump = basejump;
     this.snowbridge = snowbridge && new Snowbridge(snowbridge);
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
-  getInstaBridge(): string | undefined {
-    return this.instaBridge?.address;
+  getBasejump(): string | undefined {
+    return this.basejump?.address;
   }
 
   get evmClient(): EvmClient {

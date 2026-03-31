@@ -1,4 +1,4 @@
-export const INSTA_BRIDGE = [
+export const BASEJUMP = [
   {
     inputs: [
       { internalType: 'address', name: 'asset', type: 'address' },

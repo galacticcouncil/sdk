@@ -1,5 +1,5 @@
 export enum Tag {
-  InstaBridge = 'InstaBridge',
+  Basejump = 'Basejump',
   Wormhole = 'Wormhole',
   Relayer = 'Relayer',
   Snowbridge = 'Snowbridge',
