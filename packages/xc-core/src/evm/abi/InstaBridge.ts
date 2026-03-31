@@ -3,8 +3,6 @@ export const INSTA_BRIDGE = [
     inputs: [
       { internalType: 'address', name: 'asset', type: 'address' },
       { internalType: 'uint256', name: 'amount', type: 'uint256' },
-      { internalType: 'uint16', name: 'destChain', type: 'uint16' },
-      { internalType: 'address', name: 'destAsset', type: 'address' },
       { internalType: 'bytes32', name: 'recipient', type: 'bytes32' },
     ],
     name: 'bridgeViaWormhole',

@@ -66,7 +66,7 @@ export function toHydrationViaInstaBridgeTemplate(
     },
     contract: ContractBuilder()
       .InstaBridge()
-      .bridgeViaWormhole({ destChain: moonbeam, destAsset: assetOut }),
+      .bridgeViaWormhole(),
     tags: [Tag.InstaBridge],
   });
 }
