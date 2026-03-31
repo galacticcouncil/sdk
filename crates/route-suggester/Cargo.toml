@@ -1,0 +1,22 @@
+[package]
+name = "route-suggester"
+version = "0.1.0"
+edition = "2021"
+description = "Route discovery for Hydration DEX — enumerates all valid multi-hop trading routes for a given asset pair"
+license = "Apache-2.0"
+
+[dependencies]
+hydradx-traits = { git = "https://github.com/galacticcouncil/hydration-node", default-features = false }
+primitives = { git = "https://github.com/galacticcouncil/hydration-node", default-features = false }
+sp-runtime = { git = "https://github.com/galacticcouncil/polkadot-sdk", branch = "polkadot-stable2506-7-patch", default-features = false }
+frame-support = { git = "https://github.com/galacticcouncil/polkadot-sdk", branch = "polkadot-stable2506-7-patch", default-features = false }
+
+[features]
+default = ["std"]
+std = [
+    "hydradx-traits/std",
+    "primitives/std",
+    "sp-runtime/std",
+    "frame-support/std",
+]
+local-logs = ["std"]
