@@ -5,6 +5,7 @@ import {
   XcmVersionedLocation,
   XcmV4Instruction,
   Hub,
+  XcmVersionedAssetId,
 } from '@galacticcouncil/descriptors';
 import { encodeLocation } from '@galacticcouncil/common';
 
@@ -98,11 +99,16 @@ export class AssethubClient extends BaseClient<Hub> {
       interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(destParachainId)),
     });
 
+    const dot = XcmVersionedAssetId.V5({
+      parents: 1,
+      interior: { type: 'Here', value: undefined },
+    });
+
     const result = await this.api().apis.XcmPaymentApi.query_delivery_fees(
       destination,
-      { type: 'V4', value: xcm }
+      { type: 'V5', value: xcm },
+      dot
     );
-
     if (!result.success) {
       throw Error(`Can't query XCM delivery fee.`);
     }

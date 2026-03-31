@@ -32,7 +32,7 @@ import { utils as tutils } from '@wormhole-foundation/sdk-solana';
 import { utils as cutils } from '@wormhole-foundation/sdk-solana-core';
 
 import { encoding } from '@wormhole-foundation/sdk-base';
-import { deserialize } from '@wormhole-foundation/sdk-definitions';
+import { deserialize, VAA } from '@wormhole-foundation/sdk-definitions';
 
 import {
   createCompleteTransferNativeInstruction,
@@ -55,8 +55,12 @@ export class SolanaClaim {
     this.#lilJit = new SolanaLilJit(chain);
   }
 
-  async redeem(from: string, vaaRaw: string): Promise<SolanaCall[]> {
-    const ctxWh = Wh.fromChain(this.#chain);
+  async redeem(
+    from: string,
+    vaaRaw: string,
+    recipient?: string
+  ): Promise<SolanaCall[]> {
+    const ctx = Wh.fromChain(this.#chain);
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
     // We don't check for TokenBridge:TransferWithPayload because claim (complete_wrapped_with_payload)
@@ -64,11 +68,14 @@ export class SolanaClaim {
     const vaa = deserialize('TokenBridge:Transfer', vaaBytes);
     const vaaU8a = deserialize('Uint8Array', vaaBytes);
     const postedVaaAddress = this.derivePostedVaaKey(
-      ctxWh.getCoreBridge(),
+      ctx.getCoreBridge(),
       Buffer.from(vaa.hash)
     );
 
     const payer = new PublicKey(from);
+    const payee = recipient ? new PublicKey(recipient) : payer;
+    const isSelfRedeem = payer.equals(payee);
+
     const calls: SolanaCall[] = [];
 
     const posted = await this.#connection.getAccountInfo(postedVaaAddress);
@@ -76,7 +83,7 @@ export class SolanaClaim {
       const signatureSet = Keypair.generate();
       const verifyIxs = await cutils.createVerifySignaturesInstructions(
         this.#chain.connection,
-        ctxWh.getCoreBridge(),
+        ctx.getCoreBridge(),
         payer,
         vaaU8a,
         signatureSet.publicKey
@@ -98,7 +105,7 @@ export class SolanaClaim {
 
       const postVaaIx = cutils.createPostVaaInstruction(
         this.#connection,
-        ctxWh.getCoreBridge(),
+        ctx.getCoreBridge(),
         payer,
         vaaU8a,
         signatureSet.publicKey
@@ -124,64 +131,77 @@ export class SolanaClaim {
       lamports: 1000,
     });
 
-    if (isNativeSol) {
-      const completeCall = await this.redeemAndUnwrap(
+    if (isNativeSol && isSelfRedeem) {
+      const completeCall = await this.redeemAndUnwrap(ctx, payer, vaa, tipIx);
+      calls.push(completeCall);
+    } else {
+      const completeCall = await this.redeemToken(
+        ctx,
         payer,
+        payee,
+        mint,
+        isNative,
         vaa,
-        ctxWh,
         tipIx
       );
       calls.push(completeCall);
-    } else {
-      const createCompleteTransferInstruction = isNative
-        ? createCompleteTransferNativeInstruction
-        : createCompleteTransferWrappedInstruction;
-      const completeIx = createCompleteTransferInstruction(
-        this.#connection,
-        ctxWh.getTokenBridge(),
-        ctxWh.getCoreBridge(),
-        payer,
-        vaa
-      );
-
-      const ata = getAssociatedTokenAddressSync(mint, payer);
-      const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
-        payer,
-        ata,
-        payer,
-        mint
-      );
-
-      const completeV0 = await this.getV0Message(payer, [
-        createAtaIx,
-        completeIx,
-        tipIx,
-      ]);
-      const completeTx = serializeV0(completeV0);
-      calls.push({
-        from: payer.toBase58(),
-        data: completeTx,
-        ix: ixToHuman([createAtaIx, completeIx]),
-        type: CallType.Solana,
-      } as SolanaCall);
     }
 
     return calls;
   }
 
-  private async redeemAndUnwrap(
+  private async redeemToken(
+    ctx: Wh,
     payer: PublicKey,
-    vaa: any,
-    ctxWh: any,
+    payee: PublicKey,
+    mint: PublicKey,
+    isNative: boolean,
+    vaa: VAA<'TokenBridge:Transfer'>,
     tipIx: TransactionInstruction
   ): Promise<SolanaCall> {
-    const targetPublicKey = new PublicKey(
-      vaa.payload.to.address.toUint8Array()
+    const createCompleteTransferInstruction = isNative
+      ? createCompleteTransferNativeInstruction
+      : createCompleteTransferWrappedInstruction;
+    const completeIx = createCompleteTransferInstruction(
+      this.#connection,
+      ctx.getTokenBridge(),
+      ctx.getCoreBridge(),
+      payer,
+      vaa
     );
+
+    const ata = getAssociatedTokenAddressSync(mint, payee);
+    const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
+      payer,
+      ata,
+      payee,
+      mint
+    );
+
+    const completeV0 = await this.getV0Message(payer, [
+      createAtaIx,
+      completeIx,
+      tipIx,
+    ]);
+    const completeTx = serializeV0(completeV0);
+    return {
+      from: payer.toBase58(),
+      data: completeTx,
+      ix: ixToHuman([createAtaIx, completeIx]),
+      type: CallType.Solana,
+    } as SolanaCall;
+  }
+
+  private async redeemAndUnwrap(
+    ctx: Wh,
+    payer: PublicKey,
+    vaa: VAA<'TokenBridge:Transfer'>,
+    tipIx: TransactionInstruction
+  ): Promise<SolanaCall> {
+    const ata = new PublicKey(vaa.payload.to.address.toUint8Array());
     const mintInfo = await getMint(this.#connection, NATIVE_MINT);
     const targetAmount =
-      vaa.payload.token.amount *
-      BigInt(Math.pow(10, mintInfo.decimals - 8));
+      vaa.payload.token.amount * BigInt(Math.pow(10, mintInfo.decimals - 8));
     const rentBalance = await getMinimumBalanceForRentExemptAccount(
       this.#connection
     );
@@ -190,15 +210,15 @@ export class SolanaClaim {
 
     const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
       payer,
-      targetPublicKey,
+      ata,
       payer,
       NATIVE_MINT
     );
 
     const completeIx = createCompleteTransferNativeInstruction(
       this.#connection,
-      ctxWh.getTokenBridge(),
-      ctxWh.getCoreBridge(),
+      ctx.getTokenBridge(),
+      ctx.getCoreBridge(),
       payer,
       vaa
     );
@@ -218,7 +238,7 @@ export class SolanaClaim {
     );
 
     const transferIx = createTransferInstruction(
-      targetPublicKey,
+      ata,
       ancillaryKeypair.publicKey,
       payer,
       targetAmount

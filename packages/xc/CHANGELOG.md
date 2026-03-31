@@ -1,5 +1,11 @@
 # @galacticcouncil/xc
 
+## 0.5.0
+
+### Minor Changes
+
+- bump xc peers to latest
+
 ## 0.4.0
 
 ### Minor Changes
