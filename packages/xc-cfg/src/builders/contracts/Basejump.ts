@@ -7,15 +7,17 @@ import {
 
 import { parseAssetId } from '../utils';
 import { h160 } from '@galacticcouncil/common';
+import { AccountId } from 'polkadot-api';
+import { toHex } from '@polkadot-api/utils';
 
-const { H160 } = h160;
+const { H160, isEvmAddress } = h160;
 
 /**
- * Pad H160 address to bytes32 (left-pad with zeros).
+ * Convert any address (H160 or SS58) to bytes32 AccountId.
  */
-function toBytes32(h160: `0x${string}`): `0x${string}` {
-  const addr = h160.replace('0x', '').toLowerCase();
-  return `0x${'0'.repeat(24)}${addr}` as `0x${string}`;
+function toAccountId32(address: string): `0x${string}` {
+  const ss58 = isEvmAddress(address) ? H160.toAccount(address) : address;
+  return toHex(AccountId().enc(ss58)) as `0x${string}`;
 }
 
 const bridgeViaWormhole = (): ContractConfigBuilder => ({
@@ -36,7 +38,7 @@ const bridgeViaWormhole = (): ContractConfigBuilder => ({
       args: [
         parseAssetId(assetId),
         amount,
-        toBytes32(H160.fromAccount(address) as `0x${string}`),
+        toAccountId32(address),
       ],
       func: 'bridgeViaWormhole',
       module: 'Basejump',
