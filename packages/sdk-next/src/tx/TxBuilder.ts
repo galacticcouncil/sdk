@@ -2,7 +2,7 @@ import { Enum, PolkadotClient } from 'polkadot-api';
 
 import { PublicClient } from 'viem';
 
-import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
+import { AAVE_GAS_LIMIT } from '../aave';
 import { Papi } from '../api';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
@@ -17,28 +17,40 @@ export abstract class TxBuilder extends Papi {
   protected readonly evmClient: PublicClient;
 
   protected readonly balance: BalanceClient;
-  protected readonly aaveUtils: AaveUtils;
 
   constructor(client: PolkadotClient, evm: EvmClient) {
     super(client);
     this.evm = evm;
     this.evmClient = evm.getWsProvider();
     this.balance = new BalanceClient(client);
-    this.aaveUtils = new AaveUtils(evm);
   }
 
   protected wrapTx(name: string, tx: Transaction): Tx {
     return {
       name,
       get: () => tx,
-      dryRun: (account: string) => this.dryRun(account, tx),
+      dryRun: async (account: string) => {
+        const result = await this.dryRun(account, tx);
+        if (result.success && !result.value.execution_result.success) {
+          const errorPath = enumPath(
+            result.value.execution_result.value.error.value
+          );
+          throw new Error('Dry run execution error!', {
+            cause: errorPath,
+          });
+        }
+        return result;
+      },
     };
   }
 
-  protected async dispatchWithExtraGas(tx: Transaction): Promise<Transaction> {
+  protected dispatchWithExtraGas(
+    tx: Transaction,
+    extraGas: bigint = AAVE_GAS_LIMIT
+  ): Transaction {
     return this.api.tx.Dispatcher.dispatch_with_extra_gas({
       call: tx.decodedCall,
-      extra_gas: AAVE_GAS_LIMIT,
+      extra_gas: extraGas,
     });
   }
 
@@ -53,19 +65,7 @@ export abstract class TxBuilder extends Papi {
       .getUnsafeApi()
       .apis.DryRunApi.dry_run_call(origin, tx.decodedCall);
 
-    const result = dryRun as DryRunResult;
-    const error =
-      result.success && !result.value.execution_result.success
-        ? result.value.execution_result.value.error
-        : null;
-
-    if (error) {
-      const errorPath = enumPath(error.value);
-      throw new Error('Dry run execution error!', {
-        cause: errorPath,
-      });
-    }
-    return result;
+    return dryRun as DryRunResult;
   }
 
   protected isDirectOmnipoolTrade(swaps: Swap[]): boolean {
