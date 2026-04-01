@@ -1,4 +1,4 @@
-import { ContractConfigBuilderParams } from '@galacticcouncil/xc-core';
+import { Abi, ContractConfigBuilderParams } from '@galacticcouncil/xc-core';
 
 import { eurc } from '../../assets';
 import { base, hydration } from '../../chains';
@@ -67,6 +67,46 @@ describe('Basejump contract builder', () => {
       expect(config.func).toBe('bridgeViaWormhole');
       expect(config.module).toBe('Basejump');
       expect(config.args).toHaveLength(3);
+    });
+
+    it('should pass asset address as first arg', async () => {
+      const ctx = buildCtx('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
+      const config = await Basejump().bridgeViaWormhole().build(ctx);
+
+      // First arg is the asset ERC20 address on the source chain
+      const assetArg = (config.args[0] as string).toLowerCase();
+      const expectedAssetId = base.getAssetId(eurc)?.toString().toLowerCase();
+      expect(assetArg).toBe(expectedAssetId);
+    });
+  });
+
+  describe('ABI', () => {
+    it('quoteFee should accept address param (not uint256)', () => {
+      const abi = Abi.Basejump as readonly Record<string, unknown>[];
+      const quoteFee = abi.find(
+        (e) => e.type === 'function' && e.name === 'quoteFee'
+      ) as Record<string, unknown> | undefined;
+
+      expect(quoteFee).toBeDefined();
+      const inputs = quoteFee!.inputs as { type: string; name: string }[];
+      expect(inputs).toHaveLength(1);
+      expect(inputs[0].type).toBe('address');
+      expect(inputs[0].name).toBe('asset');
+    });
+
+    it('bridgeViaWormhole should accept (address, uint256, bytes32)', () => {
+      const abi = Abi.Basejump as readonly Record<string, unknown>[];
+      const fn = abi.find(
+        (e) => e.type === 'function' && e.name === 'bridgeViaWormhole'
+      ) as Record<string, unknown> | undefined;
+
+      expect(fn).toBeDefined();
+      const inputs = fn!.inputs as { type: string }[];
+      expect(inputs.map((i) => i.type)).toEqual([
+        'address',
+        'uint256',
+        'bytes32',
+      ]);
     });
   });
 });

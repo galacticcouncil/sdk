@@ -21,7 +21,7 @@ export const BASEJUMP = [
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
+    inputs: [{ internalType: 'address', name: 'asset', type: 'address' }],
     name: 'quoteFee',
     outputs: [{ internalType: 'uint256', name: 'fee', type: 'uint256' }],
     stateMutability: 'view',
