@@ -1,7 +1,7 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
-import { BalanceBuilder, ContractBuilder } from '../../../builders';
+import { BalanceBuilder, ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
@@ -60,8 +60,8 @@ export function toHydrationViaBasejumpTemplate(
       chain: hydration,
       asset: assetOut,
       fee: {
-        amount: 0,
-        asset: assetOut,
+        amount: FeeAmountBuilder().Basejump().quoteFee(),
+        asset: assetIn,
       },
     },
     contract: ContractBuilder()
