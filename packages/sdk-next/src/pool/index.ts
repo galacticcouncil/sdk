@@ -1,5 +1,7 @@
 export { PoolFactory } from './PoolFactory';
 export { PoolContextProvider } from './PoolContextProvider';
+export { OfflinePoolService } from './offlinePoolService';
+export * from './offlinePoolService/types';
 
 export * as aave from './aave';
 export * as omni from './omni';
