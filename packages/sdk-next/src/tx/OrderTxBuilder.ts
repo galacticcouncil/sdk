@@ -78,7 +78,7 @@ export class OrderTxBuilder extends TxBuilder {
       tradeRoute,
     } = this.order;
 
-    let tx: Transaction = this.api.tx.DCA.schedule({
+    const tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -97,11 +97,6 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
-
     return this.wrapTx('DcaSchedule', tx);
   }
 
@@ -119,7 +114,7 @@ export class OrderTxBuilder extends TxBuilder {
     const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
     const minAmountOut = tradeAmountOut - slippage;
 
-    let tx: Transaction = this.api.tx.DCA.schedule({
+    const tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -138,11 +133,6 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
-
     return this.wrapTx('DcaSchedule.twapSell', tx);
   }
 
@@ -160,7 +150,7 @@ export class OrderTxBuilder extends TxBuilder {
     const slippage = calc.getFraction(tradeAmountIn, this.slippagePct);
     const maxAmountIn = tradeAmountIn + slippage;
 
-    let tx: Transaction = this.api.tx.DCA.schedule({
+    const tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
         period: tradePeriod,
@@ -178,11 +168,6 @@ export class OrderTxBuilder extends TxBuilder {
       },
       start_execution_block: undefined,
     });
-
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
 
     return this.wrapTx('DcaSchedule.twapBuy', tx);
   }
