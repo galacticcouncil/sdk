@@ -80,7 +80,7 @@ exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer fo
 exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer for Bifrost -> Hydration DOT [dot] transfer 1`] = `
 [
   "bifrost-hydration-dot",
-  "0x290d04010100c91f04040100000700e8764817030401000401000304010004040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+  "0x290d04010100c91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 
@@ -157,7 +157,7 @@ exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer fo
 exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer for Hydration -> Bifrost DOT [dot] transfer 1`] = `
 [
   "hydration-bifrost-dot",
-  "0x6b0d04010100b91f04040100000700e8764817030401000401000304010004040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+  "0x6b0d04010100b91f04040100000700e87648170304010100a10f0401000304010100a10f04040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
 `;
 

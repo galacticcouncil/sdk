@@ -58,32 +58,6 @@ export interface XcJourneysCriteria {
   actions?: string[];
 }
 
-export interface XcJourneyWhVAAInstruction {
-  type: 'WormholeVAA';
-  value: {
-    raw: string;
-    guardianSetIndex: number;
-    isDuplicated: boolean;
-  };
-}
-export interface XcJourneyWhStop {
-  type: 'wormhole';
-  from: object;
-  to: object;
-  relay?: object;
-  instructions: XcJourneyWhVAAInstruction;
-  messageId?: string;
-}
-
-export interface XcJourneyStop {
-  type: string;
-  from: object;
-  to: object;
-  relay?: object;
-  instructions: object[];
-  messageId?: string;
-}
-
 export interface XcJourneysListRequest {
   op: 'journeys.list';
   criteria?: XcJourneysCriteria;
@@ -120,9 +94,9 @@ export type XcJourney = {
   sentAt?: number;
   recvAt?: number;
   createdAt: number;
-  stops: XcJourneyStop[] | XcJourneyWhStop[];
-  instructions: any;
-  transactCalls: any[];
+  stops: string;
+  instructions: string;
+  transactCalls: string;
   originTxPrimary?: string;
   originTxSecondary?: string;
   destinationTxPrimary?: string;

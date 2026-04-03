@@ -252,28 +252,6 @@ export function viaWormholeBridgeTemplate(
   );
 }
 
-export function viaWormholeRelayerTemplate(
-  assetIn: Asset,
-  assetOut: Asset,
-  to: AnyChain
-): AssetRoute {
-  return viaWormholeTemplate(
-    assetIn,
-    assetOut,
-    to,
-    FeeAmountBuilder().Wormhole().TokenRelayer().calculateRelayerFee(),
-    ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder()
-          .Erc20()
-          .approve((ctx) => ctx.getTokenRelayer()),
-        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
-      ]),
-    [Tag.Mrl, Tag.Wormhole, Tag.Relayer]
-  );
-}
-
 export function viaSnowbridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
