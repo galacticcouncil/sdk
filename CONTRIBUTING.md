@@ -28,8 +28,8 @@ npm run build:watch
 
 3. Go to examples and run web dev server
 
-- <a href="./examples/sdk-esm/">SDK Playground</a></br>
-- <a href="./examples/xcm-transfer/">XCM Playground</a></br>
+- <a href="./examples/sdk-next-esm/">SDK Playground</a></br>
+- <a href="./examples/xc-transfer/">XC Playground</a></br>
 
 ```sh
 npm run dev
