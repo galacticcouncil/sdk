@@ -122,7 +122,13 @@ export const hydration = new EvmParachain({
       id: 0,
       xcmLocation: {
         parents: 0,
-        interior: 'Here',
+        interior: {
+          X1: [
+            {
+              GeneralIndex: 0,
+            },
+          ],
+        },
       },
     },
     {
@@ -608,9 +614,14 @@ export const hydration = new EvmParachain({
       xcmLocation: {
         parents: 1,
         interior: {
-          X1: {
-            Parachain: 2043,
-          },
+          X2: [
+            {
+              Parachain: 2043,
+            },
+            {
+              PalletInstance: 10,
+            },
+          ],
         },
       },
     },
