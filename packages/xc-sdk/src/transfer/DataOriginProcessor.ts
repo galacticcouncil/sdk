@@ -2,6 +2,7 @@ import {
   addr,
   Asset,
   AssetAmount,
+  CallType,
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
@@ -12,12 +13,10 @@ import {
 } from '@galacticcouncil/xc-core';
 import { acc, big } from '@galacticcouncil/common';
 
-import { formatAmount, formatEvmAddress } from './utils';
+import { buildBalanceConfig, formatAmount, resolveAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
-
-const { EvmAddr } = addr;
 
 export class DataOriginProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
@@ -25,9 +24,9 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {
-    const { amount, sender, source } = ctx;
-    const transfer = await this.getTransfer(ctx);
-    return this.adapter.buildCall(sender, amount, source.feeBalance, transfer);
+    const { amount, source } = ctx;
+    const { transfer, account } = await this.getTransfer(ctx);
+    return this.adapter.buildCall(account, amount, source.feeBalance, transfer);
   }
 
   async getDestinationFee(): Promise<{
@@ -82,35 +81,28 @@ export class DataOriginProcessor extends DataProcessor {
       return this.getBalance(address);
     }
 
-    const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = EvmAddr.isValid(feeAssetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const feeBalanceConfig = source.destinationFee.balance.build({
-      address: account,
-      asset: feeAsset,
-      chain: chain,
-    });
+    const feeBalanceConfig = await buildBalanceConfig(
+      source.destinationFee.balance,
+      address,
+      feeAsset,
+      chain
+    );
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
   async getFee(ctx: TransferCtx): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { amount, sender, source } = ctx;
+    const { amount, source } = ctx;
 
-    const transfer = await this.getTransfer(ctx);
-    const address = route.contract
-      ? await formatEvmAddress(sender, chain)
-      : sender;
+    const { transfer, account } = await this.getTransfer(ctx);
 
     const networkFee = await this.adapter.estimateFee(
-      address,
+      account,
       amount,
       source.feeBalance,
       transfer
     );
 
-    const { fee } = route.source;
+    const { fee } = this.config.route.source;
     const extraFee = fee ? formatAmount(networkFee.decimals, fee.extra) : 0n;
     const totalFee = networkFee.amount + extraFee;
     return networkFee.copyWith({ amount: totalFee });
@@ -124,17 +116,18 @@ export class DataOriginProcessor extends DataProcessor {
       return this.getBalance(address);
     }
 
-    const feeAsset = await this.getFeeAsset(address);
-    const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = EvmAddr.isValid(feeAssetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const feeBalanceConfig = source.fee.balance.build({
-      address: account,
-      asset: feeAsset,
-      chain: chain,
-    });
-
+    const substrateAddr = await resolveAddress(
+      address,
+      chain,
+      CallType.Substrate
+    );
+    const feeAsset = await this.getFeeAsset(substrateAddr);
+    const feeBalanceConfig = await buildBalanceConfig(
+      source.fee.balance,
+      address,
+      feeAsset,
+      chain
+    );
     return this.adapter.getBalance(feeAsset, feeBalanceConfig);
   }
 
@@ -167,23 +160,25 @@ export class DataOriginProcessor extends DataProcessor {
     if (extrinsic) {
       const { address, amount, asset, sender } = ctx;
       const substrate = await SubstrateService.create(chain as Parachain);
+      const account = await resolveAddress(sender, chain, CallType.Substrate);
       const messageId = await substrate.buildMessageId(
-        sender,
+        account,
         amount,
         asset.originSymbol,
         address
       );
-      return extrinsic.build({
+      const transfer = await extrinsic.build({
         ...ctx,
         messageId: messageId,
       });
+      return { transfer, account };
     }
 
     const callable = contract || program || move;
     if (callable) {
-      return callable.build({
-        ...ctx,
-      });
+      const transfer = await callable.build({ ...ctx });
+      const account = await resolveAddress(ctx.sender, chain, transfer.type);
+      return { transfer, account };
     }
 
     throw new Error(
@@ -234,7 +229,11 @@ export class DataOriginProcessor extends DataProcessor {
     const submittable = config.getTx(substrate.client);
 
     const fromChain = ctx.source.chain as Parachain;
-    const fromAddr = ctx.sender;
+    const fromAddr = await resolveAddress(
+      ctx.sender,
+      fromChain,
+      CallType.Substrate
+    );
 
     const mda = acc.getMultilocationDerivatedAccount(
       fromChain.parachainId,
@@ -292,11 +291,12 @@ export class DataOriginProcessor extends DataProcessor {
   ): Promise<AssetAmount> {
     const { chain } = this.config;
     const { fee } = cfg;
-    const feeBalanceConfig = fee.balance.build({
-      address: ctx.sender,
-      asset: fee.asset,
-      chain: chain,
-    });
+    const feeBalanceConfig = await buildBalanceConfig(
+      fee.balance,
+      ctx.sender,
+      fee.asset,
+      chain
+    );
     return this.adapter.getBalance(fee.asset, feeBalanceConfig);
   }
 }
