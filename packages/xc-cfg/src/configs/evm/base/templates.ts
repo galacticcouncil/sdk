@@ -1,10 +1,7 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-} from '../../../builders';
+import { BalanceBuilder, ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { hydration, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
@@ -39,5 +36,37 @@ export function toHydrationViaWormholeTemplate(
       .transferTokensWithPayload()
       .viaMrl({ moonchain: moonbeam }),
     tags: [Tag.Mrl, Tag.Wormhole],
+  });
+}
+
+export function toHydrationViaBasejumpTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        asset: assetIn,
+        balance: BalanceBuilder().evm().erc20(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Basejump().quoteFee(),
+        asset: assetIn,
+      },
+    },
+    contract: ContractBuilder()
+      .Basejump()
+      .bridgeViaWormhole(),
+    tags: [Tag.Basejump],
   });
 }

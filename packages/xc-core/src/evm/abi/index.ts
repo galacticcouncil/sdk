@@ -3,6 +3,7 @@ import type { Abi as TAbi } from 'viem';
 import { BATCH } from './Batch';
 import { ERC20 } from './Erc20';
 import { GMP } from './Gmp';
+import { BASEJUMP } from './Basejump';
 import { META } from './Meta';
 import { POLKADOT_XCM } from './PolkadotXcm';
 import { SNOWBRIDGE } from './Snowbridge';
@@ -13,6 +14,7 @@ export const Abi: Record<string, TAbi> = {
   Batch: BATCH,
   Erc20: ERC20,
   Gmp: GMP,
+  Basejump: BASEJUMP,
   Meta: META,
   PolkadotXcm: POLKADOT_XCM,
   Snowbridge: SNOWBRIDGE,
