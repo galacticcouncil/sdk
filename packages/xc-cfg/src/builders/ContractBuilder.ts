@@ -1,7 +1,7 @@
 import { Batch } from './contracts/Batch';
 import { Erc20 } from './contracts/Erc20';
 import { PolkadotXcm } from './contracts/PolkadotXcm';
-import { Snowbridge } from './contracts/Snowbridge';
+import { Snowbridge } from './contracts/snowbridge';
 import { Wormhole } from './contracts/Wormhole';
 
 export function ContractBuilder() {

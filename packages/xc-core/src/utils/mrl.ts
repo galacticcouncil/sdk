@@ -1,9 +1,4 @@
-import {
-  Codec,
-  getTypedCodecs,
-  FixedSizeBinary,
-  AccountId,
-} from 'polkadot-api';
+import { Codec, FixedSizeBinary, AccountId } from 'polkadot-api';
 
 import { Struct, Enum } from 'scale-ts';
 
@@ -12,8 +7,9 @@ import {
   XcmVersionedLocation,
   XcmV5Junction,
   XcmV5Junctions,
-  hub,
 } from '@galacticcouncil/descriptors';
+
+import { getHubCodecs } from './codec';
 
 import { Parachain } from '../chain';
 
@@ -35,7 +31,7 @@ interface EncodedPayload {
 async function getVersionedUserActionCodec(): Promise<
   Codec<VersionedUserAction>
 > {
-  const codecs = await getTypedCodecs(hub);
+  const codecs = await getHubCodecs();
   const destCodec = codecs.tx.PolkadotXcm.send.inner.dest;
 
   const XcmRoutingUserActionCodec = Struct({
