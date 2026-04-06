@@ -1,6 +1,6 @@
 export { PoolFactory } from './PoolFactory';
 export { PoolContextProvider } from './PoolContextProvider';
-export { OfflinePoolService } from './offlinePoolService';
+export { OfflinePoolService, OfflinePoolUtils } from './offlinePoolService';
 export * from './offlinePoolService/types';
 
 export * as aave from './aave';
