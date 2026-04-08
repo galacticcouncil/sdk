@@ -235,7 +235,10 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
 
   private hasValidAssets(pool: T): boolean {
     return pool.tokens.every(({ decimals, balance }) => {
-      return balance > 0n && !!decimals;
+      if (pool.type === PoolType.XYK) {
+        return balance > 0n && !!decimals;
+      }
+      return !!decimals;
     });
   }
 
