@@ -1,7 +1,7 @@
-import { big, RUNTIME_DECIMALS } from '@galacticcouncil/common';
-
-import { Router } from './Router';
-import { BuySwap, SellSwap, Swap, Trade, TradeType } from './types';
+import {
+  big,
+  RUNTIME_DECIMALS,
+} from '@galacticcouncil/common';
 
 import { RouteNotFound } from '../errors';
 import {
@@ -13,7 +13,19 @@ import {
   PoolType,
 } from '../pool';
 import { Amount } from '../types';
-import { fmt, math, calc } from '../utils';
+import {
+  calc,
+  fmt,
+  math,
+} from '../utils';
+import { Router } from './Router';
+import {
+  BuySwap,
+  SellSwap,
+  Swap,
+  Trade,
+  TradeType,
+} from './types';
 
 const { FeeUtils } = fmt;
 
@@ -499,19 +511,24 @@ export class TradeRouter extends Router {
    *
    * @param {number} assetIn - asset in
    * @param {number} assetOut - asset out
+   * @param {Hop[]} cacheMlr - optional pre-computed most liquid route; if provided,
+   *   skips MLR cache lookup and recalculation entirely
    * @return spot price of given asset pair, or undefined if trade not supported
    */
   async getSpotPrice(
     assetIn: number,
-    assetOut: number
+    assetOut: number,
+    cacheMlr: Hop[] | undefined = undefined
   ): Promise<Amount | undefined> {
     return this.withCtx(assetIn, assetOut, async (ctx) => {
       const { pools, poolsMap } = ctx;
 
-      const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
-      let route = this.mlr.get(routeKey);
-      if (!route) {
-        route = await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
+      let route: Hop[];
+      if (cacheMlr) {
+        route = cacheMlr;
+      } else {
+        const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
+        route = this.mlr.get(routeKey) ?? await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
       }
 
       const swaps = await this.toSellSwaps('1', route, poolsMap);
