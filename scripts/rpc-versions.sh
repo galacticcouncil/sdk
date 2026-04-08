@@ -3,7 +3,7 @@
 # Query Hydration RPC endpoints and display version info in a table.
 
 ENDPOINTS=(
-  "https://rpc.helikon.io/hydradx"
+  "https://hydration.rpc.stkd.io"
   "https://hydration-rpc.n.dwellir.com"
   "https://hydration.dotters.network"
   "https://hydration.ibp.network"
