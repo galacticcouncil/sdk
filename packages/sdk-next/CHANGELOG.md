@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.40.0
+
+### Minor Changes
+
+- 5583b08: fix pool client amm validation
+
 ## 0.39.0
 
 ### Minor Changes
