@@ -1,10 +1,16 @@
 # @galacticcouncil/sdk-next
 
+## 0.39.0
+
+### Minor Changes
+
+- c5a840c: fix erc20 balance watcher pipe
+
 ## 0.38.0
 
 ### Minor Changes
 
-- Bump peer deps
+- 36ebfec: bump peer deps
 
 ## 0.37.0
 
