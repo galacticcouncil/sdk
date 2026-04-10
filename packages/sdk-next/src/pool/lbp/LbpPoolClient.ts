@@ -66,8 +66,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
 
   protected async loadPools(): Promise<LbpPoolBase[]> {
     const [entries, validationData, limits] = await Promise.all([
-      this.api.query.LBP.PoolData.getEntries({ at: 'best' }),
-      this.api.query.ParachainSystem.ValidationData.getValue({ at: 'best' }),
+      this.api.query.LBP.PoolData.getEntries({ at: this.at }),
+      this.api.query.ParachainSystem.ValidationData.getValue({ at: this.at }),
       this.getPoolLimits(),
     ]);
 
@@ -122,9 +122,13 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         fee_collector.toString()
       ),
       this.balance.getBalance(poolAddress, accumulated),
-      this.api.query.AssetRegistry.Assets.getValue(accumulated),
+      this.api.query.AssetRegistry.Assets.getValue(accumulated, {
+        at: this.at,
+      }),
       this.balance.getBalance(poolAddress, distributed),
-      this.api.query.AssetRegistry.Assets.getValue(distributed),
+      this.api.query.AssetRegistry.Assets.getValue(distributed, {
+        at: this.at,
+      }),
     ]);
 
     return {

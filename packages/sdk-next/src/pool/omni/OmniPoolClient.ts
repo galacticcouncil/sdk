@@ -59,21 +59,21 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     'DynamicFees.AssetFeeConfiguration',
     (id) =>
       this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id, {
-        at: 'best',
+        at: this.at,
       }),
     (id) => String(id)
   );
 
   private dynamicFees = this.queryBus.scope<[number], TDynamicFees | undefined>(
     'DynamicFees.AssetFee',
-    (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: 'best' }),
+    (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: this.at }),
     (id) => String(id),
     6 * 1000
   );
 
   private maxSlipFee = this.queryBus.scope<[], TSlipFee | undefined>(
     'Omnipool.SlipFee',
-    () => this.apiNext.query.Omnipool.SlipFee.getValue({ at: 'best' }),
+    () => this.apiNext.query.Omnipool.SlipFee.getValue({ at: this.at }),
     () => String('slipFee')
   );
 
@@ -84,7 +84,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         ORACLE_NAME,
         pair,
         ORACLE_PERIOD,
-        { at: 'best' }
+        { at: this.at }
       ),
     (pair) => pair.join(':'),
     6 * 1000
@@ -145,20 +145,24 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       hubAssetMeta,
       hubAssetBalance,
       limits,
+      block,
     ] = await Promise.all([
-      this.api.query.Omnipool.Assets.getEntries({ at: 'best' }),
-      this.api.query.Omnipool.HubAssetTradability.getValue(),
-      this.api.query.AssetRegistry.Assets.getValue(hubAssetId),
+      this.api.query.Omnipool.Assets.getEntries({ at: this.at }),
+      this.api.query.Omnipool.HubAssetTradability.getValue({ at: this.at }),
+      this.api.query.AssetRegistry.Assets.getValue(hubAssetId, { at: this.at }),
       this.balance.getBalance(poolAddress, hubAssetId),
       this.getPoolLimits(),
+      this.api.query.System.Number.getValue({ at: this.at }),
     ]);
+
+    this.block = block;
 
     const poolTokens = entries.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
 
       const [meta, balance] = await Promise.all([
-        this.api.query.AssetRegistry.Assets.getValue(id),
+        this.api.query.AssetRegistry.Assets.getValue(id, { at: this.at }),
         this.balance.getBalance(poolAddress, id),
       ]);
 

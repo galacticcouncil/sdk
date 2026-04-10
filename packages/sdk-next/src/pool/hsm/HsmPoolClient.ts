@@ -23,6 +23,7 @@ import { PoolClient } from '../PoolClient';
 import { StableSwapClient } from '../stable';
 import { PoolBase, PoolFees, PoolType } from '../types';
 
+import { BlockAt } from '../../api';
 import { EvmClient } from '../../evm';
 import { GHO_TOKEN_ABI, GhoTokenClient } from '../../gho';
 import { AssetBalance, XcmV3Multilocation } from '../../types';
@@ -46,9 +47,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   constructor(
     client: PolkadotClient,
     evm: EvmClient,
-    stableClient: StableSwapClient
+    stableClient: StableSwapClient,
+    at?: BlockAt
   ) {
-    super(client, evm);
+    super(client, evm, at);
     this.stableClient = stableClient;
     this.ghoClient = new GhoTokenClient(evm);
   }
@@ -94,8 +96,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     const hollarId = await this.api.constants.HSM.HollarId();
 
     const [hollarLocation, collaterals, stablePools] = await Promise.all([
-      this.api.query.AssetRegistry.AssetLocations.getValue(hollarId),
-      this.api.query.HSM.Collaterals.getEntries({ at: 'best' }),
+      this.api.query.AssetRegistry.AssetLocations.getValue(hollarId, {
+        at: this.at,
+      }),
+      this.api.query.HSM.Collaterals.getEntries({ at: this.at }),
       this.stableClient.getPools(),
     ]);
 
