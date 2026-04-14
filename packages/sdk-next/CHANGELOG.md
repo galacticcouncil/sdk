@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 22e6512: Fix health factor after swap function
+- 22e6512: fix aave health factor after swap function
 
 ## 0.40.0
 

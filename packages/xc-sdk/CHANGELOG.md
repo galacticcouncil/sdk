@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 3ac6e78: Added extrafee param to energyweb, fixed calculation to use real values and updated the location to neuroweb token
+- 3ac6e78: fixed max fee calc
 
 ## 0.9.1
 
