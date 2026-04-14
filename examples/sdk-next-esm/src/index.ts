@@ -1,5 +1,5 @@
 import { api as papi, createSdkContext } from '@galacticcouncil/sdk-next';
-import { big } from '@galacticcouncil/common';
+import { big } from '@galacticcouncil/common/utils';
 
 import { createClient } from 'polkadot-api';
 

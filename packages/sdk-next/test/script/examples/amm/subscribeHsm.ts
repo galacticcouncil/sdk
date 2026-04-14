@@ -3,17 +3,18 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
-import { pool, evm } from '../../../../src';
+import { EvmClient } from '../../../../src/evm';
+import { hsm, stable } from '../../../../src/pool';
 
 class SubscribeHsm extends PapiExecutor {
-  async script(client: PolkadotClient, evm: evm.EvmClient) {
-    const { StableSwapClient } = pool.stable;
-    const { HsmPoolClient } = pool.hsm;
+  async script(client: PolkadotClient, evm: EvmClient) {
+    const { StableSwapClient } = stable;
+    const { HsmPoolClient } = hsm;
 
     const stableClient = new StableSwapClient(client, evm);
     const hsmClient = new HsmPoolClient(client, evm, stableClient);
 
-    const print = (pools: pool.hsm.HsmPoolBase[]) => {
+    const print = (pools: hsm.HsmPoolBase[]) => {
       pools.forEach((pool) => {
         console.log(pool.address, pool.collateralBalance);
       });
