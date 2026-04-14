@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-sdk
 
+## 0.10.1
+
+### Patch Changes
+
+- eb9af28: Removal of fee re-estimation
+
 ## 0.10.0
 
 ### Minor Changes

@@ -24,6 +24,6 @@
     "@galacticcouncil/sdk-next": "^0.41.0",
     "@galacticcouncil/xc-cfg": "^0.19.0",
     "@galacticcouncil/xc-core": "^0.14.0",
-    "@galacticcouncil/xc-sdk": "^0.10.0"
+    "@galacticcouncil/xc-sdk": "^0.10.1"
   }
 }
