@@ -322,9 +322,11 @@ export class AaveUtils {
         )
       : Big(0);
 
-    const toWeightedCollateral = Big(toValueInRef.toString()).mul(
-      toReserveCtx.reserveLiquidationThreshold
-    );
+    const toWeightedCollateral = toReserveCtx.isCollateral
+      ? Big(toValueInRef.toString()).mul(
+          toReserveCtx.reserveLiquidationThreshold
+        )
+      : Big(0);
 
     const weightedCollateralDelta = toWeightedCollateral.minus(
       fromWeightedCollateral
