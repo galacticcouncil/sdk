@@ -1,9 +1,12 @@
 import { Abi, ContractConfigBuilderParams } from '@galacticcouncil/xc-core';
+import { h160 } from '@galacticcouncil/common';
 
 import { eurc } from '../../assets';
 import { base, hydration } from '../../chains';
 
 import { Basejump } from './Basejump';
+
+const { H160 } = h160;
 
 const buildCtx = (address: string) => {
   return {
@@ -34,8 +37,7 @@ describe('Basejump contract builder', () => {
 
     it('should encode SS58 EVM account with ETH\\0 prefix', async () => {
       // This SS58 address is the Hydration mapping of 0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0
-      const { h160 } = await import('@galacticcouncil/common');
-      const ss58 = h160.H160.toAccount('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
+      const ss58 = H160.toAccount('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
       const ctx = buildCtx(ss58);
       const config = await Basejump().bridgeViaWormhole().build(ctx);
 

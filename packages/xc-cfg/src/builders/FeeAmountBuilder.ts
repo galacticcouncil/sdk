@@ -6,6 +6,7 @@ import {
   Parachain,
   Snowbridge as Sb,
   Wormhole as Wh,
+  Basejump as Bj,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -208,15 +209,13 @@ function Basejump() {
     quoteFee: (): FeeAmountConfigBuilder => ({
       build: async ({ feeAsset, source }) => {
         const ctx = source as EvmChain;
-        const basejumpAddress = ctx.getBasejump();
-        if (!basejumpAddress) {
-          throw new Error(`Basejump not configured for ${ctx.name}`);
-        }
+
+        const ctxBj = Bj.fromChain(ctx);
 
         const feeAssetId = ctx.getAssetId(feeAsset);
         const fee = await ctx.evmClient.getProvider().readContract({
           abi: Abi.Basejump,
-          address: basejumpAddress as `0x${string}`,
+          address: ctxBj.getAddress() as `0x${string}`,
           args: [feeAssetId as `0x${string}`],
           functionName: 'quoteFee',
         });

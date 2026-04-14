@@ -1,5 +1,6 @@
 import {
   Abi,
+  Basejump as Bj,
   ContractConfig,
   ContractConfigBuilder,
   EvmChain,
@@ -23,23 +24,15 @@ function toAccountId32(address: string): `0x${string}` {
 const bridgeViaWormhole = (): ContractConfigBuilder => ({
   build: async (params) => {
     const { address, amount, asset, source } = params;
+
     const ctx = source.chain as EvmChain;
+    const ctxBj = Bj.fromChain(ctx);
 
     const assetId = ctx.getAssetId(asset);
-
-    const basejumpAddress = ctx.getBasejump();
-    if (!basejumpAddress) {
-      throw new Error(`Basejump not configured for ${ctx.name}`);
-    }
-
     return new ContractConfig({
       abi: Abi.Basejump,
-      address: basejumpAddress,
-      args: [
-        parseAssetId(assetId),
-        amount,
-        toAccountId32(address),
-      ],
+      address: ctxBj.getAddress(),
+      args: [parseAssetId(assetId), amount, toAccountId32(address)],
       func: 'bridgeViaWormhole',
       module: 'Basejump',
     });
