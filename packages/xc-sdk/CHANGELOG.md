@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- chore: re-moduling
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.14.0
+
 ## 0.9.2
 
 ### Patch Changes

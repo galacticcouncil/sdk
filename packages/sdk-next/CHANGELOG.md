@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.41.0
+
+### Minor Changes
+
+- chore: re-moduling
+
 ## 0.40.1
 
 ### Patch Changes

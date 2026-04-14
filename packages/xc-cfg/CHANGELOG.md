@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 0.19.0
+
+### Minor Changes
+
+- chore: re-moduling
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.14.0
+
 ## 0.18.3
 
 ### Patch Changes

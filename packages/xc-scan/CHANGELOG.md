@@ -1,3 +1,9 @@
+## 0.5.0
+
+### Minor Changes
+
+- chore: re-moduling
+
 ## 0.4.0
 
 ### Minor Changes
