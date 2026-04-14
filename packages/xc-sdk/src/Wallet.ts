@@ -207,13 +207,6 @@ export class Wallet {
     const srcEd = await src.getEd();
     let max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
 
-    // Re-estimate fee with real max amount (max + fee ≈ balance)
-    if (max.amount > 0n) {
-      ctx.amount = max.amount;
-      srcFee = await src.getFee(ctx);
-      max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
-    }
-
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
 
