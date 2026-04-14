@@ -11,6 +11,7 @@ import {
   combineLatest,
   defer,
   from,
+  interval,
   merge,
   of,
   EMPTY,
@@ -316,6 +317,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   private startWatchdog(): Subscription {
     const gapThreshold = 3;
     const repeatDelayMs = 1_000;
+    const resyncIntervalMs = 60 * 60 * 1_000; // 60 min
 
     const recovery$ = this.watcher.connection$.pipe(
       pairwise(),
@@ -350,7 +352,19 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
       repeat({ delay: repeatDelayMs })
     );
 
-    return merge(recovery$, gap$).subscribe();
+    const periodic$ = interval(resyncIntervalMs).pipe(
+      tap(() => {
+        this.log.debug('watchdog_periodic', { mem: this.mem });
+        this.requestResync();
+      }),
+      catchError((e) => {
+        this.log.error('watchdog_periodic_error', e);
+        return EMPTY;
+      }),
+      repeat({ delay: repeatDelayMs })
+    );
+
+    return merge(recovery$, gap$, periodic$).subscribe();
   }
 
   /**
