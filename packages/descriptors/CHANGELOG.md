@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 1.16.0
+
+### Minor Changes
+
+- 3fabeeb: Add Multisig descriptors
+
 ## 1.15.0
 
 ### Minor Changes

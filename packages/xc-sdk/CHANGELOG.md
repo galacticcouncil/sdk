@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-sdk
 
+## 0.9.2
+
+### Patch Changes
+
+- 3ac6e78: Added extrafee param to energyweb, fixed calculation to use real values and updated the location to neuroweb token
+
 ## 0.9.1
 
 ### Patch Changes

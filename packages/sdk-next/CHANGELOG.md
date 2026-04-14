@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.40.1
+
+### Patch Changes
+
+- 22e6512: Fix health factor after swap function
+
 ## 0.40.0
 
 ### Minor Changes
