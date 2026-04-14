@@ -143,6 +143,5 @@ export const ethereum = new EvmChain({
     id: 2,
     coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
     tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
-    tokenRelayer: '0xCafd2f0A35A4459fA40C0517e17e6fA2939441CA',
   },
 });

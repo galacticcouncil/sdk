@@ -1,3 +1,9 @@
+## 0.4.0
+
+### Minor Changes
+
+- e620b8c: Update xc-journey types
+
 ## 0.3.0
 
 ### Minor Changes

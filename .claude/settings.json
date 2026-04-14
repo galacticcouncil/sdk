@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run test)",
+      "Bash(npm run clean)",
+      "Bash(npm test)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(cd packages/* && npm run build)",
+      "Bash(cd packages/* && npm test)",
+      "Bash(cd packages/* && npm run clean)",
+      "Bash(turbo run build*)",
+      "Bash(turbo run test*)"
+    ],
+    "deny": [
+      "Bash(npm run release*)",
+      "Bash(npm run changeset:version*)",
+      "Bash(changeset publish*)",
+      "Bash(npm publish*)",
+      "Bash(rm -rf packages/math-*/build*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-generated-files.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

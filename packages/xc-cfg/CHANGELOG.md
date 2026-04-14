@@ -1,5 +1,30 @@
 # @galacticcouncil/xc-cfg
 
+## 0.18.2
+
+### Patch Changes
+
+- update hydration rpcs list
+
+## 0.18.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.13.0
+
+## 0.18.0
+
+### Minor Changes
+
+- fix hub delivery fee calc
+
+## 0.17.0
+
+### Minor Changes
+
+- get rid of xLabs
+
 ## 0.16.0
 
 ### Minor Changes

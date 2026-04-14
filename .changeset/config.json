@@ -6,16 +6,7 @@
   "access": "public",
   "baseBranch": "origin/master",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "sdk-cjs",
-    "sdk-esm",
-    "sdk-next-cjs",
-    "sdk-next-esm",
-    "sdk-swapp",
-    "xc-transfer",
-    "xcm-transfer",
-    "xcm-test"
-  ],
+  "ignore": ["sdk-next-cjs", "sdk-next-esm", "xc-transfer"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   }

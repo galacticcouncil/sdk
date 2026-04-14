@@ -1,17 +1,9 @@
 import { PolkadotClient, createClient } from 'polkadot-api';
-import {
-  hydration,
-  HydrationConstants,
-  HydrationNextConstants,
-} from '@galacticcouncil/descriptors';
+import { hydration } from '@galacticcouncil/descriptors';
 
 import { ApiUrl } from './types';
 
 import { api, json, evm } from '../../src';
-
-type SystemVersion =
-  | HydrationConstants['System']['Version']
-  | HydrationNextConstants['System']['Version'];
 
 export abstract class PapiExecutor {
   protected readonly apiUrl: ApiUrl;
