@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-core",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -23,11 +23,11 @@
   ],
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
-  "types": "./build/types/index.d.ts",
+  "types": "./build/index.d.ts",
   "scripts": {
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
-    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
     "link": "npm ln",
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
@@ -51,8 +51,8 @@
     "bs58": "^6.0.0"
   },
   "peerDependencies": {
-    "@galacticcouncil/common": ">=0.6.0 <1.0.0",
-    "@galacticcouncil/descriptors": ">=1.15.0 <2.0.0",
+    "@galacticcouncil/common": ">=0.7.0 <1.0.0",
+    "@galacticcouncil/descriptors": ">=1.16.0 <2.0.0",
     "@polkadot-api/legacy-provider": "^0.3.8",
     "polkadot-api": "^1.23.3",
     "viem": "^2.38.3"

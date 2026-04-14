@@ -3,13 +3,13 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
-import { client as c } from '../../../src';
+import { BalanceClient } from '../../../src/client';
 
 const TRSRY_ADDRESS = '7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh';
 
 class SubscribeBalance extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const balanceClient = new c.BalanceClient(client);
+    const balanceClient = new BalanceClient(client);
     const subscription = balanceClient
       .watchBalance(TRSRY_ADDRESS)
       .subscribe((balances) => {

@@ -1,5 +1,28 @@
 # @galacticcouncil/xc-sdk
 
+## 0.10.1
+
+### Patch Changes
+
+- eb9af28: Removal of fee re-estimation
+
+## 0.10.0
+
+### Minor Changes
+
+- chore: re-moduling
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.14.0
+
+## 0.9.2
+
+### Patch Changes
+
+- 3ac6e78: fixed max fee calc
+
 ## 0.9.1
 
 ### Patch Changes

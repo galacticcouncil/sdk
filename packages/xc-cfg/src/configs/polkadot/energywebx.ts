@@ -9,6 +9,11 @@ const toHydration: AssetRoute[] = [
     source: {
       asset: ewt,
       balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: ewt,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: 0.030555,
+      },
       destinationFee: {
         balance: BalanceBuilder().substrate().system().account(),
       },

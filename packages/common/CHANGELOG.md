@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 0.7.0
+
+### Minor Changes
+
+- chore: re-moduling
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Cross-chain ctx",
   "author": "GalacticCouncil",
   "repository": {
@@ -21,17 +21,17 @@
   ],
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
-  "types": "./build/types/index.d.ts",
+  "types": "./build/index.d.ts",
   "scripts": {
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
-    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
     "link": "npm ln"
   },
   "peerDependencies": {
-    "@galacticcouncil/xc-cfg": ">=0.18.1 <1.0.0",
-    "@galacticcouncil/xc-core": ">=0.13.0 <1.0.0",
-    "@galacticcouncil/xc-sdk": ">=0.9.1 <1.0.0"
+    "@galacticcouncil/xc-cfg": ">=0.19.0 <1.0.0",
+    "@galacticcouncil/xc-core": ">=0.14.0 <1.0.0",
+    "@galacticcouncil/xc-sdk": ">=0.10.0 <1.0.0"
   }
 }
