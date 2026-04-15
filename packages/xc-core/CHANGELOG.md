@@ -1,5 +1,17 @@
 # @galacticcouncil/xc-core
 
+## 0.15.0
+
+### Minor Changes
+
+[d27ab087]: https://github.com/galacticcouncil/sdk/commit/d27ab087
+[ce812808]: https://github.com/galacticcouncil/sdk/commit/ce812808
+[40cc4afd]: https://github.com/galacticcouncil/sdk/commit/40cc4afd
+
+- [[#d27ab087][d27ab087]] xc: support tag filtering (bridge opts)
+- [[#ce812808][ce812808]] xc: basejump cleanup
+- [[#40cc4afd][40cc4afd]] xc: basejump base eurc
+
 ## 0.14.0
 
 ### Minor Changes

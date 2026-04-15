@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 0.20.0
+
+### Minor Changes
+
+- 40cc4af: basejump base eurc
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.15.0
+
 ## 0.19.0
 
 ### Minor Changes
