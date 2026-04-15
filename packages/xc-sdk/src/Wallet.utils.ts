@@ -21,19 +21,31 @@ export function TransferBuilder(wallet: Wallet) {
           return {
             destinations,
             withDestination(dstChain: string | AnyChain) {
-              const { routes, build } = destinations.destination(dstChain);
+              const {
+                routes,
+                destinationAssets,
+                isAssetSelect,
+                isTagSelect,
+                build,
+              } = destinations.destination(dstChain);
+
               return {
                 routes,
+                destinationAssets,
+                isAssetSelect,
+                isTagSelect,
                 build({
                   srcAddress,
                   dstAddress,
                   dstAsset,
+                  tag,
                 }: {
                   srcAddress: string;
                   dstAddress: string;
                   dstAsset?: string | Asset;
+                  tag?: string;
                 }): Promise<Transfer> {
-                  const configs = build(dstAsset);
+                  const configs = build(dstAsset, tag);
                   return wallet.getTransferData(
                     configs,
                     srcAddress,

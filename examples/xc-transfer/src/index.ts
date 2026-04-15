@@ -1,9 +1,18 @@
 import { AssetAmount, ConfigBuilder } from '@galacticcouncil/xc-core';
 import { TransferBuilder } from '@galacticcouncil/xc-sdk';
+import { tags } from '@galacticcouncil/xc-cfg';
 
 import { sign } from './signers';
 import { ctx } from './setup';
 import { log } from './utils';
+
+const { Tag } = tags;
+
+const BRIDGES = [
+  Tag.Wormhole.toString(),
+  Tag.Snowbridge.toString(),
+  Tag.Basejump.toString(),
+];
 
 const { logAssets, logSrcChains, logDestChains } = log;
 const { config, wallet } = ctx;
@@ -37,12 +46,32 @@ const balanceSubscription = await wallet.subscribeBalance(
   balanceObserver
 );
 
-// Build transfer input data
-const transfer = await TransferBuilder(wallet)
+const transfers = TransferBuilder(wallet)
   .withAsset(asset)
   .withSource(srcChain)
-  .withDestination(destChain)
-  .build({ srcAddress: srcAddr, dstAddress: destAddr });
+  .withDestination(destChain);
+
+const { destinationAssets, routes, isAssetSelect, isTagSelect } = transfers;
+
+if (isAssetSelect) {
+  const destAssets = destinationAssets.map((a) => a.key);
+  console.log('Destination assets:', destAssets);
+}
+
+if (isTagSelect) {
+  const bridgeOptions = routes
+    .map((r) => r.tags)
+    .filter((tags) => !!tags)
+    .map((group) => BRIDGES.find((bridge) => group.includes(bridge)))
+    .filter((x) => x);
+  console.log('Bridge options:', bridgeOptions);
+}
+
+// Build transfer input data
+const transfer = await transfers.build({
+  srcAddress: srcAddr,
+  dstAddress: destAddr,
+});
 
 // Validate transfer
 const status = await transfer.validate();
