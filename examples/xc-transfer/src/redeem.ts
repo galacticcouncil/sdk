@@ -18,13 +18,15 @@ const { config } = ctx;
 
 const moonbeam = config.getChain('moonbeam') as EvmParachain;
 const ethereum = config.getChain('ethereum') as EvmChain;
+const base = config.getChain('base') as EvmChain;
 const solana = config.getChain('solana') as SolanaChain;
 const sui = config.getChain('sui') as SuiChain;
 
 const solanaClaim = new SolanaClaim(solana);
 const mrlClaim = new SubstrateClaim(moonbeam);
 const suiClaim = new SuiClaim(sui);
-const evmClaim = new EvmClaim(ethereum);
+const ethereumClaim = new EvmClaim(ethereum);
+const baseClaim = new EvmClaim(base);
 
 /**
  * Helpers for redeeming a Wormhole VAA on different chains.
@@ -40,16 +42,17 @@ const evmClaim = new EvmClaim(ethereum);
  * await signSolanaBundle(claim, solana)
  * ```
  *
- * Example (EVM):
+ * Example (Ethereum):
  *
  * ```ts
- * const claim = redeem.evm("INSERT_YOUR_ADDRESS", "INSERT_VAA")
- * await signEvmCall(claim, ethereum)
+ * const claim = redeem.eth("INSERT_YOUR_ADDRESS", "INSERT_VAA")
+ * await signEvm(claim, ethereum)
  * ```
  */
 export const redeem = {
   mrl: (address: string, vaa: string) => mrlClaim.redeemMrl(address, vaa),
   sol: (address: string, vaa: string) => solanaClaim.redeem(address, vaa),
   sui: (address: string, vaa: string) => suiClaim.redeem(address, vaa),
-  evm: (address: string, vaa: string) => evmClaim.redeem(address, vaa),
+  eth: (address: string, vaa: string) => ethereumClaim.redeem(address, vaa),
+  base: (address: string, vaa: string) => baseClaim.redeem(address, vaa),
 };
