@@ -1,7 +1,8 @@
+import { SizedHex } from 'polkadot-api';
 import { XcmV3Junctions } from '@galacticcouncil/descriptors';
 
 export const AMOUNT_MAX = 340282366920938463463374607431768211455n;
-export const TOPIC =
+export const TOPIC: SizedHex<32> =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 // Location

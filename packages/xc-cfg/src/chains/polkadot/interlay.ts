@@ -140,6 +140,5 @@ export const interlay = new Parachain({
   parachainId: 2032,
   ss58Format: 2032,
   ws: 'wss://api.interlay.io/parachain',
-  usesLegacyEnhancer: true,
   xcmVersion: XcmVersion.v3,
 });

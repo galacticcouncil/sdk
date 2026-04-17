@@ -8,8 +8,6 @@ import {
 } from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
-import { Binary } from 'polkadot-api';
-
 import { ACCOUNT_SS_58, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
 
 import {
@@ -29,7 +27,7 @@ export function buildParaERC20Received(
     version
   );
 
-  const topic = Binary.fromHex(TOPIC);
+  const topic = TOPIC;
   return [
     XcmV4Instruction.ReserveAssetDeposited([
       {
