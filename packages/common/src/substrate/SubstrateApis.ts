@@ -1,5 +1,5 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
-import { getWsProvider } from 'polkadot-api/ws-provider';
+import { getWsProvider } from 'polkadot-api/ws';
 import { LRUCache } from 'lru-cache';
 import { Subscription } from 'rxjs';
 
