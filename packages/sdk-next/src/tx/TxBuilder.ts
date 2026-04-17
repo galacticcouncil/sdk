@@ -51,7 +51,7 @@ export abstract class TxBuilder extends Papi {
 
     const dryRun = await this.client
       .getUnsafeApi()
-      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall);
+      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 4);
 
     const result = dryRun as DryRunResult;
     const error =

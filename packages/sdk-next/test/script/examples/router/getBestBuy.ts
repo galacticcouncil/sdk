@@ -1,4 +1,4 @@
-import { PolkadotClient } from 'polkadot-api';
+import { Binary, PolkadotClient } from 'polkadot-api';
 
 import { createSdkContext } from '../../../../src';
 
@@ -16,7 +16,7 @@ class GetBestBuy extends PapiExecutor {
     const tradeTx = await tx.trade(trade).withBeneficiary(BENEFICIARY).build();
     const tradeCall = await tradeTx.get().getEncodedData();
     console.log(trade.toHuman());
-    console.log('Transaction hash: ' + tradeCall.asHex());
+    console.log('Transaction hash: ' + Binary.toHex(tradeCall));
 
     return () => {
       sdk.destroy();

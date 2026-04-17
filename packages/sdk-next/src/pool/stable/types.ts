@@ -1,4 +1,4 @@
-import { Enum, FixedSizeArray, FixedSizeBinary } from 'polkadot-api';
+import { Enum, FixedSizeArray, SizedHex } from 'polkadot-api';
 
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
@@ -8,7 +8,7 @@ export type TStableswapPeg =
 
 export type TEmaOracle = HydrationQueries['EmaOracle']['Oracles']['Value'];
 
-export type TEmaName = FixedSizeBinary<8>;
+export type TEmaName = SizedHex<8>;
 export type TEmaPair = FixedSizeArray<2, number>;
 export type TEmaPeriod = Enum<{
   LastBlock: undefined;

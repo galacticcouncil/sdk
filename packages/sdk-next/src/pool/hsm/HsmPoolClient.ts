@@ -1,4 +1,9 @@
-import { AccountId, CompatibilityLevel, PolkadotClient } from 'polkadot-api';
+import {
+  AccountId,
+  Binary,
+  CompatibilityLevel,
+  PolkadotClient,
+} from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import {
@@ -7,6 +12,7 @@ import {
   combineLatest,
   filter,
   map,
+  mergeMap,
   pairwise,
 } from 'rxjs';
 import { decodeEventLog } from 'viem';
@@ -64,7 +70,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       const interior = location.interior;
       if (interior.type === 'X1' && interior.value.type === 'AccountKey20') {
         const { value } = interior.value;
-        return value.key.asHex();
+        return value.key;
       }
     }
     throw Error('Invalid hollar multilocation');
@@ -78,11 +84,9 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   }
 
   async isSupported(): Promise<boolean> {
-    const query = this.api.query.HSM.Collaterals;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const staticApis = await this.api.getStaticApis();
+    return staticApis.compat.query.HSM.Collaterals.isCompatible(
+      CompatibilityLevel.BackwardsCompatible
     );
   }
 
@@ -157,8 +161,8 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
   private parseEvmLog(payload: TEvmPayload): TEvmEvent | undefined {
     const { topics, data } = payload.log;
-    const topicsHex = topics.map((t) => t.asHex());
-    const dataHex = data.asHex();
+    const topicsHex = topics;
+    const dataHex = Binary.toHex(data);
 
     try {
       const { eventName, args } = decodeEventLog({
@@ -182,6 +186,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   private subscribeEvmLog(): Subscription {
     return this.api.event.EVM.Log.watch()
       .pipe(
+        mergeMap(({ events }) => events),
         map(({ payload }) => this.parseEvmLog(payload)),
         filter((v): v is TEvmEvent => v !== undefined),
         filter(({ eventName }) => SYNC_BUCKET_EVENTS.includes(eventName)),

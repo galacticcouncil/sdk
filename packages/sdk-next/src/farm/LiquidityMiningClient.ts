@@ -1,5 +1,9 @@
 import { Papi } from '../api';
-import { Binary, Enum } from 'polkadot-api';
+import { Binary, Enum, SizedHex } from 'polkadot-api';
+
+const OMNIPOOL_ORACLE = Binary.toHex(
+  Binary.fromText('omnipool')
+) as SizedHex<8>;
 
 export class LiquidityMiningClient extends Papi {
   protected omnipoolAssetIds: string[] = [];
@@ -7,7 +11,7 @@ export class LiquidityMiningClient extends Papi {
   async getOraclePrice(orderedAssets: [number, number]) {
     const query = this.api.query.EmaOracle.Oracles;
     const value = await query.getValue(
-      Binary.fromText('omnipool'),
+      OMNIPOOL_ORACLE,
       orderedAssets,
       Enum('TenMinutes')
     );

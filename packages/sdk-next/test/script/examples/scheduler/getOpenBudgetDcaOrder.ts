@@ -1,4 +1,4 @@
-import { PolkadotClient } from 'polkadot-api';
+import { Binary, PolkadotClient } from 'polkadot-api';
 
 import { createSdkContext } from '../../../../src';
 
@@ -25,7 +25,7 @@ class GetOpenBudgetDcaOrder extends PapiExecutor {
       .build();
     const orderCall = await orderTx.get().getEncodedData();
     console.log(order.toHuman());
-    console.log('Transaction hash: ' + orderCall.asHex());
+    console.log('Transaction hash: ' + Binary.toHex(orderCall));
 
     const dryRun = await orderTx.dryRun(BENEFICIARY);
     if (dryRun.success) {

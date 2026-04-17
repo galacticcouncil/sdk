@@ -106,11 +106,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   async isSupported(): Promise<boolean> {
-    const query = this.api.query.Stableswap.Pools;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const staticApis = await this.api.getStaticApis();
+    return staticApis.compat.query.Stableswap.Pools.isCompatible(
+      CompatibilityLevel.BackwardsCompatible
     );
   }
 
@@ -186,7 +184,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     const streams = pools
       .map((p) => p.id)
       .map((id) =>
-        this.api.query.Tokens.TotalIssuance.watchValue(id, 'best').pipe(
+        this.api.query.Tokens.TotalIssuance.watchValue(id, {
+          at: 'best',
+        }).pipe(
+          map(({ value }) => value),
           map((value, index) => ({ value, index })),
           tap(({ index, value }) => {
             if (index > 0) {
