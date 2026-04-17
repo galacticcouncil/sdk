@@ -23,6 +23,13 @@ exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer fo
 
 exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer for AssetHub Polkadot -> Hydration KSM [ksm] transfer 1`] = `
 [
+  "assethub-hydration-dot",
+  "0x1f0d04010100c91f04040100000700e8764817010401000104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
+]
+`;
+
+exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer for AssetHub Polkadot -> Hydration KSM [ksm] transfer 2`] = `
+[
   "assethub-hydration-ksm",
   "0x1f0d04010100c91f040402010903000b00a0724e18090104020109030104040d0102040001010088dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee00",
 ]
@@ -213,7 +220,7 @@ exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer fo
 exports[`Wallet with XC config (E2E) should result in valid Polkadot transfer for Hydration -> Moonbeam HDX [hdx] transfer 1`] = `
 [
   "hydration-moonbeam-hdx",
-  "0x6b0804010100511f0400010300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac04040000000b00a0724e18090000000000",
+  "0x6b0804010100511f0400010300f24ff3a9cf04c71dbc94d0b566f7a27b94566cac040400010500000b00a0724e18090000000000",
 ]
 `;
 

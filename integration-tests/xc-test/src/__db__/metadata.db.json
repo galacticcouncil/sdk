@@ -1,38 +1,38 @@
 {
   "assethub-hydration-dot": {
-    "updated": 1773832152124,
+    "updated": 1776422763825,
     "destination": {
-      "fee": "0.0001060906",
+      "fee": "0.000143314",
       "feeAsset": "DOT",
-      "feeNative": "1060906"
+      "feeNative": "1433140"
     }
   },
   "assethub-hydration-ksm": {
-    "updated": 1773832170917,
+    "updated": 1776422799855,
     "destination": {
-      "fee": "0.000035932345",
+      "fee": "0.00003540085",
       "feeAsset": "KSM",
-      "feeNative": "35932345"
+      "feeNative": "35400850"
     }
   },
   "assethub-hydration-usdt": {
-    "updated": 1773832205792,
+    "updated": 1776422829323,
     "destination": {
-      "fee": "0.000172",
+      "fee": "0.000186",
       "feeAsset": "USDT",
-      "feeNative": "172"
+      "feeNative": "186"
     }
   },
   "assethub-hydration-usdc": {
-    "updated": 1773832224542,
+    "updated": 1776422865592,
     "destination": {
-      "fee": "0.000172",
+      "fee": "0.000186",
       "feeAsset": "USDC",
-      "feeNative": "172"
+      "feeNative": "186"
     }
   },
   "assethub-moonbeam-usdt": {
-    "updated": 1773832237048,
+    "updated": 1776422887595,
     "destination": {
       "fee": "10",
       "feeAsset": "USDT",
@@ -40,7 +40,7 @@
     }
   },
   "assethub-moonbeam-usdc": {
-    "updated": 1773832244783,
+    "updated": 1776422900039,
     "destination": {
       "fee": "10",
       "feeAsset": "USDC",
@@ -48,15 +48,15 @@
     }
   },
   "assethub-bifrost-usdt": {
-    "updated": 1773832259820,
+    "updated": 1776422956446,
     "destination": {
-      "fee": "0.004496",
+      "fee": "0.00395",
       "feeAsset": "USDT",
-      "feeNative": "4496"
+      "feeNative": "3950"
     }
   },
   "assethub-bifrost-usdc": {
-    "updated": 1773832267046,
+    "updated": 1776422971220,
     "destination": {
       "fee": "10",
       "feeAsset": "USDC",
@@ -64,79 +64,79 @@
     }
   },
   "bifrost-hydration-bnc": {
-    "updated": 1773832294028,
+    "updated": 1776423005060,
     "destination": {
-      "fee": "0.004682776001",
+      "fee": "0.005790887218",
       "feeAsset": "BNC",
-      "feeNative": "4682776001"
+      "feeNative": "5790887218"
     }
   },
   "bifrost-hydration-vdot": {
-    "updated": 1773832312685,
+    "updated": 1776423028813,
     "destination": {
-      "fee": "0.0000659932",
+      "fee": "0.0000885115",
       "feeAsset": "vDOT",
-      "feeNative": "659932"
+      "feeNative": "885115"
     }
   },
   "bifrost-hydration-vastr": {
-    "updated": 1773832333252,
+    "updated": 1776423050108,
     "destination": {
-      "fee": "0.015353201477021181",
+      "fee": "0.016398056946241966",
       "feeAsset": "vASTR",
-      "feeNative": "15353201477021181"
+      "feeNative": "16398056946241966"
     }
   },
   "bifrost-hydration-dot": {
-    "updated": 1773832353768,
+    "updated": 1776423077240,
     "destination": {
-      "fee": "0.0317054175",
+      "fee": "0.0317427278",
       "feeAsset": "DOT",
-      "feeNative": "317054175"
+      "feeNative": "317427278"
     }
   },
   "bifrost-hydration-glmr": {
-    "updated": 1773832373282,
+    "updated": 1776423101343,
     "destination": {
-      "fee": "0.019314153755756912",
+      "fee": "0.01568071464703215",
       "feeAsset": "GLMR",
-      "feeNative": "19314153755756912"
+      "feeNative": "15680714647032150"
     }
   },
   "bifrost-hydration-usdt": {
-    "updated": 1773832395212,
+    "updated": 1776423127373,
     "destination": {
-      "fee": "0.051709",
+      "fee": "0.041998",
       "feeAsset": "USDT",
-      "feeNative": "51709"
+      "feeNative": "41998"
     }
   },
   "bifrost-hydration-usdc": {
-    "updated": 1773832413576,
+    "updated": 1776423153415,
     "destination": {
-      "fee": "0.051716",
+      "fee": "0.04194",
       "feeAsset": "USDC",
-      "feeNative": "51716"
+      "feeNative": "41940"
     }
   },
   "bifrost-assethub-usdt": {
-    "updated": 1773832419716,
+    "updated": 1776423162200,
     "destination": {
-      "fee": "0.001571",
+      "fee": "0.001275",
       "feeAsset": "USDT",
-      "feeNative": "1571"
+      "feeNative": "1275"
     }
   },
   "bifrost-assethub-usdc": {
-    "updated": 1773832425763,
+    "updated": 1776423170958,
     "destination": {
-      "fee": "0.001572",
+      "fee": "0.001273",
       "feeAsset": "USDC",
-      "feeNative": "1572"
+      "feeNative": "1273"
     }
   },
   "hydration-assethub-dot": {
-    "updated": 1773832442938,
+    "updated": 1776423187327,
     "destination": {
       "fee": "0.0009648989",
       "feeAsset": "DOT",
@@ -144,31 +144,31 @@
     }
   },
   "hydration-assethub-ksm": {
-    "updated": 1773832455641,
+    "updated": 1776423205205,
     "destination": {
-      "fee": "0.000308872749",
+      "fee": "0.000228466611",
       "feeAsset": "KSM",
-      "feeNative": "308872749"
+      "feeNative": "228466611"
     }
   },
   "hydration-assethub-usdt": {
-    "updated": 1773832467686,
+    "updated": 1776423220748,
     "destination": {
-      "fee": "0.001571",
+      "fee": "0.001275",
       "feeAsset": "USDT",
-      "feeNative": "1571"
+      "feeNative": "1275"
     }
   },
   "hydration-assethub-usdc": {
-    "updated": 1773832480711,
+    "updated": 1776423238931,
     "destination": {
-      "fee": "0.001572",
+      "fee": "0.001273",
       "feeAsset": "USDC",
-      "feeNative": "1572"
+      "feeNative": "1273"
     }
   },
   "hydration-bifrost-bnc": {
-    "updated": 1773832492447,
+    "updated": 1776423254982,
     "destination": {
       "fee": "0.263045757293",
       "feeAsset": "BNC",
@@ -176,7 +176,7 @@
     }
   },
   "hydration-bifrost-vdot": {
-    "updated": 1773832503654,
+    "updated": 1776423268887,
     "destination": {
       "fee": "10",
       "feeAsset": "vDOT",
@@ -184,47 +184,47 @@
     }
   },
   "hydration-bifrost-vastr": {
-    "updated": 1773832514806,
+    "updated": 1776423284118,
     "destination": {
-      "fee": "0.1514693918125",
+      "fee": "0.133084712828125",
       "feeAsset": "vASTR",
-      "feeNative": "151469391812500000"
+      "feeNative": "133084712828125000"
     }
   },
   "hydration-bifrost-glmr": {
-    "updated": 1773832527510,
+    "updated": 1776423302791,
     "destination": {
-      "fee": "0.025021159245652174",
+      "fee": "0.02327316312173913",
       "feeAsset": "GLMR",
-      "feeNative": "25021159245652174"
+      "feeNative": "23273163121739130"
     }
   },
   "hydration-bifrost-usdt": {
-    "updated": 1773832540419,
+    "updated": 1776423320471,
     "destination": {
-      "fee": "0.056042",
+      "fee": "0.045762",
       "feeAsset": "USDT",
-      "feeNative": "56042"
+      "feeNative": "45762"
     }
   },
   "hydration-bifrost-usdc": {
-    "updated": 1773832553440,
+    "updated": 1776423337985,
     "destination": {
-      "fee": "0.056047",
+      "fee": "0.045704",
       "feeAsset": "USDC",
-      "feeNative": "56047"
+      "feeNative": "45704"
     }
   },
   "hydration-bifrost-dot": {
-    "updated": 1773832566582,
+    "updated": 1776423355882,
     "destination": {
-      "fee": "0.0343492571",
+      "fee": "0.0346168961",
       "feeAsset": "DOT",
-      "feeNative": "343492571"
+      "feeNative": "346168961"
     }
   },
   "hydration-moonbeam-hdx": {
-    "updated": 1773832578719,
+    "updated": 1776423371349,
     "destination": {
       "fee": "10",
       "feeAsset": "HDX",
@@ -232,15 +232,15 @@
     }
   },
   "hydration-moonbeam-glmr": {
-    "updated": 1773832591103,
+    "updated": 1776423385081,
     "destination": {
-      "fee": "0.00991044625",
+      "fee": "0.0054199225",
       "feeAsset": "GLMR",
-      "feeNative": "9910446250000000"
+      "feeNative": "5419922500000000"
     }
   },
   "hydration-moonbeam-usdt": {
-    "updated": 1773832605565,
+    "updated": 1776423405644,
     "destination": {
       "fee": "10",
       "feeAsset": "USDT",
@@ -248,7 +248,7 @@
     }
   },
   "hydration-moonbeam-usdc": {
-    "updated": 1773832621370,
+    "updated": 1776423422897,
     "destination": {
       "fee": "10",
       "feeAsset": "USDC",
@@ -256,7 +256,7 @@
     }
   },
   "hydration-moonbeam-dai_mwh": {
-    "updated": 1773832635015,
+    "updated": 1776423438403,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -264,7 +264,7 @@
     }
   },
   "hydration-moonbeam-susds_mwh": {
-    "updated": 1773832648097,
+    "updated": 1776423456051,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -272,7 +272,7 @@
     }
   },
   "hydration-moonbeam-usdc_mwh": {
-    "updated": 1773832661665,
+    "updated": 1776423473151,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -280,7 +280,7 @@
     }
   },
   "hydration-moonbeam-usdt_mwh": {
-    "updated": 1773832675365,
+    "updated": 1776423487938,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -288,7 +288,7 @@
     }
   },
   "hydration-moonbeam-wbtc_mwh": {
-    "updated": 1773832691319,
+    "updated": 1776423503045,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -296,7 +296,7 @@
     }
   },
   "hydration-moonbeam-weth_mwh": {
-    "updated": 1773832705822,
+    "updated": 1776423517915,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",
@@ -304,7 +304,7 @@
     }
   },
   "hydration-moonbeam-sol": {
-    "updated": 1773832720062,
+    "updated": 1776423533229,
     "destination": {
       "fee": "1",
       "feeAsset": "GLMR",

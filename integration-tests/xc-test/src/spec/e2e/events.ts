@@ -1,6 +1,6 @@
 import * as c from 'console';
 
-type PapiEventRecord = {
+export type PapiEventRecord = {
   phase: any;
   event: {
     type: string;

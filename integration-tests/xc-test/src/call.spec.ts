@@ -72,9 +72,9 @@ describe('Wallet with XC config', () => {
 
   describe.each(ctx.chains)('should return valid calldata for', (c) => {
     const config = configService.getChainRoutes(c);
-    const { chain, routes } = config;
+    const { chain } = config;
 
-    for (const route of Array.from(routes.values())) {
+    for (const route of config.getRoutes()) {
       const { destination } = route;
       const { skipFor } = ctx;
 
