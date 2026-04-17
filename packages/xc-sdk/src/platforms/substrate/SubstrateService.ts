@@ -15,7 +15,7 @@ import { HubApis } from '@galacticcouncil/descriptors';
 import { Blake2256, u32 } from '@polkadot-api/substrate-bindings';
 import { toHex, fromHex } from '@polkadot-api/utils';
 
-import { Enum } from 'polkadot-api';
+import { Enum, ResultPayload } from 'polkadot-api';
 
 import { getDeliveryFeeFromDryRun, getErrorFromDryRun } from './utils';
 
@@ -112,11 +112,11 @@ export class SubstrateService {
     const rawOrigin = Enum('Signed', account);
     const origin = Enum('system', rawOrigin);
 
-    const raw = await this.api.apis.DryRunApi.dry_run_call(
+    const raw = (await this.api.apis.DryRunApi.dry_run_call(
       origin,
       tx.decodedCall,
       4
-    );
+    )) as ResultPayload<TRawDryRun, unknown>;
 
     if (!raw.success) {
       throw new Error('DryRun call failed');

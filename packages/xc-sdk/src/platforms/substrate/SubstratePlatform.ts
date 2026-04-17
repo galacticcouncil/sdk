@@ -7,11 +7,14 @@ import {
   SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
 
+import { Binary } from 'polkadot-api';
+
 import {
   concatMap,
   catchError,
   distinctUntilChanged,
   firstValueFrom,
+  map,
   throwError,
   Observable,
 } from 'rxjs';
@@ -21,6 +24,8 @@ import { getErrorFromDryRun, normalizeAssetAmount } from './utils';
 import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
+
+type WatchValueEmission<T = any> = { value: T };
 
 export class SubstratePlatform implements Platform<
   ExtrinsicConfig,
@@ -60,7 +65,7 @@ export class SubstratePlatform implements Platform<
 
     return {
       from: account,
-      data: callData.asHex(),
+      data: Binary.toHex(callData),
       type: CallType.Substrate,
       txOptions: txOptions,
       dryRun: substrate.isDryRunSupported()
@@ -122,7 +127,9 @@ export class SubstratePlatform implements Platform<
     const { module, func, args, transform } = config;
 
     const fn = substrate.client.getUnsafeApi().query[module][func];
-    const observable$ = fn.watchValue(...args, 'best');
+    const observable$ = fn
+      .watchValue(...args, { at: 'best' })
+      .pipe(map(({ value }: WatchValueEmission) => value));
 
     return observable$.pipe(
       concatMap((b: any) => transform(b)),

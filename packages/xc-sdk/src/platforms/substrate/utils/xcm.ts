@@ -1,8 +1,6 @@
 import { AnyParachain, AssetAmount } from '@galacticcouncil/xc-core';
 import { xcm } from '@galacticcouncil/common';
 
-import { Binary } from 'polkadot-api';
-
 export function buildBeneficiary(dstAccount: string) {
   const acc = dstAccount.startsWith('0x')
     ? xcm.toAccountKey20(dstAccount)
@@ -49,7 +47,7 @@ export const buildXcmMessage = (
   dstFee: AssetAmount,
   dstRefTime: bigint,
   dstProofSize: bigint,
-  dstCallEncoded: Binary
+  dstCallEncoded: Uint8Array
 ) => {
   console.log(dstCallEncoded);
   const beneficiary = buildBeneficiary(dstAccount);
