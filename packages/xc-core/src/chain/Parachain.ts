@@ -1,5 +1,4 @@
 import { PolkadotClient } from 'polkadot-api';
-import { withLegacy } from '@polkadot-api/legacy-provider';
 
 import { SubstrateApis } from '@galacticcouncil/common';
 
@@ -62,7 +61,6 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   usesDeliveryFee?: boolean;
   usesSignerFee?: boolean;
   usesH160Acc?: boolean;
-  usesLegacyEnhancer?: boolean;
   ws: string | string[];
   xcmVersion?: XcmVersion;
 }
@@ -88,8 +86,6 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   readonly usesH160Acc: boolean;
 
-  readonly usesLegacyEnhancer: boolean;
-
   readonly ws: string | string[];
 
   readonly xcmVersion: XcmVersion;
@@ -104,7 +100,6 @@ export class Parachain extends Chain<ParachainAssetData> {
     usesDeliveryFee = false,
     usesSignerFee = false,
     usesH160Acc = false,
-    usesLegacyEnhancer = false,
     ws,
     xcmVersion = XcmVersion.v4,
     ...others
@@ -119,18 +114,13 @@ export class Parachain extends Chain<ParachainAssetData> {
     this.usesDeliveryFee = usesDeliveryFee;
     this.usesSignerFee = usesSignerFee;
     this.usesH160Acc = usesH160Acc;
-    this.usesLegacyEnhancer = usesLegacyEnhancer;
     this.ws = ws;
     this.xcmVersion = xcmVersion;
   }
 
   get client(): PolkadotClient {
     const pool = SubstrateApis.getInstance();
-    return pool.api(this.ws, {
-      wsProviderOpts: this.usesLegacyEnhancer
-        ? { innerEnhancer: withLegacy() }
-        : undefined,
-    });
+    return pool.api(this.ws);
   }
 
   getType(): ChainType {
