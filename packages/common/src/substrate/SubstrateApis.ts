@@ -1,5 +1,5 @@
-import { createClient, PolkadotClient } from 'polkadot-api';
-import { getWsProvider } from 'polkadot-api/ws';
+import { PolkadotClient } from 'polkadot-api';
+import { createWsClient } from 'polkadot-api/ws';
 import { LRUCache } from 'lru-cache';
 import { Subscription } from 'rxjs';
 
@@ -10,9 +10,12 @@ export interface MetadataCache {
   setMetadata: (codeHash: string, metadata: Uint8Array) => void;
 }
 
-type WsProvider = ReturnType<typeof getWsProvider>;
+type WsClient = ReturnType<typeof createWsClient>;
 
-export type WsProviderOpts = Parameters<typeof getWsProvider>[1];
+export type WsProviderOpts = Omit<
+  NonNullable<Parameters<typeof createWsClient>[1]>,
+  'getMetadata' | 'setMetadata'
+>;
 
 export interface ApiOptions {
   wsProviderOpts?: WsProviderOpts;
@@ -20,8 +23,7 @@ export interface ApiOptions {
 }
 
 interface CachedConnection {
-  client: PolkadotClient;
-  provider: WsProvider;
+  client: WsClient;
   endpoints: string[];
   currentEndpointIndex: number;
   probeSubscription?: Subscription;
@@ -70,15 +72,17 @@ export class SubstrateApis {
   }
 
   public createClient(endpoints: string[], opts?: ApiOptions): PolkadotClient {
-    const wsProvider = getWsProvider(endpoints, opts?.wsProviderOpts);
-    const client = createClient(wsProvider, this._metadataCache);
+    const client = createWsClient(endpoints, {
+      ...opts?.wsProviderOpts,
+      getMetadata: this._metadataCache?.getMetadata,
+      setMetadata: this._metadataCache?.setMetadata,
+    });
 
     const cacheKey = this.createCacheKey(endpoints);
     console.log(`Created PAPI client for ${cacheKey}`);
 
     const connection: CachedConnection = {
       client,
-      provider: wsProvider,
       endpoints,
       currentEndpointIndex: 0,
     };
@@ -141,11 +145,9 @@ export class SubstrateApis {
         console.log(
           `${reason} on ${connection.endpoints[connection.currentEndpointIndex]}, switching to ${nextEndpoint}`
         );
-        connection.provider.switch(nextEndpoint);
+        connection.client.switch(nextEndpoint);
         connection.currentEndpointIndex = nextIndex;
 
-        // Stop the current probe before restarting, otherwise the old
-        // subscription remains active alongside the new one (leak + double switching).
         this.stopHealthProbe(connection);
         this.startHealthProbe(connection, {
           ...config,
@@ -171,16 +173,5 @@ export class SubstrateApis {
       connection.probeSubscription.unsubscribe();
       connection.probeSubscription = undefined;
     }
-  }
-
-  public getWs(ws: string | string[]): WsProvider | undefined {
-    const endpoints = typeof ws === 'string' ? ws.split(',') : ws;
-    const cacheKey = this.findCacheKey(endpoints);
-
-    if (!cacheKey) {
-      return undefined;
-    }
-
-    return this._cache.get(cacheKey)?.provider;
   }
 }
