@@ -16,14 +16,5 @@
   "editor.tabSize": 2,
   "github-actions.use-enterprise": true,
   "prettier.printWidth": 100,
-  "todo-tree.highlights.customHighlight": {
-    "TODO": {
-      "foreground": "#000",
-      "background": "#ddd317"
-    },
-    "FIXME": {
-      "foreground": "#f44336",
-      "background": "#592c2c"
-    }
-  }
+  "rust-analyzer.linkedProjects": ["crates/Cargo.toml"]
 }

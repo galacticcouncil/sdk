@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-cfg",
-  "version": "0.18.1",
+  "version": "0.20.0",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "repository": {
@@ -21,19 +21,19 @@
   ],
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
-  "types": "./build/types/index.d.ts",
+  "types": "./build/index.d.ts",
   "scripts": {
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
-    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
     "link": "npm ln",
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
-    "@galacticcouncil/xc-core": "^0.13.0"
+    "@galacticcouncil/xc-core": "^0.15.0"
   },
   "peerDependencies": {
-    "@galacticcouncil/sdk-next": ">=0.38.0 <1.0.0"
+    "@galacticcouncil/sdk-next": ">=0.41.0 <1.0.0"
   }
 }

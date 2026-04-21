@@ -3,14 +3,14 @@ import { PolkadotClient } from 'polkadot-api';
 import { PapiExecutor } from '../PapiExecutor';
 import { ApiUrl } from '../types';
 
-import { client as c } from '../../../src';
+import { BalanceClient } from '../../../src/client';
 
 const G_POOL_ADDRESS = '7Ni2vDQ41AMCzx8pBpNvL3CtrkprAaAB73NzyJy6T17PaGHo';
 const G_POOL_ERC20 = [1001];
 
 class SubscribeErc20Balance extends PapiExecutor {
   async script(client: PolkadotClient) {
-    const balanceClient = new c.BalanceClient(client);
+    const balanceClient = new BalanceClient(client);
     const subscription = balanceClient
       .watchErc20Balance(G_POOL_ADDRESS, G_POOL_ERC20)
       .subscribe((balances) => {

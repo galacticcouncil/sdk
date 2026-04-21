@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "0.38.0",
+  "version": "0.41.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -22,11 +22,63 @@
   ],
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
-  "types": "./build/types/index.d.ts",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.mjs",
+      "require": "./build/index.cjs"
+    },
+    "./aave": {
+      "types": "./build/aave/index.d.ts",
+      "import": "./build/aave/index.mjs",
+      "require": "./build/aave/index.cjs"
+    },
+    "./client": {
+      "types": "./build/client/index.d.ts",
+      "import": "./build/client/index.mjs",
+      "require": "./build/client/index.cjs"
+    },
+    "./evm": {
+      "types": "./build/evm/index.d.ts",
+      "import": "./build/evm/index.mjs",
+      "require": "./build/evm/index.cjs"
+    },
+    "./farm": {
+      "types": "./build/farm/index.d.ts",
+      "import": "./build/farm/index.mjs",
+      "require": "./build/farm/index.cjs"
+    },
+    "./pool": {
+      "types": "./build/pool/index.d.ts",
+      "import": "./build/pool/index.mjs",
+      "require": "./build/pool/index.cjs"
+    },
+    "./sor": {
+      "types": "./build/sor/index.d.ts",
+      "import": "./build/sor/index.mjs",
+      "require": "./build/sor/index.cjs"
+    },
+    "./staking": {
+      "types": "./build/staking/index.d.ts",
+      "import": "./build/staking/index.mjs",
+      "require": "./build/staking/index.cjs"
+    },
+    "./tx": {
+      "types": "./build/tx/index.d.ts",
+      "import": "./build/tx/index.mjs",
+      "require": "./build/tx/index.cjs"
+    },
+    "./utils": {
+      "types": "./build/utils/index.d.ts",
+      "import": "./build/utils/index.mjs",
+      "require": "./build/utils/index.cjs"
+    }
+  },
   "scripts": {
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
-    "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
     "link": "npm ln",
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
@@ -48,8 +100,8 @@
     "big.js": "^6.2.1"
   },
   "peerDependencies": {
-    "@galacticcouncil/common": ">=0.6.0 <1.0.0",
-    "@galacticcouncil/descriptors": ">=1.15.0 <2.0.0",
+    "@galacticcouncil/common": ">=0.7.0 <1.0.0",
+    "@galacticcouncil/descriptors": ">=1.16.0 <2.0.0",
     "polkadot-api": "^1.23.3",
     "viem": "^2.38.3"
   }

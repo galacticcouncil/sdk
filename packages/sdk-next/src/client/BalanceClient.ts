@@ -10,7 +10,6 @@ import {
   distinctUntilChanged,
   debounceTime,
   map,
-  pairwise,
   retry,
   startWith,
   switchMap,
@@ -31,6 +30,8 @@ type TAccount = TSystemAccount['data'] | TTokenAccount;
 const { logger } = log;
 
 export class BalanceClient extends Papi {
+  private erc20Ids: number[] | null = null;
+
   constructor(client: PolkadotClient) {
     super(client);
   }
@@ -183,15 +184,20 @@ export class BalanceClient extends Papi {
     includeOnly?: number[]
   ): Observable<AssetBalance[]> {
     const getErc20s = async () => {
+      if (this.erc20Ids) {
+        return this.erc20Ids;
+      }
+
       const assets = await this.api.query.AssetRegistry.Assets.getEntries({
         at: 'best',
       });
-      return assets
+      this.erc20Ids = assets
         .filter(({ value }) => value.asset_type.type === 'Erc20')
         .map(({ keyArgs }) => {
           const [id] = keyArgs;
           return id as number;
         });
+      return this.erc20Ids;
     };
 
     const fetchBalance = async (ids: number[]) => {
@@ -206,12 +212,10 @@ export class BalanceClient extends Papi {
     return defer(() =>
       from(includeOnly ? Promise.resolve(includeOnly) : getErc20s()).pipe(
         switchMap((ids) =>
-          this.watcher.bestBlock$.pipe(
-            startWith(null),
-            switchMap(() => from(fetchBalance(ids)))
-          )
+          this.watcher.bestBlock$.pipe(switchMap(() => from(fetchBalance(ids))))
         ),
-        pairwise(),
+        startWith([] as AssetBalance[]),
+        bufferCount(2, 1),
         map(([prev, curr], i) => {
           if (i === 0) return curr.filter((a) => a.balance.total > 0n);
           return this.getDeltas(prev, curr);

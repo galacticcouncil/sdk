@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-sdk",
-  "version": "0.9.1",
+  "version": "0.11.0",
   "description": "Cross-chain sdk",
   "author": "GalacticCouncil",
   "type": "module",
@@ -24,15 +24,15 @@
   ],
   "main": "./build/index.cjs",
   "module": "./build/index.mjs",
-  "types": "./build/types/index.d.ts",
+  "types": "./build/index.d.ts",
   "scripts": {
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
-    "postbuild": "tsc --emitDeclarationOnly --outDir build/types",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
     "link": "npm ln"
   },
   "dependencies": {
-    "@galacticcouncil/xc-core": "^0.13.0"
+    "@galacticcouncil/xc-core": "^0.15.0"
   }
 }

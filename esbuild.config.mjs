@@ -24,7 +24,8 @@ const common = {
 
 export const esmConfig = {
   ...common,
-  outfile: 'build/index.mjs',
+  outdir: 'build',
+  outExtension: { '.js': '.mjs' },
   format: 'esm',
   platform: 'browser',
   target: ['esnext'],
@@ -33,7 +34,8 @@ export const esmConfig = {
 
 export const cjsConfig = {
   ...common,
-  outfile: 'build/index.cjs',
+  outdir: 'build',
+  outExtension: { '.js': '.cjs' },
   format: 'cjs',
   platform: 'node',
   target: ['node18'],

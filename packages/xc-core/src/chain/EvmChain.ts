@@ -8,13 +8,21 @@ import {
   ChainType,
 } from './Chain';
 
-import { Snowbridge, SnowbridgeDef, Wormhole, WormholeDef } from '../bridge';
+import {
+  Basejump,
+  BasejumpDef,
+  Snowbridge,
+  SnowbridgeDef,
+  Wormhole,
+  WormholeDef,
+} from '../bridge';
 import { EvmClient } from '../evm';
 
 export interface EvmChainParams extends ChainParams<ChainAssetData> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
+  basejump?: BasejumpDef;
   snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
 }
@@ -23,6 +31,7 @@ export class EvmChain extends Chain<ChainAssetData> {
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
+  readonly basejump?: Basejump;
   readonly snowbridge?: Snowbridge;
   readonly wormhole?: Wormhole;
 
@@ -30,6 +39,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     evmChain,
     id,
     rpcs,
+    basejump,
     snowbridge,
     wormhole,
     ...others
@@ -38,6 +48,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.evmChain = evmChain;
     this.id = id;
     this.rpcs = rpcs;
+    this.basejump = basejump && new Basejump(basejump);
     this.snowbridge = snowbridge && new Snowbridge(snowbridge);
     this.wormhole = wormhole && new Wormhole(wormhole);
   }

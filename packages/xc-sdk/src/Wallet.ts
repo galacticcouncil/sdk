@@ -157,9 +157,13 @@ export class Wallet {
     const dstFee = srcDestinationFee.fee.copyWith(destination.fee.asset);
     const dstFeeBreakdown = srcDestinationFee.feeBreakdown;
 
+    const sameAssetDestFee = source.asset.isEqual(dstFee);
+    const initAmount =
+      sameAssetDestFee && dstFee.amount > 10n ? dstFee.amount + 1n : 10n;
+
     const ctx: TransferCtx = {
       address: dstAddress,
-      amount: 10n, // Use 10 satoshi as init amount
+      amount: initAmount,
       asset: source.asset,
       destination: {
         balance: dstBalance,

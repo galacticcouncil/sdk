@@ -5,6 +5,7 @@ import {
   FeeAmountConfigBuilder,
   Parachain,
   Wormhole as Wh,
+  Basejump as Bj,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -307,8 +308,30 @@ function XcmPaymentApi() {
   };
 }
 
+function Basejump() {
+  return {
+    quoteFee: (): FeeAmountConfigBuilder => ({
+      build: async ({ feeAsset, source }) => {
+        const ctx = source as EvmChain;
+
+        const ctxBj = Bj.fromChain(ctx);
+
+        const feeAssetId = ctx.getAssetId(feeAsset);
+        const fee = await ctx.evmClient.getProvider().readContract({
+          abi: Abi.Basejump,
+          address: ctxBj.getAddress() as `0x${string}`,
+          args: [feeAssetId as `0x${string}`],
+          functionName: 'quoteFee',
+        });
+        return { amount: fee } as FeeAmount;
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
+    Basejump,
     XcmPaymentApi,
     Snowbridge,
     Wormhole,

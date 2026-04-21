@@ -31,6 +31,9 @@ export const base = new EvmChain({
   evmChain: evmChain,
   explorer: 'https://basescan.org/',
   rpcs: ['https://stylish-quick-firefly.base-mainnet.quiknode.pro/'],
+  basejump: {
+    address: '0xf5b9334e44f800382cb47fc19669401d694e529b',
+  },
   wormhole: {
     id: 30,
     coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',

@@ -1,5 +1,39 @@
 # @galacticcouncil/xc-cfg
 
+## 0.20.0
+
+### Minor Changes
+
+- 40cc4af: basejump base eurc
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.15.0
+
+## 0.19.0
+
+### Minor Changes
+
+- chore: re-moduling
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.14.0
+
+## 0.18.3
+
+### Patch Changes
+
+- 3ac6e78: extrafee param to energyweb, updated the location to neuroweb token
+
+## 0.18.2
+
+### Patch Changes
+
+- update hydration rpcs list
+
 ## 0.18.1
 
 ### Patch Changes

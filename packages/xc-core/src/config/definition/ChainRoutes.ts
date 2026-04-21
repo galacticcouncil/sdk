@@ -9,42 +9,35 @@ export interface ChainRoutesParams {
 }
 
 export class ChainRoutes {
-  readonly routes: Map<string, AssetRoute> = new Map();
+  readonly routes: Map<string, AssetRoute[]> = new Map();
 
   readonly chain: AnyChain;
 
   constructor({ chain, routes }: ChainRoutesParams) {
     this.chain = chain;
-    this.routes = new Map(
-      routes.map(
-        ({
-          source,
-          destination,
-          contract,
-          extrinsic,
-          move,
-          program,
-          transact,
-          tags,
-        }) => [
-          `${source.asset.key}-${destination.chain.key}-${destination.asset.key}`,
-          new AssetRoute({
-            source,
-            destination,
-            contract,
-            extrinsic,
-            move,
-            program,
-            transact,
-            tags,
-          }),
-        ]
-      )
-    );
+    const grouped = new Map<string, AssetRoute[]>();
+    for (const route of routes) {
+      const key = `${route.source.asset.key}-${route.destination.chain.key}-${route.destination.asset.key}`;
+      const existing = grouped.get(key) ?? [];
+      existing.push(
+        new AssetRoute({
+          source: route.source,
+          destination: route.destination,
+          contract: route.contract,
+          extrinsic: route.extrinsic,
+          move: route.move,
+          program: route.program,
+          transact: route.transact,
+          tags: route.tags,
+        })
+      );
+      grouped.set(key, existing);
+    }
+    this.routes = grouped;
   }
 
   getRoutes(): AssetRoute[] {
-    return Array.from(this.routes.values());
+    return Array.from(this.routes.values()).flat();
   }
 
   getUniqueRoutes(): AssetRoute[] {
@@ -61,11 +54,14 @@ export class ChainRoutes {
   }
 
   getAssetDestinations(asset: Asset): AnyChain[] {
-    return this.getAssetRoutes(asset).map((route) => route.destination.chain);
+    const chains = this.getAssetRoutes(asset).map(
+      (route) => route.destination.chain
+    );
+    return [...new Set(chains)];
   }
 
   getAssetDestinationRoutes(asset: Asset, destination: AnyChain): AssetRoute[] {
-    const routes = Array.from(this.routes.values()).filter(
+    const routes = this.getRoutes().filter(
       (r) => r.source.asset === asset && r.destination.chain === destination
     );
     if (routes.length === 0) {

@@ -1,5 +1,45 @@
 # @galacticcouncil/xc-sdk
 
+## 0.11.0
+
+### Minor Changes
+
+[d27ab087]: https://github.com/galacticcouncil/sdk/commit/d27ab087
+[ce812808]: https://github.com/galacticcouncil/sdk/commit/ce812808
+[40cc4afd]: https://github.com/galacticcouncil/sdk/commit/40cc4afd
+
+- [[#d27ab087][d27ab087]] xc: support tag filtering (bridge opts)
+- [[#ce812808][ce812808]] xc: basejump cleanup
+- [[#40cc4afd][40cc4afd]] xc: basejump base eurc
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.15.0
+
+## 0.10.1
+
+### Patch Changes
+
+- eb9af28: Removal of fee re-estimation
+
+## 0.10.0
+
+### Minor Changes
+
+- chore: re-moduling
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@0.14.0
+
+## 0.9.2
+
+### Patch Changes
+
+- 3ac6e78: fixed max fee calc
+
 ## 0.9.1
 
 ### Patch Changes

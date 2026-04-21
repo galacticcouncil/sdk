@@ -36,28 +36,63 @@ export function ConfigBuilder(service: ConfigService) {
                     destination
                   );
 
+                  const destinationAssets = [
+                    ...new Map(
+                      routes.map((r) => [
+                        r.destination.asset.key,
+                        r.destination.asset,
+                      ])
+                    ).values(),
+                  ];
+
+                  const isAssetSelect = destinationAssets.length > 1;
+                  const isTagSelect =
+                    destinationAssets.length === 1 && routes.length > 1;
+
                   return {
                     routes,
-                    build: (assetOnDest?: string | Asset): TransferConfigs => {
-                      const sameAssetRoute = routes.find(
+                    destinationAssets,
+                    isAssetSelect,
+                    isTagSelect,
+                    build: (
+                      assetOnDest?: string | Asset,
+                      tag?: string
+                    ): TransferConfigs => {
+                      // Narrow routes by tag (bridge selection)
+                      const candidates = tag
+                        ? routes.filter((r) => r.tags?.includes(tag))
+                        : routes;
+
+                      // Prefer route where dest asset matches source asset (e.g. eth→eth over eth→weth_mwh)
+                      const sameAssetRoute = candidates.find(
                         (r) =>
                           r.destination.asset.originSymbol ===
                           r.source.asset.originSymbol
                       );
 
-                      const defaultRoute = sameAssetRoute || routes[0];
+                      const defaultRoute = sameAssetRoute || candidates[0];
 
+                      // Use explicit dest asset if provided, otherwise use default route dest asset
                       const assetToReceive = assetOnDest
                         ? config.getAsset(assetOnDest)
                         : defaultRoute.destination.asset;
 
-                      const [reverse] = config.getAssetRoutes(
+                      // Find reverse route (dest→source) for the received asset
+                      const reverseRoutes = config.getAssetRoutes(
                         assetToReceive,
                         destination,
                         source
                       );
 
-                      const origin = routes.find(
+                      // Prefer reverse route with same tag, fallback to first available
+                      const taggedReverse = tag
+                        ? reverseRoutes.filter((r) => r.tags?.includes(tag))
+                        : [];
+
+                      const reverse = taggedReverse[0] ?? reverseRoutes[0];
+
+                      // Find forward route matching the dest asset
+                      const origin = candidates.find(
                         (r) => r.destination.asset === assetToReceive
                       );
 
