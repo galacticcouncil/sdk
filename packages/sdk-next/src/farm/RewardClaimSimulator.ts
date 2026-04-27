@@ -123,11 +123,11 @@ export class RewardClaimSimulator {
     currentPeriod: number
   ): YieldFarm | null {
     if (yieldFarm.state.type !== 'Active') {
-      return null;
+      return yieldFarm;
     }
 
     if (yieldFarm.updated_at === currentPeriod) {
-      return null;
+      return yieldFarm;
     }
 
     if (yieldFarm.total_valued_shares === 0n) {
