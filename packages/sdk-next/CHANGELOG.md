@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 0.41.1
+
+### Patch Changes
+
+- bdb1f07: Fix claiming rewards of stopped farms
+
 ## 0.41.0
 
 ### Minor Changes
