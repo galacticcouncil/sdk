@@ -42,7 +42,7 @@
     "papi:update": "papi update",
     "papi:whitelist": "papi"
   },
-  "peerDependencies": {
+  "devDependencies": {
     "polkadot-api": "^2.0.0"
   }
 }
