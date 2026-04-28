@@ -1,8 +1,11 @@
-import { Trade, TradeRouteBuilder, TradeType } from '../sor';
+import { AAVE_GAS_LIMIT, WEIGHT_PER_GAS } from '../aave';
+import { PoolType } from '../pool';
+import { Swap, Trade, TradeRouteBuilder, TradeType } from '../sor';
 import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
-import { Transaction, Tx } from './types';
+import { DryRunResult, Transaction, Tx } from './types';
+import { enumPath } from './utils';
 
 export class TradeTxBuilder extends TxBuilder {
   private _trade?: Trade;
@@ -90,10 +93,7 @@ export class TradeTxBuilder extends TxBuilder {
       });
     }
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
+    tx = await this.applyExtraGas(this.beneficiary, tx, swaps);
 
     return this.wrapTx('RouterBuy', tx);
   }
@@ -128,10 +128,7 @@ export class TradeTxBuilder extends TxBuilder {
       });
     }
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
+    tx = await this.applyExtraGas(this.beneficiary, tx, swaps);
 
     return this.wrapTx('RouterSell', tx);
   }
@@ -154,11 +151,86 @@ export class TradeTxBuilder extends TxBuilder {
       route: TradeRouteBuilder.build(swaps) as any,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
+    tx = await this.applyExtraGas(this.beneficiary, tx, swaps);
 
     return this.wrapTx('RouterSellAll', tx);
+  }
+
+  private async applyExtraGas(
+    account: string,
+    tx: Transaction,
+    swaps: Swap[]
+  ): Promise<Transaction> {
+    const hasAavePool = swaps.some((s) => s.pool === PoolType.Aave);
+    if (!hasAavePool) {
+      return tx;
+    }
+
+    const result = await this.dryRun(account, tx);
+    const error = this.getDryRunError(result);
+    if (!error || !error.includes('OutOfGas')) {
+      return tx;
+    }
+
+    return this.estimateExtraGas(account, tx);
+  }
+
+  private async estimateExtraGas(
+    account: string,
+    tx: Transaction
+  ): Promise<Transaction> {
+    const wrappedBase = this.dispatchWithExtraGas(tx, 0n);
+    const wrappedMax = this.dispatchWithExtraGas(tx, AAVE_GAS_LIMIT);
+
+    const [baseInfo, maxResult] = await Promise.all([
+      wrappedBase.getPaymentInfo(account),
+      this.dryRun(account, wrappedMax),
+    ]);
+
+    const error = this.getDryRunError(maxResult);
+    if (error) {
+      return wrappedMax;
+    }
+
+    const baseRefTime = BigInt(baseInfo.weight.ref_time);
+    const actualRefTime = this.getActualRefTime(maxResult);
+
+    if (actualRefTime <= baseRefTime) {
+      return wrappedMax;
+    }
+
+    const usedExtraWeight = actualRefTime - baseRefTime;
+    const extraGas = usedExtraWeight / WEIGHT_PER_GAS;
+    const bufferedGas = (extraGas * 110n) / 100n;
+    const clampedGas =
+      bufferedGas > AAVE_GAS_LIMIT ? AAVE_GAS_LIMIT : bufferedGas;
+
+    return this.dispatchWithExtraGas(tx, clampedGas);
+  }
+
+  private getDryRunError(result: DryRunResult): string | null {
+    if (!result.success) {
+      return 'DryRun call failed';
+    }
+
+    const execResult = result.value.execution_result;
+    if (!execResult.success) {
+      return enumPath(execResult.value.error.value);
+    }
+
+    return null;
+  }
+
+  private getActualRefTime(result: DryRunResult): bigint {
+    if (!result.success) {
+      return 0n;
+    }
+
+    const execResult = result.value.execution_result;
+    if (execResult.success) {
+      return execResult.value.actual_weight?.ref_time ?? 0n;
+    }
+
+    return execResult.value.post_info?.actual_weight?.ref_time ?? 0n;
   }
 }
