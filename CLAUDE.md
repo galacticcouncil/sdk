@@ -13,7 +13,7 @@ Monorepo for [Hydration](https://hydration.net) chain integration SDKs. Built on
 
 **Repo:** `galacticcouncil/sdk`
 **License:** Apache 2.0
-**Toolchain:** TypeScript 5.7 (strict, ES2022), Node 22+ (`.nvmrc`)
+**Toolchain:** TypeScript 5.7 (strict, ES2022), Node 25+ (`.nvmrc`)
 
 ## Build & test
 
