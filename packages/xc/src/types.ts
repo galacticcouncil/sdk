@@ -1,3 +1,4 @@
+import type { JsonRpcProvider } from '@polkadot-api/json-rpc-provider';
 import type { ConfigService } from '@galacticcouncil/xc-core';
 import type {
   Wallet,
@@ -18,4 +19,5 @@ export type XcCtx = {
 
 export type XcOpts = {
   poolCtx?: pool.PoolContextProvider;
+  smProvider?: JsonRpcProvider;
 };

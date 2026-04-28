@@ -1,6 +1,8 @@
 import { getSmProvider } from 'polkadot-api/sm-provider';
 
-export async function getSm(chainSpec: string) {
+import { chainSpec } from './chainspec/hydration';
+
+export async function getSm() {
   const { start } = await import('polkadot-api/smoldot');
   const { chainSpec: relayChainSpec } =
     await import('polkadot-api/chains/polkadot');

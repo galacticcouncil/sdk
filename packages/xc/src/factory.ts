@@ -28,6 +28,11 @@ export async function createXcContext(opts: XcOpts = {}): Promise<XcCtx> {
   // Get chain ctx
   const hydration = config.getChain('hydration') as Parachain;
 
+  // Configure smoldot provider if provided
+  if (opts.smProvider) {
+    hydration.smProvider = opts.smProvider;
+  }
+
   // Initialize clients
   const whScan = new WormholeScan();
   const whTransfer = new WormholeTransfer(config, hydration.parachainId);

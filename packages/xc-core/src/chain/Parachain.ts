@@ -1,4 +1,5 @@
 import { PolkadotClient } from 'polkadot-api';
+import { JsonRpcProvider } from '@polkadot-api/json-rpc-provider';
 import { withLegacy } from '@polkadot-api/legacy-provider';
 
 import { SubstrateApis } from '@galacticcouncil/common';
@@ -55,6 +56,7 @@ export interface ParachainAssetData extends ChainAssetData {
 export interface ParachainParams extends ChainParams<ParachainAssetData> {
   genesisHash: string;
   parachainId: number;
+  smProvider?: JsonRpcProvider;
   ss58Format: number;
   treasury?: string;
   usesChainDecimals?: boolean;
@@ -73,6 +75,8 @@ export class Parachain extends Chain<ParachainAssetData> {
   readonly genesisHash: string;
 
   readonly parachainId: number;
+
+  smProvider: JsonRpcProvider | undefined;
 
   readonly ss58Format: number;
 
@@ -97,6 +101,7 @@ export class Parachain extends Chain<ParachainAssetData> {
   constructor({
     genesisHash,
     parachainId,
+    smProvider,
     ss58Format,
     treasury,
     usesChainDecimals = false,
@@ -112,6 +117,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     super({ ...others });
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
+    this.smProvider = smProvider;
     this.ss58Format = ss58Format;
     this.treasury = treasury;
     this.usesChainDecimals = usesChainDecimals;
@@ -126,6 +132,9 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   get client(): PolkadotClient {
     const pool = SubstrateApis.getInstance();
+    if (this.smProvider) {
+      return pool.smApi(this.key, this.smProvider);
+    }
     return pool.api(this.ws, {
       wsProviderOpts: this.usesLegacyEnhancer
         ? { innerEnhancer: withLegacy() }

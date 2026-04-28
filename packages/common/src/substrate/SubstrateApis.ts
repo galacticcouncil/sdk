@@ -1,4 +1,5 @@
 import { createClient, PolkadotClient } from 'polkadot-api';
+import { JsonRpcProvider } from '@polkadot-api/json-rpc-provider';
 import { getWsProvider } from 'polkadot-api/ws-provider';
 import { LRUCache } from 'lru-cache';
 import { Subscription } from 'rxjs';
@@ -101,6 +102,24 @@ export class SubstrateApis {
     }
 
     return this.createClient(endpoints, opts);
+  }
+
+  public smApi(key: string, provider: JsonRpcProvider): PolkadotClient {
+    if (this._cache.has(key)) {
+      return this._cache.get(key)!.client;
+    }
+
+    const client = createClient(provider, this._metadataCache);
+    console.log(`Created PAPI sm client for ${key}`);
+
+    const connection: CachedConnection = {
+      client,
+      provider: provider as WsProvider,
+      endpoints: [key],
+      currentEndpointIndex: 0,
+    };
+    this._cache.set(key, connection, { noDisposeOnSet: true });
+    return client;
   }
 
   public release() {
