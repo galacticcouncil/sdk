@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 1.0.0
+
+### Major Changes
+
+- 1281cfa: polkadot api v2 migration
+
 ## 0.7.0
 
 ### Minor Changes
