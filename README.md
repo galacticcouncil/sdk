@@ -50,8 +50,8 @@ All packages are built on the modern [Polkadot API (papi)](https://papi.how/).
 
 ### Prerequisites
 
-- Node.js 23+
-- npm 10+
+- Node.js 25+
+- npm 11+
 
 ### Installation
 
