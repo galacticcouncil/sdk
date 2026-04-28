@@ -70,7 +70,7 @@ export class SubstrateClaim {
 
     const encoded = await tx.getEncodedData();
     return {
-      data: encoded.asHex(),
+      data: Binary.toHex(encoded),
       from: from,
       type: CallType.Substrate,
       dryRun: async () => undefined,

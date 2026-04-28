@@ -43,11 +43,9 @@ export class XykPoolClient extends PoolClient<PoolBase> {
   }
 
   async isSupported(): Promise<boolean> {
-    const query = this.api.query.XYK.PoolAssets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const staticApis = await this.api.getStaticApis();
+    return staticApis.compat.query.XYK.PoolAssets.isCompatible(
+      CompatibilityLevel.BackwardsCompatible
     );
   }
 

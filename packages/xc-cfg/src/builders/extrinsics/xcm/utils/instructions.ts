@@ -3,7 +3,7 @@ import {
   XcmV3Junction,
   XcmV3JunctionNetworkId,
 } from '@galacticcouncil/descriptors';
-import { Binary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
 
 export const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -35,7 +35,7 @@ export function erc20Location(ethChainId: number, tokenAddress: string) {
     parents: 2,
     interior: XcmV3Junctions.X2([
       ethereumGlobalConsensus(ethChainId),
-      XcmV3Junction.AccountKey20({ key: Binary.fromHex(tokenAddress) }),
+      XcmV3Junction.AccountKey20({ key: tokenAddress as SizedHex<20> }),
     ]),
   };
 }
@@ -53,7 +53,7 @@ export function erc20LocationReanchored(tokenAddress: string) {
   return {
     parents: 0,
     interior: XcmV3Junctions.X1(
-      XcmV3Junction.AccountKey20({ key: Binary.fromHex(tokenAddress) })
+      XcmV3Junction.AccountKey20({ key: tokenAddress as SizedHex<20> })
     ),
   };
 }

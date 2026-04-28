@@ -16,5 +16,5 @@ export async function getSm(chainSpec: string) {
     potentialRelayChains: [relay],
   });
 
-  return getSmProvider(hydration);
+  return getSmProvider(() => hydration);
 }

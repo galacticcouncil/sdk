@@ -106,12 +106,12 @@ export class BalanceClient extends Papi {
   watchSystemBalance(address: string): Observable<AssetBalance> {
     const query = this.api.query.System.Account;
 
-    return defer(() => query.watchValue(address, 'best')).pipe(
+    return defer(() => query.watchValue(address, { at: 'best' })).pipe(
       map(
-        (balance) =>
+        ({ value }) =>
           ({
             id: SYSTEM_ASSET_ID,
-            balance: this.getBreakdown(balance.data),
+            balance: this.getBreakdown(value.data),
           }) as AssetBalance
       ),
       tap({
@@ -126,12 +126,14 @@ export class BalanceClient extends Papi {
   ): Observable<AssetBalance> {
     const query = this.api.query.Tokens.Accounts;
 
-    return defer(() => query.watchValue(address, assetId, 'best')).pipe(
+    return defer(() =>
+      query.watchValue(address, assetId, { at: 'best' })
+    ).pipe(
       map(
-        (balance) =>
+        ({ value }) =>
           ({
             id: assetId,
-            balance: this.getBreakdown(balance),
+            balance: this.getBreakdown(value),
           }) as AssetBalance
       ),
       tap({

@@ -1,4 +1,4 @@
-type NestedEnum = { type: string; value?: NestedEnum } | undefined;
+export type NestedEnum = { type: string; value?: NestedEnum } | undefined;
 
 export function enumPath(enumObj: NestedEnum): string {
   const path: string[] = [];

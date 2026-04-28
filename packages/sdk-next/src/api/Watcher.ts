@@ -2,7 +2,7 @@ import type { PolkadotClient } from 'polkadot-api';
 
 import { log } from '@galacticcouncil/common';
 
-import { Observable, shareReplay, tap } from 'rxjs';
+import { Observable, map, shareReplay, tap } from 'rxjs';
 
 import { connectionProbe$ } from './probe';
 
@@ -18,7 +18,10 @@ export class Watcher {
   private constructor(client: PolkadotClient) {
     this.bestBlock$ = this.watched(
       'watcher(bestBlock)',
-      client.getUnsafeApi().query.System.Number.watchValue('best')
+      client
+        .getUnsafeApi()
+        .query.System.Number.watchValue({ at: 'best' })
+        .pipe(map(({ value }) => value as number))
     );
 
     this.finalizedBlock$ = this.watched(

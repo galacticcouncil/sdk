@@ -52,9 +52,8 @@
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=0.7.0 <1.0.0",
-    "@galacticcouncil/descriptors": ">=1.16.0 <2.0.0",
-    "@polkadot-api/legacy-provider": "^0.3.8",
-    "polkadot-api": "^1.23.3",
+    "@galacticcouncil/descriptors": ">=2.0.0 <3.0.0",
+    "polkadot-api": "^2.0.0",
     "viem": "^2.38.3"
   }
 }

@@ -6,16 +6,16 @@ import { createClient } from 'polkadot-api';
 const wsProvider = papi.getWs('wss://hydration-rpc.n.dwellir.com', {
   onStatusChanged: (s) => {
     switch (s.type) {
-      case 0:
+      case 'CONNECTING':
         console.log('[WS] CONNECTING', s.uri);
         break;
-      case 1:
+      case 'CONNECTED':
         console.log('[WS] CONNECTED', s.uri);
         break;
-      case 2:
+      case 'CLOSE':
         console.warn('[WS] CLOSED', s.event);
         break;
-      case 3:
+      case 'ERROR':
         console.error('[WS] ERROR', s);
         break;
     }

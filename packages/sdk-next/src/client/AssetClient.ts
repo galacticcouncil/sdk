@@ -1,4 +1,4 @@
-import { PolkadotClient } from 'polkadot-api';
+import { Binary, PolkadotClient } from 'polkadot-api';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { Papi } from '../api';
@@ -82,7 +82,7 @@ export class AssetClient extends Papi {
     const { symbol, decimals } = metadata.get(key) ?? {};
     return {
       id: key,
-      name: name?.asText(),
+      name: name ? Binary.toText(name) : undefined,
       symbol: symbol,
       decimals: decimals,
       icon: symbol,
@@ -147,7 +147,7 @@ export class AssetClient extends Papi {
     return {
       id: key,
       name: symbols.join(', '),
-      symbol: symbol?.asText() || name?.asText(),
+      symbol: (symbol && Binary.toText(symbol)) || (name && Binary.toText(name)),
       decimals: 18,
       icon: symbols.join('/'),
       type: asset_type.type,
@@ -184,7 +184,7 @@ export class AssetClient extends Papi {
       Array.from(assets, ([key, value]) => [
         key,
         {
-          symbol: value.symbol?.asText(),
+          symbol: value.symbol ? Binary.toText(value.symbol) : undefined,
           decimals: value.decimals,
         } as AssetMetadata,
       ])

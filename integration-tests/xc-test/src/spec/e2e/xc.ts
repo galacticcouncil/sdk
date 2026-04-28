@@ -20,11 +20,12 @@ import { big } from '@galacticcouncil/common';
 
 import { jest } from '@jest/globals';
 import { Binary } from 'polkadot-api';
+import { toHex } from '@polkadot-api/utils';
 
 import * as c from 'console';
 
 import { aliceSigner, getAddress } from './account';
-import { checkIfProcessed, logEvents } from './events';
+import { checkIfProcessed, logEvents, PapiEventRecord } from './events';
 import { SetupCtx } from './types';
 
 const { BaseClient, AssethubClient } = clients;
@@ -81,27 +82,28 @@ export const runXc = (
 
       c.log('🥢 Calldata: ', calldata.data.substring(0, 66) + '...');
 
-      // Create transaction from encoded calldata via papi
+      // Build a tx from the encoded calldata, sign it, and inject it into
+      // the next block via chopsticks' `dev_newBlock { transactions }`.
+
       const api = srcNetwork.client.getUnsafeApi();
       const tx = await api.txFromCallData(Binary.fromHex(calldata.data));
+      const signedBytes = await tx.sign(aliceSigner);
+      const signedHex = toHex(signedBytes);
 
-      // Sign the transaction (returns hex-encoded signed extrinsic)
-      const signedHex = await tx.sign(aliceSigner);
-
-      // Submit to Chopsticks tx pool via legacy RPC
-      await srcNetwork.client._request('author_submitExtrinsic', [signedHex]);
-
-      // Create block using chopsticks chain object directly
-      const srcBlock = await srcNetwork.chain.newBlock();
-      c.log('🥢 Source block:', srcBlock.hash);
-      const srcEvents = await api.query.System.Events.getValue();
+      const srcBlockHash = await srcNetwork.client._request<string>(
+        'dev_newBlock',
+        [{ transactions: [signedHex] }]
+      );
+      c.log('🥢 Source block:', srcBlockHash);
+      const srcEvents =
+        (await api.query.System.Events.getValue()) as PapiEventRecord[];
       logEvents(srcEvents);
       const srcFailures = srcEvents
         .filter(
-          ({ event }: any) =>
+          ({ event }) =>
             event.type === 'System' && event.value?.type === 'ExtrinsicFailed'
         )
-        .map(({ event }: any) => event.value);
+        .map(({ event }) => event.value);
       expect(srcFailures).toEqual([]);
 
       // Advance relay chain to forward UMP/DMP messages
@@ -124,12 +126,14 @@ export const runXc = (
         ) {
           await reserveNetwork.chain.newBlock();
           const reserveApi = reserveNetwork.client.getUnsafeApi();
-          let reserveEvents = await reserveApi.query.System.Events.getValue();
+          let reserveEvents =
+            (await reserveApi.query.System.Events.getValue()) as PapiEventRecord[];
 
           // Sometimes needs a second block to forward queued messages
           if (!checkIfProcessed(reserveEvents)) {
             await reserveNetwork.chain.newBlock();
-            reserveEvents = await reserveApi.query.System.Events.getValue();
+            reserveEvents =
+              (await reserveApi.query.System.Events.getValue()) as PapiEventRecord[];
           }
 
           logEvents(reserveEvents);
@@ -139,16 +143,23 @@ export const runXc = (
       // Advance destination block to process incoming XCM
       await destNetwork.chain.newBlock();
       const destApi = destNetwork.client.getUnsafeApi();
-      let destEvents = await destApi.query.System.Events.getValue();
+      let destEvents =
+        (await destApi.query.System.Events.getValue()) as PapiEventRecord[];
 
       // Sometimes needs a second block to process queued messages
       if (!checkIfProcessed(destEvents)) {
         await destNetwork.chain.newBlock();
-        destEvents = await destApi.query.System.Events.getValue();
+        destEvents =
+          (await destApi.query.System.Events.getValue()) as PapiEventRecord[];
       }
 
       logEvents(destEvents);
-      expect(checkIfProcessed(destEvents)).toBeTruthy();
+      if (!checkIfProcessed(destEvents)) {
+        const types = destEvents.map((e) => e.event.type).join(', ');
+        throw new Error(
+          `Destination did not process the XCM message. Events: [${types}]`
+        );
+      }
 
       shouldSnapshot && expect([key, calldata.data]).toMatchSnapshot();
 

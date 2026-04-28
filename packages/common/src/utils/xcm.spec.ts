@@ -1,10 +1,10 @@
-import { Binary, FixedSizeBinary } from 'polkadot-api';
+import { Binary } from 'polkadot-api';
 
 import { transform } from './xcm';
 
 const formatter = (_: any, val: any) => {
-  if (val instanceof Binary) {
-    return FixedSizeBinary.fromBytes(val.asBytes()).asHex();
+  if (val instanceof Uint8Array) {
+    return Binary.toHex(val);
   }
 
   if (typeof val === 'bigint') {

@@ -1,7 +1,7 @@
-import { AccountId } from 'polkadot-api';
+import { AccountId, Binary } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Subscription, filter, map } from 'rxjs';
+import { Subscription, filter, map, mergeMap } from 'rxjs';
 import { decodeEventLog } from 'viem';
 
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
@@ -113,7 +113,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
       const interior = reserve.location.interior;
       if (interior.type === 'X1' && interior.value.type === 'AccountKey20') {
         const { value } = interior.value;
-        return value.key.asHex();
+        return value.key;
       }
       throw new Error('Invalid aave reserve multilocation');
     }
@@ -132,8 +132,8 @@ export class AavePoolClient extends PoolClient<PoolBase> {
 
   private parseEvmLog(payload: TEvmPayload): TEvmEvent | undefined {
     const { topics, data } = payload.log;
-    const topicsHex = topics.map((t) => t.asHex());
-    const dataHex = data.asHex();
+    const topicsHex = topics;
+    const dataHex = Binary.toHex(data);
 
     try {
       const { eventName, args } = decodeEventLog({
@@ -164,6 +164,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
 
     return this.api.event.Router.Executed.watch()
       .pipe(
+        mergeMap(({ events }) => events),
         map(({ payload }) => this.parseRouterLog(payload)),
         filter(
           ({ assetIn, assetOut }) =>
@@ -196,6 +197,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   private subscribeEvmLog(): Subscription {
     return this.api.event.EVM.Log.watch()
       .pipe(
+        mergeMap(({ events }) => events),
         map(({ payload }) => this.parseEvmLog(payload)),
         filter((v): v is TEvmEvent => v !== undefined),
         filter(({ eventName }) => SYNC_MM_EVENTS.includes(eventName)),

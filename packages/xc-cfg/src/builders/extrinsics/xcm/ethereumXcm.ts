@@ -5,7 +5,7 @@ import {
   ExtrinsicConfigBuilder,
 } from '@galacticcouncil/xc-core';
 
-import { Binary } from 'polkadot-api';
+import { Binary, SizedHex } from 'polkadot-api';
 
 import { encodeFunctionData } from 'viem';
 
@@ -40,7 +40,7 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
                 },
                 action: {
                   type: 'Call',
-                  value: Binary.fromHex(contract.address),
+                  value: contract.address as SizedHex<20>,
                 },
                 value: [0n, 0n, 0n, 0n],
                 input: Binary.fromHex(call),

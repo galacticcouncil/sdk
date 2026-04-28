@@ -94,9 +94,9 @@ describe('Wallet with XC config (E2E)', () => {
     'should result in valid Polkadot transfer for',
     (c) => {
       const config = configService.getChainRoutes(c);
-      const { chain, routes } = config;
+      const { chain } = config;
 
-      for (const route of Array.from(routes.values())) {
+      for (const route of config.getRoutes()) {
         const { source, destination } = route;
         const { asset } = source;
 

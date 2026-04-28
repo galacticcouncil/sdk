@@ -8,7 +8,7 @@ import { createConfig } from '@acala-network/chopsticks-testing';
 import { Parachain } from '@galacticcouncil/xc-core';
 
 import { createClient } from 'polkadot-api';
-import { getWsProvider } from 'polkadot-api/ws-provider';
+import { getWsProvider } from 'polkadot-api/ws';
 
 import * as c from 'console';
 

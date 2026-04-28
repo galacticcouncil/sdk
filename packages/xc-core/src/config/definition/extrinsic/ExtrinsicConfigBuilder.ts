@@ -1,5 +1,3 @@
-import { Binary } from 'polkadot-api';
-
 import { AssetAmount } from '../../../asset';
 import { AnyParachain } from '../../../chain';
 
@@ -16,7 +14,7 @@ export interface TransactCtx {
   chain: AnyParachain;
   fee: AssetAmount;
   feeBalance: AssetAmount;
-  call: Binary;
+  call: Uint8Array;
   weight: TxWeight;
 }
 

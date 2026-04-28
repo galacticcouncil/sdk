@@ -1,4 +1,10 @@
-import { AccountId, Binary, CompatibilityLevel, Enum } from 'polkadot-api';
+import {
+  AccountId,
+  Binary,
+  CompatibilityLevel,
+  Enum,
+  SizedHex,
+} from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import {
@@ -39,7 +45,7 @@ import {
 
 const { FeeUtils } = fmt;
 
-const ORACLE_NAME = Binary.fromText('omnipool');
+const ORACLE_NAME = Binary.toHex(Binary.fromText('omnipool')) as SizedHex<8>;
 const ORACLE_PERIOD = Enum('Short');
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
@@ -116,16 +122,15 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   async isSupported(): Promise<boolean> {
-    const query = this.api.query.Omnipool.Assets;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const staticApis = await this.api.getStaticApis();
+    return staticApis.compat.query.Omnipool.Assets.isCompatible(
+      CompatibilityLevel.BackwardsCompatible
     );
   }
 
   async isSlipFeeSupported(): Promise<boolean> {
-    return this.apiNext.query.Omnipool.SlipFee.isCompatible(
+    const staticApis = await this.apiNext.getStaticApis();
+    return staticApis.compat.query.Omnipool.SlipFee.isCompatible(
       CompatibilityLevel.Partial
     );
   }
@@ -372,8 +377,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         ORACLE_NAME,
         pair,
         ORACLE_PERIOD,
-        'best'
+        { at: 'best' }
       ).pipe(
+        map(({ value }) => value),
         filter((v): v is TEmaOracle => v !== undefined),
         map((value, index) => ({ value, index })),
         tap(({ index }) => {

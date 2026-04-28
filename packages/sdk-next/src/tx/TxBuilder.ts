@@ -10,7 +10,7 @@ import { PoolType } from '../pool';
 import { Swap } from '../sor';
 
 import { DryRunResult, Transaction, Tx } from './types';
-import { enumPath } from './utils';
+import { enumPath, NestedEnum } from './utils';
 
 export abstract class TxBuilder extends Papi {
   protected readonly evm: EvmClient;
@@ -51,7 +51,7 @@ export abstract class TxBuilder extends Papi {
 
     const dryRun = await this.client
       .getUnsafeApi()
-      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall);
+      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 4);
 
     const result = dryRun as DryRunResult;
     const error =
@@ -60,7 +60,10 @@ export abstract class TxBuilder extends Papi {
         : null;
 
     if (error) {
-      const errorPath = enumPath(error.value);
+      const errorPath =
+        error.type === 'Module'
+          ? enumPath(error.value as NestedEnum)
+          : error.type;
       throw new Error('Dry run execution error!', {
         cause: errorPath,
       });
