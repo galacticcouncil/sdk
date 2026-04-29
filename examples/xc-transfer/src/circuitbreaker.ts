@@ -36,7 +36,9 @@ function hours(ms: bigint | number): string {
 const { config } = ctx;
 const hydration = config.getChain('hydration') as Parachain;
 const client = new HydrationClient(hydration);
-const currentBlock = await client.api().query.System.Number.getValue();
+const currentBlock = await client
+  .api()
+  .query.System.Number.getValue({ at: 'best' });
 
 console.group('Hydration Circuit Breaker');
 
@@ -53,7 +55,7 @@ if (!global.configured) {
   );
   console.log('Utilised:', pct(global.used, global.limit));
   console.log('Window:', hours(global.windowMs), '(decays linearly)');
-  console.log('Block:', `#${global.currentBlock}`);
+  console.log('Block:', `#${currentBlock}`);
   console.log(
     'Last on-chain update:',
     new Date(Number(global.lastUpdateMs)).toISOString()

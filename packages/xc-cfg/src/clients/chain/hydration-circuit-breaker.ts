@@ -27,7 +27,6 @@ export interface GlobalWithdrawLimit {
   windowMs: bigint;
   used: bigint;
   lastUpdateMs: bigint;
-  currentBlock: number;
   headroom: bigint;
   lockdown: boolean;
   lockdownUntilMs?: bigint;
@@ -199,18 +198,12 @@ export async function getAllAssetDepositLimits(
 export async function getGlobalWithdrawLimit(
   api: Api
 ): Promise<GlobalWithdrawLimit> {
-  const [config, accumulator, lockdownUntil, currentBlock, now] =
-    await Promise.all([
-      api.query.CircuitBreaker.GlobalWithdrawLimitConfig.getValue({
-        at: 'best',
-      }),
-      api.query.CircuitBreaker.WithdrawLimitAccumulator.getValue({
-        at: 'best',
-      }),
-      api.query.CircuitBreaker.WithdrawLockdownUntil.getValue({ at: 'best' }),
-      api.query.System.Number.getValue({ at: 'best' }),
-      api.query.Timestamp.Now.getValue({ at: 'best' }),
-    ]);
+  const [config, accumulator, lockdownUntil, now] = await Promise.all([
+    api.query.CircuitBreaker.GlobalWithdrawLimitConfig.getValue({ at: 'best' }),
+    api.query.CircuitBreaker.WithdrawLimitAccumulator.getValue({ at: 'best' }),
+    api.query.CircuitBreaker.WithdrawLockdownUntil.getValue({ at: 'best' }),
+    api.query.Timestamp.Now.getValue({ at: 'best' }),
+  ]);
 
   const lockdownUntilMs = lockdownUntil ?? undefined;
   const lockdown = lockdownUntilMs !== undefined && now < lockdownUntilMs;
@@ -223,7 +216,6 @@ export async function getGlobalWithdrawLimit(
       windowMs: 0n,
       used: 0n,
       lastUpdateMs: lastUpdate,
-      currentBlock,
       headroom: 0n,
       lockdown,
       lockdownUntilMs,
@@ -232,6 +224,7 @@ export async function getGlobalWithdrawLimit(
 
   const { limit, window: windowMs } = config;
 
+  // Mirror pallet's linear decay (try_to_decay_withdraw_limit_accumulator).
   let used = current;
   if (!lockdown && windowMs > 0n) {
     const dt = now > lastUpdate ? now - lastUpdate : 0n;
@@ -250,7 +243,6 @@ export async function getGlobalWithdrawLimit(
     windowMs,
     used,
     lastUpdateMs: lastUpdate,
-    currentBlock,
     headroom,
     lockdown,
     lockdownUntilMs,

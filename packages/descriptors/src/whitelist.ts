@@ -38,6 +38,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.AssetRegistry.*',
   'query.Balances.*',
   'query.Bonds.*',
+  'query.CircuitBreaker.*',
   'query.ConvictionVoting.*',
   'query.Democracy.*',
   'query.DynamicFees.*',
