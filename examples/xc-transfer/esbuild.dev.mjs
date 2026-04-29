@@ -5,7 +5,12 @@ import { createProxyServer } from '../../esbuild.proxy.mjs';
 const plugins = [wasmLoader({ mode: 'deferred' })];
 
 const options = {
-  entryPoints: ['src/index.ts', 'src/redeem.ts', 'src/scan.ts'],
+  entryPoints: [
+    'src/index.ts',
+    'src/redeem.ts',
+    'src/scan.ts',
+    'src/circuitbreaker.ts',
+  ],
   bundle: true,
   format: 'esm',
   platform: 'browser',
