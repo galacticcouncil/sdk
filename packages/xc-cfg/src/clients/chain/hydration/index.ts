@@ -1,7 +1,7 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 import { hydration } from '@galacticcouncil/descriptors';
 
-import { BaseClient } from '../base';
+import { BaseClient } from '../../base';
 
 import {
   AssetDepositLimit,
@@ -9,7 +9,9 @@ import {
   getAllAssetDepositLimits,
   getAssetDepositLimit,
   getGlobalWithdrawLimit,
-} from './hydration-circuit-breaker';
+} from './circuit-breaker';
+
+export * from './circuit-breaker';
 
 export class HydrationClient extends BaseClient<typeof hydration> {
   constructor(chain: Parachain) {

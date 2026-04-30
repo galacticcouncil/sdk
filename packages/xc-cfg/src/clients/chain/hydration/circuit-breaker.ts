@@ -2,7 +2,7 @@ import type { TypedApi } from 'polkadot-api';
 
 import { hydration } from '@galacticcouncil/descriptors';
 
-export const PERIOD_BLOCKS = 14400;
+export const ASSET_LOCKDOWN_PERIOD_BLOCKS = 14400;
 
 export type AssetCategory = 'External' | 'Local';
 
@@ -80,7 +80,7 @@ function buildAssetDepositLimit(
   const periodExpired =
     !locked &&
     lastResetBlock !== undefined &&
-    lastResetBlock + PERIOD_BLOCKS <= currentBlock;
+    lastResetBlock + ASSET_LOCKDOWN_PERIOD_BLOCKS <= currentBlock;
 
   let headroom: bigint | null = null;
   if (limit !== null) {

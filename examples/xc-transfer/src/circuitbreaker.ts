@@ -3,7 +3,7 @@ import { clients } from '@galacticcouncil/xc-cfg';
 
 import { ctx } from './setup';
 
-const { HydrationClient, PERIOD_BLOCKS } = clients;
+const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS } = clients;
 
 const HDX_DECIMALS = 12;
 const BLOCK_TIME_MS = 6_000;
@@ -84,7 +84,8 @@ const rows = Array.from(states.values()).map((s) => {
   } else if (s.periodExpired) {
     window = 'expired — next mint resets';
   } else if (s.lastResetBlock !== undefined) {
-    const blocksLeft = s.lastResetBlock + PERIOD_BLOCKS - currentBlock;
+    const blocksLeft =
+      s.lastResetBlock + ASSET_LOCKDOWN_PERIOD_BLOCKS - currentBlock;
     window = `resets in ~${hours(BigInt(blocksLeft * BLOCK_TIME_MS))}`;
   }
 
