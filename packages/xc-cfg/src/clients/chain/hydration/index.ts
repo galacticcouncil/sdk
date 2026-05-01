@@ -1,7 +1,17 @@
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 import { hydration } from '@galacticcouncil/descriptors';
 
-import { BaseClient } from '../base';
+import { BaseClient } from '../../base';
+
+import {
+  AssetDepositLimit,
+  GlobalWithdrawLimit,
+  getAllAssetDepositLimits,
+  getAssetDepositLimit,
+  getGlobalWithdrawLimit,
+} from './circuit-breaker';
+
+export * from './circuit-breaker';
 
 export class HydrationClient extends BaseClient<typeof hydration> {
   constructor(chain: Parachain) {
@@ -57,5 +67,21 @@ export class HydrationClient extends BaseClient<typeof hydration> {
     );
     const { free, frozen } = response;
     return BigInt(free) - BigInt(frozen);
+  }
+
+  getAssetDepositLimit(assetOrId: Asset | number): Promise<AssetDepositLimit> {
+    const assetId =
+      typeof assetOrId === 'number'
+        ? assetOrId
+        : Number(this.chain.getAssetId(assetOrId));
+    return getAssetDepositLimit(this.api(), assetId);
+  }
+
+  getAllAssetDepositLimits(): Promise<Map<string, AssetDepositLimit>> {
+    return getAllAssetDepositLimits(this.api());
+  }
+
+  getGlobalWithdrawLimit(): Promise<GlobalWithdrawLimit> {
+    return getGlobalWithdrawLimit(this.api());
   }
 }
