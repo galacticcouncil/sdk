@@ -15,6 +15,7 @@
     "integration-tests/*"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "build": "turbo run build",
     "build:watch": "turbo run build:watch",
     "clean": "turbo run clean",
@@ -36,6 +37,7 @@
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.0.0",
     "fs-extra": "^10.1.0",
+    "patch-package": "^8.0.1",
     "prettier": "^3.0.3",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
