@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.1.0
+
+### Minor Changes
+
+- c700e2b: exposed circuit breaker limits and globalWithdrawal limit
+
 ## 1.0.0
 
 ### Major Changes
