@@ -144,7 +144,7 @@ All examples assume SDK has been initialized, [see](#usage)
 
 ### TradeRouter
 
-Calculate sell of 1 DOT for HDX & build tx with 5% slippage (default to 1% if not specified)
+Calculate sell of 1 DOT for USDT & build tx with 5% slippage (default to 1% if not specified)
 
 ```typescript
 const { api, tx } = sdk;
