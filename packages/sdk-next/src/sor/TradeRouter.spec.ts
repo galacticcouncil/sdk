@@ -59,3 +59,18 @@ describe('TradeRouter with mocked pool ctx', () => {
     expect(buy.amountIn).toStrictEqual(lastRoute.amountIn);
   });
 });
+
+describe('TradeRouter spot-price liquidity threshold', () => {
+  let ctx: IPoolCtxProvider;
+  let sor: TradeRouter;
+
+  beforeEach(() => {
+    ctx = new MockCtxProvider();
+    sor = new TradeRouter(ctx);
+  });
+
+  it('suppresses spot price when assetIn depth is below MIN_LIQUIDITY', async () => {
+    const price = await sor.getSpotPrice(3, 222);
+    expect(price).toBeUndefined();
+  });
+});
