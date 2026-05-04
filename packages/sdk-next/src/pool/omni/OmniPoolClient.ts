@@ -22,24 +22,17 @@ import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { PoolClient } from '../PoolClient';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../types';
 
-import {
-  HUB_ASSET_ID,
-  PERMILL_DENOMINATOR,
-  SYSTEM_ASSET_ID,
-} from '../../consts';
+import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../../consts';
 import { fmt, QueryBus } from '../../utils';
 
-import { OmniMath } from './OmniMath';
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
+import { OmniPoolFee } from './OmniPoolFee';
 import {
-  TAssetFeeParams,
   TDynamicFees,
   TDynamicFeesConfig,
-  TDynamicFeeRange,
   TEmaOracle,
   TEmaPair,
   TOmnipoolAsset,
-  TProtocolFeeParams,
   TSlipFee,
 } from './types';
 
@@ -230,24 +223,34 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       this.emaOracles.get(oraclePfk),
     ]);
 
-    const [assetFeeMin, assetFee, assetFeeMax] = await this.getAssetFee(
-      pair,
-      this.block,
-      dynamicFee,
-      oracleAssetFee,
-      feeConfiguration?.value.asset_fee_params
-    );
+    const assetParams =
+      feeConfiguration?.value.asset_fee_params ??
+      (await this.api.constants.DynamicFees.AssetFeeParameters());
 
-    const [protocolFeeMin, protocolFee, protocolFeeMax] =
-      protocolAsset === HUB_ASSET_ID
-        ? [0, 0, 0] // No protocol fee for LRNA sell
-        : await this.getProtocolFee(
-            pair,
-            this.block,
-            dynamicFee,
-            oracleProtocolFee,
-            feeConfiguration?.value.protocol_fee_params
-          );
+    const [assetFeeMin, assetFee, assetFeeMax] = OmniPoolFee.getAssetFee({
+      pair,
+      block: this.block,
+      dynamicFee,
+      oracle: oracleAssetFee,
+      params: assetParams,
+    });
+
+    let protocolFeeMin = 0;
+    let protocolFee = 0;
+    let protocolFeeMax = 0;
+    if (protocolAsset !== HUB_ASSET_ID) {
+      const protocolParams =
+        feeConfiguration?.value.protocol_fee_params ??
+        (await this.api.constants.DynamicFees.ProtocolFeeParameters());
+
+      [protocolFeeMin, protocolFee, protocolFeeMax] = OmniPoolFee.getProtocolFee({
+        pair,
+        block: this.block,
+        dynamicFee,
+        oracle: oracleProtocolFee,
+        params: protocolParams,
+      });
+    }
 
     const min = assetFeeMin + protocolFeeMin;
     const max = assetFeeMax + protocolFeeMax;
@@ -259,110 +262,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       min: FeeUtils.fromPermill(min),
       max: FeeUtils.fromPermill(max),
     };
-  }
-
-  private async getAssetFee(
-    poolPair: PoolPair,
-    blockNumber: number,
-    dynamicFee: TDynamicFees | undefined,
-    oracle: TEmaOracle | undefined,
-    configuration: TAssetFeeParams | undefined
-  ): Promise<TDynamicFeeRange> {
-    const { assetOut, balanceOut } = poolPair;
-
-    const { min_fee, max_fee, decay, amplification } = configuration
-      ? configuration
-      : await this.api.constants.DynamicFees.AssetFeeParameters();
-
-    if (!dynamicFee || !oracle) {
-      return [min_fee, min_fee, max_fee];
-    }
-
-    const feeMin = FeeUtils.fromPermill(min_fee);
-    const feeMax = FeeUtils.fromPermill(max_fee);
-
-    const [entry] = oracle;
-    const { asset_fee, timestamp } = dynamicFee;
-
-    const blockDifference = Math.max(1, blockNumber - timestamp);
-
-    let oracleAmountIn = entry.volume.b_in.toString();
-    let oracleAmountOut = entry.volume.b_out.toString();
-    let oracleLiquidity = entry.liquidity.b.toString();
-
-    if (assetOut === SYSTEM_ASSET_ID) {
-      oracleAmountIn = entry.volume.a_in.toString();
-      oracleAmountOut = entry.volume.a_out.toString();
-      oracleLiquidity = entry.liquidity.a.toString();
-    }
-
-    const feePrev = FeeUtils.fromPermill(asset_fee);
-    const fee = OmniMath.recalculateAssetFee(
-      oracleAmountIn,
-      oracleAmountOut,
-      oracleLiquidity,
-      '9',
-      balanceOut.toString(),
-      FeeUtils.toRaw(feePrev).toString(),
-      blockDifference.toString(),
-      FeeUtils.toRaw(feeMin).toString(),
-      FeeUtils.toRaw(feeMax).toString(),
-      decay.toString(),
-      amplification.toString()
-    );
-    return [min_fee, Number(fee) * PERMILL_DENOMINATOR, max_fee];
-  }
-
-  private async getProtocolFee(
-    poolPair: PoolPair,
-    blockNumber: number,
-    dynamicFee: TDynamicFees | undefined,
-    oracle: TEmaOracle | undefined,
-    configuration: TProtocolFeeParams | undefined
-  ): Promise<TDynamicFeeRange> {
-    const { assetIn, balanceIn } = poolPair;
-
-    const { min_fee, max_fee, decay, amplification } = configuration
-      ? configuration
-      : await this.api.constants.DynamicFees.ProtocolFeeParameters();
-
-    if (!dynamicFee || !oracle) {
-      return [min_fee, min_fee, max_fee];
-    }
-
-    const feeMin = FeeUtils.fromPermill(min_fee);
-    const feeMax = FeeUtils.fromPermill(max_fee);
-
-    const [entry] = oracle;
-    const { protocol_fee, timestamp } = dynamicFee;
-
-    const blockDifference = Math.max(1, blockNumber - timestamp);
-
-    let oracleAmountIn = entry.volume.b_in.toString();
-    let oracleAmountOut = entry.volume.b_out.toString();
-    let oracleLiquidity = entry.liquidity.b.toString();
-
-    if (assetIn === SYSTEM_ASSET_ID) {
-      oracleAmountIn = entry.volume.a_in.toString();
-      oracleAmountOut = entry.volume.a_out.toString();
-      oracleLiquidity = entry.liquidity.a.toString();
-    }
-
-    const feePrev = FeeUtils.fromPermill(protocol_fee);
-    const fee = OmniMath.recalculateProtocolFee(
-      oracleAmountIn,
-      oracleAmountOut,
-      oracleLiquidity,
-      '9',
-      balanceIn.toString(),
-      FeeUtils.toRaw(feePrev).toString(),
-      blockDifference.toString(),
-      FeeUtils.toRaw(feeMin).toString(),
-      FeeUtils.toRaw(feeMax).toString(),
-      decay.toString(),
-      amplification.toString()
-    );
-    return [min_fee, Number(fee) * PERMILL_DENOMINATOR, max_fee];
   }
 
   private subscribeEmaOracles(): Subscription {
