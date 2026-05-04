@@ -51,7 +51,7 @@ I changed packages/common/src/utils/big.ts — validate it builds and tests pass
 Add a cross-chain route for USDT from Ethereum to Hydration via Moonbeam
 ```
 
-### solana-ata
+### derive-solana-ata
 
 ```
 Give me the ATA for SOL for CGzdbCTM9T4A5arB9smDaotVnPJ4fadjntUDz5nVnvgP
