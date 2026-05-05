@@ -3,6 +3,7 @@ import {
   XcmV5Junctions,
   XcmV5Junction,
   XcmVersionedLocation,
+  XcmVersionedXcm,
   XcmV4Instruction,
   Hub,
   XcmVersionedAssetId,
@@ -108,7 +109,7 @@ export class AssethubClient extends BaseClient<Hub> {
 
     const result = await this.api().apis.XcmPaymentApi.query_delivery_fees(
       destination,
-      { type: 'V5', value: xcm },
+      XcmVersionedXcm.V4(xcm),
       dot
     );
     if (!result.success) {

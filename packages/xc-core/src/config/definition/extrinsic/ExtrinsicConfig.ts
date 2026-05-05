@@ -1,11 +1,8 @@
-import { PolkadotClient, Transaction, UnsafeTransaction } from 'polkadot-api';
+import { PolkadotClient, Transaction } from 'polkadot-api';
 
 import { BaseConfig, BaseConfigParams, CallType } from '../base';
 
-type SafeTx = Transaction<any, string, string, void | undefined>;
-type UnsafeTx = UnsafeTransaction<any, string, string, void | undefined>;
-
-export type Extrinsic = SafeTx | UnsafeTx;
+export type Extrinsic = Transaction<void | undefined>;
 
 export interface ExtrinsicConfigParams extends Omit<BaseConfigParams, 'type'> {
   getTx: (client: PolkadotClient) => Extrinsic;

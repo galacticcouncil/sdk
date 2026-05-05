@@ -2,7 +2,7 @@ import {
   HydrationWhitelistEntry,
   HubWhitelistEntry,
   WhitelistEntriesByChain,
-} from '../.papi/descriptors';
+} from './descriptors';
 
 const hydrationWhitelist: HydrationWhitelistEntry[] = [
   // runtime

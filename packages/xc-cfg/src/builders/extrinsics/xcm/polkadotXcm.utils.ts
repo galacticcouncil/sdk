@@ -5,7 +5,8 @@ import {
   TxWeight,
 } from '@galacticcouncil/xc-core';
 
-import { Binary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
+
 import {
   XcmV3Junctions,
   XcmV3Junction,
@@ -295,7 +296,7 @@ export const toBridgeXcmOnDest = (
   transferAssetLocation: { parents: number; interior: XcmV3Junctions },
   messageId: any
 ) => {
-  const topic = Binary.fromHex(messageId);
+  const topic = messageId as SizedHex<32>;
   return {
     type: version,
     value: [
@@ -389,7 +390,7 @@ export const toTransactMessage = (
   account: any,
   transactFeeLocation: { parents: number; interior: XcmV3Junctions },
   transactFeeAmount: any,
-  transactCall: Binary,
+  transactCall: Uint8Array,
   transactWeight: TxWeight
 ) => {
   return {

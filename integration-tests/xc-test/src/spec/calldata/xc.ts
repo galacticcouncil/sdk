@@ -14,7 +14,7 @@ import {
   Wallet,
 } from '@galacticcouncil/xc-sdk';
 
-import { builders, clients } from '@galacticcouncil/xc-cfg';
+import { clients } from '@galacticcouncil/xc-cfg';
 
 const { BaseClient, AssethubClient } = clients;
 

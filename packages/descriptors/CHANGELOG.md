@@ -1,5 +1,17 @@
 # @galacticcouncil/descriptors
 
+## 2.1.0
+
+### Minor Changes
+
+- c700e2b: whitelist circuit breaker
+
+## 2.0.0
+
+### Major Changes
+
+- 1281cfa: polkadot api v2 migration
+
 ## 1.16.0
 
 ### Minor Changes

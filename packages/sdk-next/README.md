@@ -144,7 +144,7 @@ All examples assume SDK has been initialized, [see](#usage)
 
 ### TradeRouter
 
-Calculate sell of 1 DOT for HDX & build tx with 5% slippage (default to 1% if not specified)
+Calculate sell of 1 DOT for USDT & build tx with 5% slippage (default to 1% if not specified)
 
 ```typescript
 const { api, tx } = sdk;
@@ -156,7 +156,7 @@ const tradeTx = await tx.trade(trade)
   .build();
 const tradeCall = await tradeTx.get().getEncodedData();
 console.log(trade.toHuman());
-console.log('Transaction hash:', tradeCall.asHex());
+console.log('Transaction hash:', Binary.toHex(tradeCall));
 ```
 
 **Note:** For convenience, the router amount can be specified either as a native bigint or as a human-readable string.

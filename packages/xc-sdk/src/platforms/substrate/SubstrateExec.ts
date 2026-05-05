@@ -97,7 +97,7 @@ export class SubstrateExec {
 
     return {
       from: srcAccount,
-      data: batchTxEncoded.asHex(),
+      data: Binary.toHex(batchTxEncoded),
       type: CallType.Substrate,
       dryRun: this.#src.isDryRunSupported()
         ? async () => {

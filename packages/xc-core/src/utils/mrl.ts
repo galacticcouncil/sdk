@@ -1,4 +1,9 @@
-import { Codec, FixedSizeBinary, AccountId } from 'polkadot-api';
+import {
+  Codec,
+  getTypedCodecs,
+  FixedSizeBinary,
+  AccountId,
+} from 'polkadot-api';
 
 import { Struct, Enum } from 'scale-ts';
 
@@ -54,13 +59,13 @@ function createXcmLocation(
 
   if (isEthereumStyle) {
     accountJunction = XcmV5Junction.AccountKey20({
-      key: FixedSizeBinary.fromHex(address),
+      key: address as SizedHex<20>,
       network: undefined,
     });
   } else {
     const ss58 = AccountId().enc(address);
     accountJunction = XcmV5Junction.AccountId32({
-      id: FixedSizeBinary.fromBytes(ss58),
+      id: Binary.toHex(ss58) as SizedHex<32>,
       network: undefined,
     });
   }

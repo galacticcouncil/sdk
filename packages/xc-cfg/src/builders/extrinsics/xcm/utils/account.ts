@@ -2,7 +2,7 @@ import { acc } from '@galacticcouncil/common';
 import { Parachain } from '@galacticcouncil/xc-core';
 import { XcmV3Junction } from '@galacticcouncil/descriptors';
 
-import { FixedSizeBinary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
 
 import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
@@ -12,7 +12,7 @@ export function getExtrinsicAccount(address: string) {
 
   if (isEthAddress) {
     return XcmV3Junction.AccountKey20({
-      key: FixedSizeBinary.fromHex(address),
+      key: address as SizedHex<20>,
       network: undefined,
     });
   }
@@ -23,7 +23,7 @@ export function getExtrinsicAccount(address: string) {
   }
 
   return XcmV3Junction.AccountId32({
-    id: FixedSizeBinary.fromHex(toHex(info.publicKey)),
+    id: toHex(info.publicKey) as SizedHex<32>,
     network: undefined,
   });
 }

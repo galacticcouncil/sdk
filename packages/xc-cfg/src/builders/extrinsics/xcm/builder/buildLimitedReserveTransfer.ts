@@ -9,8 +9,6 @@ import {
 } from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
-import { Binary } from 'polkadot-api';
-
 import { ACCOUNT_SS_58, AMOUNT_MAX, TOPIC } from './const';
 
 import {
@@ -30,7 +28,7 @@ export function buildReserveTransfer(
     version
   );
 
-  const topic = Binary.fromHex(TOPIC);
+  const topic = TOPIC;
 
   return [
     XcmV4Instruction.WithdrawAsset([
@@ -98,7 +96,7 @@ export function buildMultiHopReserveTransfer(
     version
   );
 
-  const topic = Binary.fromHex(TOPIC);
+  const topic = TOPIC;
 
   const nestedXcm = buildNestedReserveTransfer(asset, destination);
 

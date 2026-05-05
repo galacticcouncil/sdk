@@ -1,5 +1,23 @@
 # @galacticcouncil/xc-cfg
 
+## 1.1.0
+
+### Minor Changes
+
+- c700e2b: exposed circuit breaker limits and globalWithdrawal limit
+
+## 1.0.0
+
+### Major Changes
+
+- 1281cfa: polkadot api v2 migration
+
+### Patch Changes
+
+- Updated dependencies [1281cfa]
+  - @galacticcouncil/sdk-next@1.0.0
+  - @galacticcouncil/xc-core@1.0.0
+
 ## 0.20.0
 
 ### Minor Changes

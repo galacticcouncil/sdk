@@ -2,7 +2,7 @@ import { CompatibilityLevel } from 'polkadot-api';
 
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { Subscription, distinctUntilChanged, filter } from 'rxjs';
+import { Subscription, distinctUntilChanged, filter, map } from 'rxjs';
 
 import { PoolType, PoolLimits, PoolFees, PoolFee, PoolPair } from '../types';
 import { PoolClient } from '../PoolClient';
@@ -58,11 +58,9 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   }
 
   async isSupported(): Promise<boolean> {
-    const query = this.api.query.LBP.PoolData;
-    const compatibilityToken = await this.api.compatibilityToken;
-    return query.isCompatible(
-      CompatibilityLevel.BackwardsCompatible,
-      compatibilityToken
+    const staticApis = await this.api.getStaticApis();
+    return staticApis.compat.query.LBP.PoolData.isCompatible(
+      CompatibilityLevel.BackwardsCompatible
     );
   }
 
@@ -202,8 +200,11 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   }
 
   private subscribeValidationData(): Subscription {
-    return this.api.query.ParachainSystem.ValidationData.watchValue('best')
+    return this.api.query.ParachainSystem.ValidationData.watchValue({
+      at: 'best',
+    })
       .pipe(
+        map(({ value }) => value),
         filter((v): v is TValidationData => v !== undefined),
         distinctUntilChanged(
           (a, b) => a.relay_parent_number === b.relay_parent_number

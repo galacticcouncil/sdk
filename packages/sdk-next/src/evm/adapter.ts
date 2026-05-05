@@ -1,9 +1,4 @@
-import {
-  Binary,
-  FixedSizeBinary,
-  PolkadotClient,
-  TypedApi,
-} from 'polkadot-api';
+import { Binary, PolkadotClient, SizedHex, TypedApi } from 'polkadot-api';
 
 import { hydration } from '@galacticcouncil/descriptors';
 
@@ -47,8 +42,8 @@ export class EvmRpcAdapter {
     });
 
     const result = await this.api.apis.EthereumRuntimeRPCApi.call(
-      FixedSizeBinary.fromText(''),
-      FixedSizeBinary.fromHex(address as `0x${string}`),
+      '0x0000000000000000000000000000000000000000' as SizedHex<20>,
+      address as SizedHex<20>,
       Binary.fromHex(data),
       [0n, 0n, 0n, 0n] as const,
       [GAS_LIMIT, 0n, 0n, 0n] as const,
@@ -73,7 +68,7 @@ export class EvmRpcAdapter {
       return decodeFunctionResult({
         abi: abi,
         functionName: functionName,
-        data: value.asHex() as `0x${string}`,
+        data: Binary.toHex(value) as `0x${string}`,
       });
     }
     console.log(functionName, exit_reason.type, exit_reason.value.type);

@@ -7,9 +7,9 @@
   },
   "keywords": [],
   "devDependencies": {
-    "node": "^22.12.0"
+    "node": "^25.9.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^0.41.0"
+    "@galacticcouncil/sdk-next": "^1.0.1"
   }
 }

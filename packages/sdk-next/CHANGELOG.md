@@ -1,5 +1,29 @@
 # @galacticcouncil/sdk-next
 
+## 1.0.1
+
+### Patch Changes
+
+- b07d266: moving smProvider to dynamic import
+
+## 1.0.0
+
+### Major Changes
+
+- 1281cfa: polkadot api v2 migration
+
+### Patch Changes
+
+- Updated dependencies [1281cfa]
+  - @galacticcouncil/descriptors@2.0.0
+  - @galacticcouncil/common@1.0.0
+
+## 0.41.1
+
+### Patch Changes
+
+- bdb1f07: Fix claiming rewards of stopped farms
+
 ## 0.41.0
 
 ### Minor Changes

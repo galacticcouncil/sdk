@@ -9,7 +9,7 @@ After modifying code in any package. Use this checklist to confirm the change is
 | You changed... | Also affected |
 |----------------|---------------|
 | `common` | sdk-next, xc-core (and everything above them) |
-| `descriptors/src/whitelist.ts` | descriptors build, then sdk-next, xc-core |
+| `descriptors/.papi/whitelist.ts` | descriptors build, then sdk-next, xc-core |
 | `sdk-next` | xc-cfg (peer dep) |
 | `xc-core` | xc-sdk, xc-cfg, xc |
 | `xc-cfg` | xc |

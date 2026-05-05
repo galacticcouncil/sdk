@@ -1,4 +1,4 @@
-import { AccountId, Binary, FixedSizeBinary } from 'polkadot-api';
+import { AccountId, Binary, SizedHex } from 'polkadot-api';
 
 export const toAccountId32 = (address: string) => {
   const ss58 = AccountId().enc(address);
@@ -6,7 +6,7 @@ export const toAccountId32 = (address: string) => {
     type: 'AccountId32',
     value: {
       network: undefined,
-      id: FixedSizeBinary.fromBytes(ss58),
+      id: Binary.toHex(ss58) as SizedHex<32>,
     },
   };
 };
@@ -16,7 +16,7 @@ export const toAccountKey20 = (address: string) => {
     type: 'AccountKey20',
     value: {
       network: undefined,
-      key: FixedSizeBinary.fromHex(address),
+      key: address as SizedHex<20>,
     },
   };
 };
@@ -59,10 +59,9 @@ export const transform = (obj: any): any => {
           type: key,
           value: {
             length: value.length,
-            data:
-              typeof value.data === 'string'
-                ? Binary.fromHex(value.data)
-                : value.data,
+            data: (typeof value.data === 'string'
+              ? value.data
+              : Binary.toHex(value.data)) as SizedHex<32>,
           },
         };
       }

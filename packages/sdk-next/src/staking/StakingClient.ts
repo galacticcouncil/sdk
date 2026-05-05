@@ -1,10 +1,12 @@
+import { Binary } from 'polkadot-api';
+
 import { Papi } from '../api';
 
 export class StakingClient extends Papi {
   async getPalletId(): Promise<string> {
     const query = this.api.constants.Staking.PalletId;
     const value = await query();
-    return value.asText();
+    return Binary.toText(Binary.fromHex(value));
   }
 
   async getPeriodLength(): Promise<number> {

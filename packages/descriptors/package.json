@@ -1,8 +1,9 @@
 {
   "name": "@galacticcouncil/descriptors",
-  "version": "1.16.0",
+  "version": "2.1.0",
   "description": "Hydration papi (polkadot-api) descriptors",
   "author": "GalacticCouncil",
+  "type": "module",
   "repository": {
     "directory": "packages/descriptors",
     "type": "git",
@@ -23,14 +24,13 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "module": "./build/index.mjs",
-      "import": "./build/index.mjs",
-      "require": "./build/index.js"
+      "import": "./build/index.js",
+      "default": "./build/index.js"
     },
     "./package.json": "./package.json"
   },
   "main": "./build/index.js",
-  "module": "./build/index.mjs",
+  "module": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
     "prebuild": "npm run papi:whitelist",
@@ -40,9 +40,9 @@
     "link": "npm ln",
     "papi": "papi",
     "papi:update": "papi update",
-    "papi:whitelist": "papi --whitelist ./src/whitelist.ts"
+    "papi:whitelist": "papi"
   },
   "devDependencies": {
-    "polkadot-api": "^1.23.3"
+    "polkadot-api": "^2.1.0"
   }
 }

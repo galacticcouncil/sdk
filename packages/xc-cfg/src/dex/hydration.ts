@@ -9,6 +9,7 @@ import {
 import { pool, sor, tx } from '@galacticcouncil/sdk-next';
 import { RUNTIME_DECIMALS } from '@galacticcouncil/common';
 
+import { Binary } from 'polkadot-api';
 import { memoize1 } from '@thi.ng/memoize';
 
 import { HydrationClient } from '../clients';
@@ -66,7 +67,7 @@ export class HydrationDex implements Dex {
 
     const transaction = txWrapper.get();
     const encodedData = await transaction.getEncodedData();
-    return encodedData.asHex();
+    return Binary.toHex(encodedData);
   }
 
   async getQuote(

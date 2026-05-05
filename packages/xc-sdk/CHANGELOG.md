@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-sdk
 
+## 1.0.0
+
+### Major Changes
+
+- 1281cfa: polkadot api v2 migration
+
+### Patch Changes
+
+- Updated dependencies [1281cfa]
+  - @galacticcouncil/xc-core@1.0.0
+
 ## 0.11.0
 
 ### Minor Changes

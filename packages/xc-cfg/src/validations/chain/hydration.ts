@@ -56,6 +56,53 @@ export class HydrationEdValidation extends TransferValidation {
   }
 }
 
+export class HydrationDepositLimitValidation extends TransferValidation {
+  async validate(ctx: TransferCtx) {
+    const { amount, asset, destination } = ctx;
+
+    const chain = destination.chain as Parachain;
+    const client = new HydrationClient(chain);
+    const state = await client.getAssetDepositLimit(asset);
+
+    if (state.locked) {
+      throw new TransferValidationError('Deposit_Asset_Lockdown', {
+        asset: asset.originSymbol,
+        chain: chain.name,
+        lockedUntilBlock: state.lockedUntilBlock,
+        error: 'circuitBreaker.assetLockdown',
+      });
+    }
+
+    if (state.headroom !== null && amount > state.headroom) {
+      throw new TransferValidationError('Deposit_Limit_Exceeded', {
+        asset: asset.originSymbol,
+        chain: chain.name,
+        headroom: state.headroom,
+        limit: state.limit,
+        error: 'circuitBreaker.depositLimitExceeded',
+      });
+    }
+  }
+}
+
+export class HydrationWithdrawLimitValidation extends TransferValidation {
+  async validate(ctx: TransferCtx) {
+    const { source } = ctx;
+
+    const chain = source.chain as Parachain;
+    const client = new HydrationClient(chain);
+    const state = await client.getGlobalWithdrawLimit();
+
+    if (state.lockdown) {
+      throw new TransferValidationError('Withdraw_Lockdown_Active', {
+        chain: chain.name,
+        lockdownUntilMs: state.lockdownUntilMs,
+        error: 'circuitBreaker.withdrawLockdown',
+      });
+    }
+  }
+}
+
 export class HydrationMrlFeeValidation extends TransferValidation {
   protected async skipFor(ctx: TransferCtx): Promise<boolean> {
     const { source, transact } = ctx;
