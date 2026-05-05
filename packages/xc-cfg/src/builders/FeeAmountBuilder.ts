@@ -19,6 +19,7 @@ import {
   buildMultiHopReserveTransfer,
   buildSnowbridgeOutboundXcm,
   etherLocation,
+  TOPIC,
 } from './extrinsics/xcm';
 import { validateReserveChain } from './extrinsics/xcm/utils';
 import { padFeeByPercentage } from './utils';
@@ -220,7 +221,7 @@ function Snowbridge() {
           dotRemoteFee: 1_000_000_000n,
           dotToEtherSwapAmount: 1_000_000_000n,
           etherFeeAmount: 1_000_000_000n,
-          topic: '0x' + '00'.repeat(32),
+          topic: TOPIC,
         });
 
         const sourceExecutionFee = padFeeByPercentage(

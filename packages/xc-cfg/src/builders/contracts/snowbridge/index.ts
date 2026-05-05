@@ -15,7 +15,7 @@ import {
   XcmVersionedLocation,
 } from '@galacticcouncil/descriptors';
 
-import { FixedSizeBinary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
 import { Blake2256 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 import { encodeAbiParameters } from 'viem';
@@ -53,7 +53,7 @@ const v2SendMessage = (): ContractConfigBuilder => ({
     const entropy = new TextEncoder().encode(
       `${rcv.parachainId}${sender}${tokenAddress}${beneficiaryHex}${amount}${Date.now()}`
     );
-    const topic = toHex(Blake2256(entropy));
+    const topic = toHex(Blake2256(entropy)) as SizedHex<32>;
 
     const xcmInstructions = buildSnowbridgeInboundXcm({
       ethChainId: ETHEREUM_CHAIN_ID,
@@ -87,7 +87,7 @@ const v2SendMessage = (): ContractConfigBuilder => ({
         parents: 0,
         interior: XcmV5Junctions.X1(
           XcmV5Junction.AccountId32({
-            id: FixedSizeBinary.fromHex(beneficiaryHex),
+            id: beneficiaryHex as SizedHex<32>,
             network: undefined,
           })
         ),

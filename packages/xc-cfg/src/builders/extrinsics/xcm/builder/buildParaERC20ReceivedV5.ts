@@ -8,7 +8,7 @@ import {
 } from '@galacticcouncil/descriptors';
 import { Asset, Parachain } from '@galacticcouncil/xc-core';
 
-import { FixedSizeBinary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
 
 import { ACCOUNT_ID_32, AMOUNT_MAX, DOT_LOCATION, TOPIC } from './const';
 
@@ -38,12 +38,11 @@ export function buildParaERC20ReceivedV5(
     version
   );
 
-  const topic = FixedSizeBinary.fromHex(TOPIC);
   const beneficiary = {
     parents: 0,
     interior: XcmV5Junctions.X1(
       XcmV5Junction.AccountId32({
-        id: FixedSizeBinary.fromHex(ACCOUNT_ID_32),
+        id: ACCOUNT_ID_32 as SizedHex<32>,
         network: undefined,
       })
     ),
@@ -74,6 +73,6 @@ export function buildParaERC20ReceivedV5(
       assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
       beneficiary,
     }),
-    XcmV5Instruction.SetTopic(topic),
+    XcmV5Instruction.SetTopic(TOPIC),
   ];
 }

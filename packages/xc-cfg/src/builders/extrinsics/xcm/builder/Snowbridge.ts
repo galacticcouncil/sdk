@@ -15,7 +15,7 @@ import {
   XcmVersionedXcm,
 } from '@galacticcouncil/descriptors';
 
-import { FixedSizeBinary } from 'polkadot-api';
+import { SizedHex } from 'polkadot-api';
 import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
 
@@ -42,7 +42,7 @@ export const erc20Location = (ethChainId: number, tokenAddress: string) => ({
       XcmV5NetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
     ),
     XcmV5Junction.AccountKey20({
-      key: FixedSizeBinary.fromHex(tokenAddress),
+      key: tokenAddress as SizedHex<20>,
       network: undefined,
     }),
   ]),
@@ -60,7 +60,7 @@ export type SnowbridgeInboundXcmParams = {
   tokenAmount: bigint;
   remoteEtherFeeAmount: bigint;
   remoteDotFeeAmount?: bigint;
-  topic: string;
+  topic: SizedHex<32>;
 };
 
 /**
@@ -105,11 +105,11 @@ export function buildSnowbridgeInboundXcm(
     beneficiaryHex.length === 42 && beneficiaryHex.startsWith('0x');
   const beneficiaryJunction = isEthAddress
     ? XcmV5Junction.AccountKey20({
-        key: FixedSizeBinary.fromHex(beneficiaryHex),
+        key: beneficiaryHex as SizedHex<20>,
         network: undefined,
       })
     : XcmV5Junction.AccountId32({
-        id: FixedSizeBinary.fromHex(beneficiaryHex),
+        id: beneficiaryHex as SizedHex<32>,
         network: undefined,
       });
 
@@ -186,7 +186,7 @@ export function buildSnowbridgeInboundXcm(
           assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
           beneficiary,
         }),
-        XcmV5Instruction.SetTopic(FixedSizeBinary.fromHex(topic)),
+        XcmV5Instruction.SetTopic(topic),
       ],
     }),
     XcmV5Instruction.RefundSurplus(),
@@ -199,7 +199,7 @@ export function buildSnowbridgeInboundXcm(
       ),
       beneficiary,
     }),
-    XcmV5Instruction.SetTopic(FixedSizeBinary.fromHex(topic))
+    XcmV5Instruction.SetTopic(topic)
   );
 
   return instructions;
@@ -218,7 +218,7 @@ export type SnowbridgeOutboundXcmParams = {
   dotRemoteFee: bigint;
   dotToEtherSwapAmount: bigint;
   etherFeeAmount: bigint;
-  topic: string;
+  topic: SizedHex<32>;
 };
 
 /**
@@ -257,13 +257,11 @@ export function buildSnowbridgeOutboundXcm(
     ? ether
     : erc20Location(ETHEREUM_CHAIN_ID, tokenAddress);
 
-  const topicBin = FixedSizeBinary.fromHex(topic);
-
   const sender = {
     parents: 0,
     interior: XcmV5Junctions.X1(
       XcmV5Junction.AccountId32({
-        id: FixedSizeBinary.fromHex(senderPubKey),
+        id: senderPubKey as SizedHex<32>,
         network: undefined,
       })
     ),
@@ -273,7 +271,7 @@ export function buildSnowbridgeOutboundXcm(
     parents: 0,
     interior: XcmV5Junctions.X1(
       XcmV5Junction.AccountKey20({
-        key: FixedSizeBinary.fromHex(beneficiaryHex),
+        key: beneficiaryHex as SizedHex<20>,
         network: undefined,
       })
     ),
@@ -294,7 +292,7 @@ export function buildSnowbridgeOutboundXcm(
       assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
       beneficiary: ethBeneficiary,
     }),
-    XcmV5Instruction.SetTopic(topicBin),
+    XcmV5Instruction.SetTopic(topic),
   ];
 
   // --- Leg 2: AssetHub ---
@@ -383,7 +381,7 @@ export function buildSnowbridgeOutboundXcm(
       assets: bridgeAssets,
       remote_xcm: ethereumXcm,
     }),
-    XcmV5Instruction.SetTopic(topicBin)
+    XcmV5Instruction.SetTopic(topic)
   );
 
   // Total DOT withdrawn: PayFees budget + remote_fees on AH + swap DOT
@@ -472,7 +470,7 @@ export function buildSnowbridgeOutboundXcm(
       assets: initiateAssets,
       remote_xcm: assetHubXcm,
     }),
-    XcmV5Instruction.SetTopic(topicBin),
+    XcmV5Instruction.SetTopic(topic),
   ];
 }
 
@@ -507,9 +505,8 @@ export function snowbridgeOutboundMessage(
   const dotToEtherSwapAmount = feeBreakdown['dotToEtherSwapAmount'] ?? 0n;
   const etherFeeAmount = feeBreakdown['etherFeeAmount'] ?? 0n;
 
-  const topic =
-    messageId ??
-    '0x0000000000000000000000000000000000000000000000000000000000000000';
+  const topic = (messageId ??
+    '0x0000000000000000000000000000000000000000000000000000000000000000') as SizedHex<32>;
 
   const xcmInstructions = buildSnowbridgeOutboundXcm({
     tokenAddress,

@@ -1,9 +1,4 @@
-import {
-  Codec,
-  getTypedCodecs,
-  FixedSizeBinary,
-  AccountId,
-} from 'polkadot-api';
+import { AccountId, Binary, Codec, SizedHex } from 'polkadot-api';
 
 import { Struct, Enum } from 'scale-ts';
 
