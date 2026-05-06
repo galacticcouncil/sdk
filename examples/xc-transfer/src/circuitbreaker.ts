@@ -98,7 +98,8 @@ const rows = Array.from(states.values()).map((s) => {
         ? '–'
         : (netChange > 0n ? '+' : '') + fmt(netChange, s.decimals),
     limit: s.limit !== null ? fmt(s.limit, s.decimals) : '∞',
-    usage: s.limit !== null ? pct(used, s.limit) : '–',
+    usage:
+      s.limit === null ? '–' : s.locked ? '100.00%' : pct(used, s.limit),
     window,
   };
 });
