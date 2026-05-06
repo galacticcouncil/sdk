@@ -1,8 +1,14 @@
-import { PERMILL_DENOMINATOR, SYSTEM_ASSET_ID } from '../../consts';
-import { fmt } from '../../utils';
 import { PoolPair } from '../types';
 
+import {
+  HUB_ASSET_ID,
+  PERMILL_DENOMINATOR,
+  SYSTEM_ASSET_ID,
+} from '../../consts';
+import { fmt } from '../../utils';
+
 import { OmniMath } from './OmniMath';
+import { OmniPoolFees } from './OmniPool';
 import {
   TAssetFeeParams,
   TDynamicFees,
@@ -10,28 +16,62 @@ import {
   TEmaOracle,
   TProtocolFeeParams,
 } from './types';
-
 const { FeeUtils } = fmt;
 
-export type AssetFeeInput = {
-  pair: PoolPair;
-  block: number;
-  dynamicFee: TDynamicFees | undefined;
-  oracle: TEmaOracle | undefined;
-  params: TAssetFeeParams;
-};
-
-export type ProtocolFeeInput = {
-  pair: PoolPair;
-  block: number;
-  dynamicFee: TDynamicFees | undefined;
-  oracle: TEmaOracle | undefined;
-  params: TProtocolFeeParams;
-};
-
 export class OmniPoolFee {
-  static getAssetFee(input: AssetFeeInput): TDynamicFeeRange {
-    const { pair, block, dynamicFee, oracle, params } = input;
+  static compute(
+    pair: PoolPair,
+    block: number,
+    dynamicFee: TDynamicFees | undefined,
+    oracleAssetFee: TEmaOracle | undefined,
+    oracleProtocolFee: TEmaOracle | undefined,
+    assetFeeParams: TAssetFeeParams,
+    protocolFeeParams: TProtocolFeeParams,
+    maxSlipFee: number
+  ): OmniPoolFees {
+    const protocolAsset = pair.assetIn;
+
+    const [assetFeeMin, assetFee, assetFeeMax] = OmniPoolFee.getAssetFee(
+      pair,
+      block,
+      dynamicFee,
+      oracleAssetFee,
+      assetFeeParams
+    );
+
+    let protocolFeeMin = 0;
+    let protocolFee = 0;
+    let protocolFeeMax = 0;
+    if (protocolAsset !== HUB_ASSET_ID) {
+      [protocolFeeMin, protocolFee, protocolFeeMax] =
+        OmniPoolFee.getProtocolFee(
+          pair,
+          block,
+          dynamicFee,
+          oracleProtocolFee,
+          protocolFeeParams
+        );
+    }
+
+    const min = assetFeeMin + protocolFeeMin;
+    const max = assetFeeMax + protocolFeeMax;
+
+    return {
+      assetFee: FeeUtils.fromPermill(assetFee),
+      protocolFee: FeeUtils.fromPermill(protocolFee),
+      maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
+      min: FeeUtils.fromPermill(min),
+      max: FeeUtils.fromPermill(max),
+    };
+  }
+
+  static getAssetFee(
+    pair: PoolPair,
+    block: number,
+    dynamicFee: TDynamicFees | undefined,
+    oracle: TEmaOracle | undefined,
+    params: TAssetFeeParams
+  ): TDynamicFeeRange {
     const { assetOut, balanceOut } = pair;
     const { min_fee, max_fee, decay, amplification } = params;
 
@@ -74,8 +114,13 @@ export class OmniPoolFee {
     return [min_fee, Number(fee) * PERMILL_DENOMINATOR, max_fee];
   }
 
-  static getProtocolFee(input: ProtocolFeeInput): TDynamicFeeRange {
-    const { pair, block, dynamicFee, oracle, params } = input;
+  static getProtocolFee(
+    pair: PoolPair,
+    block: number,
+    dynamicFee: TDynamicFees | undefined,
+    oracle: TEmaOracle | undefined,
+    params: TProtocolFeeParams
+  ): TDynamicFeeRange {
     const { assetIn, balanceIn } = pair;
     const { min_fee, max_fee, decay, amplification } = params;
 

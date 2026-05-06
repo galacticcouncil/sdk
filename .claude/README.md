@@ -21,7 +21,7 @@ The root `CLAUDE.md` is the primary context file. It describes architecture, com
 └── skills/
     ├── add-xc-route.md            # Add a cross-chain route in xc-cfg
     ├── query-router.md            # Run router queries (spot price, routes, trades) inline via tsx
-    ├── solana-ata.md              # Derive a Solana Associated Token Account address
+    ├── derive-solana-ata.md       # Derive a Solana Associated Token Account address
     └── validate-change.md         # Build + test checklist for monorepo changes
 ```
 

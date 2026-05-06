@@ -22,7 +22,6 @@ import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { PoolClient } from '../PoolClient';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../types';
 
-import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../../consts';
 import { fmt, QueryBus } from '../../utils';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
@@ -35,6 +34,7 @@ import {
   TOmnipoolAsset,
   TSlipFee,
 } from './types';
+import { getEmaPair } from './utils';
 
 const { FeeUtils } = fmt;
 
@@ -94,12 +94,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return AccountId(HYDRATION_SS58_PREFIX).dec(nameHex);
   }
 
-  private getOraclePair(asset: number): TEmaPair {
-    return asset === SYSTEM_ASSET_ID
-      ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
-      : [HUB_ASSET_ID, asset];
-  }
-
   private async getPoolLimits(): Promise<PoolLimits> {
     const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
       this.api.constants.Omnipool.MaxInRatio(),
@@ -118,13 +112,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const staticApis = await this.api.getStaticApis();
     return staticApis.compat.query.Omnipool.Assets.isCompatible(
       CompatibilityLevel.BackwardsCompatible
-    );
-  }
-
-  async isSlipFeeSupported(): Promise<boolean> {
-    const staticApis = await this.apiNext.getStaticApis();
-    return staticApis.compat.query.Omnipool.SlipFee.isCompatible(
-      CompatibilityLevel.Partial
     );
   }
 
@@ -196,13 +183,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const feeAsset = pair.assetOut;
     const protocolAsset = pair.assetIn;
 
-    let maxSlipFee = 0;
-
-    const isSlipFeeSupported = await this.isSlipFeeSupported();
-    if (isSlipFeeSupported) {
-      const slipFee = await this.maxSlipFee.get();
-      maxSlipFee = slipFee ?? 0;
-    }
+    const slipFee = await this.maxSlipFee.get();
+    const maxSlipFee = slipFee ?? 0;
 
     const feeConfiguration = await this.dynamicFeesConfig.get(feeAsset);
     if (feeConfiguration?.type === 'Fixed') {
@@ -214,54 +196,34 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       };
     }
 
-    const oracleAfk = this.getOraclePair(feeAsset);
-    const oraclePfk = this.getOraclePair(protocolAsset);
-
-    const [dynamicFee, oracleAssetFee, oracleProtocolFee] = await Promise.all([
+    const [
+      dynamicFee,
+      oracleAssetFee,
+      oracleProtocolFee,
+      assetFeeParams,
+      protocolFeeParams,
+    ] = await Promise.all([
       this.dynamicFees.get(feeAsset),
-      this.emaOracles.get(oracleAfk),
-      this.emaOracles.get(oraclePfk),
+      this.emaOracles.get(getEmaPair(feeAsset)),
+      this.emaOracles.get(getEmaPair(protocolAsset)),
+      feeConfiguration
+        ? feeConfiguration.value.asset_fee_params
+        : this.api.constants.DynamicFees.AssetFeeParameters(),
+      feeConfiguration
+        ? feeConfiguration.value.protocol_fee_params
+        : this.api.constants.DynamicFees.ProtocolFeeParameters(),
     ]);
 
-    const assetParams =
-      feeConfiguration?.value.asset_fee_params ??
-      (await this.api.constants.DynamicFees.AssetFeeParameters());
-
-    const [assetFeeMin, assetFee, assetFeeMax] = OmniPoolFee.getAssetFee({
+    return OmniPoolFee.compute(
       pair,
-      block: this.block,
+      this.block,
       dynamicFee,
-      oracle: oracleAssetFee,
-      params: assetParams,
-    });
-
-    let protocolFeeMin = 0;
-    let protocolFee = 0;
-    let protocolFeeMax = 0;
-    if (protocolAsset !== HUB_ASSET_ID) {
-      const protocolParams =
-        feeConfiguration?.value.protocol_fee_params ??
-        (await this.api.constants.DynamicFees.ProtocolFeeParameters());
-
-      [protocolFeeMin, protocolFee, protocolFeeMax] = OmniPoolFee.getProtocolFee({
-        pair,
-        block: this.block,
-        dynamicFee,
-        oracle: oracleProtocolFee,
-        params: protocolParams,
-      });
-    }
-
-    const min = assetFeeMin + protocolFeeMin;
-    const max = assetFeeMax + protocolFeeMax;
-
-    return {
-      assetFee: FeeUtils.fromPermill(assetFee),
-      protocolFee: FeeUtils.fromPermill(protocolFee),
-      maxSlipFee: FeeUtils.fromPermill(maxSlipFee),
-      min: FeeUtils.fromPermill(min),
-      max: FeeUtils.fromPermill(max),
-    };
+      oracleAssetFee,
+      oracleProtocolFee,
+      assetFeeParams,
+      protocolFeeParams,
+      maxSlipFee
+    );
   }
 
   private subscribeEmaOracles(): Subscription {
@@ -269,7 +231,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
 
     const oraclePairs = pool.tokens
       .map((t) => t.id)
-      .map((id) => this.getOraclePair(id));
+      .map((id) => getEmaPair(id));
 
     const streams = oraclePairs.map((pair) =>
       this.api.query.EmaOracle.Oracles.watchValue(
