@@ -47,16 +47,26 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   }
 
   async loadPools(): Promise<PoolBase[]> {
-    const entries = await this.api.apis.AaveTradeExecutor.pools({ at: 'best' });
+    const entries = await this.api.apis.AaveTradeExecutor.pools({
+      at: this.at,
+    });
 
     const pools = entries.map(
       async ({ reserve, atoken, liqudity_in, liqudity_out }) => {
         const [reserveMeta, reserveLocation, aTokenMeta, aTokenLocation] =
           await Promise.all([
-            this.api.query.AssetRegistry.Assets.getValue(reserve),
-            this.api.query.AssetRegistry.AssetLocations.getValue(reserve),
-            this.api.query.AssetRegistry.Assets.getValue(atoken),
-            this.api.query.AssetRegistry.AssetLocations.getValue(atoken),
+            this.api.query.AssetRegistry.Assets.getValue(reserve, {
+              at: this.at,
+            }),
+            this.api.query.AssetRegistry.AssetLocations.getValue(reserve, {
+              at: this.at,
+            }),
+            this.api.query.AssetRegistry.Assets.getValue(atoken, {
+              at: this.at,
+            }),
+            this.api.query.AssetRegistry.AssetLocations.getValue(atoken, {
+              at: this.at,
+            }),
           ]);
 
         return {
@@ -92,7 +102,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
 
     const { liqudity_in, liqudity_out } =
       await this.api.apis.AaveTradeExecutor.pool(reserve.id, aToken.id, {
-        at: 'best',
+        at: this.at,
       });
 
     return pool.tokens.map((t) => {

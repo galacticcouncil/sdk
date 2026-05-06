@@ -4,7 +4,7 @@ import { log } from '@galacticcouncil/common';
 
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
-import { Papi } from '../api';
+import { BlockAt, Papi } from '../api';
 import { EvmClient } from '../evm';
 import { PoolNotFound } from '../errors';
 
@@ -59,15 +59,15 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private isReady: boolean = false;
   private isDestroyed = new Subject<boolean>();
 
-  constructor(client: PolkadotClient, evm: EvmClient) {
-    super(client);
+  constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
+    super(client, at);
     this.evm = evm;
-    this.aave = new AavePoolClient(client, evm);
-    this.omnipool = new OmniPoolClient(client, evm);
-    this.stableswap = new StableSwapClient(client, evm);
-    this.hsm = new HsmPoolClient(client, evm, this.stableswap);
-    this.xyk = new XykPoolClient(client, evm);
-    this.lbp = new LbpPoolClient(client, evm);
+    this.aave = new AavePoolClient(client, evm, at);
+    this.omnipool = new OmniPoolClient(client, evm, at);
+    this.stableswap = new StableSwapClient(client, evm, at);
+    this.hsm = new HsmPoolClient(client, evm, this.stableswap, at);
+    this.xyk = new XykPoolClient(client, evm, at);
+    this.lbp = new LbpPoolClient(client, evm, at);
     this.clients = [
       this.aave,
       this.omnipool,
@@ -78,7 +78,15 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     ];
   }
 
+  private get isHistorical(): boolean {
+    return this.at !== 'best' && this.at !== 'finalized';
+  }
+
   private subscribe<T extends PoolBase>(client: PoolClient<T>) {
+    if (this.isHistorical) {
+      return Subscription.EMPTY;
+    }
+
     return client
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
