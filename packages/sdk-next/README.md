@@ -82,7 +82,7 @@ It handles all necessary setup under the hood. Just plug in your PolkadotClient,
 
 Gracefully cleans up SDK resources. Always call before exiting to avoid memory leaks or stale subscriptions.
 
-## Historical queries (`at`)
+## Historical queries
 
 By default the SDK reads chain state at the `best` block. Pass an `at` option to `createSdkContext` to pin all queries (pool state, balances, fees, oracles) to a specific block — useful for historical pricing, replay, or auditing.
 
@@ -100,7 +100,7 @@ Accepted values:
 - `'finalized'` — reads at finalized block, **subscribes** to live updates.
 - `'0x…'` (block hash) — reads pinned to that block, **no subscriptions**. State is one-shot; the context will not refresh.
 
-## Offline routing (snapshots)
+## Offline routing
 
 `SnapshotPoolCtxProvider` is a stateless, offline alternative to `PoolContextProvider`. It implements the same `IPoolCtxProvider` interface, so any consumer (e.g. `TradeRouter`) works without changes. Use it for indexers, workers, replays, simulations, or tests — anywhere a live RPC subscription is undesirable.
 
