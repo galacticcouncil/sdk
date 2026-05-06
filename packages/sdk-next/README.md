@@ -13,6 +13,7 @@ Table of contents:
   - [client](#client)
   - [ctx](#ctx)
   - [tx](#tx)
+- [Historical queries (`at`)](#historical-queries-at)
 - [Offline routing (snapshots)](#offline-routing-snapshots)
 - [API Reference](#api-reference)
   - [AaveUtils](#aaveutils)
@@ -80,6 +81,24 @@ It handles all necessary setup under the hood. Just plug in your PolkadotClient,
 ### `destroy()`
 
 Gracefully cleans up SDK resources. Always call before exiting to avoid memory leaks or stale subscriptions.
+
+## Historical queries (`at`)
+
+By default the SDK reads chain state at the `best` block. Pass an `at` option to `createSdkContext` to pin all queries (pool state, balances, fees, oracles) to a specific block — useful for historical pricing, replay, or auditing.
+
+```ts
+import { createSdkContext } from '@galacticcouncil/sdk-next';
+
+const sdk = await createSdkContext(client, {
+  at: '0xabc…',   // block hash
+});
+```
+
+Accepted values:
+
+- `'best'` (default) — reads at best block, **subscribes** to live updates.
+- `'finalized'` — reads at finalized block, **subscribes** to live updates.
+- `'0x…'` (block hash) — reads pinned to that block, **no subscriptions**. State is one-shot; the context will not refresh.
 
 ## Offline routing (snapshots)
 
