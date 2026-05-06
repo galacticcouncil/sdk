@@ -13,6 +13,7 @@ Table of contents:
   - [client](#client)
   - [ctx](#ctx)
   - [tx](#tx)
+- [Offline routing (snapshots)](#offline-routing-snapshots)
 - [API Reference](#api-reference)
   - [AaveUtils](#aaveutils)
   - [TradeRouter](#traderouter)
@@ -70,6 +71,8 @@ It handles all necessary setup under the hood. Just plug in your PolkadotClient,
   - XYK pools
   - LBP pools
 
+- `pool: SnapshotPoolCtxProvider` — Stateless, offline pool context built from a static `SnapshotPoolCtx`. Drop-in replacement for `PoolContextProvider` when you do not have (or do not want) a live chain subscription. See [Offline routing (snapshots)](#offline-routing-snapshots).
+
 ### `tx`
 
 - `TxBuilderFactory` — Factory for generating submittable transaction using fluent APIs.
@@ -77,6 +80,32 @@ It handles all necessary setup under the hood. Just plug in your PolkadotClient,
 ### `destroy()`
 
 Gracefully cleans up SDK resources. Always call before exiting to avoid memory leaks or stale subscriptions.
+
+## Offline routing (snapshots)
+
+`SnapshotPoolCtxProvider` is a stateless, offline alternative to `PoolContextProvider`. It implements the same `IPoolCtxProvider` interface, so any consumer (e.g. `TradeRouter`) works without changes. Use it for indexers, workers, replays, simulations, or tests — anywhere a live RPC subscription is undesirable.
+
+You provide a `SnapshotPoolCtx` (pools + state + block) and pass the provider into the router:
+
+```ts
+import {
+  SnapshotPoolCtx,
+  SnapshotPoolCtxProvider,
+  TradeRouter,
+} from '@galacticcouncil/sdk-next';
+
+const snapshot: SnapshotPoolCtx = { /* pools, states, block */ };
+
+const ctx = new SnapshotPoolCtxProvider(snapshot);
+const router = new TradeRouter(ctx);
+
+const trade = await router.getBestSell(5, 10, 10_000_000_000n);
+console.log(trade.toHuman());
+```
+
+No `destroy()` needed — the provider holds no subscriptions.
+
+➡️ For the snapshot shape see [SnapshotPoolCtxProvider.ts](src/pool/SnapshotPoolCtxProvider.ts).
 
 ## API Reference
 
