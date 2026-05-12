@@ -13,7 +13,7 @@
   "scripts": {
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
     "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts",
-    "spec:across-snowbridge": "NODE_OPTIONS=--experimental-vm-modules jest --silent across-snowbridge.spec.ts"
+    "spec:across-snowbridge": "NODE_OPTIONS=--experimental-vm-modules jest --silent --forceExit across-snowbridge.spec.ts"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^1.2.4",
