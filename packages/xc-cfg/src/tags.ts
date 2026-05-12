@@ -3,5 +3,6 @@ export enum Tag {
   Wormhole = 'Wormhole',
   Relayer = 'Relayer',
   Snowbridge = 'Snowbridge',
+  Across_Snowbridge = 'Across_Snowbridge',
   Mrl = 'Mrl',
 }

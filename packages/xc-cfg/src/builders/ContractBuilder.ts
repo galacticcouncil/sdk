@@ -1,3 +1,4 @@
+import { Across } from './contracts/Across';
 import { Batch } from './contracts/Batch';
 import { Erc20 } from './contracts/Erc20';
 import { Basejump } from './contracts/Basejump';
@@ -7,6 +8,7 @@ import { Wormhole } from './contracts/Wormhole';
 
 export function ContractBuilder() {
   return {
+    Across,
     Batch,
     Erc20,
     Basejump,
