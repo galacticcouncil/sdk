@@ -1,4 +1,5 @@
 import {
+  addr,
   Abi,
   Across as AcrossPrimitive,
   ContractConfig,
@@ -7,100 +8,48 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 import { h160 } from '@galacticcouncil/common';
-import { AccountId } from 'polkadot-api';
+
+import {
+  XcmV5Junctions,
+  XcmV5Junction,
+  XcmVersionedLocation,
+  XcmVersionedXcm,
+} from '@galacticcouncil/descriptors';
+
+import { SizedHex } from 'polkadot-api';
+import { Blake2256 } from '@polkadot-api/substrate-bindings';
 import { toHex } from '@polkadot-api/utils';
+import { encodeAbiParameters } from 'viem';
+
+import { getXcmCodecs } from '../snowbridge/codec';
+import { buildSnowbridgeInboundXcm } from '../../extrinsics/xcm/builder/Snowbridge';
+import { ETHEREUM_CHAIN_ID } from '../../extrinsics/xcm/builder/const';
 
 import { parseAssetId } from '../../utils';
 
+const { Ss58Addr } = addr;
 const { H160, isEvmAddress } = h160;
 
-const ETHEREUM_CHAIN_ID = 1n;
+const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
 const FILL_DEADLINE_BUFFER = 600; // 10 minutes
 const ZERO_TOPIC =
   '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
 
 /**
- * Encode beneficiary as bytes for the SendParams.claimer field, which
- * Snowfork's L2 adaptor delivers to AssetHub as the XCM beneficiary location.
+ * Across V3 fast-fill on the source L2 → MulticallHandler on Ethereum →
+ * Snowbridge V2 `v2_sendMessage` to AssetHub → XCM `InitiateTransfer` to the
+ * destination parachain. End-to-end via Snowfork's deployed `SnowbridgeL2Adaptor`.
  *
- * H160 EVM addresses arrive as AccountKey20; raw SS58/AccountId32 arrives as
- * AccountId32. See Snowbridge `accountToLocation` and erc20ToParachain.ts.
+ * The XCM bytes and SendParams encoding match the Snowbridge V2 builder
+ * (`../snowbridge/index.ts`) because the same `v2_sendMessage` call runs
+ * inside the L2 adaptor's multicall on Ethereum.
  */
-function toClaimerBytes(address: string): `0x${string}` {
-  if (isEvmAddress(address)) {
-    // AccountKey20: prefix 0x00 (no parents/network) + 0x0101 (X1 interior)
-    // + 0x03 (AccountKey20 variant) + 20-byte address + 0x00 (network=None)
-    // Layout follows Snowfork's L2 adaptor encoding for EVM-style accounts.
-    return ('0x000103' + address.slice(2).toLowerCase() + '00') as `0x${string}`;
-  }
-  const ss58Bytes = AccountId().enc(address);
-  // AccountId32: 0x00 (parents=0) + 0x0101 (X1) + 0x00 (AccountId32 variant)
-  // + 32-byte id + 0x00 (network=None)
-  return ('0x000100' +
-    toHex(ss58Bytes).slice(2) +
-    '00') as `0x${string}`;
-}
-
-/**
- * STUB: build the Hydration-bound XCM bytes passed in SendParams.xcm.
- *
- * The full XCM construction lives in Snowfork's
- * `@snowbridge/api/dist/xcmbuilders/toPolkadot/erc20ToParachain.sendMessageXCM`
- * but it requires a polkadot.js Registry (older `@polkadot/types`), which
- * conflicts with xc-core's `polkadot-api` stack.
- *
- * Follow-up PR will either:
- *   (a) port the InitiateTransfer construction to polkadot-api + descriptors
- *       (mirrors `xc-core/src/utils/mrl.createPayload`), or
- *   (b) bring in a small @polkadot/types bridge.
- *
- * Until that lands, this returns a placeholder so consumers can wire builders
- * and routes; calldata produced will NOT execute end-to-end yet.
- */
-function buildHydrationBoundXcm(_params: {
-  destination: Parachain;
-  recipient: string;
-  asset: string;
-  amount: bigint;
-  remoteEtherFee: bigint;
-}): `0x${string}` {
-  // TODO(across-snowbridge): replace with sendMessageXCM(...).toHex()
-  return '0x' as `0x${string}`;
-}
-
-/**
- * STUB: build the SendParams.assets list (encoded XCM assets that travel
- * alongside the message — typically the Ether-for-fees and the bridged ERC20).
- */
-function buildSendAssets(_params: {
-  asset: string;
-  amount: bigint;
-  ether: bigint;
-}): `0x${string}`[] {
-  // TODO(across-snowbridge): SCALE-encode V5 Asset entries.
-  return [];
-}
-
-/**
- * STUB: build SwapParams.callData — the Uniswap V3 router callData that
- * swaps a portion of the output token to WETH so the multicall can fund the
- * Snowbridge `v2_sendMessage` ETH fee.
- */
-function buildUniswapSwapCalldata(_params: {
-  router: string;
-  inputToken: string;
-  outputAmount: bigint;
-}): `0x${string}` {
-  // TODO(across-snowbridge): produce real Uniswap V3 swap calldata.
-  return '0x' as `0x${string}`;
-}
-
 const sendTokenAndCall = (): ContractConfigBuilder => ({
   build: async (params) => {
-    const { address, amount, asset, source, destination } = params;
+    const { address, amount, asset, sender, source, destination } = params;
 
     const src = source.chain as EvmChain;
-    const dst = destination.chain as Parachain;
+    const rcv = destination.chain as Parachain;
     const across = AcrossPrimitive.fromChain(src);
 
     const l2Adaptor = across.getSnowbridgeL2Adaptor();
@@ -112,40 +61,76 @@ const sendTokenAndCall = (): ContractConfigBuilder => ({
 
     const inputTokenId = src.getAssetId(asset);
     const inputToken = parseAssetId(inputTokenId) as `0x${string}`;
-    const outputToken = inputToken; // same canonical token on the Ethereum hop
+    const isNativeTransfer = asset.originSymbol === 'ETH';
+    // On the Ethereum leg the canonical token is the same — Across fills the
+    // output token there before the multicall hands it to the Gateway.
+    const outputToken = inputToken;
 
-    // Fee breakdown is populated by the FeeAmountBuilder (Across() chain).
+    // Hydration users may pass either a substrate SS58 address or an EVM
+    // H160. Convert H160 to its SS58 mapping first so the pubkey extract
+    // produces the AccountId32 the destination chain holds tokens under.
+    const ss58 = isEvmAddress(address) ? H160.toAccount(address) : address;
+    const beneficiaryHex = Ss58Addr.getPubKey(ss58) as string;
+
+    // Topic ties the originating deposit to the resulting XCM journey.
+    const entropy = new TextEncoder().encode(
+      `${rcv.parachainId}${sender}${inputToken}${beneficiaryHex}${amount}${Date.now()}`
+    );
+    const topic = toHex(Blake2256(entropy)) as SizedHex<32>;
+
+    // Fee breakdown is populated by the FeeAmountBuilder for this route.
     const acrossFee = destination.feeBreakdown['acrossRelayerFee'] ?? 0n;
-    const executionFee = destination.feeBreakdown['snowbridgeExecutionFee'] ?? 0n;
-    const relayerFee = destination.feeBreakdown['snowbridgeRelayerFee'] ?? 0n;
-    const remoteEtherFee =
-      destination.feeBreakdown['hydrationExecutionFee'] ?? 0n;
+    const executionFee = destination.feeBreakdown['executionFee'] ?? 0n;
+    const relayerFee = destination.feeBreakdown['relayerFee'] ?? 0n;
+    const remoteEtherFee = destination.feeBreakdown['remoteEtherFee'] ?? 0n;
+    const remoteDotFee = destination.feeBreakdown['remoteDotFee'];
     const swapInputAmount = destination.feeBreakdown['swapInputAmount'] ?? 0n;
 
-    const xcm = buildHydrationBoundXcm({
-      destination: dst,
-      recipient: address,
-      asset: inputToken,
-      amount,
-      remoteEtherFee,
+    const xcmInstructions = buildSnowbridgeInboundXcm({
+      ethChainId: ETHEREUM_CHAIN_ID,
+      destinationParaId: rcv.parachainId,
+      tokenAddress: isNativeTransfer ? ETHER_TOKEN_ADDRESS : inputToken,
+      beneficiaryHex,
+      tokenAmount: amount,
+      remoteEtherFeeAmount: remoteEtherFee,
+      remoteDotFeeAmount: remoteDotFee,
+      topic,
     });
 
-    const assets = buildSendAssets({
-      asset: inputToken,
-      amount,
-      ether: remoteEtherFee,
-    });
+    const codecs = await getXcmCodecs();
+    const xcm = toHex(
+      codecs.message.enc(XcmVersionedXcm.V5(xcmInstructions))
+    ) as `0x${string}`;
 
-    const claimer = toClaimerBytes(address);
+    const assets: `0x${string}`[] = [];
+    if (!isNativeTransfer) {
+      assets.push(
+        encodeAbiParameters(
+          [{ type: 'uint8' }, { type: 'address' }, { type: 'uint128' }],
+          [0, inputToken, amount]
+        )
+      );
+    }
 
-    // Uniswap router on Base/Arb/OP. For now hardcoded to Uniswap V3 SwapRouter
-    // until a per-chain `swapRouter` field is added to chain configs.
+    const claimerVersioned = codecs.location.enc(
+      XcmVersionedLocation.V5({
+        parents: 0,
+        interior: XcmV5Junctions.X1(
+          XcmV5Junction.AccountId32({
+            id: beneficiaryHex as SizedHex<32>,
+            network: undefined,
+          })
+        ),
+      })
+    );
+    const claimer = toHex(claimerVersioned.slice(1)) as `0x${string}`;
+
+    // SwapParams.callData: Uniswap V3 router calldata that converts a portion
+    // of the output token to WETH for the Snowbridge v2 fee. Stubbed until
+    // we wire a Uniswap quoter via destination.feeBreakdown.
+    // TODO(across-snowbridge): produce real Uniswap V3 swap calldata.
     const uniswapRouter = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
-    const swapCalldata = buildUniswapSwapCalldata({
-      router: uniswapRouter,
-      inputToken,
-      outputAmount: executionFee + relayerFee,
-    });
+    const swapCalldata = '0x' as `0x${string}`;
 
     const recipientAddr = isEvmAddress(address)
       ? (address as `0x${string}`)
@@ -160,7 +145,7 @@ const sendTokenAndCall = (): ContractConfigBuilder => ({
           outputToken,
           inputAmount: amount,
           outputAmount: amount - acrossFee,
-          destinationChainId: ETHEREUM_CHAIN_ID,
+          destinationChainId: BigInt(ETHEREUM_CHAIN_ID),
           fillDeadlineBuffer: FILL_DEADLINE_BUFFER,
         },
         {
