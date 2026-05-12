@@ -1,7 +1,7 @@
 import { ContractConfigBuilderParams } from '@galacticcouncil/xc-core';
 import { h160 } from '@galacticcouncil/common';
 
-import { usdc } from '../../../assets';
+import { eth, usdc } from '../../../assets';
 import { base } from '../../../chains/evm/base';
 import { hydration } from '../../../chains/polkadot/hydration';
 
@@ -43,7 +43,7 @@ describe('Across.Snowbridge contract builder', () => {
       expect(config.args).toHaveLength(5);
     });
 
-    it('encodes DepositParams with destinationChainId=Ethereum and same input/output token', async () => {
+    it('maps outputToken to the L1 equivalent of the L2 input token', async () => {
       const ctx = buildCtx(ALICE_SS58);
       const config = await Across().Snowbridge().sendTokenAndCall().build(ctx);
       const deposit = config.args[0] as {
@@ -57,18 +57,54 @@ describe('Across.Snowbridge contract builder', () => {
 
       expect(deposit.destinationChainId).toBe(1n);
       expect(deposit.fillDeadlineBuffer).toBe(600);
-      expect(deposit.inputToken.toLowerCase()).toBe(deposit.outputToken.toLowerCase());
       expect(deposit.inputAmount).toBe(1000000n);
+      // Base USDC → Ethereum USDC via Across swap registry
+      expect(deposit.inputToken.toLowerCase()).toBe(
+        '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'
+      );
+      expect(deposit.outputToken.toLowerCase()).toBe(
+        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+      );
     });
 
-    it('subtracts acrossRelayerFee from outputAmount', async () => {
+    it('subtracts acrossRelayerFee and swapInputAmount from outputAmount', async () => {
       const ctx = buildCtx(
         ALICE_SS58,
-        new Map([['acrossRelayerFee', 5000n]])
+        new Map([
+          ['acrossRelayerFee', 5000n],
+          ['swapInputAmount', 2000n],
+        ])
       );
       const config = await Across().Snowbridge().sendTokenAndCall().build(ctx);
       const deposit = config.args[0] as { outputAmount: bigint };
-      expect(deposit.outputAmount).toBe(995000n);
+      // amount(1_000_000) - acrossFee(5_000) - swapInput(2_000) = 993_000
+      expect(deposit.outputAmount).toBe(993000n);
+    });
+
+    it('produces non-empty Uniswap exactOutputSingle calldata in SwapParams', async () => {
+      const ctx = buildCtx(
+        ALICE_SS58,
+        new Map([
+          ['executionFee', 1234n],
+          ['relayerFee', 5678n],
+          ['swapInputAmount', 10000n],
+        ])
+      );
+      const config = await Across().Snowbridge().sendTokenAndCall().build(ctx);
+      const swap = config.args[1] as {
+        inputAmount: bigint;
+        router: string;
+        callData: string;
+      };
+      expect(swap.inputAmount).toBe(10000n);
+      // Uniswap V3 SwapRouter on Ethereum mainnet
+      expect(swap.router.toLowerCase()).toBe(
+        '0xe592427a0aece92de3edee1f18e0157c05861564'
+      );
+      // exactOutputSingle selector + a tuple of 8 32-byte slots
+      expect(swap.callData.length).toBe(2 + 8 + 8 * 64);
+      // Function selector for SwapRouter.exactOutputSingle
+      expect(swap.callData.slice(0, 10)).toBe('0xdb3e2198');
     });
 
     it('reads Snowbridge fees from feeBreakdown into SendParams', async () => {
@@ -113,6 +149,57 @@ describe('Across.Snowbridge contract builder', () => {
       await expect(
         Across().Snowbridge().sendTokenAndCall().build(noAcrossCtx)
       ).rejects.toThrow();
+    });
+  });
+
+  describe('sendEtherAndCall (WETH/ETH path)', () => {
+    const buildEthCtx = (
+      address: string,
+      feeBreakdown?: Iterable<[string, bigint]>
+    ): ContractConfigBuilderParams => {
+      const breakdown: { [k: string]: bigint } = {};
+      if (feeBreakdown) for (const [k, v] of feeBreakdown) breakdown[k] = v;
+      return {
+        address,
+        amount: 10n ** 17n, // 0.1 ETH
+        asset: eth,
+        sender: EVM_USER,
+        source: { chain: base },
+        destination: { chain: hydration, feeBreakdown: breakdown },
+      } as unknown as ContractConfigBuilderParams;
+    };
+
+    it('targets sendEtherAndCall with outputToken = WETH on Ethereum', async () => {
+      const ctx = buildEthCtx(ALICE_SS58);
+      const config = await Across().Snowbridge().sendEtherAndCall().build(ctx);
+
+      expect(config.func).toBe('sendEtherAndCall');
+      expect(config.module).toBe('AcrossSnowbridge');
+      const deposit = config.args[0] as { outputToken: string };
+      expect(deposit.outputToken.toLowerCase()).toBe(
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+      );
+    });
+
+    it('omits SwapParams entirely (4 args, not 5)', async () => {
+      const ctx = buildEthCtx(ALICE_SS58);
+      const config = await Across().Snowbridge().sendEtherAndCall().build(ctx);
+      expect(config.args).toHaveLength(4);
+    });
+
+    it('subtracts Snowbridge fees from outputAmount instead of routing them through SwapParams', async () => {
+      const ctx = buildEthCtx(
+        ALICE_SS58,
+        new Map([
+          ['executionFee', 1000n],
+          ['relayerFee', 2000n],
+          ['acrossRelayerFee', 500n],
+        ])
+      );
+      const config = await Across().Snowbridge().sendEtherAndCall().build(ctx);
+      const deposit = config.args[0] as { outputAmount: bigint };
+      // 0.1 ETH - 500 - 1000 - 2000
+      expect(deposit.outputAmount).toBe(10n ** 17n - 3500n);
     });
   });
 

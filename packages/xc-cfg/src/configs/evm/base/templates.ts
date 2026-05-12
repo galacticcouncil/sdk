@@ -114,3 +114,43 @@ export function toHydrationViaAcrossSnowbridgeTemplate(
     tags: [Tag.Across_Snowbridge],
   });
 }
+
+/**
+ * Across V3 ETH/WETH path: identical to the ERC20 template but uses the
+ * L2 adaptor's `sendEtherAndCall` entrypoint — no Uniswap swap leg needed
+ * because the multicall on Ethereum unwraps WETH directly to fund the
+ * Snowbridge inbound fee.
+ */
+export function toHydrationViaAcrossSnowbridgeEtherTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: BalanceBuilder().evm().native(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().native(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateInboundFee({ hub: assetHub }),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder()
+      .Across()
+      .Snowbridge()
+      .sendEtherAndCall(),
+    tags: [Tag.Across_Snowbridge],
+  });
+}

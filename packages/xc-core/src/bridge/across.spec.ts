@@ -35,6 +35,23 @@ describe('Across bridge primitive', () => {
       expect(across.getMulticallHandler()).toBe('0xmulti');
       expect(across.getSnowbridgeL2Adaptor()).toBe('0xl2');
       expect(across.getSnowbridgeL1Adaptor()).toBeUndefined();
+      expect(across.getSwapRouter()).toBeUndefined();
+      expect(across.getSwapQuoter()).toBeUndefined();
+      expect(across.getL1FeeToken()).toBeUndefined();
+    });
+
+    it('exposes optional Ethereum-side swap addresses when configured', () => {
+      const across = new Across({
+        spokePool: '0xspoke',
+        multicallHandler: '0xmulti',
+        snowbridgeL1Adaptor: '0xl1',
+        swapRouter: '0xrouter',
+        swapQuoter: '0xquoter',
+        l1FeeToken: '0xweth',
+      });
+      expect(across.getSwapRouter()).toBe('0xrouter');
+      expect(across.getSwapQuoter()).toBe('0xquoter');
+      expect(across.getL1FeeToken()).toBe('0xweth');
     });
 
     it('leaves optional adaptor fields undefined when unset', () => {

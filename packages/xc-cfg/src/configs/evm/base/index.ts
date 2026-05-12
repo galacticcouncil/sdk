@@ -1,8 +1,9 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { eurc, eurc_mwh, usdc, usdc_eth } from '../../../assets';
+import { eth, eurc, eurc_mwh, usdc, usdc_eth } from '../../../assets';
 import { base } from '../../../chains';
 import {
+  toHydrationViaAcrossSnowbridgeEtherTemplate,
   toHydrationViaAcrossSnowbridgeTemplate,
   toHydrationViaBasejumpTemplate,
   toHydrationViaWormholeTemplate,
@@ -18,6 +19,7 @@ const toHydrationViaBasejump: AssetRoute[] = [
 
 const toHydrationViaAcrossSnowbridge: AssetRoute[] = [
   toHydrationViaAcrossSnowbridgeTemplate(usdc, usdc_eth),
+  toHydrationViaAcrossSnowbridgeEtherTemplate(eth, eth),
 ];
 
 export const baseConfig = new ChainRoutes({
