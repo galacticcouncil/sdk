@@ -9,6 +9,8 @@ import {
 } from './Chain';
 
 import {
+  Across,
+  AcrossDef,
   Basejump,
   BasejumpDef,
   Snowbridge,
@@ -22,6 +24,7 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
+  across?: AcrossDef;
   basejump?: BasejumpDef;
   snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
@@ -31,6 +34,7 @@ export class EvmChain extends Chain<ChainAssetData> {
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
+  readonly across?: Across;
   readonly basejump?: Basejump;
   readonly snowbridge?: Snowbridge;
   readonly wormhole?: Wormhole;
@@ -39,6 +43,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     evmChain,
     id,
     rpcs,
+    across,
     basejump,
     snowbridge,
     wormhole,
@@ -48,6 +53,7 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.evmChain = evmChain;
     this.id = id;
     this.rpcs = rpcs;
+    this.across = across && new Across(across);
     this.basejump = basejump && new Basejump(basejump);
     this.snowbridge = snowbridge && new Snowbridge(snowbridge);
     this.wormhole = wormhole && new Wormhole(wormhole);
