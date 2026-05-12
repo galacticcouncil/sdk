@@ -28,6 +28,7 @@ import { ETHEREUM_CHAIN_ID } from '../../extrinsics/xcm/builder/const';
 import { parseAssetId } from '../../utils';
 import {
   buildAcrossSnowbridgeSwapCallData,
+  fetchAcrossRelayerFee,
   getSwapEntry,
 } from './swap';
 
@@ -58,7 +59,6 @@ type CommonBuildInputs = {
   claimer: `0x${string}`;
   executionFee: bigint;
   relayerFee: bigint;
-  acrossFee: bigint;
   amount: bigint;
 };
 
@@ -97,7 +97,6 @@ async function buildCommonInputs(params: {
   );
   const topic = toHex(Blake2256(entropy)) as SizedHex<32>;
 
-  const acrossFee = destination.feeBreakdown['acrossRelayerFee'] ?? 0n;
   const executionFee = destination.feeBreakdown['executionFee'] ?? 0n;
   const relayerFee = destination.feeBreakdown['relayerFee'] ?? 0n;
   const remoteEtherFee = destination.feeBreakdown['remoteEtherFee'] ?? 0n;
@@ -159,9 +158,32 @@ async function buildCommonInputs(params: {
     claimer,
     executionFee,
     relayerFee,
-    acrossFee,
     amount,
   };
+}
+
+/**
+ * Resolve the Across relayer fee — prefer the value pre-computed and stashed
+ * in `feeBreakdown.acrossRelayerFee` (test path, or future async fee builder),
+ * otherwise hit Across `/suggested-fees` directly with the actual amount.
+ */
+async function resolveAcrossFee(args: {
+  feeBreakdown: { [k: string]: bigint };
+  inputToken: string;
+  outputToken: string;
+  originChainId: number;
+  destinationChainId: number;
+  amount: bigint;
+}): Promise<bigint> {
+  const override = args.feeBreakdown['acrossRelayerFee'];
+  if (override !== undefined) return override;
+  return await fetchAcrossRelayerFee({
+    inputToken: args.inputToken,
+    outputToken: args.outputToken,
+    originChainId: args.originChainId,
+    destinationChainId: args.destinationChainId,
+    amount: args.amount,
+  });
 }
 
 /**
@@ -190,6 +212,18 @@ const sendTokenAndCall = (): ContractConfigBuilder => ({
     const swapInputAmount =
       destination.feeBreakdown['swapInputAmount'] ?? 0n;
 
+    // Across relayer fee is amount-dependent — fetched here with the actual
+    // transfer amount. Honored override in feeBreakdown for tests / pre-quoting.
+    // Across must carry the bridged amount + swap input across to Ethereum.
+    const acrossFee = await resolveAcrossFee({
+      feeBreakdown: destination.feeBreakdown,
+      inputToken,
+      outputToken: swapEntry.swapTokenAddress,
+      originChainId: src.id,
+      destinationChainId: ETHEREUM_CHAIN_ID,
+      amount: amount + swapInputAmount,
+    });
+
     const inputs = await buildCommonInputs({
       address,
       amount,
@@ -207,7 +241,7 @@ const sendTokenAndCall = (): ContractConfigBuilder => ({
     // amountOut for the swap = ETH needed for Snowbridge inbound fee.
     // outputAmount of Across deposit = amount - across fee - swap input
     // (the swap consumes part of the bridged token on Ethereum).
-    const outputAmount = amount - inputs.acrossFee - swapInputAmount;
+    const outputAmount = amount - acrossFee - swapInputAmount;
 
     const swapCallData = buildAcrossSnowbridgeSwapCallData({
       router: ETHEREUM_SWAP_ROUTER as `0x${string}`,
@@ -285,11 +319,21 @@ const sendEtherAndCall = (): ContractConfigBuilder => ({
       isNativeTransfer: true,
     });
 
+    // For the ETH path, the canonical L1 token is WETH on Ethereum.
+    const acrossFee = await resolveAcrossFee({
+      feeBreakdown: destination.feeBreakdown,
+      inputToken,
+      outputToken: ETHEREUM_WETH,
+      originChainId: src.id,
+      destinationChainId: ETHEREUM_CHAIN_ID,
+      amount,
+    });
+
     // For the ETH path, the Across deposit carries the full amount, the
     // adaptor unwraps WETH locally on Ethereum, and the user receives ETH
     // minus the Snowbridge fees on Hydration.
     const totalOutputAmount =
-      amount - inputs.acrossFee - inputs.executionFee - inputs.relayerFee;
+      amount - acrossFee - inputs.executionFee - inputs.relayerFee;
 
     return new ContractConfig({
       abi: Abi.SnowbridgeL2Adaptor,

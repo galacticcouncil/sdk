@@ -2,7 +2,7 @@ import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
 import { BalanceBuilder, ContractBuilder, FeeAmountBuilder } from '../../../builders';
-import { assetHub, hydration, moonbeam } from '../../../chains';
+import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 export function toHydrationViaWormholeTemplate(
@@ -102,8 +102,8 @@ export function toHydrationViaAcrossSnowbridgeTemplate(
       asset: assetOut,
       fee: {
         amount: FeeAmountBuilder()
-          .Snowbridge()
-          .calculateInboundFee({ hub: assetHub }),
+          .AcrossSnowbridge()
+          .calculateFee({ hub: assetHub, ethereum }),
         asset: eth,
       },
     },
@@ -142,8 +142,8 @@ export function toHydrationViaAcrossSnowbridgeEtherTemplate(
       asset: assetOut,
       fee: {
         amount: FeeAmountBuilder()
-          .Snowbridge()
-          .calculateInboundFee({ hub: assetHub }),
+          .AcrossSnowbridge()
+          .calculateFee({ hub: assetHub, ethereum }),
         asset: eth,
       },
     },

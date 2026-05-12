@@ -60,6 +60,49 @@ export type SwapCallDataParams = {
   deadlineSeconds?: number; // Defaults to 10 minutes from now
 };
 
+const ACROSS_API_BASE = 'https://app.across.to/api';
+
+export type AcrossSuggestedFeeParams = {
+  inputToken: string; // L2 source token
+  outputToken: string; // L1 token (post-Across-fill on Ethereum)
+  originChainId: number;
+  destinationChainId: number;
+  amount: bigint;
+  apiBaseUrl?: string;
+};
+
+/**
+ * Queries Across `/suggested-fees` for the relayer fee at a given input
+ * amount. Across relayer fee scales with amount; this is called at contract
+ * build time (where amount is known), not at fee-quote time.
+ *
+ * Returns 0n on any failure so the deposit can still be built; the relayer
+ * may then simply not fill at zero fee — slow fill recovers the user funds.
+ */
+export async function fetchAcrossRelayerFee(
+  params: AcrossSuggestedFeeParams
+): Promise<bigint> {
+  const base = params.apiBaseUrl ?? ACROSS_API_BASE;
+  const url =
+    `${base}/suggested-fees` +
+    `?inputToken=${params.inputToken}` +
+    `&outputToken=${params.outputToken}` +
+    `&originChainId=${params.originChainId}` +
+    `&destinationChainId=${params.destinationChainId}` +
+    `&amount=${params.amount}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return 0n;
+    const data = (await res.json()) as {
+      totalRelayFee?: { total?: string };
+    };
+    const total = data.totalRelayFee?.total;
+    return total ? BigInt(total) : 0n;
+  } catch {
+    return 0n;
+  }
+}
+
 export function buildAcrossSnowbridgeSwapCallData(
   params: SwapCallDataParams
 ): `0x${string}` {
