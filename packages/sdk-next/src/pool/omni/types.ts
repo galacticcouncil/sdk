@@ -22,3 +22,11 @@ export type TEmaOracle = HydrationQueries['EmaOracle']['Oracles']['Value'];
 export type TEmaPair = FixedSizeArray<2, number>;
 
 export type TOmnipoolAsset = HydrationQueries['Omnipool']['Assets']['Value'];
+
+export interface OmniSnapshot {
+  dynamicFees: { asset: number; fee: TDynamicFees }[];
+  emaOracles: { pair: [number, number]; oracle: TEmaOracle }[];
+  assetFeeParams: TAssetFeeParams;
+  protocolFeeParams: TProtocolFeeParams;
+  maxSlipFee: number;
+}
