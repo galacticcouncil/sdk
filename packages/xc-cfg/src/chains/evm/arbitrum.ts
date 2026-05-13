@@ -25,7 +25,11 @@ export const arbitrum = new EvmChain({
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
   explorer: 'https://arbiscan.io/',
-  rpcs: ['https://arb1.arbitrum.io/rpc'],
+  rpcs: [
+    'https://arbitrum-one.publicnode.com',
+    'https://arb1.arbitrum.io/rpc',
+    'https://endpoints.omniatech.io/v1/arbitrum/one/public',
+  ],
   across: {
     spokePool: '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A',
     multicallHandler: '0x924a9f036260DdD5808007E1AA95f08eD08aA569',

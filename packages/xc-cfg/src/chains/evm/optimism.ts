@@ -25,7 +25,11 @@ export const optimism = new EvmChain({
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
   explorer: 'https://optimistic.etherscan.io/',
-  rpcs: ['https://mainnet.optimism.io'],
+  rpcs: [
+    'https://optimism.publicnode.com',
+    'https://mainnet.optimism.io',
+    'https://endpoints.omniatech.io/v1/op/mainnet/public',
+  ],
   across: {
     spokePool: '0x6f26Bf09B1C792e3228e5467807a900A503c0281',
     multicallHandler: '0x924a9f036260DdD5808007E1AA95f08eD08aA569',
