@@ -1,0 +1,24 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf public/dist build-meta.json",
+    "prebuild": "npm run clean",
+    "build": "node ./esbuild.dist.mjs",
+    "predev": "npm run clean",
+    "dev": "node ./esbuild.dev.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-wasm": "^1.0.0"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^1.0.1",
+    "@galacticcouncil/xc": "^1.0.0",
+    "@galacticcouncil/xc-sdk": "^1.0.0",
+    "@galacticcouncil/xc-core": "^1.0.0",
+    "@galacticcouncil/xc-cfg": "^1.1.0",
+    "@galacticcouncil/common": "^1.0.0"
+  }
+}
