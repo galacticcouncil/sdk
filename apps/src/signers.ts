@@ -56,15 +56,15 @@ export async function signSolanaBundle(
   if (!wallet) throw new Error('Phantom (Solana) wallet not detected.');
 
   return new Promise<void>((resolve, reject) => {
-    let settled = false;
     new SolanaSigner(chain, wallet).signAndSendAll(calls, {
       onTransactionSend: (bundleId) => events.onSubmit?.(bundleId),
       onBundleStatus: (status) => {
-        events.onStatus?.(JSON.stringify(status));
-        if (!settled && (status as any)?.confirmed) {
-          settled = true;
-          resolve();
-        }
+        const first = (status as any)?.[0];
+        const summary = first?.status
+          ? `${first.status}${first.landed_slot ? ` @ slot ${first.landed_slot}` : ''}`
+          : JSON.stringify(status);
+        events.onStatus?.(summary);
+        resolve();
       },
       onError: (error) => {
         events.onError?.(error);
