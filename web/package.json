@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf public/dist build-meta.json",
-    "prebuild": "npm run clean",
-    "build": "node ./esbuild.dist.mjs",
+    "predist": "npm run clean",
+    "dist": "node ./esbuild.dist.mjs",
     "predev": "npm run clean",
     "dev": "node ./esbuild.dev.mjs"
   },

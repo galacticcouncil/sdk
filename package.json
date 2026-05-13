@@ -12,7 +12,8 @@
   "workspaces": [
     "packages/*",
     "examples/*",
-    "integration-tests/*"
+    "integration-tests/*",
+    "web"
   ],
   "scripts": {
     "postinstall": "patch-package",
