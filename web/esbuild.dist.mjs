@@ -4,7 +4,7 @@ import { wasmLoader } from 'esbuild-plugin-wasm';
 import { writeFileSync } from 'fs';
 
 const options = {
-  entryPoints: ['src/redeem/app.ts'],
+  entryPoints: [{ in: 'src/redeem/app.ts', out: 'redeem' }],
   bundle: true,
   format: 'esm',
   platform: 'browser',
