@@ -52,11 +52,11 @@ Emits: `IntentLimitOrder`.
 
 Submits a scheduled intent. Dispatches by `TradeOrder.type`:
 
-| `TradeOrderType` | Tx name              | Notes                                  |
-|------------------|----------------------|----------------------------------------|
-| `Dca`            | `IntentDcaSchedule`  | `amount_out = 1n` (no min)             |
-| `TwapSell`       | `IntentTwapSchedule` | `amount_out` derived from slippage     |
-| `TwapBuy`        | `IntentTwapSchedule` | `amount_out` derived from slippage     |
+| `TradeOrderType` | Tx name                  | Notes                                  |
+|------------------|--------------------------|----------------------------------------|
+| `Dca`            | `IntentDcaSchedule`      | `amount_out = 1n` (no min)             |
+| `TwapSell`       | `IntentDcaSchedule.twap` | `amount_out` derived from slippage     |
+| `TwapBuy`        | `IntentDcaSchedule.twap` | `amount_out` derived from slippage     |
 
 ```ts
 const tx = await factory
@@ -67,8 +67,6 @@ const tx = await factory
 ```
 
 Slippage is encoded on-chain as `slippagePct * 10_000` (basis-points × 100).
-
-> Note: `IntentOrderTxBuilder.buildTwapTx` does **not** wrap with extra-gas dispatch — only DCA and market/limit variants do.
 
 ## Tx shape
 

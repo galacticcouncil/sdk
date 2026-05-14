@@ -114,6 +114,11 @@ export class IntentOrderTxBuilder extends TxBuilder {
       },
     });
 
-    return this.wrapTx('IntentTwapSchedule', tx);
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
+
+    return this.wrapTx('IntentDcaSchedule.twap', tx);
   }
 }
