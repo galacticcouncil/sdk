@@ -11,6 +11,9 @@
     "hydrationNext": {
       "metadata": ".papi/metadata/hydrationNext.scale"
     },
+    "hydrationIce": {
+      "metadata": ".papi/metadata/hydrationIce.scale"
+    },
     "hub": {
       "chain": "polkadot_asset_hub",
       "metadata": ".papi/metadata/hub.scale",
