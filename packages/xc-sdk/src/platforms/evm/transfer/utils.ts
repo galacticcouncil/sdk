@@ -7,7 +7,7 @@ export function isSnowbridgeV2(config: ContractConfig): boolean {
 
 /**
  * Extract the ERC20 token address from Snowbridge V2 assets arg.
-s */
+ */
 export function getSnowbridgeV2TokenAddress(
   config: ContractConfig
 ): string | undefined {

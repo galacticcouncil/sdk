@@ -45,8 +45,7 @@ const v2SendMessage = (): ContractConfigBuilder => ({
 
     const executionFee = destination.feeBreakdown['executionFee'];
     const relayerFee = destination.feeBreakdown['relayerFee'];
-    const remoteEtherFee = destination.feeBreakdown['remoteEtherFee'];
-    const remoteDotFee = destination.feeBreakdown['remoteDotFee'];
+    const hydrationDotFee = destination.feeBreakdown['hydrationDotFee'];
     const bridgeFeeInWei = destination.fee.amount;
 
     const beneficiaryHex = Ss58Addr.getPubKey(address) as string;
@@ -61,8 +60,7 @@ const v2SendMessage = (): ContractConfigBuilder => ({
       tokenAddress: isNativeTransfer ? ETHER_TOKEN_ADDRESS : tokenAddress,
       beneficiaryHex,
       tokenAmount: amount,
-      remoteEtherFeeAmount: remoteEtherFee,
-      remoteDotFeeAmount: remoteDotFee,
+      hydrationDotFee,
       topic,
     });
 

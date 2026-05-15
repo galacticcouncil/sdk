@@ -31,7 +31,12 @@ import {
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
-import { Transfer } from './types';
+import {
+  applySnowbridgeAcceleration,
+  applySnowbridgeVolumeFee,
+  SnowbridgeDirection,
+} from './transfer/applySnowbridgeVolumeFee';
+import { Transfer, VolumeFeeOpts } from './types';
 
 import { FeeSwap } from './FeeSwap';
 
@@ -214,7 +219,7 @@ export class Wallet {
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
 
-    return {
+    const transfer = {
       source: {
         balance: srcBalance,
         destinationFee: srcDestinationFee.fee,
@@ -249,6 +254,37 @@ export class Wallet {
         return validator.validate(copyCtx);
       },
     } as Transfer;
+
+    // Snowbridge V2 runtime mutators. Volume fee + acceleration share a
+    // single state object so toggling one does not erase the other.
+    if (srcConf.route.tags?.includes('Snowbridge')) {
+      const direction: SnowbridgeDirection = srcConf.chain.isEvmChain()
+        ? 'inbound'
+        : 'outbound';
+      const base = {
+        amount: dstFee.amount,
+        breakdown: { ...dstFeeBreakdown },
+      };
+      const state = {
+        accelerationTipWei: 0n,
+        volumeTipWei: 0n,
+      };
+      transfer.applySnowbridgeVolumeFee = (opts: VolumeFeeOpts): void => {
+        applySnowbridgeVolumeFee(transfer, ctx, base, state, direction, opts);
+      };
+      transfer.applySnowbridgeAcceleration = (enabled: boolean): void => {
+        applySnowbridgeAcceleration(
+          transfer,
+          ctx,
+          base,
+          state,
+          direction,
+          enabled
+        );
+      };
+    }
+
+    return transfer;
   }
 
   async subscribeBalance(
