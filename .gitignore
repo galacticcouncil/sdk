@@ -18,6 +18,10 @@ examples/*/public/**/*.js
 examples/*/public/**/*.js.map
 examples/*/public/**/*.wasm
 
+# apps site build output
+apps/public/dist
+apps/build-meta.json
+
 # jest test results
 integration-tests/*/output.json
 

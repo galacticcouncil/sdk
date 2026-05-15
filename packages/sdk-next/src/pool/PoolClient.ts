@@ -34,7 +34,7 @@ import {
   throttleTime,
 } from 'rxjs/operators';
 
-import { Papi } from '../api';
+import { BlockAt, Papi } from '../api';
 import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
@@ -72,10 +72,10 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     return this.loadPools();
   }, this.memPoolsCache);
 
-  constructor(client: PolkadotClient, evm: EvmClient) {
-    super(client);
+  constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
+    super(client, at);
     this.evm = evm;
-    this.balance = new BalanceClient(client);
+    this.balance = new BalanceClient(client, at);
     this.log = new PoolLog(this.getPoolType());
   }
 
@@ -91,7 +91,9 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
 
   async getPools(): Promise<T[]> {
     const pools = await this.getMemPools();
-    return pools.filter((p) => this.hasValidAssets(p));
+    const valid = pools.filter((p) => this.hasValidAssets(p));
+    this.store.set(valid);
+    return valid;
   }
 
   getSubscriber(): Observable<T[]> {

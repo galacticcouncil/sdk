@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Redeem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Redeem</h1>
+        <p class="lede">
+          Claim a Wormhole transfer on the destination chain by submitting your
+          wallet address and the signed VAA.
+        </p>
+      </header>
+
+      <section class="card">
+        <form id="redeem-form" novalidate>
+          <label class="field">
+            <span class="label">Destination chain</span>
+            <select id="chain" name="chain" required>
+              <option value="" disabled selected>Select chain</option>
+              <option value="eth">Ethereum (EVM)</option>
+              <option value="base">Base (EVM)</option>
+              <option value="mrl">Moonbeam · MRL (EVM)</option>
+              <option value="sol">Solana</option>
+              <option value="sui">Sui</option>
+            </select>
+            <span class="hint" id="chain-hint"
+              >Pick the chain where the VAA should be redeemed.</span
+            >
+          </label>
+
+          <label class="field">
+            <span class="label">Wallet address</span>
+            <input
+              id="address"
+              name="address"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="0x… / base58 / 0x… (32-byte)"
+              required
+            />
+            <span class="hint" id="address-hint"
+              >Must match the address that owns the VAA on the destination
+              chain.</span
+            >
+          </label>
+
+          <label class="field">
+            <span class="label">VAA</span>
+            <textarea
+              id="vaa"
+              name="vaa"
+              rows="5"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Hex-encoded VAA (0x… or AQAAA…)"
+              required
+            ></textarea>
+            <span class="hint"
+              >Verified Action Approval issued by Wormhole Guardians.</span
+            >
+          </label>
+
+          <button id="submit" class="btn-primary" type="submit">
+            <span class="btn-label">Redeem</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/redeem.js"></script>
+  </body>
+</html>

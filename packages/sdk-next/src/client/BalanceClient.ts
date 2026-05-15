@@ -19,7 +19,7 @@ import {
   connect,
 } from 'rxjs/operators';
 
-import { Papi } from '../api';
+import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { AssetBalance, Balance } from '../types';
 
@@ -32,8 +32,8 @@ const { logger } = log;
 export class BalanceClient extends Papi {
   private erc20Ids: number[] | null = null;
 
-  constructor(client: PolkadotClient) {
-    super(client);
+  constructor(client: PolkadotClient, at?: BlockAt) {
+    super(client, at);
   }
 
   async getBalance(account: string, assetId: number): Promise<Balance> {
@@ -44,13 +44,13 @@ export class BalanceClient extends Papi {
 
   async getSystemBalance(account: string): Promise<Balance> {
     const query = this.api.query.System.Account;
-    const { data } = await query.getValue(account, { at: 'best' });
+    const { data } = await query.getValue(account, { at: this.at });
     return this.getBreakdown(data);
   }
 
   async getTokenBalance(account: string, assetId: number): Promise<Balance> {
     const query = this.api.query.Tokens.Accounts;
-    const data = await query.getValue(account, assetId, { at: 'best' });
+    const data = await query.getValue(account, assetId, { at: this.at });
     return this.getBreakdown(data);
   }
 
@@ -235,7 +235,7 @@ export class BalanceClient extends Papi {
     assetId: number
   ): Promise<Balance> {
     const data = await this.api.apis.CurrenciesApi.account(assetId, account, {
-      at: 'best',
+      at: this.at,
     });
     return this.getBreakdown(data);
   }

@@ -1,6 +1,11 @@
 export { PoolFactory } from './PoolFactory';
 export { PoolContextProvider } from './PoolContextProvider';
 
+export {
+  SnapshotPoolCtxProvider,
+  SnapshotPoolCtx,
+} from './SnapshotPoolCtxProvider';
+
 export * as aave from './aave';
 export * as omni from './omni';
 export * as stable from './stable';

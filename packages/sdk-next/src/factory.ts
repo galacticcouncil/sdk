@@ -1,5 +1,6 @@
 import { PolkadotClient } from 'polkadot-api';
 
+import { BlockAt } from './api';
 import { AaveUtils } from './aave';
 import { AssetClient, BalanceClient, ChainParams } from './client';
 import { EvmClient } from './evm';
@@ -9,6 +10,10 @@ import { TradeRouter, TradeScheduler } from './sor';
 import { StakingApi, StakingClient } from './staking';
 
 import { TxBuilderFactory } from './tx';
+
+export type SdkOptions = {
+  at?: BlockAt;
+};
 
 export type SdkCtx = {
   api: {
@@ -31,8 +36,11 @@ export type SdkCtx = {
 };
 
 export async function createSdkContext(
-  client: PolkadotClient
+  client: PolkadotClient,
+  options?: SdkOptions
 ): Promise<SdkCtx> {
+  const { at } = options ?? {};
+
   const params = new ChainParams(client);
   const evm = new EvmClient(client);
 
@@ -42,7 +50,7 @@ export async function createSdkContext(
   ]);
 
   // Initialize pool context
-  const poolCtx = new PoolContextProvider(client, evm)
+  const poolCtx = new PoolContextProvider(client, evm, at)
     .withAave()
     .withOmnipool()
     .withStableswap()

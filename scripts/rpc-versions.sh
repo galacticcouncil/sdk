@@ -12,6 +12,10 @@ ENDPOINTS=(
   'https://rpc.zipp.hydration.cloud'
   'https://rpc.sin.hydration.cloud'
   'https://rpc.coke.hydration.cloud'
+  "https://node.lark.hydration.cloud"
+  "https://node2.lark.hydration.cloud"
+  "https://node3.lark.hydration.cloud"
+  "https://node4.lark.hydration.cloud"
 )
 
 PAYLOAD='{"id":1,"jsonrpc":"2.0","method":"system_version","params":[]}'
