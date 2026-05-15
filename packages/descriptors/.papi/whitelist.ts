@@ -103,6 +103,7 @@ const hubWhitelist: HubWhitelistEntry[] = [
   'query.Assets.*',
   'api.AssetConversionApi.*',
   'tx.Assets.*',
+  'tx.Balances.*',
 ];
 
 export const whitelist: WhitelistEntriesByChain = {
