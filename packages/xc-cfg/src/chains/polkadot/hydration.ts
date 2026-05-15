@@ -8,6 +8,7 @@ import { defineChain, Chain } from 'viem';
 import {
   aave,
   ajun,
+  apyusd,
   astr,
   bnc,
   cfg_new,
@@ -301,6 +302,32 @@ export const hydration = new EvmParachain({
               },
             },
           },
+        },
+      },
+    },
+    {
+      asset: apyusd,
+      decimals: 18,
+      id: 46,
+      min: 0.0147058823529412,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X2: [
+            {
+              GlobalConsensus: {
+                Ethereum: {
+                  chain_id: 1,
+                },
+              },
+            },
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a',
+              },
+            },
+          ],
         },
       },
     },
