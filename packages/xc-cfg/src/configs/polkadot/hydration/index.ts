@@ -3,6 +3,7 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 import {
   aave,
   ajun,
+  apyusd,
   astr,
   bnc,
   cfg_new,
@@ -373,6 +374,7 @@ const toEthereumViaWormhole: AssetRoute[] = [
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
   viaSnowbridgeTemplate(aave, aave, ethereum),
+  viaSnowbridgeTemplate(apyusd, apyusd, ethereum),
   viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum),
   viaSnowbridgeTemplate(ena, ena, ethereum),
   viaSnowbridgeTemplate(paxg, paxg, ethereum),

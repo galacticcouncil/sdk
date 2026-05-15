@@ -5,6 +5,7 @@ import {
 
 import {
   aave,
+  apyusd,
   cfg_new,
   dai,
   ena,
@@ -41,6 +42,11 @@ export const ethereum = new EvmChain({
       asset: aave,
       decimals: 18,
       id: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+    },
+    {
+      asset: apyusd,
+      decimals: 18,
+      id: '0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a',
     },
     {
       asset: cfg_new,
