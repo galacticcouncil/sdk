@@ -422,6 +422,9 @@ export function buildSnowbridgeOutboundXcm(
   // Total DOT withdrawn: PayFees budget + remote_fees on AH + swap DOT
   const totalDot = sourceExecutionFee + dotRemoteFee + dotToEtherSwapAmount;
 
+  const tokenWithdrawAmount =
+    token === ether ? tokenAmount + etherFeeAmount : tokenAmount;
+
   const withdrawAssets = [
     {
       id: DOT_LOCATION,
@@ -429,7 +432,7 @@ export function buildSnowbridgeOutboundXcm(
     },
     {
       id: token,
-      fun: XcmV3MultiassetFungibility.Fungible(tokenAmount),
+      fun: XcmV3MultiassetFungibility.Fungible(tokenWithdrawAmount),
     },
   ];
 
