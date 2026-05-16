@@ -1,9 +1,4 @@
-import {
-  AccountId,
-  Binary,
-  CompatibilityLevel,
-  PolkadotClient,
-} from 'polkadot-api';
+import { AccountId, CompatibilityLevel, PolkadotClient } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import {
@@ -15,7 +10,6 @@ import {
   mergeMap,
   pairwise,
 } from 'rxjs';
-import { decodeEventLog } from 'viem';
 
 import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
@@ -25,12 +19,11 @@ import { PoolBase, PoolFees, PoolType } from '../types';
 
 import { BlockAt } from '../../api';
 import { EvmClient } from '../../evm';
-import { GHO_TOKEN_ABI, GhoTokenClient } from '../../gho';
+import { GhoTokenLog, GhoTokenClient, GhoTokenEvent } from '../../gho';
 import { AssetBalance, XcmV3Multilocation } from '../../types';
 import { fmt } from '../../utils';
 
 import { HsmPoolBase } from './HsmPool';
-import { TEvmEvent, TEvmPayload } from './types';
 
 const { FeeUtils } = fmt;
 const { H160 } = h160;
@@ -163,36 +156,12 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     return {} as PoolFees;
   }
 
-  private parseEvmLog(payload: TEvmPayload): TEvmEvent | undefined {
-    const { topics, data } = payload.log;
-    const topicsHex = topics;
-    const dataHex = Binary.toHex(data);
-
-    try {
-      const { eventName, args } = decodeEventLog({
-        abi: GHO_TOKEN_ABI,
-        topics: topicsHex as any,
-        data: dataHex as any,
-      });
-
-      const facilitator = args.facilitatorAddress.toLowerCase();
-
-      return {
-        eventName,
-        facilitator,
-        key: `${eventName}:${facilitator}`,
-      };
-    } catch {
-      return undefined;
-    }
-  }
-
   private subscribeEvmLog(): Subscription {
     return this.api.event.EVM.Log.watch()
       .pipe(
         mergeMap(({ events }) => events),
-        map(({ payload }) => this.parseEvmLog(payload)),
-        filter((v): v is TEvmEvent => v !== undefined),
+        map(({ payload }) => GhoTokenLog.parse(payload)),
+        filter((v): v is GhoTokenEvent => v !== undefined),
         filter(({ eventName }) => SYNC_BUCKET_EVENTS.includes(eventName)),
         this.watchGuard('evm.Log')
       )

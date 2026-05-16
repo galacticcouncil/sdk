@@ -1,2 +1,5 @@
-export { GhoTokenClient } from './GhoTokenClient';
-export { GHO_TOKEN_ABI } from './abi';
+export * from './GhoTokenLog';
+export * from './GhoTokenClient';
+
+export * from './abi';
+export * from './types';
