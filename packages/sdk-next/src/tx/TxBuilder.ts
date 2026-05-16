@@ -3,7 +3,7 @@ import { Enum, PolkadotClient } from 'polkadot-api';
 import { PublicClient } from 'viem';
 
 import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
-import { Papi } from '../api';
+import { BlockAt, Papi } from '../api';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
 import { PoolType } from '../pool';
@@ -19,11 +19,11 @@ export abstract class TxBuilder extends Papi {
   protected readonly balance: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
-  constructor(client: PolkadotClient, evm: EvmClient) {
-    super(client);
+  constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
+    super(client, at);
     this.evm = evm;
     this.evmClient = evm.getWsProvider();
-    this.balance = new BalanceClient(client);
+    this.balance = new BalanceClient(client, at);
     this.aaveUtils = new AaveUtils(evm);
   }
 
@@ -51,7 +51,9 @@ export abstract class TxBuilder extends Papi {
 
     const dryRun = await this.client
       .getUnsafeApi()
-      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 4);
+      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 4, {
+        at: this.at,
+      });
 
     const result = dryRun as DryRunResult;
     const error =

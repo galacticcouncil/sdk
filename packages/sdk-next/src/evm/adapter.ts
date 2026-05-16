@@ -6,18 +6,22 @@ import type { PublicClient, ReadContractParameters } from 'viem';
 
 import { encodeFunctionData, decodeFunctionResult } from 'viem';
 
+import { BlockAt } from '../api';
+
 const GAS_LIMIT = 10_000_000n;
 
 export class EvmRpcAdapter {
   private api: TypedApi<typeof hydration>;
+  private at: BlockAt;
 
-  constructor(client: PolkadotClient) {
+  constructor(client: PolkadotClient, at: BlockAt = 'best') {
     this.api = client.getTypedApi(hydration);
+    this.at = at;
   }
 
   async getBlock(): Promise<{ timestamp: bigint; number: bigint }> {
     const block = await this.api.query.Ethereum.CurrentBlock.getValue({
-      at: 'best',
+      at: this.at,
     });
     const { header } = block!;
 
@@ -52,7 +56,8 @@ export class EvmRpcAdapter {
       undefined,
       false,
       [],
-      []
+      [],
+      { at: this.at }
     );
 
     if (!result.success) {
@@ -62,7 +67,10 @@ export class EvmRpcAdapter {
 
     const { exit_reason, value, used_gas } = result.value;
 
-    console.log(used_gas);
+    console.log(
+      functionName,
+      'Gas: ' + used_gas.standard[0] + ' / ' + used_gas.effective[0]
+    );
 
     if (exit_reason.type === 'Succeed') {
       return decodeFunctionResult({
