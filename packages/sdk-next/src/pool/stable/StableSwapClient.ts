@@ -31,10 +31,14 @@ import { TRADEABLE_DEFAULT } from '../../consts';
 import { fmt, QueryBus } from '../../utils';
 
 import {
+  DIA_MM_BY_KEY,
+  HYBRID_MM_BY_EMA,
+  HYBRID_MM_BY_EMITTER,
   MmOracleLog,
   MmOracleClient,
   MmOracleEntry,
   MmOracleEvent,
+  emaRouteKey,
 } from '../../oracle';
 
 import { StableMath } from './StableMath';
@@ -59,6 +63,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   private mmOracle = new MmOracleClient(this.evm);
   private mmAddresses: Set<string> = new Set();
+  private mmRouting = {
+    byEmitter: new Map<string, string>(),
+    byDiaKey: new Map<string, string>(),
+    byEma: new Map<string, string>(),
+  };
 
   private queryBus = new QueryBus();
 
@@ -165,6 +174,36 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(poolTokens);
   }
 
+  private buildRouting(): void {
+    this.mmRouting.byEmitter.clear();
+    this.mmRouting.byDiaKey.clear();
+    this.mmRouting.byEma.clear();
+
+    // Managed direct: emitter is itself the mmAddress.
+    for (const mm of this.mmAddresses) {
+      this.mmRouting.byEmitter.set(mm, mm);
+    }
+
+    // Hybrid: wrapped Managed emitter → hybrid mmAddress.
+    for (const [emitter, hybridMm] of Object.entries(HYBRID_MM_BY_EMITTER)) {
+      const e = emitter.toLowerCase();
+      const m = hybridMm.toLowerCase();
+      if (this.mmAddresses.has(m)) this.mmRouting.byEmitter.set(e, m);
+    }
+
+    // DIA wrapper: OracleUpdate key → mmAddress.
+    for (const [key, mm] of Object.entries(DIA_MM_BY_KEY)) {
+      const m = mm.toLowerCase();
+      if (this.mmAddresses.has(m)) this.mmRouting.byDiaKey.set(key, m);
+    }
+
+    // Hybrid EMA leg: `${source}:${pairA}:${pairB}` → hybrid mmAddress.
+    for (const [key, mm] of Object.entries(HYBRID_MM_BY_EMA)) {
+      const m = mm.toLowerCase();
+      if (this.mmAddresses.has(m)) this.mmRouting.byEma.set(key, m);
+    }
+  }
+
   async isSupported(): Promise<boolean> {
     const staticApis = await this.api.getStaticApis();
     return staticApis.compat.query.Stableswap.Pools.isCompatible(
@@ -189,6 +228,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         }
       }
     }
+
+    this.buildRouting();
 
     const entries = pools.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
@@ -389,16 +430,27 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         }),
         this.watchGuard('emaOracle.Oracles')
       )
-      .subscribe(({ value: { deltas } }) => {
+      .subscribe(async ({ value: { deltas } }) => {
+        const hybridTargets = new Set<string>();
         for (const { args, value } of deltas?.upserted ?? []) {
           const [name, pair, period] = args;
           this.emaOracles.set(value, name, pair, period);
+
+          const mmEmaKey = emaRouteKey(name, pair, period.type);
+          const mm = this.mmRouting.byEma.get(mmEmaKey);
+          if (mm) hybridTargets.add(mm);
+        }
+
+        for (const h160 of hybridTargets) {
+          const fresh = await this.mmOracle.getData(h160);
+          console.log('Debug EMA:', h160, fresh);
+
+          this.mmOracles.set(fresh, h160);
         }
       });
   }
 
   private subscribeMMOracles(): Subscription {
-    console.log(this.mmAddresses.size);
     return this.api.event.EVM.Log.watch()
       .pipe(
         map(({ events }) =>
@@ -411,13 +463,23 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         this.watchGuard('evm.Log')
       )
       .subscribe(async (parsed) => {
-        const triggeredBy = Array.from(new Set(parsed.map((p) => p.eventName)));
-        console.log(triggeredBy);
+        const targets = new Set<string>();
+        for (const ev of parsed) {
+          console.log(ev);
+          if (ev.eventName === 'ManagedOracle.PriceUpdated') {
+            const t = this.mmRouting.byEmitter.get(ev.emitter);
+            if (t) targets.add(t);
+          }
+          if (ev.eventName === 'DIA.OracleUpdate' && ev.key) {
+            const t = this.mmRouting.byDiaKey.get(ev.key);
+            if (t) targets.add(t);
+          }
+        }
 
-        this.log.trace('evm.Log', triggeredBy);
-        for (const h160 of this.mmAddresses) {
+        this.log.trace('evm.Log', [...targets]);
+        for (const h160 of targets) {
           const fresh = await this.mmOracle.getData(h160);
-          console.log('updating', h160);
+          console.log('Debug:', h160, fresh);
           this.mmOracles.set(fresh, h160);
         }
       });

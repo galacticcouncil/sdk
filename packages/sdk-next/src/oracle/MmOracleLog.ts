@@ -6,7 +6,8 @@ import { TEvmPayload, MmOracleEvent } from './types';
 
 export class MmOracleLog {
   static parse(payload: TEvmPayload): MmOracleEvent | undefined {
-    const { topics, data } = payload.log;
+    const { address, topics, data } = payload.log;
+    const emitter = address.toLowerCase();
     const dataHex = Binary.toHex(data);
 
     try {
@@ -17,6 +18,7 @@ export class MmOracleLog {
       });
       return {
         eventName: `ManagedOracle.${eventName}`,
+        emitter,
         value: args.answer,
         timestamp: args.timestamp,
       };
@@ -30,6 +32,8 @@ export class MmOracleLog {
       });
       return {
         eventName: `DIA.${eventName}`,
+        emitter,
+        key: args.key,
         value: args.value,
         timestamp: args.timestamp,
       };

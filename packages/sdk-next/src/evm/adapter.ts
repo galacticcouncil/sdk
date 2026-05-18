@@ -67,10 +67,10 @@ export class EvmRpcAdapter {
 
     const { exit_reason, value, used_gas } = result.value;
 
-    console.log(
-      functionName,
-      'Gas: ' + used_gas.standard[0] + ' / ' + used_gas.effective[0]
-    );
+    // console.log(
+    //   functionName,
+    //   'Gas: ' + used_gas.standard[0] + ' / ' + used_gas.effective[0]
+    // );
 
     if (exit_reason.type === 'Succeed') {
       return decodeFunctionResult({

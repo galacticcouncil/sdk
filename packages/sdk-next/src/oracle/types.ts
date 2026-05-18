@@ -10,6 +10,10 @@ export type MmOracleEntry = {
 
 export type MmOracleEvent = {
   eventName: string;
+  /** Lowercase H160 of the contract that emitted the log. */
+  emitter: string;
+  /** Decoded `key` arg — present only for DIA `OracleUpdate`. */
+  key?: string;
   value: bigint;
   timestamp: bigint;
 };
