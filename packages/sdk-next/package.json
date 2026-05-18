@@ -49,6 +49,11 @@
       "import": "./build/farm/index.mjs",
       "require": "./build/farm/index.cjs"
     },
+    "./indexer": {
+      "types": "./build/indexer/index.d.ts",
+      "import": "./build/indexer/index.mjs",
+      "require": "./build/indexer/index.cjs"
+    },
     "./pool": {
       "types": "./build/pool/index.d.ts",
       "import": "./build/pool/index.mjs",

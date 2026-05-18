@@ -9,6 +9,7 @@ const modules = [
   'src/client/index.ts',
   'src/evm/index.ts',
   'src/farm/index.ts',
+  'src/indexer/index.ts',
   'src/pool/index.ts',
   'src/sor/index.ts',
   'src/staking/index.ts',
