@@ -443,8 +443,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
         for (const h160 of hybridTargets) {
           const fresh = await this.mmOracle.getData(h160);
-          console.log('Debug EMA:', h160, fresh);
-
+          this.log.trace('mmOracle.Hybrid', { h160, fresh });
           this.mmOracles.set(fresh, h160);
         }
       });
@@ -476,10 +475,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           }
         }
 
-        this.log.trace('evm.Log', [...targets]);
         for (const h160 of targets) {
           const fresh = await this.mmOracle.getData(h160);
-          console.log('Debug:', h160, fresh);
+          this.log.trace('mmOracle', { h160, fresh });
           this.mmOracles.set(fresh, h160);
         }
       });
