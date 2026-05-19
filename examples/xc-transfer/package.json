@@ -12,6 +12,7 @@
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
+    "@defuse-protocol/one-click-sdk-typescript": "^0.1.17",
     "@galacticcouncil/xc": "^1.0.0",
     "@galacticcouncil/xc-scan": "^0.5.0",
     "@talismn/connect-wallets": "^1.2.8"
