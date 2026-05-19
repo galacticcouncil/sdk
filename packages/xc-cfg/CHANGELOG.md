@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.2.0
+
+### Minor Changes
+
+- 3cae384: added apyUSD to snowbridge route
+
 ## 1.1.0
 
 ### Minor Changes

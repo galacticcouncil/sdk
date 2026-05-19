@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 1.1.0
+
+### Minor Changes
+
+- 25f3a93: support historical blocks & snapshots (indexer)
+
 ## 1.0.1
 
 ### Patch Changes
