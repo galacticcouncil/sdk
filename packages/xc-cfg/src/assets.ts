@@ -10,6 +10,11 @@ export const ajun = new Asset({
   originSymbol: 'AJUN',
 });
 
+export const apyusd = new Asset({
+  key: 'apyusd',
+  originSymbol: 'apyUSD',
+});
+
 export const astr = new Asset({
   key: 'astr',
   originSymbol: 'ASTR',
@@ -268,6 +273,7 @@ export const wud = new Asset({
 export const assets: Asset[] = [
   aave,
   ajun,
+  apyusd,
   astr,
   bsx,
   cfg_new,
