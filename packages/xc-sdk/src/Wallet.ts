@@ -31,12 +31,7 @@ import {
   DataOriginProcessor,
   DataReverseProcessor,
 } from './transfer';
-import {
-  applySnowbridgeAcceleration,
-  applySnowbridgeVolumeFee,
-  SnowbridgeDirection,
-} from './transfer/applySnowbridgeVolumeFee';
-import { Transfer, VolumeFeeOpts } from './types';
+import { Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
 
@@ -247,6 +242,16 @@ export class Wallet {
         copyCtx.transact = await src.getTransact(copyCtx);
         return src.getFee(copyCtx);
       },
+      async estimateDestinationFee(amount): Promise<AssetAmount> {
+        const target = big.toBigInt(amount, srcBalance.decimals);
+        const { fee, feeBreakdown } = await src.getDestinationFee(target);
+        ctx.destination.fee = fee;
+        ctx.destination.feeBreakdown = feeBreakdown;
+        ctx.source.destinationFee = fee;
+        transfer.destination.fee = fee;
+        transfer.source.destinationFee = fee;
+        return fee;
+      },
       async validate(fee): Promise<TransferValidationReport[]> {
         const copyCtx = Object.assign({}, ctx);
         const srcFeeAmount = fee || srcFee.amount;
@@ -254,35 +259,6 @@ export class Wallet {
         return validator.validate(copyCtx);
       },
     } as Transfer;
-
-    // Snowbridge V2 runtime mutators. Volume fee + acceleration share a
-    // single state object so toggling one does not erase the other.
-    if (srcConf.route.tags?.includes('Snowbridge')) {
-      const direction: SnowbridgeDirection = srcConf.chain.isEvmChain()
-        ? 'inbound'
-        : 'outbound';
-      const base = {
-        amount: dstFee.amount,
-        breakdown: { ...dstFeeBreakdown },
-      };
-      const state = {
-        accelerationTipWei: 0n,
-        volumeTipWei: 0n,
-      };
-      transfer.applySnowbridgeVolumeFee = (opts: VolumeFeeOpts): void => {
-        applySnowbridgeVolumeFee(transfer, ctx, base, state, direction, opts);
-      };
-      transfer.applySnowbridgeAcceleration = (enabled: boolean): void => {
-        applySnowbridgeAcceleration(
-          transfer,
-          ctx,
-          base,
-          state,
-          direction,
-          enabled
-        );
-      };
-    }
 
     return transfer;
   }

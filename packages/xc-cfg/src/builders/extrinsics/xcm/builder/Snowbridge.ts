@@ -287,10 +287,10 @@ export function buildSnowbridgeOutboundXcm(
   } = params;
 
   const ether = etherLocation(ETHEREUM_CHAIN_ID);
-  const isNativeEther = tokenAddress === ETHER_TOKEN_ADDRESS;
-  const token = isNativeEther
-    ? ether
-    : erc20Location(ETHEREUM_CHAIN_ID, tokenAddress);
+  const token =
+    tokenAddress === ETHER_TOKEN_ADDRESS
+      ? ether
+      : erc20Location(ETHEREUM_CHAIN_ID, tokenAddress);
 
   const sender = {
     parents: 0,
@@ -345,64 +345,51 @@ export function buildSnowbridgeOutboundXcm(
     ]),
   ];
 
-  // Swap DOT for Ether on AssetHub DEX
-  if (!isNativeEther) {
-    assetHubXcm.push(
-      XcmV5Instruction.ExchangeAsset({
-        give: XcmV5AssetFilter.Definite([
-          {
-            id: DOT_LOCATION,
-            fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
-          },
-        ]),
-        want: [
-          {
-            id: ether,
-            fun: XcmV3MultiassetFungibility.Fungible(etherFeeAmount),
-          },
-        ],
-        maximal: false,
-      })
-    );
-  }
-
-  const bridgeAssets = isNativeEther
-    ? [
+  // Swap DOT for Ether on AssetHub DEX. Done unconditionally — even when
+  // the user is bridging native ETH, the relayer fee is paid from this
+  // swap output rather than from the user's ETH withdrawal, so the
+  // user-facing fee stays denominated entirely in DOT.
+  assetHubXcm.push(
+    XcmV5Instruction.ExchangeAsset({
+      give: XcmV5AssetFilter.Definite([
         {
-          type: 'ReserveWithdraw' as const,
-          value: XcmV5AssetFilter.Wild(
-            XcmV5WildAsset.AllOf({
-              id: ether,
-              fun: { type: 'Fungible' as const, value: undefined },
-            })
-          ),
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
         },
-      ]
-    : [
-        {
-          type: 'ReserveWithdraw' as const,
-          value: XcmV5AssetFilter.Wild(
-            XcmV5WildAsset.AllOf({
-              id: token,
-              fun: { type: 'Fungible' as const, value: undefined },
-            })
-          ),
-        },
-      ];
-
-  const bridgeRemoteFees = isNativeEther
-    ? XcmV5AssetFilter.Definite([
+      ]),
+      want: [
         {
           id: ether,
           fun: XcmV3MultiassetFungibility.Fungible(etherFeeAmount),
         },
-      ])
-    : XcmV5AssetFilter.Wild(
+      ],
+      maximal: false,
+    })
+  );
+
+  const bridgeAssets = [
+    {
+      type: 'ReserveWithdraw' as const,
+      value: XcmV5AssetFilter.Wild(
         XcmV5WildAsset.AllOf({
-          id: ether,
+          id: token,
           fun: { type: 'Fungible' as const, value: undefined },
         })
-      );
+      ),
+    },
+  ];
+
+  // Definite filter pulls exactly the relayer fee from holding. Works for
+  // both paths: ERC20 leaves only `etherFeeAmount` ether in holding (from
+  // the swap), so Definite == Wild there; native-ETH holding mixes the
+  // swap output with the user's ETH transfer, and Definite ensures only
+  // the fee portion is consumed, leaving `tokenAmount` ether to bridge.
+  const bridgeRemoteFees = XcmV5AssetFilter.Definite([
+    {
+      id: ether,
+      fun: XcmV3MultiassetFungibility.Fungible(etherFeeAmount),
+    },
+  ]);
 
   assetHubXcm.push(
     // Bridge to Ethereum
@@ -422,9 +409,9 @@ export function buildSnowbridgeOutboundXcm(
   // Total DOT withdrawn: PayFees budget + remote_fees on AH + swap DOT
   const totalDot = sourceExecutionFee + dotRemoteFee + dotToEtherSwapAmount;
 
-  const tokenWithdrawAmount =
-    token === ether ? tokenAmount + etherFeeAmount : tokenAmount;
-
+  // No fee consolidation for native ETH: the relayer fee is funded by the
+  // DOT→ether swap on AssetHub, so the user withdraws exactly the
+  // transfer amount of `token` regardless of asset class.
   const withdrawAssets = [
     {
       id: DOT_LOCATION,
@@ -432,7 +419,7 @@ export function buildSnowbridgeOutboundXcm(
     },
     {
       id: token,
-      fun: XcmV3MultiassetFungibility.Fungible(tokenWithdrawAmount),
+      fun: XcmV3MultiassetFungibility.Fungible(tokenAmount),
     },
   ];
 
@@ -454,24 +441,21 @@ export function buildSnowbridgeOutboundXcm(
     ),
   };
 
-  // For ERC20 transfers, include DOT for the swap as a separate asset.
-  // This DOT lands in holding on AssetHub (not the fee register),
-  // so ExchangeAsset can swap it for Ether.
-  const initiateAssets =
-    !isNativeEther && dotToEtherSwapAmount > 0n
-      ? [
-          {
-            type: 'ReserveWithdraw' as const,
-            value: XcmV5AssetFilter.Definite([
-              {
-                id: DOT_LOCATION,
-                fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
-              },
-            ]),
-          },
-          tokenAsset,
-        ]
-      : [tokenAsset];
+  // DOT for the swap is forwarded alongside the bridged token. It lands
+  // in holding on AssetHub (not the fee register) so ExchangeAsset can
+  // consume it for Ether.
+  const initiateAssets = [
+    {
+      type: 'ReserveWithdraw' as const,
+      value: XcmV5AssetFilter.Definite([
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
+        },
+      ]),
+    },
+    tokenAsset,
+  ];
 
   return [
     XcmV5Instruction.WithdrawAsset(withdrawAssets),

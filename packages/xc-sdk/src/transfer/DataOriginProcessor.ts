@@ -30,7 +30,7 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.buildCall(sender, amount, source.feeBalance, transfer);
   }
 
-  async getDestinationFee(): Promise<{
+  async getDestinationFee(transferAmount?: bigint): Promise<{
     fee: AssetAmount;
     feeBreakdown: { [key: string]: bigint };
   }> {
@@ -58,6 +58,7 @@ export class DataOriginProcessor extends DataProcessor {
       transferAsset: source.asset,
       source: transact ? transact.chain : chain,
       destination: destination.chain,
+      amount: transferAmount,
     });
 
     const fee = AssetAmount.fromAsset(feeAsset, {

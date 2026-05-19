@@ -7,15 +7,6 @@ import {
 import { Call } from './platforms';
 
 /**
- * Volume-based fee inputs (Snowbridge V2).
- */
-export interface VolumeFeeOpts {
-  txValueUsd: bigint;
-  ethToUsdNumerator: bigint;
-  ethToUsdDenominator: bigint;
-}
-
-/**
  * Transfer source data
  *
  * @interface TransferSourceData
@@ -64,7 +55,8 @@ export interface Transfer {
   destination: TransferDestinationData;
   buildCall(amount: bigint | number | string): Promise<Call>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
+  estimateDestinationFee(
+    amount: bigint | number | string
+  ): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
-  applySnowbridgeVolumeFee?(opts: VolumeFeeOpts): void;
-  applySnowbridgeAcceleration?(enabled: boolean): void;
 }
