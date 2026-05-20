@@ -102,17 +102,25 @@ export async function getVolumeTipInWei(
 ): Promise<bigint> {
   if (transferAmount <= 0n) return 0n;
 
-  const [txValueUsd, { ethToUsdNumerator, ethToUsdDenominator }] =
-    await Promise.all([
-      getTxValueUsd(dex, transferAsset, transferAmount),
-      getEthUsdRatio(dex),
-    ]);
+  try {
+    const [txValueUsd, { ethToUsdNumerator, ethToUsdDenominator }] =
+      await Promise.all([
+        getTxValueUsd(dex, transferAsset, transferAmount),
+        getEthUsdRatio(dex),
+      ]);
 
-  return calculateVolumeTipInWei({
-    txValueUsd,
-    ethToUsdNumerator,
-    ethToUsdDenominator,
-  });
+    return calculateVolumeTipInWei({
+      txValueUsd,
+      ethToUsdNumerator,
+      ethToUsdDenominator,
+    });
+  } catch (e) {
+    console.warn(
+      `Snowbridge volume tip pricing failed for ${transferAsset.key}; defaulting to 0.`,
+      e
+    );
+    return 0n;
+  }
 }
 
 async function getTxValueUsd(
@@ -141,8 +149,7 @@ async function getTxValueUsd(
   const { amount: transferForProbe } = await dex.getQuote(
     transferAsset,
     usdc,
-    probeUsdc,
-    true
+    probeUsdc
   );
 
   // transferForProbe (base units of transferAsset) ↔ USDC_PROBE (USDC base)
@@ -159,7 +166,7 @@ async function getEthUsdRatio(dex: Dex): Promise<{
     amount: ETH_PROBE,
     decimals: 18,
   });
-  const { amount: usdcForEth } = await dex.getQuote(usdc, eth, probeEth, true);
+  const { amount: usdcForEth } = await dex.getQuote(usdc, eth, probeEth);
   // 1 ETH (= WEI base units) costs `usdcForEth` USDC-base-units.
   // 1 ETH = usdcForEth / 10^6 USD.
   return {
