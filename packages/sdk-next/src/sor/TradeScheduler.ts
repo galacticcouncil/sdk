@@ -10,6 +10,7 @@ import {
   TWAP_MAX_DURATION,
 } from './const';
 import {
+  Swap,
   TradeDcaOrder,
   TradeOrder,
   TradeOrderError,
@@ -113,6 +114,7 @@ export class TradeScheduler {
       errors.push(TradeOrderError.OrderTooSmall);
     }
 
+    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const amountOut = dca.amountOut * BigInt(tradeCount);
     const tradePeriod = this.toBlockPeriod(frequency);
     const tradeFee = dca.tradeFee * BigInt(tradeCount);
@@ -121,6 +123,7 @@ export class TradeScheduler {
     const order = {
       assetIn: assetIn,
       assetOut: assetOut,
+      assetOutEd: assetOutEd,
       errors: errors,
       maxTradeCount: maxTradeCount,
       tradeCount: tradeCount,
@@ -142,6 +145,7 @@ export class TradeScheduler {
           ...order,
           amountIn: big.toDecimal(amountIn, assetInDecimals),
           amountOut: big.toDecimal(amountOut, assetOutDecimals),
+          assetOutEd: big.toDecimal(assetOutEd, assetOutDecimals),
           tradeAmountIn: big.toDecimal(dca.amountIn, assetInDecimals),
           tradeAmountOut: big.toDecimal(dca.amountOut, assetOutDecimals),
         };
@@ -272,12 +276,14 @@ export class TradeScheduler {
       errors.push(TradeOrderError.OrderTooSmall);
     }
 
+    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const tradePeriod = this.toBlockPeriod(periodMs);
     const tradeRoute = TradeRouteBuilder.build(swaps);
 
     const order = {
       assetIn: assetIn,
       assetOut: assetOut,
+      assetOutEd: assetOutEd,
       errors: errors,
       maxTradeCount: 0,
       tradeCount: 0,
@@ -299,6 +305,7 @@ export class TradeScheduler {
           ...order,
           amountIn: '0',
           amountOut: '0',
+          assetOutEd: big.toDecimal(assetOutEd, assetOutDecimals),
           tradeAmountIn: big.toDecimal(trade.amountIn, assetInDecimals),
           tradeAmountOut: big.toDecimal(trade.amountOut, assetOutDecimals),
         };
@@ -358,6 +365,7 @@ export class TradeScheduler {
       errors.push(TradeOrderError.OrderImpactTooBig);
     }
 
+    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const amountOut = twap.amountOut * BigInt(tradeCount);
     const tradeFee = twap.tradeFee * BigInt(tradeCount);
     const tradeRoute = TradeRouteBuilder.build(swaps);
@@ -365,6 +373,7 @@ export class TradeScheduler {
     const order = {
       assetIn: assetIn,
       assetOut: assetOut,
+      assetOutEd: assetOutEd,
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
@@ -385,6 +394,7 @@ export class TradeScheduler {
           ...order,
           amountIn: big.toDecimal(amountIn, assetInDecimals),
           amountOut: big.toDecimal(amountOut, assetOutDecimals),
+          assetOutEd: big.toDecimal(assetOutEd, assetOutDecimals),
           tradeAmountIn: big.toDecimal(twap.amountIn, assetInDecimals),
           tradeAmountOut: big.toDecimal(twap.amountOut, assetOutDecimals),
           tradeFee: big.toDecimal(tradeFee, assetOutDecimals),
@@ -443,12 +453,14 @@ export class TradeScheduler {
       errors.push(TradeOrderError.OrderImpactTooBig);
     }
 
+    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const tradeFee = twap.tradeFee * BigInt(tradeCount);
     const tradeRoute = TradeRouteBuilder.build(swaps);
 
     const order = {
       assetIn: assetIn,
       assetOut: assetOut,
+      assetOutEd: assetOutEd,
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
@@ -469,6 +481,7 @@ export class TradeScheduler {
           ...order,
           amountIn: big.toDecimal(amountIn, assetInDecimals),
           amountOut: big.toDecimal(amountOut, assetOutDecimals),
+          assetOutEd: big.toDecimal(assetOutEd, assetOutDecimals),
           tradeAmountIn: big.toDecimal(twap.amountIn, assetInDecimals),
           tradeAmountOut: big.toDecimal(twap.amountOut, assetOutDecimals),
           tradeFee: big.toDecimal(tradeFee, assetInDecimals),
@@ -518,5 +531,26 @@ export class TradeScheduler {
     const noOfBlocks = periodMsec / this.blockTime;
     const estPeriod = Math.round(noOfBlocks);
     return Math.max(estPeriod, ORDER_MIN_BLOCK_PERIOD);
+  }
+
+  /**
+   * Resolve the on-chain existential deposit of assetOut from the pool
+   * used by the last swap in the trade. Intents (in particular DCA)
+   * require `amount_out >= ED`, so the ED is exposed on the order DTO
+   * so callers can clamp the per-trade minimum accordingly.
+   *
+   * @param lastSwap - last hop of the resolved trade (holds assetOut)
+   * @returns existential deposit of assetOut (in its smallest unit)
+   */
+  private async getAssetOutEd(lastSwap: Swap): Promise<bigint> {
+    const pools = await this.router.getPools();
+    const pool = pools.find((p) => p.address === lastSwap.poolAddress);
+    const token = pool?.tokens.find((t) => t.id === lastSwap.assetOut);
+    if (!token) {
+      throw new Error(
+        `Asset ${lastSwap.assetOut} not found in pool ${lastSwap.poolAddress}`
+      );
+    }
+    return token.existentialDeposit;
   }
 }

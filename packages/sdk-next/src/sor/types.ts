@@ -52,6 +52,7 @@ export interface TradeOrder extends Humanizer {
   amountOut: bigint;
   assetIn: number;
   assetOut: number;
+  assetOutEd: bigint;
   errors: TradeOrderError[];
   tradeAmountIn: bigint;
   tradeAmountOut: bigint;
