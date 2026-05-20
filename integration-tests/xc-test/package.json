@@ -21,7 +21,7 @@
     "@polkadot-labs/hdkd-helpers": "^0.0.19"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^1.1.0",
+    "@galacticcouncil/sdk-next": "^1.2.0",
     "@galacticcouncil/xc-cfg": "^1.2.0",
     "@galacticcouncil/xc-core": "^1.0.0",
     "@galacticcouncil/xc-sdk": "^1.0.0"

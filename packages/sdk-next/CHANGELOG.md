@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 1.2.0
+
+### Minor Changes
+
+- e49bd6b: ice: add tx builders & descriptors
+
 ## 1.1.0
 
 ### Minor Changes
