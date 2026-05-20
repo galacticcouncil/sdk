@@ -9,6 +9,7 @@ export class IntentLimitTxBuilder extends TxBuilder {
   private _trade?: Trade;
   private _beneficiary?: string;
   private _minAmountOut?: bigint;
+  private _deadline?: bigint;
   private _partial = true;
 
   setTrade(trade: Trade): this {
@@ -28,6 +29,11 @@ export class IntentLimitTxBuilder extends TxBuilder {
 
   withMinAmountOut(amount: bigint): this {
     this._minAmountOut = amount;
+    return this;
+  }
+
+  withDeadline(deadline: bigint): this {
+    this._deadline = deadline;
     return this;
   }
 
@@ -53,6 +59,10 @@ export class IntentLimitTxBuilder extends TxBuilder {
     return this._minAmountOut;
   }
 
+  private get deadline(): bigint | undefined {
+    return this._deadline;
+  }
+
   async build(): Promise<Tx> {
     const { amountIn, amountOut, swaps } = this.trade;
 
@@ -73,6 +83,7 @@ export class IntentLimitTxBuilder extends TxBuilder {
     let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
       intent: {
         data: swap,
+        deadline: this.deadline,
       },
     });
 
