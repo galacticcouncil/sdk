@@ -58,14 +58,20 @@ export class IntentOrderTxBuilder extends TxBuilder {
   }
 
   private async buildDcaTx(): Promise<Tx> {
-    const { amountIn, assetIn, assetOut, tradeAmountIn, tradePeriod } =
-      this.order;
+    const {
+      amountIn,
+      assetIn,
+      assetOut,
+      assetOutEd,
+      tradeAmountIn,
+      tradePeriod,
+    } = this.order;
 
     const dca = Enum('Dca', {
       asset_in: assetIn,
       asset_out: assetOut,
       amount_in: tradeAmountIn,
-      amount_out: 1n,
+      amount_out: assetOutEd,
       slippage: this.slippagePct * 10000,
       budget: amountIn,
       period: tradePeriod,
