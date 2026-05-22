@@ -25,5 +25,5 @@ export const mythos = new Parachain({
   parachainId: 3369,
   ss58Format: 29972,
   usesH160Acc: true,
-  ws: 'wss://polkadot-mythos-rpc.polkadot.io',
+  ws: 'wss://mythos-rpc.dmarket.com',
 });
