@@ -50,143 +50,26 @@ export const AGGREGATOR_V3_ABI = [
 
 export const DIA_ORACLE_ABI = [
   {
-    inputs: [],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
-  {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'key',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'uint128',
-        name: 'value',
-        type: 'uint128',
-      },
-      {
-        indexed: false,
-        internalType: 'uint128',
-        name: 'timestamp',
-        type: 'uint128',
-      },
+      { indexed: false, name: 'key', type: 'string' },
+      { indexed: false, name: 'value', type: 'uint128' },
+      { indexed: false, name: 'timestamp', type: 'uint128' },
     ],
     name: 'OracleUpdate',
     type: 'event',
   },
+] as const;
+
+export const MANAGED_ORACLE_ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'newUpdater',
-        type: 'address',
-      },
+      { indexed: true, name: 'roundId', type: 'uint80' },
+      { indexed: false, name: 'answer', type: 'int256' },
+      { indexed: false, name: 'timestamp', type: 'uint256' },
     ],
-    name: 'UpdaterAddressChange',
+    name: 'PriceUpdated',
     type: 'event',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'string',
-        name: 'key',
-        type: 'string',
-      },
-    ],
-    name: 'getValue',
-    outputs: [
-      {
-        internalType: 'uint128',
-        name: '',
-        type: 'uint128',
-      },
-      {
-        internalType: 'uint128',
-        name: '',
-        type: 'uint128',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'string[]',
-        name: 'keys',
-        type: 'string[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'compressedValues',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'setMultipleValues',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'string',
-        name: 'key',
-        type: 'string',
-      },
-      {
-        internalType: 'uint128',
-        name: 'value',
-        type: 'uint128',
-      },
-      {
-        internalType: 'uint128',
-        name: 'timestamp',
-        type: 'uint128',
-      },
-    ],
-    name: 'setValue',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'newOracleUpdaterAddress',
-        type: 'address',
-      },
-    ],
-    name: 'updateOracleUpdaterAddress',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    name: 'values',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
   },
 ] as const;

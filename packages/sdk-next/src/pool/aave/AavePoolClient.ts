@@ -1,22 +1,17 @@
-import { AccountId, Binary } from 'polkadot-api';
+import { AccountId } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import { Subscription, filter, map, mergeMap } from 'rxjs';
-import { decodeEventLog } from 'viem';
 
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../types';
 import { PoolClient } from '../PoolClient';
 
+import { AaveLog, AaveEvent } from '../../aave';
+
 import { AavePoolToken } from './AavePool';
-import { AAVE_ABI } from './AaveAbi';
-import {
-  TRouterEvent,
-  TRouterExecutedPayload,
-  TEvmEvent,
-  TEvmPayload,
-} from './types';
+import { TRouterEvent, TRouterExecutedPayload } from './types';
 
 const { ERC20 } = erc20;
 
@@ -140,30 +135,6 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     };
   }
 
-  private parseEvmLog(payload: TEvmPayload): TEvmEvent | undefined {
-    const { topics, data } = payload.log;
-    const topicsHex = topics;
-    const dataHex = Binary.toHex(data);
-
-    try {
-      const { eventName, args } = decodeEventLog({
-        abi: AAVE_ABI,
-        topics: topicsHex as any,
-        data: dataHex as any,
-      });
-
-      const reserve = args.reserve.toLowerCase();
-
-      return {
-        eventName,
-        reserve,
-        key: `${eventName}:${reserve}`,
-      };
-    } catch {
-      return undefined;
-    }
-  }
-
   private subscribeRouterExecuted(): Subscription {
     const pools = this.store.pools;
 
@@ -208,8 +179,8 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     return this.api.event.EVM.Log.watch()
       .pipe(
         mergeMap(({ events }) => events),
-        map(({ payload }) => this.parseEvmLog(payload)),
-        filter((v): v is TEvmEvent => v !== undefined),
+        map(({ payload }) => AaveLog.parse(payload)),
+        filter((v): v is AaveEvent => v !== undefined),
         filter(({ eventName }) => SYNC_MM_EVENTS.includes(eventName)),
         this.watchGuard('evm.Log')
       )

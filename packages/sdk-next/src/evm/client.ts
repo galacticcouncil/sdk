@@ -12,14 +12,17 @@ import {
 
 import { createChain } from './chain';
 import { EvmRpcAdapter } from './adapter';
+import { BlockAt } from '../api';
 
 export class EvmClient {
   private client: PolkadotClient;
+  private at: BlockAt;
 
   readonly chain: Chain;
 
-  constructor(client: PolkadotClient) {
+  constructor(client: PolkadotClient, at: BlockAt = 'best') {
     this.client = client;
+    this.at = at;
     this.chain = createChain();
   }
 
@@ -60,6 +63,6 @@ export class EvmClient {
   }
 
   getRPCAdapter(): EvmRpcAdapter {
-    return new EvmRpcAdapter(this.client);
+    return new EvmRpcAdapter(this.client, this.at);
   }
 }

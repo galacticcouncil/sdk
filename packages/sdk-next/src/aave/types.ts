@@ -1,3 +1,13 @@
+import { HydrationEvents } from '@galacticcouncil/descriptors';
+
+export type TEvmPayload = HydrationEvents['EVM']['Log'];
+
+export type AaveEvent = {
+  eventName: string;
+  reserve: string;
+  key: string;
+};
+
 export type AaveSummary = {
   healthFactor: number;
   currentLiquidationThreshold: number;

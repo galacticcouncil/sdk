@@ -42,7 +42,7 @@ export async function createSdkContext(
   const { at } = options ?? {};
 
   const params = new ChainParams(client);
-  const evm = new EvmClient(client);
+  const evm = new EvmClient(client, at);
 
   const [blockTime, minOrderBudget] = await Promise.all([
     params.getBlockTime(),
@@ -57,7 +57,7 @@ export async function createSdkContext(
     .withXyk();
 
   // Initialize clients
-  const balance = new BalanceClient(client);
+  const balance = new BalanceClient(client, at);
   const stakingClient = new StakingClient(client);
   const farmClient = new LiquidityMiningClient(client);
 
@@ -90,7 +90,7 @@ export async function createSdkContext(
     ctx: {
       pool: poolCtx,
     },
-    tx: new TxBuilderFactory(client, evm),
+    tx: new TxBuilderFactory(client, evm, at),
     destroy: () => {
       poolCtx.destroy();
     },

@@ -52,7 +52,7 @@ export class StableSwap implements Pool {
   id: number;
   fee: PoolFee;
   totalIssuance: bigint;
-  pegs: string[][];
+  pegs: PoolPegs;
 
   static fromPool(pool: StableSwapBase): StableSwap {
     return new StableSwap(pool);
