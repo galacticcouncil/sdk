@@ -42,7 +42,7 @@ describe('chains config', () => {
           .filter((c) => h160AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()
-      ).toEqual(['laos', 'moonbeam', 'mythos'].sort());
+      ).toEqual(['moonbeam', 'mythos'].sort());
     });
     it('should match given chains with substrate only address space support', async () => {
       expect(

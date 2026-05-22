@@ -22,7 +22,6 @@ import {
   intr,
   jito_sol,
   ksm,
-  laos,
   ldo,
   link,
   myth,
@@ -66,7 +65,6 @@ import {
   ethereum,
   hydration,
   interlay,
-  laos_chain,
   moonbeam,
   mythos,
   neuroweb,
@@ -308,8 +306,6 @@ const toCrust: AssetRoute[] = [
   }),
 ];
 
-const toLaos: AssetRoute[] = [toTransferTemplate(laos, laos_chain)];
-
 const toEnergywebx: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -419,7 +415,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaSnowbridge,
     ...toEthereumViaWormhole,
     ...toInterlay,
-    ...toLaos,
     ...toEnergywebx,
     ...toMoonbeam,
     ...toMythos,

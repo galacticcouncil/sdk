@@ -39,7 +39,7 @@ const ORML_TOKENS_CHAINS: string[] = [];
 /**
  * Chains with EVM account pallet
  */
-const EVM_CHAINS = ['moonbeam', 'hydration', 'laos', 'mythos'];
+const EVM_CHAINS = ['moonbeam', 'hydration', 'mythos'];
 
 export const initStorage = (chainDecimals: number, chain: Parachain) => {
   const chainAssets = Array.from(chain.assetsData.values());

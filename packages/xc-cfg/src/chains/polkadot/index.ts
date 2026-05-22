@@ -7,7 +7,6 @@ import { bifrost } from './bifrost';
 import { crust } from './crust';
 import { hydration } from './hydration';
 import { interlay } from './interlay';
-import { laos_chain } from './laos';
 import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { neuroweb } from './neuroweb';
@@ -24,7 +23,6 @@ export const polkadotChains: AnyChain[] = [
   bifrost,
   crust,
   hydration,
-  laos_chain,
   neuroweb,
   interlay,
   moonbeam,
@@ -43,7 +41,6 @@ export {
   bifrost,
   crust,
   hydration,
-  laos_chain,
   neuroweb,
   interlay,
   moonbeam,
