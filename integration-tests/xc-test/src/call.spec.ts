@@ -22,7 +22,6 @@ const getChains = () => {
     'bifrost',
     'crust',
     'interlay',
-    'laos',
     'energywebx',
     'hydration',
     'moonbeam',

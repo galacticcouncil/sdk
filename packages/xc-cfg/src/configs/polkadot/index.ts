@@ -11,7 +11,6 @@ import { uniqueConfig } from './unique';
 import { crustConfig } from './crust';
 import { pendulumConfig } from './pendulum';
 import { ajunaConfig } from './ajuna';
-import { laosConfig } from './laos';
 import { energywebxConfig } from './energywebx';
 import { neurowebConfig } from './neuroweb';
 
@@ -29,6 +28,5 @@ export const polkadotChainsConfig: ChainRoutes[] = [
   uniqueConfig,
   crustConfig,
   pendulumConfig,
-  laosConfig,
   energywebxConfig,
 ];
