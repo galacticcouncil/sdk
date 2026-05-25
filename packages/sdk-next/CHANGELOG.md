@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 1.3.0
+
+### Minor Changes
+
+- eb5b1f3: next: fix pegs drift
+
 ## 1.2.0
 
 ### Minor Changes

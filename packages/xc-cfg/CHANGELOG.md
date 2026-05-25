@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.3.0
+
+### Minor Changes
+
+- 5ed62ef: removal of laos network
+
 ## 1.2.0
 
 ### Minor Changes
