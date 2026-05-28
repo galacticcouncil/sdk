@@ -66,6 +66,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.XYK.*',
   'query.XYKWarehouseLM.*',
   // tx
+  'tx.Bonds.*',
   'tx.ConvictionVoting.*',
   'tx.Currencies.*',
   'tx.DCA.*',
