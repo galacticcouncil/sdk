@@ -66,6 +66,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.XYK.*',
   'query.XYKWarehouseLM.*',
   // tx
+  'tx.Bonds.*',
   'tx.ConvictionVoting.*',
   'tx.Currencies.*',
   'tx.DCA.*',
@@ -103,6 +104,7 @@ const hubWhitelist: HubWhitelistEntry[] = [
   'query.Assets.*',
   'api.AssetConversionApi.*',
   'tx.Assets.*',
+  'tx.Balances.*',
 ];
 
 export const whitelist: WhitelistEntriesByChain = {
