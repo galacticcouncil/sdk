@@ -36,7 +36,11 @@ export async function signSubstrate(call: Call, chain: AnyChain) {
   });
 }
 
-export async function signEvm(call: Call, chain: AnyChain) {
+export async function signEvm(
+  call: Call,
+  chain: AnyChain,
+  callback?: (hash: string) => void
+) {
   const ctx = chain as AnyEvmChain;
   const client = ctx.evmClient;
 
@@ -49,6 +53,7 @@ export async function signEvm(call: Call, chain: AnyChain) {
   new EvmSigner(ctx, wallet).signAndSend(call, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
+      callback?.(hash);
     },
     onTransactionReceipt: (receipt) => {
       console.log(receipt);

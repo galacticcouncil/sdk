@@ -1,42 +1,41 @@
-import { ConfigBuilder } from '@galacticcouncil/xc-core';
-import { TransferBuilder } from '@galacticcouncil/xc-sdk';
+import { CallType, EvmChain } from '@galacticcouncil/xc-core';
+import { EvmCall } from '@galacticcouncil/xc-sdk';
 import {
   OneClickService,
   QuoteRequest,
 } from '@defuse-protocol/one-click-sdk-typescript';
+import { encodeFunctionData } from 'viem';
 
-import { sign } from './signers';
+import { signEvm } from './signers';
 import { ctx } from './setup';
-import { log } from './utils';
 
-const { logAssets, logSrcChains, logDestChains } = log;
-const { config, wallet } = ctx;
+const { config } = ctx;
 
-// Define transfer constraints
-const srcChain = config.getChain('hydration');
-const destChain = config.getChain('ethereum');
-const asset = config.getAsset('usdc_mwh');
+// Define intent constraints — deposit USDC on Ethereum, swap to NEAR.
+const srcChain = config.getChain('ethereum') as EvmChain;
+const evmClient = srcChain.evmClient;
 
-const configBuilder = ConfigBuilder(config);
-const { sourceChains } = configBuilder.assets().asset(asset);
-const { destinationChains } = configBuilder
-  .assets()
-  .asset(asset)
-  .source(srcChain);
-
-// Dump transfer info
-logAssets(srcChain);
-logDestChains(asset.key, destinationChains);
-logSrcChains(asset.key, sourceChains);
-
-// Define source account (recipient = same address on dest chain)
+// Define source account
 const sender = 'INSERT_ADDRESS';
 const recipient = 'INSERT_ADDRESS';
-const refund = 'INSERT_ADDRESS';
 
-// Transfer amount in the smallest unit (e.g. 1 USDC = 1_000_000)
-const transferAmount = '0.5';
-const amountInSmallestUnit = '500000';
+// Deposit amount in the smallest unit (e.g. 0.5 USDC = 500_000)
+const amountInSmallestUnit = '970000000';
+
+const USDC_ON_ETHEREUM = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as const;
+
+const ERC20_ABI = [
+  {
+    name: 'transfer',
+    type: 'function',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'nonpayable',
+  },
+] as const;
 
 // 1) Create NEAR intent — request a 1Click quote.
 // The response contains the depositAddress on the origin chain
@@ -48,9 +47,9 @@ const quoteRequest: QuoteRequest = {
   originAsset:
     'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
   depositType: QuoteRequest.depositType.ORIGIN_CHAIN,
-  destinationAsset: 'nep141:zec.omft.near',
+  destinationAsset: 'nep141:wrap.near',
   amount: amountInSmallestUnit,
-  refundTo: refund,
+  refundTo: sender,
   refundType: QuoteRequest.refundType.ORIGIN_CHAIN,
   recipient: recipient,
   recipientType: QuoteRequest.recipientType.DESTINATION_CHAIN,
@@ -64,40 +63,42 @@ console.log(JSON.stringify(quote, null, 2));
 const depositAddress = quote.quote.depositAddress;
 if (!depositAddress) throw new Error('No depositAddress in quote response.');
 
-const transfers = TransferBuilder(wallet)
-  .withAsset(asset)
-  .withSource(srcChain)
-  .withDestination(destChain);
-
-// 2) Build the transfer to the depositAddress returned by 1Click.
-const transfer = await transfers.build({
-  srcAddress: sender,
-  dstAddress: depositAddress,
+// 2) Build the ERC20 transfer call to the depositAddress returned by 1Click.
+const data = encodeFunctionData({
+  abi: ERC20_ABI,
+  functionName: 'transfer',
+  args: [depositAddress as `0x${string}`, BigInt(amountInSmallestUnit)],
 });
 
-const status = await transfer.validate();
+const call: EvmCall = {
+  from: sender,
+  to: USDC_ON_ETHEREUM,
+  data,
+  type: CallType.Evm,
+  dryRun: async () => undefined,
+};
 
-const [call, fee] = await Promise.all([
-  transfer.buildCall(transferAmount),
-  transfer.estimateFee(transferAmount),
-]);
+signEvm(call, srcChain, async (hash) => {
+  console.log('Waiting for confirmation…');
+  const receipt = await evmClient
+    .getProvider()
+    .waitForTransactionReceipt({ hash: hash as '0x{string}' });
+  console.log(
+    'Confirmed in block:',
+    receipt.blockNumber,
+    'status:',
+    receipt.status
+  );
 
-console.log(transfer);
-console.log(status);
-console.log('Estimated fee:', [fee.toDecimal(), fee.originSymbol].join(' '));
-console.log(call);
-console.log('Dry run:', await call.dryRun());
+  // 4) Submit deposit tx to 1Click to speed up settlement.
+  console.log('\nSubmit:');
+  const submit = await OneClickService.submitDepositTx({
+    depositAddress,
+    txHash: hash,
+  });
+  console.log(JSON.stringify(submit, null, 2));
 
-// 3) Sign and send the transfer.
-// await sign(call, srcChain);
-
-// 4) Submit deposit tx to 1Click to speed up settlement.
-
-// const submit = await OneClickService.submitDepositTx({
-//   depositAddress,
-//   txHash,
-// });
-// console.log(JSON.stringify(submit, null, 2));
-
-// const status = await OneClickService.getExecutionStatus(depositAddress);
-// console.log(JSON.stringify(status, null, 2));
+  console.log('\nStatus:');
+  const status = await OneClickService.getExecutionStatus(depositAddress);
+  console.log(JSON.stringify(status, null, 2));
+});
