@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.3.0
+
+### Minor Changes
+
+- 98d6f71: Added 'tx.Balances.\*' entry to hub whitelist
+
 ## 2.2.0
 
 ### Minor Changes
