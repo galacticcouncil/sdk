@@ -1,0 +1,20 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XC Transfer Example - Wormhole Rate Limits</title>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <p>Open the browser console to see Wormhole Governor rate-limit state.</p>
+    <script>
+      new EventSource('/esbuild').addEventListener('change', () =>
+        location.reload()
+      );
+    </script>
+    <script type="module" src="/out/wormhole-ratelimit.js"></script>
+  </body>
+</html>
