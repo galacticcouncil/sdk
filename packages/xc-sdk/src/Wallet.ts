@@ -214,7 +214,7 @@ export class Wallet {
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
 
-    return {
+    const transfer = {
       source: {
         balance: srcBalance,
         destinationFee: srcDestinationFee.fee,
@@ -242,6 +242,16 @@ export class Wallet {
         copyCtx.transact = await src.getTransact(copyCtx);
         return src.getFee(copyCtx);
       },
+      async estimateDestinationFee(amount): Promise<AssetAmount> {
+        const target = big.toBigInt(amount, srcBalance.decimals);
+        const { fee, feeBreakdown } = await src.getDestinationFee(target);
+        ctx.destination.fee = fee;
+        ctx.destination.feeBreakdown = feeBreakdown;
+        ctx.source.destinationFee = fee;
+        transfer.destination.fee = fee;
+        transfer.source.destinationFee = fee;
+        return fee;
+      },
       async validate(fee): Promise<TransferValidationReport[]> {
         const copyCtx = Object.assign({}, ctx);
         const srcFeeAmount = fee || srcFee.amount;
@@ -249,6 +259,8 @@ export class Wallet {
         return validator.validate(copyCtx);
       },
     } as Transfer;
+
+    return transfer;
   }
 
   async subscribeBalance(

@@ -19,7 +19,12 @@ import {
 
 import { EvmBalanceFactory } from './balance';
 import { EvmTransferFactory } from './transfer';
-import { isNativeEthBridge, isPrecompile } from './transfer/utils';
+import {
+  isNativeEthBridge,
+  isPrecompile,
+  isSnowbridgeV2,
+  getSnowbridgeV2TokenAddress,
+} from './transfer/utils';
 import { EvmCall, EvmDryRunResult } from './types';
 
 import { Platform } from '../types';
@@ -61,7 +66,11 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       return transferCall;
     }
 
-    const erc20 = new Erc20Client(this.#client, asset);
+    const tokenAddress = isSnowbridgeV2(config)
+      ? getSnowbridgeV2TokenAddress(config)!
+      : asset;
+
+    const erc20 = new Erc20Client(this.#client, tokenAddress);
     const allowance = await erc20.allowance(account, config.address);
     if (allowance >= amount) {
       return transferCall;
@@ -73,7 +82,7 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
       allowance: allowance,
       data: approve as `0x${string}`,
       from: account as `0x${string}`,
-      to: asset as `0x${string}`,
+      to: tokenAddress as `0x${string}`,
       type: CallType.Evm,
       dryRun: () => {},
     } as EvmCall;

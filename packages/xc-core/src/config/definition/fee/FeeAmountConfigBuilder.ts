@@ -11,6 +11,7 @@ export interface FeeAmountConfigParams {
   transferAsset: Asset;
   source: AnyChain;
   destination: AnyChain;
+  amount?: bigint;
 }
 
 export interface FeeAmountConfigBuilder {

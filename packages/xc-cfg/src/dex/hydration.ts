@@ -113,10 +113,10 @@ export class HydrationDex implements Dex {
 
     const systemToAssetPrice = await this.client
       .api()
-      .query.MultiTransactionPayment.AcceptedCurrencies.getValue(Number(asset));
+      .query.MultiTransactionPayment.AcceptedCurrencies.getValue(Number(id));
 
     if (!systemToAssetPrice) {
-      throw new Error(`No price found for asset ${asset}`);
+      throw new Error(`No price found for asset ${asset.key}`);
     }
 
     const fallbackPrice = systemToAssetPrice * amount;

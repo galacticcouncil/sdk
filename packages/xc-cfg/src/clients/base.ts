@@ -5,6 +5,7 @@ import { encodeLocation } from '@galacticcouncil/common';
 import {
   hub,
   XcmV4Instruction,
+  XcmV5Instruction,
   XcmVersionedAssetId,
 } from '@galacticcouncil/descriptors';
 
@@ -47,6 +48,39 @@ export class BaseClient<C extends ChainDefinition = typeof hub> {
 
     if (!weight.success) {
       throw Error(`Can't query XCM weight.`);
+    }
+
+    const feeAssetLocation = this.chain.getAssetXcmLocation(asset);
+    if (!feeAssetLocation) {
+      throw Error(`Can't get XCM location for asset ${asset.originSymbol}`);
+    }
+
+    const encodedLocation = encodeLocation(feeAssetLocation);
+
+    const feeInAsset =
+      await this.refApi.apis.XcmPaymentApi.query_weight_to_asset_fee(
+        weight.value,
+        XcmVersionedAssetId.V4(encodedLocation)
+      );
+
+    if (!feeInAsset.success) {
+      throw Error(`Can't convert weight to fee in ${asset.originSymbol}`);
+    }
+
+    return BigInt(feeInAsset.value);
+  }
+
+  async calculateDestinationFeeV5(
+    xcm: XcmV5Instruction[],
+    asset: Asset
+  ): Promise<bigint> {
+    const weight = await this.refApi.apis.XcmPaymentApi.query_xcm_weight({
+      type: 'V5',
+      value: xcm,
+    });
+
+    if (!weight.success) {
+      throw Error(`Can't query XCM weight (V5).`);
     }
 
     const feeAssetLocation = this.chain.getAssetXcmLocation(asset);

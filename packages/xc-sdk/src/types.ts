@@ -55,5 +55,8 @@ export interface Transfer {
   destination: TransferDestinationData;
   buildCall(amount: bigint | number | string): Promise<Call>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
+  estimateDestinationFee(
+    amount: bigint | number | string
+  ): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
 }

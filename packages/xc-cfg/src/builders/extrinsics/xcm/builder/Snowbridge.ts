@@ -1,0 +1,546 @@
+import {
+  ExtrinsicConfigBuilderParams,
+  multiloc,
+  Parachain,
+} from '@galacticcouncil/xc-core';
+
+import {
+  XcmV3MultiassetFungibility,
+  XcmV5AssetFilter,
+  XcmV5Instruction,
+  XcmV5Junctions,
+  XcmV5Junction,
+  XcmV5NetworkId,
+  XcmV5WildAsset,
+  XcmVersionedXcm,
+} from '@galacticcouncil/descriptors';
+
+import { SizedHex } from 'polkadot-api';
+import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
+import { toHex } from '@polkadot-api/utils';
+
+import { DOT_LOCATION, ASSET_HUB_ID, ETHEREUM_CHAIN_ID } from './const';
+
+const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+/**
+ * Location helpers for Snowbridge V2 XCM
+ */
+export const etherLocation = (ethChainId: number) => ({
+  parents: 2,
+  interior: XcmV5Junctions.X1(
+    XcmV5Junction.GlobalConsensus(
+      XcmV5NetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
+    )
+  ),
+});
+
+export const erc20Location = (ethChainId: number, tokenAddress: string) => ({
+  parents: 2,
+  interior: XcmV5Junctions.X2([
+    XcmV5Junction.GlobalConsensus(
+      XcmV5NetworkId.Ethereum({ chain_id: BigInt(ethChainId) })
+    ),
+    XcmV5Junction.AccountKey20({
+      key: tokenAddress as SizedHex<20>,
+      network: undefined,
+    }),
+  ]),
+});
+
+// ---------------------------------------------------------------------------
+// Inbound: Ethereum → Polkadot (used by Snowbridge Gateway v2_sendMessage)
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the complete XCM that AssetHub actually executes for a Snowbridge V2
+ * inbound transfer: BridgeHub's prelude (ReserveAssetDeposited + ExchangeAsset
+ * + PayFees) followed by the user XCM.
+ */
+export function buildSnowbridgeInboundDryRunXcm(
+  ethChainId: number,
+  destinationParaId: number
+): XcmV5Instruction[] {
+  const ether = etherLocation(ethChainId);
+  const dummyToken = erc20Location(ethChainId, '0x' + '00'.repeat(20));
+  const dummyAmount = 1_000_000_000_000n;
+  const dummyDot = 1_000_000_000n;
+
+  const prelude: XcmV5Instruction[] = [
+    XcmV5Instruction.ReserveAssetDeposited([
+      { id: ether, fun: XcmV3MultiassetFungibility.Fungible(dummyAmount) },
+      { id: dummyToken, fun: XcmV3MultiassetFungibility.Fungible(dummyAmount) },
+    ]),
+    XcmV5Instruction.ExchangeAsset({
+      give: XcmV5AssetFilter.Wild(
+        XcmV5WildAsset.AllOf({
+          id: ether,
+          fun: { type: 'Fungible' as const, value: undefined },
+        })
+      ),
+      want: [
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(dummyDot),
+        },
+      ],
+      maximal: false,
+    }),
+    XcmV5Instruction.PayFees({
+      asset: {
+        id: DOT_LOCATION,
+        fun: XcmV3MultiassetFungibility.Fungible(dummyDot),
+      },
+    }),
+  ];
+
+  const userXcm = buildSnowbridgeInboundXcm({
+    ethChainId,
+    destinationParaId,
+    tokenAddress: '0x' + '00'.repeat(20),
+    beneficiaryHex: '0x' + '00'.repeat(32),
+    tokenAmount: dummyAmount,
+    hydrationDotFee: dummyDot,
+    topic: ('0x' + '00'.repeat(32)) as SizedHex<32>,
+  });
+
+  return [...prelude, ...userXcm];
+}
+
+export type SnowbridgeInboundXcmParams = {
+  ethChainId: number;
+  destinationParaId: number;
+  tokenAddress: string;
+  beneficiaryHex: string;
+  tokenAmount: bigint;
+  hydrationDotFee: bigint;
+  topic: SizedHex<32>;
+};
+
+/**
+ * Builds the XCM V5 program passed to `v2_sendMessage` for
+ * transferring ERC20/ETH from Ethereum to a Polkadot parachain.
+ *
+ * BridgeHub V2's inbound queue deposits ether + token into holding and
+ * pays for AH-side execution from its own prelude. We do NOT assume any
+ * DOT is left in holding for us — instead we explicitly swap leftover
+ * ether into the exact DOT amount needed for the destination's PayFees,
+ * then forward token + DOT downstream via InitiateTransfer.
+ *
+ * Flow:
+ * 1. SetAppendix — refund + deposit-to-beneficiary on error
+ * 2. ExchangeAsset — swap leftover ether → hydrationDotFee DOT
+ * 3. InitiateTransfer to destination parachain
+ *    - remote_fees: ReserveDeposit(DOT) sized for destination PayFees
+ *    - assets: ReserveDeposit(token) for the actual transfer
+ *    - remote_xcm: RefundSurplus + DepositAsset to beneficiary
+ * 4. RefundSurplus + DepositAsset — sweep leftover assets to beneficiary on AH
+ * 5. SetTopic for tracking
+ */
+export function buildSnowbridgeInboundXcm(
+  params: SnowbridgeInboundXcmParams
+): XcmV5Instruction[] {
+  const {
+    ethChainId,
+    destinationParaId,
+    tokenAddress,
+    beneficiaryHex,
+    tokenAmount,
+    hydrationDotFee,
+    topic,
+  } = params;
+
+  const ether = etherLocation(ethChainId);
+  const token =
+    tokenAddress === ETHER_TOKEN_ADDRESS
+      ? ether
+      : erc20Location(ethChainId, tokenAddress);
+
+  const isEthAddress =
+    beneficiaryHex.length === 42 && beneficiaryHex.startsWith('0x');
+  const beneficiaryJunction = isEthAddress
+    ? XcmV5Junction.AccountKey20({
+        key: beneficiaryHex as SizedHex<20>,
+        network: undefined,
+      })
+    : XcmV5Junction.AccountId32({
+        id: beneficiaryHex as SizedHex<32>,
+        network: undefined,
+      });
+
+  const beneficiary = {
+    parents: 0,
+    interior: XcmV5Junctions.X1(beneficiaryJunction),
+  };
+
+  return [
+    XcmV5Instruction.SetAppendix([
+      XcmV5Instruction.RefundSurplus(),
+      XcmV5Instruction.DepositAsset({
+        assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+        beneficiary,
+      }),
+    ]),
+    XcmV5Instruction.ExchangeAsset({
+      give: XcmV5AssetFilter.Wild(
+        XcmV5WildAsset.AllOf({
+          id: ether,
+          fun: { type: 'Fungible' as const, value: undefined },
+        })
+      ),
+      want: [
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(hydrationDotFee),
+        },
+      ],
+      maximal: false,
+    }),
+    XcmV5Instruction.InitiateTransfer({
+      destination: {
+        parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(destinationParaId)),
+      },
+      remote_fees: {
+        type: 'ReserveDeposit',
+        value: XcmV5AssetFilter.Definite([
+          {
+            id: DOT_LOCATION,
+            fun: XcmV3MultiassetFungibility.Fungible(hydrationDotFee),
+          },
+        ]),
+      },
+      preserve_origin: false,
+      assets: [
+        {
+          type: 'ReserveDeposit',
+          value: XcmV5AssetFilter.Definite([
+            {
+              id: token,
+              fun: XcmV3MultiassetFungibility.Fungible(tokenAmount),
+            },
+          ]),
+        },
+      ],
+      remote_xcm: [
+        XcmV5Instruction.RefundSurplus(),
+        XcmV5Instruction.DepositAsset({
+          assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
+          beneficiary,
+        }),
+        XcmV5Instruction.SetTopic(topic),
+      ],
+    }),
+    XcmV5Instruction.RefundSurplus(),
+    XcmV5Instruction.DepositAsset({
+      assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+      beneficiary,
+    }),
+    XcmV5Instruction.SetTopic(topic),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Outbound: Polkadot → Ethereum (used by polkadotXcm.execute)
+// ---------------------------------------------------------------------------
+
+export type SnowbridgeOutboundXcmParams = {
+  tokenAddress: string;
+  senderPubKey: string;
+  beneficiaryHex: string;
+  tokenAmount: bigint;
+  sourceExecutionFee: bigint;
+  dotRemoteFee: bigint;
+  dotToEtherSwapAmount: bigint;
+  etherFeeAmount: bigint;
+  topic: SizedHex<32>;
+};
+
+/**
+ * Builds the V5 XCM program for `polkadotXcm.execute` to transfer
+ * ERC20/ETH from a Polkadot parachain to Ethereum via Snowbridge V2.
+ *
+ * 3-leg program:
+ *
+ * Leg 1 — Source parachain:
+ *   WithdrawAsset, PayFees, SetAppendix (error recovery), InitiateTransfer → AssetHub
+ *
+ * Leg 2 — AssetHub (remote_xcm):
+ *   SetAppendix (error recovery), ExchangeAsset (DOT→Ether), InitiateTransfer → Ethereum
+ *
+ * Leg 3 — Ethereum (innermost remote_xcm):
+ *   DepositAsset to beneficiary, SetTopic
+ */
+export function buildSnowbridgeOutboundXcm(
+  params: SnowbridgeOutboundXcmParams
+): XcmV5Instruction[] {
+  const {
+    tokenAddress,
+    senderPubKey,
+    beneficiaryHex,
+    tokenAmount,
+    sourceExecutionFee,
+    dotRemoteFee,
+    dotToEtherSwapAmount,
+    etherFeeAmount,
+    topic,
+  } = params;
+
+  const ether = etherLocation(ETHEREUM_CHAIN_ID);
+  const token =
+    tokenAddress === ETHER_TOKEN_ADDRESS
+      ? ether
+      : erc20Location(ETHEREUM_CHAIN_ID, tokenAddress);
+
+  const sender = {
+    parents: 0,
+    interior: XcmV5Junctions.X1(
+      XcmV5Junction.AccountId32({
+        id: senderPubKey as SizedHex<32>,
+        network: undefined,
+      })
+    ),
+  };
+
+  const ethBeneficiary = {
+    parents: 0,
+    interior: XcmV5Junctions.X1(
+      XcmV5Junction.AccountKey20({
+        key: beneficiaryHex as SizedHex<20>,
+        network: undefined,
+      })
+    ),
+  };
+
+  const ethereumDest = {
+    parents: 2,
+    interior: XcmV5Junctions.X1(
+      XcmV5Junction.GlobalConsensus(
+        XcmV5NetworkId.Ethereum({ chain_id: BigInt(ETHEREUM_CHAIN_ID) })
+      )
+    ),
+  };
+
+  // --- Leg 3: Ethereum ---
+  const ethereumXcm = [
+    XcmV5Instruction.DepositAsset({
+      assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
+      beneficiary: ethBeneficiary,
+    }),
+    XcmV5Instruction.SetTopic(topic),
+  ];
+
+  // --- Leg 2: AssetHub ---
+  const assetHubXcm: XcmV5Instruction[] = [
+    // Error recovery on AssetHub: return assets to sender
+    XcmV5Instruction.SetAppendix([
+      XcmV5Instruction.SetHints({
+        hints: [{ type: 'AssetClaimer', value: { location: sender } }],
+      }),
+      XcmV5Instruction.RefundSurplus(),
+      XcmV5Instruction.DepositAsset({
+        assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+        beneficiary: sender,
+      }),
+    ]),
+  ];
+
+  // Swap DOT for Ether on AssetHub DEX. Done unconditionally — even when
+  // the user is bridging native ETH, the relayer fee is paid from this
+  // swap output rather than from the user's ETH withdrawal, so the
+  // user-facing fee stays denominated entirely in DOT.
+  assetHubXcm.push(
+    XcmV5Instruction.ExchangeAsset({
+      give: XcmV5AssetFilter.Definite([
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
+        },
+      ]),
+      want: [
+        {
+          id: ether,
+          fun: XcmV3MultiassetFungibility.Fungible(etherFeeAmount),
+        },
+      ],
+      maximal: false,
+    })
+  );
+
+  const bridgeAssets = [
+    {
+      type: 'ReserveWithdraw' as const,
+      value: XcmV5AssetFilter.Wild(
+        XcmV5WildAsset.AllOf({
+          id: token,
+          fun: { type: 'Fungible' as const, value: undefined },
+        })
+      ),
+    },
+  ];
+
+  // Definite filter pulls exactly the relayer fee from holding. Works for
+  // both paths: ERC20 leaves only `etherFeeAmount` ether in holding (from
+  // the swap), so Definite == Wild there; native-ETH holding mixes the
+  // swap output with the user's ETH transfer, and Definite ensures only
+  // the fee portion is consumed, leaving `tokenAmount` ether to bridge.
+  const bridgeRemoteFees = XcmV5AssetFilter.Definite([
+    {
+      id: ether,
+      fun: XcmV3MultiassetFungibility.Fungible(etherFeeAmount),
+    },
+  ]);
+
+  assetHubXcm.push(
+    // Bridge to Ethereum
+    XcmV5Instruction.InitiateTransfer({
+      destination: ethereumDest,
+      remote_fees: {
+        type: 'ReserveWithdraw',
+        value: bridgeRemoteFees,
+      },
+      preserve_origin: true,
+      assets: bridgeAssets,
+      remote_xcm: ethereumXcm,
+    }),
+    XcmV5Instruction.SetTopic(topic)
+  );
+
+  // Total DOT withdrawn: PayFees budget + remote_fees on AH + swap DOT
+  const totalDot = sourceExecutionFee + dotRemoteFee + dotToEtherSwapAmount;
+
+  // No fee consolidation for native ETH: the relayer fee is funded by the
+  // DOT→ether swap on AssetHub, so the user withdraws exactly the
+  // transfer amount of `token` regardless of asset class.
+  const withdrawAssets = [
+    {
+      id: DOT_LOCATION,
+      fun: XcmV3MultiassetFungibility.Fungible(totalDot),
+    },
+    {
+      id: token,
+      fun: XcmV3MultiassetFungibility.Fungible(tokenAmount),
+    },
+  ];
+
+  const sourceXcmFeeAssets: typeof withdrawAssets = [
+    {
+      id: DOT_LOCATION,
+      fun: XcmV3MultiassetFungibility.Fungible(sourceExecutionFee),
+    },
+  ];
+
+  // Assets forwarded to AssetHub via InitiateTransfer:
+  const tokenAsset = {
+    type: 'ReserveWithdraw' as const,
+    value: XcmV5AssetFilter.Wild(
+      XcmV5WildAsset.AllOf({
+        id: token,
+        fun: { type: 'Fungible' as const, value: undefined },
+      })
+    ),
+  };
+
+  // DOT for the swap is forwarded alongside the bridged token. It lands
+  // in holding on AssetHub (not the fee register) so ExchangeAsset can
+  // consume it for Ether.
+  const initiateAssets = [
+    {
+      type: 'ReserveWithdraw' as const,
+      value: XcmV5AssetFilter.Definite([
+        {
+          id: DOT_LOCATION,
+          fun: XcmV3MultiassetFungibility.Fungible(dotToEtherSwapAmount),
+        },
+      ]),
+    },
+    tokenAsset,
+  ];
+
+  return [
+    XcmV5Instruction.WithdrawAsset(withdrawAssets),
+    XcmV5Instruction.PayFees({
+      asset: sourceXcmFeeAssets[0],
+    }),
+    // Error recovery on source: return assets to sender
+    XcmV5Instruction.SetAppendix([
+      XcmV5Instruction.SetHints({
+        hints: [{ type: 'AssetClaimer', value: { location: sender } }],
+      }),
+      XcmV5Instruction.RefundSurplus(),
+      XcmV5Instruction.DepositAsset({
+        assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+        beneficiary: sender,
+      }),
+    ]),
+    // Transfer to AssetHub
+    XcmV5Instruction.InitiateTransfer({
+      destination: {
+        parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(ASSET_HUB_ID)),
+      },
+      remote_fees: {
+        type: 'ReserveWithdraw',
+        value: XcmV5AssetFilter.Definite([
+          {
+            id: DOT_LOCATION,
+            fun: XcmV3MultiassetFungibility.Fungible(dotRemoteFee),
+          },
+        ]),
+      },
+      preserve_origin: true,
+      assets: initiateAssets,
+      remote_xcm: assetHubXcm,
+    }),
+    XcmV5Instruction.SetTopic(topic),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Message builder for polkadotXcm.execute (used in route templates)
+// ---------------------------------------------------------------------------
+
+export function snowbridgeOutboundMessage(
+  params: ExtrinsicConfigBuilderParams
+) {
+  const { address, amount, asset, sender, source, destination, messageId } =
+    params;
+  const ctx = source.chain as Parachain;
+
+  const senderInfo = getSs58AddressInfo(sender);
+  if (!senderInfo.isValid) {
+    throw new Error(`Invalid SS58 address: ${sender}`);
+  }
+  const senderPubKey = toHex(senderInfo.publicKey);
+
+  const assetLocation = ctx.getAssetXcmLocation(asset);
+  const erc20KeyObj = assetLocation
+    ? multiloc.findNestedKey(assetLocation, 'key')
+    : undefined;
+  const tokenAddress = erc20KeyObj
+    ? (erc20KeyObj.key as string)
+    : ETHER_TOKEN_ADDRESS;
+
+  const feeBreakdown = destination.feeBreakdown;
+  const sourceExecutionFee = feeBreakdown['sourceExecutionFee'] ?? 0n;
+  const dotRemoteFee = feeBreakdown['dotRemoteFee'] ?? 0n;
+  const dotToEtherSwapAmount = feeBreakdown['dotToEtherSwapAmount'] ?? 0n;
+  const etherFeeAmount = feeBreakdown['etherFeeAmount'] ?? 0n;
+
+  const topic = (messageId ??
+    '0x0000000000000000000000000000000000000000000000000000000000000000') as SizedHex<32>;
+
+  const xcmInstructions = buildSnowbridgeOutboundXcm({
+    tokenAddress,
+    senderPubKey,
+    beneficiaryHex: address,
+    tokenAmount: amount,
+    sourceExecutionFee,
+    dotRemoteFee,
+    dotToEtherSwapAmount,
+    etherFeeAmount,
+    topic,
+  });
+
+  return XcmVersionedXcm.V5(xcmInstructions);
+}

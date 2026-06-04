@@ -4,24 +4,39 @@ import {
   FeeAmount,
   FeeAmountConfigBuilder,
   Parachain,
-  Snowbridge as Sb,
   Wormhole as Wh,
   Basejump as Bj,
 } from '@galacticcouncil/xc-core';
 
 import {
   BRIDGE_HUB_ID,
+  ETHEREUM_CHAIN_ID,
   buildERC20TransferFromPara,
   buildParaERC20Received,
+  buildParaERC20ReceivedV5,
   buildReserveTransfer,
   buildNestedReserveTransfer,
   buildMultiHopReserveTransfer,
+  buildSnowbridgeInboundDryRunXcm,
+  buildSnowbridgeOutboundXcm,
+  etherLocation,
+  TOPIC,
 } from './extrinsics/xcm';
 import { validateReserveChain } from './extrinsics/xcm/utils';
 import { padFeeByPercentage } from './utils';
 
 import { dot } from '../assets';
-import { BaseClient, AssethubClient } from '../clients';
+import {
+  ASSETHUB_ETHER_ED,
+  SNOWBRIDGE_BASE_DISPATCH_GAS,
+  SNOWBRIDGE_BASE_VERIFICATION_GAS,
+  SNOWBRIDGE_FIAT_SHAMIR_GAS,
+  SNOWBRIDGE_SUBMIT_GAS,
+  SnowbridgeFast,
+  getVolumeTipInWei,
+} from '../bridges/snowbridge';
+import { hydration } from '../chains';
+import { BaseClient, AssethubClient, HydrationClient } from '../clients';
 
 function TokenRelayer() {
   return {
@@ -61,46 +76,127 @@ type SendFeeOpts = {
   hub: Parachain;
 };
 
+type OutboundFeeOpts = SendFeeOpts & {
+  fast?: SnowbridgeFast;
+};
+
 function Snowbridge() {
   return {
     calculateInboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
-      build: async ({ feeAsset, destination, source }) => {
-        const ctx = source as EvmChain;
+      build: async ({ feeAsset, transferAsset, destination, amount }) => {
         const rcv = destination as Parachain;
 
-        const ctxSb = Sb.fromChain(ctx);
-
-        const paraClient = new BaseClient(rcv);
+        const paraClient = new HydrationClient(rcv);
         const hubClient = new AssethubClient(opts.hub);
 
         const xcm = buildParaERC20Received(feeAsset, rcv);
+        const xcmV5 = buildParaERC20ReceivedV5(feeAsset, rcv);
+        const etherLoc = etherLocation(ETHEREUM_CHAIN_ID);
 
-        const [destinationFee, deliveryFee] = await Promise.all([
-          paraClient.calculateDestinationFee(xcm, dot),
+        // Hardcoded BridgeHub extrinsic fee
+        const extrinsicFeeDot = 250_000_000n;
+
+        // Comprehensive dummy of what AH actually executes: BridgeHub's
+        // prelude (ReserveAssetDeposited + ExchangeAsset + PayFees) plus our
+        // user XCM.
+        const dummyInboundXcm = buildSnowbridgeInboundDryRunXcm(
+          ETHEREUM_CHAIN_ID,
+          rcv.parachainId
+        );
+
+        // 1. Query DOT-denominated fees (and the volume tip — fully
+        // independent of everything else, so it rides the same round-trip).
+        const [
+          destinationExecutionFeeDot,
+          destinationDeliveryFeeDot,
+          assetHubDeliveryFeeDot,
+          assetHubExecutionFeeDotRaw,
+          volumeTip,
+        ] = await Promise.all([
+          paraClient.calculateDestinationFeeV5(xcmV5, dot),
           hubClient.calculateDeliveryFee(xcm, rcv.parachainId),
+          hubClient.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
+          hubClient.calculateDestinationFeeV5(dummyInboundXcm, dot),
+          getVolumeTipInWei(hydration.dex, transferAsset, amount ?? 0n),
         ]);
 
-        const bridgeFeeInDot =
-          deliveryFee + padFeeByPercentage(destinationFee, 25n);
+        const paddedDestExecutionDot = padFeeByPercentage(
+          destinationExecutionFeeDot,
+          33n
+        );
+        const paddedDestDeliveryDot = padFeeByPercentage(
+          destinationDeliveryFeeDot,
+          33n
+        );
+        const paddedAssetHubDeliveryDot = padFeeByPercentage(
+          assetHubDeliveryFeeDot,
+          33n
+        );
+        const assetHubExecutionFeeDot = padFeeByPercentage(
+          assetHubExecutionFeeDotRaw,
+          33n
+        );
 
-        const feeAssetId = ctx.getAssetId(feeAsset);
-        const bridgeFeeInWei = await ctx.evmClient.getProvider().readContract({
-          abi: Abi.Snowbridge,
-          address: ctxSb.getGateway() as `0x${string}`,
-          args: [feeAssetId as `0x${string}`, rcv.parachainId, bridgeFeeInDot],
-          functionName: 'quoteSendTokenFee',
-        });
+        // 2. Compute fee
+        const ahDotFee = assetHubExecutionFeeDot + paddedDestDeliveryDot;
+        const hydrationDotFee = paddedDestExecutionDot;
+
+        // 3a. Ether for BridgeHub's PayFees
+        const executionFeeQuoted = await hubClient.quoteEtherForDot(
+          etherLoc,
+          ahDotFee
+        );
+        const executionFeePadded = padFeeByPercentage(executionFeeQuoted, 30n);
+        const executionFee =
+          executionFeePadded < ASSETHUB_ETHER_ED * 2n
+            ? ASSETHUB_ETHER_ED * 2n
+            : executionFeePadded;
+
+        const remoteEtherFee = padFeeByPercentage(
+          await hubClient.quoteEtherForDot(etherLoc, hydrationDotFee),
+          100n
+        );
+
+        // 4. Relayer fee
+        const relayerFee = padFeeByPercentage(
+          await hubClient.quoteDotToEther(
+            etherLoc,
+            extrinsicFeeDot + paddedAssetHubDeliveryDot
+          ),
+          30n
+        );
+
+        // 5. Total wei the user pays. Volume tip (V2 standard relayer fee)
+        // was fetched alongside the DOT-denominated fees above; it's zero
+        // when amount is absent (preview render).
+        const totalFeeInWei =
+          executionFee + relayerFee + remoteEtherFee + volumeTip;
+
         return {
-          amount: bridgeFeeInWei,
-          breakdown: { bridgeFeeInDot: bridgeFeeInDot },
+          amount: totalFeeInWei,
+          breakdown: {
+            executionFee,
+            relayerFee,
+            remoteEtherFee,
+            hydrationDotFee,
+            volumeTip,
+          },
         } as FeeAmount;
       },
     }),
-    calculateOutboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
-      build: async ({ transferAsset, feeAsset, source }) => {
+    calculateOutboundFee: (opts: OutboundFeeOpts): FeeAmountConfigBuilder => ({
+      build: async ({
+        transferAsset,
+        feeAsset,
+        source,
+        destination,
+        amount,
+      }) => {
         const ctx = source as Parachain;
+        const dest = destination as EvmChain;
 
-        const client = new AssethubClient(opts.hub);
+        const hubClient = new AssethubClient(opts.hub);
+        const etherLoc = etherLocation(ETHEREUM_CHAIN_ID);
 
         const xcm = buildERC20TransferFromPara(transferAsset, ctx);
         const returnToSenderXcm = buildParaERC20Received(transferAsset, ctx);
@@ -112,28 +208,79 @@ function Snowbridge() {
           returnToSenderDeliveryFee,
           returnToSenderDestinationFee,
         ] = await Promise.all([
-          client.getBridgeDeliveryFee(),
-          client.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
-          client.calculateDestinationFee(xcm, feeAsset),
-          client.calculateDeliveryFee(returnToSenderXcm, ctx.parachainId),
-          client.calculateDestinationFee(returnToSenderXcm, feeAsset),
+          hubClient.getBridgeDeliveryFee(),
+          hubClient.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
+          hubClient.calculateDestinationFee(xcm, feeAsset),
+          hubClient.calculateDeliveryFee(returnToSenderXcm, ctx.parachainId),
+          hubClient.calculateDestinationFee(returnToSenderXcm, feeAsset),
         ]);
 
-        const bridgeFeeInDot =
+        const gasPrice = await dest.evmClient.getProvider().getGasPrice();
+        const submitGas = opts.fast
+          ? SNOWBRIDGE_FIAT_SHAMIR_GAS
+          : SNOWBRIDGE_SUBMIT_GAS;
+        const totalGas =
+          submitGas +
+          SNOWBRIDGE_BASE_VERIFICATION_GAS +
+          SNOWBRIDGE_BASE_DISPATCH_GAS;
+        const etherFeeAmount = padFeeByPercentage(gasPrice * totalGas, 33n);
+
+        // DOT for AssetHub execution + downstream deliveries (remote_fees)
+        const dotRemoteFee =
           bridgeDeliveryFee +
           bridgeHubDeliveryFee +
           padFeeByPercentage(assetHubDestinationFee, 25n) +
           returnToSenderDeliveryFee +
           padFeeByPercentage(returnToSenderDestinationFee, 25n);
 
+        const dotToEtherSwapAmount = padFeeByPercentage(
+          await hubClient.quoteDotForExactEther(etherLoc, etherFeeAmount),
+          20n
+        );
+
+        // Query source chain XCM execution fee dynamically
+        const sourceClient = new HydrationClient(ctx);
+        const dummyOutboundXcm = buildSnowbridgeOutboundXcm({
+          tokenAddress: '0x0000000000000000000000000000000000000000',
+          senderPubKey: '0x' + '00'.repeat(32),
+          beneficiaryHex: '0x' + '00'.repeat(20),
+          tokenAmount: 1_000_000_000_000n,
+          sourceExecutionFee: 1_000_000_000n,
+          dotRemoteFee: 1_000_000_000n,
+          dotToEtherSwapAmount: 1_000_000_000n,
+          etherFeeAmount: 1_000_000_000n,
+          topic: TOPIC,
+        });
+
+        const sourceExecutionFee = padFeeByPercentage(
+          await sourceClient.calculateDestinationFeeV5(dummyOutboundXcm, dot),
+          33n
+        );
+
+        const volumeTipWei = await getVolumeTipInWei(
+          hydration.dex,
+          transferAsset,
+          amount ?? 0n
+        );
+        const volumeTipDot =
+          etherFeeAmount === 0n
+            ? 0n
+            : (volumeTipWei * dotToEtherSwapAmount) / etherFeeAmount;
+
+        const totalDotFee =
+          dotRemoteFee +
+          dotToEtherSwapAmount +
+          sourceExecutionFee +
+          volumeTipDot;
+
         return {
-          amount: bridgeFeeInDot,
+          amount: totalDotFee,
           breakdown: {
-            bridgeDeliveryFee: bridgeDeliveryFee,
-            bridgeHubDeliveryFee: bridgeHubDeliveryFee,
-            assetHubDestinationFee: assetHubDestinationFee,
-            returnToSenderDeliveryFee: returnToSenderDeliveryFee,
-            returnToSenderDestinationFee: returnToSenderDestinationFee,
+            dotRemoteFee,
+            dotToEtherSwapAmount,
+            etherFeeAmount,
+            sourceExecutionFee,
+            volumeTip: volumeTipDot,
           },
         } as FeeAmount;
       },

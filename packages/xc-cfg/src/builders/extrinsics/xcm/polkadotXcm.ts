@@ -1,9 +1,12 @@
 import {
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
+  ExtrinsicConfigBuilderParams,
   Parachain,
 } from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
+
+export type XcmMessageBuilder = (params: ExtrinsicConfigBuilderParams) => any;
 
 import {
   isSnowbridgeTransfer,
@@ -25,6 +28,8 @@ import {
   shouldFeeAssetPrecede,
 } from './utils';
 import { XcmTransferType, XcmVersion } from './types';
+
+import { snowbridgeOutboundMessage } from './builder/Snowbridge';
 
 const pallet = 'PolkadotXcm';
 
@@ -436,6 +441,44 @@ const send = () => {
   };
 };
 
+function execute(
+  messageBuilder: XcmMessageBuilder
+): ExtrinsicConfigBuilder;
+function execute(): { viaSnowbridge: () => ExtrinsicConfigBuilder };
+function execute(messageBuilder?: XcmMessageBuilder) {
+  const buildExecute = (
+    msgBuilder: XcmMessageBuilder
+  ): ExtrinsicConfigBuilder => ({
+    build: async (params) => {
+      const message = msgBuilder(params);
+
+      const func = 'execute';
+      return new ExtrinsicConfig({
+        module: pallet,
+        func,
+        getTx: (client) => {
+          return client.getUnsafeApi().tx[pallet][func]({
+            message,
+            max_weight: {
+              ref_time: 20_000_000_000n,
+              proof_size: 500_000n,
+            },
+          });
+        },
+      });
+    },
+  });
+
+  if (messageBuilder) {
+    return buildExecute(messageBuilder);
+  }
+
+  return {
+    viaSnowbridge: (): ExtrinsicConfigBuilder =>
+      buildExecute(snowbridgeOutboundMessage),
+  };
+};
+
 export const polkadotXcm = () => {
   return {
     limitedReserveTransferAssets,
@@ -443,6 +486,7 @@ export const polkadotXcm = () => {
     reserveTransferAssets,
     transferAssets,
     transferAssetsUsingTypeAndThen,
+    execute,
     send,
   };
 };

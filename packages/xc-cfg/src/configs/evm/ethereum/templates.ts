@@ -69,7 +69,7 @@ export function toHydrationViaSnowbridgeTemplate(
         asset: eth,
       },
     },
-    contract: ContractBuilder().Snowbridge().sendToken(),
+    contract: ContractBuilder().Snowbridge().v2SendMessage(),
     tags: [Tag.Snowbridge],
   });
 }
