@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 1.1.0
+
+### Minor Changes
+
+- 9a867af: Snowbridge migration from V1 to V2
+
 ## 1.0.0
 
 ### Major Changes

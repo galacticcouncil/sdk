@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 1.4.0
+
+### Minor Changes
+
+- 9a867af: Snowbridge migration from V1 to V2
+
+### Patch Changes
+
+- Updated dependencies [9a867af]
+  - @galacticcouncil/xc-core@1.1.0
+
 ## 1.3.0
 
 ### Minor Changes
