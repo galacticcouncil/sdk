@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-sdk
 
+## 1.1.1
+
+### Patch Changes
+
+- 310086e: Fixed claim script
+
 ## 1.1.0
 
 ### Minor Changes
