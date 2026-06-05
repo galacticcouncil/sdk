@@ -55,7 +55,7 @@ export class SubstrateClaim {
           gas_limit: [5_000_000n, 0n, 0n, 0n],
           action: {
             type: 'Call',
-            value: Binary.fromHex(claim.to),
+            value: claim.to,
           },
           value: [0n, 0n, 0n, 0n],
           input: Binary.fromHex(claim.data),
