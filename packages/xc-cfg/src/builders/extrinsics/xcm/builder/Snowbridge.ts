@@ -133,7 +133,7 @@ export type SnowbridgeInboundXcmParams = {
  * 3. InitiateTransfer to destination parachain
  *    - remote_fees: ReserveDeposit(DOT) sized for destination PayFees
  *    - assets: ReserveDeposit(token) for the actual transfer
- *    - remote_xcm: RefundSurplus + DepositAsset to beneficiary
+ *    - remote_xcm: DepositAsset to beneficiary
  * 4. RefundSurplus + DepositAsset — sweep leftover assets to beneficiary on AH
  * 5. SetTopic for tracking
  */
@@ -223,7 +223,6 @@ export function buildSnowbridgeInboundXcm(
         },
       ],
       remote_xcm: [
-        XcmV5Instruction.RefundSurplus(),
         XcmV5Instruction.DepositAsset({
           assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
           beneficiary,

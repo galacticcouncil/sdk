@@ -24,9 +24,8 @@ import { XcmVersion } from '../types';
  * 2. PayFees(DOT)
  * 3. ReserveAssetDeposited(token)
  * 4. ClearOrigin
- * 5. RefundSurplus
- * 6. DepositAsset
- * 7. SetTopic
+ * 5. DepositAsset
+ * 6. SetTopic
  */
 export function buildParaERC20ReceivedV5(
   asset: Asset,
@@ -68,7 +67,6 @@ export function buildParaERC20ReceivedV5(
       },
     ]),
     XcmV5Instruction.ClearOrigin(),
-    XcmV5Instruction.RefundSurplus(),
     XcmV5Instruction.DepositAsset({
       assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.AllCounted(3)),
       beneficiary,
