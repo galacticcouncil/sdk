@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.4.1
+
+### Patch Changes
+
+- 2d7d465: Removed refundSurplus from xcm commands
+
 ## 1.4.0
 
 ### Minor Changes
