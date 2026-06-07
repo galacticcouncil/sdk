@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.4.0
+
+### Minor Changes
+
+- whitelist tx.ethereum
+
 ## 2.3.0
 
 ### Minor Changes
