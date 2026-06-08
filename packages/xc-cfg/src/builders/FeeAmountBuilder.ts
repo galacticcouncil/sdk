@@ -30,6 +30,7 @@ import {
   ASSETHUB_ETHER_ED,
   SNOWBRIDGE_BASE_DISPATCH_GAS,
   SNOWBRIDGE_BASE_VERIFICATION_GAS,
+  SNOWBRIDGE_TOKEN_DELIVERY_GAS,
   SNOWBRIDGE_FIAT_SHAMIR_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
   SnowbridgeFast,
@@ -199,20 +200,15 @@ function Snowbridge() {
         const etherLoc = etherLocation(ETHEREUM_CHAIN_ID);
 
         const xcm = buildERC20TransferFromPara(transferAsset, ctx);
-        const returnToSenderXcm = buildParaERC20Received(transferAsset, ctx);
 
         const [
           bridgeDeliveryFee,
           bridgeHubDeliveryFee,
           assetHubDestinationFee,
-          returnToSenderDeliveryFee,
-          returnToSenderDestinationFee,
         ] = await Promise.all([
           hubClient.getBridgeDeliveryFee(),
           hubClient.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
           hubClient.calculateDestinationFee(xcm, feeAsset),
-          hubClient.calculateDeliveryFee(returnToSenderXcm, ctx.parachainId),
-          hubClient.calculateDestinationFee(returnToSenderXcm, feeAsset),
         ]);
 
         const gasPrice = await dest.evmClient.getProvider().getGasPrice();
@@ -222,16 +218,22 @@ function Snowbridge() {
         const totalGas =
           submitGas +
           SNOWBRIDGE_BASE_VERIFICATION_GAS +
-          SNOWBRIDGE_BASE_DISPATCH_GAS;
-        const etherFeeAmount = padFeeByPercentage(gasPrice * totalGas, 33n);
+          SNOWBRIDGE_BASE_DISPATCH_GAS +
+          SNOWBRIDGE_TOKEN_DELIVERY_GAS;
+
+        const volumeTipWei = await getVolumeTipInWei(
+          hydration.dex,
+          transferAsset,
+          amount ?? 0n
+        );
+        const etherFeeAmount =
+          padFeeByPercentage(gasPrice * totalGas, 33n) + volumeTipWei;
 
         // DOT for AssetHub execution + downstream deliveries (remote_fees)
         const dotRemoteFee =
           bridgeDeliveryFee +
-          bridgeHubDeliveryFee +
-          padFeeByPercentage(assetHubDestinationFee, 25n) +
-          returnToSenderDeliveryFee +
-          padFeeByPercentage(returnToSenderDestinationFee, 25n);
+          padFeeByPercentage(bridgeHubDeliveryFee, 33n) +
+          padFeeByPercentage(assetHubDestinationFee, 33n);
 
         const dotToEtherSwapAmount = padFeeByPercentage(
           await hubClient.quoteDotForExactEther(etherLoc, etherFeeAmount),
@@ -257,21 +259,13 @@ function Snowbridge() {
           33n
         );
 
-        const volumeTipWei = await getVolumeTipInWei(
-          hydration.dex,
-          transferAsset,
-          amount ?? 0n
-        );
         const volumeTipDot =
           etherFeeAmount === 0n
             ? 0n
             : (volumeTipWei * dotToEtherSwapAmount) / etherFeeAmount;
 
         const totalDotFee =
-          dotRemoteFee +
-          dotToEtherSwapAmount +
-          sourceExecutionFee +
-          volumeTipDot;
+          dotRemoteFee + dotToEtherSwapAmount + sourceExecutionFee;
 
         return {
           amount: totalDotFee,
