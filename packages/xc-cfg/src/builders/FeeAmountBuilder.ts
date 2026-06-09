@@ -23,7 +23,7 @@ import {
   TOPIC,
 } from './extrinsics/xcm';
 import { validateReserveChain } from './extrinsics/xcm/utils';
-import { padFeeByPercentage } from './utils';
+import { padFeeByPercentage, scaledPadPercentage } from './utils';
 
 import { dot } from '../assets';
 import {
@@ -226,8 +226,13 @@ function Snowbridge() {
           transferAsset,
           amount ?? 0n
         );
+        // The volume tip already over-covers gas drift and swap slippage, so
+        // both pads decay as the tip grows (matching Snowbridge). Without this,
+        // a flat 33%/20% pad on top of a large tip over-charges the user.
+        const rawGasFee = gasPrice * totalGas;
+        const scaledGasPad = scaledPadPercentage(33n, volumeTipWei, rawGasFee);
         const etherFeeAmount =
-          padFeeByPercentage(gasPrice * totalGas, 33n) + volumeTipWei;
+          padFeeByPercentage(rawGasFee, scaledGasPad) + volumeTipWei;
 
         // DOT for AssetHub execution + downstream deliveries (remote_fees)
         const dotRemoteFee =
@@ -235,9 +240,14 @@ function Snowbridge() {
           padFeeByPercentage(bridgeHubDeliveryFee, 33n) +
           padFeeByPercentage(assetHubDestinationFee, 33n);
 
+        const scaledSlippagePad = scaledPadPercentage(
+          20n,
+          volumeTipWei,
+          rawGasFee
+        );
         const dotToEtherSwapAmount = padFeeByPercentage(
           await hubClient.quoteDotForExactEther(etherLoc, etherFeeAmount),
-          20n
+          scaledSlippagePad
         );
 
         // Query source chain XCM execution fee dynamically
