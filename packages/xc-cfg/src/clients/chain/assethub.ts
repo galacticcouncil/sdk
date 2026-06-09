@@ -75,7 +75,32 @@ export class AssethubClient extends BaseClient<Hub> {
       defaultFee: 150_000_000_000n,
     }
   ): Promise<bigint> {
-    const keyBytes = new TextEncoder().encode(':BridgeHubEthereumBaseFeeV2:');
+    return this.readBridgeBaseFee(
+      ':BridgeHubEthereumBaseFeeV2:',
+      options.defaultFee
+    );
+  }
+
+  // Snowbridge V1 (legacy) is charged the un-suffixed base-fee storage item by
+  // the V1 EthereumOutboundQueue. This is a different (higher) value than the
+  // V2 key above, so the V1 fee path must read it explicitly — otherwise a V1
+  // transfer is funded with the cheaper V2 base fee and underpays the bridge.
+  async getBridgeDeliveryFeeV1(
+    options = {
+      defaultFee: 2_750_872_500_000n,
+    }
+  ): Promise<bigint> {
+    return this.readBridgeBaseFee(
+      ':BridgeHubEthereumBaseFee:',
+      options.defaultFee
+    );
+  }
+
+  private async readBridgeBaseFee(
+    key: string,
+    defaultFee: bigint
+  ): Promise<bigint> {
+    const keyBytes = new TextEncoder().encode(key);
     const feeStorageKey = toHex(Twox128(keyBytes));
     const feeStorageItem = await this.client._request<string>(
       'state_getStorage',
@@ -83,12 +108,12 @@ export class AssethubClient extends BaseClient<Hub> {
     );
 
     if (!feeStorageItem) {
-      return options.defaultFee;
+      return defaultFee;
     }
 
     const leFee = u128.dec(feeStorageItem);
     if (leFee === 0n) {
-      return options.defaultFee;
+      return defaultFee;
     }
     return leFee;
   }

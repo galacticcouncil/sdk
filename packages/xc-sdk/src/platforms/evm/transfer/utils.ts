@@ -28,13 +28,19 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
     Array.isArray(config.args[1]) &&
     config.args[1].length === 0;
 
+  // Snowbridge V1 (legacy) native ETH: sendToken with the zero token address.
+  const isSnowbridgeV1Native =
+    config.module === 'Snowbridge' &&
+    config.func === 'sendToken' &&
+    config.args[0] === '0x0000000000000000000000000000000000000000';
+
   const isWormholeNative =
     config.module === 'TokenBridge' &&
     ['wrapAndTransferETHWithPayload', 'wrapAndTransferETH'].includes(
       config.func
     );
 
-  return isWormholeNative || isSnowbridgeNative;
+  return isWormholeNative || isSnowbridgeNative || isSnowbridgeV1Native;
 }
 
 export function isPrecompile(config: ContractConfig): boolean {

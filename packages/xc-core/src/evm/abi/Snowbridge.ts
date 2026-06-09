@@ -306,4 +306,38 @@ export const SNOWBRIDGE = [
     stateMutability: 'view',
     type: 'function',
   },
+  // Snowbridge V1 (legacy) — kept alongside the V2 funcs so the V1 transfer
+  // path (cheaper, flat bridge fee) can be offered as a selectable route.
+  {
+    inputs: [
+      { internalType: 'address', name: 'token', type: 'address' },
+      { internalType: 'ParaID', name: 'destinationChain', type: 'uint32' },
+      { internalType: 'uint128', name: 'destinationFee', type: 'uint128' },
+    ],
+    name: 'quoteSendTokenFee',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: 'token', type: 'address' },
+      { internalType: 'ParaID', name: 'destinationChain', type: 'uint32' },
+      {
+        components: [
+          { internalType: 'enum Kind', name: 'kind', type: 'uint8' },
+          { internalType: 'bytes', name: 'data', type: 'bytes' },
+        ],
+        internalType: 'struct MultiAddress',
+        name: 'destinationAddress',
+        type: 'tuple',
+      },
+      { internalType: 'uint128', name: 'destinationFee', type: 'uint128' },
+      { internalType: 'uint128', name: 'amount', type: 'uint128' },
+    ],
+    name: 'sendToken',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
 ] as const;

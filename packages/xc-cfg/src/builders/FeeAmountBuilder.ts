@@ -4,6 +4,7 @@ import {
   FeeAmount,
   FeeAmountConfigBuilder,
   Parachain,
+  Snowbridge as Sb,
   Wormhole as Wh,
   Basejump as Bj,
 } from '@galacticcouncil/xc-core';
@@ -281,6 +282,83 @@ function Snowbridge() {
             etherFeeAmount,
             sourceExecutionFee,
             volumeTip: volumeTipDot,
+          },
+        } as FeeAmount;
+      },
+    }),
+
+    calculateInboundFeeV1: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
+      build: async ({ feeAsset, destination, source }) => {
+        const ctx = source as EvmChain;
+        const rcv = destination as Parachain;
+
+        const ctxSb = Sb.fromChain(ctx);
+
+        const paraClient = new BaseClient(rcv);
+        const hubClient = new AssethubClient(opts.hub);
+
+        const xcm = buildParaERC20Received(feeAsset, rcv);
+
+        const [destinationFee, deliveryFee] = await Promise.all([
+          paraClient.calculateDestinationFee(xcm, dot),
+          hubClient.calculateDeliveryFee(xcm, rcv.parachainId),
+        ]);
+
+        const bridgeFeeInDot =
+          deliveryFee + padFeeByPercentage(destinationFee, 25n);
+
+        const feeAssetId = ctx.getAssetId(feeAsset);
+        const bridgeFeeInWei = await ctx.evmClient.getProvider().readContract({
+          abi: Abi.Snowbridge,
+          address: ctxSb.getGateway() as `0x${string}`,
+          args: [feeAssetId as `0x${string}`, rcv.parachainId, bridgeFeeInDot],
+          functionName: 'quoteSendTokenFee',
+        });
+        return {
+          amount: bridgeFeeInWei,
+          breakdown: { bridgeFeeInDot: bridgeFeeInDot },
+        } as FeeAmount;
+      },
+    }),
+
+    calculateOutboundFeeV1: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
+      build: async ({ transferAsset, feeAsset, source }) => {
+        const ctx = source as Parachain;
+
+        const client = new AssethubClient(opts.hub);
+
+        const xcm = buildERC20TransferFromPara(transferAsset, ctx);
+        const returnToSenderXcm = buildParaERC20Received(transferAsset, ctx);
+
+        const [
+          bridgeDeliveryFee,
+          bridgeHubDeliveryFee,
+          assetHubDestinationFee,
+          returnToSenderDeliveryFee,
+          returnToSenderDestinationFee,
+        ] = await Promise.all([
+          client.getBridgeDeliveryFeeV1(),
+          client.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
+          client.calculateDestinationFee(xcm, feeAsset),
+          client.calculateDeliveryFee(returnToSenderXcm, ctx.parachainId),
+          client.calculateDestinationFee(returnToSenderXcm, feeAsset),
+        ]);
+
+        const bridgeFeeInDot =
+          bridgeDeliveryFee +
+          bridgeHubDeliveryFee +
+          padFeeByPercentage(assetHubDestinationFee, 25n) +
+          returnToSenderDeliveryFee +
+          padFeeByPercentage(returnToSenderDestinationFee, 25n);
+
+        return {
+          amount: bridgeFeeInDot,
+          breakdown: {
+            bridgeDeliveryFee,
+            bridgeHubDeliveryFee,
+            assetHubDestinationFee,
+            returnToSenderDeliveryFee,
+            returnToSenderDestinationFee,
           },
         } as FeeAmount;
       },
