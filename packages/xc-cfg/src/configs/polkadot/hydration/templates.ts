@@ -287,3 +287,42 @@ export function viaSnowbridgeTemplate(
     tags: fast ? [Tag.Snowbridge, Tag.SnowbridgeFast] : [Tag.Snowbridge],
   });
 }
+
+// Snowbridge V1 (legacy) outbound route (Hydration -> Ethereum). Uses the
+// runtime-constructed reserve transfer (transferAssetsUsingTypeAndThen) and the
+// flat V1 DOT bridge fee — cheaper than V2 but the relayer absorbs Ethereum gas.
+export function viaSnowbridgeV1Template(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: to,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateOutboundFeeV1({ hub: assetHub }),
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.DestinationReserve,
+      })
+    ),
+    tags: [Tag.Snowbridge, Tag.SnowbridgeV1],
+  });
+}

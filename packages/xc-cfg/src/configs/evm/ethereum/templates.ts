@@ -73,3 +73,37 @@ export function toHydrationViaSnowbridgeTemplate(
     tags: [Tag.Snowbridge],
   });
 }
+
+// Snowbridge V1 (legacy) inbound route (Ethereum -> Hydration). Direct Gateway
+// sendToken call with the flat V1 bridge fee quoted on-chain — cheaper than the
+// V2 v2_sendMessage path.
+export function toHydrationViaSnowbridgeV1Template(
+  assetIn: Asset,
+  assetOut: Asset
+) {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().native(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateInboundFeeV1({ hub: assetHub }),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
+    tags: [Tag.Snowbridge, Tag.SnowbridgeV1],
+  });
+}

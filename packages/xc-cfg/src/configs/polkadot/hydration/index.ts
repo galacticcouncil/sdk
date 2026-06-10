@@ -87,6 +87,7 @@ import {
   toParaTemplate,
   toTransferTemplate,
   viaSnowbridgeTemplate,
+  viaSnowbridgeV1Template,
   viaWormholeBridgeTemplate,
 } from './templates';
 
@@ -402,6 +403,28 @@ const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(usdt_eth, usdt, ethereum, { fast: true }),
 ];
 
+// Snowbridge V1 (legacy, cheaper) outbound routes. Registered after the V2
+// routes so the default/`Snowbridge`-tag selection still resolves to V2; the
+// V1 route is reached via the `SnowbridgeV1` tag from the UI switch.
+const toEthereumViaSnowbridgeV1: AssetRoute[] = [
+  viaSnowbridgeV1Template(eth, eth, ethereum),
+  viaSnowbridgeV1Template(aave, aave, ethereum),
+  viaSnowbridgeV1Template(apyusd, apyusd, ethereum),
+  viaSnowbridgeV1Template(cfg_new, cfg_new, ethereum),
+  viaSnowbridgeV1Template(ena, ena, ethereum),
+  viaSnowbridgeV1Template(paxg, paxg, ethereum),
+  viaSnowbridgeV1Template(susde, susde, ethereum),
+  viaSnowbridgeV1Template(tbtc, tbtc, ethereum),
+  viaSnowbridgeV1Template(trac, trac, ethereum),
+  viaSnowbridgeV1Template(lbtc, lbtc, ethereum),
+  viaSnowbridgeV1Template(ldo, ldo, ethereum),
+  viaSnowbridgeV1Template(link, link, ethereum),
+  viaSnowbridgeV1Template(sky, sky, ethereum),
+  viaSnowbridgeV1Template(wsteth, wsteth, ethereum),
+  viaSnowbridgeV1Template(usdc_eth, usdc, ethereum),
+  viaSnowbridgeV1Template(usdt_eth, usdt, ethereum),
+];
+
 const toSolanaViaWormhole: AssetRoute[] = [
   viaWormholeBridgeTemplate(sol, sol, solana),
   viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
@@ -429,6 +452,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toCrust,
     ...toEthereumViaSnowbridge,
+    ...toEthereumViaSnowbridgeV1,
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toEnergywebx,

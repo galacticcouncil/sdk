@@ -40,6 +40,7 @@ import { Tag } from '../../../tags';
 import {
   toHydrationViaWormholeTemplate,
   toHydrationViaSnowbridgeTemplate,
+  toHydrationViaSnowbridgeV1Template,
 } from './templates';
 
 const toHydrationViaWormhole: AssetRoute[] = [
@@ -117,6 +118,52 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   toHydrationViaSnowbridgeTemplate(usdt, usdt_eth),
 ];
 
+// Snowbridge V1 (legacy, cheaper) inbound routes. Registered after the V2
+// routes so the default/`Snowbridge`-tag selection still resolves to V2; the
+// V1 route is reached via the `SnowbridgeV1` tag from the UI switch.
+const toHydrationViaSnowbridgeV1: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: eth,
+      balance: BalanceBuilder().evm().native(),
+      fee: {
+        asset: eth,
+        balance: BalanceBuilder().evm().native(),
+      },
+      destinationFee: {
+        balance: BalanceBuilder().evm().native(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: eth,
+      fee: {
+        amount: FeeAmountBuilder()
+          .Snowbridge()
+          .calculateInboundFeeV1({ hub: assetHub }),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Snowbridge().sendToken(),
+    tags: [Tag.Snowbridge, Tag.SnowbridgeV1],
+  }),
+  toHydrationViaSnowbridgeV1Template(aave, aave),
+  toHydrationViaSnowbridgeV1Template(apyusd, apyusd),
+  toHydrationViaSnowbridgeV1Template(cfg_new, cfg_new),
+  toHydrationViaSnowbridgeV1Template(ena, ena),
+  toHydrationViaSnowbridgeV1Template(paxg, paxg),
+  toHydrationViaSnowbridgeV1Template(susde, susde),
+  toHydrationViaSnowbridgeV1Template(tbtc, tbtc),
+  toHydrationViaSnowbridgeV1Template(lbtc, lbtc),
+  toHydrationViaSnowbridgeV1Template(ldo, ldo),
+  toHydrationViaSnowbridgeV1Template(link, link),
+  toHydrationViaSnowbridgeV1Template(sky, sky),
+  toHydrationViaSnowbridgeV1Template(trac, trac),
+  toHydrationViaSnowbridgeV1Template(wsteth, wsteth),
+  toHydrationViaSnowbridgeV1Template(usdc, usdc_eth),
+  toHydrationViaSnowbridgeV1Template(usdt, usdt_eth),
+];
+
 const toMoonbeamViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -166,5 +213,9 @@ const toMoonbeamViaWormhole: AssetRoute[] = [
 
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
-  routes: [...toHydrationViaWormhole, ...toHydrationViaSnowbridge],
+  routes: [
+    ...toHydrationViaWormhole,
+    ...toHydrationViaSnowbridge,
+    ...toHydrationViaSnowbridgeV1,
+  ],
 });

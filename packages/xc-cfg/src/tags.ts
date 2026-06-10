@@ -5,4 +5,5 @@ export enum Tag {
   Snowbridge = 'Snowbridge',
   Mrl = 'Mrl',
   SnowbridgeFast = 'SnowbridgeFast',
+  SnowbridgeV1 = 'SnowbridgeV1',
 }
