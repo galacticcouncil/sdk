@@ -4,3 +4,16 @@ export function padFeeByPercentage(fee: bigint, padPercent: bigint) {
   }
   return fee + (fee * padPercent) / 100n;
 }
+
+export function scaledPadPercentage(
+  staticPadPercent: bigint,
+  tip: bigint,
+  rawCost: bigint
+): bigint {
+  if (staticPadPercent <= 0n) return 0n;
+  if (rawCost <= 0n) return staticPadPercent;
+  if (tip <= 0n) return staticPadPercent;
+  if (tip >= rawCost) return 0n;
+  const remaining = rawCost - tip;
+  return (remaining * remaining * staticPadPercent) / (rawCost * rawCost);
+}
