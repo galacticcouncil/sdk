@@ -1,5 +1,14 @@
 # @galacticcouncil/xc-cfg
 
+## 1.4.2
+
+### Patch Changes
+
+- df66924: Fix the fee calc on snowbridge transfer to include erc20 delivery fee
+- 2c0b9f6: Snowbridge v1 implementation in paralel with v2
+- Updated dependencies [2c0b9f6]
+  - @galacticcouncil/xc-core@1.1.1
+
 ## 1.4.1
 
 ### Patch Changes
