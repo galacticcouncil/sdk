@@ -19,8 +19,9 @@ const evmClient = srcChain.evmClient;
 const sender = 'INSERT_ADDRESS';
 const recipient = 'INSERT_ADDRESS';
 
-// Deposit amount in the smallest unit (e.g. 0.5 USDC = 500_000)
-const amountInSmallestUnit = '970000000';
+// Deposit amount in the smallest unit (e.g. 0.001 ETH)
+// Min: 0.00004 ETH
+const amountInSmallestUnit = '1000000000000000';
 
 const USDC_ON_ETHEREUM = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as const;
 
@@ -44,8 +45,7 @@ const quoteRequest: QuoteRequest = {
   dry: false,
   swapType: QuoteRequest.swapType.EXACT_INPUT,
   slippageTolerance: 100,
-  originAsset:
-    'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+  originAsset: 'nep141:eth.omft.near',
   depositType: QuoteRequest.depositType.ORIGIN_CHAIN,
   destinationAsset: 'nep141:wrap.near',
   amount: amountInSmallestUnit,
@@ -78,27 +78,27 @@ const call: EvmCall = {
   dryRun: async () => undefined,
 };
 
-signEvm(call, srcChain, async (hash) => {
-  console.log('Waiting for confirmation…');
-  const receipt = await evmClient
-    .getProvider()
-    .waitForTransactionReceipt({ hash: hash as '0x{string}' });
-  console.log(
-    'Confirmed in block:',
-    receipt.blockNumber,
-    'status:',
-    receipt.status
-  );
+// signEvm(call, srcChain, async (hash) => {
+//   console.log('Waiting for confirmation…');
+//   const receipt = await evmClient
+//     .getProvider()
+//     .waitForTransactionReceipt({ hash: hash as '0x{string}' });
+//   console.log(
+//     'Confirmed in block:',
+//     receipt.blockNumber,
+//     'status:',
+//     receipt.status
+//   );
 
-  // 4) Submit deposit tx to 1Click to speed up settlement.
-  console.log('\nSubmit:');
-  const submit = await OneClickService.submitDepositTx({
-    depositAddress,
-    txHash: hash,
-  });
-  console.log(JSON.stringify(submit, null, 2));
+//   // 4) Submit deposit tx to 1Click to speed up settlement.
+//   console.log('\nSubmit:');
+//   const submit = await OneClickService.submitDepositTx({
+//     depositAddress,
+//     txHash: hash,
+//   });
+//   console.log(JSON.stringify(submit, null, 2));
 
-  console.log('\nStatus:');
-  const status = await OneClickService.getExecutionStatus(depositAddress);
-  console.log(JSON.stringify(status, null, 2));
-});
+//   console.log('\nStatus:');
+//   const status = await OneClickService.getExecutionStatus(depositAddress);
+//   console.log(JSON.stringify(status, null, 2));
+// });
