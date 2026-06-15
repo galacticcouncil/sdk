@@ -12,6 +12,7 @@ export enum PoolType {
   Stable = 'Stableswap',
   XYK = 'XYK',
   HSM = 'HSM',
+  V3 = 'UniswapV3',
 }
 
 export enum PoolError {
@@ -120,6 +121,7 @@ export type Hop = {
   pool: PoolType;
   poolAddress: string;
   poolId?: number;
+  fee?: number;
   assetIn: number;
   assetOut: number;
 };
