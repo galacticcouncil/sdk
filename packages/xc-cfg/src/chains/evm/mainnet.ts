@@ -141,6 +141,14 @@ export const ethereum = new EvmChain({
     'https://ethereum-rpc.publicnode.com',
     'https://cosmopolitan-dimensional-diagram.quiknode.pro',
   ],
+  across: {
+    spokePool: '0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5',
+    multicallHandler: '0x924a9f036260DdD5808007E1AA95f08eD08aA569',
+    snowbridgeL1Adaptor: '0xd3b11c36404b092645522b682832fcdee07d2668',
+    swapRouter: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+    swapQuoter: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
+    l1FeeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  },
   snowbridge: {
     id: 1,
     gateway: '0x27ca963c279c93801941e1eb8799c23f407d68e7',

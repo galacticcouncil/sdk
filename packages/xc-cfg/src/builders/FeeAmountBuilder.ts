@@ -1,5 +1,6 @@
 import {
   Abi,
+  Across as Ac,
   EvmChain,
   FeeAmount,
   FeeAmountConfigBuilder,
@@ -8,6 +9,9 @@ import {
   Wormhole as Wh,
   Basejump as Bj,
 } from '@galacticcouncil/xc-core';
+
+import { getSwapEntry } from './contracts/Across/swap';
+import { parseAssetId } from './utils';
 
 import {
   BRIDGE_HUB_ID,
@@ -454,8 +458,108 @@ function Basejump() {
   };
 }
 
+type AcrossSnowbridgeFeeOpts = {
+  hub: Parachain;
+  // Ethereum chain — needed for the Uniswap V3 Quoter staticCall.
+  // The L2 adaptor's multicall executes on Ethereum after Across fast-fill,
+  // so the swap happens on the Ethereum-side Uniswap V3 pools.
+  ethereum: EvmChain;
+};
+
+function AcrossSnowbridge() {
+  return {
+    /**
+     * Across-Snowbridge inbound fee composer.
+     *
+     * Reuses `Snowbridge().calculateInboundFee()` for the Snowbridge V2 fees
+     * (executionFee, relayerFee, remoteEtherFee, remoteDotFee) which are
+     * amount-independent, then adds:
+     *   - `swapInputAmount`: how much of the L2 token the Uniswap V3 multicall
+     *     must consume to obtain `executionFee + relayerFee` ETH on Ethereum.
+     *     Padded by 33% for AMM slippage, matching Snowfork.
+     *
+     * The amount-dependent `acrossRelayerFee` is computed at build time by
+     * the contract builder (`Across/Snowbridge.sendTokenAndCall`) because
+     * the FeeAmountConfigParams shape does not carry the transfer amount.
+     */
+    calculateFee: (opts: AcrossSnowbridgeFeeOpts): FeeAmountConfigBuilder => ({
+      build: async (params) => {
+        const { feeAsset, destination, source, transferAsset } = params;
+
+        // 1) Snowbridge inbound fee (ETH-denominated, amount-independent).
+        const snowbridgeFee = await Snowbridge()
+          .calculateInboundFee({ hub: opts.hub })
+          .build(params);
+        const baseBreakdown = snowbridgeFee.breakdown ?? {};
+        const executionFee = baseBreakdown['executionFee'] ?? 0n;
+        const relayerFee = baseBreakdown['relayerFee'] ?? 0n;
+        const ethNeededOut = executionFee + relayerFee;
+
+        // 2) Look up L2 → L1 swap mapping for the transferred asset.
+        const src = source as EvmChain;
+        const l2TokenId = src.getAssetId(transferAsset);
+        const l2Token = parseAssetId(l2TokenId) as string;
+        const swapEntry = getSwapEntry(src.id, l2Token);
+
+        // Native ETH/WETH path → no swap leg; the multicall unwraps WETH
+        // directly. Leave swapInputAmount unset; the contract builder's
+        // sendEtherAndCall variant doesn't read it.
+        if (!swapEntry || ethNeededOut === 0n) {
+          return {
+            amount: snowbridgeFee.amount,
+            breakdown: baseBreakdown,
+          } as FeeAmount;
+        }
+
+        // 3) Quote Uniswap V3 exactOutputSingle on Ethereum.
+        const eth = opts.ethereum;
+        const across = Ac.fromChain(eth);
+        const quoter = across.getSwapQuoter();
+        const l1FeeToken = across.getL1FeeToken();
+
+        if (!quoter || !l1FeeToken) {
+          throw new Error(
+            `Ethereum chain config is missing Across swap addresses (swapQuoter / l1FeeToken).`
+          );
+        }
+
+        const quoteResult = await eth.evmClient.getProvider().simulateContract({
+          abi: Abi.UniswapV3Quoter,
+          address: quoter as `0x${string}`,
+          args: [
+            {
+              tokenIn: swapEntry.swapTokenAddress,
+              tokenOut: l1FeeToken as `0x${string}`,
+              amount: ethNeededOut,
+              fee: swapEntry.swapFee,
+              sqrtPriceLimitX96: 0n,
+            },
+          ],
+          functionName: 'quoteExactOutputSingle',
+        });
+        const [rawSwapIn] = quoteResult.result as readonly [
+          bigint,
+          bigint,
+          number,
+          bigint,
+        ];
+        const swapInputAmount = padFeeByPercentage(rawSwapIn, 33n);
+
+        return {
+          amount: snowbridgeFee.amount,
+          breakdown: {
+            ...baseBreakdown,
+            swapInputAmount,
+          },
+        } as FeeAmount;
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
+    AcrossSnowbridge,
     Basejump,
     XcmPaymentApi,
     Snowbridge,

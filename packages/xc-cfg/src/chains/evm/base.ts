@@ -31,6 +31,11 @@ export const base = new EvmChain({
   evmChain: evmChain,
   explorer: 'https://basescan.org/',
   rpcs: ['https://stylish-quick-firefly.base-mainnet.quiknode.pro/'],
+  across: {
+    spokePool: '0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64',
+    multicallHandler: '0x924a9f036260DdD5808007E1AA95f08eD08aA569',
+    snowbridgeL2Adaptor: '0x07fe4e7340976fc873b74bafe3c3e5b0e01f3665',
+  },
   basejump: {
     address: '0xf5b9334e44f800382cb47fc19669401d694e529b',
   },
