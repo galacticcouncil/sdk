@@ -71,6 +71,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'tx.DCA.*',
   'tx.Democracy.*',
   'tx.Dispatcher.*',
+  'tx.Ethereum.*',
   'tx.EVM.*',
   'tx.EVMAccounts.*',
   'tx.MultiTransactionPayment.*',

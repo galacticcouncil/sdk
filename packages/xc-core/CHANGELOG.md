@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 1.1.1
+
+### Patch Changes
+
+- 2c0b9f6: Snowbridge v1 implementation in paralel with v2
+
 ## 1.1.0
 
 ### Minor Changes

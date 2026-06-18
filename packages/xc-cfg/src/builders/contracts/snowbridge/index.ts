@@ -45,8 +45,11 @@ const v2SendMessage = (): ContractConfigBuilder => ({
 
     const executionFee = destination.feeBreakdown['executionFee'];
     const relayerFee = destination.feeBreakdown['relayerFee'];
+    const volumeTip = destination.feeBreakdown['volumeTip'] ?? 0n;
     const hydrationDotFee = destination.feeBreakdown['hydrationDotFee'];
     const bridgeFeeInWei = destination.fee.amount;
+
+    const relayerFeeTotal = relayerFee + volumeTip;
 
     const beneficiaryHex = Ss58Addr.getPubKey(address) as string;
     const entropy = new TextEncoder().encode(
@@ -96,9 +99,45 @@ const v2SendMessage = (): ContractConfigBuilder => ({
     return new ContractConfig({
       abi: Abi.Snowbridge,
       address: ctxSb.getGateway(),
-      args: [xcmBytes, assets, claimerBytes, executionFee, relayerFee],
+      args: [xcmBytes, assets, claimerBytes, executionFee, relayerFeeTotal],
       value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
       func: 'v2_sendMessage',
+      module: 'Snowbridge',
+    });
+  },
+});
+
+// Snowbridge V1 (legacy) Gateway call. The Gateway builds all XCM internally;
+// the caller just supplies the token, destination para, beneficiary and the
+// DOT-denominated bridge fee. Cheaper than V2 (no Ethereum gas reimbursement).
+const sendToken = (): ContractConfigBuilder => ({
+  build: async (params) => {
+    const { address, amount, asset, source, destination } = params;
+    const ctx = source.chain as EvmChain;
+    const rcv = destination.chain as Parachain;
+
+    const ctxSb = Sb.fromChain(ctx);
+
+    const assetId = ctx.getAssetId(asset);
+    const parsedAssetId = parseAssetId(assetId);
+
+    const isNativeTransfer = asset.originSymbol === 'ETH';
+
+    const bridgeFeeInDot = destination.feeBreakdown['bridgeFeeInDot'];
+    const bridgeFeeInWei = destination.fee.amount;
+
+    return new ContractConfig({
+      abi: Abi.Snowbridge,
+      address: ctxSb.getGateway(),
+      args: [
+        parsedAssetId,
+        rcv.parachainId,
+        [1, Ss58Addr.getPubKey(address) as `0x${string}`],
+        bridgeFeeInDot,
+        amount,
+      ],
+      value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
+      func: 'sendToken',
       module: 'Snowbridge',
     });
   },
@@ -107,5 +146,6 @@ const v2SendMessage = (): ContractConfigBuilder => ({
 export const Snowbridge = () => {
   return {
     v2SendMessage,
+    sendToken,
   };
 };
