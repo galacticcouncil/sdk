@@ -1,17 +1,3 @@
-/** Minimal ERC-20 `approve` ABI fragment. */
-export const ERC20_APPROVE_ABI = [
-  {
-    name: 'approve',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'bool' }],
-  },
-] as const;
-
 /**
  * `IntentEmitter.swapAndBridge` ABI fragment
  * (see WHM contracts/src/intents/interfaces/IIntentEmitter.sol).

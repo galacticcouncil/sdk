@@ -3,6 +3,7 @@ import {
   OpenAPI,
   QuoteRequest,
   type QuoteResponse,
+  type TokenResponse,
 } from '@defuse-protocol/one-click-sdk-typescript';
 
 import { ONE_CLICK_ORIGIN_ASSET } from '../registry/consts';
@@ -18,6 +19,11 @@ export function configureOneClick(config: OneClickConfig = {}): void {
   if (config.jwt) OpenAPI.TOKEN = config.jwt;
 }
 
+/** Fetch the 1Click token registry (`GET /v0/tokens`). */
+export function fetchOneClickTokens(): Promise<TokenResponse[]> {
+  return OneClickService.getTokens();
+}
+
 export interface OneClickQuoteParams {
   /** Net amount (smallest unit) that lands at the deposit address, post relay fee. */
   amount: bigint;
@@ -29,10 +35,15 @@ export interface OneClickQuoteParams {
   refundTo: string;
   /** Slippage tolerance in basis points. */
   slippageBps: number;
-  /** Quote deadline. */
-  deadline: Date;
+  /** Quote deadline as a Unix timestamp (ms). */
+  deadline: number;
   /** Origin asset entering the swap. Default native ETH on Ethereum. */
   originAsset?: string;
+  /**
+   * Dry run. `true` for estimation (no deposit address generated); `false` for
+   * a firm, committed quote (returns the deposit address). Default `true`.
+   */
+  dry?: boolean;
 }
 
 /**
@@ -45,7 +56,7 @@ export async function getOneClickQuote(
   params: OneClickQuoteParams
 ): Promise<QuoteResponse> {
   const request: QuoteRequest = {
-    dry: false,
+    dry: params.dry ?? true,
     swapType: QuoteRequest.swapType.FLEX_INPUT,
     slippageTolerance: params.slippageBps,
     originAsset: params.originAsset ?? ONE_CLICK_ORIGIN_ASSET,
@@ -56,7 +67,7 @@ export async function getOneClickQuote(
     refundType: QuoteRequest.refundType.ORIGIN_CHAIN,
     recipient: params.recipient,
     recipientType: QuoteRequest.recipientType.DESTINATION_CHAIN,
-    deadline: params.deadline.toISOString(),
+    deadline: new Date(params.deadline).toISOString(),
   };
 
   return OneClickService.getQuote(request);

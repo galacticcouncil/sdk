@@ -1,27 +1,14 @@
-import { toErc20, WETH_ID, GLMR_ID } from './consts';
+import { WRAP_NEAR_ASSET, ZEC_ASSET } from './consts';
 import { CHAINS } from './chains';
-import { DESTINATION_ASSETS, toOriginAsset } from './assets';
-import { ROUTES } from './routes';
+import {
+  DEFAULT_DESTINATION_ASSET_IDS,
+  tokenToAsset,
+  toOriginAsset,
+} from './assets';
+import { buildRoutes } from './routes';
 
 describe('registry', () => {
-  it('maps a Hydration asset id to its ERC-20 precompile address', () => {
-    // HydrationConsts.toErc20: address((uint160(1) << 32) | assetId)
-    expect(toErc20(0)).toBe('0x0000000000000000000000000000000100000000');
-    expect(toErc20(WETH_ID)).toBe('0x0000000000000000000000000000000100000014');
-    expect(toErc20(GLMR_ID)).toBe('0x0000000000000000000000000000000100000010');
-  });
-
-  it('exposes wrapped NEAR as the only phase-1 destination asset', () => {
-    expect(DESTINATION_ASSETS).toHaveLength(1);
-    expect(DESTINATION_ASSETS[0].oneClickId).toBe('nep141:wrap.near');
-    expect(DESTINATION_ASSETS[0].chain).toBe('near');
-  });
-
-  it('exposes hydration + near chains', () => {
-    expect(CHAINS.map((c) => c.key).sort()).toEqual(['hydration', 'near']);
-  });
-
-  it('maps an sdk-next asset to an origin asset descriptor', () => {
+  it('maps an sdk-next asset to an origin asset (ERC-20 precompile address)', () => {
     const origin = toOriginAsset({
       id: 5,
       symbol: 'DOT',
@@ -33,17 +20,57 @@ describe('registry', () => {
       decimals: 10,
       chain: 'hydration',
       id: 5,
+      // HydrationConsts.toErc20: address((uint160(1) << 32) | assetId)
       address: '0x0000000000000000000000000000000100000005',
     });
   });
 
-  it('exposes an executable hydration -> near route', () => {
-    expect(ROUTES).toHaveLength(1);
-    expect(ROUTES[0]).toMatchObject({
+  it('defaults the destination allowlist to wrapped NEAR + ZEC', () => {
+    expect(DEFAULT_DESTINATION_ASSET_IDS).toEqual([WRAP_NEAR_ASSET, ZEC_ASSET]);
+  });
+
+  it('maps a 1Click token to a destination asset', () => {
+    const asset = tokenToAsset({
+      assetId: 'nep141:zec.omft.near',
+      decimals: 8,
+      blockchain: 'zec',
+      symbol: 'ZEC',
+      price: 529.98,
+      priceUpdatedAt: '2026-05-28T14:36:00.533Z',
+    } as any);
+    expect(asset).toMatchObject({
+      key: 'nep141:zec.omft.near',
+      symbol: 'ZEC',
+      decimals: 8,
+      chain: 'zec',
+      oneClickId: 'nep141:zec.omft.near',
+    });
+  });
+
+  it('exposes hydration + near + zec chains', () => {
+    expect(CHAINS.map((c) => c.key).sort()).toEqual([
+      'hydration',
+      'near',
+      'zec',
+    ]);
+  });
+
+  it('builds an executable route per destination asset', () => {
+    const routes = buildRoutes([
+      {
+        key: 'nep141:wrap.near',
+        symbol: 'wNEAR',
+        decimals: 24,
+        chain: 'near',
+        oneClickId: 'nep141:wrap.near',
+      },
+    ]);
+    expect(routes).toHaveLength(1);
+    expect(routes[0]).toMatchObject({
       executable: true,
       oneClickOriginAsset: 'nep141:eth.omft.near',
     });
-    expect(ROUTES[0].origin.key).toBe('hydration');
-    expect(ROUTES[0].destination.key).toBe('near');
+    expect(routes[0].origin.key).toBe('hydration');
+    expect(routes[0].destination.key).toBe('near');
   });
 });

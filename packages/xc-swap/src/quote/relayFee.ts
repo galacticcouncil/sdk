@@ -1,6 +1,7 @@
 import {
   DEFAULT_QUOTER_URL,
-  DEFAULT_RELAY_MARGIN_BPS,
+  DEFAULT_RELAY_MARGIN_PCT,
+  pctToBps,
 } from '../registry/consts';
 
 export interface RelayFeeParams {
@@ -8,7 +9,7 @@ export interface RelayFeeParams {
   quoterUrl?: string;
   /** Destination chain for the relay leg. Default 'ethereum'. */
   chain?: string;
-  /** Fee margin in basis points. Default 2000. */
+  /** Fee margin in basis points (the quoter's unit). Default 2000 (20%). */
   marginBps?: number;
 }
 
@@ -22,7 +23,7 @@ export async function fetchMaxRelayFee(
 ): Promise<bigint> {
   const quoterUrl = params.quoterUrl ?? DEFAULT_QUOTER_URL;
   const chain = params.chain ?? 'ethereum';
-  const marginBps = params.marginBps ?? DEFAULT_RELAY_MARGIN_BPS;
+  const marginBps = params.marginBps ?? pctToBps(DEFAULT_RELAY_MARGIN_PCT);
 
   const url = `${quoterUrl}/relay-fee?chain=${chain}&marginBps=${marginBps}`;
   const res = await fetch(url);

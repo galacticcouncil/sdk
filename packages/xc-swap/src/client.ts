@@ -1,18 +1,19 @@
-import type { Asset as SdkAsset, sor } from '@galacticcouncil/sdk-next';
+import type { Asset as SdkAsset, SdkCtx } from '@galacticcouncil/sdk-next';
+import type { TokenResponse } from '@defuse-protocol/one-click-sdk-typescript';
 
 import {
   CHAINS,
-  DESTINATION_ASSETS,
-  ROUTES,
-  getDestinationAsset,
+  DEFAULT_DESTINATION_ASSET_IDS,
+  buildRoutes,
+  tokenToAsset,
   toOriginAsset,
   DEFAULT_QUOTER_URL,
-  DEFAULT_RELAY_MARGIN_BPS,
-  DEFAULT_SLIPPAGE_BPS,
+  DEFAULT_RELAY_MARGIN_PCT,
+  DEFAULT_SLIPPAGE_PCT,
   DEFAULT_XCM_FEE,
-  HYDRATION_EVM_CHAIN_ID,
 } from './registry';
-import { estimateTrade, type EstimateContext } from './trade/estimate';
+import { configureOneClick, fetchOneClickTokens } from './quote/oneClick';
+import { swap, type SwapContext } from './trade/swap';
 import type {
   XcSwapAsset,
   XcSwapChain,
@@ -24,40 +25,32 @@ import type {
 
 /**
  * Cross-chain swap client. Exposes the supported assets/chains/routes and
- * estimates a trade (Hydration asset → NEAR via NEAR Intent Routing),
- * returning an {@link XcSwapTrade} that can build the executable EVM calls.
+ * estimates a trade via NEAR Intent Routing.
  */
 export class XcSwapClient {
-  private readonly router: sor.TradeRouter;
-  private readonly assets: Map<number, SdkAsset>;
+  private readonly sdk: SdkCtx;
   private readonly emitter: string;
-  private readonly evmChainId: number;
   private readonly quoterUrl: string;
-  private readonly relayMarginBps: number;
-  private readonly slippageBps: number;
+  private readonly relayMargin: number;
+  private readonly slippage: number;
   private readonly xcmFee: bigint;
   private readonly oneClick: { baseUrl?: string; jwt?: string };
+  /** 1Click asset ids exposed as destinations. */
+  private readonly destinationAssetIds: string[];
+
+  private tokens?: Promise<TokenResponse[]>;
+  private assets?: Promise<Map<number, SdkAsset>>;
 
   constructor(opts: XcSwapOpts) {
-    this.router = opts.router;
-    this.assets = new Map(opts.assets.map((a) => [a.id, a]));
+    this.sdk = opts.sdk;
     this.emitter = opts.emitter;
-    this.evmChainId = opts.evmChainId ?? HYDRATION_EVM_CHAIN_ID;
     this.quoterUrl = opts.quoterUrl ?? DEFAULT_QUOTER_URL;
-    this.relayMarginBps = opts.relayMarginBps ?? DEFAULT_RELAY_MARGIN_BPS;
-    this.slippageBps = opts.slippageBps ?? DEFAULT_SLIPPAGE_BPS;
+    this.relayMargin = opts.relayMargin ?? DEFAULT_RELAY_MARGIN_PCT;
+    this.slippage = opts.slippage ?? DEFAULT_SLIPPAGE_PCT;
     this.xcmFee = opts.xcmFee ?? DEFAULT_XCM_FEE;
     this.oneClick = opts.oneClick ?? {};
-  }
-
-  /** Supported origin assets (every Hydration asset routable to WETH/GLMR). */
-  getOriginAssets(): XcSwapAsset[] {
-    return Array.from(this.assets.values()).map(toOriginAsset);
-  }
-
-  /** Supported destination assets (phase 1: wrapped NEAR). */
-  getDestinationAssets(): XcSwapAsset[] {
-    return DESTINATION_ASSETS;
+    this.destinationAssetIds =
+      opts.destinationAssets ?? DEFAULT_DESTINATION_ASSET_IDS;
   }
 
   /** Supported chains. */
@@ -65,43 +58,85 @@ export class XcSwapClient {
     return CHAINS;
   }
 
+  /** Supported origin assets */
+  async getOriginAssets(): Promise<XcSwapAsset[]> {
+    const assets = await this.getAssets();
+    return Array.from(assets.values()).map(toOriginAsset);
+  }
+
+  /**
+   * Supported destination assets, sourced from the 1Click token registry
+   * (`GET /v0/tokens`) and scoped to the configured allowlist.
+   */
+  async getDestinationAssets(): Promise<XcSwapAsset[]> {
+    const tokens = await this.getTokens();
+    const allow = new Set(this.destinationAssetIds);
+    return tokens.filter((t) => allow.has(t.assetId)).map(tokenToAsset);
+  }
+
   /** Supported route metadata. */
-  getRoutes(): XcSwapRoute[] {
-    return ROUTES;
+  async getRoutes(): Promise<XcSwapRoute[]> {
+    return buildRoutes(await this.getDestinationAssets());
   }
 
-  /** Estimate a trade and produce a builder for the executable calls. */
-  estimateTrade(params: XcSwapParams): Promise<XcSwapTrade> {
-    return estimateTrade(this.context(), params);
+  /** Estimate a swap and produce a builder for the executable request. */
+  async swap(params: XcSwapParams): Promise<XcSwapTrade> {
+    return swap(this.context(), params);
   }
 
-  private context(): EstimateContext {
+  private context(): SwapContext {
     return {
-      router: this.router,
+      router: this.sdk.api.router,
+      evm: this.sdk.client.evm,
       resolveAsset: (id) => this.resolveAsset(id),
       resolveDestination: (oneClickId) => this.resolveDestination(oneClickId),
       emitter: this.emitter,
       quoterUrl: this.quoterUrl,
-      relayMarginBps: this.relayMarginBps,
-      slippageBps: this.slippageBps,
+      relayMarginPct: this.relayMargin,
+      slippagePct: this.slippage,
       xcmFee: this.xcmFee,
       oneClick: this.oneClick,
     };
   }
 
-  private resolveAsset(id: number): XcSwapAsset {
-    const asset = this.assets.get(id);
+  /** Memoized Hydration asset registry (runtime ids), from sdk-next. */
+  private getAssets(): Promise<Map<number, SdkAsset>> {
+    if (!this.assets) {
+      this.assets = this.sdk.client.asset
+        .getSupported()
+        .then((list) => new Map(list.map((a) => [a.id, a])));
+    }
+    return this.assets;
+  }
+
+  private getTokens(): Promise<TokenResponse[]> {
+    if (!this.tokens) {
+      configureOneClick(this.oneClick);
+      this.tokens = fetchOneClickTokens();
+    }
+    return this.tokens;
+  }
+
+  private async resolveAsset(id: number): Promise<XcSwapAsset> {
+    const assets = await this.getAssets();
+    const asset = assets.get(id);
     if (!asset) {
       throw new Error(`Unsupported origin asset id: ${id}`);
     }
     return toOriginAsset(asset);
   }
 
-  private resolveDestination(oneClickId: string): XcSwapAsset {
-    const asset = getDestinationAsset(oneClickId);
-    if (!asset) {
+  private async resolveDestination(oneClickId: string): Promise<XcSwapAsset> {
+    if (!this.destinationAssetIds.includes(oneClickId)) {
       throw new Error(`Unsupported destination asset: ${oneClickId}`);
     }
-    return asset;
+    const tokens = await this.getTokens();
+    const token = tokens.find((t) => t.assetId === oneClickId);
+    if (!token) {
+      throw new Error(
+        `Destination asset not in 1Click registry: ${oneClickId}`
+      );
+    }
+    return tokenToAsset(token);
   }
 }

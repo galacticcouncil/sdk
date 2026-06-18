@@ -1,31 +1,25 @@
+import { erc20 } from '@galacticcouncil/common';
 import type { Asset as SdkAsset } from '@galacticcouncil/sdk-next';
+import type { TokenResponse } from '@defuse-protocol/one-click-sdk-typescript';
 
-import { NEAR, HYDRATION } from './chains';
-import { WRAP_NEAR_ASSET, toErc20 } from './consts';
+import { HYDRATION } from './chains';
+import { WRAP_NEAR_ASSET, ZEC_ASSET } from './consts';
 import type { XcSwapAsset } from '../types';
 
-/**
- * Phase-1 destination assets. Only wrapped NEAR is supported.
- * `decimals: 24` is NEAR's native precision (`wrap.near`).
- */
-export const WRAP_NEAR: XcSwapAsset = {
-  key: 'wrap.near',
-  symbol: 'wNEAR',
-  decimals: 24,
-  chain: NEAR.key,
-  oneClickId: WRAP_NEAR_ASSET,
-};
+export const DEFAULT_DESTINATION_ASSET_IDS = [WRAP_NEAR_ASSET, ZEC_ASSET];
 
-export const DESTINATION_ASSETS: XcSwapAsset[] = [WRAP_NEAR];
-
-/** Look up a supported destination asset by its 1Click id. */
-export function getDestinationAsset(
-  oneClickId: string
-): XcSwapAsset | undefined {
-  return DESTINATION_ASSETS.find((a) => a.oneClickId === oneClickId);
+/** Map a 1Click token registry entry to a destination asset descriptor. */
+export function tokenToAsset(token: TokenResponse): XcSwapAsset {
+  return {
+    key: token.assetId,
+    symbol: token.symbol,
+    decimals: token.decimals,
+    chain: token.blockchain,
+    oneClickId: token.assetId,
+  };
 }
 
-/** Map an sdk-next Hydration asset to an xc-swap origin asset descriptor. */
+/** Map an Hydration registry asset to an xc-swap origin asset descriptor. */
 export function toOriginAsset(asset: SdkAsset): XcSwapAsset {
   return {
     key: String(asset.id),
@@ -33,6 +27,6 @@ export function toOriginAsset(asset: SdkAsset): XcSwapAsset {
     decimals: asset.decimals,
     chain: HYDRATION.key,
     id: asset.id,
-    address: toErc20(asset.id),
+    address: erc20.ERC20.fromAssetId(asset.id) as `0x${string}`,
   };
 }

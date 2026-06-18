@@ -1,9 +1,9 @@
 import { CallType } from '@galacticcouncil/xc-core';
 import type { EvmCall } from '@galacticcouncil/xc-sdk';
 
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, erc20Abi } from 'viem';
 
-import { ERC20_APPROVE_ABI, SWAP_AND_BRIDGE_ABI } from './abi';
+import { SWAP_AND_BRIDGE_ABI } from './abi';
 
 export interface BuildCallsParams {
   /** `from` of both calls — the Hydration EVM account initiating the swap. */
@@ -26,20 +26,20 @@ export interface BuildCallsParams {
   intentDepositAddress: string;
   /** Relay fee ceiling carried in the payload. */
   maxRelayFee: bigint;
+  /**
+   * Whether the emitter already has sufficient allowance over A. When `true`
+   * the `approve` call is omitted and only `swapAndBridge` is returned.
+   */
+  approved: boolean;
 }
 
 /**
- * Build the two executable EVM calls on Hydration EVM:
- *   1. `approve(emitter, amountIn)` on A's ERC-20 precompile.
+ * Build the executable EVM calls on Hydration EVM:
+ *   1. `approve(emitter, amountIn)` on A's ERC-20 precompile — skipped when
+ *      `approved` (the emitter already has sufficient allowance).
  *   2. `swapAndBridge(...)` on the `IntentEmitter`.
  */
 export function buildCalls(params: BuildCallsParams): EvmCall[] {
-  const approveData = encodeFunctionData({
-    abi: ERC20_APPROVE_ABI,
-    functionName: 'approve',
-    args: [params.emitter as `0x${string}`, params.amountIn],
-  });
-
   const swapData = encodeFunctionData({
     abi: SWAP_AND_BRIDGE_ABI,
     functionName: 'swapAndBridge',
@@ -54,20 +54,30 @@ export function buildCalls(params: BuildCallsParams): EvmCall[] {
     ],
   });
 
+  const swapAndBridge: EvmCall = {
+    from: params.from,
+    to: params.emitter as `0x${string}`,
+    data: swapData,
+    type: CallType.Evm,
+    dryRun: async () => undefined,
+  };
+
+  if (params.approved) {
+    return [swapAndBridge];
+  }
+
+  const approveData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: 'approve',
+    args: [params.emitter as `0x${string}`, params.amountIn],
+  });
+
   const approve: EvmCall = {
     from: params.from,
     to: params.assetInAddress,
     data: approveData,
     type: CallType.Evm,
     allowance: params.amountIn,
-    dryRun: async () => undefined,
-  };
-
-  const swapAndBridge: EvmCall = {
-    from: params.from,
-    to: params.emitter as `0x${string}`,
-    data: swapData,
-    type: CallType.Evm,
     dryRun: async () => undefined,
   };
 

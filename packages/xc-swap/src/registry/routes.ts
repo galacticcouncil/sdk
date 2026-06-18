@@ -1,19 +1,26 @@
-import { HYDRATION, NEAR } from './chains';
-import { DESTINATION_ASSETS } from './assets';
+import { HYDRATION, CHAINS } from './chains';
 import { ONE_CLICK_ORIGIN_ASSET } from './consts';
-import type { XcSwapRoute } from '../types';
+import type { XcSwapAsset, XcSwapChain, XcSwapRoute } from '../types';
 
 /**
- * Supported routes. Phase 1: Hydration (any asset) → NEAR, one route per
- * supported destination asset. The bridged value enters the 1Click swap as
- * native ETH on Ethereum (`ONE_CLICK_ORIGIN_ASSET`).
+ * Build route metadata for the given destination assets.
  */
-export const ROUTES: XcSwapRoute[] = DESTINATION_ASSETS.map(
-  (destinationAsset) => ({
+export function buildRoutes(destinationAssets: XcSwapAsset[]): XcSwapRoute[] {
+  return destinationAssets.map((destinationAsset) => ({
     origin: HYDRATION,
-    destination: NEAR,
+    destination: resolveChain(destinationAsset.chain),
     destinationAsset,
     oneClickOriginAsset: ONE_CLICK_ORIGIN_ASSET,
     executable: true,
-  })
-);
+  }));
+}
+
+function resolveChain(key: string): XcSwapChain {
+  return (
+    CHAINS.find((c) => c.key === key) ?? {
+      key,
+      name: key,
+      platform: key as XcSwapChain['platform'],
+    }
+  );
+}

@@ -36,6 +36,7 @@
     "@defuse-protocol/one-click-sdk-typescript": "^0.1.17"
   },
   "peerDependencies": {
+    "@galacticcouncil/common": ">=1.0.0",
     "@galacticcouncil/sdk-next": ">=1.3.0",
     "@galacticcouncil/xc-core": ">=1.0.0",
     "@galacticcouncil/xc-sdk": ">=1.0.0",
