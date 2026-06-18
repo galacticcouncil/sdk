@@ -1,0 +1,45 @@
+{
+  "name": "@galacticcouncil/xc-swap",
+  "version": "0.1.0",
+  "description": "Cross-chain swap SDK (NEAR Intent Routing)",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xc-swap",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydration",
+    "near",
+    "intents",
+    "xc",
+    "swap"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
+    "clean": "rimraf build",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@defuse-protocol/one-click-sdk-typescript": "^0.1.17"
+  },
+  "peerDependencies": {
+    "@galacticcouncil/common": ">=1.0.0",
+    "@galacticcouncil/sdk-next": ">=1.3.0",
+    "@galacticcouncil/xc-core": ">=1.0.0",
+    "@galacticcouncil/xc-sdk": ">=1.0.0",
+    "viem": "^2.38.3"
+  }
+}

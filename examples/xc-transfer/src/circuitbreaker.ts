@@ -1,7 +1,9 @@
 import { Parachain } from '@galacticcouncil/xc-core';
 import { clients } from '@galacticcouncil/xc-cfg';
 
-import { ctx } from './setup';
+import { xc } from './setup';
+
+const { config } = xc;
 
 const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS } = clients;
 
@@ -33,7 +35,6 @@ function hours(ms: bigint | number): string {
   return `${h.toFixed(1)}h`;
 }
 
-const { config } = ctx;
 const hydration = config.getChain('hydration') as Parachain;
 const client = new HydrationClient(hydration);
 const currentBlock = await client
@@ -98,8 +99,7 @@ const rows = Array.from(states.values()).map((s) => {
         ? '–'
         : (netChange > 0n ? '+' : '') + fmt(netChange, s.decimals),
     limit: s.limit !== null ? fmt(s.limit, s.decimals) : '∞',
-    usage:
-      s.limit === null ? '–' : s.locked ? '100.00%' : pct(used, s.limit),
+    usage: s.limit === null ? '–' : s.locked ? '100.00%' : pct(used, s.limit),
     window,
   };
 });

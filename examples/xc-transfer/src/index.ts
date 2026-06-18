@@ -3,7 +3,7 @@ import { TransferBuilder } from '@galacticcouncil/xc-sdk';
 import { tags } from '@galacticcouncil/xc-cfg';
 
 import { sign } from './signers';
-import { ctx } from './setup';
+import { xc } from './setup';
 import { log } from './utils';
 
 const { Tag } = tags;
@@ -15,7 +15,7 @@ const BRIDGES = [
 ];
 
 const { logAssets, logSrcChains, logDestChains } = log;
-const { config, wallet } = ctx;
+const { config, wallet } = xc;
 
 // Define transfer constraints
 const srcChain = config.getChain('ethereum');
