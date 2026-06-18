@@ -50,17 +50,26 @@ export async function signEvm(
   await wallet.switchChain({ id: client.chain.id });
   await wallet.request({ method: 'eth_requestAccounts' });
 
-  new EvmSigner(ctx, wallet).signAndSend(call, {
-    onTransactionSend: (hash) => {
-      console.log('TxHash: ' + hash);
-      callback?.(hash);
-    },
-    onTransactionReceipt: (receipt) => {
-      console.log(receipt);
-    },
-    onError: (error) => {
-      console.error(error);
-    },
+  // Resolve once the tx is CONFIRMED so callers can `await` and chain txs
+  // (approve → swapAndBridge). Reject on send/estimate/receipt errors so a
+  // failure surfaces instead of the loop hanging silently.
+  await new Promise<void>((resolve, reject) => {
+    new EvmSigner(ctx, wallet)
+      .signAndSend(call, {
+        onTransactionSend: (hash) => {
+          console.log('TxHash: ' + hash);
+          callback?.(hash);
+        },
+        onTransactionReceipt: (receipt) => {
+          console.log('Confirmed in block:', receipt.blockNumber);
+          resolve();
+        },
+        onError: (error) => {
+          console.error(error);
+          reject(error);
+        },
+      })
+      .catch(reject);
   });
 }
 

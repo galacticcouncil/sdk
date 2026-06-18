@@ -2,9 +2,9 @@ import { Parachain } from '@galacticcouncil/xc-core';
 import { SubstrateCall } from '@galacticcouncil/xc-sdk';
 
 import { sign, signSubstrate, signSolanaBundle } from '../signers';
-import { ctx } from '../setup';
+import { xc } from '../setup';
 
-const { config, wallet, wormhole } = ctx;
+const { config, wallet, wormhole } = xc;
 
 /**
  * Check hydration withdrawals and claim stucked

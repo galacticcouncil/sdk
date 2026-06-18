@@ -11,10 +11,10 @@ import {
   SuiChain,
 } from '@galacticcouncil/xc-core';
 
-import { ctx } from './setup';
+import { xc } from './setup';
 import { signSolanaBundle, signSui, signEvm } from './signers';
 
-const { config } = ctx;
+const { config } = xc;
 
 const moonbeam = config.getChain('moonbeam') as EvmParachain;
 const ethereum = config.getChain('ethereum') as EvmChain;

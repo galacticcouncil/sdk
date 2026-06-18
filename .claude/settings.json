@@ -35,6 +35,9 @@
       }
     ]
   },
+  "instructions": [
+    "When editing code, treat all comments as immutable. If code changes make a comment inaccurate, stop and ask for guidance instead of modifying the comment."
+  ],
   "enabledPlugins": {
     "andrej-karpathy-skills@karpathy-skills": true
   }
