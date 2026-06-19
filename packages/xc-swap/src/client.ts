@@ -13,7 +13,8 @@ import {
   DEFAULT_XCM_FEE,
 } from './registry';
 import { configureOneClick, fetchOneClickTokens } from './quote/oneClick';
-import { swap, type SwapContext } from './trade/swap';
+import { swap } from './trade/swap';
+import type { SwapContext } from './trade/types';
 import type {
   XcSwapAsset,
   XcSwapChain,
@@ -51,6 +52,7 @@ export class XcSwapClient {
     this.oneClick = opts.oneClick ?? {};
     this.destinationAssetIds =
       opts.destinationAssets ?? DEFAULT_DESTINATION_ASSET_IDS;
+    configureOneClick(this.oneClick);
   }
 
   /** Supported chains. */
@@ -95,7 +97,6 @@ export class XcSwapClient {
       relayMarginPct: this.relayMargin,
       slippagePct: this.slippage,
       xcmFee: this.xcmFee,
-      oneClick: this.oneClick,
     };
   }
 
@@ -111,7 +112,6 @@ export class XcSwapClient {
 
   private getTokens(): Promise<TokenResponse[]> {
     if (!this.tokens) {
-      configureOneClick(this.oneClick);
       this.tokens = fetchOneClickTokens();
     }
     return this.tokens;

@@ -1,6 +1,6 @@
 import type { AssetAmount } from '@galacticcouncil/xc-core';
 import type { EvmCall } from '@galacticcouncil/xc-sdk';
-import type { sor, SdkCtx } from '@galacticcouncil/sdk-next';
+import type { SdkCtx } from '@galacticcouncil/sdk-next';
 
 /** Platform an asset/chain lives on within an xc-swap route. */
 export type XcSwapPlatform = 'hydration' | 'near' | 'zec';
@@ -61,36 +61,40 @@ export interface XcSwapParams {
   deadline?: number;
 }
 
+/** Total swap fee */
+export interface XcSwapFee {
+  /** Fee valued in WETH (the bridged asset). */
+  amount: AssetAmount;
+  /** Fee in USD (from the 1Click quote's USD valuation). */
+  usd: number;
+  /** Fee as a percent of the input value. */
+  pct: number;
+}
+
+/** Per-leg time estimates (seconds). */
+export interface XcSwapTimeEstimate {
+  /** 1Click swap leg (ETH → destination), as reported by the quote. */
+  quote: number;
+}
+
 /**
  * An estimated cross-chain swap.
  */
 export interface XcSwapTrade {
-  // ─── (Hydration) legs ───
-
   /** Amount of A pulled from the caller. */
   amountIn: AssetAmount;
-  /** Upper bound of A spent buying the GLMR xcm fee (slippage-bounded; 0 when A is GLMR). */
-  maxFeeIn: AssetAmount;
-  /** Expected WETH bridged out. */
-  wethOut: AssetAmount;
-  /** Slippage floor on the bridged WETH, passed to `swapAndBridge` as `minEthOut`. */
-  minEthOut: AssetAmount;
-  /** Relay fee ceiling carried in the bridge payload (from the quoter). */
-  maxRelayFee: bigint;
-
-  // ─── 1Click leg (estimated) ───
-
-  /** Expected destination asset out. */
+  /** Expected destination asset out (net, after fees). */
   amountOut: AssetAmount;
   /** Minimum destination asset out after slippage. */
   minAmountOut: AssetAmount;
-  /** Estimated time of the 1Click swap */
-  swapTimeEstimate: number;
+  /** Effective exchange rate — destination units per 1 unit of A. */
+  spotPrice: number;
+  /** Total fee (GLMR xcm fee + relay fee). */
+  fee: XcSwapFee;
+  /** Per-leg time estimates (seconds). */
+  timeEstimate: XcSwapTimeEstimate;
   /** Price impact of the on-Hydration sell leg, percent. */
   priceImpactPct: number;
-
-  /** The underlying on-Hydration trades (fee-buy A → GLMR, sell A → WETH). */
-  trades: sor.Trade[];
 
   /**
    * Request a firm (non-dry) 1Click quote.

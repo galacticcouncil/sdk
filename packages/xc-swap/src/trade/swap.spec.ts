@@ -8,8 +8,8 @@ import {
 
 import { keccak256, encodePacked, decodeFunctionData } from 'viem';
 
-import { createXcSwap } from '../factory';
 import { SWAP_AND_BRIDGE_ABI } from './abi';
+import { createXcSwap } from '../factory';
 import { WETH_ID, GLMR_ID, WRAP_NEAR_ASSET } from '../registry/consts';
 
 const DOT_ID = 5;
@@ -93,6 +93,7 @@ function quoteResponse(dry: boolean): QuoteResponse {
     quote: {
       depositAddress: dry ? undefined : DEPOSIT,
       amountIn: QUOTE_AMOUNT_IN,
+      amountInUsd: '1000', // USD of the quoted WETH input (0.5 WETH @ $2000)
       amountOut: QUOTE_AMOUNT_OUT,
       minAmountOut: QUOTE_MIN_OUT,
       timeEstimate: 120,
@@ -117,36 +118,39 @@ describe('swap', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it('estimates with a dry quote sized after the relay fee', async () => {
+  it('estimates with a dry quote at full WETH, scaled to net', async () => {
     const xcSwap = createXcSwap({ sdk: mockSdk(), emitter: EMITTER });
 
     const trade = await xcSwap.swap(PARAMS);
 
-    // relay fee comes straight from the quoter
-    expect(trade.maxRelayFee).toBe(RELAY_FEE);
-    // bridged WETH == sell output; min applies 1% slippage floor
-    expect(trade.wethOut.amount).toBe(WETH_OUT);
-    expect(trade.minEthOut.amount).toBe((WETH_OUT * 9900n) / 10000n);
-    // maxFeeIn is the fee-buy input padded up by slippage
-    expect(trade.maxFeeIn.amount).toBe((FEE_IN * 10100n) / 10000n);
-
-    // estimate uses a DRY quote, sized to wethOut - maxRelayFee
+    // dry quote runs in parallel with the relay fee → priced at the full WETH
     const req = getQuoteSpy.mock.calls[0][0] as any;
     expect(req.dry).toBe(true);
-    expect(req.amount).toBe((WETH_OUT - RELAY_FEE).toString());
+    expect(req.amount).toBe(WETH_OUT.toString());
     expect(req.destinationAsset).toBe(WRAP_NEAR_ASSET);
     expect(req.recipient).toBe('alice.near');
     expect(req.deadline).toBe(DEADLINE_ISO);
     // slippage passed to 1Click is bps (default 1% -> 100)
     expect(req.slippageTolerance).toBe(100);
 
-    // destination amounts surfaced from the 1Click registry metadata
-    expect(trade.amountOut.amount).toBe(BigInt(QUOTE_AMOUNT_OUT));
+    // outputs scaled to the net that lands (swapAmount) via the quoted rate
+    const net = WETH_OUT - RELAY_FEE;
+    expect(trade.amountOut.amount).toBe(
+      (BigInt(QUOTE_AMOUNT_OUT) * net) / WETH_OUT
+    );
+    expect(trade.minAmountOut.amount).toBe(
+      (BigInt(QUOTE_MIN_OUT) * net) / WETH_OUT
+    );
     expect(trade.amountOut.decimals).toBe(24);
     expect(trade.priceImpactPct).toBe(0.42);
+    expect(trade.timeEstimate.quote).toBe(120);
 
-    // underlying Hydration trades: fee-buy (DOT → GLMR) + sell (DOT → WETH)
-    expect(trade.trades).toHaveLength(2);
+    // fee = idealWeth − swapAmount (mock sell is amount-independent → relay fee)
+    expect(trade.fee.amount.amount).toBe(RELAY_FEE);
+    expect(trade.fee.pct).toBe(0.2);
+    expect(trade.fee.usd).toBeCloseTo(2); // 0.001 WETH @ $2000
+    // exchange rate: destination units per 1 unit of A
+    expect(trade.spotPrice).toBeCloseTo(4.1916, 4);
   });
 
   it('buildCall() requests a firm quote and yields the executable request', async () => {
@@ -241,6 +245,8 @@ describe('swap', () => {
     }));
     const xcSwap = createXcSwap({ sdk: mockSdk(0n, router), emitter: EMITTER });
 
-    await expect(xcSwap.swap(PARAMS)).rejects.toThrow(/must exceed maxRelayFee/);
+    await expect(xcSwap.swap(PARAMS)).rejects.toThrow(
+      /must exceed maxRelayFee/
+    );
   });
 });

@@ -10,3 +10,6 @@ export const sdk = await createSdkContext(client);
 export const xc = await createXcContext({
   poolCtx: sdk.ctx.pool,
 });
+
+// Eager start
+await sdk.ctx.pool.getPools();

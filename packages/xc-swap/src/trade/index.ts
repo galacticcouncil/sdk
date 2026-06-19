@@ -1,3 +1,5 @@
 export * from './abi';
-export * from './build';
+export * from './builder';
 export * from './swap';
+export * from './types';
+export * from './utils';
