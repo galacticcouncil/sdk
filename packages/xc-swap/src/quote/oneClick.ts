@@ -63,6 +63,7 @@ export async function getOneClickQuote(
     depositType: QuoteRequest.depositType.ORIGIN_CHAIN,
     destinationAsset: params.destinationAsset,
     amount: params.amount.toString(),
+    referral: 'hydration',
     refundTo: params.refundTo,
     refundType: QuoteRequest.refundType.ORIGIN_CHAIN,
     recipient: params.recipient,
