@@ -13,10 +13,17 @@ export interface OneClickConfig {
   jwt?: string;
 }
 
+const DEFAULT_DISTRIBUTION_CHANNEL =
+  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjUtMDEtMTItdjEifQ.eyJ2IjoxLCJrZXlfdHlwZSI6ImRpc3RyaWJ1dGlvbl9jaGFubmVsIiwicGFydG5lcl9pZCI6Imh5ZHJhdGlvbiIsImlhdCI6MTc4MTg3MjQzNywiZXhwIjoxODEzNDA4NDM3fQ.JOLeSM9F4PiyCCpT2xsoLm3hsS77hT4JjyNVxw_8PpENkIKsLFtSpTPUH6eN2cmSXtuAGiJ9UV44anBHL76j19uYvTqZaJNTDoRMB0oUd6WNKiaQJQXs2UmjYOOKNNvBlQU-i8H7bw5tN_yf-rzKuuj-VRNU6TcAhNDkhnWnFChFG4UTd-9V4Ktd5stAFX1VdaWDW9ueBQDkF-dcmrjXBlM44G2UTy3HP65XvzIhYpIRv_CusUkBTipk8nHnkdjXtFBuds2okzI875LLRzf8ANx3HBzdjZsuHbHeBLIPwZcueV2KkkfeEoa2bLRnaXS3IfIhY13N666wyeea0HvUvA';
+
 /** Apply 1Click client configuration (base URL + optional JWT). */
 export function configureOneClick(config: OneClickConfig = {}): void {
   if (config.baseUrl) OpenAPI.BASE = config.baseUrl;
-  if (config.jwt) OpenAPI.TOKEN = config.jwt;
+  if (config.jwt) {
+    OpenAPI.TOKEN = config.jwt;
+  } else {
+    OpenAPI.TOKEN = DEFAULT_DISTRIBUTION_CHANNEL;
+  }
 }
 
 /** Fetch the 1Click token registry (`GET /v0/tokens`). */

@@ -7,7 +7,7 @@ export const GLMR_ID = 16;
 /**
  * Default cross-chain XCM fee reserved in GLMR by the emitter.
  */
-export const DEFAULT_XCM_FEE = 1_000_000_000_000_000_000n;
+export const DEFAULT_XCM_FEE = 3_000_000_000_000_000_000n;
 
 /** Default relay-fee quoter endpoint. */
 export const DEFAULT_QUOTER_URL = 'https://quoter-api.play.hydration.cloud';
