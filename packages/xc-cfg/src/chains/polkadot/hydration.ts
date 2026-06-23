@@ -64,10 +64,7 @@ const evmResolver = new HydrationEvmResolver();
 const rpcHttpList = [
   'https://hydration-rpc.n.dwellir.com',
   'https://hydration.dotters.network',
-  'https://hydration.ibp.network',
-  'https://rpc.lait.hydration.cloud',
-  'https://rpc.roach.hydration.cloud',
-  'https://rpc.zipp.hydration.cloud',
+  'https://hydration.rotko.net',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
 ];
@@ -76,11 +73,8 @@ const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
   'wss://hydration.dotters.network',
   'wss://hydration.ibp.network',
-  /* 'wss://rpc.lait.hydration.cloud',
-  'wss://rpc.roach.hydration.cloud',
-  'wss://rpc.zipp.hydration.cloud',
   'wss://rpc.sin.hydration.cloud',
-  'wss://rpc.coke.hydration.cloud', */
+  'wss://rpc.coke.hydration.cloud',
 ];
 
 const evmChain: Chain = defineChain({
