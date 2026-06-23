@@ -72,7 +72,7 @@ const rpcHttpList = [
 const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
   'wss://hydration.dotters.network',
-  'wss://hydration.ibp.network',
+  'wss://hydration.rotko.net',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',
 ];
