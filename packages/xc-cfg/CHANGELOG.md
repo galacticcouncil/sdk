@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.4.4
+
+### Patch Changes
+
+- remove ibp
+
 ## 1.4.3
 
 ### Patch Changes
