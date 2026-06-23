@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 1.4.3
+
+### Patch Changes
+
+- update hydration rpc list
+
 ## 1.4.2
 
 ### Patch Changes
