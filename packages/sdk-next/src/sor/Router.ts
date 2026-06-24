@@ -8,6 +8,7 @@ import {
   PoolFactory,
   PoolFilter,
 } from '../pool';
+import { UniswapV3Pool } from '../pool/uniswapv3';
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;
@@ -233,13 +234,17 @@ export class Router {
   private toHops(path: Edge[], poolsMap: Map<string, Pool>): Hop[] {
     return path.map(([address, from, to]: Edge) => {
       const pool = poolsMap.get(address);
-      return {
+      const hop = {
         poolAddress: address,
         poolId: pool?.id,
         pool: pool?.type,
         assetIn: from,
         assetOut: to,
       } as Hop;
+      if (pool instanceof UniswapV3Pool) {
+        hop.fee = pool.fee;
+      }
+      return hop;
     });
   }
 }

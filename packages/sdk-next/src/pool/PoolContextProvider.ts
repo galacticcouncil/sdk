@@ -14,6 +14,7 @@ import { LbpPoolClient } from './lbp';
 import { OmniPoolClient } from './omni';
 import { XykPoolClient } from './xyk';
 import { StableSwapClient } from './stable';
+import { UniswapV3PoolClient } from './uniswapv3';
 import {
   IPoolCtxProvider,
   Pool,
@@ -37,6 +38,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   readonly hsm: HsmPoolClient;
   readonly xyk: XykPoolClient;
   readonly lbp: LbpPoolClient;
+  readonly uniswapv3: UniswapV3PoolClient;
 
   private readonly active: Set<PoolType> = new Set([]);
   private readonly pools: Map<string, PoolBase> = new Map([]);
@@ -47,6 +49,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     | HsmPoolClient
     | XykPoolClient
     | LbpPoolClient
+    | UniswapV3PoolClient
   )[] = [];
 
   private aaveSub: Subscription = Subscription.EMPTY;
@@ -55,6 +58,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private hsmSub: Subscription = Subscription.EMPTY;
   private xykSub: Subscription = Subscription.EMPTY;
   private lbpSub: Subscription = Subscription.EMPTY;
+  private v3Sub: Subscription = Subscription.EMPTY;
 
   private isReady: boolean = false;
   private isDestroyed = new Subject<boolean>();
@@ -68,6 +72,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.hsm = new HsmPoolClient(client, evm, this.stableswap, at);
     this.xyk = new XykPoolClient(client, evm, at);
     this.lbp = new LbpPoolClient(client, evm, at);
+    this.uniswapv3 = new UniswapV3PoolClient(client, evm, at);
     this.clients = [
       this.aave,
       this.omnipool,
@@ -75,6 +80,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       this.hsm,
       this.xyk,
       this.lbp,
+      this.uniswapv3,
     ];
   }
 
@@ -142,6 +148,13 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.lbpSub.unsubscribe();
     this.lbpSub = this.subscribe(this.lbp);
     this.active.add(PoolType.LBP);
+    return this;
+  }
+
+  public withV3(): this {
+    this.v3Sub.unsubscribe();
+    this.v3Sub = this.subscribe(this.uniswapv3);
+    this.active.add(PoolType.V3);
     return this;
   }
 
