@@ -11,6 +11,7 @@ import { keccak256, encodePacked, decodeFunctionData } from 'viem';
 import { SWAP_AND_BRIDGE_ABI } from './abi';
 import { createXcSwap } from '../factory';
 import { WETH_ID, GLMR_ID, WRAP_NEAR_ASSET } from '../registry/consts';
+import { XcSwapError } from '../types';
 
 const DOT_ID = 5;
 const DOT_DECIMALS = 10;
@@ -151,6 +152,9 @@ describe('swap', () => {
     expect(trade.fee.usd).toBeCloseTo(2); // 0.001 WETH @ $2000
     // exchange rate: destination units per 1 unit of A
     expect(trade.spotPrice).toBeCloseTo(4.1916, 4);
+
+    // a viable swap carries no errors
+    expect(trade.errors).toEqual([]);
   });
 
   it('buildCall() requests a firm quote and yields the executable request', async () => {
@@ -236,7 +240,7 @@ describe('swap', () => {
     ).rejects.toThrow(/Unsupported destination asset/);
   });
 
-  it('rejects when the bridged WETH cannot cover the relay fee', async () => {
+  it('flags non-viable swaps via errors instead of throwing', async () => {
     const router = mockRouter();
     router.getBestSell = jest.fn(async () => ({
       amountIn: 0n,
@@ -245,8 +249,17 @@ describe('swap', () => {
     }));
     const xcSwap = createXcSwap({ sdk: mockSdk(0n, router), emitter: EMITTER });
 
-    await expect(xcSwap.swap(PARAMS)).rejects.toThrow(
-      /must exceed maxRelayFee/
-    );
+    const trade = await xcSwap.swap(PARAMS);
+    expect(trade.errors).toContain(XcSwapError.RelayFeeTooHigh);
+  });
+
+  it('maps a 1Click quote API error to a custom error', async () => {
+    getQuoteSpy.mockRejectedValueOnce({
+      body: { message: 'recipient is not valid' },
+    });
+    const xcSwap = createXcSwap({ sdk: mockSdk(), emitter: EMITTER });
+
+    const trade = await xcSwap.swap(PARAMS);
+    expect(trade.errors).toContain(XcSwapError.RecipientInvalid);
   });
 });

@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-swap
 
+## 0.4.0
+
+### Minor Changes
+
+- xcswap: add abis, validations
+
 ## 0.3.0
 
 ### Minor Changes

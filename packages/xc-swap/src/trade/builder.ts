@@ -31,6 +31,7 @@ export function buildCalls(params: BuildCallsParams): EvmCall[] {
     from: params.from,
     to: params.emitter as `0x${string}`,
     data: swapData,
+    abi: JSON.stringify(SWAP_AND_BRIDGE_ABI),
     type: CallType.Evm,
     dryRun: async () => undefined,
   };
@@ -49,6 +50,7 @@ export function buildCalls(params: BuildCallsParams): EvmCall[] {
     from: params.from,
     to: params.assetInAddress,
     data: approveData,
+    abi: JSON.stringify(erc20Abi),
     type: CallType.Evm,
     allowance: params.amountIn,
     dryRun: async () => undefined,

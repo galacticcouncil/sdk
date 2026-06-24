@@ -4,6 +4,9 @@ export const WETH_ID = 20;
 /** Hydration runtime asset id of GLMR (used to pay the cross-chain XCM fee). */
 export const GLMR_ID = 16;
 
+/** Minimum bridged WETH for a viable swap (0.0004 WETH, 18 dp). */
+export const MIN_WETH = 400_000_000_000_000n;
+
 /**
  * Default cross-chain XCM fee reserved in GLMR by the emitter.
  */

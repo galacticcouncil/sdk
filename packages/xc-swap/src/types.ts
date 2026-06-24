@@ -77,6 +77,20 @@ export interface XcSwapTimeEstimate {
   quote: number;
 }
 
+/** Swap viability errors — reported on the trade rather than thrown. */
+export enum XcSwapError {
+  /** Bridged WETH (after slippage) is below the 0.0004 WETH minimum. */
+  MinWethNotMet = 'MinWethNotMet',
+  /** Bridged WETH does not cover at least 2× the relay fee. */
+  RelayFeeTooHigh = 'RelayFeeTooHigh',
+  /** 1Click rejected the amount as too low for the bridge. */
+  AmountTooLow = 'AmountTooLow',
+  /** 1Click rejected the recipient address. */
+  RecipientInvalid = 'RecipientInvalid',
+  /** 1Click quote failed for another reason. */
+  QuoteFailed = 'QuoteFailed',
+}
+
 /**
  * An estimated cross-chain swap.
  */
@@ -95,6 +109,8 @@ export interface XcSwapTrade {
   timeEstimate: XcSwapTimeEstimate;
   /** Price impact of the on-Hydration sell leg, percent. */
   priceImpactPct: number;
+  /** Viability errors — empty when the swap is executable. */
+  errors: XcSwapError[];
 
   /**
    * Request a firm (non-dry) 1Click quote.
