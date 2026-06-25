@@ -15,6 +15,7 @@ import {
   vastr,
   vdot,
 } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const astar = new Parachain({
   assetsData: [
@@ -207,6 +208,10 @@ export const astar = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().assets().account(),
+  balanceOverrides: {
+    [astr.key]: BalanceBuilder().substrate().system().account(),
+  },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://astar.subscan.io',
   genesisHash:

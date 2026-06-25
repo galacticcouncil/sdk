@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { ajun } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const ajuna = new Parachain({
   assetsData: [
@@ -16,6 +17,7 @@ export const ajuna = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().system().account(),
   ecosystem: Ecosystem.Polkadot,
   genesisHash:
     '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee',

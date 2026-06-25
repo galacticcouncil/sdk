@@ -23,6 +23,7 @@ import {
   wbtc_mwh,
   weth_mwh,
 } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 const evmChain: Chain = defineChain({
   id: 1284,
@@ -375,6 +376,10 @@ export const moonbeam = new EvmParachain({
       },
     },
   ],
+  balance: BalanceBuilder().evm().erc20(),
+  balanceOverrides: {
+    [glmr.key]: BalanceBuilder().substrate().system().account(),
+  },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,
   explorer: 'https://moonbeam.subscan.io',

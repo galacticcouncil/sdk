@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { jito_sol, prime, sol } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -25,6 +26,10 @@ export const solana = new SolanaChain({
       decimals: 6,
     },
   ],
+  balance: BalanceBuilder().solana().token(),
+  balanceOverrides: {
+    [sol.key]: BalanceBuilder().solana().native(),
+  },
   ecosystem: Ecosystem.Solana,
   explorer: 'https://explorer.solana.com/',
   rpcUrls: {

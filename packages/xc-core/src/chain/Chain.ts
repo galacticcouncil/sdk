@@ -1,6 +1,9 @@
 import { Asset } from '../asset';
 import { Dex } from './dex';
 
+import type { BalanceConfigBuilder } from '../config/definition/balance';
+import type { MinConfigBuilder } from '../config/definition/min';
+
 export type ChainAssetId =
   | string
   | number
@@ -53,15 +56,30 @@ export interface ChainAssetData {
 
 export interface ChainParams<T extends ChainAssetData> {
   assetsData: T[];
+  /**
+   * Default balance storage builder for assets on this chain. Per-asset
+   * outliers are declared via {@link balanceOverrides}.
+   */
+  balance: BalanceConfigBuilder;
+  balanceOverrides?: Record<string /* asset.key */, BalanceConfigBuilder>;
   ecosystem?: ChainEcosystem;
   explorer?: string;
   isTestChain?: boolean;
   key: string;
+  /**
+   * Dynamic minimum storage builder (e.g. AssetHub `assets.asset`). Optional —
+   * chains with static minimums rely on `assetsData[*].min` instead.
+   */
+  min?: MinConfigBuilder;
   name: string;
 }
 
 export abstract class Chain<T extends ChainAssetData> {
   readonly assetsData: Map<string, T>;
+
+  readonly balance: BalanceConfigBuilder;
+
+  readonly balanceOverrides?: Record<string, BalanceConfigBuilder>;
 
   readonly ecosystem?: ChainEcosystem;
 
@@ -71,23 +89,31 @@ export abstract class Chain<T extends ChainAssetData> {
 
   readonly key: string;
 
+  readonly min?: MinConfigBuilder;
+
   readonly name: string;
 
   private _dex?: Dex;
 
   constructor({
     assetsData,
+    balance,
+    balanceOverrides,
     ecosystem,
     explorer,
     isTestChain = false,
     key,
+    min,
     name,
   }: ChainParams<T>) {
     this.assetsData = new Map(assetsData.map((data) => [data.asset.key, data]));
+    this.balance = balance;
+    this.balanceOverrides = balanceOverrides;
     this.ecosystem = ecosystem;
     this.explorer = explorer;
     this.isTestChain = isTestChain;
     this.key = key;
+    this.min = min;
     this.name = name;
   }
 
@@ -158,6 +184,22 @@ export abstract class Chain<T extends ChainAssetData> {
 
   getBalanceAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.balanceId ?? this.getAssetId(asset);
+  }
+
+  /**
+   * Balance storage builder for a given asset — per-asset override if one is
+   * registered, otherwise the chain default.
+   */
+  getBalanceBuilder(asset: Asset): BalanceConfigBuilder {
+    return this.balanceOverrides?.[asset.key] ?? this.balance;
+  }
+
+  /**
+   * Dynamic minimum storage builder for this chain (shared across assets), or
+   * undefined when the chain uses static `assetsData[*].min` values.
+   */
+  getMinBuilder(): MinConfigBuilder | undefined {
+    return this.min;
   }
 
   updateAsset(asset: T): void {

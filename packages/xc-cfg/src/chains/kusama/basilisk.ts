@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { bsx, ksm, usdt } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const basilisk = new Parachain({
   assetsData: [
@@ -46,6 +47,7 @@ export const basilisk = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().tokens().accounts(),
   ecosystem: Ecosystem.Kusama,
   explorer: 'https://basilisk.subscan.io',
   genesisHash:

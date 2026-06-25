@@ -5,6 +5,7 @@ const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 
 const parachain = new Parachain({
   assetsData: [],
+  balance: { build: () => ({} as any) },
   genesisHash: '0x',
   key: 'hydration',
   name: 'Hydration',

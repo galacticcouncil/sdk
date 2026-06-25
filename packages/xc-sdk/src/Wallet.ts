@@ -29,7 +29,7 @@ import {
   calculateMin,
   formatEvmAddress,
   DataOriginProcessor,
-  DataReverseProcessor,
+  DataDestinationProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
@@ -124,13 +124,13 @@ export class Wallet {
     dstAddress: string
   ): Promise<Transfer> {
     const srcConf = configs.origin;
-    const dstConf = configs.reverse;
+    const { chain: dstChain, asset: dstAsset } = srcConf.route.destination;
 
     const srcAdapter = new PlatformAdapter(srcConf.chain);
-    const dstAdapter = new PlatformAdapter(dstConf.chain);
+    const dstAdapter = new PlatformAdapter(dstChain);
 
     const src = new DataOriginProcessor(srcAdapter, srcConf);
-    const dst = new DataReverseProcessor(dstAdapter, dstConf);
+    const dst = new DataDestinationProcessor(dstAdapter, dstChain, dstAsset);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -167,7 +167,7 @@ export class Wallet {
       asset: source.asset,
       destination: {
         balance: dstBalance,
-        chain: dstConf.chain,
+        chain: dstChain,
         fee: dstFee,
         feeBreakdown: dstFeeBreakdown,
       },
@@ -230,6 +230,7 @@ export class Wallet {
         balance: dstBalance,
         fee: dstFee,
       },
+      reversible: configs.reversible,
       async buildCall(amount): Promise<Call> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);

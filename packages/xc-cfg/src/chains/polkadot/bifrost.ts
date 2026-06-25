@@ -14,6 +14,7 @@ import {
   vastr,
   vdot,
 } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 const rpcWebsocketList = [
   'wss://bifrost-polkadot.ibp.network',
@@ -189,6 +190,10 @@ export const bifrost = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().tokens().accounts(),
+  balanceOverrides: {
+    [bnc.key]: BalanceBuilder().substrate().system().account(),
+  },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',
   genesisHash:

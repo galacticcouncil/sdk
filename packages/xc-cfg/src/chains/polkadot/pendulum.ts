@@ -5,6 +5,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { pen } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const pendulum = new Parachain({
   assetsData: [
@@ -21,6 +22,7 @@ export const pendulum = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().system().account(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://pendulum.subscan.io',
   genesisHash:

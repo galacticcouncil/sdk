@@ -77,19 +77,14 @@ export function ConfigBuilder(service: ConfigService) {
                         ? config.getAsset(assetOnDest)
                         : defaultRoute.destination.asset;
 
-                      // Find reverse route (dest→source) for the received asset
-                      const reverseRoutes = config.getAssetRoutes(
+                      // Probe for a reverse route (dest→source) for the
+                      // received asset. Absence is allowed — one-way routes
+                      // resolve with reversible=false.
+                      const reverseRoutes = config.getAssetRoutesOrEmpty(
                         assetToReceive,
                         destination,
                         source
                       );
-
-                      // Prefer reverse route with same tag, fallback to first available
-                      const taggedReverse = tag
-                        ? reverseRoutes.filter((r) => r.tags?.includes(tag))
-                        : [];
-
-                      const reverse = taggedReverse[0] ?? reverseRoutes[0];
 
                       // Find forward route matching the dest asset
                       const origin = candidates.find(
@@ -101,10 +96,7 @@ export function ConfigBuilder(service: ConfigService) {
                           chain: source,
                           route: origin!,
                         },
-                        reverse: {
-                          chain: destination,
-                          route: reverse,
-                        },
+                        reversible: reverseRoutes.length > 0,
                       };
                     },
                   };

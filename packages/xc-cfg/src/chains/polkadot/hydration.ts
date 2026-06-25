@@ -57,6 +57,7 @@ import {
   tbtc,
   lbtc,
 } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 import { HydrationEvmResolver } from '../../resolvers';
 
 const evmResolver = new HydrationEvmResolver();
@@ -1232,6 +1233,10 @@ export const hydration = new EvmParachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().tokens().accounts(),
+  balanceOverrides: {
+    [hdx.key]: BalanceBuilder().substrate().system().account(),
+  },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,
   evmResolver: evmResolver,

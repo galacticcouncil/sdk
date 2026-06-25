@@ -5,6 +5,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const interlay = new Parachain({
   assetsData: [
@@ -131,6 +132,7 @@ export const interlay = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().tokens().accounts(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://interlay.subscan.io',
   genesisHash:

@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { eth, eurc, usdc } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 import { base as evmChain } from 'viem/chains';
 
 export const base = new EvmChain({
@@ -27,6 +28,7 @@ export const base = new EvmChain({
       id: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     },
   ],
+  balance: BalanceBuilder().evm().erc20(),
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
   explorer: 'https://basescan.org/',

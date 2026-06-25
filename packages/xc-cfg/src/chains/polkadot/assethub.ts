@@ -5,6 +5,8 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { dot, ksm, myth, usdc, usdt, wud } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
+import { AssetMinBuilder } from '../../builders/AssetMinBuilder';
 
 const config = {
   assetsData: [
@@ -105,6 +107,13 @@ const config = {
       },
     },
   ],
+  balance: BalanceBuilder().substrate().assets().account(),
+  balanceOverrides: {
+    [dot.key]: BalanceBuilder().substrate().system().account(),
+    [ksm.key]: BalanceBuilder().substrate().foreignAssets().account(),
+    [myth.key]: BalanceBuilder().substrate().foreignAssets().account(),
+  },
+  min: AssetMinBuilder().assets().asset(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://assethub-polkadot.subscan.io',
   genesisHash:
@@ -132,4 +141,8 @@ export const assetHubCex = new Parachain({
   name: 'AssetHub (CEX)',
   usesSignerFee: true,
   isTestChain: true,
+  // CEX forwarding reads every asset (incl. DOT) from the `assets` pallet,
+  // unlike canonical AssetHub which reads DOT from `system`. Drop the inherited
+  // overrides so the registry matches this chain's own route balance builders.
+  balanceOverrides: {},
 });

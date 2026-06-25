@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { sui } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const sui_chain = new SuiChain({
   id: '0x35834a8a',
@@ -15,6 +16,7 @@ export const sui_chain = new SuiChain({
       decimals: 9,
     },
   ],
+  balance: BalanceBuilder().sui().native(),
   ecosystem: Ecosystem.Sui,
   explorer: 'https://suiscan.xyz/',
   wormhole: {

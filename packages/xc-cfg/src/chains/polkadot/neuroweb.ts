@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { neuro } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const neuroweb = new Parachain({
   assetsData: [
@@ -19,6 +20,7 @@ export const neuroweb = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().system().account(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://neuroweb.subscan.io',
   genesisHash:

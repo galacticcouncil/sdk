@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { unq } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const unique = new Parachain({
   assetsData: [
@@ -16,6 +17,7 @@ export const unique = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().system().account(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://unique.subscan.io',
   genesisHash:

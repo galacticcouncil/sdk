@@ -4,6 +4,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { myth } from '../../assets';
+import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const mythos = new Parachain({
   assetsData: [
@@ -16,6 +17,7 @@ export const mythos = new Parachain({
       },
     },
   ],
+  balance: BalanceBuilder().substrate().system().account(),
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://mythos.subscan.io',
   genesisHash:

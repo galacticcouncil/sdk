@@ -92,6 +92,20 @@ export class ConfigService {
     return routes.getAssetDestinationRoutes(asset, destination);
   }
 
+  /**
+   * Like {@link getAssetRoutes} but returns an empty array instead of throwing
+   * when no route exists — used to probe for a reverse route.
+   */
+  getAssetRoutesOrEmpty(
+    asset: Asset,
+    source: AnyChain,
+    destination: AnyChain
+  ): AssetRoute[] {
+    const key = typeof source === 'string' ? source : source.key;
+    const routes = this.routes.get(key);
+    return routes?.getAssetDestinationRoutesOrEmpty(asset, destination) ?? [];
+  }
+
   updateAsset(asset: Asset): void {
     this.assets.set(asset.key, asset);
   }
