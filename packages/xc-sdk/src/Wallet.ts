@@ -274,16 +274,18 @@ export class Wallet {
     const observables = chainRoutes
       .getUniqueRoutes()
       .map(async ({ source }) => {
-        const { asset, balance } = source;
+        const { asset } = source;
         const assetId = chainRoutes.chain.getBalanceAssetId(asset);
         const account = EvmAddr.isValid(assetId.toString())
           ? await formatEvmAddress(address, chainRoutes.chain)
           : address;
-        const balanceConfig = balance.build({
-          address: account,
-          asset: asset,
-          chain: chainRoutes.chain,
-        });
+        const balanceConfig = chainRoutes.chain
+          .getBalanceBuilder(asset)
+          .build({
+            address: account,
+            asset: asset,
+            chain: chainRoutes.chain,
+          });
         return adapter.subscribeBalance(asset, balanceConfig);
       });
 

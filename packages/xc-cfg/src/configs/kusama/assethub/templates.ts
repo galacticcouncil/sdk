@@ -1,12 +1,7 @@
 import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { ksm } from '../../../assets';
-import {
-  AssetMinBuilder,
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  XcmTransferType,
-} from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 export const extraFee = 0.0015; // xcmDeliveryFee
 
@@ -18,16 +13,10 @@ export function toParaStablesTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: ksm,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: destination,

@@ -8,17 +8,13 @@ import {
   XcmTransferType,
 } from '../../../builders';
 
-import { balance, fee } from './configs';
+import { fee } from './configs';
 
 const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: kusamaAssetHub,
@@ -39,11 +35,7 @@ const toKusamaAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ksm,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: kusamaAssetHub,

@@ -33,15 +33,14 @@ export abstract class DataProcessor {
 
   async getBalance(address: string): Promise<AssetAmount> {
     const { chain, route } = this.config;
-    const { source } = route;
 
-    const asset = source.asset;
+    const asset = route.source.asset;
 
     const assetId = chain.getBalanceAssetId(asset);
     const account = EvmAddr.isValid(assetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const balanceConfig = route.source.balance.build({
+    const balanceConfig = chain.getBalanceBuilder(asset).build({
       address: account,
       asset: asset,
       chain: chain,
@@ -52,10 +51,9 @@ export abstract class DataProcessor {
 
   async getMin(): Promise<AssetAmount> {
     const { chain, route } = this.config;
-    const { source } = route;
 
-    const asset = source.asset;
-    const min = source.min;
+    const asset = route.source.asset;
+    const min = chain.getMinBuilder();
 
     if (chain instanceof Parachain && min) {
       const minAssetId = chain.getMinAssetId(asset);

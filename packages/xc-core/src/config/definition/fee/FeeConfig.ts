@@ -6,7 +6,6 @@ import { FeeAmountConfigBuilder } from './FeeAmountConfigBuilder';
 
 export interface FeeConfig {
   asset: Asset | FeeAssetConfigBuilder;
-  balance: BalanceConfigBuilder;
   extra?: number;
   swap?: boolean;
 }
@@ -20,5 +19,4 @@ export interface DestinationFeeConfig {
 export interface TransactFeeConfig {
   amount: number;
   asset: Asset;
-  balance: BalanceConfigBuilder;
 }

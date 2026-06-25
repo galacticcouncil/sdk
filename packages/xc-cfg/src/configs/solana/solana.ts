@@ -2,18 +2,14 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { jito_sol, prime, sol } from '../../assets';
 import { solana, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, ProgramBuilder } from '../../builders';
+import { ProgramBuilder } from '../../builders';
 import { Tag } from '../../tags';
 
 const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: sol,
-      balance: BalanceBuilder().solana().native(),
-      destinationFee: {
-        asset: sol,
-        balance: BalanceBuilder().solana().native(),
-      },
+      destinationFee: sol,
     },
     destination: {
       chain: hydration,
@@ -35,15 +31,10 @@ const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: jito_sol,
-      balance: BalanceBuilder().solana().token(),
       fee: {
         asset: sol,
-        balance: BalanceBuilder().solana().native(),
       },
-      destinationFee: {
-        asset: jito_sol,
-        balance: BalanceBuilder().solana().token(),
-      },
+      destinationFee: jito_sol,
     },
     destination: {
       chain: hydration,
@@ -65,15 +56,10 @@ const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: prime,
-      balance: BalanceBuilder().solana().token(),
       fee: {
         asset: sol,
-        balance: BalanceBuilder().solana().native(),
       },
-      destinationFee: {
-        asset: prime,
-        balance: BalanceBuilder().solana().token(),
-      },
+      destinationFee: prime,
     },
     destination: {
       chain: hydration,

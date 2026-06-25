@@ -38,7 +38,7 @@ export class DataOriginProcessor extends DataProcessor {
     const { source, destination, transact } = route;
 
     const feeAmount = destination.fee.amount;
-    const feeAsset = source.destinationFee.asset || destination.fee.asset;
+    const feeAsset = source.destinationFee ?? destination.fee.asset;
     const feeDecimals = await this.getDecimals(feeAsset);
 
     if (Number.isFinite(feeAmount)) {
@@ -77,7 +77,7 @@ export class DataOriginProcessor extends DataProcessor {
     const { source, destination } = route;
 
     const asset = source.asset;
-    const feeAsset = source.destinationFee.asset || destination.fee.asset;
+    const feeAsset = source.destinationFee ?? destination.fee.asset;
 
     if (asset.isEqual(feeAsset)) {
       return this.getBalance(address);
@@ -87,7 +87,7 @@ export class DataOriginProcessor extends DataProcessor {
     const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const feeBalanceConfig = source.destinationFee.balance.build({
+    const feeBalanceConfig = chain.getBalanceBuilder(feeAsset).build({
       address: account,
       asset: feeAsset,
       chain: chain,
@@ -130,7 +130,7 @@ export class DataOriginProcessor extends DataProcessor {
     const account = EvmAddr.isValid(feeAssetId.toString())
       ? await formatEvmAddress(address, chain)
       : address;
-    const feeBalanceConfig = source.fee.balance.build({
+    const feeBalanceConfig = chain.getBalanceBuilder(feeAsset).build({
       address: account,
       asset: feeAsset,
       chain: chain,
@@ -293,7 +293,7 @@ export class DataOriginProcessor extends DataProcessor {
   ): Promise<AssetAmount> {
     const { chain } = this.config;
     const { fee } = cfg;
-    const feeBalanceConfig = fee.balance.build({
+    const feeBalanceConfig = chain.getBalanceBuilder(fee.asset).build({
       address: ctx.sender,
       asset: fee.asset,
       chain: chain,

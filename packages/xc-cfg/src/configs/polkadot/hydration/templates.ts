@@ -19,7 +19,7 @@ import {
 import { assetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
-import { balance, fee } from './configs';
+import { fee } from './configs';
 
 export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
@@ -44,11 +44,7 @@ export function toTransferTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -72,11 +68,7 @@ export function toParaTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -94,11 +86,7 @@ export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
   return new AssetRoute({
     source: {
       asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: hub,
@@ -118,11 +106,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: assetHub,
@@ -147,11 +131,7 @@ export function toParaErc20Template(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -191,12 +171,8 @@ function viaWormholeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        asset: assetIn,
-        balance: balance(),
-      },
+      destinationFee: assetIn,
     },
     destination: {
       chain: to,
@@ -222,7 +198,6 @@ function viaWormholeTemplate(
       fee: {
         amount: MRL_XCM_FEE,
         asset: glmr,
-        balance: balance(),
       },
       extrinsic: ExtrinsicBuilder().ethereumXcm().transact(transact),
     },
@@ -262,11 +237,7 @@ export function viaSnowbridgeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: to,
@@ -299,11 +270,7 @@ export function viaSnowbridgeV1Template(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: to,
