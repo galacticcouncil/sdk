@@ -1,8 +1,8 @@
-import { Asset } from '../asset';
-import { Dex } from './dex';
+import { combineLatest, debounceTime, Observable } from 'rxjs';
 
-import type { BalanceConfigBuilder } from '../config/definition/balance';
-import type { MinConfigBuilder } from '../config/definition/min';
+import { Asset, AssetAmount } from '../asset';
+import { BalanceType } from './balance';
+import { Dex } from './dex';
 
 export type ChainAssetId =
   | string
@@ -57,29 +57,24 @@ export interface ChainAssetData {
 export interface ChainParams<T extends ChainAssetData> {
   assetsData: T[];
   /**
-   * Default balance storage builder for assets on this chain. Per-asset
-   * outliers are declared via {@link balanceOverrides}.
+   * Default balance storage type for assets on this chain. Per-asset outliers
+   * are declared via {@link balanceOverrides}.
    */
-  balance: BalanceConfigBuilder;
-  balanceOverrides?: Record<string /* asset.key */, BalanceConfigBuilder>;
+  balance: BalanceType;
+  balanceOverrides?: Record<string, BalanceType>;
   ecosystem?: ChainEcosystem;
   explorer?: string;
   isTestChain?: boolean;
   key: string;
-  /**
-   * Dynamic minimum storage builder (e.g. AssetHub `assets.asset`). Optional —
-   * chains with static minimums rely on `assetsData[*].min` instead.
-   */
-  min?: MinConfigBuilder;
   name: string;
 }
 
 export abstract class Chain<T extends ChainAssetData> {
   readonly assetsData: Map<string, T>;
 
-  readonly balance: BalanceConfigBuilder;
+  readonly balance: BalanceType;
 
-  readonly balanceOverrides?: Record<string, BalanceConfigBuilder>;
+  readonly balanceOverrides?: Record<string, BalanceType>;
 
   readonly ecosystem?: ChainEcosystem;
 
@@ -88,8 +83,6 @@ export abstract class Chain<T extends ChainAssetData> {
   readonly isTestChain: boolean;
 
   readonly key: string;
-
-  readonly min?: MinConfigBuilder;
 
   readonly name: string;
 
@@ -103,7 +96,6 @@ export abstract class Chain<T extends ChainAssetData> {
     explorer,
     isTestChain = false,
     key,
-    min,
     name,
   }: ChainParams<T>) {
     this.assetsData = new Map(assetsData.map((data) => [data.asset.key, data]));
@@ -113,7 +105,6 @@ export abstract class Chain<T extends ChainAssetData> {
     this.explorer = explorer;
     this.isTestChain = isTestChain;
     this.key = key;
-    this.min = min;
     this.name = name;
   }
 
@@ -187,19 +178,49 @@ export abstract class Chain<T extends ChainAssetData> {
   }
 
   /**
-   * Balance storage builder for a given asset — per-asset override if one is
+   * Balance storage type for a given asset — per-asset override if one is
    * registered, otherwise the chain default.
    */
-  getBalanceBuilder(asset: Asset): BalanceConfigBuilder {
+  getBalanceType(asset: Asset): BalanceType {
     return this.balanceOverrides?.[asset.key] ?? this.balance;
   }
 
   /**
-   * Dynamic minimum storage builder for this chain (shared across assets), or
-   * undefined when the chain uses static `assetsData[*].min` values.
+   * Read an asset's balance for `address` directly from this chain — no
+   * transfer, route, wallet or platform adapter required. Implemented per
+   * platform.
    */
-  getMinBuilder(): MinConfigBuilder | undefined {
-    return this.min;
+  abstract getBalance(asset: Asset, address: string): Promise<AssetAmount>;
+
+  /**
+   * Reactive balance for a single asset. Implemented per platform.
+   */
+  abstract subscribeBalance(
+    asset: Asset,
+    address: string
+  ): Observable<AssetAmount>;
+
+  /**
+   * Reactive composite balance — merges the per-asset streams into one,
+   * emitting the full set on any change. The building block for multi-token
+   * and (by merging chains) multi-chain balance feeds.
+   */
+  subscribeBalances(
+    assets: Asset[],
+    address: string
+  ): Observable<AssetAmount[]> {
+    return combineLatest(
+      assets.map((asset) => this.subscribeBalance(asset, address))
+    ).pipe(debounceTime(500));
+  }
+
+  protected async resolveDecimals(asset: Asset): Promise<number> {
+    const decimals = this.getAssetDecimals(asset);
+    if (decimals) {
+      return decimals;
+    }
+    const currency = await this.getCurrency();
+    return currency.decimals;
   }
 
   updateAsset(asset: T): void {

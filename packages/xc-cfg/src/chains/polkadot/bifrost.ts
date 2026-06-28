@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -14,7 +15,6 @@ import {
   vastr,
   vdot,
 } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 const rpcWebsocketList = [
   'wss://bifrost-polkadot.ibp.network',
@@ -190,9 +190,9 @@ export const bifrost = new Parachain({
       },
     },
   ],
-  balance: BalanceBuilder().substrate().tokens().accounts(),
+  balance: BalanceType.Tokens,
   balanceOverrides: {
-    [bnc.key]: BalanceBuilder().substrate().system().account(),
+    [bnc.key]: BalanceType.System,
   },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',

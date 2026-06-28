@@ -2,11 +2,11 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   ParachainParams,
+  BalanceType,
+  MinType,
 } from '@galacticcouncil/xc-core';
 
 import { dot, ksm, myth, usdc, usdt, wud } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
-import { AssetMinBuilder } from '../../builders/AssetMinBuilder';
 
 const config = {
   assetsData: [
@@ -107,13 +107,13 @@ const config = {
       },
     },
   ],
-  balance: BalanceBuilder().substrate().assets().account(),
+  balance: BalanceType.Assets,
   balanceOverrides: {
-    [dot.key]: BalanceBuilder().substrate().system().account(),
-    [ksm.key]: BalanceBuilder().substrate().foreignAssets().account(),
-    [myth.key]: BalanceBuilder().substrate().foreignAssets().account(),
+    [dot.key]: BalanceType.System,
+    [ksm.key]: BalanceType.ForeignAssets,
+    [myth.key]: BalanceType.ForeignAssets,
   },
-  min: AssetMinBuilder().assets().asset(),
+  min: MinType.Assets,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://assethub-polkadot.subscan.io',
   genesisHash:

@@ -5,5 +5,6 @@ export * from './EvmChain';
 export * from './SolanaChain';
 export * from './SuiChain';
 
+export * from './balance';
 export * from './dex';
 export * from './types';

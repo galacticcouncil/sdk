@@ -1,10 +1,10 @@
 import {
   ChainEcosystem as Ecosystem,
   SolanaChain,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { jito_sol, prime, sol } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -26,9 +26,9 @@ export const solana = new SolanaChain({
       decimals: 6,
     },
   ],
-  balance: BalanceBuilder().solana().token(),
+  balance: BalanceType.SolanaToken,
   balanceOverrides: {
-    [sol.key]: BalanceBuilder().solana().native(),
+    [sol.key]: BalanceType.SolanaNative,
   },
   ecosystem: Ecosystem.Solana,
   explorer: 'https://explorer.solana.com/',

@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   EvmParachain,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { defineChain, Chain } from 'viem';
@@ -57,7 +58,6 @@ import {
   tbtc,
   lbtc,
 } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 import { HydrationEvmResolver } from '../../resolvers';
 
 const evmResolver = new HydrationEvmResolver();
@@ -1233,9 +1233,9 @@ export const hydration = new EvmParachain({
       },
     },
   ],
-  balance: BalanceBuilder().substrate().tokens().accounts(),
+  balance: BalanceType.Tokens,
   balanceOverrides: {
-    [hdx.key]: BalanceBuilder().substrate().system().account(),
+    [hdx.key]: BalanceType.System,
   },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,

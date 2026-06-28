@@ -1,5 +1,4 @@
 import {
-  addr,
   Asset,
   AssetAmount,
   FeeAmountConfigBuilder,
@@ -16,8 +15,6 @@ import { formatAmount, formatEvmAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
-
-const { EvmAddr } = addr;
 
 export class DataOriginProcessor extends DataProcessor {
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
@@ -73,8 +70,7 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getDestinationFeeBalance(address: string): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source, destination } = route;
+    const { source, destination } = this.config.route;
 
     const asset = source.asset;
     const feeAsset = source.destinationFee ?? destination.fee.asset;
@@ -83,16 +79,7 @@ export class DataOriginProcessor extends DataProcessor {
       return this.getBalance(address);
     }
 
-    const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = EvmAddr.isValid(feeAssetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const feeBalanceConfig = chain.getBalanceBuilder(feeAsset).build({
-      address: account,
-      asset: feeAsset,
-      chain: chain,
-    });
-    return this.adapter.getBalance(feeAsset, feeBalanceConfig);
+    return this.config.chain.getBalance(feeAsset, address);
   }
 
   async getFee(ctx: TransferCtx): Promise<AssetAmount> {
@@ -118,25 +105,14 @@ export class DataOriginProcessor extends DataProcessor {
   }
 
   async getFeeBalance(address: string): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source } = route;
+    const { source } = this.config.route;
 
     if (!source.fee) {
       return this.getBalance(address);
     }
 
     const feeAsset = await this.getFeeAsset(address);
-    const feeAssetId = chain.getBalanceAssetId(feeAsset);
-    const account = EvmAddr.isValid(feeAssetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const feeBalanceConfig = chain.getBalanceBuilder(feeAsset).build({
-      address: account,
-      asset: feeAsset,
-      chain: chain,
-    });
-
-    return this.adapter.getBalance(feeAsset, feeBalanceConfig);
+    return this.config.chain.getBalance(feeAsset, address);
   }
 
   async getFeeAsset(address: string): Promise<Asset> {
@@ -291,13 +267,6 @@ export class DataOriginProcessor extends DataProcessor {
     cfg: TransactConfig,
     ctx: TransferCtx
   ): Promise<AssetAmount> {
-    const { chain } = this.config;
-    const { fee } = cfg;
-    const feeBalanceConfig = chain.getBalanceBuilder(fee.asset).build({
-      address: ctx.sender,
-      asset: fee.asset,
-      chain: chain,
-    });
-    return this.adapter.getBalance(fee.asset, feeBalanceConfig);
+    return this.config.chain.getBalance(cfg.fee.asset, ctx.sender);
   }
 }

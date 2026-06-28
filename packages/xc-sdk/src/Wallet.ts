@@ -1,7 +1,6 @@
 import { acc, big } from '@galacticcouncil/common';
 
 import {
-  addr,
   Asset,
   AnyChain,
   AnyParachain,
@@ -15,7 +14,7 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xc-core';
 
-import { combineLatest, debounceTime, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   Call,
@@ -27,15 +26,12 @@ import {
 import {
   calculateMax,
   calculateMin,
-  formatEvmAddress,
   DataOriginProcessor,
   DataDestinationProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
-
-const { EvmAddr } = addr;
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -270,27 +266,9 @@ export class Wallet {
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainRoutes = this.config.getChainRoutes(chain);
-    const adapter = new PlatformAdapter(chainRoutes.chain);
-    const observables = chainRoutes
+    const assets = chainRoutes
       .getUniqueRoutes()
-      .map(async ({ source }) => {
-        const { asset } = source;
-        const assetId = chainRoutes.chain.getBalanceAssetId(asset);
-        const account = EvmAddr.isValid(assetId.toString())
-          ? await formatEvmAddress(address, chainRoutes.chain)
-          : address;
-        const balanceConfig = chainRoutes.chain
-          .getBalanceBuilder(asset)
-          .build({
-            address: account,
-            asset: asset,
-            chain: chainRoutes.chain,
-          });
-        return adapter.subscribeBalance(asset, balanceConfig);
-      });
-
-    const ob = await Promise.all(observables);
-    const observable = combineLatest(ob);
-    return observable.pipe(debounceTime(500)).subscribe(observer);
+      .map((route) => route.source.asset);
+    return chainRoutes.chain.subscribeBalances(assets, address).subscribe(observer);
   }
 }

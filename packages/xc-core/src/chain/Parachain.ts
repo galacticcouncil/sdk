@@ -1,8 +1,15 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { SubstrateApis } from '@galacticcouncil/common';
+import { big, SubstrateApis } from '@galacticcouncil/common';
 
-import { Asset } from '../asset';
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import {
+  BalanceType,
+  MinType,
+  SubstrateBalanceClient,
+} from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -53,6 +60,11 @@ export interface ParachainAssetData extends ChainAssetData {
 
 export interface ParachainParams extends ChainParams<ParachainAssetData> {
   genesisHash: string;
+  /**
+   * Dynamic minimum storage type (e.g. AssetHub `assets.asset`). Optional —
+   * chains with static minimums rely on `assetsData[*].min` instead.
+   */
+  min?: MinType;
   parachainId: number;
   ss58Format: number;
   treasury?: string;
@@ -67,6 +79,10 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
 
 export class Parachain extends Chain<ParachainAssetData> {
   private _chainSpec?: Promise<ParachainSpec>;
+
+  protected readonly balanceClient = new SubstrateBalanceClient(this);
+
+  readonly min?: MinType;
 
   readonly genesisHash: string;
 
@@ -92,6 +108,7 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   constructor({
     genesisHash,
+    min,
     parachainId,
     ss58Format,
     treasury,
@@ -105,6 +122,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     ...others
   }: ParachainParams) {
     super({ ...others });
+    this.min = min;
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
@@ -161,6 +179,59 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   getMinAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.minId ?? this.getAssetId(asset);
+  }
+
+  getMinType(): MinType | undefined {
+    return this.min;
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  /**
+   * Minimum balance for an asset — dynamic storage when a {@link MinType} is
+   * registered, otherwise the static `assetsData[*].min`.
+   */
+  async getMin(asset: Asset): Promise<AssetAmount> {
+    const type = this.getMinType();
+    if (type) {
+      return this.balanceClient.getMin(asset, type);
+    }
+    const min = this.getAssetMin(asset);
+    const decimals = await this.resolveDecimals(asset);
+    return AssetAmount.fromAsset(asset, {
+      amount: min ? big.toBigInt(min, decimals) : 0n,
+      decimals,
+    });
+  }
+
+  async getExistentialDeposit(): Promise<AssetAmount | undefined> {
+    let ed: bigint;
+    try {
+      const result =
+        await this.client.getUnsafeApi().constants.Balances.ExistentialDeposit();
+      ed = typeof result === 'bigint' ? result : BigInt(String(result));
+    } catch {
+      ed = 0n;
+    }
+    const { asset, decimals } = await this.getCurrency();
+    return AssetAmount.fromAsset(asset, {
+      amount: ed,
+      decimals,
+    });
   }
 
   findAssetById(id: string) {

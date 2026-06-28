@@ -1,16 +1,12 @@
 import {
-  addr,
   Asset,
   AssetAmount,
   Parachain,
   TransferConfig,
 } from '@galacticcouncil/xc-core';
-import { big } from '@galacticcouncil/common';
 
-import { formatEvmAddress, getDecimals } from './utils';
-import { PlatformAdapter, SubstrateService } from '../platforms';
-
-const { EvmAddr } = addr;
+import { getDecimals } from './utils';
+import { PlatformAdapter } from '../platforms';
 
 export abstract class DataProcessor {
   readonly adapter: PlatformAdapter;
@@ -23,66 +19,23 @@ export abstract class DataProcessor {
 
   async getEd(): Promise<AssetAmount | undefined> {
     const { chain } = this.config;
-
-    if (chain instanceof Parachain) {
-      const substrate = await SubstrateService.create(chain);
-      return substrate.getExistentialDeposit();
-    }
-    return undefined;
+    return chain instanceof Parachain
+      ? chain.getExistentialDeposit()
+      : undefined;
   }
 
   async getBalance(address: string): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-
-    const asset = route.source.asset;
-
-    const assetId = chain.getBalanceAssetId(asset);
-    const account = EvmAddr.isValid(assetId.toString())
-      ? await formatEvmAddress(address, chain)
-      : address;
-    const balanceConfig = chain.getBalanceBuilder(asset).build({
-      address: account,
-      asset: asset,
-      chain: chain,
-    });
-
-    return this.adapter.getBalance(asset, balanceConfig);
+    return this.config.chain.getBalance(this.config.route.source.asset, address);
   }
 
   async getMin(): Promise<AssetAmount> {
     const { chain, route } = this.config;
-
     const asset = route.source.asset;
-    const min = chain.getMinBuilder();
-
-    if (chain instanceof Parachain && min) {
-      const minAssetId = chain.getMinAssetId(asset);
-      const minBalanceConfig = min.build({
-        asset: minAssetId,
-      });
-      return this.adapter.getBalance(asset, minBalanceConfig);
+    if (chain instanceof Parachain) {
+      return chain.getMin(asset);
     }
-
-    return this.getAssetMin();
-  }
-
-  private async getAssetMin(): Promise<AssetAmount> {
-    const { chain, route } = this.config;
-    const { source } = route;
-
-    const asset = source.asset;
-    const min = chain.getAssetMin(asset);
-    const decimals = await this.getDecimals(asset);
-
-    let balance: bigint = 0n;
-    if (min) {
-      balance = big.toBigInt(min, decimals);
-    }
-
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
+    const decimals = await getDecimals(chain, asset);
+    return AssetAmount.fromAsset(asset, { amount: 0n, decimals });
   }
 
   protected async getDecimals(asset: Asset): Promise<number> {

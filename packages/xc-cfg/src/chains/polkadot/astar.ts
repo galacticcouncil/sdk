@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -15,7 +16,6 @@ import {
   vastr,
   vdot,
 } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const astar = new Parachain({
   assetsData: [
@@ -208,9 +208,9 @@ export const astar = new Parachain({
       },
     },
   ],
-  balance: BalanceBuilder().substrate().assets().account(),
+  balance: BalanceType.Assets,
   balanceOverrides: {
-    [astr.key]: BalanceBuilder().substrate().system().account(),
+    [astr.key]: BalanceType.System,
   },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://astar.subscan.io',

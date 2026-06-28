@@ -1,5 +1,9 @@
 import { Connection } from '@solana/web3.js';
 
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import { SolanaBalanceClient } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -21,6 +25,8 @@ export interface SolanaChainParams extends ChainParams<ChainAssetData> {
 }
 
 export class SolanaChain extends Chain<ChainAssetData> {
+  private readonly balanceClient = new SolanaBalanceClient(this);
+
   readonly id: number;
   readonly rpcUrls: ChainRpcs;
   readonly wormhole?: Wormhole;
@@ -51,5 +57,21 @@ export class SolanaChain extends Chain<ChainAssetData> {
       return { asset, decimals: SOLANA_DECIMALS } as ChainCurrency;
     }
     throw Error('Chain currency configuration not found');
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
   }
 }

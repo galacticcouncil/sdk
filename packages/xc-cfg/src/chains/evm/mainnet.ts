@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   EvmChain,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -25,7 +26,6 @@ import {
   weth,
   wsteth,
 } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 import { mainnet as evmChain } from 'viem/chains';
 
@@ -135,9 +135,9 @@ export const ethereum = new EvmChain({
       id: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
     },
   ],
-  balance: BalanceBuilder().evm().erc20(),
+  balance: BalanceType.EvmErc20,
   balanceOverrides: {
-    [eth.key]: BalanceBuilder().evm().native(),
+    [eth.key]: BalanceType.EvmNative,
   },
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,

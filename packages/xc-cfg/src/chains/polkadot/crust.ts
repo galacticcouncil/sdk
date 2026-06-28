@@ -2,10 +2,10 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   XcmVersion,
+  BalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { cru } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
 
 export const crust = new Parachain({
   assetsData: [
@@ -18,7 +18,7 @@ export const crust = new Parachain({
       },
     },
   ],
-  balance: BalanceBuilder().substrate().system().account(),
+  balance: BalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://crust.subscan.io',
   genesisHash:

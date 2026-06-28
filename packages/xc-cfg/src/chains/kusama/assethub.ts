@@ -1,11 +1,11 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  BalanceType,
+  MinType,
 } from '@galacticcouncil/xc-core';
 
 import { ksm, usdt } from '../../assets';
-import { BalanceBuilder } from '../../builders/BalanceBuilder';
-import { AssetMinBuilder } from '../../builders/AssetMinBuilder';
 
 export const kusamaAssetHub = new Parachain({
   assetsData: [
@@ -37,11 +37,11 @@ export const kusamaAssetHub = new Parachain({
       },
     },
   ],
-  balance: BalanceBuilder().substrate().assets().account(),
+  balance: BalanceType.Assets,
   balanceOverrides: {
-    [ksm.key]: BalanceBuilder().substrate().system().account(),
+    [ksm.key]: BalanceType.System,
   },
-  min: AssetMinBuilder().assets().asset(),
+  min: MinType.Assets,
   ecosystem: Ecosystem.Kusama,
   explorer: 'https://assethub-kusama.subscan.io',
   genesisHash:
