@@ -1,7 +1,6 @@
 import {
   Abi,
   AnyEvmChain,
-  Asset,
   AssetAmount,
   CallType,
   ContractConfig,
@@ -9,15 +8,6 @@ import {
   EvmClient,
 } from '@galacticcouncil/xc-core';
 
-import {
-  distinctUntilChanged,
-  finalize,
-  shareReplay,
-  Observable,
-  Subject,
-} from 'rxjs';
-
-import { EvmBalanceFactory } from './balance';
 import { EvmTransferFactory } from './transfer';
 import {
   isNativeEthBridge,
@@ -29,7 +19,7 @@ import { EvmCall, EvmDryRunResult } from './types';
 
 import { Platform } from '../types';
 
-export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
+export class EvmPlatform implements Platform<ContractConfig> {
   readonly #client: EvmClient;
 
   constructor(chain: AnyEvmChain) {
@@ -99,46 +89,5 @@ export class EvmPlatform implements Platform<ContractConfig, ContractConfig> {
     return feeBalance.copyWith({
       amount: fee,
     });
-  }
-
-  async getBalance(asset: Asset, config: ContractConfig): Promise<AssetAmount> {
-    const contract = EvmBalanceFactory.get(this.#client, config);
-    const [balance, decimals] = await Promise.all([
-      contract.getBalance(),
-      contract.getDecimals(),
-    ]);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: ContractConfig
-  ): Promise<Observable<AssetAmount>> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
-    const provider = this.#client.getProvider();
-
-    const run = async () => {
-      const updateBalance = async () => {
-        const balance = await this.getBalance(asset, config);
-        subject.next(balance);
-      };
-      await updateBalance();
-      const unsub = provider.watchBlocks({
-        onBlock: () => updateBalance(),
-      });
-      return () => unsub();
-    };
-
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
   }
 }
