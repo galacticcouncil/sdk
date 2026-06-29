@@ -4,43 +4,72 @@
 '@galacticcouncil/xc-cfg': minor
 ---
 
-Unidirectional routes: chain-level balance/min registry & route simplification
+Unidirectional routes & chain-native balance reads
 
-The chain is now the single source of truth for how to read an asset's balance
-and minimum. Reverse routes are optional, which unblocks one-way transfers, and
-route templates no longer carry balance/min builders.
+The chain is now the single source of truth for an asset's balance, minimum and
+existential deposit, and reads them itself. Reverse routes are optional (one-way
+transfers work), route templates no longer carry balance/min builders, and any
+asset's balance can be read directly from a chain — no `Wallet`,
+`ConfigService`, route or `PlatformAdapter`:
 
-Phase 1 — chain registry & one-way routes:
+```ts
+const amount = await chain.getBalance(asset, address); // AssetAmount
+```
 
-- `xc-core`: base `Chain` gains a balance/min registry — `balance` (required),
-  `balanceOverrides`, optional `min` — resolved per asset (finalized in the
-  chain-native-balances change as the declarative `getBalanceType(asset)` +
-  `getMin` / `getEd`).
+This makes a chain a reusable read surface (e.g. for `xc-swap`) and lets a new
+chain be added by declaring data only.
+
+Routes
+
 - `xc-core`: `TransferConfigs` drops `reverse` for a `reversible: boolean` flag;
   `ConfigBuilder.build()` no longer throws when no reverse route exists. Added
   non-throwing `getAssetRoutesOrEmpty` / `getAssetDestinationRoutesOrEmpty`.
-- `xc-sdk`: `DataReverseProcessor` replaced by `DataDestinationProcessor`, which
-  reads destination balance/min/ed from the destination chain registry. The
-  `Transfer` DTO gains a `reversible` flag.
-- `xc-cfg`: every chain declares its `balance` (and `balanceOverrides` / `min`).
-
-Phase 2 — route simplification:
-
 - `xc-core`: `SourceConfig`, `FeeConfig` and `TransactFeeConfig` lose their
   `balance` builders; `SourceConfig` loses `min`; `source.destinationFee`
   collapses from `{ asset?, balance }` to an optional `Asset` (fee-asset
   override).
-- `xc-sdk`: all balance read sites (origin balance/min, source fee, destination
-  fee, transact fee, `subscribeBalance`) now resolve builders from the chain
-  registry instead of the route.
-- `xc-cfg`: `source.balance` / `source.min` / `source.fee.balance` /
-  `source.destinationFee.balance` / `transact.fee.balance` removed from every
-  route template and definition.
+- `xc-sdk`: `DataReverseProcessor` is replaced by `DataDestinationProcessor`; the
+  `Transfer` DTO gains a `reversible` flag.
 
-Migration:
+Declarative, per-platform balances (`xc-core`)
 
-- Consumers reading `configs.reverse.*` should take the destination chain/asset
-  from `configs.origin.route.destination` and use the new `reversible` flag.
-- Anyone constructing `Chain` subclasses must pass `balance`. Anyone building
-  `AssetRoute`s directly must drop the removed `balance`/`min` fields and pass
-  `source.destinationFee` as a bare `Asset` (or omit it).
+- A chain declares how each asset's balance is stored via `balance` /
+  `balanceOverrides`, using the enum for its platform — `SubstrateBalanceType`,
+  `EvmBalanceType`, `SolanaBalanceType`, `SuiBalanceType` (`BalanceType` is their
+  union) — so a chain can only declare storage types its own client supports.
+  The substrate dynamic minimum is declared via `SubstrateMinType`.
+- Each chain owns a per-platform balance client under `chain/balance` and
+  implements `getBalance(asset, address)`, `subscribeBalance` and
+  `subscribeBalances(assets, address)` (a merged multi-asset stream); `Parachain`
+  adds `getMin` / `getEd`. Adds `rxjs` as a peer dep.
+- The old builders (`BalanceBuilder`, `AssetMinBuilder`, `BalanceConfigBuilder`,
+  `MinConfigBuilder`) and the query-config DTOs (`SubstrateQueryConfig`,
+  `Solana/SuiQueryConfig`) are removed.
+
+`xc-sdk`
+
+- The platform-side balance code is removed: `getBalance` / `subscribeBalance`
+  are gone from the `Platform` interface, `PlatformAdapter` and every `*Platform`,
+  and the `platforms/*/balance` factories are deleted. `Platform` keeps only
+  `buildCall` / `estimateFee`.
+- `DataProcessor` is the shared base for both `DataOriginProcessor` and
+  `DataDestinationProcessor`; both resolve balance/min/ed straight off the chain
+  (origin from its `TransferConfig`, destination from constructor args).
+  `Wallet.subscribeBalance` delegates to `chain.subscribeBalances`.
+
+`xc-cfg`
+
+- Every chain definition declares `balance: <Platform>BalanceType.X` (plus
+  `balanceOverrides`, and `min: SubstrateMinType.Assets` for the AssetHubs).
+  Route templates drop `source.balance` / `source.min` / `*.fee.balance` /
+  `source.destinationFee.balance` / `transact.fee.balance`.
+
+Migration
+
+- Reading `configs.reverse.*`: take the destination chain/asset from
+  `configs.origin.route.destination` and use the `reversible` flag.
+- Constructing `Chain` subclasses: pass `balance` using the platform enum.
+  Building `AssetRoute`s directly: drop the removed `balance` / `min` fields and
+  pass `source.destinationFee` as a bare `Asset` (or omit it).
+- Reading balances no longer needs `xc-sdk` — use `chain.getBalance` /
+  `chain.subscribeBalances` and `chain.getMin` / `chain.getEd`.
