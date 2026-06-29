@@ -3,7 +3,7 @@ import { Chain as EvmChainDef } from 'viem';
 import { Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
-import { EvmBalanceClient } from './balance';
+import { EvmBalanceClient, EvmBalanceType } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -22,7 +22,8 @@ import {
 } from '../bridge';
 import { EvmClient } from '../evm';
 
-export interface EvmChainParams extends ChainParams<ChainAssetData> {
+export interface EvmChainParams
+  extends ChainParams<ChainAssetData, EvmBalanceType> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
@@ -31,7 +32,7 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   wormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> {
+export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
   private readonly balanceClient = new EvmBalanceClient(this);
 
   readonly evmChain: EvmChainDef;

@@ -54,14 +54,22 @@ export interface ChainAssetData {
   min?: number;
 }
 
-export interface ChainParams<T extends ChainAssetData> {
+export interface ChainParams<
+  T extends ChainAssetData,
+  B extends BalanceType = BalanceType,
+> {
   assetsData: T[];
   /**
    * Default balance storage type for assets on this chain. Per-asset outliers
-   * are declared via {@link balanceOverrides}.
+   * are declared via {@link balanceOverrides}. Typed per platform — a chain
+   * can only declare storage types its own balance client supports.
+   *
+   * `NoInfer` keeps `B` pinned to each chain's declared balance type instead of
+   * being widened to whatever is passed, so e.g. `new Parachain` rejects evm/sui
+   * storage types rather than silently inferring them.
    */
-  balance: BalanceType;
-  balanceOverrides?: Record<string, BalanceType>;
+  balance: NoInfer<B>;
+  balanceOverrides?: Record<string, NoInfer<B>>;
   ecosystem?: ChainEcosystem;
   explorer?: string;
   isTestChain?: boolean;
@@ -69,12 +77,15 @@ export interface ChainParams<T extends ChainAssetData> {
   name: string;
 }
 
-export abstract class Chain<T extends ChainAssetData> {
+export abstract class Chain<
+  T extends ChainAssetData,
+  B extends BalanceType = BalanceType,
+> {
   readonly assetsData: Map<string, T>;
 
-  readonly balance: BalanceType;
+  readonly balance: B;
 
-  readonly balanceOverrides?: Record<string, BalanceType>;
+  readonly balanceOverrides?: Record<string, B>;
 
   readonly ecosystem?: ChainEcosystem;
 
@@ -97,7 +108,7 @@ export abstract class Chain<T extends ChainAssetData> {
     isTestChain = false,
     key,
     name,
-  }: ChainParams<T>) {
+  }: ChainParams<T, B>) {
     this.assetsData = new Map(assetsData.map((data) => [data.asset.key, data]));
     this.balance = balance;
     this.balanceOverrides = balanceOverrides;
@@ -181,7 +192,7 @@ export abstract class Chain<T extends ChainAssetData> {
    * Balance storage type for a given asset — per-asset override if one is
    * registered, otherwise the chain default.
    */
-  getBalanceType(asset: Asset): BalanceType {
+  getBalanceType(asset: Asset): B {
     return this.balanceOverrides?.[asset.key] ?? this.balance;
   }
 

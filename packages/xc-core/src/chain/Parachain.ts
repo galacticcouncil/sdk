@@ -9,6 +9,7 @@ import {
   BalanceType,
   MinType,
   SubstrateBalanceClient,
+  SubstrateBalanceType,
 } from './balance';
 import {
   Chain,
@@ -58,7 +59,9 @@ export interface ParachainAssetData extends ChainAssetData {
   xcmLocation?: XcmLocation;
 }
 
-export interface ParachainParams extends ChainParams<ParachainAssetData> {
+export interface ParachainParams<
+  B extends BalanceType = SubstrateBalanceType,
+> extends ChainParams<ParachainAssetData, B> {
   genesisHash: string;
   /**
    * Dynamic minimum storage type (e.g. AssetHub `assets.asset`). Optional —
@@ -77,7 +80,9 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   xcmVersion?: XcmVersion;
 }
 
-export class Parachain extends Chain<ParachainAssetData> {
+export class Parachain<
+  B extends BalanceType = SubstrateBalanceType,
+> extends Chain<ParachainAssetData, B> {
   private _chainSpec?: Promise<ParachainSpec>;
 
   protected readonly balanceClient = new SubstrateBalanceClient(this);
@@ -120,8 +125,8 @@ export class Parachain extends Chain<ParachainAssetData> {
     ws,
     xcmVersion = XcmVersion.v4,
     ...others
-  }: ParachainParams) {
-    super({ ...others });
+  }: ParachainParams<B>) {
+    super({ ...others } as ChainParams<ParachainAssetData, B>);
     this.min = min;
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
@@ -189,7 +194,7 @@ export class Parachain extends Chain<ParachainAssetData> {
     return this.balanceClient.getBalance(
       asset,
       address,
-      this.getBalanceType(asset)
+      this.substrateBalanceType(asset)
     );
   }
 
@@ -197,8 +202,17 @@ export class Parachain extends Chain<ParachainAssetData> {
     return this.balanceClient.subscribe(
       asset,
       address,
-      this.getBalanceType(asset)
+      this.substrateBalanceType(asset)
     );
+  }
+
+  /**
+   * Resolved balance type narrowed to substrate. The base parachain only reads
+   * substrate storages; {@link EvmParachain} overrides these methods to route
+   * evm storages to its evm client.
+   */
+  protected substrateBalanceType(asset: Asset): SubstrateBalanceType {
+    return this.getBalanceType(asset) as SubstrateBalanceType;
   }
 
   /**

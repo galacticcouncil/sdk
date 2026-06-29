@@ -9,7 +9,7 @@ import {
 import { Asset, AssetAmount } from '../../asset';
 import { Erc20Client } from '../../evm';
 
-import { BalanceType } from './types';
+import { EvmBalanceType } from './types';
 
 import type { AnyEvmChain } from '../types';
 
@@ -23,11 +23,11 @@ export class EvmBalanceClient {
   async getBalance(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: EvmBalanceType
   ): Promise<AssetAmount> {
     const client = this.chain.evmClient;
     switch (type) {
-      case BalanceType.EvmNative: {
+      case EvmBalanceType.Native: {
         const balance = await client
           .getProvider()
           .getBalance({ address: account as `0x${string}` });
@@ -36,7 +36,7 @@ export class EvmBalanceClient {
           decimals: client.chain.nativeCurrency.decimals,
         });
       }
-      case BalanceType.EvmErc20: {
+      case EvmBalanceType.Erc20: {
         const assetId = this.chain.getBalanceAssetId(asset);
         if (!assetId || typeof assetId !== 'string') {
           throw new Error(`Invalid contract address: ${asset.key}`);
@@ -59,7 +59,7 @@ export class EvmBalanceClient {
   subscribe(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: EvmBalanceType
   ): Observable<AssetAmount> {
     const provider = this.chain.evmClient.getProvider();
     const subject = new Subject<AssetAmount>();

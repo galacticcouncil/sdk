@@ -1,7 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
-  BalanceType,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -208,9 +208,9 @@ export const astar = new Parachain({
       },
     },
   ],
-  balance: BalanceType.Assets,
+  balance: SubstrateBalanceType.Assets,
   balanceOverrides: {
-    [astr.key]: BalanceType.System,
+    [astr.key]: SubstrateBalanceType.System,
   },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://astar.subscan.io',

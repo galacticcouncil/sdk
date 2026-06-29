@@ -2,7 +2,7 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   ParachainParams,
-  BalanceType,
+  SubstrateBalanceType,
   MinType,
 } from '@galacticcouncil/xc-core';
 
@@ -107,11 +107,11 @@ const config = {
       },
     },
   ],
-  balance: BalanceType.Assets,
+  balance: SubstrateBalanceType.Assets,
   balanceOverrides: {
-    [dot.key]: BalanceType.System,
-    [ksm.key]: BalanceType.ForeignAssets,
-    [myth.key]: BalanceType.ForeignAssets,
+    [dot.key]: SubstrateBalanceType.System,
+    [ksm.key]: SubstrateBalanceType.ForeignAssets,
+    [myth.key]: SubstrateBalanceType.ForeignAssets,
   },
   min: MinType.Assets,
   ecosystem: Ecosystem.Polkadot,

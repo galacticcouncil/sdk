@@ -1,7 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
-  BalanceType,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { dot } from '../../assets';
@@ -16,7 +16,7 @@ const config = {
       },
     },
   ],
-  balance: BalanceType.System,
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://polkadot.subscan.io',
   genesisHash:

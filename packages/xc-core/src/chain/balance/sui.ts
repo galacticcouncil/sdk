@@ -10,7 +10,7 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 import { Asset, AssetAmount } from '../../asset';
 
-import { BalanceType } from './types';
+import { SuiBalanceType } from './types';
 
 import type { SuiChain } from '../SuiChain';
 
@@ -25,10 +25,10 @@ export class SuiBalanceClient {
   async getBalance(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SuiBalanceType
   ): Promise<AssetAmount> {
     switch (type) {
-      case BalanceType.SuiNative: {
+      case SuiBalanceType.Native: {
         const balance = await this.chain.client.getBalance({
           owner: account,
           coinType: SUI_TYPE_ARG,
@@ -46,7 +46,7 @@ export class SuiBalanceClient {
   subscribe(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SuiBalanceType
   ): Observable<AssetAmount> {
     const subject = new Subject<AssetAmount>();
     const observable = subject.pipe(shareReplay(1));

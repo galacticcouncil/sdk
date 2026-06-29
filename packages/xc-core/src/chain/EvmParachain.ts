@@ -3,7 +3,12 @@ import { Chain as EvmChainDef } from 'viem';
 import { from, switchMap, Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
-import { EvmBalanceClient, isEvmBalanceType } from './balance';
+import {
+  EvmBalanceClient,
+  EvmBalanceType,
+  isEvmBalanceType,
+  SubstrateBalanceType,
+} from './balance';
 import { ChainType } from './Chain';
 import { Parachain, ParachainParams } from './Parachain';
 
@@ -13,14 +18,16 @@ import { addr } from '../utils';
 
 const { EvmAddr } = addr;
 
-export interface EvmParachainParams extends ParachainParams {
+type EvmParachainBalanceType = SubstrateBalanceType | EvmBalanceType;
+
+export interface EvmParachainParams extends ParachainParams<EvmParachainBalanceType> {
   evmChain: EvmChainDef;
   evmResolver?: EvmResolver;
   rpcs?: string[];
   wormhole?: WormholeDef;
 }
 
-export class EvmParachain extends Parachain {
+export class EvmParachain extends Parachain<EvmParachainBalanceType> {
   private readonly evmBalanceClient = new EvmBalanceClient(this);
 
   readonly evmChain: EvmChainDef;

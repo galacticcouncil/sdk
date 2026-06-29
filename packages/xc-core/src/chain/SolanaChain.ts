@@ -3,7 +3,7 @@ import { Connection } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
-import { SolanaBalanceClient } from './balance';
+import { SolanaBalanceClient, SolanaBalanceType } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -18,13 +18,14 @@ import { Wormhole, WormholeDef } from '../bridge';
 const SOLANA_NATIVE = 'SOL';
 const SOLANA_DECIMALS = 9;
 
-export interface SolanaChainParams extends ChainParams<ChainAssetData> {
+export interface SolanaChainParams
+  extends ChainParams<ChainAssetData, SolanaBalanceType> {
   id: number;
   rpcUrls: ChainRpcs;
   wormhole?: WormholeDef;
 }
 
-export class SolanaChain extends Chain<ChainAssetData> {
+export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
   private readonly balanceClient = new SolanaBalanceClient(this);
 
   readonly id: number;

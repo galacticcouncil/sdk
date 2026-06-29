@@ -12,8 +12,8 @@ import {
 
 import { Asset, AssetAmount } from '../../asset';
 
-import { normalizeAssetAmount } from './normalize';
-import { BalanceType, MinType } from './types';
+import { normalizeAssetAmount } from './utils';
+import { MinType, SubstrateBalanceType } from './types';
 
 import type { AnyParachain } from '../types';
 
@@ -42,7 +42,7 @@ export class SubstrateBalanceClient {
   async getBalance(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SubstrateBalanceType
   ): Promise<AssetAmount> {
     return firstValueFrom(this.subscribe(asset, account, type));
   }
@@ -50,7 +50,7 @@ export class SubstrateBalanceClient {
   subscribe(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SubstrateBalanceType
   ): Observable<AssetAmount> {
     const { module, func, args, extract } = this.entry(asset, account, type);
     const fn = this.chain.client.getUnsafeApi().query[module][func];
@@ -84,10 +84,14 @@ export class SubstrateBalanceClient {
     return AssetAmount.fromAsset(asset, params);
   }
 
-  private entry(asset: Asset, account: string, type: BalanceType): StorageEntry {
+  private entry(
+    asset: Asset,
+    account: string,
+    type: SubstrateBalanceType
+  ): StorageEntry {
     const { chain } = this;
     switch (type) {
-      case BalanceType.System:
+      case SubstrateBalanceType.System:
         return {
           module: 'System',
           func: 'Account',
@@ -101,28 +105,28 @@ export class SubstrateBalanceClient {
             return free >= frozen ? free - frozen : 0n;
           },
         };
-      case BalanceType.Tokens:
+      case SubstrateBalanceType.Tokens:
         return {
           module: 'Tokens',
           func: 'Accounts',
           args: [account, encodeAssetId(chain.getBalanceAssetId(asset))],
           extract: freeMinusFrozen,
         };
-      case BalanceType.OrmlTokens:
+      case SubstrateBalanceType.OrmlTokens:
         return {
           module: 'OrmlTokens',
           func: 'Accounts',
           args: [account, encodeAssetId(chain.getBalanceAssetId(asset))],
           extract: freeMinusFrozen,
         };
-      case BalanceType.Assets:
+      case SubstrateBalanceType.Assets:
         return {
           module: 'Assets',
           func: 'Account',
           args: [encodeAssetId(chain.getBalanceAssetId(asset)), account],
           extract: (response) => BigInt(response?.balance?.toString() ?? '0'),
         };
-      case BalanceType.ForeignAssets: {
+      case SubstrateBalanceType.ForeignAssets: {
         const location = chain.getAssetXcmLocation(asset);
         if (!location) {
           throw new Error('Missing asset xcm location for ' + asset.key);

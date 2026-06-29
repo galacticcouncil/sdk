@@ -1,23 +1,35 @@
-/**
- * Declarative balance storage type for an asset on a chain. A chain registers a
- * `BalanceType` per asset; the chain's balance client knows how to read it.
- */
-export enum BalanceType {
-  // substrate
+/** Substrate balance pallets. Owned by {@link Parachain}. */
+export enum SubstrateBalanceType {
   System = 'System',
   Tokens = 'Tokens',
   OrmlTokens = 'OrmlTokens',
   Assets = 'Assets',
   ForeignAssets = 'ForeignAssets',
-  // evm
-  EvmNative = 'EvmNative',
-  EvmErc20 = 'EvmErc20',
-  // solana
-  SolanaNative = 'SolanaNative',
-  SolanaToken = 'SolanaToken',
-  // sui
-  SuiNative = 'SuiNative',
 }
+
+/** Evm balance storages. Owned by {@link EvmChain} / {@link EvmParachain}. */
+export enum EvmBalanceType {
+  Native = 'EvmNative',
+  Erc20 = 'EvmErc20',
+}
+
+/** Solana balance storages. Owned by {@link SolanaChain}. */
+export enum SolanaBalanceType {
+  Native = 'SolanaNative',
+  Token = 'SolanaToken',
+}
+
+/** Sui balance storages. Owned by {@link SuiChain}. */
+export enum SuiBalanceType {
+  Native = 'SuiNative',
+}
+
+/** Any platform's balance storage type. */
+export type BalanceType =
+  | SubstrateBalanceType
+  | EvmBalanceType
+  | SolanaBalanceType
+  | SuiBalanceType;
 
 /**
  * Declarative dynamic-minimum storage type. Substrate-only — optional per
@@ -27,11 +39,8 @@ export enum MinType {
   Assets = 'Assets',
 }
 
-const EVM_TYPES = new Set<BalanceType>([
-  BalanceType.EvmNative,
-  BalanceType.EvmErc20,
-]);
+const EVM_TYPES = new Set<BalanceType>(Object.values(EvmBalanceType));
 
-export function isEvmBalanceType(type: BalanceType): boolean {
+export function isEvmBalanceType(type: BalanceType): type is EvmBalanceType {
   return EVM_TYPES.has(type);
 }

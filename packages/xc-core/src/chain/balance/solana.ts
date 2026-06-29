@@ -11,7 +11,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { Asset, AssetAmount } from '../../asset';
 
-import { BalanceType } from './types';
+import { SolanaBalanceType } from './types';
 
 import type { SolanaChain } from '../SolanaChain';
 
@@ -27,20 +27,20 @@ export class SolanaBalanceClient {
   async getBalance(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SolanaBalanceType
   ): Promise<AssetAmount> {
     const { connection } = this.chain;
     const owner = new SolanaAddress(account).unwrap();
 
     switch (type) {
-      case BalanceType.SolanaNative: {
+      case SolanaBalanceType.Native: {
         const balance = await connection.getBalance(owner);
         return AssetAmount.fromAsset(asset, {
           amount: BigInt(balance),
           decimals: NATIVE_DECIMALS,
         });
       }
-      case BalanceType.SolanaToken: {
+      case SolanaBalanceType.Token: {
         const token = this.chain.getBalanceAssetId(asset);
         if (!token) {
           throw new Error(`Invalid token address: ${asset.key}`);
@@ -66,7 +66,7 @@ export class SolanaBalanceClient {
   subscribe(
     asset: Asset,
     account: string,
-    type: BalanceType
+    type: SolanaBalanceType
   ): Observable<AssetAmount> {
     const { connection } = this.chain;
     const subject = new Subject<AssetAmount>();

@@ -1,7 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
-  BalanceType,
+  SubstrateBalanceType,
   MinType,
 } from '@galacticcouncil/xc-core';
 
@@ -37,9 +37,9 @@ export const kusamaAssetHub = new Parachain({
       },
     },
   ],
-  balance: BalanceType.Assets,
+  balance: SubstrateBalanceType.Assets,
   balanceOverrides: {
-    [ksm.key]: BalanceType.System,
+    [ksm.key]: SubstrateBalanceType.System,
   },
   min: MinType.Assets,
   ecosystem: Ecosystem.Kusama,

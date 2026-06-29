@@ -1,7 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
-  BalanceType,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { bsx, ksm, usdt } from '../../assets';
@@ -47,7 +47,7 @@ export const basilisk = new Parachain({
       },
     },
   ],
-  balance: BalanceType.Tokens,
+  balance: SubstrateBalanceType.Tokens,
   ecosystem: Ecosystem.Kusama,
   explorer: 'https://basilisk.subscan.io',
   genesisHash:

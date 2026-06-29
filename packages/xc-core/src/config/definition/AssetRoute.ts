@@ -1,5 +1,5 @@
 import { Asset } from '../../asset';
-import { AnyChain, Parachain } from '../../chain';
+import { AnyChain, AnyParachain } from '../../chain';
 
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
@@ -22,7 +22,7 @@ export interface DestinationConfig {
 }
 
 export interface TransactConfig {
-  chain: Parachain;
+  chain: AnyParachain;
   fee: TransactFeeConfig;
   extrinsic: ExtrinsicConfigBuilder;
 }

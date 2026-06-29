@@ -1,5 +1,6 @@
 import {
   AnyChain,
+  AnyParachain,
   Asset,
   AssetRoute,
   ContractConfigBuilder,
@@ -39,7 +40,7 @@ const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
 export function toTransferTemplate(
   asset: Asset,
   destination: AnyChain,
-  reserve?: Parachain
+  reserve?: AnyParachain
 ): AssetRoute {
   return new AssetRoute({
     source: {
@@ -125,7 +126,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
 
 export function toParaErc20Template(
   asset: Asset,
-  destination: Parachain,
+  destination: AnyParachain,
   transferType: XcmTransferType = XcmTransferType.LocalReserve
 ): AssetRoute {
   return new AssetRoute({
