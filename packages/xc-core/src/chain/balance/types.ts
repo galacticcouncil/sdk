@@ -35,7 +35,7 @@ export type BalanceType =
  * Declarative dynamic-minimum storage type. Substrate-only — optional per
  * chain; chains with static minimums rely on `assetsData[*].min` instead.
  */
-export enum MinType {
+export enum SubstrateMinType {
   Assets = 'Assets',
 }
 

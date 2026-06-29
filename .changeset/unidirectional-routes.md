@@ -13,8 +13,9 @@ route templates no longer carry balance/min builders.
 Phase 1 — chain registry & one-way routes:
 
 - `xc-core`: base `Chain` gains a balance/min registry — `balance` (required),
-  `balanceOverrides`, optional `min` — with `getBalanceBuilder(asset)` /
-  `getMinBuilder()` accessors.
+  `balanceOverrides`, optional `min` — resolved per asset (finalized in the
+  chain-native-balances change as the declarative `getBalanceType(asset)` +
+  `getMin` / `getEd`).
 - `xc-core`: `TransferConfigs` drops `reverse` for a `reversible: boolean` flag;
   `ConfigBuilder.build()` no longer throws when no reverse route exists. Added
   non-throwing `getAssetRoutesOrEmpty` / `getAssetDestinationRoutesOrEmpty`.

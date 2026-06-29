@@ -16,9 +16,18 @@ import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
 
+/**
+ * Resolves origin-side transfer data — balance, minimum and existential
+ * deposit (via {@link DataProcessor}) plus the source/destination fee
+ * estimates and the transfer {@link Call} — sourcing `(chain, asset)` and the
+ * route from its `TransferConfig`.
+ */
 export class DataOriginProcessor extends DataProcessor {
+  readonly config: TransferConfig;
+
   constructor(adapter: PlatformAdapter, config: TransferConfig) {
-    super(adapter, config);
+    super(adapter, config.chain, config.route.source.asset);
+    this.config = config;
   }
 
   async getCall(ctx: TransferCtx): Promise<Call> {

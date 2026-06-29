@@ -13,7 +13,7 @@ import {
 import { Asset, AssetAmount } from '../../asset';
 
 import { normalizeAssetAmount } from './utils';
-import { MinType, SubstrateBalanceType } from './types';
+import { SubstrateMinType, SubstrateBalanceType } from './types';
 
 import type { AnyParachain } from '../types';
 
@@ -31,6 +31,19 @@ const freeMinusFrozen = (response: any): bigint => {
   const frozen = BigInt(response?.frozen?.toString() ?? '0');
   return free >= frozen ? free - frozen : 0n;
 };
+
+const systemFreeMinusFrozen = (response: any): bigint => {
+  const data = response?.data;
+  const free = BigInt(data?.free?.toString() ?? '0');
+  const frozen = BigInt((data?.miscFrozen ?? data?.frozen)?.toString() ?? '0');
+  return free >= frozen ? free - frozen : 0n;
+};
+
+const balanceField = (response: any): bigint =>
+  BigInt(response?.balance?.toString() ?? '0');
+
+const minBalanceField = (response: any): bigint =>
+  BigInt(response?.minBalance?.toString() ?? '0');
 
 /**
  * Reads substrate balances (and dynamic minimums) from a parachain's papi
@@ -69,19 +82,30 @@ export class SubstrateBalanceClient {
     );
   }
 
-  async getMin(asset: Asset, type: MinType): Promise<AssetAmount> {
-    if (type !== MinType.Assets) {
-      throw new Error('Unsupported min type: ' + type);
-    }
-    const fn = this.chain.client.getUnsafeApi().query.Assets.Asset;
-    const response = await firstValueFrom(
-      fn
-        .watchValue(this.chain.getMinAssetId(asset), { at: 'best' })
-        .pipe(map(({ value }: WatchValueEmission) => value))
+  async getMin(asset: Asset, type: SubstrateMinType): Promise<AssetAmount> {
+    const { module, func, args, extract } = this.minEntry(asset, type);
+    const fn = this.chain.client.getUnsafeApi().query[module][func];
+    const value = await fn.getValue(...args, { at: 'best' });
+    const params = await normalizeAssetAmount(
+      extract(value),
+      asset,
+      this.chain
     );
-    const min = BigInt(response?.minBalance?.toString() ?? '0');
-    const params = await normalizeAssetAmount(min, asset, this.chain);
     return AssetAmount.fromAsset(asset, params);
+  }
+
+  async getEd(): Promise<AssetAmount> {
+    let ed: bigint;
+    try {
+      const result = await this.chain.client
+        .getUnsafeApi()
+        .constants.Balances.ExistentialDeposit();
+      ed = typeof result === 'bigint' ? result : BigInt(String(result));
+    } catch {
+      ed = 0n;
+    }
+    const { asset, decimals } = await this.chain.getCurrency();
+    return AssetAmount.fromAsset(asset, { amount: ed, decimals });
   }
 
   private entry(
@@ -96,14 +120,7 @@ export class SubstrateBalanceClient {
           module: 'System',
           func: 'Account',
           args: [account],
-          extract: (response) => {
-            const data = response?.data;
-            const free = BigInt(data?.free?.toString() ?? '0');
-            const frozen = BigInt(
-              (data?.miscFrozen ?? data?.frozen)?.toString() ?? '0'
-            );
-            return free >= frozen ? free - frozen : 0n;
-          },
+          extract: systemFreeMinusFrozen,
         };
       case SubstrateBalanceType.Tokens:
         return {
@@ -124,7 +141,7 @@ export class SubstrateBalanceClient {
           module: 'Assets',
           func: 'Account',
           args: [encodeAssetId(chain.getBalanceAssetId(asset)), account],
-          extract: (response) => BigInt(response?.balance?.toString() ?? '0'),
+          extract: balanceField,
         };
       case SubstrateBalanceType.ForeignAssets: {
         const location = chain.getAssetXcmLocation(asset);
@@ -135,11 +152,25 @@ export class SubstrateBalanceClient {
           module: 'ForeignAssets',
           func: 'Account',
           args: [encodeLocation(location), account],
-          extract: (response) => BigInt(response?.balance?.toString() ?? '0'),
+          extract: balanceField,
         };
       }
       default:
         throw new Error('Unsupported substrate balance type: ' + type);
+    }
+  }
+
+  private minEntry(asset: Asset, type: SubstrateMinType): StorageEntry {
+    switch (type) {
+      case SubstrateMinType.Assets:
+        return {
+          module: 'Assets',
+          func: 'Asset',
+          args: [this.chain.getMinAssetId(asset)],
+          extract: minBalanceField,
+        };
+      default:
+        throw new Error('Unsupported substrate min type: ' + type);
     }
   }
 }

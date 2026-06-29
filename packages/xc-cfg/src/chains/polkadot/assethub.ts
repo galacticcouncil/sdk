@@ -3,7 +3,7 @@ import {
   Parachain,
   ParachainParams,
   SubstrateBalanceType,
-  MinType,
+  SubstrateMinType,
 } from '@galacticcouncil/xc-core';
 
 import { dot, ksm, myth, usdc, usdt, wud } from '../../assets';
@@ -113,7 +113,7 @@ const config = {
     [ksm.key]: SubstrateBalanceType.ForeignAssets,
     [myth.key]: SubstrateBalanceType.ForeignAssets,
   },
-  min: MinType.Assets,
+  min: SubstrateMinType.Assets,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://assethub-polkadot.subscan.io',
   genesisHash:

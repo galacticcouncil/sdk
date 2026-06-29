@@ -7,9 +7,9 @@ import { Observable } from 'rxjs';
 import { Asset, AssetAmount } from '../asset';
 import {
   BalanceType,
-  MinType,
   SubstrateBalanceClient,
   SubstrateBalanceType,
+  SubstrateMinType,
 } from './balance';
 import {
   Chain,
@@ -67,7 +67,7 @@ export interface ParachainParams<
    * Dynamic minimum storage type (e.g. AssetHub `assets.asset`). Optional —
    * chains with static minimums rely on `assetsData[*].min` instead.
    */
-  min?: MinType;
+  min?: SubstrateMinType;
   parachainId: number;
   ss58Format: number;
   treasury?: string;
@@ -87,7 +87,7 @@ export class Parachain<
 
   protected readonly balanceClient = new SubstrateBalanceClient(this);
 
-  readonly min?: MinType;
+  readonly min?: SubstrateMinType;
 
   readonly genesisHash: string;
 
@@ -186,7 +186,7 @@ export class Parachain<
     return this.assetsData.get(asset.key)?.minId ?? this.getAssetId(asset);
   }
 
-  getMinType(): MinType | undefined {
+  getMinType(): SubstrateMinType | undefined {
     return this.min;
   }
 
@@ -194,7 +194,7 @@ export class Parachain<
     return this.balanceClient.getBalance(
       asset,
       address,
-      this.substrateBalanceType(asset)
+      this.getBalanceType(asset) as SubstrateBalanceType
     );
   }
 
@@ -202,28 +202,16 @@ export class Parachain<
     return this.balanceClient.subscribe(
       asset,
       address,
-      this.substrateBalanceType(asset)
+      this.getBalanceType(asset) as SubstrateBalanceType
     );
   }
 
-  /**
-   * Resolved balance type narrowed to substrate. The base parachain only reads
-   * substrate storages; {@link EvmParachain} overrides these methods to route
-   * evm storages to its evm client.
-   */
-  protected substrateBalanceType(asset: Asset): SubstrateBalanceType {
-    return this.getBalanceType(asset) as SubstrateBalanceType;
-  }
-
-  /**
-   * Minimum balance for an asset — dynamic storage when a {@link MinType} is
-   * registered, otherwise the static `assetsData[*].min`.
-   */
   async getMin(asset: Asset): Promise<AssetAmount> {
     const type = this.getMinType();
     if (type) {
       return this.balanceClient.getMin(asset, type);
     }
+
     const min = this.getAssetMin(asset);
     const decimals = await this.resolveDecimals(asset);
     return AssetAmount.fromAsset(asset, {
@@ -232,20 +220,8 @@ export class Parachain<
     });
   }
 
-  async getExistentialDeposit(): Promise<AssetAmount | undefined> {
-    let ed: bigint;
-    try {
-      const result =
-        await this.client.getUnsafeApi().constants.Balances.ExistentialDeposit();
-      ed = typeof result === 'bigint' ? result : BigInt(String(result));
-    } catch {
-      ed = 0n;
-    }
-    const { asset, decimals } = await this.getCurrency();
-    return AssetAmount.fromAsset(asset, {
-      amount: ed,
-      decimals,
-    });
+  async getEd(): Promise<AssetAmount> {
+    return this.balanceClient.getEd();
   }
 
   findAssetById(id: string) {
