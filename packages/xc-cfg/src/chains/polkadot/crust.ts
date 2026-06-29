@@ -2,6 +2,7 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   XcmVersion,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { cru } from '../../assets';
@@ -17,6 +18,7 @@ export const crust = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://crust.subscan.io',
   genesisHash:

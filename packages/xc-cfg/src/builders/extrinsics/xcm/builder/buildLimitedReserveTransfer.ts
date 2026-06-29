@@ -7,7 +7,7 @@ import {
   XcmV4AssetWildAsset,
   XcmV4Instruction,
 } from '@galacticcouncil/descriptors';
-import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { AnyParachain, Asset, Parachain } from '@galacticcouncil/xc-core';
 
 import { ACCOUNT_SS_58, AMOUNT_MAX, TOPIC } from './const';
 
@@ -86,7 +86,7 @@ export function buildNestedReserveTransfer(
 
 export function buildMultiHopReserveTransfer(
   asset: Asset,
-  hub: Parachain,
+  hub: AnyParachain,
   destination: Parachain
 ): XcmV4Instruction[] {
   const version = XcmVersion.v4;

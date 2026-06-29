@@ -4,20 +4,9 @@ import {
   AssetAmount,
   CallType,
   ExtrinsicConfig,
-  SubstrateQueryConfig,
 } from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
-
-import {
-  concatMap,
-  catchError,
-  distinctUntilChanged,
-  firstValueFrom,
-  map,
-  throwError,
-  Observable,
-} from 'rxjs';
 
 import { SubstrateService } from './SubstrateService';
 import { getErrorFromDryRun, normalizeAssetAmount } from './utils';
@@ -25,12 +14,7 @@ import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 import { Platform } from '../types';
 
-type WatchValueEmission<T = any> = { value: T };
-
-export class SubstratePlatform implements Platform<
-  ExtrinsicConfig,
-  SubstrateQueryConfig
-> {
+export class SubstratePlatform implements Platform<ExtrinsicConfig> {
   readonly #substrate: Promise<SubstrateService>;
 
   constructor(chain: AnyParachain) {
@@ -109,44 +93,6 @@ export class SubstratePlatform implements Platform<
     const fee = await this.exchangeFee(networkFee + deliveryFee, feeBalance);
     const params = await normalizeAssetAmount(fee, feeBalance, substrate);
     return feeBalance.copyWith(params);
-  }
-
-  async getBalance(
-    asset: Asset,
-    config: SubstrateQueryConfig
-  ): Promise<AssetAmount> {
-    const ob = await this.subscribeBalance(asset, config);
-    return firstValueFrom(ob);
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: SubstrateQueryConfig
-  ): Promise<Observable<AssetAmount>> {
-    const substrate = await this.#substrate;
-    const { module, func, args, transform } = config;
-
-    const fn = substrate.client.getUnsafeApi().query[module][func];
-    const observable$ = fn
-      .watchValue(...args, { at: 'best' })
-      .pipe(map(({ value }: WatchValueEmission) => value));
-
-    return observable$.pipe(
-      concatMap((b: any) => transform(b)),
-      distinctUntilChanged((prev, curr) => prev === curr),
-      concatMap(async (balance) => {
-        const params = await normalizeAssetAmount(
-          balance as bigint,
-          asset,
-          substrate
-        );
-        return AssetAmount.fromAsset(asset, params);
-      }),
-      catchError((err) => {
-        console.error('subscribe fails for:', asset);
-        return throwError(() => err);
-      })
-    );
   }
 
   /**

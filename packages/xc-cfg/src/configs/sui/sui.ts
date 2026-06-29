@@ -2,18 +2,14 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { sui } from '../../assets';
 import { sui_chain, hydration, moonbeam } from '../../chains';
-import { BalanceBuilder, MoveBuilder } from '../../builders';
+import { MoveBuilder } from '../../builders';
 import { Tag } from '../../tags';
 
 const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: sui,
-      balance: BalanceBuilder().sui().native(),
-      destinationFee: {
-        asset: sui,
-        balance: BalanceBuilder().sui().native(),
-      },
+      destinationFee: sui,
     },
     destination: {
       chain: hydration,

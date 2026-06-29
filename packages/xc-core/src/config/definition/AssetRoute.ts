@@ -1,23 +1,18 @@
 import { Asset } from '../../asset';
-import { AnyChain, Parachain } from '../../chain';
+import { AnyChain, AnyParachain } from '../../chain';
 
-import { BalanceConfigBuilder } from './balance';
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
 import { FeeConfig, DestinationFeeConfig, TransactFeeConfig } from './fee';
-import { MinConfigBuilder } from './min';
 import { ProgramConfigBuilder } from './program';
 import { MoveConfigBuilder } from './move';
 
 export interface SourceConfig {
   asset: Asset;
-  balance: BalanceConfigBuilder;
-  destinationFee: {
-    asset?: Asset;
-    balance: BalanceConfigBuilder;
-  };
+  // Optional fee-asset override. When unset, the destination fee is paid in
+  // `destination.fee.asset`. Balance/min are read from the chain registry.
+  destinationFee?: Asset;
   fee?: FeeConfig;
-  min?: MinConfigBuilder;
 }
 
 export interface DestinationConfig {
@@ -27,7 +22,7 @@ export interface DestinationConfig {
 }
 
 export interface TransactConfig {
-  chain: Parachain;
+  chain: AnyParachain;
   fee: TransactFeeConfig;
   extrinsic: ExtrinsicConfigBuilder;
 }

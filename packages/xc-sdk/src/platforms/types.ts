@@ -1,13 +1,6 @@
-import {
-  Asset,
-  AssetAmount,
-  BaseConfig,
-  CallType,
-} from '@galacticcouncil/xc-core';
+import { AssetAmount, BaseConfig, CallType } from '@galacticcouncil/xc-core';
 
-import { Observable } from 'rxjs';
-
-export interface Platform<T extends BaseConfig, B extends BaseConfig> {
+export interface Platform<T extends BaseConfig> {
   buildCall(
     account: string,
     amount: bigint,
@@ -20,8 +13,6 @@ export interface Platform<T extends BaseConfig, B extends BaseConfig> {
     feeBalance: AssetAmount,
     config: T
   ): Promise<AssetAmount>;
-  getBalance(asset: Asset, config: B): Promise<AssetAmount>;
-  subscribeBalance(asset: Asset, config: B): Promise<Observable<AssetAmount>>;
 }
 
 export interface Call {

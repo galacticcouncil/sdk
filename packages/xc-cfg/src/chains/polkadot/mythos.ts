@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { myth } from '../../assets';
@@ -16,6 +17,7 @@ export const mythos = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://mythos.subscan.io',
   genesisHash:

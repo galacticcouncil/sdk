@@ -12,20 +12,12 @@ import {
   vdot,
 } from '../../assets';
 import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  FeeAmountBuilder,
-} from '../../builders';
+import { ExtrinsicBuilder, FeeAmountBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: astr,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,
@@ -64,13 +56,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: bnc,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -88,13 +75,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: glmr,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -112,13 +94,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ibtc,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -134,13 +111,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: intr,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -156,13 +128,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: vdot,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -180,13 +147,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: vastr,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -204,13 +166,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {
@@ -228,13 +185,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: astr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
       },
     },
     destination: {

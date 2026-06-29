@@ -1,7 +1,6 @@
 import {
   AnyChain,
   AnyEvmChain,
-  Asset,
   AssetAmount,
   BaseConfig,
   ChainType,
@@ -10,8 +9,6 @@ import {
   SuiChain,
 } from '@galacticcouncil/xc-core';
 
-import { Observable } from 'rxjs';
-
 import { EvmPlatform } from './evm';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
@@ -19,7 +16,7 @@ import { SuiPlatform } from './sui';
 import { Call, Platform } from './types';
 
 export class PlatformAdapter {
-  readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
+  readonly platform: Record<string, Platform<BaseConfig>> = {};
 
   constructor(chain: AnyChain) {
     switch (chain.getType()) {
@@ -90,16 +87,5 @@ export class PlatformAdapter {
       feeBalance,
       config
     );
-  }
-
-  async getBalance(asset: Asset, config: BaseConfig): Promise<AssetAmount> {
-    return this.platform[config.type].getBalance(asset, config);
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: BaseConfig
-  ): Promise<Observable<AssetAmount>> {
-    return this.platform[config.type].subscribeBalance(asset, config);
   }
 }

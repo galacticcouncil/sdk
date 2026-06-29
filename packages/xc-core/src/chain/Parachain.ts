@@ -1,8 +1,16 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { SubstrateApis } from '@galacticcouncil/common';
+import { big, SubstrateApis } from '@galacticcouncil/common';
 
-import { Asset } from '../asset';
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import {
+  BalanceType,
+  SubstrateBalanceClient,
+  SubstrateBalanceType,
+  SubstrateMinType,
+} from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -51,8 +59,15 @@ export interface ParachainAssetData extends ChainAssetData {
   xcmLocation?: XcmLocation;
 }
 
-export interface ParachainParams extends ChainParams<ParachainAssetData> {
+export interface ParachainParams<
+  B extends BalanceType = SubstrateBalanceType,
+> extends ChainParams<ParachainAssetData, B> {
   genesisHash: string;
+  /**
+   * Dynamic minimum storage type (e.g. AssetHub `assets.asset`). Optional —
+   * chains with static minimums rely on `assetsData[*].min` instead.
+   */
+  min?: SubstrateMinType;
   parachainId: number;
   ss58Format: number;
   treasury?: string;
@@ -65,8 +80,14 @@ export interface ParachainParams extends ChainParams<ParachainAssetData> {
   xcmVersion?: XcmVersion;
 }
 
-export class Parachain extends Chain<ParachainAssetData> {
+export class Parachain<
+  B extends BalanceType = SubstrateBalanceType,
+> extends Chain<ParachainAssetData, B> {
   private _chainSpec?: Promise<ParachainSpec>;
+
+  protected readonly balanceClient = new SubstrateBalanceClient(this);
+
+  readonly min?: SubstrateMinType;
 
   readonly genesisHash: string;
 
@@ -92,6 +113,7 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   constructor({
     genesisHash,
+    min,
     parachainId,
     ss58Format,
     treasury,
@@ -103,8 +125,9 @@ export class Parachain extends Chain<ParachainAssetData> {
     ws,
     xcmVersion = XcmVersion.v4,
     ...others
-  }: ParachainParams) {
-    super({ ...others });
+  }: ParachainParams<B>) {
+    super({ ...others } as ChainParams<ParachainAssetData, B>);
+    this.min = min;
     this.genesisHash = genesisHash;
     this.parachainId = parachainId;
     this.ss58Format = ss58Format;
@@ -161,6 +184,44 @@ export class Parachain extends Chain<ParachainAssetData> {
 
   getMinAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.minId ?? this.getAssetId(asset);
+  }
+
+  getMinType(): SubstrateMinType | undefined {
+    return this.min;
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset) as SubstrateBalanceType
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset) as SubstrateBalanceType
+    );
+  }
+
+  async getMin(asset: Asset): Promise<AssetAmount> {
+    const type = this.getMinType();
+    if (type) {
+      return this.balanceClient.getMin(asset, type);
+    }
+
+    const min = this.getAssetMin(asset);
+    const decimals = await this.resolveDecimals(asset);
+    return AssetAmount.fromAsset(asset, {
+      amount: min ? big.toBigInt(min, decimals) : 0n,
+      decimals,
+    });
+  }
+
+  async getEd(): Promise<AssetAmount> {
+    return this.balanceClient.getEd();
   }
 
   findAssetById(id: string) {

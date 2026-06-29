@@ -2,25 +2,14 @@ import { Asset, AssetRoute, ChainRoutes, Parachain } from '@galacticcouncil/xc-c
 
 import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
 import { assetHub, bifrost, hydration, interlay } from '../../chains';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  FeeAmountBuilder,
-} from '../../builders';
-
-const balance = () => BalanceBuilder().substrate().tokens().accounts();
+import { ExtrinsicBuilder, FeeAmountBuilder } from '../../builders';
 
 function toHydrationTemplate(asset: Asset, reserve: Parachain): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: {
         asset: intr,
-        balance: balance(),
-      },
-      destinationFee: {
-        balance: balance(),
       },
     },
     destination: {
@@ -41,10 +30,6 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: intr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
     },
     destination: {
       chain: hydration,
@@ -59,13 +44,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ibtc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -81,13 +61,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: hdx,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: intr,
-        balance: BalanceBuilder().substrate().tokens().accounts(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {

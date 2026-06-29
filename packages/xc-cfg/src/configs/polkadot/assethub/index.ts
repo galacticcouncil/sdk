@@ -10,12 +10,7 @@ import {
   moonbeam,
   mythos,
 } from '../../../chains';
-import {
-  AssetMinBuilder,
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  XcmTransferType,
-} from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import {
   extraFee,
@@ -28,16 +23,10 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: hydration,
@@ -54,14 +43,9 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ksm,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
@@ -85,14 +69,9 @@ const toKusamaAssethub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ksm,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
@@ -121,14 +100,9 @@ const toMythos: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: myth,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {

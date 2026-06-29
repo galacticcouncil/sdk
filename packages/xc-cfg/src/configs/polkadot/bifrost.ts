@@ -13,7 +13,6 @@ import {
 } from '../../assets';
 import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
 import {
-  BalanceBuilder,
   ExtrinsicBuilder,
   FeeAmountBuilder,
   XcmTransferType,
@@ -23,10 +22,6 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: bnc,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,
@@ -43,13 +38,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: vdot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -67,13 +57,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: vastr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -91,13 +76,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -117,13 +97,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: astr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -141,13 +116,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: glmr,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -165,13 +135,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ibtc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -187,13 +152,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -211,13 +171,8 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -238,13 +193,8 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {
@@ -262,13 +212,8 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().substrate().tokens().accounts(),
       fee: {
         asset: bnc,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().tokens().accounts(),
       },
     },
     destination: {

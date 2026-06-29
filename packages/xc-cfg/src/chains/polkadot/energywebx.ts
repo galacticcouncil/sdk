@@ -2,6 +2,7 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   XcmVersion,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { ewt } from '../../assets';
@@ -17,6 +18,7 @@ export const energywebx = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://energywebx.subscan.io',
   genesisHash:

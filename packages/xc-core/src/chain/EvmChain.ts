@@ -1,5 +1,9 @@
 import { Chain as EvmChainDef } from 'viem';
 
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import { EvmBalanceClient, EvmBalanceType } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -18,7 +22,8 @@ import {
 } from '../bridge';
 import { EvmClient } from '../evm';
 
-export interface EvmChainParams extends ChainParams<ChainAssetData> {
+export interface EvmChainParams
+  extends ChainParams<ChainAssetData, EvmBalanceType> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
@@ -27,7 +32,9 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   wormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> {
+export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
+  private readonly balanceClient = new EvmBalanceClient(this);
+
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
@@ -70,5 +77,21 @@ export class EvmChain extends Chain<ChainAssetData> {
       return { asset, decimals } as ChainCurrency;
     }
     throw Error('Chain currency configuration not found');
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
   }
 }

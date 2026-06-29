@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   SuiChain,
+  SuiBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { sui } from '../../assets';
@@ -15,6 +16,7 @@ export const sui_chain = new SuiChain({
       decimals: 9,
     },
   ],
+  balance: SuiBalanceType.Native,
   ecosystem: Ecosystem.Sui,
   explorer: 'https://suiscan.xyz/',
   wormhole: {

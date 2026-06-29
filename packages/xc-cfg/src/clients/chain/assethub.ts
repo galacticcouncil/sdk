@@ -62,13 +62,6 @@ export class AssethubClient extends BaseClient<Hub> {
     return response.status.type === 'Frozen' || false;
   }
 
-  async getAssetMin(asset: Asset): Promise<bigint> {
-    const assetId = this.chain.getAssetId(asset);
-    const response = await this.api().query.Assets.Asset.getValue(
-      Number(assetId)
-    );
-    return response?.min_balance || 0n;
-  }
 
   async getBridgeDeliveryFee(
     options = {
