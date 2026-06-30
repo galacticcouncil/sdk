@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 1.4.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.3.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 1.2.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.1.1
 
 ### Patch Changes

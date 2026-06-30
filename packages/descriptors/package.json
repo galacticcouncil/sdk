@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/descriptors",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Hydration papi (polkadot-api) descriptors",
   "author": "GalacticCouncil",
   "type": "module",

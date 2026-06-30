@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.5.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 2.4.0
 
 ### Minor Changes
