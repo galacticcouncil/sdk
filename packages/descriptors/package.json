@@ -43,6 +43,6 @@
     "papi:whitelist": "papi"
   },
   "devDependencies": {
-    "polkadot-api": "^2.1.0"
+    "polkadot-api": "^2.1.7"
   }
 }
