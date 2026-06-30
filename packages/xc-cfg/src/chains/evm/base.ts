@@ -29,6 +29,9 @@ export const base = new EvmChain({
     },
   ],
   balance: EvmBalanceType.Erc20,
+  balanceOverrides: {
+    [eth.key]: EvmBalanceType.Native,
+  },
   ecosystem: Ecosystem.Ethereum,
   evmChain: evmChain,
   explorer: 'https://basescan.org/',

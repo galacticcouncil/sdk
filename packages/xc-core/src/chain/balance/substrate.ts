@@ -43,7 +43,7 @@ const balanceField = (response: any): bigint =>
   BigInt(response?.balance?.toString() ?? '0');
 
 const minBalanceField = (response: any): bigint =>
-  BigInt(response?.minBalance?.toString() ?? '0');
+  BigInt(response?.min_balance?.toString() ?? '0');
 
 /**
  * Reads substrate balances (and dynamic minimums) from a parachain's papi
