@@ -10,10 +10,8 @@ import { toHex } from '@polkadot-api/utils';
 import {
   Subscription,
   distinctUntilChanged,
-  filter,
   finalize,
   map,
-  merge,
   tap,
 } from 'rxjs';
 
@@ -233,40 +231,35 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private subscribeEmaOracles(): Subscription {
     const [pool] = this.store.pools;
 
-    const oraclePairs = pool.tokens
-      .map((t) => t.id)
-      .map((id) => getEmaPair(id));
-
-    const streams = oraclePairs.map((pair) =>
-      this.api.query.EmaOracle.Oracles.watchValue(
-        ORACLE_NAME,
-        pair,
-        ORACLE_PERIOD,
-        { at: 'best' }
-      ).pipe(
-        map(({ value }) => value),
-        filter((v): v is TEmaOracle => v !== undefined),
-        map((value, index) => ({ value, index })),
-        tap(({ index }) => {
-          if (index > 0) {
-            this.log.trace('emaOracle.Oracles', pair.join(':'));
-          }
-        }),
-        map(({ value }) => ({
-          pair,
-          value,
-        }))
-      )
+    // the omnipool oracle pairs we actually care about, keyed for O(1) lookup
+    const wanted = new Set(
+      pool.tokens.map((t) => getEmaPair(t.id).join(':'))
     );
 
-    return merge(...streams)
+    // one merkle-gated subscription prefix-scoped to ORACLE_NAME instead of
+    // one watchValue per pair (~23 `value` storage reads/block -> ~1 merkle
+    // probe/block, with descendant reads only when an omnipool oracle changes).
+    return this.api.query.EmaOracle.Oracles.watchEntries(ORACLE_NAME, {
+      at: 'best',
+    })
       .pipe(
+        distinctUntilChanged((_, current) => !current.deltas),
+        map((value, index) => ({ value, index })),
+        tap(({ value, index }) => {
+          if (index > 0) {
+            this.log.trace('emaOracle.Oracles', value.deltas?.upserted);
+          }
+        }),
         finalize(() => this.emaOracles.clear()),
         this.watchGuard('emaOracle.Oracles')
       )
-      .subscribe((delta) => {
-        const { pair, value } = delta;
-        this.emaOracles.set(value, pair);
+      .subscribe(({ value: { deltas } }) => {
+        deltas?.upserted.forEach((delta) => {
+          const [, pair, period] = delta.args;
+          if (period.type !== ORACLE_PERIOD.type) return;
+          if (!wanted.has(pair.join(':'))) return;
+          this.emaOracles.set(delta.value, pair);
+        });
       });
   }
 
