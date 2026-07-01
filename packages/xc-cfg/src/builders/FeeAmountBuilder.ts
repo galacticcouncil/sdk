@@ -32,9 +32,7 @@ import {
   SNOWBRIDGE_BASE_DISPATCH_GAS,
   SNOWBRIDGE_BASE_VERIFICATION_GAS,
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
-  SNOWBRIDGE_FIAT_SHAMIR_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
-  SnowbridgeFast,
 } from '../bridges/snowbridge';
 import { BaseClient, AssethubClient, HydrationClient } from '../clients';
 
@@ -74,10 +72,6 @@ function Wormhole() {
 
 type SendFeeOpts = {
   hub: Parachain;
-};
-
-type OutboundFeeOpts = SendFeeOpts & {
-  fast?: SnowbridgeFast;
 };
 
 function Snowbridge() {
@@ -177,7 +171,7 @@ function Snowbridge() {
         } as FeeAmount;
       },
     }),
-    calculateOutboundFee: (opts: OutboundFeeOpts): FeeAmountConfigBuilder => ({
+    calculateOutboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
       build: async ({ transferAsset, feeAsset, source, destination }) => {
         const ctx = source as Parachain;
         const dest = destination as EvmChain;
@@ -198,11 +192,8 @@ function Snowbridge() {
         ]);
 
         const gasPrice = await dest.evmClient.getProvider().getGasPrice();
-        const submitGas = opts.fast
-          ? SNOWBRIDGE_FIAT_SHAMIR_GAS
-          : SNOWBRIDGE_SUBMIT_GAS;
         const totalGas =
-          submitGas +
+          SNOWBRIDGE_SUBMIT_GAS +
           SNOWBRIDGE_BASE_VERIFICATION_GAS +
           SNOWBRIDGE_BASE_DISPATCH_GAS +
           SNOWBRIDGE_TOKEN_DELIVERY_GAS;
