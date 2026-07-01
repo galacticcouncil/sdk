@@ -19,11 +19,6 @@ import { hydration, moonbeam } from '../../../chains';
 
 export const extraFee = 0;
 
-const isSwapSupported = (params: ExtrinsicConfigBuilderParams) => {
-  const { source } = params;
-  return !!source.feeSwap;
-};
-
 const isDestinationFeeSwapSupported = (
   params: ExtrinsicConfigBuilderParams
 ) => {
@@ -84,7 +79,6 @@ export function toParaReservesWithSwapTemplate(
       fee: {
         asset: asset,
         balance: BalanceBuilder().substrate().assets().account(),
-        swap: true,
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -99,11 +93,9 @@ export function toParaReservesWithSwapTemplate(
         asset: asset,
       },
     },
-    extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsicBuilder).prior(
-      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.LocalReserve,
-      })
-    ),
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+    }),
   });
 }
 
