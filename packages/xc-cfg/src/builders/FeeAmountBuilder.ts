@@ -199,7 +199,7 @@ function Snowbridge() {
           SNOWBRIDGE_TOKEN_DELIVERY_GAS;
 
         const rawGasFee = gasPrice * totalGas;
-        const etherFeeAmount = padFeeByPercentage(rawGasFee, 33n);
+        const etherFeeAmount = padFeeByPercentage(rawGasFee, 10n);
 
         // DOT for AssetHub execution + downstream deliveries (remote_fees)
         const dotRemoteFee =
