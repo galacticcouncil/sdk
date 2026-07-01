@@ -255,10 +255,8 @@ export function viaWormholeBridgeTemplate(
 export function viaSnowbridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
-  to: AnyChain,
-  opts: { fast?: boolean } = {}
+  to: AnyChain
 ): AssetRoute {
-  const { fast } = opts;
   return new AssetRoute({
     source: {
       asset: assetIn,
@@ -274,7 +272,7 @@ export function viaSnowbridgeTemplate(
       fee: {
         amount: FeeAmountBuilder()
           .Snowbridge()
-          .calculateOutboundFee({ hub: assetHub, fast }),
+          .calculateOutboundFee({ hub: assetHub }),
         asset: dot,
       },
     },
@@ -284,7 +282,7 @@ export function viaSnowbridgeTemplate(
     ).prior(
       ExtrinsicBuilder().polkadotXcm().execute().viaSnowbridge()
     ),
-    tags: fast ? [Tag.Snowbridge, Tag.SnowbridgeFast] : [Tag.Snowbridge],
+    tags: [Tag.Snowbridge],
   });
 }
 
