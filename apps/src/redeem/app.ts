@@ -48,6 +48,8 @@ async function submit(chain: ChainKey, address: string, vaa: string) {
   switch (chain) {
     case 'eth':
       return signEvm(redeem.eth(address, vaa), ethereum, events);
+    case 'eth-intent':
+      return signEvm(redeem.ethIntent(address, vaa), ethereum, events);
     case 'base':
       return signEvm(redeem.base(address, vaa), base, events);
     case 'mrl':
