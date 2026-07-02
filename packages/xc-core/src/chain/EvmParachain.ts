@@ -7,7 +7,7 @@ import { Wormhole, WormholeDef } from '../bridge';
 import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
-const { EvmAddr } = addr;
+const { EvmAddr, Ss58Addr } = addr;
 
 export interface EvmParachainParams extends ParachainParams {
   evmChain: EvmChainDef;
@@ -52,6 +52,19 @@ export class EvmParachain extends Parachain {
     if (this.evmResolver) {
       return this.evmResolver.toH160(address, this.client);
     }
-    throw new Error(`No EVM resolver found for ` + this.name);
+
+    return address;
+  }
+
+  async getSubstrateAddress(address: string): Promise<string> {
+    if (Ss58Addr.isValid(address)) {
+      return address;
+    }
+
+    if (this.evmResolver) {
+      return this.evmResolver.toSS58(address, this.client);
+    }
+
+    return address;
   }
 }
