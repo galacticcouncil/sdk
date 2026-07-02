@@ -21,6 +21,11 @@ const bootstrap: Record<string, DexBootstrap> = {
   },
 };
 
+// chains that share another chain's runtime and reuse its dex
+const dexAlias: Record<string, string> = {
+  assethub_cex: 'assethub',
+};
+
 export async function registerDexes(
   config: ConfigService,
   opts: XcOpts = {}
@@ -32,4 +37,10 @@ export async function registerDexes(
       chain.registerDex(dex);
     })
   );
+
+  // reuse a sibling chain's dex for chains sharing its runtime
+  for (const [alias, target] of Object.entries(dexAlias)) {
+    const chain = config.chains.get(alias) as Parachain | undefined;
+    chain?.registerDex(config.getChain(target).dex);
+  }
 }
