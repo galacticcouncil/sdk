@@ -1,7 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { ksm } from '../../../assets';
-import { assetHub, basilisk, kusamaAssetHub } from '../../../chains';
+import { dot, ksm } from '../../../assets';
+import { assetHub, basilisk, hydration, kusamaAssetHub } from '../../../chains';
 import {
   BalanceBuilder,
   ExtrinsicBuilder,
@@ -62,7 +62,64 @@ const toBasilisk = new AssetRoute({
   }),
 });
 
+// Direct routes via the Polkadot<>Kusama bridge with an onward hop
+// executed on the peer AssetHub gateway (single signature).
+const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      balance: BalanceBuilder().substrate().system().account(),
+      fee: {
+        asset: ksm,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: extraFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().system().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: ksm,
+      fee: {
+        amount: 0.04,
+        asset: ksm,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+      executionFee: 0.005,
+    }),
+  }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      balance: BalanceBuilder().substrate().foreignAssets().account(),
+      fee: {
+        asset: ksm,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: extraFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().foreignAssets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.15,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+      executionFee: 0.01,
+    }),
+  }),
+];
+
 export const assetHubConfig = new ChainRoutes({
   chain: kusamaAssetHub,
-  routes: [toBasilisk, toPolkadotAssethub],
+  routes: [toBasilisk, toPolkadotAssethub, ...toHydration],
 });
