@@ -40,12 +40,15 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     const rcv = destination.chain as Parachain;
     const version = XcmVersion.v4;
 
+    const transferAssetRawLocation = locationOrError(ctx, asset);
+    const transferFeeRawLocation = locationOrError(ctx, destination.fee);
+
     const transferAssetLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, asset),
+      transferAssetRawLocation,
       version
     );
     const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, destination.fee),
+      transferFeeRawLocation,
       version
     );
 
@@ -75,7 +78,12 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         }
 
         // Flip asset order if general index of asset greater than fee asset
-        if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
+        if (
+          shouldFeeAssetPrecede(
+            transferAssetRawLocation,
+            transferFeeRawLocation
+          )
+        ) {
           return tx({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
@@ -441,9 +449,7 @@ const send = () => {
   };
 };
 
-function execute(
-  messageBuilder: XcmMessageBuilder
-): ExtrinsicConfigBuilder;
+function execute(messageBuilder: XcmMessageBuilder): ExtrinsicConfigBuilder;
 function execute(): { viaSnowbridge: () => ExtrinsicConfigBuilder };
 function execute(messageBuilder?: XcmMessageBuilder) {
   const buildExecute = (
@@ -477,7 +483,7 @@ function execute(messageBuilder?: XcmMessageBuilder) {
     viaSnowbridge: (): ExtrinsicConfigBuilder =>
       buildExecute(snowbridgeOutboundMessage),
   };
-};
+}
 
 export const polkadotXcm = () => {
   return {
