@@ -5,6 +5,7 @@ export enum ApiUrl {
   WSMUX = 'wss://wsmuxmain.lark.hydration.cloud',
   Fish = 'wss://subway.shellfish.hydration.cloud',
   Latam = 'wss://hydration.rpc.stkd.io',
+  Catfish1 = 'wss://rpc-catfish-1.catfish.hydration.cloud',
   Catfish2 = 'wss://rpc-catfish-2.catfish.hydration.cloud',
   Lark1 = 'wss://node.lark.hydration.cloud',
   Lark2 = 'wss://node2.lark.hydration.cloud',

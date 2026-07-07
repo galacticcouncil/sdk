@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Moxit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body>
+    <main class="container wide">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Moxit</h1>
+        <p class="lede">
+          Moonbeam exit — bridge Wormhole-wrapped ERC20s out of Hydration's
+          Moonbeam sovereign account back to their origin chain. Governance
+          dispatches the generated <code>PolkadotXcm.send</code>; the
+          <code>TokenBridge.transferTokens</code> runs on Moonbeam under the SA.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Sovereign account balances</h2>
+          <button id="refresh" class="btn-ghost" type="button">Refresh</button>
+        </div>
+        <p class="hint">
+          SA · <span id="sa" class="mono"></span>
+        </p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Origin</th>
+                <th>Contract</th>
+                <th class="num">SA balance</th>
+              </tr>
+            </thead>
+            <tbody id="balances-body"></tbody>
+          </table>
+        </div>
+        <p class="hint" id="balances-status"></p>
+      </section>
+
+      <section class="card">
+        <form id="transact-form" novalidate>
+          <label class="field">
+            <span class="label">Exit asset</span>
+            <select id="asset" name="asset" required>
+              <option value="" disabled selected>Select asset</option>
+            </select>
+            <span class="hint">
+              Wormhole-wrapped token to bridge out ·
+              <span>Origin chain: </span><strong id="origin">—</strong>
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="label">Origin-chain recipient</span>
+            <input
+              id="recipient"
+              name="recipient"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Select an asset first"
+              required
+            />
+            <span class="hint" id="recipient-hint">
+              Account on the origin chain that receives the bridged tokens.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="label">Amount</span>
+            <input
+              id="amount"
+              name="amount"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="0.0"
+              required
+            />
+            <span class="hint">Human-readable, scaled by the asset decimals.</span>
+          </label>
+
+          <label class="field">
+            <span class="label">Execution fee (GLMR)</span>
+            <input
+              id="fee"
+              name="fee"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              spellcheck="false"
+              value="1"
+            />
+            <span class="hint">
+              GLMR the SA spends on BuyExecution; unused surplus is refunded to
+              the SA.
+            </span>
+          </label>
+
+          <button id="build" class="btn-primary" type="submit">
+            <span class="btn-label">Build governance call</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <section class="card status" id="result" hidden>
+        <div class="card-head">
+          <h2 id="result-title">Governance call</h2>
+          <button id="copy-call" class="btn-ghost" type="button">Copy call</button>
+        </div>
+        <pre id="result-call"></pre>
+        <pre id="result-details"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/moxit.js"></script>
+  </body>
+</html>
