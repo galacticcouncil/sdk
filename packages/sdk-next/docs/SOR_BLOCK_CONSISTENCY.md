@@ -29,9 +29,15 @@ Storage reads also accept `{ at: <blockHash> }`. So block-coherent commits requi
 **no new subscriptions and no extra RPC** — only threading the block number that is
 already in hand.
 
-**Recommendation:** coalesce all same-block writes into a **single atomic
-`store.update()` per block** (Fix A). Keep the delta streams; add a per-client
-block barrier keyed on the `block.number` already present in each emission.
+**Recommendation:** for the cross-pallet pools (Omni, Stable, HSM, LBP), use the delta
+streams as **change triggers only** and, on any trigger for block `N`, **pin-read the
+coupled fields at `block.hash` and commit atomically** (Fix B). A single trigger
+suffices, so the fix is immune to a stale/late sibling stream — coherence comes from the
+pinned read, not from waiting on all writers. A pure per-block *barrier* (Fix A) is
+**not** sufficient here: it waits on an unknown set of writers, so a stale stream either
+tears the snapshot (flush early) or stalls block `N` indefinitely (wait for a delta that
+never comes) — the two are indistinguishable. Fix A is kept only for XYK token/token,
+where one emission already delivers both reserves atomically.
 
 ---
 
@@ -364,15 +370,19 @@ const at = this.at === 'best' ? (await this.client.getBestBlocks())[0].hash : th
 
 | # | Action | Effort | Impact | Risk |
 |---|--------|--------|--------|------|
-| 1 | **Fix A** — per-block commit barrier (Omni, Stable, HSM, LBP, XYK) | S–M | **Eliminates torn reads, no extra RPC** | Low (merge-fold correctness) |
-| 2 | **Fix D** — pin seed reads | S | Removes seed-time tears | None |
-| 3 | Hardening #1 (`syncedAt`) + #2 (block-gate) | S | Guarantee + observability | Low |
-| 4 | Hardening #3 (pin fee reads) | S | Fees match reserves' block | Low |
-| 5 | Fix C — uniform snapshot-per-block | L | Simplest model long-term | Medium (rewrite) |
+| 1 | **Fix B** — trigger-then-pinned-read for the cross-pallet pools (Omni, Stable, HSM, LBP) | M | **Hard same-block guarantee; immune to stream staleness** | Low |
+| 2 | **Fix D** — pin seed reads (all pools) | S | Removes seed-time tears | None |
+| 3 | **Fix A** — single-commit for XYK token/token (already atomic delivery) | S | Removes native/erc20-leg tear; batches commits | Low |
+| 4 | Hardening #1 (`syncedAt`) + #2 (block-gate) | S | Guarantee + observability | Low |
+| 5 | Hardening #3 (pin fee reads) | S | Fees match reserves' block | Low |
+| 6 | **Fix C** — converge all clients on the uniform snapshot-per-block model | L | Simplest model long-term; deletes per-field patching | Medium (rewrite) |
 
-**Do 1–4 now.** They are additive, need no new subscriptions, and turn the store into a
-block-coherent snapshot. Consider Fix C later only if the coalescer merge logic proves
-fiddly enough to justify a uniform rewrite.
+**Do 1–2 first** — they close the High-severity tears with a bounded, detectable delay
+and cannot be defeated by a stale sibling stream. Fix A is retained only where a single
+subscription already delivers all coupled fields atomically (never as the coherence
+mechanism for cross-pallet coupling — see the §4 completeness flaw). Treat Fix C as the
+end-state that Fix B incrementally grows into: once every coupled pool triggers a pinned
+per-block read, the per-field delta-patching model can be retired entirely.
 
 ---
 

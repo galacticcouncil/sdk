@@ -1,5 +1,11 @@
 # @galacticcouncil/xc
 
+## 1.0.2
+
+### Patch Changes
+
+- reuse sigling chain dexes
+
 ## 1.0.1
 
 ### Patch Changes
