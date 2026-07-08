@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 1.2.1
+
+### Patch Changes
+
+- 5d923e6: WUD xcm fix and assethub_cex routes fix
+
 ## 1.2.0
 
 ### Minor Changes

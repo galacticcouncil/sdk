@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 1.5.1
+
+### Patch Changes
+
+- 5d923e6: WUD xcm fix and assethub_cex routes fix
+- Updated dependencies [5d923e6]
+  - @galacticcouncil/xc-core@1.2.1
+
 ## 1.5.0
 
 ### Minor Changes
