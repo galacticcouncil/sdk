@@ -3,7 +3,7 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-import { ksm, usdt } from '../../assets';
+import { dot, ksm, usdt } from '../../assets';
 
 export const kusamaAssetHub = new Parachain({
   assetsData: [
@@ -14,6 +14,22 @@ export const kusamaAssetHub = new Parachain({
       xcmLocation: {
         parents: 1,
         interior: 'Here',
+      },
+    },
+    // bridged (foreign asset)
+    {
+      asset: dot,
+      decimals: 10,
+      min: 0.001,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: [
+            {
+              GlobalConsensus: 'Polkadot',
+            },
+          ],
+        },
       },
     },
     {

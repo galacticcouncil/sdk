@@ -10,11 +10,13 @@ export type XcmMessageBuilder = (params: ExtrinsicConfigBuilderParams) => any;
 
 import {
   isSnowbridgeTransfer,
+  resolveBridgeRoute,
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
   toDepositXcmOnDest,
   toDest,
+  toReserveXcmOnDest,
   toTransferType,
   toTransactMessage,
   toTransferMessage,
@@ -231,6 +233,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
 
 type TransferOpts = {
   transferType: XcmTransferType;
+  executionFee?: number;
 };
 
 const transferAssetsUsingTypeAndThen = (
@@ -284,7 +287,8 @@ const transferAssetsUsingTypeAndThen = (
 
     const isSufficientPaymentAsset = asset.isEqual(feeAsset);
 
-    const dest = toDest(version, ctx, rcv);
+    const bridgeRoute = resolveBridgeRoute(version, ctx, rcv, asset);
+    const dest = bridgeRoute?.dest ?? toDest(version, ctx, rcv);
 
     const assets = {
       type: version,
@@ -323,6 +327,23 @@ const transferAssetsUsingTypeAndThen = (
         from,
         transferAssetLocation,
         messageId
+      );
+    } else if (bridgeRoute) {
+      const executionFeeAmount = big.toBigInt(
+        opts.executionFee ?? destination.fee.amount,
+        destination.fee.decimals
+      );
+      const destAssetLocation = getExtrinsicAssetLocation(
+        locationOrError(rcv, asset),
+        version
+      );
+      customXcmOnDest = toReserveXcmOnDest(
+        version,
+        account,
+        rcv,
+        bridgeRoute.mode,
+        destAssetLocation,
+        executionFeeAmount
       );
     } else {
       customXcmOnDest = toDepositXcmOnDest(

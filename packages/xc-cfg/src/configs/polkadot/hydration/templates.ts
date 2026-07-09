@@ -16,7 +16,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, moonbeam } from '../../../chains';
+import { assetHub, kusamaAssetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { balance, fee } from './configs';
@@ -137,6 +137,38 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
+  });
+}
+
+// Direct route to Kusama AssetHub via the Polkadot<>Kusama bridge - first hop
+// to the sibling AssetHub gateway, bridge crossing executed in custom XCM
+// (single signature). `executionFee` funds BuyExecution on the peer AssetHub.
+export function toKusamaHubTemplate(
+  asset: Asset,
+  destFee: number,
+  executionFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: kusamaAssetHub,
+      asset,
+      fee: {
+        amount: destFee,
+        asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+      executionFee,
+    }),
   });
 }
 

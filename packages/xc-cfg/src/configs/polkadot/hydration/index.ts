@@ -83,6 +83,7 @@ import { balance, fee } from './configs';
 import {
   toHubTemplate,
   toHubExtTemplate,
+  toKusamaHubTemplate,
   toMoonbeamErc20Template,
   toParaTemplate,
   toTransferTemplate,
@@ -97,6 +98,13 @@ const toAssetHub: AssetRoute[] = [
   toHubTemplate(usdt, assetHub),
   toHubTemplate(usdc, assetHub),
   toHubExtTemplate(wud),
+];
+
+// Direct routes via the Polkadot<>Kusama bridge - first hop to the sibling
+// AssetHub gateway, bridge crossing executed in custom XCM (single signature).
+const toKusamaAssethub: AssetRoute[] = [
+  toKusamaHubTemplate(ksm, 0.05, 0.005),
+  toKusamaHubTemplate(dot, 0.2, 0.02),
 ];
 
 const toAstar: AssetRoute[] = [
@@ -440,6 +448,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toEnergywebx,
+    ...toKusamaAssethub,
     ...toMoonbeam,
     ...toMythos,
     ...toNeuroweb,
