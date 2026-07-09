@@ -84,7 +84,7 @@ export function toParaReservesWithSwapTemplate(
       fee: {
         asset: asset,
         balance: BalanceBuilder().substrate().assets().account(),
-        swap: true,
+        swap: !asset.isEqual(dot),
       },
       destinationFee: {
         balance: BalanceBuilder().substrate().assets().account(),
@@ -99,6 +99,7 @@ export function toParaReservesWithSwapTemplate(
         asset: asset,
       },
     },
+
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsicBuilder).prior(
       ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
         transferType: XcmTransferType.LocalReserve,

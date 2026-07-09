@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-cfg",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "repository": {
@@ -31,7 +31,7 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
-    "@galacticcouncil/xc-core": "^1.2.0"
+    "@galacticcouncil/xc-core": "^1.2.1"
   },
   "peerDependencies": {
     "@galacticcouncil/sdk-next": ">=1.5.0"

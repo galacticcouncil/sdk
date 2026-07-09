@@ -198,7 +198,8 @@ export class SubstrateService {
       }
 
       // Upward (use chain treasury account if any)
-      if (interior && interior['interior'] === 'Here') {
+      const interiorValue = interior && interior['interior'];
+      if (interiorValue === 'Here' || interiorValue?.type === 'Here') {
         return this.chain.treasury || account;
       }
     }
