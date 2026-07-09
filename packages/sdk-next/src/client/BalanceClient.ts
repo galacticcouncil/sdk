@@ -126,9 +126,7 @@ export class BalanceClient extends Papi {
   ): Observable<AssetBalance> {
     const query = this.api.query.Tokens.Accounts;
 
-    return defer(() =>
-      query.watchValue(address, assetId, { at: 'best' })
-    ).pipe(
+    return defer(() => query.watchValue(address, assetId, { at: 'best' })).pipe(
       map(
         ({ value }) =>
           ({
@@ -241,8 +239,11 @@ export class BalanceClient extends Papi {
   }
 
   private getBreakdown(data: TAccount): Balance {
+    const freezeExcess = data.frozen - data.reserved;
+    const netFreezeConstraint = freezeExcess > 0n ? freezeExcess : 0n;
+
     const transferable =
-      data.free >= data.frozen ? data.free - data.frozen : 0n;
+      data.free >= netFreezeConstraint ? data.free - netFreezeConstraint : 0n;
     const total = data.free + data.reserved;
 
     return {
