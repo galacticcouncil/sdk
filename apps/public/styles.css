@@ -391,6 +391,20 @@ code {
   border-bottom: 0;
 }
 
+.table tfoot td {
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 0;
+  font-weight: 600;
+  background: var(--surface-2);
+}
+
+.table tfoot .total td:first-child {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
 .table .num {
   text-align: right;
 }

@@ -1,10 +1,12 @@
 import {
   HYDRATION_SA,
   MoxitAsset,
+  MoxitBalance,
   fetchSaBalances,
   formatUnits,
   listMoxitAssets,
 } from './assets';
+import { formatUsd, getUnitPriceUsd } from './price';
 import { buildGovernanceTransact } from './transact';
 
 const EVM_RX = /^0x[0-9a-fA-F]{40}$/;
@@ -20,6 +22,7 @@ const balancesStatus = document.getElementById(
   'balances-status'
 ) as HTMLElement;
 const refreshBtn = document.getElementById('refresh') as HTMLButtonElement;
+const totalEl = document.getElementById('balances-total') as HTMLElement;
 
 const form = document.getElementById('transact-form') as HTMLFormElement;
 const assetEl = document.getElementById('asset') as HTMLSelectElement;
@@ -90,8 +93,11 @@ async function loadBalances() {
   setBusy(refreshBtn, true);
   balancesStatus.textContent = 'Loading balances from Moonbeam…';
   balancesBody.innerHTML = '';
+  totalEl.textContent = '—';
   try {
     const rows = await fetchSaBalances(assets);
+    const priced: { row: MoxitBalance; cell: HTMLElement }[] = [];
+
     for (const r of rows) {
       const tr = document.createElement('tr');
 
@@ -111,16 +117,47 @@ async function loadBalances() {
       bal.textContent = r.error ? '—' : formatUnits(r.balance, r.decimals);
       if (r.error) bal.title = r.error;
 
-      tr.append(sym, origin, addr, bal);
+      const usd = document.createElement('td');
+      usd.className = 'num';
+      usd.textContent = r.error ? '—' : '…';
+
+      tr.append(sym, origin, addr, bal, usd);
       balancesBody.appendChild(tr);
+      if (!r.error) priced.push({ row: r, cell: usd });
     }
     balancesStatus.textContent = `${rows.length} exit assets · SA ${HYDRATION_SA}`;
+    void fillUsdValues(priced);
   } catch (e: any) {
     balancesStatus.textContent =
       'Failed to load balances: ' + String(e?.message ?? e);
   } finally {
     setBusy(refreshBtn, false);
   }
+}
+
+/** Price each holding via the Hydration DEX, fill the USD column and total. */
+async function fillUsdValues(
+  items: { row: MoxitBalance; cell: HTMLElement }[]
+) {
+  if (!items.length) return;
+  totalEl.textContent = 'Pricing…';
+  let total = 0;
+
+  await Promise.all(
+    items.map(async ({ row, cell }) => {
+      const price = await getUnitPriceUsd(row);
+      if (price === undefined) {
+        cell.textContent = '—';
+        return;
+      }
+      const balance = Number(row.balance) / 10 ** row.decimals;
+      const value = balance * price;
+      cell.textContent = formatUsd(value);
+      total += value;
+    })
+  );
+
+  totalEl.textContent = formatUsd(total);
 }
 
 refreshBtn.addEventListener('click', () => void loadBalances());
