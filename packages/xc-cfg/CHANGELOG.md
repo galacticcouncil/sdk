@@ -1,5 +1,15 @@
 # @galacticcouncil/xc-cfg
 
+## 1.6.0
+
+### Minor Changes
+
+- 47728eb: xc: add direct Polkadot<>Kusama bridge routes between Hydration and Kusama AssetHub (KSM & DOT), crossing the bridge in a single signature via a gateway AssetHub onward hop
+
+### Patch Changes
+
+- 2d1e289: xc: removed snowbridge relayer tip
+
 ## 1.5.1
 
 ### Patch Changes
