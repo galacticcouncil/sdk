@@ -4,6 +4,5 @@ export enum Tag {
   Relayer = 'Relayer',
   Snowbridge = 'Snowbridge',
   Mrl = 'Mrl',
-  SnowbridgeFast = 'SnowbridgeFast',
   SnowbridgeV1 = 'SnowbridgeV1',
 }
