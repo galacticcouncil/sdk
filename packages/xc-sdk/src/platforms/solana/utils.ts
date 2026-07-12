@@ -14,25 +14,11 @@ export function ixToHuman(
   });
 }
 
-export function chunkBySize(
-  instructions: TransactionInstruction[],
-  maxBytes = 1000
-): TransactionInstruction[][] {
-  const out: TransactionInstruction[][] = [];
-  let cur: TransactionInstruction[] = [];
-  let sz = 0;
-
-  for (const ix of instructions) {
-    const add = ix.data?.length ?? 0;
-    if (cur.length && sz + add > maxBytes) {
-      out.push(cur);
-      cur = [];
-      sz = 0;
-    }
-    cur.push(ix);
-    sz += add;
+export function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
   }
-  if (cur.length) out.push(cur);
   return out;
 }
 
