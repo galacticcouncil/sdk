@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-sdk
 
+## 1.2.2
+
+### Patch Changes
+
+- xc: fix solana claim (chunks)
+
 ## 1.2.1
 
 ### Patch Changes
