@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@defuse-protocol/one-click-sdk-typescript": "^0.1.17",
-    "@galacticcouncil/sdk-next": "^1.5.0",
+    "@galacticcouncil/sdk-next": "^1.5.1",
     "@galacticcouncil/xc": "^1.0.2",
     "@galacticcouncil/xc-scan": "^0.5.0",
     "@galacticcouncil/xc-swap": "^0.4.0",
