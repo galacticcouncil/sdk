@@ -24,15 +24,15 @@ export const configService = new HydrationConfigService({
 
 /**
  * Override Parachain.client getters for all networked chains so any
- * SDK code that accesses chain.client gets the Chopsticks-backed client.
+ * SDK code that accesses chain.client gets the forked client.
  */
 const overrideClients = (networks: SetupCtx[]) => {
   for (const n of networks) {
     const chain = configService.getChain(n.config.key);
     if (chain instanceof Parachain) {
-      const chopsticksClient = n.client;
+      const forkClient = n.client;
       Object.defineProperty(chain, 'client', {
-        get: () => chopsticksClient,
+        get: () => forkClient,
         configurable: true,
       });
     }

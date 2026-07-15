@@ -7,18 +7,22 @@
     "xc",
     "integration",
     "e2e",
-    "chopsticks",
+    "forklift",
     "test"
   ],
   "scripts": {
+    "postinstall": "node scripts/patch-forklift.mjs",
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
     "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^1.4.0",
-    "@acala-network/chopsticks-testing": "^1.4.0",
+    "@acala-network/chopsticks-executor": "1.4.2",
+    "@polkadot-api/forklift": "^0.4.1",
     "@polkadot-labs/hdkd": "^0.0.19",
-    "@polkadot-labs/hdkd-helpers": "^0.0.19"
+    "@polkadot-labs/hdkd-helpers": "^0.0.19",
+    "@types/jest": "^30.0.0",
+    "@types/ws": "^8.18.1",
+    "ws": "^8.21.0"
   },
   "dependencies": {
     "@galacticcouncil/sdk-next": "^1.5.1",

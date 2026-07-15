@@ -4,7 +4,9 @@ import {
   Parachain,
   ParachainAssetData,
 } from '@galacticcouncil/xc-core';
-import { acc, big } from '@galacticcouncil/common';
+import { acc, big, encodeAssetId, encodeLocation } from '@galacticcouncil/common';
+
+import { Enum } from 'polkadot-api';
 
 import { getAddress } from './account';
 import { findNestedKey } from '../../utils/json';
@@ -12,6 +14,18 @@ import { findNestedKey } from '../../utils/json';
 const BALANCE = 10_000n;
 
 const { Ss58Addr } = addr;
+
+/**
+ * `Assets.Account` / `ForeignAssets.Account` are OptionQuery entries, so they
+ * carry no metadata fallback to merge a partial value into. Spell the account
+ * out in full; these are the defaults chopsticks produced implicitly.
+ */
+const assetAccount = (balance: bigint) => ({
+  balance,
+  status: Enum('Liquid'),
+  reason: Enum('Consumer'),
+  extra: undefined,
+});
 
 /**
  * Chains using the Tokens pallet (ORML-based, Hydration)
@@ -96,8 +110,8 @@ export const initStorage = (chainDecimals: number, chain: Parachain) => {
       );
 
       foreignAssets.push([
-        [chain.getAssetXcmLocation(ksm), hydrationSa],
-        { balance: 1_000_000_000_000_000n },
+        [encodeLocation(chain.getAssetXcmLocation(ksm)), hydrationSa],
+        assetAccount(1_000_000_000_000_000n),
       ]);
     }
 
@@ -167,7 +181,7 @@ const populateAssets = (
     .map((a) => {
       const assetId = chain.getBalanceAssetId(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
-      return [[assetId, address], { balance: balance }];
+      return [[encodeAssetId(assetId), address], assetAccount(balance)];
     });
 };
 
@@ -187,7 +201,7 @@ const populateForeignAssets = (
     .map((a) => {
       const assetLocation = chain.getAssetXcmLocation(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
-      return [[assetLocation, address], { balance: balance }];
+      return [[encodeLocation(assetLocation), address], assetAccount(balance)];
     });
 };
 
@@ -202,7 +216,7 @@ const populateOrmlTokens = (
     .map((a) => {
       const assetId = chain.getBalanceAssetId(a.asset);
       const balance = useNormalizedBalance(chain, decimals, a.asset);
-      return [[address, assetId], { free: balance }];
+      return [[address, encodeAssetId(assetId)], { free: balance }];
     });
 };
 
@@ -215,7 +229,7 @@ const populateTokens = (
   return assets.map((a) => {
     const assetId = chain.getBalanceAssetId(a.asset);
     const balance = useNormalizedBalance(chain, decimals, a.asset);
-    return [[address, assetId], { free: balance }];
+    return [[address, encodeAssetId(assetId)], { free: balance }];
   });
 };
 

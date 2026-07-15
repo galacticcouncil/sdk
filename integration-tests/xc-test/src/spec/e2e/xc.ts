@@ -19,7 +19,7 @@ import { clients } from '@galacticcouncil/xc-cfg';
 import { big } from '@galacticcouncil/common';
 
 import { jest } from '@jest/globals';
-import { Binary } from 'polkadot-api';
+import { Binary, type HexString } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import * as c from 'console';
@@ -83,17 +83,16 @@ export const runXc = (
       c.log('🥢 Calldata: ', calldata.data.substring(0, 66) + '...');
 
       // Build a tx from the encoded calldata, sign it, and inject it into
-      // the next block via chopsticks' `dev_newBlock { transactions }`.
+      // the next block via `dev_newBlock { transactions }`.
 
       const api = srcNetwork.client.getUnsafeApi();
       const tx = await api.txFromCallData(Binary.fromHex(calldata.data));
       const signedBytes = await tx.sign(aliceSigner);
-      const signedHex = toHex(signedBytes);
+      const signedHex = toHex(signedBytes) as HexString;
 
-      const srcBlockHash = await srcNetwork.client._request<string>(
-        'dev_newBlock',
-        [{ transactions: [signedHex] }]
-      );
+      const srcBlockHash = await srcNetwork.dev.newBlock({
+        transactions: [signedHex],
+      });
       c.log('🥢 Source block:', srcBlockHash);
       const srcEvents =
         (await api.query.System.Events.getValue()) as PapiEventRecord[];
@@ -109,10 +108,10 @@ export const runXc = (
       // Advance relay chain to forward UMP/DMP messages
       const relayNetwork = networks.find((n) => n.config.parachainId === 0);
       if (relayNetwork) {
-        await relayNetwork.chain.newBlock();
+        await relayNetwork.dev.newBlock();
       }
 
-      await srcNetwork.chain.newBlock();
+      await srcNetwork.dev.newBlock();
 
       // If transfer goes via a reserve chain, advance that too
       const assetReserve = getAssetReserve(srcChain, route);
@@ -124,14 +123,14 @@ export const runXc = (
           reserveNetwork &&
           isViaReserve(srcChain, destChain, reserveNetwork.config)
         ) {
-          await reserveNetwork.chain.newBlock();
+          await reserveNetwork.dev.newBlock();
           const reserveApi = reserveNetwork.client.getUnsafeApi();
           let reserveEvents =
             (await reserveApi.query.System.Events.getValue()) as PapiEventRecord[];
 
           // Sometimes needs a second block to forward queued messages
           if (!checkIfProcessed(reserveEvents)) {
-            await reserveNetwork.chain.newBlock();
+            await reserveNetwork.dev.newBlock();
             reserveEvents =
               (await reserveApi.query.System.Events.getValue()) as PapiEventRecord[];
           }
@@ -141,14 +140,14 @@ export const runXc = (
       }
 
       // Advance destination block to process incoming XCM
-      await destNetwork.chain.newBlock();
+      await destNetwork.dev.newBlock();
       const destApi = destNetwork.client.getUnsafeApi();
       let destEvents =
         (await destApi.query.System.Events.getValue()) as PapiEventRecord[];
 
       // Sometimes needs a second block to process queued messages
       if (!checkIfProcessed(destEvents)) {
-        await destNetwork.chain.newBlock();
+        await destNetwork.dev.newBlock();
         destEvents =
           (await destApi.query.System.Events.getValue()) as PapiEventRecord[];
       }
@@ -233,7 +232,7 @@ const isViaReserve = (
 };
 
 /**
- * Build Transfer reading real chain balances from Chopsticks.
+ * Build Transfer reading real chain balances from the fork.
  * Only fees, swaps & EVM are mocked; balance queries hit real state.
  */
 const getTransfer = async (

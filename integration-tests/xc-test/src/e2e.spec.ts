@@ -38,16 +38,17 @@ Examples:
  * 1) Bridge transfers (ethereum, solana, sui) are skipped as sources.
  * 2) Kusama chains are excluded.
  * 3) EVM-only chains not yet supported in e2e.
+ * 4) Moonbeam cannot be forked: it authors with Nimbus and a VRF pre-runtime
+ *    digest, which forklift does not produce (it handles AURA and BABE), so the
+ *    runtime panics in pallet-randomness' VRF check on the first block. Routes
+ *    to and from Moonbeam therefore have no e2e coverage — see forklift's
+ *    buildNextDigests in src/block-builder/create-block.ts.
  */
 const getChains = () => {
   const bridge: string[] = ['ethereum', 'solana', 'sui'];
-  const allowedChains: string[] = [
-    'polkadot',
-    'hydration',
-    'assethub',
-    'bifrost',
-    'moonbeam',
-  ];
+  const allowedChains: string[] = (
+    process.env.CHAINS ?? 'polkadot,hydration,assethub,bifrost'
+  ).split(',');
 
   const chains: Parachain[] = Array.from(configService.chains.values())
     .filter((c) => c instanceof Parachain)
@@ -113,7 +114,11 @@ describe('Wallet with XC config (E2E)', () => {
         const info = getRouteInfo(chain, route);
         const key = getRouteKey(chain, route);
 
-        const isKeyConstraint = keyParam ? keyParam !== key : false;
+        // -key accepts a comma-separated list, so several routes can be driven
+        // through a single fork (state carries across them, which matters).
+        const isKeyConstraint = keyParam
+          ? !keyParam.split(',').includes(key)
+          : false;
         const isChainConstraint = chainParam ? chainParam !== chain.key : false;
 
         const isContractTransfer = !!route.contract;

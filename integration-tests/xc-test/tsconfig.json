@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": false,
+    "types": ["jest", "node"],
     "paths": {
       "types": ["../../packages/sdk-next/src/types.ts"]
     }
