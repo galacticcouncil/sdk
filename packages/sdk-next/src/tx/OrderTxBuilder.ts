@@ -106,19 +106,13 @@ export class OrderTxBuilder extends TxBuilder {
   }
 
   private async buildTwapSellTx(): Promise<Tx> {
-    const {
-      amountIn,
-      assetIn,
-      assetOut,
-      tradeAmountIn,
-      tradeAmountOut,
-      tradePeriod,
-      tradeRoute,
-    } = this.order;
+    const { amountIn, assetIn, assetOut, tradeAmountIn, tradePeriod, tradeRoute } =
+      this.order;
 
-    const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
-    const minAmountOut = tradeAmountOut - slippage;
-
+    // TWAP executes as a Sell with no absolute output floor; per-slice
+    // protection is delegated to the pallet's adaptive oracle slippage limit
+    // (driven by the schedule `slippage` field), exactly like DCA. This avoids
+    // the frozen-floor stall on large orders.
     let tx: Transaction = this.api.tx.DCA.schedule({
       schedule: {
         owner: this.beneficiary,
@@ -131,7 +125,7 @@ export class OrderTxBuilder extends TxBuilder {
           asset_in: assetIn,
           asset_out: assetOut,
           amount_in: tradeAmountIn,
-          min_amount_out: minAmountOut,
+          min_amount_out: 0n,
           route: tradeRoute as any,
         }),
       },
