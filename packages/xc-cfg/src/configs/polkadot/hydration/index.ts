@@ -18,6 +18,7 @@ import {
   ewt,
   glmr,
   hdx,
+  hollar,
   ibtc,
   intr,
   jito_sol,
@@ -82,6 +83,7 @@ import {
 import { balance, fee } from './configs';
 import {
   toHubTemplate,
+  toHubErc20Template,
   toHubExtTemplate,
   toKusamaHubTemplate,
   toMoonbeamErc20Template,
@@ -97,6 +99,7 @@ const toAssetHub: AssetRoute[] = [
   toHubTemplate(ksm, assetHub),
   toHubTemplate(usdt, assetHub),
   toHubTemplate(usdc, assetHub),
+  toHubErc20Template(hollar, assetHub),
   toHubExtTemplate(wud),
 ];
 

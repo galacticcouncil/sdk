@@ -233,6 +233,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
 
 type TransferOpts = {
   transferType: XcmTransferType;
+  feesTransferType?: XcmTransferType;
   executionFee?: number;
 };
 
@@ -312,7 +313,7 @@ const transferAssetsUsingTypeAndThen = (
 
     const feesTransferType = toTransferType(
       version,
-      transferType,
+      opts.feesTransferType ?? transferType,
       transferFeeLocation
     );
 

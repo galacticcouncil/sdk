@@ -21,6 +21,7 @@ import {
   ewt,
   glmr,
   hdx,
+  hollar,
   ibtc,
   intr,
   jito_sol,
@@ -364,6 +365,23 @@ export const hydration = new EvmParachain({
             },
             {
               PalletInstance: 10,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: hollar,
+      decimals: 18,
+      id: 222,
+      balanceId: '0x531a654d1696ed52e7275a8cede955e82620f99a',
+      min: 0.02,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              GeneralIndex: 222,
             },
           ],
         },
