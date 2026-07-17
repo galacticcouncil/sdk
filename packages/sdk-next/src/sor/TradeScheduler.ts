@@ -404,6 +404,30 @@ export class TradeScheduler {
   }
 
   /**
+   * Build a DCA sell order (TWAP sell executed as DCA)
+   *
+   * @param assetIn - assetIn id
+   * @param assetOut - assetOut id
+   * @param amountInTotal - order budget
+   * @returns dca sell trade order
+   */
+  async getDcaSellOrder(
+    assetIn: number,
+    assetOut: number,
+    amountInTotal: string
+  ): Promise<TradeOrder> {
+    const order = await this.getTwapSellOrder(assetIn, assetOut, amountInTotal);
+    return {
+      ...order,
+      type: TradeOrderType.DcaSell,
+      toHuman: () => ({
+        ...order.toHuman(),
+        type: TradeOrderType.DcaSell,
+      }),
+    };
+  }
+
+  /**
    * Build a TWAP (Time-Weighted Average Price) buy order
    *
    * @param assetIn - assetIn id
