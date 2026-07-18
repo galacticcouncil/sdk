@@ -1,18 +1,19 @@
 import { EvmResolver } from '@galacticcouncil/xc-core';
-import { getSs58AddressInfo } from '@polkadot-api/substrate-bindings';
+import { h160 } from '@galacticcouncil/common';
 
-const ETH_PREFIX = 'ETH\0';
+const { H160, isEvmAccount } = h160;
 
 export class HydrationEvmResolver implements EvmResolver {
   async toH160(ss58Addr: string): Promise<string> {
-    const info = getSs58AddressInfo(ss58Addr);
-    if (!info.isValid) {
-      throw new Error(`Invalid SS58 address: ${ss58Addr}`);
+    if (!isEvmAccount(ss58Addr)) {
+      throw new Error(
+        `SS58 address is not an EVM-derived account: ${ss58Addr}`
+      );
     }
+    return H160.fromAccount(ss58Addr);
+  }
 
-    const decodedBytes = info.publicKey;
-    const prefixBytes = Buffer.from(ETH_PREFIX);
-    const addressBytes = decodedBytes.slice(prefixBytes.length, -8);
-    return '0x' + Buffer.from(addressBytes).toString('hex');
+  async toSS58(h160Addr: string): Promise<string> {
+    return H160.toAccount(h160Addr);
   }
 }
