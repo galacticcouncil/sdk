@@ -25,6 +25,14 @@ describe('Suggester graph for XYK pool', () => {
       '2': [
         ['bXjT2D2cuxUuP2JzddMxYusg4cKo3wENje5Xdk3jbNwtRvStq', 2, 0],
         ['bXi1mHNp4jSRUNXuX3sY1fjCF9Um2EezkpzkFmQuLHaChdPM3', 2, 1],
+        ['bXjHOLLARP1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 2, 222],
+        ['bXjHOLLARP2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 2, 3],
+      ],
+      '222': [
+        ['bXjHOLLARP1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 222, 2],
+      ],
+      '3': [
+        ['bXjHOLLARP2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 3, 2],
       ],
     });
   });
