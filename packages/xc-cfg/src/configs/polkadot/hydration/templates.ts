@@ -136,11 +136,7 @@ export function toKusamaHubTemplate(
   return new AssetRoute({
     source: {
       asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: kusamaAssetHub,
