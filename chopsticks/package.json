@@ -1,5 +1,5 @@
 {
-  "name": "xc-test",
+  "name": "chopsticks",
   "private": true,
   "type": "module",
   "keywords": [
@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
-    "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts"
+    "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts",
+    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^1.4.0",

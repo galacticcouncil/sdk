@@ -1,10 +1,10 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": false,
     "paths": {
-      "types": ["../../packages/sdk-next/src/types.ts"]
+      "types": ["../packages/sdk-next/src/types.ts"]
     }
   },
   "include": ["src/**/*.ts"]
