@@ -1,7 +1,7 @@
 import { AnyChain, Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { glmr } from '../../../assets';
-import { BalanceBuilder, ContractBuilder } from '../../../builders';
+import { ContractBuilder } from '../../../builders';
 import { hydration } from '../../../chains';
 
 function toErc20Template(
@@ -12,13 +12,8 @@ function toErc20Template(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -41,13 +36,8 @@ function toXcTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().evm().erc20(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {

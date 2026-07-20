@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-core",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -54,6 +54,7 @@
     "@galacticcouncil/common": ">=1.0.0",
     "@galacticcouncil/descriptors": ">=2.0.0",
     "polkadot-api": "^2.1.7",
+    "rxjs": "^7.8.0",
     "viem": "^2.38.3"
   }
 }

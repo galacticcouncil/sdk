@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   EvmParachain,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { defineChain, Chain } from 'viem';
@@ -1250,6 +1251,10 @@ export const hydration = new EvmParachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.Tokens,
+  balanceOverrides: {
+    [hdx.key]: SubstrateBalanceType.System,
+  },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,
   evmResolver: evmResolver,

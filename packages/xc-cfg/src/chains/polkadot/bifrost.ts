@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -189,6 +190,10 @@ export const bifrost = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.Tokens,
+  balanceOverrides: {
+    [bnc.key]: SubstrateBalanceType.System,
+  },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',
   genesisHash:

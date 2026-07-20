@@ -1,4 +1,9 @@
-import { AnyChain, AssetAmount, EvmParachain } from '@galacticcouncil/xc-core';
+import {
+  AnyChain,
+  Asset,
+  AssetAmount,
+  EvmParachain,
+} from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
 import Big from 'big.js';
@@ -100,4 +105,22 @@ export async function formatEvmAddress(
  */
 export function formatAmount(decimals: number, amount?: number): bigint {
   return amount ? big.toBigInt(amount, decimals) : 0n;
+}
+
+/**
+ * Resolve decimals for an asset on a given chain, falling back to the chain
+ * native currency decimals when the asset has no chain-specific override.
+ *
+ * @param chain - chain the asset is read on
+ * @param asset - asset to resolve decimals for
+ * @returns asset decimals
+ */
+export async function getDecimals(chain: AnyChain, asset: Asset): Promise<number> {
+  const decimals = chain.getAssetDecimals(asset);
+  if (decimals) {
+    return decimals;
+  }
+
+  const chainCurrency = await chain.getCurrency();
+  return chainCurrency.decimals;
 }

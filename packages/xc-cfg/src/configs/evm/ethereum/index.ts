@@ -30,11 +30,7 @@ import {
   susds,
 } from '../../../assets';
 import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../../builders';
+import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { Tag } from '../../../tags';
 
 import {
@@ -47,11 +43,7 @@ const toHydrationViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
-      destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
+      destinationFee: eth,
     },
     destination: {
       chain: hydration,
@@ -79,13 +71,8 @@ const toHydrationViaSnowbridge: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -125,13 +112,8 @@ const toHydrationViaSnowbridgeV1: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -168,11 +150,7 @@ const toMoonbeamViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
-      destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().erc20(),
-      },
+      destinationFee: eth,
     },
     destination: {
       chain: moonbeam,
@@ -188,15 +166,10 @@ const toMoonbeamViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dai,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
       },
-      destinationFee: {
-        asset: dai,
-        balance: BalanceBuilder().evm().erc20(),
-      },
+      destinationFee: dai,
     },
     destination: {
       chain: moonbeam,

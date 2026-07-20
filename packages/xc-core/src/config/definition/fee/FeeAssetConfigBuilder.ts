@@ -1,9 +1,9 @@
 import { Asset } from '../../../asset';
-import { Parachain } from '../../../chain';
+import { AnyParachain } from '../../../chain';
 
 export interface FeeAssetConfigParams {
   address: string;
-  chain: Parachain;
+  chain: AnyParachain;
 }
 
 export interface FeeAssetConfigBuilder {

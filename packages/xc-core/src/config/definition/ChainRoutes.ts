@@ -61,14 +61,26 @@ export class ChainRoutes {
   }
 
   getAssetDestinationRoutes(asset: Asset, destination: AnyChain): AssetRoute[] {
-    const routes = this.getRoutes().filter(
-      (r) => r.source.asset === asset && r.destination.chain === destination
-    );
+    const routes = this.getAssetDestinationRoutesOrEmpty(asset, destination);
     if (routes.length === 0) {
       throw new Error(
         `AssetRoute for asset ${asset.key} and destination ${destination.key} not found`
       );
     }
     return routes;
+  }
+
+  /**
+   * Like {@link getAssetDestinationRoutes} but returns an empty array instead
+   * of throwing when no route exists — used to probe for a reverse route
+   * without relying on exceptions for control flow.
+   */
+  getAssetDestinationRoutesOrEmpty(
+    asset: Asset,
+    destination: AnyChain
+  ): AssetRoute[] {
+    return this.getRoutes().filter(
+      (r) => r.source.asset === asset && r.destination.chain === destination
+    );
   }
 }

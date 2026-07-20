@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-swap
 
+## 0.5.0
+
+### Minor Changes
+
+- bump xc deps
+
 ## 0.4.0
 
 ### Minor Changes

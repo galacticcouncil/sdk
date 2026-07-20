@@ -1,11 +1,7 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../../builders';
+import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { hydration, moonbeam, assetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
@@ -16,15 +12,10 @@ export function toHydrationViaWormholeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
       },
-      destinationFee: {
-        asset: assetIn,
-        balance: BalanceBuilder().evm().erc20(),
-      },
+      destinationFee: assetIn,
     },
     destination: {
       chain: hydration,
@@ -50,13 +41,8 @@ export function toHydrationViaSnowbridgeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -84,13 +70,8 @@ export function toHydrationViaSnowbridgeV1Template(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {

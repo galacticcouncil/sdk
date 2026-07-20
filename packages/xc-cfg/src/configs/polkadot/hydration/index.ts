@@ -80,7 +80,7 @@ import {
   XcmTransferType,
 } from '../../../builders';
 
-import { balance, fee } from './configs';
+import { fee } from './configs';
 import {
   toHubTemplate,
   toHubErc20Template,
@@ -117,11 +117,7 @@ const toAstar: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ibtc,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: astar,
@@ -136,11 +132,7 @@ const toAstar: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: intr,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: astar,
@@ -167,11 +159,7 @@ const toBifrost: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ibtc,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: bifrost,
@@ -188,11 +176,7 @@ const toBifrost: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: bifrost,
@@ -219,11 +203,7 @@ const toInterlay: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: vdot,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: interlay,
@@ -238,11 +218,7 @@ const toInterlay: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: interlay,
@@ -276,11 +252,7 @@ const toMythos: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: myth,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: mythos,
@@ -300,11 +272,7 @@ const toCrust: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: cru,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: crust,
@@ -322,11 +290,7 @@ const toEnergywebx: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ewt,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: energywebx,
@@ -344,11 +308,7 @@ const toPendulum: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: pen,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: pendulum,

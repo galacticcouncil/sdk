@@ -1,5 +1,6 @@
 import {
   Abi,
+  AnyParachain,
   EvmChain,
   FeeAmount,
   FeeAmountConfigBuilder,
@@ -328,7 +329,7 @@ function Snowbridge() {
 function XcmPaymentApi() {
   return {
     calculateDestFee: (opts?: {
-      reserve?: Parachain;
+      reserve?: AnyParachain;
     }): FeeAmountConfigBuilder => ({
       build: async ({ feeAsset, source, destination }) => {
         const src = source as Parachain;

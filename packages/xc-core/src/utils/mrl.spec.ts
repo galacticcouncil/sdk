@@ -1,10 +1,11 @@
-import { Parachain } from '../chain';
+import { Parachain, SubstrateBalanceType } from '../chain';
 import { createPayload, decodePayload } from './mrl';
 
 const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 
 const parachain = new Parachain({
   assetsData: [],
+  balance: SubstrateBalanceType.System,
   genesisHash: '0x',
   key: 'hydration',
   name: 'Hydration',

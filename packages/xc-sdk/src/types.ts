@@ -49,10 +49,13 @@ export interface TransferDestinationData {
  * @interface Transfer
  * @member {TransferSourceData} source Source chain data
  * @member {TransferDestinationData} destination Destination chain data
+ * @member {boolean} reversible True if a return-trip route is registered.
+ * Consumers may use this to gate UI affordances (swap-direction button, etc.).
  */
 export interface Transfer {
   source: TransferSourceData;
   destination: TransferDestinationData;
+  reversible: boolean;
   buildCall(amount: bigint | number | string): Promise<Call>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
   estimateDestinationFee(

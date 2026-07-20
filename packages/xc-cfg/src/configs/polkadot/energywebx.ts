@@ -2,20 +2,15 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { ewt } from '../../assets';
 import { hydration, energywebx } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ewt,
-      balance: BalanceBuilder().substrate().system().account(),
       fee: {
         asset: ewt,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: 0.030555,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
       },
     },
     destination: {

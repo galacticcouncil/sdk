@@ -12,7 +12,7 @@
   "workspaces": [
     "packages/*",
     "examples/*",
-    "integration-tests/*"
+    "chopsticks"
   ],
   "scripts": {
     "postinstall": "patch-package",
@@ -22,7 +22,6 @@
     "link": "turbo run link",
     "test": "turbo run test --concurrency=1",
     "changeset": "changeset",
-    "version": "node -e \"console.log('WebSocket in globals:', !!globalThis.WebSocket, process.version)\"",
     "changeset:version": "node ./scripts/changeset-version.mjs",
     "changeset:snapshot": "node ./scripts/changeset-snapshot.mjs",
     "prerelease": "npm run build",

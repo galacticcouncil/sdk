@@ -1,30 +1,19 @@
 import {
-  Asset,
   AssetAmount,
   CallType,
   MoveConfig,
   SuiChain,
-  SuiQueryConfig,
 } from '@galacticcouncil/xc-core';
 
 import { SuiClient } from '@mysten/sui/client';
 import { toBase64 } from '@mysten/bcs';
 
-import {
-  distinctUntilChanged,
-  finalize,
-  shareReplay,
-  Observable,
-  Subject,
-} from 'rxjs';
-
-import { SuiBalanceFactory } from './balance';
 import { SuiCall } from './types';
 import { resolveCommandsTyped } from './utils';
 
 import { DryRunResult, Platform } from '../types';
 
-export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
+export class SuiPlatform implements Platform<MoveConfig> {
   readonly #client: SuiClient;
 
   constructor(chain: SuiChain) {
@@ -84,43 +73,5 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
     const mist = computation + storage;
 
     return feeBalance.copyWith({ amount: mist });
-  }
-
-  async getBalance(asset: Asset, config: SuiQueryConfig): Promise<AssetAmount> {
-    const query = SuiBalanceFactory.get(this.#client, config);
-    const [balance, decimals] = await Promise.all([
-      query.getBalance(),
-      query.getDecimals(),
-    ]);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: SuiQueryConfig
-  ): Promise<Observable<AssetAmount>> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
-
-    const run = async () => {
-      const updateBalance = async () => {
-        const balance = await this.getBalance(asset, config);
-        subject.next(balance);
-      };
-      await updateBalance();
-      const intervalId = setInterval(() => {}, 3000);
-      return () => clearInterval(intervalId);
-    };
-
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
   }
 }

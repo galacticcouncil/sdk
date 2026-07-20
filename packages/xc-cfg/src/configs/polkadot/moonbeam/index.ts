@@ -16,11 +16,7 @@ import {
   weth_mwh,
 } from '../../../assets';
 import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../../builders';
+import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { Tag } from '../../../tags';
 
 import { toHydrationErc20Template, toHydrationXcTemplate } from './templates';
@@ -29,10 +25,6 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: glmr,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,
@@ -60,13 +52,8 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdt,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -82,13 +69,8 @@ const toAssetHub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: usdc,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -107,15 +89,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: weth_mwh,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
       },
-      destinationFee: {
-        asset: weth_mwh,
-        balance: BalanceBuilder().evm().erc20(),
-      },
+      destinationFee: weth_mwh,
     },
     destination: {
       chain: ethereum,
@@ -141,15 +118,10 @@ const toEthereumViaWormhole: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dai_mwh,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: glmr,
-        balance: BalanceBuilder().substrate().system().account(),
       },
-      destinationFee: {
-        asset: dai_mwh,
-        balance: BalanceBuilder().evm().erc20(),
-      },
+      destinationFee: dai_mwh,
     },
     destination: {
       chain: ethereum,

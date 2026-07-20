@@ -1,34 +1,21 @@
 import {
-  Asset,
   AssetAmount,
   CallType,
   ProgramConfig,
   SolanaChain,
-  SolanaQueryConfig,
 } from '@galacticcouncil/xc-core';
 
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 
 import { Buffer } from 'buffer';
-import {
-  distinctUntilChanged,
-  finalize,
-  shareReplay,
-  Observable,
-  Subject,
-} from 'rxjs';
 
-import { SolanaBalanceFactory } from './balance';
 import { SolanaTransferFactory } from './transfer';
 import { SolanaCall, SolanaDryRunResult } from './types';
 import { ixToHuman } from './utils';
 
 import { Platform } from '../types';
 
-export class SolanaPlatform implements Platform<
-  ProgramConfig,
-  SolanaQueryConfig
-> {
+export class SolanaPlatform implements Platform<ProgramConfig> {
   readonly #connection: Connection;
 
   constructor(chain: SolanaChain) {
@@ -98,51 +85,5 @@ export class SolanaPlatform implements Platform<
     return feeBalance.copyWith({
       amount: fee + config.rentReserve,
     });
-  }
-
-  async getBalance(
-    asset: Asset,
-    config: SolanaQueryConfig
-  ): Promise<AssetAmount> {
-    const query = SolanaBalanceFactory.get(this.#connection, config);
-    const [balance, decimals] = await Promise.all([
-      query.getBalance(),
-      query.getDecimals(),
-    ]);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: SolanaQueryConfig
-  ): Promise<Observable<AssetAmount>> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
-
-    const run = async () => {
-      const updateBalance = async () => {
-        const balance = await this.getBalance(asset, config);
-        subject.next(balance);
-      };
-      await updateBalance();
-      const sender = new PublicKey(config.address);
-      const id = this.#connection.onAccountChange(sender, () =>
-        updateBalance()
-      );
-      return () => {
-        this.#connection.removeAccountChangeListener(id);
-      };
-    };
-
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
   }
 }

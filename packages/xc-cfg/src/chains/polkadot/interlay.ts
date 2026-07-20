@@ -2,6 +2,7 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   XcmVersion,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { dot, hdx, ibtc, intr, usdc, usdt, vdot } from '../../assets';
@@ -131,6 +132,7 @@ export const interlay = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.Tokens,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://interlay.subscan.io',
   genesisHash:

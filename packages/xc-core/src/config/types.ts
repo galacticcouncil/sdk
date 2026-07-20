@@ -40,5 +40,6 @@ export interface TransferConfig {
 
 export interface TransferConfigs {
   origin: TransferConfig;
-  reverse: TransferConfig;
+  // True when a route in the opposite direction exists in the config service.
+  reversible: boolean;
 }

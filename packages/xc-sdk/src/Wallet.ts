@@ -1,7 +1,6 @@
 import { acc, big } from '@galacticcouncil/common';
 
 import {
-  addr,
   Asset,
   AnyChain,
   AnyParachain,
@@ -15,7 +14,7 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xc-core';
 
-import { combineLatest, debounceTime, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   Call,
@@ -27,15 +26,12 @@ import {
 import {
   calculateMax,
   calculateMin,
-  formatEvmAddress,
   DataOriginProcessor,
-  DataReverseProcessor,
+  DataDestinationProcessor,
 } from './transfer';
 import { Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
-
-const { EvmAddr } = addr;
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -124,13 +120,13 @@ export class Wallet {
     dstAddress: string
   ): Promise<Transfer> {
     const srcConf = configs.origin;
-    const dstConf = configs.reverse;
+    const { chain: dstChain, asset: dstAsset } = srcConf.route.destination;
 
     const srcAdapter = new PlatformAdapter(srcConf.chain);
-    const dstAdapter = new PlatformAdapter(dstConf.chain);
+    const dstAdapter = new PlatformAdapter(dstChain);
 
     const src = new DataOriginProcessor(srcAdapter, srcConf);
-    const dst = new DataReverseProcessor(dstAdapter, dstConf);
+    const dst = new DataDestinationProcessor(dstAdapter, dstChain, dstAsset);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -167,7 +163,7 @@ export class Wallet {
       asset: source.asset,
       destination: {
         balance: dstBalance,
-        chain: dstConf.chain,
+        chain: dstChain,
         fee: dstFee,
         feeBreakdown: dstFeeBreakdown,
       },
@@ -230,6 +226,7 @@ export class Wallet {
         balance: dstBalance,
         fee: dstFee,
       },
+      reversible: configs.reversible,
       async buildCall(amount): Promise<Call> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
@@ -269,25 +266,9 @@ export class Wallet {
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
     const chainRoutes = this.config.getChainRoutes(chain);
-    const adapter = new PlatformAdapter(chainRoutes.chain);
-    const observables = chainRoutes
+    const assets = chainRoutes
       .getUniqueRoutes()
-      .map(async ({ source }) => {
-        const { asset, balance } = source;
-        const assetId = chainRoutes.chain.getBalanceAssetId(asset);
-        const account = EvmAddr.isValid(assetId.toString())
-          ? await formatEvmAddress(address, chainRoutes.chain)
-          : address;
-        const balanceConfig = balance.build({
-          address: account,
-          asset: asset,
-          chain: chainRoutes.chain,
-        });
-        return adapter.subscribeBalance(asset, balanceConfig);
-      });
-
-    const ob = await Promise.all(observables);
-    const observable = combineLatest(ob);
-    return observable.pipe(debounceTime(500)).subscribe(observer);
+      .map((route) => route.source.asset);
+    return chainRoutes.chain.subscribeBalances(assets, address).subscribe(observer);
   }
 }

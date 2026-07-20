@@ -1,6 +1,8 @@
 import {
   ChainEcosystem as Ecosystem,
   EvmParachain,
+  EvmBalanceType,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { defineChain, Chain } from 'viem';
@@ -375,6 +377,10 @@ export const moonbeam = new EvmParachain({
       },
     },
   ],
+  balance: EvmBalanceType.Erc20,
+  balanceOverrides: {
+    [glmr.key]: SubstrateBalanceType.System,
+  },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,
   explorer: 'https://moonbeam.subscan.io',

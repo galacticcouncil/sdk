@@ -7,8 +7,6 @@ import {
   TransferValidationError,
 } from '@galacticcouncil/xc-core';
 
-import { AssethubClient } from '../clients';
-
 export class FeeValidation extends TransferValidation {
   async validate(ctx: TransferCtx) {
     const { source } = ctx;
@@ -60,12 +58,12 @@ export class DestFeeValidation extends TransferValidation {
   }
 
   async getMin(chain: AnyChain, destFee: AssetAmount): Promise<bigint> {
-    if (chain.key === 'assethub') {
-      const client = new AssethubClient(chain as Parachain);
-      return client.getAssetMin(destFee);
+    // Parachains resolve their own min (dynamic AssetHub read or static
+    // assetsData min); other chains expose only the static value.
+    if (chain instanceof Parachain) {
+      return (await chain.getMin(destFee)).amount;
     }
     const min = chain.getAssetMin(destFee);
-    const minDecimals = min * 10 ** destFee.decimals;
-    return BigInt(minDecimals);
+    return BigInt(min * 10 ** destFee.decimals);
   }
 }

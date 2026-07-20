@@ -1,5 +1,3 @@
-export * from './AssetMinBuilder';
-export * from './BalanceBuilder';
 export * from './ContractBuilder';
 export * from './ExtrinsicBuilder';
 export * from './FeeAmountBuilder';

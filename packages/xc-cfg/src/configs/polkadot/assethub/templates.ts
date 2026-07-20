@@ -7,8 +7,6 @@ import {
 
 import { dot, usdt } from '../../../assets';
 import {
-  AssetMinBuilder,
-  BalanceBuilder,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
   XcmTransferType,
@@ -46,16 +44,10 @@ function toParaExtTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: destination,
@@ -80,16 +72,10 @@ export function toParaReservesWithSwapTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: asset,
-        balance: BalanceBuilder().substrate().assets().account(),
         swap: !asset.isEqual(dot),
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: destination,
@@ -116,16 +102,10 @@ export function toParaStablesTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: BalanceBuilder().substrate().assets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().assets().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: destination,
