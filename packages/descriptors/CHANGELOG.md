@@ -1,5 +1,17 @@
 # @galacticcouncil/descriptors
 
+## 2.6.0
+
+### Minor Changes
+
+- 475a029: bump to latest metadata and whitelist gigahdx
+
+## 2.5.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 2.4.0
 
 ### Minor Changes

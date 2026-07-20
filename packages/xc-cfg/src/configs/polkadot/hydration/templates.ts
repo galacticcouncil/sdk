@@ -17,7 +17,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, moonbeam } from '../../../chains';
+import { assetHub, kusamaAssetHub, moonbeam } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { fee } from './configs';
@@ -26,6 +26,7 @@ export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
 export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
 export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
+export const HUB_EXT_USDT_DEST_FEE = 0.02;
 
 const isDestinationFeeSwapSupported = (
   params: ExtrinsicConfigBuilderParams
@@ -113,7 +114,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       chain: assetHub,
       asset: asset,
       fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        amount: HUB_EXT_USDT_DEST_FEE,
         asset: usdt,
       },
     },
@@ -121,6 +122,38 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
     ).prior(ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets()),
+  });
+}
+
+// Direct route to Kusama AssetHub via the Polkadot<>Kusama bridge - first hop
+// to the sibling AssetHub gateway, bridge crossing executed in custom XCM
+// (single signature). `executionFee` funds BuyExecution on the peer AssetHub.
+export function toKusamaHubTemplate(
+  asset: Asset,
+  destFee: number,
+  executionFee: number
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset,
+      balance: balance(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: kusamaAssetHub,
+      asset,
+      fee: {
+        amount: destFee,
+        asset,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+      executionFee,
+    }),
   });
 }
 
@@ -231,10 +264,8 @@ export function viaWormholeBridgeTemplate(
 export function viaSnowbridgeTemplate(
   assetIn: Asset,
   assetOut: Asset,
-  to: AnyChain,
-  opts: { fast?: boolean } = {}
+  to: AnyChain
 ): AssetRoute {
-  const { fast } = opts;
   return new AssetRoute({
     source: {
       asset: assetIn,
@@ -246,17 +277,15 @@ export function viaSnowbridgeTemplate(
       fee: {
         amount: FeeAmountBuilder()
           .Snowbridge()
-          .calculateOutboundFee({ hub: assetHub, fast }),
+          .calculateOutboundFee({ hub: assetHub }),
         asset: dot,
       },
     },
     extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(
-      ExtrinsicBuilder().polkadotXcm().execute().viaSnowbridge()
-    ),
-    tags: fast ? [Tag.Snowbridge, Tag.SnowbridgeFast] : [Tag.Snowbridge],
+    ).prior(ExtrinsicBuilder().polkadotXcm().execute().viaSnowbridge()),
+    tags: [Tag.Snowbridge],
   });
 }
 

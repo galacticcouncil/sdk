@@ -74,7 +74,7 @@ export function toParaReservesWithSwapTemplate(
       asset: asset,
       fee: {
         asset: asset,
-        swap: true,
+        swap: !asset.isEqual(dot),
       },
     },
     destination: {
@@ -85,6 +85,7 @@ export function toParaReservesWithSwapTemplate(
         asset: asset,
       },
     },
+
     extrinsic: ExtrinsicDecorator(isSwapSupported, swapExtrinsicBuilder).prior(
       ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
         transferType: XcmTransferType.LocalReserve,

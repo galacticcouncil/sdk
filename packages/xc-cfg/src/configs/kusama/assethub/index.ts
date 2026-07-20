@@ -1,7 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { ksm } from '../../../assets';
-import { assetHub, basilisk, kusamaAssetHub } from '../../../chains';
+import { dot, ksm } from '../../../assets';
+import { assetHub, basilisk, hydration, kusamaAssetHub } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import { extraFee } from './templates';
@@ -48,7 +48,54 @@ const toBasilisk = new AssetRoute({
   }),
 });
 
+// Direct routes via the Polkadot<>Kusama bridge with an onward hop
+// executed on the peer AssetHub gateway (single signature).
+const toHydration: AssetRoute[] = [
+  new AssetRoute({
+    source: {
+      asset: ksm,
+      fee: {
+        asset: ksm,
+        extra: extraFee,
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: ksm,
+      fee: {
+        amount: 0.04,
+        asset: ksm,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.LocalReserve,
+      executionFee: 0.005,
+    }),
+  }),
+  new AssetRoute({
+    source: {
+      asset: dot,
+      fee: {
+        asset: ksm,
+        extra: extraFee,
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: dot,
+      fee: {
+        amount: 0.15,
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+      executionFee: 0.01,
+    }),
+  }),
+];
+
 export const assetHubConfig = new ChainRoutes({
   chain: kusamaAssetHub,
-  routes: [toBasilisk, toPolkadotAssethub],
+  routes: [toBasilisk, toPolkadotAssethub, ...toHydration],
 });

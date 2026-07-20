@@ -1,5 +1,23 @@
 # @galacticcouncil/sdk-next
 
+## 1.5.1
+
+### Patch Changes
+
+- b6ea527: Fix transferable balance
+
+## 1.5.0
+
+### Minor Changes
+
+- bump papi to latest
+
+## 1.4.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.3.0
 
 ### Minor Changes

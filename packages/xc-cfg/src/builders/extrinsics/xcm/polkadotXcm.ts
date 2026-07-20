@@ -10,11 +10,13 @@ export type XcmMessageBuilder = (params: ExtrinsicConfigBuilderParams) => any;
 
 import {
   isSnowbridgeTransfer,
+  resolveBridgeRoute,
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
   toDepositXcmOnDest,
   toDest,
+  toReserveXcmOnDest,
   toTransferType,
   toTransactMessage,
   toTransferMessage,
@@ -40,12 +42,15 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     const rcv = destination.chain as Parachain;
     const version = XcmVersion.v4;
 
+    const transferAssetRawLocation = locationOrError(ctx, asset);
+    const transferFeeRawLocation = locationOrError(ctx, destination.fee);
+
     const transferAssetLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, asset),
+      transferAssetRawLocation,
       version
     );
     const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, destination.fee),
+      transferFeeRawLocation,
       version
     );
 
@@ -75,7 +80,12 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         }
 
         // Flip asset order if general index of asset greater than fee asset
-        if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
+        if (
+          shouldFeeAssetPrecede(
+            transferAssetRawLocation,
+            transferFeeRawLocation
+          )
+        ) {
           return tx({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
@@ -223,6 +233,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
 
 type TransferOpts = {
   transferType: XcmTransferType;
+  executionFee?: number;
 };
 
 const transferAssetsUsingTypeAndThen = (
@@ -276,7 +287,8 @@ const transferAssetsUsingTypeAndThen = (
 
     const isSufficientPaymentAsset = asset.isEqual(feeAsset);
 
-    const dest = toDest(version, ctx, rcv);
+    const bridgeRoute = resolveBridgeRoute(version, ctx, rcv, asset);
+    const dest = bridgeRoute?.dest ?? toDest(version, ctx, rcv);
 
     const assets = {
       type: version,
@@ -315,6 +327,23 @@ const transferAssetsUsingTypeAndThen = (
         from,
         transferAssetLocation,
         messageId
+      );
+    } else if (bridgeRoute) {
+      const executionFeeAmount = big.toBigInt(
+        opts.executionFee ?? destination.fee.amount,
+        destination.fee.decimals
+      );
+      const destAssetLocation = getExtrinsicAssetLocation(
+        locationOrError(rcv, asset),
+        version
+      );
+      customXcmOnDest = toReserveXcmOnDest(
+        version,
+        account,
+        rcv,
+        bridgeRoute.mode,
+        destAssetLocation,
+        executionFeeAmount
       );
     } else {
       customXcmOnDest = toDepositXcmOnDest(
@@ -441,9 +470,7 @@ const send = () => {
   };
 };
 
-function execute(
-  messageBuilder: XcmMessageBuilder
-): ExtrinsicConfigBuilder;
+function execute(messageBuilder: XcmMessageBuilder): ExtrinsicConfigBuilder;
 function execute(): { viaSnowbridge: () => ExtrinsicConfigBuilder };
 function execute(messageBuilder?: XcmMessageBuilder) {
   const buildExecute = (
@@ -477,7 +504,7 @@ function execute(messageBuilder?: XcmMessageBuilder) {
     viaSnowbridge: (): ExtrinsicConfigBuilder =>
       buildExecute(snowbridgeOutboundMessage),
   };
-};
+}
 
 export const polkadotXcm = () => {
   return {

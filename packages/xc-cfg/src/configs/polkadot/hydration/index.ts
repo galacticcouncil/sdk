@@ -83,6 +83,7 @@ import { fee } from './configs';
 import {
   toHubTemplate,
   toHubExtTemplate,
+  toKusamaHubTemplate,
   toMoonbeamErc20Template,
   toParaTemplate,
   toTransferTemplate,
@@ -97,6 +98,13 @@ const toAssetHub: AssetRoute[] = [
   toHubTemplate(usdt, assetHub),
   toHubTemplate(usdc, assetHub),
   toHubExtTemplate(wud),
+];
+
+// Direct routes via the Polkadot<>Kusama bridge - first hop to the sibling
+// AssetHub gateway, bridge crossing executed in custom XCM (single signature).
+const toKusamaAssethub: AssetRoute[] = [
+  toKusamaHubTemplate(ksm, 0.05, 0.005),
+  toKusamaHubTemplate(dot, 0.2, 0.02),
 ];
 
 const toAstar: AssetRoute[] = [
@@ -330,37 +338,21 @@ const toEthereumViaWormhole: AssetRoute[] = [
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
-  viaSnowbridgeTemplate(eth, eth, ethereum, { fast: true }),
   viaSnowbridgeTemplate(aave, aave, ethereum),
-  viaSnowbridgeTemplate(aave, aave, ethereum, { fast: true }),
   viaSnowbridgeTemplate(apyusd, apyusd, ethereum),
-  viaSnowbridgeTemplate(apyusd, apyusd, ethereum, { fast: true }),
   viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum),
-  viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum, { fast: true }),
   viaSnowbridgeTemplate(ena, ena, ethereum),
-  viaSnowbridgeTemplate(ena, ena, ethereum, { fast: true }),
   viaSnowbridgeTemplate(paxg, paxg, ethereum),
-  viaSnowbridgeTemplate(paxg, paxg, ethereum, { fast: true }),
   viaSnowbridgeTemplate(susde, susde, ethereum),
-  viaSnowbridgeTemplate(susde, susde, ethereum, { fast: true }),
   viaSnowbridgeTemplate(tbtc, tbtc, ethereum),
-  viaSnowbridgeTemplate(tbtc, tbtc, ethereum, { fast: true }),
   viaSnowbridgeTemplate(trac, trac, ethereum),
-  viaSnowbridgeTemplate(trac, trac, ethereum, { fast: true }),
   viaSnowbridgeTemplate(lbtc, lbtc, ethereum),
-  viaSnowbridgeTemplate(lbtc, lbtc, ethereum, { fast: true }),
   viaSnowbridgeTemplate(ldo, ldo, ethereum),
-  viaSnowbridgeTemplate(ldo, ldo, ethereum, { fast: true }),
   viaSnowbridgeTemplate(link, link, ethereum),
-  viaSnowbridgeTemplate(link, link, ethereum, { fast: true }),
   viaSnowbridgeTemplate(sky, sky, ethereum),
-  viaSnowbridgeTemplate(sky, sky, ethereum, { fast: true }),
   viaSnowbridgeTemplate(wsteth, wsteth, ethereum),
-  viaSnowbridgeTemplate(wsteth, wsteth, ethereum, { fast: true }),
   viaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
-  viaSnowbridgeTemplate(usdc_eth, usdc, ethereum, { fast: true }),
   viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
-  viaSnowbridgeTemplate(usdt_eth, usdt, ethereum, { fast: true }),
 ];
 
 // Snowbridge V1 (legacy, cheaper) outbound routes. Registered after the V2
@@ -416,6 +408,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaWormhole,
     ...toInterlay,
     ...toEnergywebx,
+    ...toKusamaAssethub,
     ...toMoonbeam,
     ...toMythos,
     ...toNeuroweb,

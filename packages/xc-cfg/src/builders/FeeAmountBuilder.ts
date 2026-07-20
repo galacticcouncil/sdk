@@ -25,7 +25,7 @@ import {
   TOPIC,
 } from './extrinsics/xcm';
 import { validateReserveChain } from './extrinsics/xcm/utils';
-import { padFeeByPercentage, scaledPadPercentage } from './utils';
+import { padFeeByPercentage } from './utils';
 
 import { dot } from '../assets';
 import {
@@ -33,12 +33,8 @@ import {
   SNOWBRIDGE_BASE_DISPATCH_GAS,
   SNOWBRIDGE_BASE_VERIFICATION_GAS,
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
-  SNOWBRIDGE_FIAT_SHAMIR_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
-  SnowbridgeFast,
-  getVolumeTipInWei,
 } from '../bridges/snowbridge';
-import { hydration } from '../chains';
 import { BaseClient, AssethubClient, HydrationClient } from '../clients';
 
 function TokenRelayer() {
@@ -79,14 +75,10 @@ type SendFeeOpts = {
   hub: Parachain;
 };
 
-type OutboundFeeOpts = SendFeeOpts & {
-  fast?: SnowbridgeFast;
-};
-
 function Snowbridge() {
   return {
     calculateInboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
-      build: async ({ feeAsset, transferAsset, destination, amount }) => {
+      build: async ({ feeAsset, destination }) => {
         const rcv = destination as Parachain;
 
         const paraClient = new HydrationClient(rcv);
@@ -107,20 +99,17 @@ function Snowbridge() {
           rcv.parachainId
         );
 
-        // 1. Query DOT-denominated fees (and the volume tip — fully
-        // independent of everything else, so it rides the same round-trip).
+        // 1. Query DOT-denominated fees.
         const [
           destinationExecutionFeeDot,
           destinationDeliveryFeeDot,
           assetHubDeliveryFeeDot,
           assetHubExecutionFeeDotRaw,
-          volumeTip,
         ] = await Promise.all([
           paraClient.calculateDestinationFeeV5(xcmV5, dot),
           hubClient.calculateDeliveryFee(xcm, rcv.parachainId),
           hubClient.calculateDeliveryFee(xcm, BRIDGE_HUB_ID),
           hubClient.calculateDestinationFeeV5(dummyInboundXcm, dot),
-          getVolumeTipInWei(hydration.dex, transferAsset, amount ?? 0n),
         ]);
 
         const paddedDestExecutionDot = padFeeByPercentage(
@@ -169,11 +158,8 @@ function Snowbridge() {
           30n
         );
 
-        // 5. Total wei the user pays. Volume tip (V2 standard relayer fee)
-        // was fetched alongside the DOT-denominated fees above; it's zero
-        // when amount is absent (preview render).
-        const totalFeeInWei =
-          executionFee + relayerFee + remoteEtherFee + volumeTip;
+        // 5. Total wei the user pays.
+        const totalFeeInWei = executionFee + relayerFee + remoteEtherFee;
 
         return {
           amount: totalFeeInWei,
@@ -182,19 +168,12 @@ function Snowbridge() {
             relayerFee,
             remoteEtherFee,
             hydrationDotFee,
-            volumeTip,
           },
         } as FeeAmount;
       },
     }),
-    calculateOutboundFee: (opts: OutboundFeeOpts): FeeAmountConfigBuilder => ({
-      build: async ({
-        transferAsset,
-        feeAsset,
-        source,
-        destination,
-        amount,
-      }) => {
+    calculateOutboundFee: (opts: SendFeeOpts): FeeAmountConfigBuilder => ({
+      build: async ({ transferAsset, feeAsset, source, destination }) => {
         const ctx = source as Parachain;
         const dest = destination as EvmChain;
 
@@ -214,27 +193,14 @@ function Snowbridge() {
         ]);
 
         const gasPrice = await dest.evmClient.getProvider().getGasPrice();
-        const submitGas = opts.fast
-          ? SNOWBRIDGE_FIAT_SHAMIR_GAS
-          : SNOWBRIDGE_SUBMIT_GAS;
         const totalGas =
-          submitGas +
+          SNOWBRIDGE_SUBMIT_GAS +
           SNOWBRIDGE_BASE_VERIFICATION_GAS +
           SNOWBRIDGE_BASE_DISPATCH_GAS +
           SNOWBRIDGE_TOKEN_DELIVERY_GAS;
 
-        const volumeTipWei = await getVolumeTipInWei(
-          hydration.dex,
-          transferAsset,
-          amount ?? 0n
-        );
-        // The volume tip already over-covers gas drift and swap slippage, so
-        // both pads decay as the tip grows (matching Snowbridge). Without this,
-        // a flat 33%/20% pad on top of a large tip over-charges the user.
         const rawGasFee = gasPrice * totalGas;
-        const scaledGasPad = scaledPadPercentage(33n, volumeTipWei, rawGasFee);
-        const etherFeeAmount =
-          padFeeByPercentage(rawGasFee, scaledGasPad) + volumeTipWei;
+        const etherFeeAmount = padFeeByPercentage(rawGasFee, 10n);
 
         // DOT for AssetHub execution + downstream deliveries (remote_fees)
         const dotRemoteFee =
@@ -242,14 +208,9 @@ function Snowbridge() {
           padFeeByPercentage(bridgeHubDeliveryFee, 33n) +
           padFeeByPercentage(assetHubDestinationFee, 33n);
 
-        const scaledSlippagePad = scaledPadPercentage(
-          20n,
-          volumeTipWei,
-          rawGasFee
-        );
         const dotToEtherSwapAmount = padFeeByPercentage(
           await hubClient.quoteDotForExactEther(etherLoc, etherFeeAmount),
-          scaledSlippagePad
+          20n
         );
 
         // Query source chain XCM execution fee dynamically
@@ -271,11 +232,6 @@ function Snowbridge() {
           33n
         );
 
-        const volumeTipDot =
-          etherFeeAmount === 0n
-            ? 0n
-            : (volumeTipWei * dotToEtherSwapAmount) / etherFeeAmount;
-
         const totalDotFee =
           dotRemoteFee + dotToEtherSwapAmount + sourceExecutionFee;
 
@@ -286,7 +242,6 @@ function Snowbridge() {
             dotToEtherSwapAmount,
             etherFeeAmount,
             sourceExecutionFee,
-            volumeTip: volumeTipDot,
           },
         } as FeeAmount;
       },

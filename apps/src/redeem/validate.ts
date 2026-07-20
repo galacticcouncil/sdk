@@ -1,4 +1,4 @@
-export type ChainKey = 'eth' | 'base' | 'mrl' | 'sol' | 'sui';
+export type ChainKey = 'eth' | 'eth-intent' | 'base' | 'mrl' | 'sol' | 'sui';
 
 const EVM_RX = /^0x[0-9a-fA-F]{40}$/;
 const SUI_RX = /^0x[0-9a-fA-F]{64}$/;
@@ -6,6 +6,7 @@ const SOL_RX = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 export const PLACEHOLDERS: Record<ChainKey, string> = {
   eth: '0x… (20 bytes)',
+  'eth-intent': '0x… (20 bytes)',
   base: '0x… (20 bytes)',
   mrl: '0x… (20 bytes)',
   sol: 'Base58 Solana address',
@@ -14,6 +15,8 @@ export const PLACEHOLDERS: Record<ChainKey, string> = {
 
 export const HINTS: Record<ChainKey, string> = {
   eth: 'Ethereum address that owns the bridged tokens.',
+  'eth-intent':
+    'Ethereum wallet that signs the redeem. Forwards the bridged funds to the intent deposit address.',
   base: 'Base address that owns the bridged tokens.',
   mrl: 'Moonbeam EVM address that initiates the MRL claim on Hydration.',
   sol: 'Solana wallet (e.g. Phantom) that owns the bridged tokens.',
@@ -27,6 +30,7 @@ export function validateAddress(
   if (!address) return 'Address is required.';
   switch (chain) {
     case 'eth':
+    case 'eth-intent':
     case 'base':
     case 'mrl':
       return EVM_RX.test(address)

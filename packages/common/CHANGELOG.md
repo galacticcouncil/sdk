@@ -1,5 +1,11 @@
 # @galacticcouncil/common
 
+## 1.1.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.0.0
 
 ### Major Changes

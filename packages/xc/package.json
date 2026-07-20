@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cross-chain ctx",
   "author": "GalacticCouncil",
   "repository": {
@@ -30,8 +30,8 @@
     "link": "npm ln"
   },
   "peerDependencies": {
-    "@galacticcouncil/xc-cfg": ">=1.0.0",
-    "@galacticcouncil/xc-core": ">=1.0.0",
-    "@galacticcouncil/xc-sdk": ">=1.0.0"
+    "@galacticcouncil/xc-cfg": ">=1.5.0",
+    "@galacticcouncil/xc-core": ">=1.2.0",
+    "@galacticcouncil/xc-sdk": ">=1.2.0"
   }
 }

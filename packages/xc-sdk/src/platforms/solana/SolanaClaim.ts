@@ -40,7 +40,7 @@ import {
 } from '@wormhole-foundation/sdk-solana-tokenbridge';
 
 import { SolanaCall } from './types';
-import { chunkBySize, ixToHuman, serializeV0 } from './utils';
+import { chunk, ixToHuman, serializeV0 } from './utils';
 
 import { SolanaLilJit } from './SolanaLilJit';
 
@@ -89,7 +89,9 @@ export class SolanaClaim {
         signatureSet.publicKey
       );
 
-      const chunks = chunkBySize(verifyIxs, 1000);
+      // Each secp256k1 + verify_signatures pair goes in its own transaction.
+      // Batching multiple pairs overruns Solana's max transaction size.
+      const chunks = chunk(verifyIxs, 2);
       for (let i = 0; i < chunks.length; i++) {
         const sigIx = chunks[i];
         const sigV0 = await this.getV0Message(payer, sigIx);

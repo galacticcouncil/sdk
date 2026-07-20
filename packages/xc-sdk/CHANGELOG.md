@@ -1,12 +1,31 @@
 # @galacticcouncil/xc-sdk
 
+## 1.2.2
+
+### Patch Changes
+
+- xc: fix solana claim (chunks)
+
+## 1.2.1
+
+### Patch Changes
+
+- 5d923e6: WUD xcm fix and assethub_cex routes fix
+- Updated dependencies [5d923e6]
+  - @galacticcouncil/xc-core@1.2.1
+
+## 1.2.0
+
+### Minor Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@1.2.0
+
 ## 1.1.2
 
 ### Patch Changes
 
 - 2c0b9f6: Snowbridge v1 implementation in paralel with v2
-- Updated dependencies [2c0b9f6]
-  - @galacticcouncil/xc-core@1.1.1
 
 ## 1.1.1
 

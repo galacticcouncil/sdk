@@ -12,6 +12,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { config } from '../setup';
+import { redeemIntent } from './intent';
 
 export const moonbeam = config.getChain('moonbeam') as EvmParachain;
 export const ethereum = config.getChain('ethereum') as EvmChain;
@@ -31,4 +32,5 @@ export const redeem = {
   sui: (address: string, vaa: string) => suiClaim.redeem(address, vaa),
   eth: (address: string, vaa: string) => ethereumClaim.redeem(address, vaa),
   base: (address: string, vaa: string) => baseClaim.redeem(address, vaa),
+  ethIntent: (address: string, vaa: string) => redeemIntent(address, vaa),
 };
