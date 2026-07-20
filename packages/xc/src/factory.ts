@@ -10,6 +10,8 @@ import { Parachain } from '@galacticcouncil/xc-core';
 
 import {
   Wallet,
+  WormholeGovernor,
+  WormholeRateLimitValidation,
   WormholeScan,
   WormholeTransfer,
 } from '@galacticcouncil/xc-sdk';
@@ -30,12 +32,16 @@ export async function createXcContext(opts: XcOpts = {}): Promise<XcCtx> {
 
   // Initialize clients
   const whScan = new WormholeScan();
+  const whGovernor = new WormholeGovernor();
   const whTransfer = new WormholeTransfer(config, hydration.parachainId);
 
   // Initialize wallet
   const wallet = new Wallet({
     configService: config,
-    transferValidations: validations,
+    transferValidations: [
+      ...validations,
+      new WormholeRateLimitValidation(whGovernor, config),
+    ],
   });
 
   // Register dex-es
@@ -46,6 +52,7 @@ export async function createXcContext(opts: XcOpts = {}): Promise<XcCtx> {
     wallet: wallet,
     wormhole: {
       scan: whScan,
+      governor: whGovernor,
       transfer: whTransfer,
     },
   } as XcCtx;

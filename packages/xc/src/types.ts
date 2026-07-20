@@ -1,6 +1,7 @@
 import type { ConfigService } from '@galacticcouncil/xc-core';
 import type {
   Wallet,
+  WormholeGovernor,
   WormholeScan,
   WormholeTransfer,
 } from '@galacticcouncil/xc-sdk';
@@ -12,6 +13,7 @@ export type XcCtx = {
   wallet: Wallet;
   wormhole: {
     scan: WormholeScan;
+    governor: WormholeGovernor;
     transfer: WormholeTransfer;
   };
 };
