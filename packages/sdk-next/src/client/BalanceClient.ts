@@ -1,15 +1,25 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { log } from '@galacticcouncil/common';
+import { h160, log } from '@galacticcouncil/common';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { type Observable, combineLatest, concat, defer, from } from 'rxjs';
+import {
+  type Observable,
+  EMPTY,
+  combineLatest,
+  concat,
+  defer,
+  from,
+  merge,
+} from 'rxjs';
 
 import {
   bufferCount,
   distinctUntilChanged,
   debounceTime,
+  filter,
   map,
+  mergeMap,
   retry,
   startWith,
   switchMap,
@@ -22,6 +32,17 @@ import {
 import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { AssetBalance, Balance } from '../types';
+
+import { decodeErc20Transfer } from './Erc20Log';
+
+const { H160 } = h160;
+
+/**
+ * Full ERC20 re-read cadence (in best blocks) as a safety net: a missed or
+ * unmapped Transfer log can't permanently stale a balance. ~6s/block on
+ * Hydration => a full reconcile roughly every ~2 minutes.
+ */
+const ERC20_SAFETY_REREAD_BLOCKS = 20;
 
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
@@ -211,9 +232,83 @@ export class BalanceClient extends Papi {
 
     return defer(() =>
       from(includeOnly ? Promise.resolve(includeOnly) : getErc20s()).pipe(
-        switchMap((ids) =>
-          this.watcher.bestBlock$.pipe(switchMap(() => from(fetchBalance(ids))))
-        ),
+        switchMap((ids) => {
+          if (ids.length === 0) {
+            return from(Promise.resolve([] as AssetBalance[]));
+          }
+
+          const watched = new Set(ids);
+          // best-effort H160 of the watched account; ERC20 Transfer topics carry
+          // H160 from/to, so we compare against this.
+          let owner: string | null = null;
+          try {
+            owner = H160.fromAny(address).toLowerCase();
+          } catch {
+            owner = null;
+          }
+
+          /**
+           * Event gate: emit the set of ids to re-read whenever an ERC20
+           * Transfer log names the watched account as from/to. null = full read.
+           */
+          const eventIds$ = owner
+            ? this.api.event.EVM.Log.watch().pipe(
+                mergeMap(({ events }) => events),
+                map(({ payload }) => decodeErc20Transfer(payload)),
+                filter(
+                  (t): t is NonNullable<typeof t> =>
+                    t !== undefined &&
+                    t.assetId !== null &&
+                    watched.has(t.assetId) &&
+                    (t.from === owner || t.to === owner)
+                ),
+                map((t) => [t.assetId as number] as number[] | null)
+              )
+            : EMPTY;
+
+          /**
+           * Safety net: a full re-read every N blocks so a missed/unmapped log
+           * (e.g. a non-EVM mutation of an ERC20-typed asset) can't permanently
+           * stale a balance. Skips block 0 (the seed already covers it).
+           */
+          const safetyIds$ = this.watcher.bestBlock$.pipe(
+            skip(1),
+            bufferCount(ERC20_SAFETY_REREAD_BLOCKS),
+            map(() => null as number[] | null)
+          );
+
+          // Seed: full read (null), then targeted/full re-reads on triggers.
+          // a running snapshot map merges each (partial) read so every emission
+          // is the COMPLETE ERC20 balance set, preserving the previous
+          // switchMap-per-block output shape (full array, downstream-diffed).
+          return concat(
+            from(Promise.resolve(null as number[] | null)),
+            merge(eventIds$, safetyIds$)
+          ).pipe(
+            // serialise reads to keep snapshot updates consistent
+            mergeMap(
+              (toRead) =>
+                from(fetchBalance(toRead ?? ids)).pipe(
+                  map((part) => part as AssetBalance[])
+                ),
+              1
+            ),
+            // accumulate into a full id->balance snapshot, emit the full array
+            (source$) => {
+              const snapshot = new Map<number, Balance>();
+              return source$.pipe(
+                map((part) => {
+                  for (const { id, balance } of part) {
+                    snapshot.set(id, balance);
+                  }
+                  return Array.from(snapshot.entries()).map(
+                    ([id, balance]) => ({ id, balance }) as AssetBalance
+                  );
+                })
+              );
+            }
+          );
+        }),
         startWith([] as AssetBalance[]),
         bufferCount(2, 1),
         map(([prev, curr], i) => {
