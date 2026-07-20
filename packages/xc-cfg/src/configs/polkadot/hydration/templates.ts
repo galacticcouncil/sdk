@@ -11,6 +11,7 @@ import {
 
 import { dot, glmr, usdt } from '../../../assets';
 import {
+  BalanceBuilder,
   ContractBuilder,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
@@ -101,6 +102,40 @@ export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
       transferType: XcmTransferType.DestinationReserve,
     }),
+  });
+}
+
+// Hydration-native erc20 asset (e.g. HOLLAR) registered as a foreign asset on
+// AssetHub. The asset itself moves as LocalReserve (minted on the hub against
+// Hydration's sovereign deposit) while the execution fee is paid in DOT via
+// DestinationReserve, since the asset has no fee-payment pool on the hub.
+export function toHubErc20Template(asset: Asset, hub: Parachain): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset,
+      balance: BalanceBuilder().evm().erc20(),
+      fee: fee(),
+      destinationFee: {
+        balance: balance(),
+      },
+    },
+    destination: {
+      chain: hub,
+      asset,
+      fee: {
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
+        asset: dot,
+      },
+    },
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(
+      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+        transferType: XcmTransferType.LocalReserve,
+        feesTransferType: XcmTransferType.DestinationReserve,
+      })
+    ),
   });
 }
 

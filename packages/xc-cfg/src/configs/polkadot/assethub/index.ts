@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { dot, ksm, myth, usdc, usdt, wud } from '../../../assets';
+import { dot, hollar, ksm, myth, usdc, usdt, wud } from '../../../assets';
 import {
   assetHub,
   assetHubCex,
@@ -63,6 +63,34 @@ const toHydration: AssetRoute[] = [
   toParaStablesTemplate(usdt, hydration, 0.02),
   toParaStablesTemplate(usdc, hydration, 0.02),
   toHydrationExtTemplate(wud),
+  // HOLLAR is a foreign asset with Hydration as its reserve chain - the
+  // transfer burns the hub derivative and withdraws from AssetHub's
+  // sovereign account on Hydration.
+  new AssetRoute({
+    source: {
+      asset: hollar,
+      balance: BalanceBuilder().substrate().foreignAssets().account(),
+      fee: {
+        asset: dot,
+        balance: BalanceBuilder().substrate().system().account(),
+        extra: extraFee,
+      },
+      destinationFee: {
+        balance: BalanceBuilder().substrate().foreignAssets().account(),
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: hollar,
+      fee: {
+        amount: 0.02,
+        asset: hollar,
+      },
+    },
+    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
+      transferType: XcmTransferType.DestinationReserve,
+    }),
+  }),
 ];
 
 const toKusamaAssethub: AssetRoute[] = [

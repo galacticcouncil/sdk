@@ -23,6 +23,7 @@ import {
 } from './polkadotXcm.utils';
 
 import {
+  compareLocations,
   getDerivativeAccount,
   getExtrinsicAccount,
   getExtrinsicAssetLocation,
@@ -233,6 +234,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
 
 type TransferOpts = {
   transferType: XcmTransferType;
+  feesTransferType?: XcmTransferType;
   executionFee?: number;
 };
 
@@ -272,13 +274,16 @@ const transferAssetsUsingTypeAndThen = (
 
     const { transferType } = opts;
 
+    const transferAssetRawLocation = locationOrError(ctx, asset);
+    const transferFeeRawLocation = locationOrError(ctx, feeAsset);
+
     const transferAssetLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, asset),
+      transferAssetRawLocation,
       version
     );
 
     const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, feeAsset),
+      transferFeeRawLocation,
       version
     );
 
@@ -290,11 +295,16 @@ const transferAssetsUsingTypeAndThen = (
     const bridgeRoute = resolveBridgeRoute(version, ctx, rcv, asset);
     const dest = bridgeRoute?.dest ?? toDest(version, ctx, rcv);
 
+    // The runtime fails to decode any `Assets` vector that is not sorted by
+    // the canonical `Location` ordering, so order fee/asset accordingly.
     const assets = {
       type: version,
       value: isSufficientPaymentAsset
         ? [transferAsset]
-        : [transferFee, transferAsset],
+        : compareLocations(transferFeeRawLocation, transferAssetRawLocation) <=
+            0
+          ? [transferFee, transferAsset]
+          : [transferAsset, transferFee],
     };
 
     const assetTransferType = toTransferType(
@@ -312,7 +322,7 @@ const transferAssetsUsingTypeAndThen = (
 
     const feesTransferType = toTransferType(
       version,
-      transferType,
+      opts.feesTransferType ?? transferType,
       transferFeeLocation
     );
 
