@@ -38,11 +38,16 @@ logSrcChains(asset.key, sourceChains);
 const srcAddr = 'INSERT_ADDRESS';
 const destAddr = 'INSERT_ADDRESS';
 
-// Subscribe source chain token balance
+// Snapshot all source chain balances once (e.g. for an asset picker list)
+const balances = await wallet.getBalances(srcAddr, srcChain);
+console.log(balances);
+
+// Subscribe live balance for the selected asset only
 const balanceObserver = (balances: AssetAmount[]) => console.log(balances);
 const balanceSubscription = await wallet.subscribeBalance(
   srcAddr,
   srcChain,
+  [asset],
   balanceObserver
 );
 

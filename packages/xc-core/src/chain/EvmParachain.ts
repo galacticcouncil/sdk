@@ -30,6 +30,8 @@ export interface EvmParachainParams extends ParachainParams<EvmParachainBalanceT
 export class EvmParachain extends Parachain<EvmParachainBalanceType> {
   private readonly evmBalanceClient = new EvmBalanceClient(this);
 
+  private clientCache?: EvmClient;
+
   readonly evmChain: EvmChainDef;
   readonly evmResolver?: EvmResolver;
   readonly rpcs?: string[];
@@ -49,8 +51,15 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. Viem keys block-watch dedupe and multicall batching on client
+   * identity, so a fresh client per read defeats both.
+   */
   get evmClient(): EvmClient {
-    return new EvmClient(this.evmChain, this.rpcs);
+    if (!this.clientCache) {
+      this.clientCache = new EvmClient(this.evmChain, this.rpcs);
+    }
+    return this.clientCache;
   }
 
   getType(): ChainType {

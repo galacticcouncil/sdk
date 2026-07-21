@@ -22,8 +22,10 @@ import {
 } from '../bridge';
 import { EvmClient } from '../evm';
 
-export interface EvmChainParams
-  extends ChainParams<ChainAssetData, EvmBalanceType> {
+export interface EvmChainParams extends ChainParams<
+  ChainAssetData,
+  EvmBalanceType
+> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
@@ -34,6 +36,8 @@ export interface EvmChainParams
 
 export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
   private readonly balanceClient = new EvmBalanceClient(this);
+
+  private clientCache?: EvmClient;
 
   readonly evmChain: EvmChainDef;
   readonly id: number;
@@ -60,8 +64,15 @@ export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. Viem keys block-watch dedupe and multicall batching on client
+   * identity, so a fresh client per read defeats both.
+   */
   get evmClient(): EvmClient {
-    return new EvmClient(this.evmChain, this.rpcs);
+    if (!this.clientCache) {
+      this.clientCache = new EvmClient(this.evmChain, this.rpcs);
+    }
+    return this.clientCache;
   }
 
   getType(): ChainType {

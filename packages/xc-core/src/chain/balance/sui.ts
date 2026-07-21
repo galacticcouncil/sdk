@@ -1,7 +1,9 @@
+import { log } from '@galacticcouncil/common';
+
 import {
+  defer,
   distinctUntilChanged,
   finalize,
-  shareReplay,
   Observable,
   Subject,
 } from 'rxjs';
@@ -13,6 +15,8 @@ import { Asset, AssetAmount } from '../../asset';
 import { SuiBalanceType } from './types';
 
 import type { SuiChain } from '../SuiChain';
+
+const { logger } = log;
 
 const NATIVE_DECIMALS = 9;
 
@@ -43,28 +47,44 @@ export class SuiBalanceClient {
     }
   }
 
+  // Deferred so retry (Chain.isolateBalances) restarts the poll.
   subscribe(
     asset: Asset,
     account: string,
     type: SuiBalanceType
   ): Observable<AssetAmount> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
+    return defer(() => {
+      const subject = new Subject<AssetAmount>();
 
-    const run = async () => {
-      const update = async () =>
-        subject.next(await this.getBalance(asset, account, type));
-      await update();
-      const intervalId = setInterval(() => update(), 3000);
-      return () => clearInterval(intervalId);
-    };
+      const run = async () => {
+        const update = async () =>
+          subject.next(await this.getBalance(asset, account, type));
+        await update();
+        // Later failures ride the next update; erroring would kill the stream.
+        const intervalId = setInterval(
+          () =>
+            update().catch((err) =>
+              logger.warn(`Balance update failed for ${asset.key}:`, err)
+            ),
+          3000
+        );
+        return () => clearInterval(intervalId);
+      };
 
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
+      let disconnect: (() => void) | undefined;
+      let closed = false;
+      // A failed first read must error, or the subject silently never emits.
+      run()
+        .then((unsub) => (closed ? unsub() : (disconnect = unsub)))
+        .catch((err) => subject.error(err));
 
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
+      return subject.pipe(
+        finalize(() => {
+          closed = true;
+          disconnect?.();
+        }),
+        distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
+      );
+    });
   }
 }

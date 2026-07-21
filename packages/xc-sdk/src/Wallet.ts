@@ -1,4 +1,4 @@
-import { acc, big } from '@galacticcouncil/common';
+import { acc, big, log } from '@galacticcouncil/common';
 
 import {
   Asset,
@@ -15,6 +15,8 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { Subscription } from 'rxjs';
+
+const { logger } = log;
 
 import {
   Call,
@@ -260,15 +262,61 @@ export class Wallet {
     return transfer;
   }
 
+  /**
+   * One-shot snapshot of every asset configured on a chain.
+   *
+   * Intended for balance lists (asset/chain pickers) that should fetch once and
+   * re-fetch on demand rather than hold N live subscriptions open. Chains that
+   * can serve the whole set in a single read do so; the rest fall back to a
+   * per-asset read, where a single failing asset can't blank the snapshot.
+   */
+  async getBalances(
+    address: string,
+    chain: string | AnyChain
+  ): Promise<AssetAmount[]> {
+    const target = this.config.getChain(chain);
+    return target.getBalances(target.getAssets(), address);
+  }
+
+  /**
+   * Live subscription for an explicit set of assets on a chain.
+   *
+   * Only the given assets are subscribed — callers should narrow this to the
+   * asset(s) actually in view (e.g. the selected transfer asset) rather than the
+   * whole chain, since each asset holds an open subscription.
+   */
   async subscribeBalance(
     address: string,
     chain: string | AnyChain,
+    assets: (string | Asset)[],
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
-    const chainRoutes = this.config.getChainRoutes(chain);
-    const assets = chainRoutes
-      .getUniqueRoutes()
-      .map((route) => route.source.asset);
-    return chainRoutes.chain.subscribeBalances(assets, address).subscribe(observer);
+    const target = this.config.getChain(chain);
+
+    // Resolved against the chain's asset registry rather than its routes — a
+    // chain is also a destination, and on a one-way route the received asset
+    // has no outgoing route to look up.
+    const resolved = assets.flatMap((asset) => {
+      const key = typeof asset === 'string' ? asset : asset.key;
+      const match = target.getAsset(key);
+      if (!match) {
+        logger.warn(
+          `Asset ${key} not configured on ${target.key}, skipping balance subscription`
+        );
+        return [];
+      }
+      return [match];
+    });
+
+    // Every asset dropped would otherwise hand back a subscription that never
+    // fires — indistinguishable from one that is still loading.
+    if (assets.length > 0 && resolved.length === 0) {
+      throw new Error(
+        `No assets configured on ${target.key} for any requested: ` +
+          assets.map((a) => (typeof a === 'string' ? a : a.key)).join(', ')
+      );
+    }
+
+    return target.subscribeBalances(resolved, address).subscribe(observer);
   }
 }

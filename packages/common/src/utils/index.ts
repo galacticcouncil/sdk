@@ -6,6 +6,7 @@ export * as h160 from './h160';
 export * as hex from './hex';
 export * as log from './log';
 export * as meta from './meta';
+export * as rx from './rx';
 export * as xcm from './xcm';
 export * as xc from './xc';
 
