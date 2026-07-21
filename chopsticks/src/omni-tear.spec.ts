@@ -1,7 +1,13 @@
 import { pool, evm } from '@galacticcouncil/sdk-next';
+import { hydration } from '@galacticcouncil/descriptors';
 
 import { jest } from '@jest/globals';
 import { Subscription } from 'rxjs';
+
+import { Binary } from 'polkadot-api';
+import { getPolkadotSigner } from 'polkadot-api/signer';
+import { ed25519CreateDerive } from '@polkadot-labs/hdkd';
+import { DEV_MINI_SECRET } from '@polkadot-labs/hdkd-helpers';
 
 import * as c from 'console';
 
@@ -12,40 +18,44 @@ const { EvmClient } = evm;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Ed25519 //Alice (mock-signature-host makes the scheme irrelevant); SS58 below.
+const aliceKp = ed25519CreateDerive(DEV_MINI_SECRET)('//Alice');
+const ALICE = '5FA9nQDVg267DEd8m1ZypXLBnvN7SFxYwV7ndqSYGiN9TTpu';
+const aliceSigner = getPolkadotSigner(aliceKp.publicKey, 'Ed25519', aliceKp.sign);
+
 /**
- * Reproduce the omnipool "add-liquidity price distortion" incident.
+ * Reproduce the omnipool "add-liquidity price distortion" incident against the
+ * EVENT-DRIVEN sync.
  *
- * add_liquidity moves Omnipool.Assets (hub_reserve/shares) AND the pool's
- * reserve balance in the SAME block. If the SDK's live subscription applies the
- * state change but not the coupled balance change, hub_reserve/balance (the
- * implied price) is distorted until something re-triggers the balance — exactly
- * what a user saw (~0.9% inflation for ~20 blocks).
+ * add_liquidity moves Omnipool.Assets (hub_reserve/shares) AND the pool reserve
+ * balance in the SAME block, and emits `Omnipool.LiquidityAdded`. The event
+ * handler must resolve BOTH slices pinned at that block, committing them
+ * together — so the implied price (hub_reserve/reserve) never tears.
  *
- * We inject the coupled change via dev.setStorage (price-neutral: both sides
- * bumped +1%), then step blocks and watch what the SDK's subscription believes.
+ * Unlike a dev.setStorage override (which emits no event and the event-driven
+ * sync would simply ignore), this drives a REAL extrinsic so LiquidityAdded
+ * actually fires. We assert (a) the SDK observed the add (balance grew) and
+ * (b) the ratio never distorted.
  */
-describe('omnipool add-liquidity coherence (tear repro)', () => {
+describe('omnipool add-liquidity coherence (tear repro, event-driven)', () => {
   jest.setTimeout(10 * 60 * 1000);
 
   let fork: Fork;
   let omni: InstanceType<typeof OmniPoolClient>;
   let sub: Subscription;
 
-  // latest snapshot the SDK subscription has emitted
   let latest: any[] = [];
-
   let poolAddr: string;
   let assetId: number;
   let assetSym = '?';
 
+  const api = () => fork.client.getTypedApi(hydration);
   const unsafe = () => fork.client.getUnsafeApi();
 
   const tokenOf = (id: number) =>
     latest?.[0]?.tokens?.find((t: any) => t.id === id);
-
   const ratio = (t: any) =>
     t && t.balance > 0n ? Number(t.hubReserves) / Number(t.balance) : NaN;
-
   const blockNo = async () =>
     Number(await unsafe().query.System.Number.getValue());
 
@@ -54,35 +64,27 @@ describe('omnipool add-liquidity coherence (tear repro)', () => {
     const n = await blockNo();
     c.log(
       `#${n} ${label.padEnd(14)} ` +
-        `bal=${t?.balance} hub=${t?.hubReserves} ` +
-        `ratio=${ratio(t).toFixed(10)}`
+        `bal=${t?.balance} hub=${t?.hubReserves} ratio=${ratio(t).toFixed(10)}`
     );
     return { n, t, r: ratio(t) };
   };
 
-  const step = async (label: string) => {
-    await fork.newBlock();
-    await sleep(2000); // let the SDK subs receive + apply the block
+  const step = async (label: string, txs?: string[]) => {
+    await fork.newBlock(txs);
+    await sleep(2000);
     return logRow(label);
   };
 
   beforeAll(async () => {
     fork = await spawn(configs.hydration);
     omni = new OmniPoolClient(fork.client, new EvmClient(fork.client));
+    sub = omni.getSubscriber().subscribe((pools) => (latest = pools));
 
-    // start the live subscription (this is the state we are testing)
-    sub = omni.getSubscriber().subscribe((pools) => {
-      latest = pools;
-    });
-
-    // wait for the initial seed to land
     for (let i = 0; i < 30 && latest.length === 0; i++) await sleep(1000);
-
     const [pool0] = latest;
     if (!pool0) throw new Error('omnipool seed never arrived');
     poolAddr = pool0.address;
 
-    // discover aDOT by symbol; fall back to the first non-hub token
     const assets = await unsafe().query.AssetRegistry.Assets.getEntries();
     const symText = (v: any) => {
       try {
@@ -105,57 +107,56 @@ describe('omnipool add-liquidity coherence (tear repro)', () => {
 
   afterAll(async () => {
     sub?.unsubscribe();
+    await sleep(500); // let in-flight watchEntries settle before fork close
     await fork?.close();
   });
 
-  it('holds hub_reserve/balance coherent across an add-liquidity block', async () => {
+  it('holds hub_reserve/balance coherent across a real add_liquidity block', async () => {
     const base = await logRow('baseline');
     await step('empty');
-    await step('empty');
 
-    // inject a price-neutral add-liquidity: bump hub_reserve, shares AND the
-    // pool reserve balance by +1% together, in one block.
-    const state: any = await unsafe().query.Omnipool.Assets.getValue(assetId);
-    const bal: any = await unsafe().query.Tokens.Accounts.getValue(
-      poolAddr,
+    // add ~1% of the pool's current reserve of the asset (price-preserving)
+    const poolBal = tokenOf(assetId).balance as bigint;
+    const addAmount = poolBal / 100n;
+
+    // fund Alice: HDX for fees + the asset to add
+    const aliceSys: any = await unsafe().query.System.Account.getValue(ALICE);
+    const aliceTok: any = await unsafe().query.Tokens.Accounts.getValue(
+      ALICE,
       assetId
     );
-    const bump = (x: bigint) => x + x / 100n;
-
-    // papi decodes `tradable` (a `{ bits: u8 }` bitflags struct) as a bare
-    // number; chopsticks/@polkadot setStorage wants the struct shape back.
-    const tradableBits =
-      state.tradable && typeof state.tradable === 'object'
-        ? state.tradable.bits
-        : state.tradable;
-
     await fork.setStorage({
-      Omnipool: {
-        Assets: [
+      System: {
+        Account: [
           [
-            [assetId],
+            [ALICE],
             {
-              hub_reserve: bump(state.hub_reserve),
-              shares: bump(state.shares),
-              protocol_shares: state.protocol_shares,
-              cap: state.cap,
-              tradable: { bits: Number(tradableBits) },
+              ...aliceSys,
+              providers: Math.max(1, Number(aliceSys.providers)),
+              data: { ...aliceSys.data, free: 10n ** 24n },
             },
           ],
         ],
       },
       Tokens: {
-        Accounts: [[[poolAddr, assetId], { ...bal, free: bump(bal.free) }]],
+        Accounts: [
+          [[ALICE, assetId], { ...aliceTok, free: addAmount * 3n }],
+        ],
       },
     });
 
-    const inject = await step('ADD-LIQ');
+    // build + sign the real extrinsic, include it in the next block
+    const call = api().tx.Omnipool.add_liquidity({
+      asset: assetId,
+      amount: addAmount,
+    });
+    const signed = await call.sign(aliceSigner);
+    const hex = Binary.toHex(signed);
 
+    const inject = await step('ADD-LIQ', [hex]);
     const rows = [inject];
-    for (let i = 0; i < 25; i++) rows.push(await step(`+${i + 1}`));
+    for (let i = 0; i < 12; i++) rows.push(await step(`+${i + 1}`));
 
-    // baseline ratio should be ~preserved (price-neutral add-liq). Report the
-    // worst distortion and how long it persisted.
     const worst = rows.reduce(
       (m, r) => (Math.abs(r.r - base.r) > Math.abs(m.r - base.r) ? r : m),
       inject
@@ -164,16 +165,16 @@ describe('omnipool add-liquidity coherence (tear repro)', () => {
     const distorted = rows.filter(
       (r) => Math.abs((r.r - base.r) / base.r) > 0.001
     );
+    const finalBal = tokenOf(assetId).balance as bigint;
     c.log(
-      `\nbaseline ratio=${base.r.toFixed(10)} ` +
-        `worst=${worst.r.toFixed(10)} (${distortPct.toFixed(3)}%) ` +
-        `distorted blocks=${distorted.length}` +
-        (distorted.length
-          ? ` [#${distorted[0].n}..#${distorted[distorted.length - 1].n}]`
-          : '')
+      `\nbaseline ratio=${base.r.toFixed(10)} worst=${worst.r.toFixed(10)} ` +
+        `(${distortPct.toFixed(3)}%) distorted=${distorted.length} ` +
+        `balΔ=${finalBal - poolBal}`
     );
 
-    // The invariant we want after the fix: no lasting distortion.
+    // (a) the event-driven sync actually OBSERVED the add (not a trivial no-op)
+    expect(finalBal).toBeGreaterThan(poolBal);
+    // (b) and it never tore the implied price
     expect(distorted.length).toBe(0);
   });
 });

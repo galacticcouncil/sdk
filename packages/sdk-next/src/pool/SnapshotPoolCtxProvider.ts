@@ -1,9 +1,9 @@
 import { PoolNotFound } from '../errors';
 
-import { LbpPool, LbpPoolBase, LbpPoolFees, LbpSnapshot } from './lbp';
-import { OmniPoolBase, OmniPoolFee, OmniSnapshot, getEmaKey } from './omni';
-import { StableSwap, StableSwapBase, StableSwapFees } from './stable';
-import { XykPoolFees, XykSnapshot } from './xyk';
+import { LbpPool, LbpPoolBase, LbpPoolFees, LbpSnapshot } from './amm/lbp';
+import { OmniPoolBase, OmniPoolFee, OmniSnapshot, getEmaKey } from './amm/omni';
+import { StableSwap, StableSwapBase, StableSwapFees } from './amm/stable';
+import { XykPoolFees, XykSnapshot } from './amm/xyk';
 
 import {
   IPoolCtxProvider,

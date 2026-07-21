@@ -8,12 +8,12 @@ import { BlockAt, Papi } from '../api';
 import { EvmClient } from '../evm';
 import { PoolNotFound } from '../errors';
 
-import { AavePoolClient } from './aave';
-import { HsmPoolClient } from './hsm';
-import { LbpPoolClient } from './lbp';
-import { OmniPoolClient } from './omni';
-import { XykPoolClient } from './xyk';
-import { StableSwapClient } from './stable';
+import { AavePoolClient } from './amm/aave';
+import { HsmPoolClient } from './amm/hsm';
+import { LbpPoolClient } from './amm/lbp';
+import { OmniPoolClient } from './amm/omni';
+import { XykPoolClient } from './amm/xyk';
+import { StableSwapClient } from './amm/stable';
 import {
   IPoolCtxProvider,
   Pool,
