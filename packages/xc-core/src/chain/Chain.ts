@@ -1,8 +1,18 @@
-import { combineLatest, debounceTime, Observable } from 'rxjs';
+import { log, rx } from '@galacticcouncil/common';
+
+import { catchError, combineLatest, map, of, retry, Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
 import { BalanceType } from './balance';
 import { Dex } from './dex';
+
+const { logger } = log;
+
+/** Attempts to recover a dropped balance stream before giving up on it. */
+const BALANCE_RETRY = { count: 3, delay: 1000 };
+
+/** Window used to coalesce the update burst that follows a balance change. */
+const BALANCE_DEBOUNCE = 500;
 
 export type ChainAssetId =
   | string
@@ -172,6 +182,11 @@ export abstract class Chain<
     return this.assetsData.get(key)?.asset;
   }
 
+  /** Every asset configured on this chain, regardless of route direction. */
+  getAssets(): Asset[] {
+    return [...this.assetsData.values()].map((data) => data.asset);
+  }
+
   getAssetId(asset: Asset): ChainAssetId {
     return this.assetsData.get(asset.key)?.id ?? asset.originSymbol;
   }
@@ -204,6 +219,25 @@ export abstract class Chain<
   abstract getBalance(asset: Asset, address: string): Promise<AssetAmount>;
 
   /**
+   * One-shot balances for many assets. Reads each asset independently so one
+   * failing asset can't blank the snapshot — platforms that can serve the set
+   * in a single read override this.
+   */
+  async getBalances(assets: Asset[], address: string): Promise<AssetAmount[]> {
+    const results = await Promise.allSettled(
+      assets.map((asset) => this.getBalance(asset, address))
+    );
+
+    return results.flatMap((result, i) => {
+      if (result.status === 'fulfilled') {
+        return [result.value];
+      }
+      logger.warn(`Balance fetch failed for ${assets[i].key}:`, result.reason);
+      return [];
+    });
+  }
+
+  /**
    * Reactive balance for a single asset. Implemented per platform.
    */
   abstract subscribeBalance(
@@ -215,14 +249,56 @@ export abstract class Chain<
    * Reactive composite balance — merges the per-asset streams into one,
    * emitting the full set on any change. The building block for multi-token
    * and (by merging chains) multi-chain balance feeds.
+   *
+   * Failed assets are warned and omitted, so an emission may be shorter than
+   * `assets` and must be matched by key, not by index.
    */
   subscribeBalances(
     assets: Asset[],
     address: string
   ): Observable<AssetAmount[]> {
-    return combineLatest(
-      assets.map((asset) => this.subscribeBalance(asset, address))
-    ).pipe(debounceTime(500));
+    if (!assets.length) {
+      return of([]);
+    }
+
+    return this.debounceBalances(
+      combineLatest(
+        assets.map((asset) =>
+          this.isolateBalances(
+            this.subscribeBalance(asset, address).pipe(map((b) => [b])),
+            asset.key
+          )
+        )
+      ).pipe(map((groups) => groups.flat()))
+    );
+  }
+
+  /** The SDK-wide coalescing policy for composite balance streams. */
+  protected debounceBalances(
+    balances: Observable<AssetAmount[]>
+  ): Observable<AssetAmount[]> {
+    return balances.pipe(rx.debounceAfterFirst(BALANCE_DEBOUNCE));
+  }
+
+  /**
+   * Resubscribe on error, then warn and omit once the retries are spent —
+   * mirroring {@link getBalances}. Without this a single dead stream errors the
+   * composite and takes every other asset on the chain down with it.
+   *
+   * Retrying requires the source to rebuild its watcher on resubscribe, which
+   * is why the platform clients defer theirs.
+   */
+  protected isolateBalances(
+    balances: Observable<AssetAmount[]>,
+    label: string
+  ): Observable<AssetAmount[]> {
+    return balances.pipe(
+      retry(BALANCE_RETRY),
+      catchError((err) => {
+        logger.warn(`Balance subscription failed for ${label}:`, err);
+        return of([]);
+      })
+    );
   }
 
   protected async resolveDecimals(asset: Asset): Promise<number> {

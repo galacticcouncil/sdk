@@ -28,6 +28,8 @@ export interface SolanaChainParams
 export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
   private readonly balanceClient = new SolanaBalanceClient(this);
 
+  private connectionCache?: Connection;
+
   readonly id: number;
   readonly rpcUrls: ChainRpcs;
   readonly wormhole?: Wormhole;
@@ -39,13 +41,20 @@ export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. Each connection opens its own websocket, so building one per
+   * balance read means one socket per asset.
+   */
   get connection(): Connection {
-    const { http, webSocket } = this.rpcUrls;
+    if (!this.connectionCache) {
+      const { http, webSocket } = this.rpcUrls;
 
-    return new Connection(http[0], {
-      wsEndpoint: webSocket[0],
-      commitment: 'confirmed',
-    });
+      this.connectionCache = new Connection(http[0], {
+        wsEndpoint: webSocket[0],
+        commitment: 'confirmed',
+      });
+    }
+    return this.connectionCache;
   }
 
   getType(): ChainType {

@@ -1,8 +1,10 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { big, SubstrateApis } from '@galacticcouncil/common';
+import { big, log, SubstrateApis } from '@galacticcouncil/common';
 
-import { Observable } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
+
+const { logger } = log;
 
 import { Asset, AssetAmount } from '../asset';
 import {
@@ -204,6 +206,110 @@ export class Parachain<
       address,
       this.getBalanceType(asset) as SubstrateBalanceType
     );
+  }
+
+  /**
+   * Collapses assets sharing an account-keyed storage map onto one
+   * subscription instead of one per asset. Anything not batchable keeps the
+   * per-asset path, so mixed chains still work.
+   */
+  override subscribeBalances(
+    assets: Asset[],
+    address: string
+  ): Observable<AssetAmount[]> {
+    const { batched, rest } = this.partitionMany(assets);
+
+    if (batched.size === 0) {
+      return super.subscribeBalances(assets, address);
+    }
+
+    const streams = [
+      ...[...batched].map(([type, group]) =>
+        this.isolateBalances(
+          this.balanceClient.subscribeMany(group, address, type),
+          `${this.key} ${type} batch`
+        )
+      ),
+      ...rest.map((asset) =>
+        this.isolateBalances(
+          this.subscribeBalance(asset, address).pipe(map((b) => [b])),
+          asset.key
+        )
+      ),
+    ];
+
+    return this.debounceBalances(
+      combineLatest(streams).pipe(
+        map((groups) => this.orderMany(assets, groups.flat()))
+      )
+    );
+  }
+
+  /**
+   * Same batching as {@link subscribeBalances}, one-shot. A batched group is
+   * a single read, so a group that fails is warned and omitted rather than
+   * rejecting the whole snapshot.
+   */
+  override async getBalances(
+    assets: Asset[],
+    address: string
+  ): Promise<AssetAmount[]> {
+    const { batched, rest } = this.partitionMany(assets);
+
+    if (batched.size === 0) {
+      return super.getBalances(assets, address);
+    }
+
+    const [groups, single] = await Promise.all([
+      Promise.allSettled(
+        [...batched].map(([type, group]) =>
+          this.balanceClient.getMany(group, address, type)
+        )
+      ),
+      super.getBalances(rest, address),
+    ]);
+
+    const resolved = groups.flatMap((result) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      }
+      logger.warn(`Batch balance fetch failed on ${this.key}:`, result.reason);
+      return [];
+    });
+
+    return this.orderMany(assets, [...resolved, ...single]);
+  }
+
+  /**
+   * Splits assets into groups servable by one account-keyed read, plus the
+   * per-asset remainder.
+   */
+  private partitionMany(assets: Asset[]) {
+    const batched = new Map<SubstrateBalanceType, Asset[]>();
+    const rest: Asset[] = [];
+
+    for (const asset of assets) {
+      const type = this.getBalanceType(asset) as SubstrateBalanceType;
+      if (this.balanceClient.supportsMany(asset, type)) {
+        const group = batched.get(type);
+        if (group) {
+          group.push(asset);
+        } else {
+          batched.set(type, [asset]);
+        }
+      } else {
+        rest.push(asset);
+      }
+    }
+    return { batched, rest };
+  }
+
+  /** Restore the requested order — grouping shuffles them. */
+  private orderMany(assets: Asset[], balances: AssetAmount[]): AssetAmount[] {
+    const byKey = new Map(balances.map((b) => [b.key, b]));
+    return assets
+      .map((asset) => byKey.get(asset.key))
+      .filter((b): b is AssetAmount => !!b);
   }
 
   async getMin(asset: Asset): Promise<AssetAmount> {

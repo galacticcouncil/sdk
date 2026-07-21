@@ -1,7 +1,9 @@
+import { log } from '@galacticcouncil/common';
+
 import {
+  defer,
   distinctUntilChanged,
   finalize,
-  shareReplay,
   Observable,
   Subject,
 } from 'rxjs';
@@ -12,6 +14,8 @@ import { Erc20Client } from '../../evm';
 import { EvmBalanceType } from './types';
 
 import type { AnyEvmChain } from '../types';
+
+const { logger } = log;
 
 /**
  * Reads evm balances (native + erc20) from a chain's evm client. Owned by
@@ -56,29 +60,42 @@ export class EvmBalanceClient {
     }
   }
 
+  // Deferred so retry (Chain.isolateBalances) rebuilds the watcher.
   subscribe(
     asset: Asset,
     account: string,
     type: EvmBalanceType
   ): Observable<AssetAmount> {
-    const provider = this.chain.evmClient.getProvider();
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
+    return defer(() => {
+      const provider = this.chain.evmClient.getProvider();
+      const subject = new Subject<AssetAmount>();
 
-    const run = async () => {
-      const update = async () =>
-        subject.next(await this.getBalance(asset, account, type));
-      await update();
-      const unsub = provider.watchBlocks({ onBlock: () => update() });
-      return () => unsub();
-    };
+      const run = async () => {
+        const update = async () =>
+          subject.next(await this.getBalance(asset, account, type));
+        await update();
+        const unsub = provider.watchBlocks({
+          onBlock: () =>
+            update().catch((err) =>
+              logger.warn(`Balance update failed for ${asset.key}:`, err)
+            ),
+        });
+        return () => unsub();
+      };
 
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
+      let disconnect: (() => void) | undefined;
+      let closed = false;
+      run()
+        .then((unsub) => (closed ? unsub() : (disconnect = unsub)))
+        .catch((err) => subject.error(err));
 
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
+      return subject.pipe(
+        finalize(() => {
+          closed = true;
+          disconnect?.();
+        }),
+        distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
+      );
+    });
   }
 }
