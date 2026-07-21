@@ -21,6 +21,7 @@ import {
   bufferCount,
   bufferTime,
   catchError,
+  concatMap,
   filter,
   finalize,
   map,
@@ -44,6 +45,7 @@ import { async } from '../utils';
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
 import { PoolLog } from './PoolLog';
+import { EventBus, PoolEventHandler, PoolMutation } from './events';
 
 const { withTimeout } = async;
 
@@ -55,6 +57,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
 
   protected store = new PoolStore<T>();
   protected log: PoolLog;
+  protected eventBus = new EventBus(this.api);
 
   private shared$?: Observable<T[]>;
 
@@ -83,7 +86,33 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   abstract getPoolFees(pair: PoolPair, address: string): Promise<PoolFees>;
   abstract getPoolType(): PoolType;
   protected abstract loadPools(): Promise<T[]>;
-  protected abstract subscribeUpdates(): Subscription;
+
+  /**
+   * Event-driven sync (target). An AMM that returns handlers is driven by the
+   * single `System.Events` stream (one commit per block) instead of the legacy
+   * `subscribeBalances` + `subscribeUpdates` writers. Empty ⇒ legacy path.
+   */
+  protected syncHandlers(): PoolEventHandler<T>[] {
+    return [];
+  }
+
+  /** Gated per-block recompute (amp ramp / peg convergence). Opt-in. */
+  protected subscribeTick(): Subscription {
+    return Subscription.EMPTY;
+  }
+
+  /** Peg-target / fee oracle caches (no store write). Opt-in. */
+  protected subscribeOracles(): Subscription {
+    return Subscription.EMPTY;
+  }
+
+  /**
+   * Legacy per-AMM state writer. Overridden by not-yet-migrated AMMs; migrated
+   * AMMs leave it default and implement {@link syncHandlers} instead.
+   */
+  protected subscribeUpdates(): Subscription {
+    return Subscription.EMPTY;
+  }
 
   private async getMemPools(): Promise<T[]> {
     return this.memPools(this.mem);
@@ -145,8 +174,17 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
              * After store initialized, attach live writers (fire and forget)
              */
             tap(() => {
-              cycle.add(this.subscribeBalances());
-              cycle.add(this.subscribeUpdates());
+              const handlers = this.syncHandlers();
+              if (handlers.length > 0) {
+                // Event-driven path: one ordered writer, coherent per block.
+                cycle.add(this.subscribeEvents(handlers));
+                cycle.add(this.subscribeTick());
+                cycle.add(this.subscribeOracles());
+              } else {
+                // Legacy path (unmigrated AMMs): racing balance + state writers.
+                cycle.add(this.subscribeBalances());
+                cycle.add(this.subscribeUpdates());
+              }
             }),
 
             /**
@@ -228,6 +266,62 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
       });
   }
 
+  /**
+   * The single event-driven writer replacing `subscribeBalances` +
+   * `subscribeUpdates`.
+   *
+   * Per block: match the block's events against `handlers`, resolve every
+   * dirtied slice PINNED at the block's hash, then apply them in ONE
+   * `store.update`. `concatMap` serializes blocks — a later block cannot commit
+   * before an earlier one finishes even though `resolve` awaits reads — so the
+   * store stays in block order and coherent without any block-stamp layer.
+   */
+  protected subscribeEvents(handlers: PoolEventHandler<T>[]): Subscription {
+    return this.eventBus
+      .watchBlockEvents()
+      .pipe(
+        concatMap(async ({ block, events }) => {
+          const matched = events.flatMap((e) =>
+            handlers.filter((h) => h.match(e)).map((h) => h.resolve(e, block))
+          );
+          const muts = (await Promise.all(matched)).flat();
+          return { block, muts };
+        }),
+        filter(({ muts }) => muts.length > 0),
+        this.watchGuard('events')
+      )
+      .subscribe(({ muts }) => {
+        this.store.update((state) => this.applyMutations(state, muts));
+      });
+  }
+
+  /**
+   * Fold each pool through its mutations' `apply` (grouped by address) and
+   * return only the touched pools. Unknown pools are skipped — structural
+   * add/remove is handled out-of-band via `requestResync`.
+   */
+  private applyMutations(
+    state: readonly T[],
+    muts: PoolMutation<T>[]
+  ): T[] {
+    const byAddress = new Map<string, PoolMutation<T>[]>();
+    for (const m of muts) {
+      const list = byAddress.get(m.address);
+      if (list) list.push(m);
+      else byAddress.set(m.address, [m]);
+    }
+
+    const current = new Map(state.map((p) => [p.address, p]));
+    const updated: T[] = [];
+    for (const [address, list] of byAddress) {
+      let pool = current.get(address);
+      if (!pool) continue;
+      for (const m of list) pool = m.apply(pool);
+      updated.push(pool);
+    }
+    return updated;
+  }
+
   protected hasSystemAsset(pool: T): boolean {
     return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
   }
@@ -299,7 +393,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    *
    * @param force - forward the force flag to `resync`
    */
-  private requestResync(force = false) {
+  protected requestResync(force = false) {
     if (this.resyncPending) return;
     this.resyncPending = true;
 

@@ -32,10 +32,14 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'const.XYKLiquidityMining.*',
   'const.GigaHdx.*',
   // event
-  'event.EVM.Log',
-  'event.Proxy.PureCreated',
-  'event.Router.Executed',
+  'event.Broadcast.*',
+  'event.EVM.*',
+  'event.LBP.*',
+  'event.Omnipool.*',
+  'event.Proxy.*',
+  'event.Router.*',
   'event.Stableswap.*',
+  'event.XYK.*',
   // query
   'query.AssetRegistry.*',
   'query.Balances.*',
