@@ -4,15 +4,6 @@ import { toHex } from '@polkadot-api/utils';
 import { blake2b } from '@noble/hashes/blake2b';
 
 import {
-  Subscription,
-  distinctUntilChanged,
-  filter,
-  map,
-  merge,
-  tap,
-} from 'rxjs';
-
-import {
   HYDRATION_SS58_PREFIX,
   RUNTIME_DECIMALS,
 } from '@galacticcouncil/common';
@@ -26,6 +17,12 @@ import {
   PoolPair,
 } from '../../types';
 import { PoolClient } from '../../PoolClient';
+import {
+  BlockRef,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
 
 import { TRADEABLE_DEFAULT } from '../../../consts';
 import { fmt, QueryBus } from '../../../utils';
@@ -37,30 +34,25 @@ import {
   MmOracleLog,
   MmOracleClient,
   MmOracleEntry,
-  MmOracleEvent,
   emaRouteKey,
+  emaKey,
+  TEmaName,
+  TEmaOracle,
+  TEmaPair,
+  TEmaPeriod,
 } from '../../../oracle';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 import { StableSwapPeg } from './StableSwapPeg';
-import {
-  TEmaName,
-  TEmaOracle,
-  TEmaPair,
-  TEmaPeriod,
-  TPegLatest,
-  TStableswap,
-  TStableswapPeg,
-} from './types';
+import { TPegLatest, TStableswap, TStableswapPeg } from './types';
 
 const { FeeUtils } = fmt;
-
-const SYNC_MM_EVENTS = ['ManagedOracle.PriceUpdated', 'DIA.OracleUpdate'];
 
 export class StableSwapClient extends PoolClient<StableSwapBase> {
   protected poolsData: Map<number, TStableswap> = new Map([]);
 
+  private emaKeys: Set<string> = new Set();
   private mmOracle = new MmOracleClient(this.evm);
   private mmAddresses: Set<string> = new Set();
   private mmRouting = {
@@ -174,7 +166,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(poolTokens);
   }
 
-  private buildRouting(): void {
+  /**
+   * Builds MM-event → mmAddress lookup maps
+   */
+  private buildRouting() {
     this.mmRouting.byEmitter.clear();
     this.mmRouting.byDiaKey.clear();
     this.mmRouting.byEma.clear();
@@ -204,6 +199,45 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     }
   }
 
+  /**
+   * Cache each pool's peg config and index its oracle inputs:
+   *
+   * - MM addresses for routing
+   * - EMA `name:pair:period` keys the pegs reference
+   */
+  private indexPegs(
+    pegs: { keyArgs: [number]; value: TStableswapPeg }[],
+    assetsByPool: Map<number, number[]>
+  ) {
+    this.emaKeys.clear();
+
+    for (const { keyArgs, value } of pegs) {
+      const [id] = keyArgs;
+      const assets = assetsByPool.get(id) ?? [];
+      value.source.forEach((s, i) => {
+        if (s.type === 'MMOracle') {
+          const mmAddress = s.value.toString().toLowerCase();
+          this.mmAddresses.add(mmAddress);
+        }
+
+        if (s.type === 'Oracle') {
+          const [name, period, oracleAsset] = s.value as [
+            TEmaName,
+            TEmaPeriod,
+            number,
+          ];
+          const pair = [oracleAsset, assets[i]].sort((a, b) => a - b) as [
+            number,
+            number,
+          ];
+          const key = emaKey(name, pair, period);
+          this.emaKeys.add(key);
+        }
+      });
+      this.pegs.set(value, id);
+    }
+  }
+
   async isSupported(): Promise<boolean> {
     const staticApis = await this.api.getStaticApis();
     return staticApis.compat.query.Stableswap.Pools.isCompatible(
@@ -219,16 +253,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       this.getPoolLimits(),
     ]);
 
-    for (const { keyArgs, value } of pegs) {
-      const [id] = keyArgs;
-      this.pegs.set(value, id);
-      for (const s of value.source) {
-        if (s.type === 'MMOracle') {
-          this.mmAddresses.add(s.value.toString().toLowerCase());
-        }
-      }
-    }
+    const assetsByPool = new Map(
+      pools.map(({ keyArgs, value }) => [keyArgs[0], value.assets])
+    );
 
+    this.indexPegs(pegs, assetsByPool);
     this.buildRouting();
 
     const entries = pools.map(async ({ keyArgs, value }) => {
@@ -339,178 +368,379 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     return Promise.all(latest);
   }
 
-  private subscribeIssuance(): Subscription {
-    const pools = this.store.pools;
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
-    const streams = pools
-      .map((p) => p.id)
-      .map((id) =>
-        this.api.query.Tokens.TotalIssuance.watchValue(id, {
-          at: 'best',
-        }).pipe(
-          map(({ value }) => value),
-          map((value, index) => ({ value, index })),
-          tap(({ index, value }) => {
-            if (index > 0) {
-              this.log.trace('tokens.TotalIssuance', id, value);
-            }
-          }),
-          map(({ value }) => ({
-            id,
-            value,
-          }))
-        )
-      );
+  protected syncHandlers(): PoolEventHandler<StableSwapBase>[] {
+    return [
+      this.syncTradeHandler(),
+      this.syncLiquidityHandler(),
+      this.syncFeeHandler(),
+      this.syncTradableHandler(),
+    ];
+  }
 
-    return merge(...streams)
-      .pipe(this.watchGuard('tokens.TotalIssuance'))
-      .subscribe((delta) => {
-        const { id, value } = delta;
+  /**
+   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) where the filler is
+   * a stableswap pool (`filler_type = Stableswap`, value = pool id). Recompute
+   * the reserves of the in/out assets, pinned at the event's block. Issuance is
+   * unchanged by a swap.
+   */
+  private syncTradeHandler(): PoolEventHandler<StableSwapBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'Stableswap',
+      resolve: (e, block) => {
+        const poolId = e.data.filler_type.value as number;
+        const ids = new Set<number>();
+        for (const io of [
+          ...(e.data.inputs ?? []),
+          ...(e.data.outputs ?? []),
+        ]) {
+          ids.add(io.asset);
+        }
+        return this.stableReserveMutations(poolId, [...ids], block.hash, false);
+      },
+    };
+  }
 
-        this.store.update((pools) => {
-          const updated: StableSwapBase[] = [];
-          pools
-            .filter((pool) => pool.id === id)
-            .forEach((pool) => {
-              const tokens = pool.tokens.map((t) => {
-                if (t.id === id) {
-                  return {
-                    ...t,
-                    balance: value,
-                  };
-                }
-                return t;
-              });
+  /**
+   * Liquidity add/remove — recompute the touched assets' reserves AND the pool's
+   * total issuance (the virtual share balance), pinned at the event's block.
+   */
+  private syncLiquidityHandler(): PoolEventHandler<StableSwapBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Stableswap' &&
+        (e.method === 'LiquidityAdded' || e.method === 'LiquidityRemoved'),
+      resolve: (e, block) => {
+        const poolId = e.data.pool_id as number;
+        const legs = (e.data.assets ?? e.data.amounts ?? []) as {
+          asset_id: number;
+        }[];
+        const ids = legs.map((a) => a.asset_id);
+        return this.stableReserveMutations(poolId, ids, block.hash, true);
+      },
+    };
+  }
 
-              updated.push({
-                ...pool,
-                tokens: tokens,
-                totalIssuance: value,
-              });
-            });
-          return updated;
+  /**
+   * Fee change — field patch from the payload; also refresh the cached pool
+   * data so the tick's peg recompute uses the new fee.
+   */
+  private syncFeeHandler(): PoolEventHandler<StableSwapBase> {
+    return {
+      match: (e) => e.pallet === 'Stableswap' && e.method === 'FeeUpdated',
+      resolve: async (e) => {
+        const poolId = e.data.pool_id as number;
+        const data = this.poolsData.get(poolId);
+        if (data) {
+          this.poolsData.set(poolId, { ...data, fee: e.data.fee });
+        }
+        return [
+          {
+            address: this.getPoolAddress(poolId),
+            apply: (pool) => ({
+              ...pool,
+              fee: FeeUtils.fromPermill(e.data.fee),
+            }),
+          },
+        ];
+      },
+    };
+  }
+
+  /**
+   * Per-asset tradable state — field patch, no read.
+   */
+  private syncTradableHandler(): PoolEventHandler<StableSwapBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Stableswap' && e.method === 'TradableStateUpdated',
+      resolve: async (e) => {
+        const { pool_id, asset_id, state } = e.data;
+        return [
+          {
+            address: this.getPoolAddress(pool_id as number),
+            apply: (pool) => ({
+              ...pool,
+              tokens: pool.tokens.map((t) =>
+                t.id === asset_id ? { ...t, tradeable: state } : t
+              ),
+            }),
+          },
+        ];
+      },
+    };
+  }
+
+  // =============================================================================
+  // Effects
+  // =============================================================================
+
+  protected syncEffects(): PoolEventEffect[] {
+    return [
+      this.syncAmplificationEffect(),
+      this.syncStructuralEffect(),
+      this.syncPegEffect(),
+      this.syncPegSourceEffect(),
+      this.syncEmaOracleEffect(),
+      this.syncEmaHybridMmEffect(),
+      this.syncMmOracleEffect(),
+    ];
+  }
+
+  /**
+   * Amplification ramp scheduled — store the new ramp params; the tick
+   * interpolates `amplification` each block until `final_block`.
+   */
+  private syncAmplificationEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'Stableswap' && e.method === 'AmplificationChanging',
+      apply: async (e) => {
+        const poolId = e.data.pool_id as number;
+        const data = this.poolsData.get(poolId);
+        if (data) {
+          this.poolsData.set(poolId, {
+            ...data,
+            initial_amplification: e.data.current_amplification,
+            final_amplification: e.data.final_amplification,
+            initial_block: e.data.start_block,
+            final_block: e.data.end_block,
+          });
+        }
+      },
+    };
+  }
+
+  /**
+   * Pool created/destroyed — composition change; full reseed (v1).
+   */
+  private syncStructuralEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'Stableswap' &&
+        (e.method === 'PoolCreated' || e.method === 'PoolDestroyed'),
+      apply: async () => {
+        this.requestResync();
+      },
+    };
+  }
+
+  /**
+   * Peg cache (trade) — `PoolPegs` `current`/`updated_at` move when the pool is
+   * traded; refresh it at the event's block. The tick projects from it.
+   */
+  private syncPegEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'Stableswap',
+      apply: async (e, block) => {
+        const poolId = e.data.filler_type.value as number;
+        const cfg = await this.api.query.Stableswap.PoolPegs.getValue(poolId, {
+          at: block.hash,
         });
-      });
+        if (cfg) {
+          this.pegs.set(cfg, poolId);
+        }
+      },
+    };
   }
 
-  private subscribePoolPegs(): Subscription {
-    return this.api.query.Stableswap.PoolPegs.watchEntries({
-      at: 'best',
-    })
-      .pipe(
-        distinctUntilChanged((_, current) => !current.deltas),
-        map((value, index) => ({ value, index })),
-        tap(({ value, index }) => {
-          if (index > 0) {
-            this.log.trace('stableswap.PoolPegs', value.deltas?.upserted);
-          }
-        }),
-        this.watchGuard('stableswap.PoolPegs')
-      )
-      .subscribe({
-        error: (e) => this.log.error('stableswap.PoolPegs', e),
-        next: ({ value: { deltas } }) => {
-          for (const { args, value } of deltas?.upserted ?? []) {
-            const [key] = args;
-            this.pegs.set(value, key);
-          }
-        },
-      });
+  /**
+   * Peg cache (governance) — a pool's peg source/rate config changed; refresh it
+   * at the event's block.
+   */
+  private syncPegSourceEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'Stableswap' &&
+        (e.method === 'PoolPegSourceUpdated' ||
+          e.method === 'PoolMaxPegUpdateUpdated'),
+      apply: async (e, block) => {
+        const poolId = e.data.pool_id as number;
+        const cfg = await this.api.query.Stableswap.PoolPegs.getValue(poolId, {
+          at: block.hash,
+        });
+        if (cfg) {
+          this.pegs.set(cfg, poolId);
+        }
+      },
+    };
   }
 
-  private subscribeEmaOracles(): Subscription {
-    return this.api.query.EmaOracle.Oracles.watchEntries({ at: 'best' })
-      .pipe(
-        distinctUntilChanged((_, current) => !current.deltas),
-        map((value, index) => ({ value, index })),
-        tap(({ value, index }) => {
-          if (index > 0) {
-            this.log.trace('emaOracle.Oracles', value.deltas?.upserted);
-          }
-        }),
-        this.watchGuard('emaOracle.Oracles')
-      )
-      .subscribe(async ({ value: { deltas } }) => {
-        const hybridTargets = new Set<string>();
-        for (const { args, value } of deltas?.upserted ?? []) {
-          const [name, pair, period] = args;
-          this.emaOracles.set(value, name, pair, period);
+  /**
+   * EMA oracle cache — read + cache the entries a pool peg references. The event
+   * names the (source, pair) and the periods that moved; keep only the wanted
+   * periods and read them in one `getValues` at the event's block.
+   */
+  private syncEmaOracleEffect(): PoolEventEffect {
+    return {
+      match: (e) => e.pallet === 'EmaOracle' && e.method === 'OracleUpdated',
+      apply: async (e, block) => {
+        const name = e.data.source as TEmaName;
+        const pair = e.data.assets as TEmaPair;
+        const periods = (e.data.updates as [TEmaPeriod, unknown][])
+          .map(([p]) => p)
+          .filter((p) => this.emaKeys.has(emaKey(name, pair, p)));
 
+        if (!periods.length) return;
+
+        const keys = periods.map(
+          (p) => [name, pair, p] as [TEmaName, TEmaPair, TEmaPeriod]
+        );
+        const entries = await this.api.query.EmaOracle.Oracles.getValues(keys, {
+          at: block.hash,
+        });
+
+        periods.forEach((period, i) => {
+          const entry = entries[i];
+          if (entry) {
+            this.emaOracles.set(entry, name, pair, period);
+          }
+        });
+      },
+    };
+  }
+
+  /**
+   * Hybrid MM refresh — a Managed oracle whose EMA leg (`byEma`) just moved;
+   * re-read it. Separate concern from the direct EMA cache above.
+   */
+  private syncEmaHybridMmEffect(): PoolEventEffect {
+    return {
+      match: (e) => e.pallet === 'EmaOracle' && e.method === 'OracleUpdated',
+      apply: async (e) => {
+        const name = e.data.source as TEmaName;
+        const pair = e.data.assets as TEmaPair;
+        const periods = (e.data.updates as [TEmaPeriod, unknown][]).map(
+          ([p]) => p
+        );
+
+        const targets = new Set<string>();
+        for (const period of periods) {
           const mmEmaKey = emaRouteKey(name, pair, period.type);
           const mm = this.mmRouting.byEma.get(mmEmaKey);
-          if (mm) hybridTargets.add(mm);
-        }
-
-        for (const h160 of hybridTargets) {
-          const fresh = await this.mmOracle.getData(h160);
-          this.log.trace('mmOracle.Hybrid', { h160, fresh });
-          this.mmOracles.set(fresh, h160);
-        }
-      });
-  }
-
-  private subscribeMMOracles(): Subscription {
-    return this.api.event.EVM.Log.watch()
-      .pipe(
-        map(({ events }) =>
-          events
-            .map((e) => MmOracleLog.parse(e.payload))
-            .filter((v): v is MmOracleEvent => !!v)
-            .filter(({ eventName }) => SYNC_MM_EVENTS.includes(eventName))
-        ),
-        filter((parsed) => parsed.length > 0),
-        this.watchGuard('evm.Log')
-      )
-      .subscribe(async (parsed) => {
-        const targets = new Set<string>();
-        for (const ev of parsed) {
-          console.log(ev);
-          if (ev.eventName === 'ManagedOracle.PriceUpdated') {
-            const t = this.mmRouting.byEmitter.get(ev.emitter);
-            if (t) targets.add(t);
-          }
-          if (ev.eventName === 'DIA.OracleUpdate' && ev.key) {
-            const t = this.mmRouting.byDiaKey.get(ev.key);
-            if (t) targets.add(t);
+          if (mm) {
+            targets.add(mm);
           }
         }
-
         for (const h160 of targets) {
-          const fresh = await this.mmOracle.getData(h160);
-          this.log.trace('mmOracle', { h160, fresh });
-          this.mmOracles.set(fresh, h160);
+          const data = await this.mmOracle.getData(h160);
+          this.mmOracles.set(data, h160);
         }
-      });
+      },
+    };
   }
 
-  private subscribeBlock(): Subscription {
-    return this.watcher.bestBlock$
-      .pipe(this.watchGuard('watcher.bestBlock'))
-      .subscribe((block) => {
-        this.store.update(async (pools) => {
-          const updated: StableSwapBase[] = [];
-          for (const pool of pools) {
-            const data = this.poolsData.get(pool.id);
-            if (data) {
-              const pegs = await this.getPoolPegs(pool.id, data, block);
-              const amplification = this.getPoolAmplification(data, block);
-              updated.push({ ...pool, ...pegs, ...amplification });
+  /**
+   * Managed/DIA oracle cache — the `EVM.Log` events (already in the event
+   * stream) that carry MM price updates; refresh the routed MM oracle.
+   */
+  private syncMmOracleEffect(): PoolEventEffect {
+    return {
+      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
+      apply: async (e) => {
+        const ev = MmOracleLog.parse(e.data);
+
+        if (!ev) return;
+
+        let target: string | undefined;
+        if (ev.eventName === 'ManagedOracle.PriceUpdated') {
+          target = this.mmRouting.byEmitter.get(ev.emitter);
+        }
+
+        if (ev.eventName === 'DIA.OracleUpdate' && ev.key) {
+          target = this.mmRouting.byDiaKey.get(ev.key);
+        }
+
+        if (target) {
+          const data = await this.mmOracle.getData(target);
+          this.mmOracles.set(data, target);
+        }
+      },
+    };
+  }
+
+  // =============================================================================
+  // Mutations
+  // =============================================================================
+
+  /**
+   * Resolve a pool's reserve slice for the given assets, PINNED at `at` (the
+   * event's block hash). Optionally re-reads `Tokens.TotalIssuance` (the virtual
+   * share token's balance) for liquidity events. One mutation per pool address.
+   */
+  private async stableReserveMutations(
+    poolId: number,
+    assetIds: number[],
+    at: string,
+    withIssuance: boolean
+  ): Promise<PoolMutation<StableSwapBase>[]> {
+    const address = this.getPoolAddress(poolId);
+    const [balances, issuance] = await Promise.all([
+      Promise.all(
+        assetIds.map(async (id) => ({
+          id,
+          balance: (await this.balance.getBalanceAt(address, id, at))
+            .transferable,
+        }))
+      ),
+      withIssuance
+        ? this.api.query.Tokens.TotalIssuance.getValue(poolId, { at })
+        : Promise.resolve(undefined),
+    ]);
+
+    return [
+      {
+        address,
+        apply: (pool) => {
+          const tokens = pool.tokens.map((t) => {
+            // the virtual share token tracks total issuance
+            if (t.id === poolId) {
+              return issuance !== undefined ? { ...t, balance: issuance } : t;
             }
-          }
-          return updated;
-        });
-      });
+            const b = balances.find((x) => x.id === t.id);
+            return b ? { ...t, balance: b.balance } : t;
+          });
+          return issuance !== undefined
+            ? { ...pool, tokens, totalIssuance: issuance }
+            : { ...pool, tokens };
+        },
+      },
+    ];
   }
 
-  protected subscribeUpdates(): Subscription {
-    const sub = new Subscription();
-
-    sub.add(this.subscribePoolPegs());
-    sub.add(this.subscribeEmaOracles());
-    sub.add(this.subscribeMMOracles());
-    sub.add(this.subscribeIssuance());
-    sub.add(this.subscribeBlock());
-
-    return sub;
+  /**
+   * Pegs & amp recalc.
+   *
+   * - `amplification` interpolates every block during a ramp
+   * - `pegs` converge toward a moving oracle target each block
+   *
+   * Recompute is pure/cheap (WASM over already-cached params + oracles, no chain
+   * read)
+   */
+  protected async tickMutations(
+    block: BlockRef
+  ): Promise<PoolMutation<StableSwapBase>[]> {
+    const muts: PoolMutation<StableSwapBase>[] = [];
+    for (const pool of this.store.pools) {
+      const data = this.poolsData.get(pool.id);
+      if (data) {
+        const pegs = await this.getPoolPegs(pool.id, data, block.number);
+        const amplification = this.getPoolAmplification(data, block.number);
+        muts.push({
+          address: pool.address,
+          apply: (p) => ({ ...p, ...pegs, ...amplification }),
+        });
+      }
+    }
+    return muts;
   }
 }

@@ -45,7 +45,13 @@ import { async } from '../utils';
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
 import { PoolLog } from './PoolLog';
-import { EventBus, PoolEventHandler, PoolMutation } from './events';
+import {
+  BlockRef,
+  EventBus,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from './events';
 
 const { withTimeout } = async;
 
@@ -58,6 +64,11 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected store = new PoolStore<T>();
   protected log: PoolLog;
   protected eventBus = new EventBus(this.api);
+
+  /**
+   * The block the event stream is currently committing.
+   */
+  protected block = 0;
 
   private shared$?: Observable<T[]>;
 
@@ -89,21 +100,27 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
 
   /**
    * Event-driven sync (target). An AMM that returns handlers is driven by the
-   * single `System.Events` stream (one commit per block) instead of the legacy
-   * `subscribeBalances` + `subscribeUpdates` writers. Empty ⇒ legacy path.
+   * single `System.Events` stream (one commit per block).
    */
   protected syncHandlers(): PoolEventHandler<T>[] {
     return [];
   }
 
-  /** Gated per-block recompute (amp ramp / peg convergence). Opt-in. */
-  protected subscribeTick(): Subscription {
-    return Subscription.EMPTY;
+  /**
+   * Side-effect listeners on the same event stream — refresh caches, stash
+   * params, request resync. No store write.
+   */
+  protected syncEffects(): PoolEventEffect[] {
+    return [];
   }
 
-  /** Peg-target / fee oracle caches (no store write). Opt-in. */
-  protected subscribeOracles(): Subscription {
-    return Subscription.EMPTY;
+  /**
+   * Per-block recompute for values that drift between events (e.g. stableswap
+   * amp ramp / peg convergence). Returned mutations are committed in the SAME
+   * block commit as the event mutations.
+   */
+  protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
+    return [];
   }
 
   /**
@@ -176,10 +193,9 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
             tap(() => {
               const handlers = this.syncHandlers();
               if (handlers.length > 0) {
-                // Event-driven path: one ordered writer, coherent per block.
-                cycle.add(this.subscribeEvents(handlers));
-                cycle.add(this.subscribeTick());
-                cycle.add(this.subscribeOracles());
+                // Event-driven path: ONE writer, one commit per block covering
+                // effects + event mutations + per-block tick, one block source.
+                cycle.add(this.subscribeEvents(handlers, this.syncEffects()));
               } else {
                 // Legacy path (unmigrated AMMs): racing balance + state writers.
                 cycle.add(this.subscribeBalances());
@@ -267,25 +283,31 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
-   * The single event-driven writer replacing `subscribeBalances` +
-   * `subscribeUpdates`.
-   *
-   * Per block: match the block's events against `handlers`, resolve every
-   * dirtied slice PINNED at the block's hash, then apply them in ONE
-   * `store.update`. `concatMap` serializes blocks — a later block cannot commit
-   * before an earlier one finishes even though `resolve` awaits reads — so the
-   * store stays in block order and coherent without any block-stamp layer.
+   * Drives pool sync from `System.Events`. Per block, in order: advance
+   * `this.block`; run matching `effects` (cache/param refreshes); resolve
+   * matching `handlers` into mutations, reading any slice PINNED at `block.hash`;
+   * append the per-block `tickMutations`; commit them in one `store.update`.
+   * `concatMap` serializes blocks, so commits stay in block order.
    */
-  protected subscribeEvents(handlers: PoolEventHandler<T>[]): Subscription {
+  protected subscribeEvents(
+    handlers: PoolEventHandler<T>[],
+    effects: PoolEventEffect[]
+  ): Subscription {
     return this.eventBus
       .watchBlockEvents()
       .pipe(
         concatMap(async ({ block, events }) => {
-          const matched = events.flatMap((e) =>
+          this.block = block.number;
+          const effectsRes = events.flatMap((e) =>
+            effects.filter((x) => x.match(e)).map((x) => x.apply(e, block))
+          );
+          const handlersRes = events.flatMap((e) =>
             handlers.filter((h) => h.match(e)).map((h) => h.resolve(e, block))
           );
-          const muts = (await Promise.all(matched)).flat();
-          return { block, muts };
+          await Promise.all(effectsRes);
+          const eventMuts = await Promise.all(handlersRes);
+          const tickMuts = await this.tickMutations(block);
+          return { muts: [...eventMuts.flat(), ...tickMuts] };
         }),
         filter(({ muts }) => muts.length > 0),
         this.watchGuard('events')
@@ -300,10 +322,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    * return only the touched pools. Unknown pools are skipped — structural
    * add/remove is handled out-of-band via `requestResync`.
    */
-  private applyMutations(
-    state: readonly T[],
-    muts: PoolMutation<T>[]
-  ): T[] {
+  private applyMutations(state: readonly T[], muts: PoolMutation<T>[]): T[] {
     const byAddress = new Map<string, PoolMutation<T>[]>();
     for (const m of muts) {
       const list = byAddress.get(m.address);

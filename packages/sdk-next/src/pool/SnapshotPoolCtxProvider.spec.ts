@@ -1,4 +1,5 @@
 import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../consts';
+import { TEmaOracle } from '../oracle';
 
 import { LbpPoolBase } from './amm/lbp';
 import {
@@ -6,7 +7,6 @@ import {
   OmniPoolFees,
   TAssetFeeParams,
   TDynamicFees,
-  TEmaOracle,
   TProtocolFeeParams,
 } from './amm/omni';
 import { StableSwapBase } from './amm/stable';
