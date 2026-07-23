@@ -7,14 +7,13 @@ import {
 } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Subscription, distinctUntilChanged, finalize, map, tap } from 'rxjs';
-
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { PoolClient } from '../../PoolClient';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../../types';
-import { PoolEventHandler, PoolMutation } from '../../events';
+import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 
+import { TEmaOracle, TEmaPair } from '../../../oracle';
 import { fmt, QueryBus } from '../../../utils';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
@@ -22,8 +21,6 @@ import { OmniPoolFee } from './OmniPoolFee';
 import {
   TDynamicFees,
   TDynamicFeesConfig,
-  TEmaOracle,
-  TEmaPair,
   TOmnipoolAsset,
   TSlipFee,
 } from './types';
@@ -34,8 +31,7 @@ const { FeeUtils } = fmt;
 const ORACLE_NAME = Binary.toHex(Binary.fromText('omnipool')) as SizedHex<8>;
 const ORACLE_PERIOD = Enum('Short');
 
-// Omnipool events that move an asset's reserves and/or state — recompute that
-// asset's slice (balance + Omnipool.Assets) pinned at the event's block.
+// Reserve changes — recompute that asset's slice (balance + state).
 const ASSET_EVENTS = new Set([
   'LiquidityAdded',
   'LiquidityRemoved',
@@ -50,7 +46,6 @@ const STRUCTURAL_EVENTS = new Set(['TokenAdded', 'TokenRemoved']);
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private queryBus = new QueryBus();
-  private block: number = 0;
   private poolAddress = this.getPoolAddress();
 
   private dynamicFeesConfig = this.queryBus.scope<
@@ -238,103 +233,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     );
   }
 
-  private subscribeEmaOracles(): Subscription {
-    const [pool] = this.store.pools;
-
-    // the omnipool oracle pairs we actually care about, keyed for O(1) lookup
-    const wanted = new Set(pool.tokens.map((t) => getEmaPair(t.id).join(':')));
-
-    // one merkle-gated subscription prefix-scoped to ORACLE_NAME instead of
-    // one watchValue per pair (~23 `value` storage reads/block -> ~1 merkle
-    // probe/block, with descendant reads only when an omnipool oracle changes).
-    return this.api.query.EmaOracle.Oracles.watchEntries(ORACLE_NAME, {
-      at: 'best',
-    })
-      .pipe(
-        distinctUntilChanged((_, current) => !current.deltas),
-        map((value, index) => ({ value, index })),
-        tap(({ value, index }) => {
-          if (index > 0) {
-            this.log.trace('emaOracle.Oracles', value.deltas?.upserted);
-          }
-        }),
-        finalize(() => this.emaOracles.clear()),
-        this.watchGuard('emaOracle.Oracles')
-      )
-      .subscribe(({ value: { deltas } }) => {
-        deltas?.upserted.forEach((delta) => {
-          const [, pair, period] = delta.args;
-          if (period.type !== ORACLE_PERIOD.type) return;
-          if (!wanted.has(pair.join(':'))) return;
-          this.emaOracles.set(delta.value, pair);
-        });
-      });
-  }
-
-  private subscribeDynamicFees(): Subscription {
-    return this.api.query.DynamicFees.AssetFee.watchEntries({
-      at: 'best',
-    })
-      .pipe(
-        distinctUntilChanged((_, current) => !current.deltas),
-        map((value, index) => ({ value, index })),
-        tap(({ value, index }) => {
-          if (index > 0) {
-            this.log.trace('dynamicFees.AssetFee', value.deltas?.upserted);
-          }
-        }),
-        finalize(() => this.dynamicFees.clear()),
-        this.watchGuard('dynamicFees.AssetFee')
-      )
-      .subscribe(({ value: { deltas } }) => {
-        deltas?.upserted.forEach((delta) => {
-          const [key] = delta.args;
-          this.dynamicFees.set(delta.value, key);
-        });
-      });
-  }
-
-  private subscribeDynamicFeesConfig(): Subscription {
-    return this.api.query.DynamicFees.AssetFeeConfiguration.watchEntries({
-      at: 'best',
-    })
-      .pipe(
-        distinctUntilChanged((_, current) => !current.deltas),
-        map((value, index) => ({ value, index })),
-        tap(({ value, index }) => {
-          if (index > 0) {
-            this.log.trace(
-              'dynamicFees.AssetFeeConfiguration',
-              value.deltas?.upserted
-            );
-          }
-        }),
-        finalize(() => this.dynamicFeesConfig.clear()),
-        this.watchGuard('dynamicFees.AssetFeeConfiguration')
-      )
-      .subscribe(({ value: { deltas } }) => {
-        deltas?.upserted.forEach((delta) => {
-          const [key] = delta.args;
-          this.dynamicFeesConfig.set(delta.value, key);
-        });
-      });
-  }
-
-  private subscribeBlock(): Subscription {
-    return this.watcher.bestBlock$
-      .pipe(this.watchGuard('watcher.bestBlock'))
-      .subscribe((block) => {
-        this.block = block;
-      });
-  }
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
   protected syncHandlers(): PoolEventHandler<OmniPoolBase>[] {
-    return [
-      this.syncTradeHandler(),
-      this.syncAssetHandler(),
-      this.syncStructuralHandler(),
-      this.syncSlipFeeHandler(),
-    ];
+    return [this.syncTradeHandler(), this.syncAssetHandler()];
   }
 
   /**
@@ -372,31 +276,122 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     };
   }
 
+  // =============================================================================
+  // Effects
+  // =============================================================================
+
+  protected syncEffects(): PoolEventEffect[] {
+    return [
+      this.syncStructuralEffect(),
+      this.syncSlipFeeEffect(),
+      this.syncEmaOracleEffect(),
+      this.syncDynamicFeeEffect(),
+      this.syncFeeConfigEffect(),
+    ];
+  }
+
   /**
    * Composition change (token added/removed) — full reseed (cheap, rare, v1).
    */
-  private syncStructuralHandler(): PoolEventHandler<OmniPoolBase> {
+  private syncStructuralEffect(): PoolEventEffect {
     return {
       match: (e) => e.pallet === 'Omnipool' && STRUCTURAL_EVENTS.has(e.method),
-      resolve: async () => {
+      apply: async () => {
         this.requestResync();
-        return [];
       },
     };
   }
 
   /**
-   * Slip fee — refresh the fee-input cache only, no store write.
+   * Slip fee — refresh the fee-input cache.
    */
-  private syncSlipFeeHandler(): PoolEventHandler<OmniPoolBase> {
+  private syncSlipFeeEffect(): PoolEventEffect {
     return {
       match: (e) => e.pallet === 'Omnipool' && e.method === 'SlipFeeSet',
-      resolve: async (e) => {
+      apply: async (e) => {
         this.maxSlipFee.set(e.data.slip_fee);
-        return [];
       },
     };
   }
+
+  /**
+   * EMA oracle cache — `OracleUpdated` names the (source, pair) that moved; read
+   * the Short entry at the event's block (the event carries price only, the
+   * dynamic fee needs volume/liquidity).
+   */
+  private syncEmaOracleEffect(): PoolEventEffect {
+    const [pool] = this.store.pools;
+    const wanted = new Set(pool.tokens.map((t) => getEmaPair(t.id).join(':')));
+    return {
+      match: (e) =>
+        e.pallet === 'EmaOracle' &&
+        e.method === 'OracleUpdated' &&
+        e.data.source === ORACLE_NAME &&
+        wanted.has((e.data.assets as TEmaPair).join(':')),
+      apply: async (e, block) => {
+        const pair = e.data.assets as TEmaPair;
+        const entry = await this.api.query.EmaOracle.Oracles.getValue(
+          ORACLE_NAME,
+          pair,
+          ORACLE_PERIOD,
+          { at: block.hash }
+        );
+        if (entry) {
+          this.emaOracles.set(entry, pair);
+        }
+      },
+    };
+  }
+
+  /**
+   * Dynamic fee cache — recomputed on-chain per trade for the traded assets;
+   * read their `DynamicFees.AssetFee` at the event's block.
+   */
+  private syncDynamicFeeEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'Omnipool',
+      apply: async (e, block) => {
+        const ids = new Set<number>();
+        for (const io of [
+          ...(e.data.inputs ?? []),
+          ...(e.data.outputs ?? []),
+        ]) {
+          ids.add(io.asset);
+        }
+        await Promise.all(
+          [...ids].map(async (id) => {
+            const fee = await this.api.query.DynamicFees.AssetFee.getValue(id, {
+              at: block.hash,
+            });
+            this.dynamicFees.set(fee, id);
+          })
+        );
+      },
+    };
+  }
+
+  /**
+   * Fee-config cache invalidation — rare governance change; re-read lazily on
+   * the next `getPoolFees`.
+   */
+  private syncFeeConfigEffect(): PoolEventEffect {
+    return {
+      match: (e) =>
+        e.pallet === 'DynamicFees' &&
+        (e.method === 'AssetFeeConfigSet' ||
+          e.method === 'AssetFeeConfigRemoved'),
+      apply: async () => {
+        this.dynamicFeesConfig.clear();
+      },
+    };
+  }
+
+  // =============================================================================
+  // Mutations
+  // =============================================================================
 
   /**
    * Resolve the omnipool slice for the given assets, PINNED at `at` (the event's
@@ -433,17 +428,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         }),
       },
     ];
-  }
-
-  protected subscribeOracles(): Subscription {
-    const sub = new Subscription();
-
-    sub.add(this.subscribeDynamicFees());
-    sub.add(this.subscribeDynamicFeesConfig());
-    sub.add(this.subscribeEmaOracles());
-    sub.add(this.subscribeBlock());
-
-    return sub;
   }
 
   private updateTokenState(token: PoolToken, state: TOmnipoolAsset) {
