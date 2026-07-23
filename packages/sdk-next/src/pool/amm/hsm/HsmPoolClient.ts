@@ -1,27 +1,21 @@
 import { AccountId, CompatibilityLevel, PolkadotClient } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import {
-  Observable,
-  Subscription,
-  combineLatest,
-  filter,
-  map,
-  mergeMap,
-  pairwise,
-} from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
-import { PoolClient } from '../../PoolClient';
-import { StableSwapClient } from '../stable';
-import { PoolBase, PoolFees, PoolType } from '../../types';
-
 import { BlockAt } from '../../../api';
 import { EvmClient } from '../../../evm';
-import { GhoTokenLog, GhoTokenClient, GhoTokenEvent } from '../../../gho';
-import { AssetBalance, XcmV3Multilocation } from '../../../types';
+import { GhoTokenLog, GhoTokenClient } from '../../../gho';
+import { XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
+
+import { PoolEventHandler, PoolMutation } from '../../events';
+import { PoolBase, PoolFees, PoolType } from '../../types';
+import { PoolClient } from '../../PoolClient';
+
+import { StableSwapClient } from '../stable';
 
 import { HsmPoolBase } from './HsmPool';
 
@@ -156,106 +150,113 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     return {} as PoolFees;
   }
 
-  private subscribeEvmLog(): Subscription {
-    return this.api.event.EVM.Log.watch()
-      .pipe(
-        mergeMap(({ events }) => events),
-        map(({ payload }) => GhoTokenLog.parse(payload)),
-        filter((v): v is GhoTokenEvent => v !== undefined),
-        filter(({ eventName }) => SYNC_BUCKET_EVENTS.includes(eventName)),
-        this.watchGuard('evm.Log')
-      )
-      .subscribe(({ eventName, facilitator }) => {
-        this.log.trace(`evm.Log.${eventName}`, facilitator);
-        this.store.update(async (pools) => {
-          const updated: HsmPoolBase[] = [];
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
-          const [{ hsmAddress, hollarH160 }] = pools;
-
-          const facilitatorH160 = H160.fromAny(hsmAddress);
-
-          const isHsmFacilitatorSync =
-            facilitatorH160.toLowerCase() === facilitator;
-
-          if (isHsmFacilitatorSync) {
-            const hsmMintCapacity = await this.ghoClient.getFacilitatorCapacity(
-              hollarH160,
-              facilitatorH160
-            );
-            for (const pool of pools) {
-              updated.push({
-                ...pool,
-                hsmMintCapacity: hsmMintCapacity,
-              });
-            }
-          }
-
-          return updated;
-        });
-      });
+  protected syncHandlers(): PoolEventHandler<HsmPoolBase>[] {
+    return [this.syncCollateralHandler(), this.syncMintCapacityHandler()];
   }
 
-  private subscribeCollateralBalance(): Subscription {
-    const tokenCollaterals: number[] = [];
-    const erc20Collaterals: number[] = [];
-
-    this.store.pools.forEach((pool) => {
-      const { tokens, collateralId } = pool;
-      const collateral = tokens.find((t) => t.id === collateralId)!;
-
-      if (collateral.type === 'Erc20') {
-        erc20Collaterals.push(collateralId);
-      } else {
-        tokenCollaterals.push(collateralId);
-      }
-    });
-
-    const [{ hsmAddress }] = this.store.pools;
-
-    const subs: Observable<AssetBalance[]>[] = [];
-
-    if (tokenCollaterals.length > 0) {
-      const tokenSub = this.balance.watchTokensBalance(hsmAddress);
-      subs.push(tokenSub);
-    }
-
-    if (erc20Collaterals.length > 0) {
-      const erc20Sub = this.balance.watchErc20Balance(
-        hsmAddress,
-        erc20Collaterals
-      );
-      subs.push(erc20Sub);
-    }
-
-    if (subs.length > 0) {
-      return combineLatest(subs)
-        .pipe(
-          map((balance) => balance.flat()),
-          pairwise(),
-          map(([prev, curr]) => this.balance.getDeltas(prev, curr)),
-          this.watchGuard('balances')
-        )
-        .subscribe((balances) => {
-          this.store.update((pools) => {
-            const updated: HsmPoolBase[] = [];
-            const poolsMap = new Map(pools.map((p) => [p.collateralId, p]));
-
-            balances.forEach(({ id, balance }) => {
-              const pool = poolsMap.get(id);
-              if (pool) {
-                this.log.trace('balances', { id, balance });
-                updated.push({
-                  ...pool,
-                  collateralBalance: balance.transferable,
-                });
-              }
-            });
-            return updated;
-          });
-        });
-    }
-    return Subscription.EMPTY;
+  /**
+   * Collateral reserve — unified `Broadcast.Swapped` (method `Swapped3`) filled
+   * by HSM (buy/sell/arbitrage moves the facilitator's collateral).
+   *
+   * - Re-read the traded pools' collateral balance at the facilitator
+   * - Pinned at the event's block
+   */
+  private syncCollateralHandler(): PoolEventHandler<HsmPoolBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'HSM',
+      resolve: (e, block) => {
+        const ids = new Set<number>();
+        for (const io of [
+          ...(e.data.inputs ?? []),
+          ...(e.data.outputs ?? []),
+        ]) {
+          ids.add(io.asset);
+        }
+        return this.collateralMutations([...ids], block.hash);
+      },
+    };
   }
+
+  /**
+   * Mint capacity — GHO facilitator bucket `EVM.Log` (capacity/level updated).
+   *
+   * - Re-read the facilitator capacity when the HSM facilitator's bucket moves
+   * - Patch `hsmMintCapacity` across all pools
+   */
+  private syncMintCapacityHandler(): PoolEventHandler<HsmPoolBase> {
+    return {
+      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
+      resolve: async (e) => {
+        const ev = GhoTokenLog.parse(e.data);
+        if (!ev || !SYNC_BUCKET_EVENTS.includes(ev.eventName)) return [];
+
+        const pools = this.store.pools;
+        if (pools.length === 0) return [];
+
+        const [{ hsmAddress, hollarH160 }] = pools;
+        const facilitatorH160 = H160.fromAny(hsmAddress);
+        if (facilitatorH160.toLowerCase() !== ev.facilitator) return [];
+
+        const hsmMintCapacity = await this.ghoClient.getFacilitatorCapacity(
+          hollarH160,
+          facilitatorH160
+        );
+        return pools.map((pool) => ({
+          address: pool.address,
+          apply: (p) => ({ ...p, hsmMintCapacity }),
+        }));
+      },
+    };
+  }
+
+  // =============================================================================
+  // Mutations
+  // =============================================================================
+
+  /**
+   * Re-read collateral balances at the facilitator, PINNED at `at` (the event's
+   * block hash).
+   *
+   * - One mutation per affected pool (collateral in the trade's assets)
+   */
+  private async collateralMutations(
+    assetIds: number[],
+    at: string
+  ): Promise<PoolMutation<HsmPoolBase>[]> {
+    const pools = this.store.pools;
+    if (pools.length === 0) return [];
+
+    const [{ hsmAddress }] = pools;
+    const affected = pools.filter((p) => assetIds.includes(p.collateralId));
+
+    return Promise.all(
+      affected.map(async (pool) => {
+        const balance = await this.balance.getBalanceAt(
+          hsmAddress,
+          pool.collateralId,
+          at
+        );
+        return {
+          address: pool.address,
+          apply: (p: HsmPoolBase) => ({
+            ...p,
+            collateralBalance: balance.transferable,
+          }),
+        };
+      })
+    );
+  }
+
+  // =============================================================================
+  // Snapshot sync
+  // =============================================================================
 
   private subscribeStableswapUpdates(): Subscription {
     return this.stableClient
@@ -287,17 +288,13 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       });
   }
 
-  protected override subscribeBalances(): Subscription {
-    return Subscription.EMPTY;
-  }
-
+  /**
+   * Merge the underlying stableswap pool's coherent snapshot.
+   *
+   * - Runs alongside the event driver (disjoint fields)
+   * - Keeps fee/tokens/issuance/pegs/amplification in sync
+   */
   protected subscribeUpdates(): Subscription {
-    const sub = new Subscription();
-
-    sub.add(this.subscribeCollateralBalance());
-    sub.add(this.subscribeStableswapUpdates());
-    sub.add(this.subscribeEvmLog());
-
-    return sub;
+    return this.subscribeStableswapUpdates();
   }
 }

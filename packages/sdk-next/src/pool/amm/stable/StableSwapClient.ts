@@ -8,6 +8,26 @@ import {
   RUNTIME_DECIMALS,
 } from '@galacticcouncil/common';
 
+import { TRADEABLE_DEFAULT } from '../../../consts';
+import {
+  MmOracleLog,
+  MmOracleClient,
+  MmOracleEntry,
+  MmRouting,
+  emaKey,
+  TEmaName,
+  TEmaOracle,
+  TEmaPair,
+  TEmaPeriod,
+} from '../../../oracle';
+import { fmt, QueryBus } from '../../../utils';
+
+import {
+  BlockRef,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
 import {
   PoolType,
   PoolFee,
@@ -17,34 +37,11 @@ import {
   PoolPair,
 } from '../../types';
 import { PoolClient } from '../../PoolClient';
-import {
-  BlockRef,
-  PoolEventEffect,
-  PoolEventHandler,
-  PoolMutation,
-} from '../../events';
-
-import { TRADEABLE_DEFAULT } from '../../../consts';
-import { fmt, QueryBus } from '../../../utils';
-
-import {
-  DIA_MM_BY_KEY,
-  HYBRID_MM_BY_EMA,
-  HYBRID_MM_BY_EMITTER,
-  MmOracleLog,
-  MmOracleClient,
-  MmOracleEntry,
-  emaRouteKey,
-  emaKey,
-  TEmaName,
-  TEmaOracle,
-  TEmaPair,
-  TEmaPeriod,
-} from '../../../oracle';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 import { StableSwapPeg } from './StableSwapPeg';
+
 import { TPegLatest, TStableswap, TStableswapPeg } from './types';
 
 const { FeeUtils } = fmt;
@@ -53,13 +50,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   protected poolsData: Map<number, TStableswap> = new Map([]);
 
   private emaKeys: Set<string> = new Set();
+  private mmKeys: Set<string> = new Set();
+  private mmRouting = new MmRouting();
   private mmOracle = new MmOracleClient(this.evm);
-  private mmAddresses: Set<string> = new Set();
-  private mmRouting = {
-    byEmitter: new Map<string, string>(),
-    byDiaKey: new Map<string, string>(),
-    byEma: new Map<string, string>(),
-  };
 
   private queryBus = new QueryBus();
 
@@ -167,48 +160,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Builds MM-event → mmAddress lookup maps
-   */
-  private buildRouting() {
-    this.mmRouting.byEmitter.clear();
-    this.mmRouting.byDiaKey.clear();
-    this.mmRouting.byEma.clear();
-
-    // Managed direct: emitter is itself the mmAddress.
-    for (const mm of this.mmAddresses) {
-      this.mmRouting.byEmitter.set(mm, mm);
-    }
-
-    // Hybrid: wrapped Managed emitter → hybrid mmAddress.
-    for (const [emitter, hybridMm] of Object.entries(HYBRID_MM_BY_EMITTER)) {
-      const e = emitter.toLowerCase();
-      const m = hybridMm.toLowerCase();
-      if (this.mmAddresses.has(m)) this.mmRouting.byEmitter.set(e, m);
-    }
-
-    // DIA wrapper: OracleUpdate key → mmAddress.
-    for (const [key, mm] of Object.entries(DIA_MM_BY_KEY)) {
-      const m = mm.toLowerCase();
-      if (this.mmAddresses.has(m)) this.mmRouting.byDiaKey.set(key, m);
-    }
-
-    // Hybrid EMA leg: `${source}:${pairA}:${pairB}` → hybrid mmAddress.
-    for (const [key, mm] of Object.entries(HYBRID_MM_BY_EMA)) {
-      const m = mm.toLowerCase();
-      if (this.mmAddresses.has(m)) this.mmRouting.byEma.set(key, m);
-    }
-  }
-
-  /**
    * Cache each pool's peg config and index its oracle inputs:
    *
-   * - MM addresses for routing
+   * - MM `address` keys for routing
    * - EMA `name:pair:period` keys the pegs reference
    */
   private indexPegs(
     pegs: { keyArgs: [number]; value: TStableswapPeg }[],
     assetsByPool: Map<number, number[]>
   ) {
+    this.mmKeys.clear();
     this.emaKeys.clear();
 
     for (const { keyArgs, value } of pegs) {
@@ -217,7 +178,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       value.source.forEach((s, i) => {
         if (s.type === 'MMOracle') {
           const mmAddress = s.value.toString().toLowerCase();
-          this.mmAddresses.add(mmAddress);
+          this.mmKeys.add(mmAddress);
         }
 
         if (s.type === 'Oracle') {
@@ -258,7 +219,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     );
 
     this.indexPegs(pegs, assetsByPool);
-    this.buildRouting();
+    this.mmRouting.build(this.mmKeys);
 
     const entries = pools.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
@@ -382,10 +343,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) where the filler is
-   * a stableswap pool (`filler_type = Stableswap`, value = pool id). Recompute
-   * the reserves of the in/out assets, pinned at the event's block. Issuance is
-   * unchanged by a swap.
+   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) filled by a
+   * stableswap pool (`filler_type = Stableswap`, value = pool id).
+   *
+   * - Recompute the in/out assets' reserves, pinned at the event's block
+   * - Issuance is unchanged by a swap
    */
   private syncTradeHandler(): PoolEventHandler<StableSwapBase> {
     return {
@@ -402,14 +364,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         ]) {
           ids.add(io.asset);
         }
-        return this.stableReserveMutations(poolId, [...ids], block.hash, false);
+        return this.reserveMutations(poolId, [...ids], block.hash, false);
       },
     };
   }
 
   /**
-   * Liquidity add/remove — recompute the touched assets' reserves AND the pool's
-   * total issuance (the virtual share balance), pinned at the event's block.
+   * Liquidity add/remove.
+   *
+   * - Recompute the touched assets' reserves, pinned at the event's block
+   * - Recompute the pool's total issuance (the virtual share balance)
    */
   private syncLiquidityHandler(): PoolEventHandler<StableSwapBase> {
     return {
@@ -422,14 +386,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           asset_id: number;
         }[];
         const ids = legs.map((a) => a.asset_id);
-        return this.stableReserveMutations(poolId, ids, block.hash, true);
+        return this.reserveMutations(poolId, ids, block.hash, true);
       },
     };
   }
 
   /**
-   * Fee change — field patch from the payload; also refresh the cached pool
-   * data so the tick's peg recompute uses the new fee.
+   * Fee change.
+   *
+   * - Field patch from the payload
+   * - Refresh the cached pool data so the tick's peg recompute uses the new fee
    */
   private syncFeeHandler(): PoolEventHandler<StableSwapBase> {
     return {
@@ -532,8 +498,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Peg cache (trade) — `PoolPegs` `current`/`updated_at` move when the pool is
-   * traded; refresh it at the event's block. The tick projects from it.
+   * Peg cache (trade) — `PoolPegs` `current`/`updated_at` move when traded.
+   *
+   * - Refresh it at the event's block
+   * - The tick projects from it
    */
   private syncPegEffect(): PoolEventEffect {
     return {
@@ -576,9 +544,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * EMA oracle cache — read + cache the entries a pool peg references. The event
-   * names the (source, pair) and the periods that moved; keep only the wanted
-   * periods and read them in one `getValues` at the event's block.
+   * EMA oracle cache — read + cache the entries a pool peg references.
+   *
+   * - The event names the (source, pair) and the periods that moved
+   * - Keep only the wanted periods
+   * - Read them in one `getValues` at the event's block
    */
   private syncEmaOracleEffect(): PoolEventEffect {
     return {
@@ -610,8 +580,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Hybrid MM refresh — a Managed oracle whose EMA leg (`byEma`) just moved;
-   * re-read it. Separate concern from the direct EMA cache above.
+   * Hybrid MM refresh — a Managed oracle whose EMA leg (`byEma`) just moved.
+   *
+   * - Re-read the routed MM oracle
+   * - Distinct from the direct EMA cache (drives a Managed price, not a peg)
    */
   private syncEmaHybridMmEffect(): PoolEventEffect {
     return {
@@ -625,8 +597,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
         const targets = new Set<string>();
         for (const period of periods) {
-          const mmEmaKey = emaRouteKey(name, pair, period.type);
-          const mm = this.mmRouting.byEma.get(mmEmaKey);
+          const mm = this.mmRouting.fromEma(name, pair, period.type);
           if (mm) {
             targets.add(mm);
           }
@@ -640,8 +611,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Managed/DIA oracle cache — the `EVM.Log` events (already in the event
-   * stream) that carry MM price updates; refresh the routed MM oracle.
+   * Managed/DIA oracle cache — `EVM.Log` events carrying MM price updates.
+   *
+   * - Route the emitter/key to its MM address
+   * - Refresh that MM oracle
    */
   private syncMmOracleEffect(): PoolEventEffect {
     return {
@@ -653,11 +626,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
         let target: string | undefined;
         if (ev.eventName === 'ManagedOracle.PriceUpdated') {
-          target = this.mmRouting.byEmitter.get(ev.emitter);
+          target = this.mmRouting.fromEmitter(ev.emitter);
         }
 
         if (ev.eventName === 'DIA.OracleUpdate' && ev.key) {
-          target = this.mmRouting.byDiaKey.get(ev.key);
+          target = this.mmRouting.fromDiaKey(ev.key);
         }
 
         if (target) {
@@ -674,10 +647,13 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   /**
    * Resolve a pool's reserve slice for the given assets, PINNED at `at` (the
-   * event's block hash). Optionally re-reads `Tokens.TotalIssuance` (the virtual
-   * share token's balance) for liquidity events. One mutation per pool address.
+   * event's block hash).
+   *
+   * - Optionally re-reads `Tokens.TotalIssuance` (the virtual share token's
+   *   balance) for liquidity events
+   * - One mutation per pool address
    */
-  private async stableReserveMutations(
+  private async reserveMutations(
     poolId: number,
     assetIds: number[],
     at: string,
