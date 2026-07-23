@@ -1,8 +1,10 @@
 import { PoolBase } from '../types';
 
 /**
- * Minimal block reference carried alongside a block's events. `hash` pins slice
- * reads to the emitting block; `number` feeds the gated tick / logs.
+ * Block reference carried alongside a block's events.
+ *
+ * - `hash` pins slice reads to the emitting block
+ * - `number` feeds the per-block tick and logs
  */
 export interface BlockRef {
   hash: string;
@@ -28,8 +30,10 @@ export interface BlockEvents {
 }
 
 /**
- * A read-modify-write of a single pool. Produced by a handler's `resolve` after
- * the affected slice has been read (pinned at the event's block).
+ * A read-modify-write of a single pool.
+ *
+ * - Produced by a handler's `resolve`
+ * - Applied after the affected slice is read, pinned at the event's block
  */
 export interface PoolMutation<T extends PoolBase> {
   address: string;
@@ -49,9 +53,11 @@ export interface PoolEventHandler<T extends PoolBase> {
 }
 
 /**
- * An event that drives a side effect, not a store write — refresh a cache,
- * stash params, request a resync. Runs BEFORE the block's handlers + tick, so
- * anything the tick reads (oracle/peg caches, ramp params) is already fresh.
+ * An event that drives a side effect, not a store write.
+ *
+ * - Refresh a cache, stash params, or request a resync
+ * - Runs before the block's handlers and tick
+ * - So anything the tick reads (oracle/peg caches, ramp params) is already fresh
  */
 export interface PoolEventEffect {
   match: (e: DecodedEvent) => boolean;

@@ -1,18 +1,25 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { HydrationQueries } from '@galacticcouncil/descriptors';
-
-import { Subscription, distinctUntilChanged, filter, map } from 'rxjs';
-
+import {
+  BlockRef,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
 import { PoolType, PoolLimits, PoolFees, PoolFee, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
 
-type TLbpPoolData = HydrationQueries['LBP']['PoolData']['Value'];
-type TValidationData =
-  HydrationQueries['ParachainSystem']['ValidationData']['Value'];
+import { TLbpPoolData } from './types';
+
+// Composition/param changes — full reseed (v1). `LiquidityRemoved` destroys the pool.
+const STRUCTURAL_EVENTS = new Set([
+  'PoolCreated',
+  'PoolUpdated',
+  'LiquidityRemoved',
+]);
 
 export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   private readonly MAX_FINAL_WEIGHT = 100_000_000n;
@@ -86,6 +93,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
           relayParentNumber
         );
 
+        this.poolsData.set(poolAddress, value);
         return {
           address: poolAddress,
           type: PoolType.LBP,
@@ -119,7 +127,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
       this.isRepayFeeApplied(
         accumulated,
         repay_target,
-        fee_collector.toString()
+        fee_collector.toString(),
+        this.at
       ),
       this.balance.getBalance(poolAddress, accumulated),
       this.api.query.AssetRegistry.Assets.getValue(accumulated, {
@@ -168,16 +177,18 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   private async isRepayFeeApplied(
     accumulatedAsset: number,
     repayTarget: bigint,
-    feeCollector: string
+    feeCollector: string,
+    at: string
   ): Promise<boolean> {
     if (repayTarget === 0n) {
       return false;
     }
 
     try {
-      const repayFeeCurrent = await this.balance.getBalance(
+      const repayFeeCurrent = await this.balance.getBalanceAt(
         feeCollector,
-        accumulatedAsset
+        accumulatedAsset,
+        at
       );
       return repayFeeCurrent.transferable < repayTarget;
     } catch (err) {
@@ -203,62 +214,160 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     } as LbpPoolFees;
   }
 
-  private subscribeValidationData(): Subscription {
-    return this.api.query.ParachainSystem.ValidationData.watchValue({
-      at: 'best',
-    })
-      .pipe(
-        map(({ value }) => value),
-        filter((v): v is TValidationData => v !== undefined),
-        distinctUntilChanged(
-          (a, b) => a.relay_parent_number === b.relay_parent_number
-        ),
-        this.watchGuard('parachainSystem.ValidationData')
-      )
-      .subscribe(({ relay_parent_number }) => {
-        this.store.update(async (pools) => {
-          const updated: LbpPoolBase[] = [];
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
-          for (const pool of pools) {
-            const poolData = this.poolsData.get(pool.address);
-            if (poolData) {
-              const { assets, repay_target, fee_collector } = poolData;
-
-              const [accumulated] = assets;
-              const [accWeight, distWeight] = this.getPoolWeights(
-                poolData,
-                relay_parent_number
-              );
-
-              const [accAsset, distAsset] = pool.tokens;
-              const tokens = [
-                { ...accAsset, weight: accWeight },
-                { ...distAsset, weight: distWeight },
-              ];
-
-              const repayFeeApplied = await this.isRepayFeeApplied(
-                accumulated,
-                repay_target,
-                fee_collector.toString()
-              );
-
-              updated.push({
-                ...pool,
-                tokens,
-                repayFeeApply: repayFeeApplied,
-              });
-            }
-          }
-          return updated;
-        });
-      });
+  protected syncHandlers(): PoolEventHandler<LbpPoolBase>[] {
+    return [this.syncTradeHandler(), this.syncLiquidityHandler()];
   }
 
-  protected subscribeUpdates(): Subscription {
-    const sub = new Subscription();
+  /**
+   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) filled by an LBP
+   * pool.
+   *
+   * - `filler` is the pool account (= pool address)
+   * - Recompute both reserves + `repayFeeApply`, pinned at the event's block
+   */
+  private syncTradeHandler(): PoolEventHandler<LbpPoolBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'LBP',
+      resolve: (e, block) =>
+        this.reserveMutations(e.data.filler as string, block.hash),
+    };
+  }
 
-    sub.add(this.subscribeValidationData());
+  /**
+   * Liquidity added — `LBP.LiquidityAdded`.
+   *
+   * - Event carries the asset pair, not the pool; resolve the pool by its pair
+   * - Recompute both reserves + `repayFeeApply`, pinned at the event's block
+   */
+  private syncLiquidityHandler(): PoolEventHandler<LbpPoolBase> {
+    return {
+      match: (e) => e.pallet === 'LBP' && e.method === 'LiquidityAdded',
+      resolve: (e, block) => {
+        const { asset_a, asset_b } = e.data;
+        const pool = this.store.pools.find((p) =>
+          p.tokens.every((t) => t.id === asset_a || t.id === asset_b)
+        );
+        if (!pool) return Promise.resolve([]);
+        return this.reserveMutations(pool.address, block.hash);
+      },
+    };
+  }
 
-    return sub;
+  // =============================================================================
+  // Effects
+  // =============================================================================
+
+  protected syncEffects(): PoolEventEffect[] {
+    return [this.syncStructuralEffect()];
+  }
+
+  /**
+   * Pool created/updated/removed — composition or schedule change; full reseed (v1).
+   */
+  private syncStructuralEffect(): PoolEventEffect {
+    return {
+      match: (e) => e.pallet === 'LBP' && STRUCTURAL_EVENTS.has(e.method),
+      apply: async () => {
+        this.requestResync();
+      },
+    };
+  }
+
+  // =============================================================================
+  // Mutations
+  // =============================================================================
+
+  /**
+   * Resolve a pool's reserve slice, PINNED at `at` (the event's block hash).
+   *
+   * - Re-reads both token balances so the implied price can't tear
+   * - Re-reads `repayFeeApply` (fee collector balance vs repay target)
+   * - Leaves weights to the per-block tick
+   */
+  private async reserveMutations(
+    address: string,
+    at: string
+  ): Promise<PoolMutation<LbpPoolBase>[]> {
+    const data = this.poolsData.get(address);
+    if (!data) return [];
+
+    const { assets, repay_target, fee_collector } = data;
+    const [accumulated, distributed] = assets;
+
+    const [accBal, distBal, repayFeeApplied] = await Promise.all([
+      this.balance.getBalanceAt(address, accumulated, at),
+      this.balance.getBalanceAt(address, distributed, at),
+      this.isRepayFeeApplied(
+        accumulated,
+        repay_target,
+        fee_collector.toString(),
+        at
+      ),
+    ]);
+
+    return [
+      {
+        address,
+        apply: (pool) => {
+          const [acc, dist] = pool.tokens;
+          return {
+            ...pool,
+            repayFeeApply: repayFeeApplied,
+            tokens: [
+              { ...acc, balance: accBal.transferable },
+              { ...dist, balance: distBal.transferable },
+            ],
+          };
+        },
+      },
+    ];
+  }
+
+  /**
+   * Weight recalc — LBP weights ramp with the relay chain block.
+   *
+   * - Read the relay parent number at the event's block
+   * - Recompute each pool's accumulated/distributed weights (pure WASM)
+   */
+  protected async tickMutations(
+    block: BlockRef
+  ): Promise<PoolMutation<LbpPoolBase>[]> {
+    if (this.store.pools.length === 0) return [];
+
+    const validationData =
+      await this.api.query.ParachainSystem.ValidationData.getValue({
+        at: block.hash,
+      });
+    const relay = validationData?.relay_parent_number;
+    if (relay === undefined) return [];
+
+    const muts: PoolMutation<LbpPoolBase>[] = [];
+    for (const pool of this.store.pools) {
+      const data = this.poolsData.get(pool.address);
+      if (!data) continue;
+
+      const [accWeight, distWeight] = this.getPoolWeights(data, relay);
+      muts.push({
+        address: pool.address,
+        apply: (p) => {
+          const [acc, dist] = p.tokens;
+          return {
+            ...p,
+            tokens: [
+              { ...acc, weight: accWeight },
+              { ...dist, weight: distWeight },
+            ],
+          };
+        },
+      });
+    }
+    return muts;
   }
 }
