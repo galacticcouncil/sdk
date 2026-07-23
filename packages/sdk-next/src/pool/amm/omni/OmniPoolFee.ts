@@ -5,6 +5,7 @@ import {
   PERMILL_DENOMINATOR,
   SYSTEM_ASSET_ID,
 } from '../../../consts';
+import { TEmaOracle } from '../../../oracle';
 import { fmt } from '../../../utils';
 
 import { OmniMath } from './OmniMath';
@@ -13,7 +14,6 @@ import {
   TAssetFeeParams,
   TDynamicFees,
   TDynamicFeeRange,
-  TEmaOracle,
   TProtocolFeeParams,
 } from './types';
 const { FeeUtils } = fmt;

@@ -5,4 +5,5 @@ export {
   BlockEvents,
   PoolMutation,
   PoolEventHandler,
+  PoolEventEffect,
 } from './types';

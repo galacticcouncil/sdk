@@ -37,13 +37,23 @@ export interface PoolMutation<T extends PoolBase> {
 }
 
 /**
- * Maps a decoded event to the pool slice(s) it dirties.
+ * Maps an event to the store mutation(s) it produces.
  *
  * - `match`   — cheap predicate over (pallet, method) [+ payload].
  * - `resolve` — resolve the mutation(s), reading any counterpart slice PINNED
- *               at `block.hash` (never `'best'`). Returns [] if nothing to do.
+ *               at `block.hash` (never `'best'`).
  */
 export interface PoolEventHandler<T extends PoolBase> {
   match: (e: DecodedEvent) => boolean;
   resolve: (e: DecodedEvent, block: BlockRef) => Promise<PoolMutation<T>[]>;
+}
+
+/**
+ * An event that drives a side effect, not a store write — refresh a cache,
+ * stash params, request a resync. Runs BEFORE the block's handlers + tick, so
+ * anything the tick reads (oracle/peg caches, ramp params) is already fresh.
+ */
+export interface PoolEventEffect {
+  match: (e: DecodedEvent) => boolean;
+  apply: (e: DecodedEvent, block: BlockRef) => Promise<void>;
 }
