@@ -8,7 +8,6 @@ import {
   OperatorFunction,
   ReplaySubject,
   Subscription,
-  combineLatest,
   defer,
   from,
   interval,
@@ -19,7 +18,6 @@ import {
 
 import {
   bufferCount,
-  bufferTime,
   catchError,
   concatMap,
   filter,
@@ -37,9 +35,7 @@ import {
 
 import { BlockAt, Papi } from '../api';
 import { BalanceClient } from '../client';
-import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
-import { AssetBalance } from '../types';
 import { async } from '../utils';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
@@ -99,36 +95,35 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected abstract loadPools(): Promise<T[]>;
 
   /**
-   * Event-driven sync (target). An AMM that returns handlers is driven by the
-   * single `System.Events` stream (one commit per block).
+   * Event handlers that produce store mutations.
+   *
+   * - Each maps a matched `System.Events` record to pool mutation(s)
+   * - Reads any counterpart slice pinned at the event's block
+   * - Default none
    */
   protected syncHandlers(): PoolEventHandler<T>[] {
     return [];
   }
 
   /**
-   * Side-effect listeners on the same event stream — refresh caches, stash
-   * params, request resync. No store write.
+   * Event effects — side effects on the same stream, no store write.
+   *
+   * - Refresh a cache, stash params, request a resync
+   * - Run before the block's handlers and tick
+   * - Default none
    */
   protected syncEffects(): PoolEventEffect[] {
     return [];
   }
 
   /**
-   * Per-block recompute for values that drift between events (e.g. stableswap
-   * amp ramp / peg convergence). Returned mutations are committed in the SAME
-   * block commit as the event mutations.
+   * Per-block recompute for values that drift between events.
+   *
+   * - e.g. stableswap amp ramp / peg convergence, LBP weight ramp
+   * - Returned mutations commit in the same block commit as event mutations
    */
   protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
     return [];
-  }
-
-  /**
-   * Legacy per-AMM state writer. Overridden by not-yet-migrated AMMs; migrated
-   * AMMs leave it default and implement {@link syncHandlers} instead.
-   */
-  protected subscribeUpdates(): Subscription {
-    return Subscription.EMPTY;
   }
 
   private async getMemPools(): Promise<T[]> {
@@ -188,19 +183,20 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
 
           return seed$.pipe(
             /**
-             * After store initialized, attach live writers (fire and forget)
+             * After store initialized, attach live writers (fire and forget).
+             *
+             * ONE event-driven writer. One commit per block covering:
+             *  - effects
+             *  - event mutations
+             *  - per-block tick
+             *
+             * Supplementary reactive writer ({@link subscribeUpdates})
              */
             tap(() => {
-              const handlers = this.syncHandlers();
-              if (handlers.length > 0) {
-                // Event-driven path: ONE writer, one commit per block covering
-                // effects + event mutations + per-block tick, one block source.
-                cycle.add(this.subscribeEvents(handlers, this.syncEffects()));
-              } else {
-                // Legacy path (unmigrated AMMs): racing balance + state writers.
-                cycle.add(this.subscribeBalances());
-                cycle.add(this.subscribeUpdates());
-              }
+              cycle.add(
+                this.subscribeEvents(this.syncHandlers(), this.syncEffects())
+              );
+              cycle.add(this.subscribeUpdates());
             }),
 
             /**
@@ -240,54 +236,15 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     );
   }
 
-  protected subscribeBalances(): Subscription {
-    const pool$ = this.store.pools.map((pool) => {
-      const { address } = pool;
-
-      const subs: Observable<AssetBalance | AssetBalance[]>[] = [
-        this.balance.watchTokensBalance(address),
-      ];
-
-      if (this.hasSystemAsset(pool)) {
-        const sysSub = this.balance.watchSystemBalance(address);
-        subs.push(sysSub);
-      }
-
-      if (this.hasErc20Asset(pool)) {
-        const ids = pool.tokens
-          .filter((t) => t.type === 'Erc20')
-          .map((t) => t.id);
-        const erc20Sub = this.balance.watchErc20Balance(address, ids);
-        subs.push(erc20Sub);
-      }
-
-      return combineLatest(subs).pipe(
-        map((balance) => balance.flat()),
-        pairwise(),
-        map(([prev, curr]) => this.balance.getDeltas(prev, curr)),
-        filter((d) => d.length > 0),
-        map((balances) => [address, balances] as const)
-      );
-    });
-
-    return merge(...pool$)
-      .pipe(
-        bufferTime(250),
-        filter((batch) => batch.length > 0),
-        map((batch) => new Map(batch)),
-        this.watchGuard('balances')
-      )
-      .subscribe((latest) => {
-        this.store.update((state) => this.updateBalances(state, latest));
-      });
-  }
-
   /**
-   * Drives pool sync from `System.Events`. Per block, in order: advance
-   * `this.block`; run matching `effects` (cache/param refreshes); resolve
-   * matching `handlers` into mutations, reading any slice PINNED at `block.hash`;
-   * append the per-block `tickMutations`; commit them in one `store.update`.
-   * `concatMap` serializes blocks, so commits stay in block order.
+   * Drives pool sync from `System.Events`, one commit per block.
+   *
+   * - Advance `this.block` to the block being committed
+   * - Run matching `effects` (cache/param refreshes) first
+   * - Resolve matching `handlers` into mutations, reading slices PINNED at `block.hash`
+   * - Append the per-block `tickMutations`
+   * - Commit them all in one `store.update`
+   * - `concatMap` serializes blocks, so commits stay in block order
    */
   protected subscribeEvents(
     handlers: PoolEventHandler<T>[],
@@ -318,9 +275,20 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
-   * Fold each pool through its mutations' `apply` (grouped by address) and
-   * return only the touched pools. Unknown pools are skipped — structural
-   * add/remove is handled out-of-band via `requestResync`.
+   * Supplementary reactive writer, run alongside the event driver.
+   *
+   * - For a derived pool merging a sibling's coherent snapshot (HSM ← Stableswap)
+   * - Writes disjoint fields, so it can't tear against the driver's commits
+   */
+  protected subscribeUpdates(): Subscription {
+    return Subscription.EMPTY;
+  }
+
+  /**
+   * Fold each pool through its mutations' `apply`, grouped by address.
+   *
+   * - Return only the touched pools
+   * - Skip unknown pools; structural add/remove is handled via `requestResync`
    */
   private applyMutations(state: readonly T[], muts: PoolMutation<T>[]): T[] {
     const byAddress = new Map<string, PoolMutation<T>[]>();
@@ -341,14 +309,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     return updated;
   }
 
-  protected hasSystemAsset(pool: T): boolean {
-    return pool.tokens.some((t) => t.id === SYSTEM_ASSET_ID);
-  }
-
-  protected hasErc20Asset(pool: PoolBase) {
-    return pool.tokens.some((t) => t.type === 'Erc20');
-  }
-
   private hasValidAssets(pool: T): boolean {
     return pool.tokens.every(({ decimals, balance }) => {
       if (pool.type === PoolType.XYK) {
@@ -357,32 +317,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
       return !!decimals;
     });
   }
-
-  private updateBalances = (
-    pools: readonly T[],
-    latest: Map<string, AssetBalance[]>
-  ): T[] => {
-    const updated: T[] = [];
-    const poolsMap = new Map(pools.map((p) => [p.address, p]));
-
-    for (const [address, balances] of latest) {
-      const pool = poolsMap.get(address);
-      if (pool) {
-        const tokens = pool.tokens.map((token) => {
-          const balance = balances.find((b) => b.id === token.id);
-          if (balance && token.id !== pool.id) {
-            return {
-              ...token,
-              balance: balance.balance.transferable,
-            };
-          }
-          return token;
-        });
-        updated.push({ ...pool, tokens });
-      }
-    }
-    return updated;
-  };
 
   /**
    * Invalidates the current seed, tears down all active writers,

@@ -1,7 +1,6 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { Subscription } from 'rxjs';
-
+import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import {
   PoolBase,
   PoolType,
@@ -14,6 +13,9 @@ import {
 import { PoolClient } from '../../PoolClient';
 
 import { XykPoolFees } from './XykPool';
+
+// Composition changes — full reseed (v1).
+const STRUCTURAL_EVENTS = new Set(['PoolCreated', 'PoolDestroyed']);
 
 export class XykPoolClient extends PoolClient<PoolBase> {
   private decimals: Map<number, number> = new Map([]);
@@ -103,7 +105,112 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     return fee as PoolFee;
   }
 
-  protected subscribeUpdates(): Subscription {
-    return Subscription.EMPTY;
+  // =============================================================================
+  // Handlers
+  // =============================================================================
+
+  protected syncHandlers(): PoolEventHandler<PoolBase>[] {
+    return [this.syncTradeHandler(), this.syncLiquidityHandler()];
+  }
+
+  /**
+   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) filled by an XYK
+   * pool.
+   *
+   * - `filler` is the pool account (= pool address)
+   * - Recompute both token reserves, pinned at the event's block
+   */
+  private syncTradeHandler(): PoolEventHandler<PoolBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'Broadcast' &&
+        e.method === 'Swapped3' &&
+        e.data?.filler_type?.type === 'XYK',
+      resolve: (e, block) =>
+        this.reserveMutations(e.data.filler as string, block.hash),
+    };
+  }
+
+  /**
+   * Liquidity add/remove — `XYK.LiquidityAdded` / `LiquidityRemoved`.
+   *
+   * - Event carries the asset pair, not the pool; resolve the pool by its pair
+   * - Recompute both token reserves, pinned at the event's block
+   */
+  private syncLiquidityHandler(): PoolEventHandler<PoolBase> {
+    return {
+      match: (e) =>
+        e.pallet === 'XYK' &&
+        (e.method === 'LiquidityAdded' || e.method === 'LiquidityRemoved'),
+      resolve: (e, block) => {
+        const { asset_a, asset_b } = e.data;
+        const pool = this.store.pools.find(
+          (p) =>
+            p.tokens.length === 2 &&
+            p.tokens.every((t) => t.id === asset_a || t.id === asset_b)
+        );
+        if (!pool) return Promise.resolve([]);
+        return this.reserveMutations(pool.address, block.hash);
+      },
+    };
+  }
+
+  // =============================================================================
+  // Effects
+  // =============================================================================
+
+  protected syncEffects(): PoolEventEffect[] {
+    return [this.syncStructuralEffect()];
+  }
+
+  /**
+   * Pool created/destroyed — composition change; full reseed (v1).
+   */
+  private syncStructuralEffect(): PoolEventEffect {
+    return {
+      match: (e) => e.pallet === 'XYK' && STRUCTURAL_EVENTS.has(e.method),
+      apply: async () => {
+        this.requestResync();
+      },
+    };
+  }
+
+  // =============================================================================
+  // Mutations
+  // =============================================================================
+
+  /**
+   * Resolve a pool's reserve slice, PINNED at `at` (the event's block hash).
+   *
+   * - Re-reads both token balances so the implied price can't tear
+   * - Returns one mutation for the pool address
+   */
+  private async reserveMutations(
+    address: string,
+    at: string
+  ): Promise<PoolMutation<PoolBase>[]> {
+    const pool = this.store.pools.find((p) => p.address === address);
+    if (!pool) return [];
+
+    const balances = await Promise.all(
+      pool.tokens.map(async (t) => ({
+        id: t.id,
+        balance: (await this.balance.getBalanceAt(address, t.id, at))
+          .transferable,
+      }))
+    );
+
+    return [
+      {
+        address,
+        apply: (p) => ({
+          ...p,
+          tokens: p.tokens.map((t) => {
+            const b = balances.find((x) => x.id === t.id);
+            return b ? { ...t, balance: b.balance } : t;
+          }),
+        }),
+      },
+    ];
   }
 }

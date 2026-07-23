@@ -1,14 +1,13 @@
 import { AccountId } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Subscription, filter, map, mergeMap } from 'rxjs';
-
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
+import { AaveLog } from '../../../aave';
+
+import { PoolEventHandler, PoolMutation } from '../../events';
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
-
-import { AaveLog, AaveEvent } from '../../../aave';
 
 import { AavePoolToken } from './AavePool';
 import { TRouterEvent, TRouterExecutedPayload } from './types';
@@ -92,12 +91,15 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     return Promise.all(pools);
   }
 
-  private async getPoolDelta(pool: PoolBase): Promise<AavePoolToken[]> {
+  private async getPoolDelta(
+    pool: PoolBase,
+    at: string
+  ): Promise<AavePoolToken[]> {
     const [reserve, aToken] = pool.tokens;
 
     const { liqudity_in, liqudity_out } =
       await this.api.apis.AaveTradeExecutor.pool(reserve.id, aToken.id, {
-        at: this.at,
+        at,
       });
 
     return pool.tokens.map((t) => {
@@ -135,88 +137,81 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     };
   }
 
-  private subscribeRouterExecuted(): Subscription {
-    const pools = this.store.pools;
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
-    const aTokens = pools
-      .map((p) => p.tokens)
-      .map(([_reserve, aToken]) => aToken)
-      .map((a) => a.id);
+  protected syncHandlers(): PoolEventHandler<PoolBase>[] {
+    return [this.syncRouterHandler(), this.syncEvmLogHandler()];
+  }
 
-    return this.api.event.Router.Executed.watch()
-      .pipe(
-        mergeMap(({ events }) => events),
-        map(({ payload }) => this.parseRouterLog(payload)),
-        filter(
-          ({ assetIn, assetOut }) =>
-            aTokens.includes(assetIn) || aTokens.includes(assetOut)
-        ),
-        this.watchGuard('router.Execute')
-      )
-      .subscribe(({ assetIn, assetOut, key }) => {
-        this.log.trace('router.Executed', key);
-
-        this.store.update(async (pools) => {
-          const updated: PoolBase[] = [];
-
-          for (const pool of pools) {
-            const [_reserve, aToken] = pool.tokens;
-            const shouldSync = aToken.id === assetIn || aToken.id === assetOut;
-            if (shouldSync) {
-              const tokens = await this.getPoolDelta(pool);
-              updated.push({
-                ...pool,
-                tokens: tokens,
-              });
-            }
-          }
-          return updated;
+  /**
+   * Router trades — `Router.Executed`.
+   *
+   * - Sync any pool whose aToken is the traded in/out asset
+   * - Re-read reserves via the trade executor, pinned at the event's block
+   */
+  private syncRouterHandler(): PoolEventHandler<PoolBase> {
+    return {
+      match: (e) => e.pallet === 'Router' && e.method === 'Executed',
+      resolve: (e, block) => {
+        const { assetIn, assetOut } = this.parseRouterLog(
+          e.data as TRouterExecutedPayload
+        );
+        const pools = this.store.pools.filter((pool) => {
+          const [, aToken] = pool.tokens;
+          return aToken.id === assetIn || aToken.id === assetOut;
         });
-      });
+        return this.reserveMutations(pools, block.hash);
+      },
+    };
   }
 
-  private subscribeEvmLog(): Subscription {
-    return this.api.event.EVM.Log.watch()
-      .pipe(
-        mergeMap(({ events }) => events),
-        map(({ payload }) => AaveLog.parse(payload)),
-        filter((v): v is AaveEvent => v !== undefined),
-        filter(({ eventName }) => SYNC_MM_EVENTS.includes(eventName)),
-        this.watchGuard('evm.Log')
-      )
-      .subscribe(({ reserve: evtReserve, eventName }) => {
-        this.log.trace(`evm.Log.${eventName}`, evtReserve);
-
-        this.store.update(async (pools) => {
-          const updated: PoolBase[] = [];
-
-          for (const pool of pools) {
-            const [reserve] = pool.tokens as AavePoolToken[];
-            const poolReserve = this.getReserveH160Id(reserve).toLowerCase();
-
-            if (poolReserve === evtReserve) {
-              const tokens = await this.getPoolDelta(pool);
-              updated.push({
-                ...pool,
-                tokens: tokens,
-              });
-            }
-          }
-          return updated;
+  /**
+   * Money-market activity — `EVM.Log` Supply/Withdraw/Repay/Borrow.
+   *
+   * - Match the pool by its reserve's H160 address
+   * - Re-read reserves via the trade executor, pinned at the event's block
+   */
+  private syncEvmLogHandler(): PoolEventHandler<PoolBase> {
+    return {
+      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
+      resolve: (e, block) => {
+        const ev = AaveLog.parse(e.data);
+        if (!ev || !SYNC_MM_EVENTS.includes(ev.eventName)) {
+          return Promise.resolve([]);
+        }
+        const pools = this.store.pools.filter((pool) => {
+          const [reserve] = pool.tokens as AavePoolToken[];
+          return this.getReserveH160Id(reserve).toLowerCase() === ev.reserve;
         });
-      });
+        return this.reserveMutations(pools, block.hash);
+      },
+    };
   }
 
-  protected override subscribeBalances(): Subscription {
-    return Subscription.EMPTY;
-  }
+  // =============================================================================
+  // Mutations
+  // =============================================================================
 
-  protected subscribeUpdates(): Subscription {
-    const sub = new Subscription();
-
-    sub.add(this.subscribeRouterExecuted());
-    sub.add(this.subscribeEvmLog());
-
-    return sub;
+  /**
+   * Re-read reserves for the given pools, PINNED at `at` (the event's block hash).
+   *
+   * - Reads both legs via the trade executor so they can't tear
+   * - One mutation per pool
+   */
+  private async reserveMutations(
+    pools: PoolBase[],
+    at: string
+  ): Promise<PoolMutation<PoolBase>[]> {
+    return Promise.all(
+      pools.map(async (pool) => {
+        const tokens = await this.getPoolDelta(pool, at);
+        return {
+          address: pool.address,
+          apply: (p: PoolBase) => ({ ...p, tokens }),
+        };
+      })
+    );
   }
 }

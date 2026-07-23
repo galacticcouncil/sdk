@@ -42,12 +42,6 @@ export class BalanceClient extends Papi {
       : this.getBalanceData(account, assetId);
   }
 
-  /**
-   * Read a balance pinned at a specific block (`at` = block hash), so a slice
-   * resolved for an event's block never mixes in newer state. Used by the
-   * event-driven pool sync. `CurrenciesApi.account` covers every asset type,
-   * native included.
-   */
   async getBalanceAt(
     account: string,
     assetId: number,

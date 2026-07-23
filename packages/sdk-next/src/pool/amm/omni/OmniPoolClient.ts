@@ -9,15 +9,16 @@ import { toHex } from '@polkadot-api/utils';
 
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
-import { PoolClient } from '../../PoolClient';
-import { PoolType, PoolLimits, PoolToken, PoolPair } from '../../types';
-import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
-
 import { TEmaOracle, TEmaPair } from '../../../oracle';
 import { fmt, QueryBus } from '../../../utils';
 
+import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
+import { PoolType, PoolLimits, PoolToken, PoolPair } from '../../types';
+import { PoolClient } from '../../PoolClient';
+
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 import { OmniPoolFee } from './OmniPoolFee';
+
 import {
   TDynamicFees,
   TDynamicFeesConfig,
@@ -242,8 +243,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   /**
-   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) this omnipool
-   * filled; recompute every asset moved in/out, pinned at the event's block.
+   * Trades — unified `Broadcast.Swapped` (method `Swapped3`) this omnipool filled.
+   *
+   * - Recompute every asset moved in/out, pinned at the event's block
    */
   private syncTradeHandler(): PoolEventHandler<OmniPoolBase> {
     return {
@@ -259,7 +261,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         ]) {
           ids.add(io.asset);
         }
-        return this.omniAssetMutations([...ids], block.hash);
+        return this.assetMutations([...ids], block.hash);
       },
     };
   }
@@ -271,8 +273,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private syncAssetHandler(): PoolEventHandler<OmniPoolBase> {
     return {
       match: (e) => e.pallet === 'Omnipool' && ASSET_EVENTS.has(e.method),
-      resolve: (e, block) =>
-        this.omniAssetMutations([e.data.asset_id], block.hash),
+      resolve: (e, block) => this.assetMutations([e.data.asset_id], block.hash),
     };
   }
 
@@ -315,9 +316,11 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   /**
-   * EMA oracle cache — `OracleUpdated` names the (source, pair) that moved; read
-   * the Short entry at the event's block (the event carries price only, the
-   * dynamic fee needs volume/liquidity).
+   * EMA oracle cache — refresh on `OracleUpdated`.
+   *
+   * - The event names the (source, pair) that moved
+   * - Read the Short entry at the event's block
+   * - The event carries price only; the dynamic fee needs volume/liquidity
    */
   private syncEmaOracleEffect(): PoolEventEffect {
     const [pool] = this.store.pools;
@@ -344,8 +347,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   }
 
   /**
-   * Dynamic fee cache — recomputed on-chain per trade for the traded assets;
-   * read their `DynamicFees.AssetFee` at the event's block.
+   * Dynamic fee cache — recomputed on-chain per trade for the traded assets.
+   *
+   * - Read their `DynamicFees.AssetFee` at the event's block
    */
   private syncDynamicFeeEffect(): PoolEventEffect {
     return {
@@ -394,11 +398,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   // =============================================================================
 
   /**
-   * Resolve the omnipool slice for the given assets, PINNED at `at` (the event's
-   * block hash). Reads balance + `Omnipool.Assets` together so the implied price
-   * can't tear. Returns a single mutation (one omnipool address).
+   * Resolve the omnipool slice for the given assets
+   *
+   * - Reads balance + state together so the implied price can't tear
+   * - Returns a single mutation (one omnipool address)
    */
-  private async omniAssetMutations(
+  private async assetMutations(
     assetIds: number[],
     at: string
   ): Promise<PoolMutation<OmniPoolBase>[]> {

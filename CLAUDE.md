@@ -41,6 +41,18 @@ npm run spec:e2e              # E2E cross-chain transfers (needs Chopsticks)
 - Prettier: single quotes, trailing commas (es5), semicolons, arrow parens always.
 - ESLint: extends `prettier` + `plugin:promise/recommended`.
 - TypeScript: strict mode, ESNext modules, node module resolution.
+- JSDoc: terse and on-point — a short summary line, a blank line, then `-` bullet points for details, then `@param` lines. One idea per bullet. No dense multi-clause prose. Describe the CURRENT implementation only — never compare to a previous/old approach or narrate what changed. Example:
+
+  ```
+  /**
+   * Schedules a resync on the next tick.
+   *
+   * - Ensures the current cycle tears down before resync
+   * - Dedup multiple requests occurring in the same tick
+   *
+   * @param force - forward the force flag to `resync`
+   */
+  ```
 
 ## Commit & PR conventions
 
