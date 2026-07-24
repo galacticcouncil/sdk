@@ -36,7 +36,7 @@ import {
 import { BlockAt, Papi } from '../api';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
-import { async } from '../utils';
+import { async, QueryCache } from '../utils';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
@@ -57,14 +57,19 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected evm: EvmClient;
   protected balance: BalanceClient;
 
-  protected store = new PoolStore<T>();
   protected log: PoolLog;
+  protected store = new PoolStore<T>();
+  protected queryCache = new QueryCache();
   protected eventBus = new EventBus(this.api);
 
   /**
    * The block the event stream is currently committing.
+   *
+   * - `block`: number, feeds the per-block tick and logs
+   * - `blockHash`: hash, pins auxiliary reads (fees/oracles) to that block
    */
   protected block = 0;
+  protected blockHash?: string;
 
   private shared$?: Observable<T[]>;
 
@@ -99,7 +104,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    *
    * - Each maps a matched `System.Events` record to pool mutation(s)
    * - Reads any counterpart slice pinned at the event's block
-   * - Default none
    */
   protected syncHandlers(): PoolEventHandler<T>[] {
     return [];
@@ -110,7 +114,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    *
    * - Refresh a cache, stash params, request a resync
    * - Run before the block's handlers and tick
-   * - Default none
    */
   protected syncEffects(): PoolEventEffect[] {
     return [];
@@ -119,7 +122,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   /**
    * Per-block recompute for values that drift between events.
    *
-   * - e.g. stableswap amp ramp / peg convergence, LBP weight ramp
+   * - e.g. amp & weight ramp, peg convergence
    * - Returned mutations commit in the same block commit as event mutations
    */
   protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
@@ -255,6 +258,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
       .pipe(
         concatMap(async ({ block, events }) => {
           this.block = block.number;
+          this.blockHash = block.hash;
           const effectsRes = events.flatMap((e) =>
             effects.filter((x) => x.match(e)).map((x) => x.apply(e, block))
           );
