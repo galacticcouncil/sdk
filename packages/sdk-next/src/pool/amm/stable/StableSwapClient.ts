@@ -20,7 +20,7 @@ import {
   TEmaPair,
   TEmaPeriod,
 } from '../../../oracle';
-import { fmt, QueryBus } from '../../../utils';
+import { fmt } from '../../../utils';
 
 import {
   BlockRef,
@@ -54,34 +54,30 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   private mmRouting = new MmRouting();
   private mmOracle = new MmOracleClient(this.evm);
 
-  private queryBus = new QueryBus();
-
-  private emaOracles = this.queryBus.scope<
+  private emaOracles = this.queryCache.scope<
     [TEmaName, TEmaPair, TEmaPeriod],
     TEmaOracle | undefined
   >(
     'EmaOracle.Oracles',
-    (name, pair, period) =>
-      this.api.query.EmaOracle.Oracles.getValue(name, pair, period, {
-        at: this.at,
-      }),
+    (at, name, pair, period) =>
+      this.api.query.EmaOracle.Oracles.getValue(name, pair, period, { at }),
     (name, pair, period) =>
       `${name.toString()}:${pair.join(':')}:${period.type}`,
-    6 * 1000
+    'block'
   );
 
-  private mmOracles = this.queryBus.scope<[string], MmOracleEntry>(
+  private mmOracles = this.queryCache.scope<[string], MmOracleEntry>(
     'MmOracle',
-    (h160) => this.mmOracle.getData(h160),
+    (_at, h160) => this.mmOracle.getData(h160),
     (h160) => h160.toLowerCase(),
     10 * 60 * 1000
   );
 
-  private pegs = this.queryBus.scope<[number], TStableswapPeg | undefined>(
+  private pegs = this.queryCache.scope<[number], TStableswapPeg | undefined>(
     'Stableswap.PoolPegs',
-    (id) => this.api.query.Stableswap.PoolPegs.getValue(id, { at: this.at }),
+    (at, id) => this.api.query.Stableswap.PoolPegs.getValue(id, { at }),
     (id) => String(id),
-    6 * 1000
+    'block'
   );
 
   getPoolType(): PoolType {
@@ -227,7 +223,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       const [tokens, amplification, pegs, issuance] = await Promise.all([
         this.getPoolTokens(id, value),
         this.getPoolAmplification(value, block),
-        this.getPoolPegs(id, value, block),
+        this.getPoolPegs(id, value, block, this.at),
         this.api.query.Tokens.TotalIssuance.getValue(id, { at: this.at }),
       ]);
 
@@ -269,20 +265,22 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   private async getPoolPegs(
     poolId: number,
     pool: TStableswap,
-    blockNumber: number
+    blockNumber: number,
+    at: string
   ) {
-    const poolPegs = await this.pegs.get(poolId);
+    const poolPegs = await this.pegs.get(at, poolId);
     if (!poolPegs) {
       return StableSwapPeg.getDefault(pool);
     }
-    const latest = await this.getLatestPegs(pool, poolPegs, blockNumber);
+    const latest = await this.getLatestPegs(pool, poolPegs, blockNumber, at);
     return StableSwapPeg.compute(pool, poolPegs, latest, blockNumber);
   }
 
   private async getLatestPegs(
     pool: TStableswap,
     poolPegs: TStableswapPeg,
-    blockNumber: number
+    blockNumber: number,
+    at: string
   ): Promise<TPegLatest[]> {
     const { source } = poolPegs;
     const assets = pool.assets;
@@ -298,7 +296,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           number,
           number,
         ];
-        const entry = await this.emaOracles.get(name, oracleKey, period);
+        const entry = await this.emaOracles.get(at, name, oracleKey, period);
         if (!entry) {
           throw new Error('EmaOracle missing for ' + name + ' / ' + oracleKey);
         }
@@ -312,7 +310,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
       if (s.type === 'MMOracle') {
         const h160 = s.value.toString();
-        const { price, decimals, updatedAt } = await this.mmOracles.get(h160);
+        const { price, decimals, updatedAt } = await this.mmOracles.get(
+          at,
+          h160
+        );
         const priceDenom = (10n ** BigInt(decimals)).toString();
         const pair = [price.toString(), priceDenom];
         return { pair, updatedAt: updatedAt.toString(), source: s.type };
@@ -709,7 +710,12 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     for (const pool of this.store.pools) {
       const data = this.poolsData.get(pool.id);
       if (data) {
-        const pegs = await this.getPoolPegs(pool.id, data, block.number);
+        const pegs = await this.getPoolPegs(
+          pool.id,
+          data,
+          block.number,
+          block.hash
+        );
         const amplification = this.getPoolAmplification(data, block.number);
         muts.push({
           address: pool.address,

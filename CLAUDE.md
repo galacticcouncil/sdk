@@ -66,6 +66,8 @@ desc: update to latest metadata
 
 Common scopes: `sdk`, `xc`, `desc`, `common`, `scan`. Omit scope for multi-package or repo-wide changes.
 
+Commit messages describe intent — what changed and why, at a high level. Never include implementation details: no file-by-file breakdowns, no function/variable/type names, no "how". Keep bullets few and conceptual.
+
 Automated release commits follow: `RELEASE: Releasing N package(s)`
 
 **Branches:** `feat/description` or `fix/description`

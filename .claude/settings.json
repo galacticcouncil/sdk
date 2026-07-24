@@ -37,7 +37,8 @@
   },
   "instructions": [
     "When editing code, treat all comments as immutable. If code changes make a comment inaccurate, stop and ask for guidance instead of modifying the comment.",
-    "Write JSDoc terse and on-point: a short summary line, a blank line, then `-` bullet points for details, then `@param` lines. One idea per bullet. Never use dense multi-clause prose sentences. Describe the current implementation only — never compare to a previous/old approach or narrate what changed."
+    "Write JSDoc terse and on-point: a short summary line, a blank line, then `-` bullet points for details, then `@param` lines. One idea per bullet. Never use dense multi-clause prose sentences. Describe the current implementation only — never compare to a previous/old approach or narrate what changed.",
+    "Commit messages describe intent (what changed and why) at a high level. Never include implementation details: no file-by-file breakdowns, no function/variable/type names, no 'how'. Keep bullets few and conceptual."
   ],
   "enabledPlugins": {
     "andrej-karpathy-skills@karpathy-skills": true

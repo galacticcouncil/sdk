@@ -10,7 +10,7 @@ import { toHex } from '@polkadot-api/utils';
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { TEmaOracle, TEmaPair } from '../../../oracle';
-import { fmt, QueryBus } from '../../../utils';
+import { fmt } from '../../../utils';
 
 import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolType, PoolLimits, PoolToken, PoolPair } from '../../types';
@@ -34,57 +34,62 @@ const ORACLE_PERIOD = Enum('Short');
 
 // Reserve changes — recompute that asset's slice (balance + state).
 const ASSET_EVENTS = new Set([
+  'AssetRefunded',
+  'AssetWeightCapUpdated',
   'LiquidityAdded',
   'LiquidityRemoved',
   'ProtocolLiquidityRemoved',
-  'AssetRefunded',
   'TradableStateUpdated',
-  'AssetWeightCapUpdated',
 ]);
 
 // Composition changes — full reseed (v1).
 const STRUCTURAL_EVENTS = new Set(['TokenAdded', 'TokenRemoved']);
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
-  private queryBus = new QueryBus();
   private poolAddress = this.getPoolAddress();
 
-  private dynamicFeesConfig = this.queryBus.scope<
+  private dynamicFeesConfig = this.queryCache.scope<
     [number],
     TDynamicFeesConfig | undefined
   >(
     'DynamicFees.AssetFeeConfiguration',
-    (id) =>
-      this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id, {
-        at: this.at,
-      }),
-    (id) => String(id)
-  );
-
-  private dynamicFees = this.queryBus.scope<[number], TDynamicFees | undefined>(
-    'DynamicFees.AssetFee',
-    (id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at: this.at }),
+    (at, id) =>
+      this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id, { at }),
     (id) => String(id),
-    6 * 1000
+    'persistent'
   );
 
-  private maxSlipFee = this.queryBus.scope<[], TSlipFee | undefined>(
+  private dynamicFees = this.queryCache.scope<
+    [number],
+    TDynamicFees | undefined
+  >(
+    'DynamicFees.AssetFee',
+    (at, id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at }),
+    (id) => String(id),
+    'block'
+  );
+
+  private maxSlipFee = this.queryCache.scope<[], TSlipFee | undefined>(
     'Omnipool.SlipFee',
-    () => this.apiNext.query.Omnipool.SlipFee.getValue({ at: this.at }),
-    () => String('slipFee')
+    (at) => this.apiNext.query.Omnipool.SlipFee.getValue({ at }),
+    () => String('slipFee'),
+    'persistent'
   );
 
-  private emaOracles = this.queryBus.scope<[TEmaPair], TEmaOracle | undefined>(
+  private emaOracles = this.queryCache.scope<
+    [TEmaPair],
+    TEmaOracle | undefined
+  >(
     'EmaOracle.Oracles.Short',
-    (pair) =>
+    (at, pair) =>
       this.api.query.EmaOracle.Oracles.getValue(
         ORACLE_NAME,
         pair,
         ORACLE_PERIOD,
-        { at: this.at }
+        { at }
       ),
     (pair) => pair.join(':'),
-    6 * 1000
+    'block'
   );
 
   getPoolType(): PoolType {
@@ -190,11 +195,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   async getPoolFees(pair: PoolPair): Promise<OmniPoolFees> {
     const feeAsset = pair.assetOut;
     const protocolAsset = pair.assetIn;
+    const at = this.blockHash ?? this.at;
 
-    const slipFee = await this.maxSlipFee.get();
+    const slipFee = await this.maxSlipFee.get(at);
     const maxSlipFee = slipFee ?? 0;
 
-    const feeConfiguration = await this.dynamicFeesConfig.get(feeAsset);
+    const feeConfiguration = await this.dynamicFeesConfig.get(at, feeAsset);
     if (feeConfiguration?.type === 'Fixed') {
       const { asset_fee, protocol_fee } = feeConfiguration.value;
       return {
@@ -211,9 +217,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       assetFeeParams,
       protocolFeeParams,
     ] = await Promise.all([
-      this.dynamicFees.get(feeAsset),
-      this.emaOracles.get(getEmaPair(feeAsset)),
-      this.emaOracles.get(getEmaPair(protocolAsset)),
+      this.dynamicFees.get(at, feeAsset),
+      this.emaOracles.get(at, getEmaPair(feeAsset)),
+      this.emaOracles.get(at, getEmaPair(protocolAsset)),
       feeConfiguration
         ? feeConfiguration.value.asset_fee_params
         : this.api.constants.DynamicFees.AssetFeeParameters(),
