@@ -1,4 +1,5 @@
 import {
+  addr,
   AnyChain,
   ConfigService,
   EvmParachain,
@@ -8,10 +9,12 @@ import {
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
-import { EvmClaim } from '../platforms';
+import { EvmClaim, SubstrateClaim } from '../platforms';
 
 import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
+
+const { EvmAddr } = addr;
 
 type NttContext = {
   chain: AnyChain;
@@ -133,8 +136,14 @@ export class WormholeTransfer {
     const destination = this.findNtt(toChain, source.assetKey);
     if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
       const vaaRaw = operation.vaa.raw;
-      const claim = new EvmClaim();
-      redeem = async (from: string) => claim.redeem(from, vaaRaw, destination);
+      redeem = async (from: string) => {
+        if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
+          const claim = await SubstrateClaim.create(toChain);
+          return claim.redeem(from, vaaRaw, destination);
+        }
+        const claim = new EvmClaim();
+        return claim.redeem(from, vaaRaw, destination);
+      };
     }
 
     return {

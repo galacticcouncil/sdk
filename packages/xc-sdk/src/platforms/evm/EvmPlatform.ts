@@ -1,4 +1,5 @@
 import {
+  addr,
   Abi,
   AnyEvmChain,
   AssetAmount,
@@ -6,6 +7,7 @@ import {
   ContractConfig,
   Erc20Client,
   EvmClient,
+  EvmParachain,
 } from '@galacticcouncil/xc-core';
 
 import { EvmTransferFactory } from './transfer';
@@ -17,12 +19,17 @@ import {
 } from './transfer/utils';
 import { EvmCall, EvmDryRunResult } from './types';
 
-import { Platform } from '../types';
+import { Gas, SubstrateEvm } from '../substrate/SubstrateEvm';
+import { Call, Platform } from '../types';
+
+const { EvmAddr } = addr;
 
 export class EvmPlatform implements Platform<ContractConfig> {
+  readonly #chain: AnyEvmChain;
   readonly #client: EvmClient;
 
   constructor(chain: AnyEvmChain) {
+    this.#chain = chain;
     this.#client = chain.evmClient;
   }
 
@@ -31,7 +38,11 @@ export class EvmPlatform implements Platform<ContractConfig> {
     amount: bigint,
     _feeBalance: AssetAmount,
     config: ContractConfig
-  ): Promise<EvmCall> {
+  ): Promise<Call> {
+    if (!EvmAddr.isValid(account) && this.#chain instanceof EvmParachain) {
+      return this.buildSubstrateEvmCall(account, amount, config);
+    }
+
     const contract = EvmTransferFactory.get(this.#client, config);
     const { abi, asset, calldata } = contract;
     const transferCall = {
@@ -76,6 +87,55 @@ export class EvmPlatform implements Platform<ContractConfig> {
       type: CallType.Evm,
       dryRun: () => {},
     } as EvmCall;
+  }
+
+  /**
+   * Build transfer call for a substrate signed origin.
+   *
+   * Wraps the evm contract call(s) in EVM.call extrinsic(s), batching
+   * the erc20 approve when allowance is insufficient (single signature).
+   */
+  private async buildSubstrateEvmCall(
+    account: string,
+    amount: bigint,
+    config: ContractConfig
+  ): Promise<Call> {
+    const chain = this.#chain as EvmParachain;
+    const contract = EvmTransferFactory.get(this.#client, config);
+    const { asset, calldata } = contract;
+
+    const substrateEvm = await SubstrateEvm.create(chain);
+    const transferCall = {
+      to: config.address,
+      data: calldata,
+      value: config.value,
+      gas: Gas.transfer,
+    };
+
+    if (isPrecompile(config) || isNativeEthBridge(config)) {
+      return substrateEvm.buildCall(account, [transferCall]);
+    }
+
+    const source = await chain.getDerivatedAddress(account);
+    const tokenAddress =
+      config.token ??
+      (isSnowbridgeV2(config) ? getSnowbridgeV2TokenAddress(config)! : asset);
+
+    const erc20 = new Erc20Client(this.#client, tokenAddress);
+    const allowance = await erc20.allowance(source, config.address);
+    if (allowance >= amount) {
+      return substrateEvm.buildCall(account, [transferCall]);
+    }
+
+    const approve = erc20.approve(config.address, amount);
+    return substrateEvm.buildCall(account, [
+      {
+        to: tokenAddress,
+        data: approve,
+        gas: Gas.approve,
+      },
+      transferCall,
+    ]);
   }
 
   async estimateFee(
