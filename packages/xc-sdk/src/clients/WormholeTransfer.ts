@@ -1,27 +1,23 @@
-import { acc } from '@galacticcouncil/common';
 import {
-  mrl,
   AnyChain,
   ConfigService,
-  ChainType,
-  EvmChain,
   EvmParachain,
+  NttDef,
+  NttTokenDef,
   Parachain,
-  Precompile,
-  SolanaChain,
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
-import { encoding } from '@wormhole-foundation/sdk-base';
-import { keccak256 } from '@wormhole-foundation/sdk-connect';
-import { deserialize } from '@wormhole-foundation/sdk-definitions';
-
-import { EvmClaim, SolanaClaim, SubstrateClaim } from '../platforms';
+import { EvmClaim } from '../platforms';
 
 import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
 
-const REDEEM_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+type NttContext = {
+  chain: AnyChain;
+  assetKey: string;
+  def: NttTokenDef;
+};
 
 export class WormholeTransfer {
   private parachainId: number;
@@ -58,162 +54,138 @@ export class WormholeTransfer {
     };
   }
 
-  async getWithdraws(address: string): Promise<WhTransfer[]> {
-    const mda = acc.getMultilocationDerivatedAccount(
-      this.parachainId,
-      address,
-      1,
-      true
+  private get parachain(): EvmParachain {
+    const chain = this.chains.find(
+      (c) => c instanceof Parachain && c.parachainId === this.parachainId
     );
-
-    const operations = await this.whScan.getOperations({
-      ...this.filters,
-      address: mda,
-    });
-
-    const result = operations.map(async (o) => {
-      const { content } = o;
-      const { payload, standarizedProperties } = content;
-
-      const status = this.getStatus(o);
-
-      const fromChain = this.chains.find(
-        (c) => c instanceof Parachain && c.parachainId === this.parachainId
-      )!;
-
-      const { toAddress, tokenAddress } = standarizedProperties;
-      const toChain = this.chains.find(
-        (c) =>
-          Wormhole.isKnown(c) &&
-          Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-      )!;
-
-      let redeem;
-      if (status === WhStatus.VaaEmitted && o.vaa) {
-        const { timestamp } = this.getVaaHeader(o.vaa.raw);
-        const vaaRaw = o.vaa.raw;
-
-        if (this.isStuck(timestamp)) {
-          switch (toChain.getType()) {
-            case ChainType.EvmChain:
-              const evmClaim = new EvmClaim(toChain as EvmChain);
-              redeem = async (from: string) => evmClaim.redeem(from, vaaRaw);
-              break;
-            case ChainType.SolanaChain:
-              const solanaClaim = new SolanaClaim(toChain as SolanaChain);
-              redeem = async (from: string) => solanaClaim.redeem(from, vaaRaw);
-              break;
-          }
-        }
-      }
-
-      return {
-        asset: tokenAddress,
-        assetSymbol: o.data.symbol,
-        amount: o.data.tokenAmount,
-        from: address,
-        fromChain: fromChain,
-        to: toAddress,
-        toChain: toChain,
-        status: status,
-        redeem: redeem,
-        operation: o,
-      };
-    });
-
-    return Promise.all(result);
+    return chain as EvmParachain;
   }
 
-  async getDeposits(address: string, to = 'hydration'): Promise<WhTransfer[]> {
+  /**
+   * Get NTT transfers sent from parachain (via wormhole).
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole withdrawals
+   */
+  async getWithdraws(address: string): Promise<WhTransfer[]> {
+    const chainWh = Wormhole.fromChain(this.parachain);
+    const transfers = await this.getTransfers(address);
+    return transfers.filter(
+      (t) => t.operation.emitterChain === chainWh.getWormholeId()
+    );
+  }
+
+  /**
+   * Get NTT transfers received on parachain (via wormhole).
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole deposits
+   */
+  async getDeposits(address: string): Promise<WhTransfer[]> {
+    const chainWh = Wormhole.fromChain(this.parachain);
+    const transfers = await this.getTransfers(address);
+    return transfers.filter(
+      (t) =>
+        t.operation.content.standarizedProperties.toChain ===
+        chainWh.getWormholeId()
+    );
+  }
+
+  /**
+   * Get all NTT transfers of given user.
+   *
+   * Transfers are matched against the NTT token registry by the VAA
+   * emitter (source transceiver) address.
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole transfers
+   */
+  async getTransfers(address: string): Promise<WhTransfer[]> {
+    const h160 = await this.parachain.getDerivatedAddress(address);
+
     const operations = await this.whScan.getOperations({
       ...this.filters,
-      address: Precompile.Bridge,
-      pageSize: '100',
+      address: h160,
     });
 
-    const toChain = this.config.chains.get(to);
-    if (!toChain) {
-      return [];
+    return operations
+      .map((o) => this.toTransfer(o))
+      .filter((t): t is WhTransfer => !!t);
+  }
+
+  private toTransfer(operation: Operation): WhTransfer | undefined {
+    const { content, emitterChain, emitterAddress, sourceChain } = operation;
+    const { standarizedProperties } = content;
+
+    const source = this.findNttByEmitter(emitterChain, emitterAddress.native);
+    if (!source) {
+      return undefined;
     }
 
-    const toParachain = toChain as Parachain;
-    const payload = await mrl.createPayload(toParachain, address);
-    const payloadHex = payload.toHex();
-    const result = operations
-      .filter((o) => {
-        const { content } = o;
-        const { payload } = content;
-        return (
-          payload.payloadType === 3 &&
-          payload.toChain === 16 &&
-          '0x' + payload.payload === payloadHex
-        );
-      })
-      .map(async (o) => {
-        const { content, sourceChain } = o;
-        const { payload, standarizedProperties } = content;
+    const toChain = this.findChainByWormholeId(standarizedProperties.toChain);
+    if (!toChain) {
+      return undefined;
+    }
 
-        const status = this.getStatus(o);
-        const { tokenAddress } = standarizedProperties;
+    const status = this.getStatus(operation);
 
-        const fromChain = this.chains.find(
-          (c) =>
-            Wormhole.isKnown(c) &&
-            Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-        )!;
+    let redeem;
+    const destination = this.findNtt(toChain, source.assetKey);
+    if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
+      const vaaRaw = operation.vaa.raw;
+      const claim = new EvmClaim();
+      redeem = async (from: string) => claim.redeem(from, vaaRaw, destination);
+    }
 
-        const viaChain = this.chains.find(
-          (c) =>
-            Wormhole.isKnown(c) &&
-            Wormhole.fromChain(c).getWormholeId() === payload.toChain
-        )!;
-
-        let redeem;
-        if (status === WhStatus.VaaEmitted && o.vaa) {
-          const { timestamp } = this.getVaaHeader(o.vaa.raw);
-          const vaaRaw = o.vaa.raw;
-
-          if (this.isStuck(timestamp)) {
-            const claim = new SubstrateClaim(viaChain as EvmParachain);
-            redeem = async (address: string) =>
-              claim.redeemMrlViaXcm(address, vaaRaw);
-          }
-        }
-
-        return {
-          asset: tokenAddress,
-          assetSymbol: o.data.symbol,
-          amount: o.data.tokenAmount,
-          from: sourceChain.from,
-          fromChain: fromChain,
-          to: address,
-          toChain: toChain,
-          status: status,
-          redeem: redeem,
-          operation: o,
-        };
-      });
-
-    return Promise.all(result);
-  }
-
-  private isStuck(emittedAt: number) {
-    const now = Date.now();
-    return now >= emittedAt * 1000 + REDEEM_THRESHOLD;
-  }
-
-  private getVaaHeader(vaaRaw: string) {
-    const vaaBytes = encoding.b64.decode(vaaRaw);
-    const vaa = deserialize('Uint8Array', vaaBytes);
     return {
-      timestamp: vaa.timestamp,
-      emitterChain: vaa.emitterChain,
-      emitterAddress: vaa.emitterAddress.toString(),
-      sequence: vaa.sequence,
-      payload: vaa.payload,
-      hash: vaa.hash,
-      id: keccak256(vaa.hash),
+      asset: standarizedProperties.tokenAddress,
+      assetSymbol: operation.data.symbol,
+      amount: operation.data.tokenAmount,
+      from: sourceChain.from,
+      fromChain: source.chain,
+      to: standarizedProperties.toAddress,
+      toChain: toChain,
+      status: status,
+      redeem: redeem,
+      operation: operation,
     };
+  }
+
+  private findChainByWormholeId(wormholeId: number): AnyChain | undefined {
+    return this.chains.find(
+      (c) =>
+        Wormhole.isKnown(c) &&
+        Wormhole.fromChain(c).getWormholeId() === wormholeId
+    );
+  }
+
+  private findNtt(chain: AnyChain, assetKey: string): NttTokenDef | undefined {
+    if ('ntt' in chain && !!chain['ntt']) {
+      return (chain.ntt as NttDef)[assetKey];
+    }
+    return undefined;
+  }
+
+  private findNttByEmitter(
+    wormholeId: number,
+    emitter: string
+  ): NttContext | undefined {
+    const chain = this.findChainByWormholeId(wormholeId);
+    if (!chain || !('ntt' in chain) || !chain['ntt']) {
+      return undefined;
+    }
+
+    const registry = chain.ntt as NttDef;
+    const entry = Object.entries(registry).find(
+      ([_, def]) =>
+        def.transceiver.wormhole.toLowerCase() === emitter.toLowerCase()
+    );
+
+    if (entry) {
+      const [assetKey, def] = entry;
+      return { chain, assetKey, def };
+    }
+    return undefined;
   }
 
   private getStatus(operation: Operation) {

@@ -56,9 +56,9 @@ export class EvmPlatform implements Platform<ContractConfig> {
       return transferCall;
     }
 
-    const tokenAddress = isSnowbridgeV2(config)
-      ? getSnowbridgeV2TokenAddress(config)!
-      : asset;
+    const tokenAddress =
+      config.token ??
+      (isSnowbridgeV2(config) ? getSnowbridgeV2TokenAddress(config)! : asset);
 
     const erc20 = new Erc20Client(this.#client, tokenAddress);
     const allowance = await erc20.allowance(account, config.address);
