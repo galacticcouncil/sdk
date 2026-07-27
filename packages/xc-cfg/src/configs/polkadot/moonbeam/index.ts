@@ -1,9 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import {
-  dai,
   dai_mwh,
-  eth,
   glmr,
   hdx,
   sol,
@@ -15,9 +13,8 @@ import {
   wbtc_mwh,
   weth_mwh,
 } from '../../../assets';
-import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
-import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
-import { Tag } from '../../../tags';
+import { assetHub, hydration, moonbeam } from '../../../chains';
+import { ContractBuilder } from '../../../builders';
 
 import { toHydrationErc20Template, toHydrationXcTemplate } from './templates';
 
@@ -82,67 +79,6 @@ const toAssetHub: AssetRoute[] = [
       },
     },
     contract: ContractBuilder().PolkadotXcm().transferAssetsToPara32(),
-  }),
-];
-
-const toEthereumViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: weth_mwh,
-      fee: {
-        asset: glmr,
-      },
-      destinationFee: weth_mwh,
-    },
-    destination: {
-      chain: ethereum,
-      asset: eth,
-      fee: {
-        amount: FeeAmountBuilder()
-          .Wormhole()
-          .TokenRelayer()
-          .calculateRelayerFee(),
-        asset: eth,
-      },
-    },
-    contract: ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder()
-          .Erc20()
-          .approve((ctx) => ctx.getTokenRelayer()),
-        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
-      ]),
-    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
-  }),
-  new AssetRoute({
-    source: {
-      asset: dai_mwh,
-      fee: {
-        asset: glmr,
-      },
-      destinationFee: dai_mwh,
-    },
-    destination: {
-      chain: ethereum,
-      asset: dai,
-      fee: {
-        amount: FeeAmountBuilder()
-          .Wormhole()
-          .TokenRelayer()
-          .calculateRelayerFee(),
-        asset: dai,
-      },
-    },
-    contract: ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder()
-          .Erc20()
-          .approve((ctx) => ctx.getTokenRelayer()),
-        ContractBuilder().Wormhole().TokenRelayer().transferTokensWithRelay(),
-      ]),
-    tags: [Tag.Mrl, Tag.Wormhole, Tag.Relayer],
   }),
 ];
 

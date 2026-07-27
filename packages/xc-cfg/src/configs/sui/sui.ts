@@ -1,36 +1,12 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { sui } from '../../assets';
-import { sui_chain, hydration, moonbeam } from '../../chains';
-import { MoveBuilder } from '../../builders';
-import { Tag } from '../../tags';
+import { sui_chain } from '../../chains';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: sui,
-      destinationFee: sui,
-    },
-    destination: {
-      chain: hydration,
-      asset: sui,
-      fee: {
-        amount: 0,
-        asset: sui,
-      },
-    },
-    move: MoveBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferNativeWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-];
+// NTT (Native Token Transfers) routes are registered here once
+// per-token manager deployments land on Sui.
+const toHydrationViaNtt: AssetRoute[] = [];
 
 export const suiConfig = new ChainRoutes({
   chain: sui_chain,
-  routes: [...toHydrationViaWormhole],
+  routes: [...toHydrationViaNtt],
 });

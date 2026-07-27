@@ -34,13 +34,7 @@ export function isNativeEthBridge(config: ContractConfig): boolean {
     config.func === 'sendToken' &&
     config.args[0] === '0x0000000000000000000000000000000000000000';
 
-  const isWormholeNative =
-    config.module === 'TokenBridge' &&
-    ['wrapAndTransferETHWithPayload', 'wrapAndTransferETH'].includes(
-      config.func
-    );
-
-  return isWormholeNative || isSnowbridgeNative || isSnowbridgeV1Native;
+  return isSnowbridgeNative || isSnowbridgeV1Native;
 }
 
 export function isPrecompile(config: ContractConfig): boolean {

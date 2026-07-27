@@ -1,86 +1,12 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { jito_sol, prime, sol } from '../../assets';
-import { solana, hydration, moonbeam } from '../../chains';
-import { ProgramBuilder } from '../../builders';
-import { Tag } from '../../tags';
+import { solana } from '../../chains';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: sol,
-      destinationFee: sol,
-    },
-    destination: {
-      chain: hydration,
-      asset: sol,
-      fee: {
-        amount: 0,
-        asset: sol,
-      },
-    },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferNativeWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  new AssetRoute({
-    source: {
-      asset: jito_sol,
-      fee: {
-        asset: sol,
-      },
-      destinationFee: jito_sol,
-    },
-    destination: {
-      chain: hydration,
-      asset: jito_sol,
-      fee: {
-        amount: 0,
-        asset: jito_sol,
-      },
-    },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokenWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  new AssetRoute({
-    source: {
-      asset: prime,
-      fee: {
-        asset: sol,
-      },
-      destinationFee: prime,
-    },
-    destination: {
-      chain: hydration,
-      asset: prime,
-      fee: {
-        amount: 0,
-        asset: prime,
-      },
-    },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokenWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-];
+// NTT (Native Token Transfers) routes are registered here once
+// per-token manager deployments land on Solana.
+const toHydrationViaNtt: AssetRoute[] = [];
 
 export const solanaConfig = new ChainRoutes({
   chain: solana,
-  routes: [...toHydrationViaWormhole],
+  routes: [...toHydrationViaNtt],
 });

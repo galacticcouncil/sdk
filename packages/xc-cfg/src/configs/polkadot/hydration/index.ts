@@ -8,19 +8,15 @@ import {
   bnc,
   cfg_new,
   cru,
-  dai,
   dai_mwh,
   dot,
   ena,
   eth,
-  eurc,
-  eurc_mwh,
   ewt,
   glmr,
   hdx,
   ibtc,
   intr,
-  jito_sol,
   ksm,
   ldo,
   link,
@@ -28,9 +24,7 @@ import {
   neuro,
   paxg,
   pen,
-  prime,
   sol,
-  sui,
   sky,
   susde,
   tbtc,
@@ -44,21 +38,18 @@ import {
   usdt_eth,
   vastr,
   vdot,
-  wbtc,
   wbtc_mwh,
   weth_mwh,
   wsteth,
   wud,
   lbtc,
   susds_mwh,
-  susds,
 } from '../../../assets';
 import {
   ajuna,
   assetHub,
   assetHubCex,
   astar,
-  base,
   bifrost,
   crust,
   energywebx,
@@ -69,8 +60,6 @@ import {
   mythos,
   neuroweb,
   pendulum,
-  solana,
-  sui_chain,
   unique,
 } from '../../../chains';
 import {
@@ -89,7 +78,6 @@ import {
   toTransferTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
-  viaWormholeBridgeTemplate,
 } from './templates';
 
 const toAssetHub: AssetRoute[] = [
@@ -323,19 +311,6 @@ const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
 
-const toBaseViaWormhole: AssetRoute[] = [
-  viaWormholeBridgeTemplate(eurc_mwh, eurc, base),
-];
-
-const toEthereumViaWormhole: AssetRoute[] = [
-  viaWormholeBridgeTemplate(dai_mwh, dai, ethereum),
-  viaWormholeBridgeTemplate(weth_mwh, eth, ethereum),
-  viaWormholeBridgeTemplate(wbtc_mwh, wbtc, ethereum),
-  viaWormholeBridgeTemplate(usdt_mwh, usdt, ethereum),
-  viaWormholeBridgeTemplate(usdc_mwh, usdc, ethereum),
-  viaWormholeBridgeTemplate(susds_mwh, susds, ethereum),
-];
-
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
   viaSnowbridgeTemplate(aave, aave, ethereum),
@@ -377,16 +352,6 @@ const toEthereumViaSnowbridgeV1: AssetRoute[] = [
   viaSnowbridgeV1Template(usdt_eth, usdt, ethereum),
 ];
 
-const toSolanaViaWormhole: AssetRoute[] = [
-  viaWormholeBridgeTemplate(sol, sol, solana),
-  viaWormholeBridgeTemplate(jito_sol, jito_sol, solana),
-  viaWormholeBridgeTemplate(prime, prime, solana),
-];
-
-const toSuiViaWormhole: AssetRoute[] = [
-  viaWormholeBridgeTemplate(sui, sui, sui_chain),
-];
-
 const toCex: AssetRoute[] = [
   toHubTemplate(dot, assetHubCex),
   toHubTemplate(usdt, assetHubCex),
@@ -399,13 +364,11 @@ export const hydrationConfig = new ChainRoutes({
     ...toAjuna,
     ...toAssetHub,
     ...toAstar,
-    ...toBaseViaWormhole,
     ...toBifrost,
     ...toCex,
     ...toCrust,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaSnowbridgeV1,
-    ...toEthereumViaWormhole,
     ...toInterlay,
     ...toEnergywebx,
     ...toKusamaAssethub,
@@ -413,8 +376,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toMythos,
     ...toNeuroweb,
     ...toPendulum,
-    ...toSolanaViaWormhole,
-    ...toSuiViaWormhole,
     ...toUnique,
   ],
 });

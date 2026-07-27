@@ -391,10 +391,5 @@ export const moonbeam = new EvmParachain({
   parachainId: 2004,
   ss58Format: 1284,
   usesH160Acc: true,
-  wormhole: {
-    id: 16,
-    coreBridge: '0xC8e2b0cD52Cf01b0Ce87d389Daa3d414d4cE29f3',
-    tokenBridge: '0xb1731c586ca89a23809861c6103f0b96b3f57d92',
-  },
   ws: 'wss://wss.api.moonbeam.network',
 });
