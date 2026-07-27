@@ -1,7 +1,6 @@
 import { Enum } from 'polkadot-api';
 
 import { TradeOrder, TradeOrderType } from '../sor';
-import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
 import { Transaction, Tx } from './types';
@@ -44,6 +43,17 @@ export class IntentOrderTxBuilder extends TxBuilder {
     return this._slippagePct;
   }
 
+  /**
+   * Clamp the order's block period to the runtime minimum — the intent
+   * pallet rejects anything below `MinDcaPeriod` (InvalidDcaPeriod) and
+   * the constant differs per network (e.g. 15 on lark vs the scheduler's
+   * 6-block TWAP interval).
+   */
+  private async getDcaPeriod(tradePeriod: number): Promise<number> {
+    const minPeriod = await this.apiIce.constants.Intent.MinDcaPeriod();
+    return Math.max(tradePeriod, minPeriod);
+  }
+
   async build(): Promise<Tx> {
     const { type } = this.order;
     switch (type) {
@@ -74,7 +84,7 @@ export class IntentOrderTxBuilder extends TxBuilder {
       amount_out: assetOutEd,
       slippage: this.slippagePct * 10000,
       budget: amountIn,
-      period: tradePeriod,
+      period: await this.getDcaPeriod(tradePeriod),
     });
 
     let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
@@ -96,22 +106,25 @@ export class IntentOrderTxBuilder extends TxBuilder {
       amountIn,
       assetIn,
       assetOut,
+      assetOutEd,
       tradeAmountIn,
-      tradeAmountOut,
       tradePeriod,
     } = this.order;
 
-    const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
-    const minAmountOut = tradeAmountOut - slippage;
-
+    // No absolute per-slice floor (ED is the lowest the pallet accepts,
+    // functionally min_amount_out=0). Per-slice protection is the pallet's
+    // adaptive oracle limit driven by `slippage`, recomputed at every
+    // resolve — a floor frozen from the setup quote would stop filling
+    // (and, with no max_retries, zombie forever) once the order's own
+    // price impact or market drift exceeds the tolerance.
     const dca = Enum('Dca', {
       asset_in: assetIn,
       asset_out: assetOut,
       amount_in: tradeAmountIn,
-      amount_out: minAmountOut,
+      amount_out: assetOutEd,
       slippage: this.slippagePct * 10000,
       budget: amountIn,
-      period: tradePeriod,
+      period: await this.getDcaPeriod(tradePeriod),
     });
 
     let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
