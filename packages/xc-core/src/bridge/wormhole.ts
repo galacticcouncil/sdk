@@ -8,29 +8,25 @@ import { AnyChain } from '../chain';
 export type WormholeDef = {
   id: number;
   coreBridge: string;
-  tokenBridge: string;
-  tokenRelayer?: string;
+  executor?: string;
   platformAddressFormat?: PlatformAddressFormat;
 };
 
 export class Wormhole {
   readonly id: number;
   readonly coreBridge: string;
-  readonly tokenBridge: string;
-  readonly tokenRelayer?: string;
+  readonly executor?: string;
   readonly platformAddressFormat?: PlatformAddressFormat;
 
   constructor({
     id,
     coreBridge,
-    tokenBridge,
-    tokenRelayer,
+    executor,
     platformAddressFormat,
   }: WormholeDef) {
     this.id = id;
     this.coreBridge = coreBridge;
-    this.tokenBridge = tokenBridge;
-    this.tokenRelayer = tokenRelayer;
+    this.executor = executor;
     this.platformAddressFormat = platformAddressFormat;
   }
 
@@ -53,15 +49,11 @@ export class Wormhole {
     return this.coreBridge;
   }
 
-  getTokenBridge(): string {
-    return this.tokenBridge;
-  }
-
-  getTokenRelayer(): string | undefined {
-    if (this.tokenRelayer) {
-      return this.tokenRelayer;
+  getExecutor(): string {
+    if (this.executor) {
+      return this.executor;
     }
-    throw new Error('Wormhole relayer configuration missing');
+    throw new Error('Wormhole executor configuration missing');
   }
 
   /**

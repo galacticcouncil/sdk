@@ -12,7 +12,7 @@ import {
 import { ChainType } from './Chain';
 import { Parachain, ParachainParams } from './Parachain';
 
-import { Wormhole, WormholeDef } from '../bridge';
+import { NttDef, Wormhole, WormholeDef } from '../bridge';
 import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
@@ -24,6 +24,7 @@ export interface EvmParachainParams extends ParachainParams<EvmParachainBalanceT
   evmChain: EvmChainDef;
   evmResolver?: EvmResolver;
   rpcs?: string[];
+  ntt?: NttDef;
   wormhole?: WormholeDef;
 }
 
@@ -33,12 +34,14 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
   readonly evmChain: EvmChainDef;
   readonly evmResolver?: EvmResolver;
   readonly rpcs?: string[];
+  readonly ntt?: NttDef;
   readonly wormhole?: Wormhole;
 
   constructor({
     evmChain,
     evmResolver,
     rpcs,
+    ntt,
     wormhole,
     ...others
   }: EvmParachainParams) {
@@ -46,6 +49,7 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
     this.evmChain = evmChain;
     this.evmResolver = evmResolver;
     this.rpcs = rpcs;
+    this.ntt = ntt;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
