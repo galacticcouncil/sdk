@@ -57,9 +57,9 @@ config object a route references:
 | `program/ProgramConfigBuilder`     | Solana program call                          |
 | `balance/`, `min/`                 | balance query id, min amounts                |
 
-`xc-cfg/builders/` implements the concrete ones — notably `contracts/Wormhole/TokenBridge.ts`,
-`contracts/Basejump.ts`, `contracts/snowbridge/`, and `extrinsics/xcm/*` (the XCM message builders,
-incl. `buildParaERC20Received`, MRL helpers).
+`xc-cfg/builders/` implements the concrete ones — notably `contracts/Wormhole/Ntt.ts` (see
+[ntt.md](ntt.md)), `contracts/Basejump.ts`, `contracts/snowbridge/`, and `extrinsics/xcm/*` (the
+XCM message builders, incl. `buildParaERC20Received`).
 
 ## xc-core layout
 
@@ -67,10 +67,10 @@ incl. `buildParaERC20Received`, MRL helpers).
 asset/      Asset, AssetAmount
 chain/      Chain (+ Evm/Parachain/EvmParachain/Solana/Sui), chain/dex/ (DEX registry types)
 config/     ConfigService, ConfigBuilder, definition/* (route + builder DSL above)
-evm/        EvmClient, Erc20Client, EvmResolver, precompile, abi/* (TokenBridge, Basejump, Gmp,
-            PolkadotXcm, Snowbridge, Weth, Erc20, Batch, Meta) ← canonical EVM ABIs for the stack
-bridge/     basejump, snowbridge, wormhole  (bridge-kind definitions)
-utils/      mrl, multilocation, codec, address
+evm/        EvmClient, Erc20Client, EvmResolver, precompile, abi/* (NttManager, WormholeTransceiver,
+            Basejump, PolkadotXcm, Snowbridge, Weth, Erc20, Batch, Meta) ← canonical EVM ABIs
+bridge/     basejump, ntt, snowbridge, wormhole  (bridge-kind definitions)
+utils/      multilocation, codec, address
 ```
 
 ## xc-cfg layout (the data)
@@ -106,18 +106,19 @@ EVM `id` is a string (address); parachain `id` is numeric — branch on `typeof`
 | Need                          | Look in                                                                 |
 | ----------------------------- | ----------------------------------------------------------------------- | ----------- |
 | Asset id on a chain           | `xc-cfg` chain (`getAssetId`), data in `chains/<eco>/<chain>.ts`        |
-| EVM ABI for a bridge contract | `xc-core/evm/abi/*` (TokenBridge, Basejump, Gmp, …)                     |
+| EVM ABI for a bridge contract | `xc-core/evm/abi/*` (NttManager, WormholeTransceiver, Basejump, …)      |
 | How an asset bridges X→Y      | `xc-cfg/configs/<eco>/<chain>/` route + `builders/contracts             | extrinsics` |
 | Cross-chain registry/query    | `xc-core/config/ConfigService` + `ConfigBuilder`                        |
 | Execute a transfer            | `xc-sdk/Wallet` + `transfer/`                                           |
-| XCM message construction      | `xc-cfg/builders/extrinsics/xcm/*`, `xc-core/utils/{mrl,multilocation}` |
+| XCM message construction      | `xc-cfg/builders/extrinsics/xcm/*`, `xc-core/utils/multilocation`       |
+| Wormhole NTT deployments      | `xc-cfg/src/ntt.ts` + chain `ntt` field — see [ntt.md](ntt.md)          |
 
 ## Conventions / gotchas
 
 - `Asset` carries no id — always resolve through a `Chain` (`getAssetId`).
 - `ChainAssetId` is polymorphic (EVM address string vs parachain numeric) — branch on `typeof`.
-- Multiple representations of "the same" token coexist as distinct Assets/ids (e.g. Hydration `weth`
-  Wormhole-route `1000189` vs `eth` Snowbridge `34`) — pick the one matching the route the value
-  travels; don't assume one WETH.
+- Multiple representations of "the same" token coexist as distinct Assets/ids (e.g. Hydration `usdc`
+  AssetHub-route `22` vs `usdc_eth` Snowbridge-route `1000766`) — pick the one matching the route
+  the value travels; don't assume one USDC.
 - Data (`xc-cfg`) is separate from engine (`xc-core`) — new chains/assets/routes are data edits.
 - sdk-next and the xc stack are independent; only `common`/`descriptors` are shared.
