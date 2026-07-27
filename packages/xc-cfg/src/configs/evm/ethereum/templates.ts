@@ -2,10 +2,10 @@ import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
 import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
-import { hydration, moonbeam, assetHub } from '../../../chains';
+import { hydration, assetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
-export function toHydrationViaWormholeTemplate(
+export function toHydrationViaNttTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
@@ -15,7 +15,6 @@ export function toHydrationViaWormholeTemplate(
       fee: {
         asset: eth,
       },
-      destinationFee: assetIn,
     },
     destination: {
       chain: hydration,
@@ -25,12 +24,8 @@ export function toHydrationViaWormholeTemplate(
         asset: assetOut,
       },
     },
-    contract: ContractBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokensWithPayload()
-      .viaMrl({ moonchain: moonbeam }),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    contract: ContractBuilder().Wormhole().Ntt().transfer(),
+    tags: [Tag.Wormhole, Tag.Ntt],
   });
 }
 

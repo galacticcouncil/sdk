@@ -26,6 +26,7 @@ import {
   weth,
   wsteth,
 } from '../../assets';
+import { ethereumNtt } from '../../ntt';
 
 import { mainnet as evmChain } from 'viem/chains';
 
@@ -150,9 +151,10 @@ export const ethereum = new EvmChain({
     id: 1,
     gateway: '0x27ca963c279c93801941e1eb8799c23f407d68e7',
   },
+  ntt: ethereumNtt,
   wormhole: {
     id: 2,
     coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
-    tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
+    executor: '0x84EEe8dBa37C36947397E1E11251cA9A06Fc6F8a',
   },
 });

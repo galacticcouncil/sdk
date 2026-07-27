@@ -12,6 +12,15 @@ export class HydrationEvmResolver implements EvmResolver {
 
     const decodedBytes = info.publicKey;
     const prefixBytes = Buffer.from(ETH_PREFIX);
+    const isEvmBound =
+      prefixBytes.equals(decodedBytes.subarray(0, prefixBytes.length)) &&
+      decodedBytes.subarray(-8).every((b) => b === 0);
+    if (!isEvmBound) {
+      throw new Error(
+        `Account ${ss58Addr} is not an EVM (ETH\\0 prefixed) account`
+      );
+    }
+
     const addressBytes = decodedBytes.slice(prefixBytes.length, -8);
     return '0x' + Buffer.from(addressBytes).toString('hex');
   }

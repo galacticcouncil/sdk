@@ -39,6 +39,6 @@ export const base = new EvmChain({
   wormhole: {
     id: 30,
     coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',
-    tokenBridge: '0x8d2de8d2f73F1F4cAB472AC9A881C9b123C79627',
+    executor: '0x9E1936E91A4a5AE5A5F75fFc472D6cb8e93597ea',
   },
 });
