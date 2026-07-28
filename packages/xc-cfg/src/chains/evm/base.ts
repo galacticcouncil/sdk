@@ -12,7 +12,6 @@ export const base = new EvmChain({
   id: 8453,
   key: 'base',
   name: 'Base',
-  ntt: baseNtt,
   assetsData: [
     {
       asset: eth,
@@ -42,5 +41,6 @@ export const base = new EvmChain({
     id: 30,
     coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',
     executor: '0x9E1936E91A4a5AE5A5F75fFc472D6cb8e93597ea',
+    ntt: baseNtt,
   },
 });

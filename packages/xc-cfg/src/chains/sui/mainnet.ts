@@ -20,10 +20,10 @@ export const sui_chain = new SuiChain({
   balance: SuiBalanceType.Native,
   ecosystem: Ecosystem.Sui,
   explorer: 'https://suiscan.xyz/',
-  ntt: suiNtt,
   wormhole: {
     id: 21,
     coreBridge:
       '0xaeab97f96cf9877fee2883315d459552b2b921edc16d7ceac6eab944dd88919c',
+    ntt: suiNtt,
   },
 });

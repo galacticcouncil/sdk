@@ -37,10 +37,10 @@ export const solana = new SolanaChain({
     http: ['https://wispy-palpable-market.solana-mainnet.quiknode.pro'],
     webSocket: ['wss://wispy-palpable-market.solana-mainnet.quiknode.pro'],
   },
-  ntt: solanaNtt,
   wormhole: {
     id: 1,
     coreBridge: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
+    ntt: solanaNtt,
     platformAddressFormat: 'base58',
   },
 });

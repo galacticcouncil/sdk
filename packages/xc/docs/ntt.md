@@ -27,7 +27,7 @@ Deployments are declared per chain, keyed by asset key:
   `{ token, manager, transceiver: { wormhole }, emitter? }`.
 - Data: [xc-cfg/src/ntt.ts](packages/xc-cfg/src/ntt.ts) (`baseNtt`, `ethereumNtt`,
   `hydrationNtt`, `solanaNtt`, `suiNtt`), wired into the chain defs via the `ntt`
-  field (`EvmChain`/`EvmParachain`/`SolanaChain`/`SuiChain` param).
+  field of the `wormhole` definition (`WormholeDef`).
 - Lookup: `Ntt.fromChain(chain, asset)` / `Ntt.isKnown(chain, asset)` /
   `Ntt.find(chain, assetKey)` / `Ntt.findByEmitter(chain, emitter)`.
 

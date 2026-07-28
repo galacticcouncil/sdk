@@ -3,12 +3,15 @@ import {
   UniversalAddress,
 } from '@wormhole-foundation/sdk-connect';
 
+import type { NttDef } from './ntt';
+
 import { AnyChain } from '../chain';
 
 export type WormholeDef = {
   id: number;
   coreBridge: string;
   executor?: string;
+  ntt?: NttDef;
   platformAddressFormat?: PlatformAddressFormat;
 };
 
@@ -16,17 +19,20 @@ export class Wormhole {
   readonly id: number;
   readonly coreBridge: string;
   readonly executor?: string;
+  readonly ntt: NttDef;
   readonly platformAddressFormat?: PlatformAddressFormat;
 
   constructor({
     id,
     coreBridge,
     executor,
+    ntt,
     platformAddressFormat,
   }: WormholeDef) {
     this.id = id;
     this.coreBridge = coreBridge;
     this.executor = executor;
+    this.ntt = ntt ?? {};
     this.platformAddressFormat = platformAddressFormat;
   }
 

@@ -15,7 +15,6 @@ import {
 import {
   Basejump,
   BasejumpDef,
-  NttDef,
   Snowbridge,
   SnowbridgeDef,
   Wormhole,
@@ -29,7 +28,6 @@ export interface EvmChainParams
   id: number;
   rpcs?: string[];
   basejump?: BasejumpDef;
-  ntt?: NttDef;
   snowbridge?: SnowbridgeDef;
   wormhole?: WormholeDef;
 }
@@ -41,7 +39,6 @@ export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
   readonly id: number;
   readonly rpcs?: string[];
   readonly basejump?: Basejump;
-  readonly ntt?: NttDef;
   readonly snowbridge?: Snowbridge;
   readonly wormhole?: Wormhole;
 
@@ -50,7 +47,6 @@ export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
     id,
     rpcs,
     basejump,
-    ntt,
     snowbridge,
     wormhole,
     ...others
@@ -60,7 +56,6 @@ export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
     this.id = id;
     this.rpcs = rpcs;
     this.basejump = basejump && new Basejump(basejump);
-    this.ntt = ntt;
     this.snowbridge = snowbridge && new Snowbridge(snowbridge);
     this.wormhole = wormhole && new Wormhole(wormhole);
   }

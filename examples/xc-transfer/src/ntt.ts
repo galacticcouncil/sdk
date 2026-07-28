@@ -2,8 +2,8 @@ import {
   Asset,
   AssetRoute,
   ChainRoutes,
-  NttDef,
   NttTokenDef,
+  Wormhole,
 } from '@galacticcouncil/xc-core';
 import { builders, tags } from '@galacticcouncil/xc-cfg';
 
@@ -74,8 +74,8 @@ active.forEach(([key, { decimals, assetId, def }]) => {
     decimals: decimals,
     id: assetId ?? def.token,
   });
-  if ('ntt' in chain && chain.ntt) {
-    (chain.ntt as NttDef)[TOKEN.key] = def;
+  if (Wormhole.isKnown(chain)) {
+    Wormhole.fromChain(chain).ntt[TOKEN.key] = def;
   }
 });
 

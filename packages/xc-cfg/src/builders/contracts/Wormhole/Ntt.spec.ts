@@ -5,7 +5,7 @@ import {
   ContractConfig,
   ContractConfigBuilderParams,
   EvmChain,
-  NttDef,
+  Wormhole,
 } from '@galacticcouncil/xc-core';
 
 import { AccountId } from '@polkadot-api/substrate-bindings';
@@ -61,10 +61,12 @@ const buildTransferCtx = (asset: Asset, amount = 1000000n) => {
   } as ContractConfigBuilderParams;
 };
 
+const ethereumNtt = Wormhole.fromChain(ethereum).ntt;
+
 describe('Ntt contract builder', () => {
   beforeAll(() => {
-    (ethereum.ntt as NttDef)[usdc.key] = USDC_NTT;
-    (ethereum.ntt as NttDef)[aave.key] = AAVE_NTT;
+    ethereumNtt[usdc.key] = USDC_NTT;
+    ethereumNtt[aave.key] = AAVE_NTT;
     jest.spyOn(EvmChain.prototype, 'evmClient', 'get').mockReturnValue({
       getProvider: () => ({
         readContract: async () => [[0n], 0n],
@@ -73,8 +75,8 @@ describe('Ntt contract builder', () => {
   });
 
   afterAll(() => {
-    delete (ethereum.ntt as NttDef)[usdc.key];
-    delete (ethereum.ntt as NttDef)[aave.key];
+    delete ethereumNtt[usdc.key];
+    delete ethereumNtt[aave.key];
     jest.restoreAllMocks();
   });
 
@@ -105,12 +107,14 @@ describe('Ntt contract builder', () => {
       expect(config.args[2]).toBe(RECIPIENT_32);
     });
 
+    // Live EVMAccounts.AccountExtension query - cold rpc handshake
+    // regularly exceeds the default 5s budget.
     it('should reject native (non EVM bound) ss58 account', async () => {
       const ctx = buildTransferCtx(usdc);
       ctx.address = toNativeSs58();
       await expect(Ntt().transfer().build(ctx)).rejects.toThrow(
         'is not an EVM'
       );
-    });
+    }, 30_000);
   });
 });

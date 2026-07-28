@@ -1,3 +1,5 @@
+import { Wormhole } from './wormhole';
+
 import { Asset } from '../asset';
 import { AnyChain } from '../chain';
 
@@ -5,7 +7,7 @@ import { AnyChain } from '../chain';
  * NTT (Native Token Transfers) per-token deployment on a chain.
  *
  * Each NTT token has its own manager & transceiver contracts. Tokens
- * are declared per chain via the chain `ntt` definition, keyed by
+ * are declared per chain via the wormhole `ntt` definition, keyed by
  * asset key.
  */
 export type NttTokenDef = {
@@ -35,8 +37,8 @@ function isSameAddress(a: string, b: string): boolean {
 export class Ntt {
   /** Token deployment on a chain, or undefined when not registered. */
   static find(chain: AnyChain, assetKey: string): NttTokenDef | undefined {
-    if ('ntt' in chain && !!chain['ntt']) {
-      return (chain.ntt as NttDef)[assetKey];
+    if (Wormhole.isKnown(chain)) {
+      return Wormhole.fromChain(chain).ntt[assetKey];
     }
     return undefined;
   }
@@ -46,10 +48,10 @@ export class Ntt {
     chain: AnyChain,
     emitter: string
   ): { assetKey: string; def: NttTokenDef } | undefined {
-    if (!('ntt' in chain) || !chain['ntt']) {
+    if (!Wormhole.isKnown(chain)) {
       return undefined;
     }
-    const registry = chain.ntt as NttDef;
+    const registry = Wormhole.fromChain(chain).ntt;
     const entry = Object.entries(registry).find(([_, def]) =>
       isSameAddress(def.emitter ?? def.transceiver.wormhole, emitter)
     );
