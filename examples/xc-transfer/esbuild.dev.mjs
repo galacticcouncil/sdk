@@ -7,6 +7,7 @@ const plugins = [wasmLoader({ mode: 'deferred' })];
 const options = {
   entryPoints: [
     'src/index.ts',
+    'src/ntt.ts',
     'src/swap.ts',
     'src/redeem.ts',
     'src/scan.ts',
