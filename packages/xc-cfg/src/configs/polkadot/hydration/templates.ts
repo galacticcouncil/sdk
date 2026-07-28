@@ -23,9 +23,9 @@ import { Tag } from '../../../tags';
 import { fee } from './configs';
 
 export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
-export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
+export const MRL_XCM_FEE = 3; // Destination fee (< 0.1) + Remote execution fee (< 0.9), padded so fee swap amount_in clears source ED (1 HDX)
 
-export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
+export const GLMR_MIN_DEST_FEE = 3; // Minimum GLMR fee to meet swap threshold (swap amount_in must clear source ED of 1 HDX)
 export const HUB_EXT_USDT_DEST_FEE = 0.02;
 
 const isDestinationFeeSwapSupported = (
