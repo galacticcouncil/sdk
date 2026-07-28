@@ -5,12 +5,14 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { eth, eurc, usdc } from '../../assets';
+import { baseNtt } from '../../ntt';
 import { base as evmChain } from 'viem/chains';
 
 export const base = new EvmChain({
   id: 8453,
   key: 'base',
   name: 'Base',
+  ntt: baseNtt,
   assetsData: [
     {
       asset: eth,

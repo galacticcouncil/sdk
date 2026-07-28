@@ -16,6 +16,12 @@ import { NttDef } from '@galacticcouncil/xc-core';
  *   },
  * };
  */
+export const baseNtt: NttDef = {};
+
 export const ethereumNtt: NttDef = {};
 
 export const hydrationNtt: NttDef = {};
+
+export const solanaNtt: NttDef = {};
+
+export const suiNtt: NttDef = {};

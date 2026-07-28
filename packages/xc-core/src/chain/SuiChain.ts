@@ -12,7 +12,7 @@ import {
   ChainType,
 } from './Chain';
 
-import { Wormhole, WormholeDef } from '../bridge';
+import { NttDef, Wormhole, WormholeDef } from '../bridge';
 
 const SUI_NATIVE = 'SUI';
 const SUI_DECIMALS = 9;
@@ -20,6 +20,7 @@ const SUI_DECIMALS = 9;
 export interface SuiChainParams
   extends ChainParams<ChainAssetData, SuiBalanceType> {
   id: string;
+  ntt?: NttDef;
   wormhole?: WormholeDef;
 }
 
@@ -27,11 +28,13 @@ export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
   private readonly balanceClient = new SuiBalanceClient(this);
 
   readonly id: string;
+  readonly ntt?: NttDef;
   readonly wormhole?: Wormhole;
 
-  constructor({ id, wormhole, ...others }: SuiChainParams) {
+  constructor({ id, ntt, wormhole, ...others }: SuiChainParams) {
     super({ ...others });
     this.id = id;
+    this.ntt = ntt;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 

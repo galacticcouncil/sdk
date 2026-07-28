@@ -13,7 +13,7 @@ import {
   ChainType,
 } from './Chain';
 
-import { Wormhole, WormholeDef } from '../bridge';
+import { NttDef, Wormhole, WormholeDef } from '../bridge';
 
 const SOLANA_NATIVE = 'SOL';
 const SOLANA_DECIMALS = 9;
@@ -22,6 +22,7 @@ export interface SolanaChainParams
   extends ChainParams<ChainAssetData, SolanaBalanceType> {
   id: number;
   rpcUrls: ChainRpcs;
+  ntt?: NttDef;
   wormhole?: WormholeDef;
 }
 
@@ -30,12 +31,14 @@ export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
 
   readonly id: number;
   readonly rpcUrls: ChainRpcs;
+  readonly ntt?: NttDef;
   readonly wormhole?: Wormhole;
 
-  constructor({ id, rpcUrls, wormhole, ...others }: SolanaChainParams) {
+  constructor({ id, rpcUrls, ntt, wormhole, ...others }: SolanaChainParams) {
     super({ ...others });
     this.id = id;
     this.rpcUrls = rpcUrls;
+    this.ntt = ntt;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 

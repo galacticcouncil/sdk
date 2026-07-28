@@ -1,4 +1,28 @@
-import { fromBase64 } from '@mysten/bcs';
+import { CallType } from '@galacticcouncil/xc-core';
+
+import { SuiClient } from '@mysten/sui/client';
+import { Transaction } from '@mysten/sui/transactions';
+import { fromBase64, toBase64 } from '@mysten/bcs';
+
+import { SuiCall } from './types';
+
+/** Build a serialized sui call (base64 tx bytes + humanized commands). */
+export async function buildSuiCall(
+  from: string,
+  tx: Transaction,
+  client: SuiClient
+): Promise<SuiCall> {
+  tx.setSender(from);
+  const txBytes = await tx.build({ client });
+  const txJson = await tx.toJSON();
+  const commands = resolveCommandsTyped(JSON.parse(txJson));
+  return {
+    from: from,
+    commands: commands,
+    data: toBase64(txBytes),
+    type: CallType.Sui,
+  } as SuiCall;
+}
 
 type NumberMode = 'string' | 'number' | 'bigint';
 type Options = {

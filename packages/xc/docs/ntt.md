@@ -24,10 +24,15 @@ no Moonbeam hop, no MRL payloads, no wrapped `_mwh` assets.
 Deployments are declared per chain, keyed by asset key:
 
 - Type: [NttDef/NttTokenDef](packages/xc-core/src/bridge/ntt.ts) —
-  `{ token, manager, transceiver: { wormhole } }`.
-- Data: [xc-cfg/src/ntt.ts](packages/xc-cfg/src/ntt.ts) (`ethereumNtt`, `hydrationNtt`),
-  wired into the chain defs via the `ntt` field (`EvmChain`/`EvmParachain` param).
-- Lookup: `Ntt.fromChain(chain, asset)` / `Ntt.isKnown(chain, asset)`.
+  `{ token, manager, transceiver: { wormhole }, emitter? }`.
+- Data: [xc-cfg/src/ntt.ts](packages/xc-cfg/src/ntt.ts) (`baseNtt`, `ethereumNtt`,
+  `hydrationNtt`, `solanaNtt`, `suiNtt`), wired into the chain defs via the `ntt`
+  field (`EvmChain`/`EvmParachain`/`SolanaChain`/`SuiChain` param).
+- Lookup: `Ntt.fromChain(chain, asset)` / `Ntt.isKnown(chain, asset)` /
+  `Ntt.find(chain, assetKey)` / `Ntt.findByEmitter(chain, emitter)`.
+
+Fields are platform-flavored: `token` = erc20 contract / spl mint / sui coin type;
+`manager` & `transceiver.wormhole` = contract address / program id / sui state object id.
 
 Registry contract (breaks silently if violated):
 
@@ -35,12 +40,14 @@ Registry contract (breaks silently if violated):
    destination deployment with the *source* asset key — chain-local key variants
    (the old `usdc` vs `usdc_mwh` convention) would make the destination lookup miss and
    the redeem callback silently vanish.
-2. **`transceiver.wormhole` must be the VAA emitter address.** Transfer history matching
-   compares it to the wormholescan `emitterAddress.native`. For EVM chains that is the
-   transceiver contract address; for a future Solana entry it is the program's **emitter
-   PDA**, not the program id.
-3. `token` is the ERC20 the manager pulls via `transferFrom` — it is threaded into
-   `ContractConfig.token` so the wallet can issue the allowance to the manager.
+2. **History matching compares the VAA emitter** (wormholescan `emitterAddress.native`)
+   to `emitter ?? transceiver.wormhole`. For EVM chains the transceiver contract IS the
+   emitter; on Solana the emitter is a **PDA** of the transceiver program, on Sui the
+   transceiver's **EmitterCap object id** — set the `emitter` field for both. Hex
+   compares case-insensitive, base58 exact.
+3. On EVM sources, `token` is the ERC20 the manager pulls via `transferFrom` — it is
+   threaded into `ContractConfig.token` so the wallet can issue the allowance to the
+   manager.
 
 Chain-side cross-check: hydration-node `pallet-evm-accounts` keeps
 `NttMinters: StorageMap<AssetId, EvmAddress>` — the on-chain registry of managers allowed
@@ -92,12 +99,33 @@ registered transceiver. Destination deployment is looked up by the source asset 
 (registry rule 1).
 
 Redeem is offered as soon as the VAA is emitted (`WhStatus.VaaEmitted`) and dispatches on
-the claimer address:
+the destination chain type & claimer address:
 
-- H160 → [EvmClaim](packages/xc-sdk/src/platforms/evm/EvmClaim.ts) —
+- EVM chain → [EvmClaim](packages/xc-sdk/src/platforms/evm/EvmClaim.ts) —
   `WormholeTransceiver.receiveMessage(vaa)` on the destination.
 - ss58 + EvmParachain → [SubstrateClaim](packages/xc-sdk/src/platforms/substrate/SubstrateClaim.ts) —
   the same calldata wrapped in `EVM.call` (bound accounts, `Gas.redeem` ceiling).
+- Solana → [SolanaClaim](packages/xc-sdk/src/platforms/solana/SolanaClaim.ts) — via
+  `@wormhole-foundation/sdk-solana-ntt` (post VAA + receive/redeem/release); returns
+  multiple calls to sign & send in order, jito tip on the final one.
+- Sui → [SuiClaim](packages/xc-sdk/src/platforms/sui/SuiClaim.ts) — single move
+  transaction mirroring the reference sui NTT sdk (`parse_and_verify` →
+  `validate_message` → `ntt::redeem` → `ntt::release`), built with the v1 mysten
+  client (the published sui NTT sdk requires @mysten/sui v2 grpc, incompatible with
+  this stack).
+
+Claim caveats (inherited from the upstream SDKs, verified against 7.2.0):
+
+- **Solana**: the payer should be the VAA recipient — upstream only creates the
+  *payer's* ATA while release targets the *recipient's*, so claiming for a third party
+  fails if their ATA is missing. No already-redeemed guard (re-claiming builds a tx
+  that fails on-chain). Worst case post-VAA + redeem is 5-6 txs vs the jito 5-tx
+  bundle cap. `SolanaNtt` program version is the constructor default `3.0.0` — fine
+  for 2.x/3.x managers, would need `SolanaNtt.getVersion` for a 1.x deployment.
+- **Sui**: single attestation only — threshold >= 2 multi-transceiver deployments
+  would abort (`redeem` returns early before votes reach threshold). A transfer
+  queued by the inbound rate limit aborts the whole tx (`ECantReleaseYet`) — same as
+  upstream, which just retries later.
 
 If the inbound rate limit queues a delivered transfer, `completeInboundQueuedTransfer`
 (manager call, digest-keyed) releases it after the limit window. Digest derivation from
@@ -129,17 +157,34 @@ Two distinct contracts — don't conflate:
 Wiring the executor path is the main open decision: wrapper addresses in chain defs, an
 executor-flavored transfer builder, and a signed-quote fetch client.
 
+## Support matrix
+
+| Chain | Send (source side) | Tracking | Manual claim |
+| --- | --- | --- | --- |
+| Ethereum / Base | yes (`Ntt().transfer()`) | yes | yes (`EvmClaim`) |
+| Hydration | yes (evm or `EVM.call`-wrapped) | yes | yes (`EvmClaim`/`SubstrateClaim`) |
+| Solana | destination only | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
+| Sui | destination only | yes | yes (`SuiClaim`) |
+
+All chains are wired as NTT *destinations*; sending *from* Solana/Sui needs NTT
+program/move transfer builders (the deleted TokenBridge ones were platform-specific) —
+pending, tracked below.
+
 ## Open items
 
 - Executor wiring (above) — until then, transfers complete via manual redeem only.
-- Registry population — `ethereumNtt`/`hydrationNtt` are empty until per-token
+- Registry population — all registries (`xc-cfg/src/ntt.ts`) are empty until per-token
   NttManager deployments land.
-- Solana/Sui — structurally unsupported: no `ntt` field on `SolanaChain`/`SuiChain`, no
-  claim classes (the deleted ones were TokenBridge-specific). When routes return, reuse
-  upstream `@wormhole-foundation/sdk-solana-ntt` for instruction building on top of the
-  surviving tx scaffolding (`SolanaLilJit`, `serializeV0`, `SolanaSigner`); fix the
-  case-insensitive emitter matching (base58 is case-sensitive) and store the emitter PDA
-  in the registry.
+- Solana/Sui **outbound** transfer builders (`program`/`move` route configs) via
+  `@wormhole-foundation/sdk-solana-ntt` on top of the surviving tx scaffolding
+  (`SolanaLilJit`, `serializeV0`, `SolanaSigner`).
+- Dependency pin: `sdk-solana-ntt`/`sdk-definitions-ntt` 7.2.0 peer on wormhole sdk
+  `^5.0.0` while this stack is on 6.1.4 (which added Hydration/chain 73). Lock-driven
+  installs (`npm i`/`npm ci` with the committed lockfile) work as-is; only a fresh
+  no-lockfile resolve hits ERESOLVE and needs `--legacy-peer-deps` (npm `overrides`
+  can't silence peer-range conflicts). Goes away with the first upstream release cut
+  after native-token-transfers PR #928, then bump the pins. Publishing waits on that
+  release.
 - Queued-transfer digest derivation (NTT message digest from the VAA payload) — unlocks
   `completeInboundQueuedTransfer` from transfer history.
 - `estimateFee` surfaces gas only; the delivery price (`value`) is not shown as a fee.

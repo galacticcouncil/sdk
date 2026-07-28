@@ -5,6 +5,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { sui } from '../../assets';
+import { suiNtt } from '../../ntt';
 
 export const sui_chain = new SuiChain({
   id: '0x35834a8a',
@@ -19,6 +20,7 @@ export const sui_chain = new SuiChain({
   balance: SuiBalanceType.Native,
   ecosystem: Ecosystem.Sui,
   explorer: 'https://suiscan.xyz/',
+  ntt: suiNtt,
   wormhole: {
     id: 21,
     coreBridge:

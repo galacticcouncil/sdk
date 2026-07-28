@@ -3,13 +3,15 @@ import {
   AnyChain,
   ConfigService,
   EvmParachain,
-  NttDef,
+  Ntt,
   NttTokenDef,
   Parachain,
+  SolanaChain,
+  SuiChain,
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
-import { EvmClaim, SubstrateClaim } from '../platforms';
+import { EvmClaim, SolanaClaim, SubstrateClaim, SuiClaim } from '../platforms';
 
 import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
@@ -133,10 +135,18 @@ export class WormholeTransfer {
     const status = this.getStatus(operation);
 
     let redeem;
-    const destination = this.findNtt(toChain, source.assetKey);
+    const destination = Ntt.find(toChain, source.assetKey);
     if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
       const vaaRaw = operation.vaa.raw;
       redeem = async (from: string) => {
+        if (toChain instanceof SolanaChain) {
+          const claim = new SolanaClaim(toChain);
+          return claim.redeem(from, vaaRaw, destination);
+        }
+        if (toChain instanceof SuiChain) {
+          const claim = new SuiClaim(toChain);
+          return claim.redeem(from, vaaRaw, destination);
+        }
         if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
           const claim = await SubstrateClaim.create(toChain);
           return claim.redeem(from, vaaRaw, destination);
@@ -168,31 +178,18 @@ export class WormholeTransfer {
     );
   }
 
-  private findNtt(chain: AnyChain, assetKey: string): NttTokenDef | undefined {
-    if ('ntt' in chain && !!chain['ntt']) {
-      return (chain.ntt as NttDef)[assetKey];
-    }
-    return undefined;
-  }
-
   private findNttByEmitter(
     wormholeId: number,
     emitter: string
   ): NttContext | undefined {
     const chain = this.findChainByWormholeId(wormholeId);
-    if (!chain || !('ntt' in chain) || !chain['ntt']) {
+    if (!chain) {
       return undefined;
     }
 
-    const registry = chain.ntt as NttDef;
-    const entry = Object.entries(registry).find(
-      ([_, def]) =>
-        def.transceiver.wormhole.toLowerCase() === emitter.toLowerCase()
-    );
-
+    const entry = Ntt.findByEmitter(chain, emitter);
     if (entry) {
-      const [assetKey, def] = entry;
-      return { chain, assetKey, def };
+      return { chain, ...entry };
     }
     return undefined;
   }

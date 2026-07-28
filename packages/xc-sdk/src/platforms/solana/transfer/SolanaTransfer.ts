@@ -1,7 +1,6 @@
 import { ProgramConfig } from '@galacticcouncil/xc-core';
 
 import {
-  AddressLookupTableAccount,
   Connection,
   ComputeBudgetProgram,
   MessageV0,
@@ -11,6 +10,8 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
+
+import { getLookupTables } from '../utils';
 
 const DEFAULT_PRIORITY_FEE_PERCENTILE = 0.5;
 const DEFAULT_PERCENTILE_MULTIPLE = 2;
@@ -179,18 +180,10 @@ export class SolanaTransfer {
   }
 
   private async getTxAccounts(message: MessageV0): Promise<PublicKey[]> {
-    const luts = (
-      await Promise.all(
-        message.addressTableLookups.map((acc) =>
-          this.connection.getAddressLookupTable(acc.accountKey)
-        )
-      )
-    )
-      .map((lut) => lut.value)
-      .filter((val) => val !== null) as AddressLookupTableAccount[];
+    const luts = await getLookupTables(this.connection, message);
 
     const keys = message.getAccountKeys({
-      addressLookupTableAccounts: luts ?? undefined,
+      addressLookupTableAccounts: luts,
     });
 
     return message.compiledInstructions

@@ -9,25 +9,61 @@ import { AnyChain } from '../chain';
  * asset key.
  */
 export type NttTokenDef = {
-  /** Token contract (or precompile) address on the chain */
+  /** Token address: erc20 contract, spl mint or sui coin type */
   token: string;
-  /** NttManager contract address */
+  /** NttManager: contract address, program id or sui state object id */
   manager: string;
-  /** Transceiver contract addresses */
+  /** Transceiver addresses, keyed by transceiver kind */
   transceiver: {
+    /** Contract address, program id or sui state object id */
     wormhole: string;
   };
+  /** VAA emitter, when different from the transceiver address (Solana pda) */
+  emitter?: string;
 };
 
 export type NttDef = Record<string, NttTokenDef>;
 
+/** Hex addresses match case-insensitive, base58 (Solana) is exact. */
+function isSameAddress(a: string, b: string): boolean {
+  if (a.startsWith('0x') && b.startsWith('0x')) {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return a === b;
+}
+
 export class Ntt {
-  static fromChain(chain: AnyChain, asset: Asset): NttTokenDef {
+  /** Token deployment on a chain, or undefined when not registered. */
+  static find(chain: AnyChain, assetKey: string): NttTokenDef | undefined {
     if ('ntt' in chain && !!chain['ntt']) {
-      const def = (chain.ntt as NttDef)[asset.key];
-      if (def) {
-        return def;
-      }
+      return (chain.ntt as NttDef)[assetKey];
+    }
+    return undefined;
+  }
+
+  /** Token deployment matching a VAA emitter address, with its asset key. */
+  static findByEmitter(
+    chain: AnyChain,
+    emitter: string
+  ): { assetKey: string; def: NttTokenDef } | undefined {
+    if (!('ntt' in chain) || !chain['ntt']) {
+      return undefined;
+    }
+    const registry = chain.ntt as NttDef;
+    const entry = Object.entries(registry).find(([_, def]) =>
+      isSameAddress(def.emitter ?? def.transceiver.wormhole, emitter)
+    );
+    if (entry) {
+      const [assetKey, def] = entry;
+      return { assetKey, def };
+    }
+    return undefined;
+  }
+
+  static fromChain(chain: AnyChain, asset: Asset): NttTokenDef {
+    const def = Ntt.find(chain, asset.key);
+    if (def) {
+      return def;
     }
     throw new Error(
       asset.key + ' is not supported in NTT on ' + chain.name + '.'
@@ -35,8 +71,6 @@ export class Ntt {
   }
 
   static isKnown(chain: AnyChain, asset: Asset): boolean {
-    return (
-      'ntt' in chain && !!chain['ntt'] && !!(chain.ntt as NttDef)[asset.key]
-    );
+    return !!Ntt.find(chain, asset.key);
   }
 }
