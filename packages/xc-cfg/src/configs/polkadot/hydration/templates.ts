@@ -11,7 +11,6 @@ import {
 
 import { dot, glmr, usdt } from '../../../assets';
 import {
-  BalanceBuilder,
   ContractBuilder,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
@@ -113,11 +112,7 @@ export function toHubErc20Template(asset: Asset, hub: Parachain): AssetRoute {
   return new AssetRoute({
     source: {
       asset,
-      balance: BalanceBuilder().evm().erc20(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: hub,

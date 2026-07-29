@@ -69,14 +69,9 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: hollar,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
