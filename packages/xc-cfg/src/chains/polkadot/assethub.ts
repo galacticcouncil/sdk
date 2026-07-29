@@ -6,7 +6,7 @@ import {
   SubstrateMinType,
 } from '@galacticcouncil/xc-core';
 
-import { dot, ksm, myth, usdc, usdt, wud } from '../../assets';
+import { dot, hollar, ksm, myth, usdc, usdt, wud } from '../../assets';
 
 const config = {
   assetsData: [
@@ -76,6 +76,24 @@ const config = {
       },
     },
     // foreign assets
+    {
+      asset: hollar,
+      decimals: 18,
+      min: 0.02,
+      xcmLocation: {
+        parents: 1,
+        interior: {
+          X2: [
+            {
+              Parachain: 2034,
+            },
+            {
+              GeneralIndex: 222,
+            },
+          ],
+        },
+      },
+    },
     {
       asset: myth,
       decimals: 18,

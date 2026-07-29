@@ -85,6 +85,11 @@ export const hdx = new Asset({
   originSymbol: 'HDX',
 });
 
+export const hollar = new Asset({
+  key: 'hollar',
+  originSymbol: 'HOLLAR',
+});
+
 export const ibtc = new Asset({
   key: 'ibtc',
   originSymbol: 'IBTC',
@@ -283,6 +288,7 @@ export const assets: Asset[] = [
   eth,
   glmr,
   hdx,
+  hollar,
   ibtc,
   intr,
   ksm,
