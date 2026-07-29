@@ -25,8 +25,7 @@ Deployments are declared per chain, keyed by asset key:
 
 - Type: [NttDef/NttTokenDef](packages/xc-core/src/bridge/ntt.ts) —
   `{ token, manager, transceiver: { wormhole }, emitter? }`.
-- Data: [xc-cfg/src/ntt.ts](packages/xc-cfg/src/ntt.ts) (`baseNtt`, `ethereumNtt`,
-  `hydrationNtt`, `solanaNtt`, `suiNtt`), wired into the chain defs via the `ntt`
+- Data: declared inline in each chain def (`xc-cfg/src/chains/**`) via the `ntt`
   field of the `wormhole` definition (`WormholeDef`).
 - Lookup: `Ntt.fromChain(chain, asset)` / `Ntt.isKnown(chain, asset)` /
   `Ntt.find(chain, assetKey)` / `Ntt.findByEmitter(chain, emitter)`.
@@ -173,7 +172,7 @@ pending, tracked below.
 ## Open items
 
 - Executor wiring (above) — until then, transfers complete via manual redeem only.
-- Registry population — all registries (`xc-cfg/src/ntt.ts`) are empty until per-token
+- Registry population — all chain `wormhole.ntt` registries are empty until per-token
   NttManager deployments land.
 - Solana/Sui **outbound** transfer builders (`program`/`move` route configs) via
   `@wormhole-foundation/sdk-solana-ntt` on top of the surviving tx scaffolding

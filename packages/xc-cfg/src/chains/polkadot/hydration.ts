@@ -58,7 +58,6 @@ import {
   tbtc,
   lbtc,
 } from '../../assets';
-import { hydrationNtt } from '../../ntt';
 import { HydrationEvmResolver } from '../../resolvers';
 
 const evmResolver = new HydrationEvmResolver();
@@ -1252,7 +1251,7 @@ export const hydration = new EvmParachain({
     id: 73,
     coreBridge: '0x3792a6d63c31941B2805181771795D9176fA82A1',
     executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
-    ntt: hydrationNtt,
+    ntt: {},
   },
   ws: rpcWebsocketList,
   rpcs: rpcHttpList,

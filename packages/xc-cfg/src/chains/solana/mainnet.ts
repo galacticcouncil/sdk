@@ -5,7 +5,6 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { jito_sol, prime, sol } from '../../assets';
-import { solanaNtt } from '../../ntt';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -40,7 +39,7 @@ export const solana = new SolanaChain({
   wormhole: {
     id: 1,
     coreBridge: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
-    ntt: solanaNtt,
+    ntt: {},
     platformAddressFormat: 'base58',
   },
 });

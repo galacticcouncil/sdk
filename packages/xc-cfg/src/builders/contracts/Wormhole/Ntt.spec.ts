@@ -5,6 +5,7 @@ import {
   ContractConfig,
   ContractConfigBuilderParams,
   EvmChain,
+  Parachain,
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
@@ -72,6 +73,18 @@ describe('Ntt contract builder', () => {
         readContract: async () => [[0n], 0n],
       }),
     } as any);
+    // No bound accounts: EVMAccounts.AccountExtension resolves empty
+    jest.spyOn(Parachain.prototype, 'client', 'get').mockReturnValue({
+      getUnsafeApi: () => ({
+        query: {
+          EVMAccounts: {
+            AccountExtension: {
+              getValue: async () => undefined,
+            },
+          },
+        },
+      }),
+    } as any);
   });
 
   afterAll(() => {
@@ -107,14 +120,12 @@ describe('Ntt contract builder', () => {
       expect(config.args[2]).toBe(RECIPIENT_32);
     });
 
-    // Live EVMAccounts.AccountExtension query - cold rpc handshake
-    // regularly exceeds the default 5s budget.
     it('should reject native (non EVM bound) ss58 account', async () => {
       const ctx = buildTransferCtx(usdc);
       ctx.address = toNativeSs58();
       await expect(Ntt().transfer().build(ctx)).rejects.toThrow(
         'is not an EVM'
       );
-    }, 30_000);
+    });
   });
 });
