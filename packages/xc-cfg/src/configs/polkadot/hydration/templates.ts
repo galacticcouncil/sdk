@@ -200,7 +200,7 @@ export function viaNttTemplate(
       asset: assetOut,
       fee: {
         amount: 0,
-        asset: assetOut,
+        asset: assetIn,
       },
     },
     contract: ContractBuilder().Wormhole().Ntt().transfer(),

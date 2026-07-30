@@ -21,7 +21,10 @@ export function toHydrationViaNttTemplate(
       asset: assetOut,
       fee: {
         amount: 0,
-        asset: assetOut,
+        // Ntt delivers the full amount - nothing is taken on the far side.
+        // Denominated in the source asset: the destination fee balance is
+        // read on the source chain, where assetOut may not be registered.
+        asset: assetIn,
       },
     },
     contract: ContractBuilder().Wormhole().Ntt().transfer(),

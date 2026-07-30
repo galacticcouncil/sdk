@@ -33,10 +33,12 @@ export class HydrationEvmResolver implements EvmResolver {
     if (!extension) {
       return false;
     }
-    // Bound account id = truncated H160 (20 bytes) + stored last 12 bytes
+    // Bound account id = truncated H160 (20 bytes) + stored last 12 bytes.
+    // Both sides are wrapped: the browser Buffer polyfill rejects a plain
+    // Uint8Array argument, unlike node.
     const publicKey = AccountId().enc(ss58Addr);
     const last12 = this.asBytes(extension);
-    return Buffer.from(last12).equals(publicKey.subarray(20));
+    return Buffer.from(last12).equals(Buffer.from(publicKey.subarray(20)));
   }
 
   private asBytes(fixedBinary: unknown): Uint8Array {

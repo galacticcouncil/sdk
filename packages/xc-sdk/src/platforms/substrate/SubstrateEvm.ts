@@ -71,6 +71,9 @@ export class SubstrateEvm {
         max_priority_fee_per_gas: undefined,
         nonce: undefined,
         access_list: [],
+        // Required since the eip-7702 runtime upgrade - omitting it fails
+        // the papi compatibility check, not just encoding.
+        authorization_list: [],
       })
     );
 

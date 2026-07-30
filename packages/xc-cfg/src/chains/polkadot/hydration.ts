@@ -64,7 +64,7 @@ const evmResolver = new HydrationEvmResolver();
 
 const rpcHttpList = [
   'https://hydration-rpc.n.dwellir.com',
-  'https://hydration.dotters.network',
+  'https://rpc.kril.hydration.cloud',
   'https://hydration.rotko.net',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
@@ -72,7 +72,7 @@ const rpcHttpList = [
 
 const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
-  'wss://hydration.dotters.network',
+  'wss://rpc.kril.hydration.cloud',
   'wss://hydration.rotko.net',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',

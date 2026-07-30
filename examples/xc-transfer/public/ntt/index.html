@@ -5,10 +5,96 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>XC Transfer Example - NTT</title>
+    <style>
+      body {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: 0;
+        padding: 24px;
+        background: #14161c;
+        color: #e6e8ee;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 13px;
+        opacity: 0.7;
+      }
+      input {
+        font: inherit;
+        width: 96px;
+        padding: 6px 8px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        padding: 8px 14px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: #4c8dff;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      button.primary {
+        background: #2a4a8a;
+        border-color: #4c8dff;
+      }
+      pre {
+        margin: 16px 0 0;
+        padding: 12px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 60vh;
+        overflow: auto;
+      }
+    </style>
   </head>
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <h1>NTT &mdash; DAI</h1>
+
+    <div class="row">
+      <label for="amount">Amount</label>
+      <input id="amount" value="0.1" />
+    </div>
+
+    <!-- One button per route the sdk registers under the Ntt tag. -->
+    <div class="row" id="routes"></div>
+
+    <div class="row">
+      <button id="claim-out">Claim on Ethereum</button>
+      <button id="claim-in">Claim on Hydration</button>
+    </div>
+
+    <pre id="log"></pre>
+
     <script>
       new EventSource('/esbuild').addEventListener('change', () =>
         location.reload()
