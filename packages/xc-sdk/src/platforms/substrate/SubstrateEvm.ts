@@ -11,6 +11,7 @@ const U64_MASK = (1n << 64n) - 1n;
 // Conservative gas ceilings, unused gas is refunded by the evm runner.
 export const Gas = {
   approve: 200_000n,
+  deposit: 200_000n,
   transfer: 1_200_000n,
   redeem: 2_000_000n,
   queued: 600_000n,

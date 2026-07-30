@@ -30,7 +30,8 @@
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
-    "link": "npm ln"
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
     "@galacticcouncil/xc-core": "^1.3.0",

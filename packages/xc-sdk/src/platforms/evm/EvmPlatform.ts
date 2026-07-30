@@ -10,6 +10,8 @@ import {
   EvmParachain,
 } from '@galacticcouncil/xc-core';
 
+import { type Abi as TAbi, encodeFunctionData } from 'viem';
+
 import { EvmTransferFactory } from './transfer';
 import {
   isNativeEthBridge,
@@ -19,10 +21,38 @@ import {
 } from './transfer/utils';
 import { EvmCall, EvmDryRunResult } from './types';
 
-import { Gas, SubstrateEvm } from '../substrate/SubstrateEvm';
+import { EvmCallData, Gas, SubstrateEvm } from '../substrate/SubstrateEvm';
 import { Call, Platform } from '../types';
 
 const { EvmAddr } = addr;
+
+/** WETH.deposit() calldata, wraps the attached native value. */
+const WETH_DEPOSIT = encodeFunctionData({
+  abi: Abi.Weth,
+  functionName: 'deposit',
+});
+
+/**
+ * Evm gas ceilings for the steps a fee estimate can't measure - the transfer
+ * reverts while a prerequisite is still pending, and the prerequisites don't
+ * exist on chain yet. Realistic upper bounds (weth deposit ~28k, erc20
+ * approve ~46k, ntt transfer ~300k), unlike the fatter {@link Gas} ceilings
+ * an EVM.call has to declare upfront. Overstating only shrinks the sendable
+ * max, gas being metered on chain.
+ */
+const FeeGas = {
+  deposit: 60_000n,
+  approve: 70_000n,
+  transfer: 500_000n,
+} as const;
+
+/** Prerequisite step, signed standalone (evm) or batched (substrate). */
+type Prerequisite = EvmCallData & {
+  abi: TAbi;
+  /** Gas to charge for in a fee estimate, {@link EvmCallData.gas} being the EVM.call ceiling. */
+  feeGas: bigint;
+  allowance?: bigint;
+};
 
 export class EvmPlatform implements Platform<ContractConfig> {
   readonly #chain: AnyEvmChain;
@@ -36,11 +66,28 @@ export class EvmPlatform implements Platform<ContractConfig> {
   async buildCall(
     account: string,
     amount: bigint,
-    _feeBalance: AssetAmount,
+    feeBalance: AssetAmount,
     config: ContractConfig
   ): Promise<Call> {
+    const [call] = await this.buildCalls(account, amount, feeBalance, config);
+    return call;
+  }
+
+  /**
+   * Build the ordered call sequence of a transfer.
+   *
+   * All but the last call are prerequisites the sender has to sign first,
+   * each becoming unnecessary once executed - [wrap?, approve?, transfer].
+   * A substrate signed origin batches them into a single call.
+   */
+  async buildCalls(
+    account: string,
+    amount: bigint,
+    _feeBalance: AssetAmount,
+    config: ContractConfig
+  ): Promise<Call[]> {
     if (!EvmAddr.isValid(account) && this.#chain instanceof EvmParachain) {
-      return this.buildSubstrateEvmCall(account, amount, config);
+      return [await this.buildSubstrateEvmCall(account, amount, config)];
     }
 
     const contract = EvmTransferFactory.get(this.#client, config);
@@ -64,36 +111,87 @@ export class EvmPlatform implements Platform<ContractConfig> {
     } as EvmCall;
 
     if (isPrecompile(config) || isNativeEthBridge(config)) {
-      return transferCall;
+      return [transferCall];
     }
 
+    const prerequisites = await this.getPrerequisites(
+      account,
+      amount,
+      config,
+      asset
+    );
+
+    const calls = prerequisites.map(
+      (p) =>
+        ({
+          abi: JSON.stringify(p.abi),
+          allowance: p.allowance,
+          data: p.data as `0x${string}`,
+          from: account as `0x${string}`,
+          to: p.to as `0x${string}`,
+          type: CallType.Evm,
+          value: p.value,
+          dryRun: () => {},
+        }) as EvmCall
+    );
+
+    return [...calls, transferCall];
+  }
+
+  /**
+   * Account dependent steps required before the transfer call can execute.
+   *
+   * Ordered - a native gas source is wrapped into the erc20 the contract
+   * pulls, which the contract is then approved to spend.
+   */
+  private async getPrerequisites(
+    owner: string,
+    amount: bigint,
+    config: ContractConfig,
+    asset: string
+  ): Promise<Prerequisite[]> {
     const tokenAddress =
       config.token ??
       (isSnowbridgeV2(config) ? getSnowbridgeV2TokenAddress(config)! : asset);
 
     const erc20 = new Erc20Client(this.#client, tokenAddress);
-    const allowance = await erc20.allowance(account, config.address);
-    if (allowance >= amount) {
-      return transferCall;
+    const [wrapped, allowance] = await Promise.all([
+      config.wrapNative ? erc20.balanceOf(owner) : 0n,
+      erc20.allowance(owner, config.address),
+    ]);
+
+    const prerequisites: Prerequisite[] = [];
+
+    if (config.wrapNative && wrapped < amount) {
+      prerequisites.push({
+        abi: Abi.Weth,
+        to: tokenAddress,
+        data: WETH_DEPOSIT,
+        value: amount - wrapped,
+        gas: Gas.deposit,
+        feeGas: FeeGas.deposit,
+      });
     }
 
-    const approve = erc20.approve(config.address, amount);
-    return {
-      abi: JSON.stringify(Abi.Erc20),
-      allowance: allowance,
-      data: approve as `0x${string}`,
-      from: account as `0x${string}`,
-      to: tokenAddress as `0x${string}`,
-      type: CallType.Evm,
-      dryRun: () => {},
-    } as EvmCall;
+    if (allowance < amount) {
+      prerequisites.push({
+        abi: Abi.Erc20,
+        allowance: allowance,
+        to: tokenAddress,
+        data: erc20.approve(config.address, amount),
+        gas: Gas.approve,
+        feeGas: FeeGas.approve,
+      });
+    }
+
+    return prerequisites;
   }
 
   /**
    * Build transfer call for a substrate signed origin.
    *
-   * Wraps the evm contract call(s) in EVM.call extrinsic(s), batching
-   * the erc20 approve when allowance is insufficient (single signature).
+   * Wraps the evm contract call(s) in EVM.call extrinsic(s), batching the
+   * native wrap & erc20 approve when required (single signature).
    */
   private async buildSubstrateEvmCall(
     account: string,
@@ -117,27 +215,29 @@ export class EvmPlatform implements Platform<ContractConfig> {
     }
 
     const source = await chain.getDerivatedAddress(account);
-    const tokenAddress =
-      config.token ??
-      (isSnowbridgeV2(config) ? getSnowbridgeV2TokenAddress(config)! : asset);
+    const prerequisites = await this.getPrerequisites(
+      source,
+      amount,
+      config,
+      asset
+    );
 
-    const erc20 = new Erc20Client(this.#client, tokenAddress);
-    const allowance = await erc20.allowance(source, config.address);
-    if (allowance >= amount) {
-      return substrateEvm.buildCall(account, [transferCall]);
-    }
-
-    const approve = erc20.approve(config.address, amount);
-    return substrateEvm.buildCall(account, [
-      {
-        to: tokenAddress,
-        data: approve,
-        gas: Gas.approve,
-      },
-      transferCall,
-    ]);
+    return substrateEvm.buildCall(account, [...prerequisites, transferCall]);
   }
 
+  /**
+   * Fee of a transfer, in the route's fee asset.
+   *
+   * Gas of the transfer call, unless the amount is drawn from the very
+   * balance that pays for the transfer ({@link ContractConfig.wrapNative}).
+   * Then the call value and the gas of every prerequisite are part of it
+   * too - max being derived as balance - fee, an incomplete fee leaves
+   * nothing to wrap, deliver & execute with.
+   *
+   * For an erc20 source the value stays out: it is either reported as the
+   * route's destination fee (snowbridge) or drawn from a balance the amount
+   * doesn't compete for.
+   */
   async estimateFee(
     account: string,
     amount: bigint,
@@ -145,9 +245,36 @@ export class EvmPlatform implements Platform<ContractConfig> {
     config: ContractConfig
   ): Promise<AssetAmount> {
     const contract = EvmTransferFactory.get(this.#client, config);
-    const fee = await contract.estimateFee(account, amount);
+
+    if (!config.wrapNative) {
+      const fee = await contract.estimateFee(account, amount);
+      return feeBalance.copyWith({
+        amount: fee,
+      });
+    }
+
+    const [prerequisites, gasPrice] = await Promise.all([
+      this.getPrerequisites(account, amount, config, contract.asset),
+      contract.getGasPrice(),
+    ]);
+
+    // The transfer reverts until its prerequisites are executed, leaving
+    // its gas unmeasurable - the ceiling stands in. A revert with none
+    // pending is a genuine one, surfaced by the call's dry run.
+    let transferGas: bigint = FeeGas.transfer;
+    if (prerequisites.length === 0) {
+      try {
+        transferGas = await contract.estimateGas(account);
+      } catch {}
+    }
+
+    const gas = prerequisites.reduce<bigint>(
+      (total, p) => total + p.feeGas,
+      transferGas
+    );
+
     return feeBalance.copyWith({
-      amount: fee,
+      amount: gas * gasPrice + (config.value ?? 0n),
     });
   }
 }

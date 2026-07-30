@@ -8,6 +8,8 @@ export interface ContractConfigParams extends Omit<BaseConfigParams, 'type'> {
   address: string;
   /** ERC20 token to spend (allowance target), if not derivable from args */
   token?: string;
+  /** Wrap native gas into {@link token} before spending it */
+  wrapNative?: boolean;
   value?: bigint;
 }
 
@@ -20,6 +22,8 @@ export class ContractConfig extends BaseConfig {
 
   readonly token?: string;
 
+  readonly wrapNative?: boolean;
+
   readonly value?: bigint;
 
   constructor({
@@ -27,6 +31,7 @@ export class ContractConfig extends BaseConfig {
     address,
     args,
     token,
+    wrapNative,
     value,
     ...other
   }: ContractConfigParams) {
@@ -35,6 +40,7 @@ export class ContractConfig extends BaseConfig {
     this.address = address;
     this.args = args;
     this.token = token;
+    this.wrapNative = wrapNative;
     this.value = value;
   }
 

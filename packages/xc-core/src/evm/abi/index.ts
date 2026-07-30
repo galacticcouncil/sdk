@@ -7,6 +7,7 @@ import { META } from './Meta';
 import { NTT_MANAGER } from './NttManager';
 import { POLKADOT_XCM } from './PolkadotXcm';
 import { SNOWBRIDGE } from './Snowbridge';
+import { WETH } from './Weth';
 import { WORMHOLE_TRANSCEIVER } from './WormholeTransceiver';
 
 export const Abi: Record<string, TAbi> = {
@@ -17,5 +18,6 @@ export const Abi: Record<string, TAbi> = {
   NttManager: NTT_MANAGER,
   PolkadotXcm: POLKADOT_XCM,
   Snowbridge: SNOWBRIDGE,
+  Weth: WETH,
   WormholeTransceiver: WORMHOLE_TRANSCEIVER,
 };

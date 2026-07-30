@@ -11,7 +11,7 @@ import {
 
 import { AccountId } from '@polkadot-api/substrate-bindings';
 
-import { aave, usdc } from '../../../assets';
+import { aave, eth, usdc } from '../../../assets';
 import { ethereum, hydration } from '../../../chains';
 
 import { Ntt } from './Ntt';
@@ -29,6 +29,14 @@ const AAVE_NTT = {
   manager: '0x3333333333333333333333333333333333333333',
   transceiver: {
     wormhole: '0x4444444444444444444444444444444444444444',
+  },
+};
+
+const ETH_NTT = {
+  token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  manager: '0x5555555555555555555555555555555555555555',
+  transceiver: {
+    wormhole: '0x6666666666666666666666666666666666666666',
   },
 };
 
@@ -68,6 +76,7 @@ describe('Ntt contract builder', () => {
   beforeAll(() => {
     ethereumNtt[usdc.key] = USDC_NTT;
     ethereumNtt[aave.key] = AAVE_NTT;
+    ethereumNtt[eth.key] = ETH_NTT;
     jest.spyOn(EvmChain.prototype, 'evmClient', 'get').mockReturnValue({
       getProvider: () => ({
         readContract: async () => [[0n], 0n],
@@ -90,6 +99,7 @@ describe('Ntt contract builder', () => {
   afterAll(() => {
     delete ethereumNtt[usdc.key];
     delete ethereumNtt[aave.key];
+    delete ethereumNtt[eth.key];
     jest.restoreAllMocks();
   });
 
@@ -105,6 +115,18 @@ describe('Ntt contract builder', () => {
         module: 'NttManager',
         type: 'Evm',
       } as ContractConfig);
+    });
+
+    it('should flag native gas source to be wrapped', async () => {
+      const ctx = buildTransferCtx(eth);
+      const config = await Ntt().transfer().build(ctx);
+      expect(config.wrapNative).toBe(true);
+    });
+
+    it('should not flag erc20 source to be wrapped', async () => {
+      const ctx = buildTransferCtx(usdc);
+      const config = await Ntt().transfer().build(ctx);
+      expect(config.wrapNative).toBe(false);
     });
 
     it('should floor 18 decimals amount to ntt 8 decimals precision', async () => {

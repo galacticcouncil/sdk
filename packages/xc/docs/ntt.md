@@ -68,20 +68,53 @@ Build steps:
 4. Recipient: for an `EvmParachain` destination the address is derived via
    `getDerivatedAddress` (see resolver rules below), then padded to bytes32 with
    `Wormhole.normalizeAddress`.
-5. Emit `ContractConfig { func: 'transfer', args: [amount, dstId, recipient32], value,
-   token }` — the 3-arg `NttManager.transfer` overload (default `0x00` transceiver
-   instructions, sender as refund address).
+5. Flag `wrapNative` when the source asset's balance type is native gas — the manager
+   only ever pulls an erc20 (see below).
+6. Emit `ContractConfig { func: 'transfer', args: [amount, dstId, recipient32], value,
+   token, wrapNative }` — the 3-arg `NttManager.transfer` overload (default `0x00`
+   transceiver instructions, sender as refund address).
 
 ### Signer paths ([EvmPlatform](packages/xc-sdk/src/platforms/evm/EvmPlatform.ts))
 
-- **H160 signer** — plain EVM txs: `approve(manager, amount)` when allowance is short
-  (token address from `ContractConfig.token`), then `transfer`.
+`buildCalls` returns the ordered sequence `[wrap?, approve?, transfer]`, the transfer
+call always last. Each prerequisite drops off once executed, so re-building after a
+signed step yields a shorter sequence. `buildCall` is the head of it — consumers
+rendering a multi-step flow should use `buildCalls` instead of re-deriving.
+
+- **H160 signer** — plain EVM txs:
+  - `WETH.deposit()` with `value = amount - wethBalance`, only when `wrapNative` is set
+    and the held wrapped balance is short. `NttManager` pulls the erc20 via
+    `transferFrom`; NTT core has no `wrapAndTransferETH`, and `NttManagerWethUnwrap`
+    unwraps on **release only** — so a native-gas source (Ethereum ETH) must be
+    wrapped upfront. Pre-existing WETH is consumed first.
+  - `approve(manager, amount)` when allowance is short (token address from
+    `ContractConfig.token`).
+  - `transfer`.
 - **ss58 signer on an EvmParachain** — wrapped via
   [SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) into `EVM.call`
-  extrinsic(s), approve + transfer batched with `Utility.batch_all` (one signature).
+  extrinsic(s), the same sequence batched with `Utility.batch_all` (one signature).
   `EVM.call` runs under `EnsureAddressTruncated`: the evm source must be the signer's
   truncated H160 and the account **must be bound on chain**, otherwise gas/token balances
   resolve to the unrelated `ETH\0` phantom account.
+
+### Fee of a native-gas source
+
+With `wrapNative` the amount, the delivery price (`value`) and the gas of all three txs
+come out of one ETH balance, and `max` is derived as `balance - fee`. So `estimateFee`
+charges for the whole sequence — prerequisite gas + transfer gas + `value` — rather than
+transfer gas alone. Two consequences:
+
+- The transfer can't be gas-estimated while a prerequisite is pending (it reverts with no
+  allowance/WETH), so a `FeeGas` ceiling stands in until nothing is pending. These are
+  realistic evm bounds, unlike the fatter `Gas` ceilings an `EVM.call` declares upfront —
+  overstating only shrinks `max`, gas being metered on chain.
+- An erc20 source keeps the old gas-only fee: its `value` is either already reported as
+  the route's destination fee (Snowbridge does this) or drawn from a balance the amount
+  doesn't compete for. Folding it in unconditionally would double-count.
+
+`Wallet` estimates the fee at a small probing amount (`initAmount`) before `max` exists,
+so the ceiling headroom is also what absorbs a prerequisite that only materializes at the
+larger amount.
 
 ### Address resolution ([HydrationEvmResolver](packages/xc-cfg/src/resolvers/hydration.ts))
 
@@ -186,4 +219,13 @@ pending, tracked below.
   release.
 - Queued-transfer digest derivation (NTT message digest from the VAA payload) — unlocks
   `completeInboundQueuedTransfer` from transfer history.
-- `estimateFee` surfaces gas only; the delivery price (`value`) is not shown as a fee.
+- For an **erc20** source the delivery price (`value`) is still not surfaced as a fee, so
+  `FeeValidation` can pass on an ETH balance too small to cover it. Harmless while
+  self-redeem keeps the quote at ~0, and `max` is unaffected there (fee asset ≠ transfer
+  asset). Fix it **with the executor wiring**, which is what makes the value large: the
+  Snowbridge shape — destination fee in `eth` via a `FeeAmountBuilder().Wormhole()
+  .quoteDeliveryPrice()` instead of `{ amount: 0 }`. Only the erc20 routes need it; a
+  native source already charges the value through the source fee (above), and applying
+  both to one route would double-count it and inflate `min`.
+- Wrapping leaves sub-`TrimmedAmount` dust wrapped (≤1e10 wei), as the amount is
+  floored for the manager args but wrapped in full.

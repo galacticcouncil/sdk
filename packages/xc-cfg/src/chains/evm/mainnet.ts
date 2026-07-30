@@ -154,6 +154,15 @@ export const ethereum = new EvmChain({
     id: 2,
     coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
     executor: '0x84EEe8dBa37C36947397E1E11251cA9A06Fc6F8a',
-    ntt: {},
+    ntt: {
+      // Locking manager - dai is escrowed here, minted on hydration.
+      [dai.key]: {
+        token: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        manager: '0x804F123f75cCa0A9c0Cba341F82f4A4DA86a5259',
+        transceiver: {
+          wormhole: '0x99673a01C5779Ebf59399B4B228c1825c0113571',
+        },
+      },
+    },
   },
 });
