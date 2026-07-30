@@ -47,6 +47,7 @@ const toHydrationViaNtt: AssetRoute[] = [
   toHydrationViaNttTemplate(usdt, usdt_mwh),
   toHydrationViaNttTemplate(wbtc, wbtc_mwh),
   toHydrationViaNttTemplate(weth, weth_mwh),
+  toHydrationViaNttTemplate(eth, weth_mwh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [

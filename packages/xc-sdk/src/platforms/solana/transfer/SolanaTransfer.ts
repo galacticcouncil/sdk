@@ -59,12 +59,14 @@ export class SolanaTransfer {
     instructions: TransactionInstruction[]
   ): Promise<MessageV0> {
     const payerKey = new PublicKey(account);
-    const { blockhash } = await this.connection.getLatestBlockhash('finalized');
+    const { blockhash } = await this.connection.getLatestBlockhash('confirmed');
+    // Compiled against the same tables the instructions were built with -
+    // an ntt transfer overflows the size limit without them.
     return new TransactionMessage({
       payerKey: payerKey,
       recentBlockhash: blockhash,
       instructions: instructions,
-    }).compileToV0Message();
+    }).compileToV0Message(this.config.lookupTables);
   }
 
   private async createPriorityFeeInstructions(

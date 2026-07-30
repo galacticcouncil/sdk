@@ -198,6 +198,17 @@ export const ethereum = new EvmChain({
           wormhole: '0xbA0Cd32131b8206AF4feB79A1A3aaF0AEfe18b48',
         },
       },
+      // Native eth shares the weth deployment - the manager only ever
+      // locks the erc20, so a native source is wrapped upfront
+      // (ContractConfig.wrapNative). Registered after weth so a vaa
+      // emitted by the shared transceiver resolves to the erc20 key.
+      [eth.key]: {
+        token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        manager: '0x283B14B5Dd352e32154Df014EA96834F395E04b6',
+        transceiver: {
+          wormhole: '0xbA0Cd32131b8206AF4feB79A1A3aaF0AEfe18b48',
+        },
+      },
     },
   },
 });

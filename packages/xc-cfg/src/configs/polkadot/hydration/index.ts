@@ -19,7 +19,6 @@ import {
   prime,
   susds,
   wbtc,
-  weth,
   ewt,
   glmr,
   hdx,
@@ -328,7 +327,7 @@ const toEthereumViaNtt: AssetRoute[] = [
   viaNttTemplate(usdc_mwh, usdc, ethereum),
   viaNttTemplate(usdt_mwh, usdt, ethereum),
   viaNttTemplate(wbtc_mwh, wbtc, ethereum),
-  viaNttTemplate(weth_mwh, weth, ethereum),
+  viaNttTemplate(weth_mwh, eth, ethereum),
 ];
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_mwh, eurc, base)];
