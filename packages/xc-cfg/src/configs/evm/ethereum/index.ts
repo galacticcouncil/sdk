@@ -7,6 +7,14 @@ import {
   dai_mwh,
   ena,
   eth,
+  susds,
+  susds_mwh,
+  usdc_mwh,
+  usdt_mwh,
+  wbtc,
+  wbtc_mwh,
+  weth,
+  weth_mwh,
   usdc,
   usdc_eth,
   usdt,
@@ -34,6 +42,11 @@ import {
 
 const toHydrationViaNtt: AssetRoute[] = [
   toHydrationViaNttTemplate(dai, dai_mwh),
+  toHydrationViaNttTemplate(susds, susds_mwh),
+  toHydrationViaNttTemplate(usdc, usdc_mwh),
+  toHydrationViaNttTemplate(usdt, usdt_mwh),
+  toHydrationViaNttTemplate(wbtc, wbtc_mwh),
+  toHydrationViaNttTemplate(weth, weth_mwh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [

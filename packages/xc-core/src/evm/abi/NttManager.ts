@@ -172,4 +172,63 @@ export const NTT_MANAGER = [
     stateMutability: 'view',
     type: 'function',
   },
+  // `recipient` & `refundAddress` are indexed - they live in the topics,
+  // not the data. Decoding them as plain fields silently shifts every
+  // value by two (amount reads as the recipient, the chain id as amount).
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'recipient',
+        type: 'bytes32',
+      },
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'refundAddress',
+        type: 'bytes32',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'fee',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint16',
+        name: 'recipientChain',
+        type: 'uint16',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'msgSequence',
+        type: 'uint64',
+      },
+    ],
+    name: 'TransferSent',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'digest',
+        type: 'bytes32',
+      },
+    ],
+    name: 'TransferSent',
+    type: 'event',
+  },
 ] as const;

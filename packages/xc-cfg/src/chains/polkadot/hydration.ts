@@ -1251,13 +1251,76 @@ export const hydration = new EvmParachain({
     id: 73,
     coreBridge: '0x3792a6d63c31941B2805181771795D9176fA82A1',
     executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
+    // Burning managers - token is the erc20 precompile of the asset id.
     ntt: {
-      // Burning manager - token is the erc20 precompile of asset 18.
       [dai_mwh.key]: {
         token: '0x0000000000000000000000000000000100000012',
         manager: '0xcFd576F88C90844AEBF45378Fd09931281D8b14d',
         transceiver: {
           wormhole: '0xe8660CA48f6f4D98BC48DB7Dd07C1a8E555801eA',
+        },
+      },
+      [eurc_mwh.key]: {
+        token: '0x000000000000000000000000000000010000002C',
+        manager: '0x8dd1286A29dF5a2785FB638d6fB1598144Cfbc4C',
+        transceiver: {
+          wormhole: '0x2e84fac378D67Dc2e11026fB4919E80263a87375',
+        },
+      },
+      [jito_sol.key]: {
+        token: '0x0000000000000000000000000000000100000028',
+        manager: '0xcE73C15B9ED02413066DE5B904A36F8e8f9B5331',
+        transceiver: {
+          wormhole: '0xF38D9C3bA6999Dc331b32B416083Fd7e02D17B04',
+        },
+      },
+      [prime.key]: {
+        token: '0x000000000000000000000000000000010000002B',
+        manager: '0xFCaF4aA069C565d25539028970703F01e47D3E0B',
+        transceiver: {
+          wormhole: '0x4e7b1E55D2354d4Dc6ABD876096Dc201de0541D1',
+        },
+      },
+      [sol.key]: {
+        token: '0x00000000000000000000000000000001000F4530',
+        manager: '0x9e200C0f28D92D296b201D96C8269d3CAFFfA9FF',
+        transceiver: {
+          wormhole: '0x2F04AcF249091425d51e67EeA3C3161ccE283202',
+        },
+      },
+      [susds_mwh.key]: {
+        token: '0x00000000000000000000000000000001000F4529',
+        manager: '0x1973E7044d9A7C7bB2d6ea1693A296a9e4B7E448',
+        transceiver: {
+          wormhole: '0x68Ecadd7934D4FcFEABAfB209C95D379B96400cb',
+        },
+      },
+      [usdc_mwh.key]: {
+        token: '0x0000000000000000000000000000000100000015',
+        manager: '0xEcEab64542A875C4472671D9Ed1E690cdD4e28fC',
+        transceiver: {
+          wormhole: '0x0d7488B39AA64468a709eC3b3d354DeFE539eD97',
+        },
+      },
+      [usdt_mwh.key]: {
+        token: '0x0000000000000000000000000000000100000017',
+        manager: '0x5E6C488103b47F804824AE15861638af4C436795',
+        transceiver: {
+          wormhole: '0xd2a16B736F32Df7C0DE72838837656FE0f85Ac0F',
+        },
+      },
+      [wbtc_mwh.key]: {
+        token: '0x0000000000000000000000000000000100000013',
+        manager: '0x6BFca089916c045b0Ca4A09B655aF9F926189993',
+        transceiver: {
+          wormhole: '0x9a8a1ab288f6749Ce5626DEE1B5d59441BdC187F',
+        },
+      },
+      [weth_mwh.key]: {
+        token: '0x0000000000000000000000000000000100000014',
+        manager: '0xB5cEf790D52A57fa619eD96eDd64c5328F3DCFb7',
+        transceiver: {
+          wormhole: '0x8acce9CA511d5D7213F8C3f813B8916087cd00ae',
         },
       },
     },

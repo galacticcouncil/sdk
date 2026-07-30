@@ -135,7 +135,7 @@ export class WormholeTransfer {
     const status = this.getStatus(operation);
 
     let redeem;
-    const destination = Ntt.find(toChain, source.assetKey);
+    const destination = this.findDestinationNtt(source, toChain);
     if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
       const vaaRaw = operation.vaa.raw;
       redeem = async (from: string) => {
@@ -176,6 +176,42 @@ export class WormholeTransfer {
         Wormhole.isKnown(c) &&
         Wormhole.fromChain(c).getWormholeId() === wormholeId
     );
+  }
+
+  /**
+   * NTT deployment of the transferred token on the destination chain.
+   *
+   * The emitter identifies the token by its key on the **source** chain,
+   * which is not necessarily the key it carries on the destination (`dai`
+   * on ethereum, `dai_mwh` on hydration). The registered route holds that
+   * mapping, so resolve through it when the key doesn't carry over.
+   */
+  private findDestinationNtt(
+    source: NttContext,
+    toChain: AnyChain
+  ): NttTokenDef | undefined {
+    const direct = Ntt.find(toChain, source.assetKey);
+    if (direct) {
+      return direct;
+    }
+
+    const asset = this.config.assets.get(source.assetKey);
+    if (!asset) {
+      return undefined;
+    }
+
+    const routes = this.config.getAssetRoutesOrEmpty(
+      asset,
+      source.chain,
+      toChain
+    );
+    for (const route of routes) {
+      const def = Ntt.find(toChain, route.destination.asset.key);
+      if (def) {
+        return def;
+      }
+    }
+    return undefined;
   }
 
   private findNttByEmitter(

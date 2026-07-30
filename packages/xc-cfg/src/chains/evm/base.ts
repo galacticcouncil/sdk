@@ -40,6 +40,15 @@ export const base = new EvmChain({
     id: 30,
     coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',
     executor: '0x9E1936E91A4a5AE5A5F75fFc472D6cb8e93597ea',
-    ntt: {},
+    // Locking manager - eurc is escrowed here, minted on hydration.
+    ntt: {
+      [eurc.key]: {
+        token: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
+        manager: '0xD1dc3517732c98502b5c1ba2389AcA9E9016d89a',
+        transceiver: {
+          wormhole: '0xa84b362290b0CFdB55e877dfc633284091e0B3F7',
+        },
+      },
+    },
   },
 });

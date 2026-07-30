@@ -13,6 +13,13 @@ import {
   dot,
   ena,
   eth,
+  eurc,
+  eurc_mwh,
+  jito_sol,
+  prime,
+  susds,
+  wbtc,
+  weth,
   ewt,
   glmr,
   hdx,
@@ -51,6 +58,7 @@ import {
   assetHub,
   assetHubCex,
   astar,
+  base,
   bifrost,
   crust,
   energywebx,
@@ -61,6 +69,7 @@ import {
   mythos,
   neuroweb,
   pendulum,
+  solana,
   unique,
 } from '../../../chains';
 import {
@@ -315,6 +324,21 @@ const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
 
 const toEthereumViaNtt: AssetRoute[] = [
   viaNttTemplate(dai_mwh, dai, ethereum),
+  viaNttTemplate(susds_mwh, susds, ethereum),
+  viaNttTemplate(usdc_mwh, usdc, ethereum),
+  viaNttTemplate(usdt_mwh, usdt, ethereum),
+  viaNttTemplate(wbtc_mwh, wbtc, ethereum),
+  viaNttTemplate(weth_mwh, weth, ethereum),
+];
+
+const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_mwh, eurc, base)];
+
+// Solana inbound (solana -> hydration) needs an ntt program builder that
+// doesn't exist yet - only the hydration side is wired.
+const toSolanaViaNtt: AssetRoute[] = [
+  viaNttTemplate(sol, sol, solana),
+  viaNttTemplate(jito_sol, jito_sol, solana),
+  viaNttTemplate(prime, prime, solana),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
@@ -372,9 +396,11 @@ export const hydrationConfig = new ChainRoutes({
     ...toAstar,
     ...toBifrost,
     ...toCex,
+    ...toBaseViaNtt,
     ...toCrust,
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
+    ...toSolanaViaNtt,
     ...toEthereumViaSnowbridgeV1,
     ...toInterlay,
     ...toEnergywebx,

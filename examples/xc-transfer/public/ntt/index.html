@@ -59,6 +59,14 @@
         background: #2a4a8a;
         border-color: #4c8dff;
       }
+      h2 {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.5;
+        margin: 16px 0 8px;
+      }
       pre {
         margin: 16px 0 0;
         padding: 12px;
@@ -85,8 +93,9 @@
       <input id="amount" value="0.1" />
     </div>
 
-    <!-- One button per route the sdk registers under the Ntt tag. -->
-    <div class="row" id="routes"></div>
+    <!-- One button per route the sdk registers under the Ntt tag,
+         grouped by source chain. -->
+    <div id="routes"></div>
 
     <div class="row">
       <button id="claim-out">Claim on Ethereum</button>

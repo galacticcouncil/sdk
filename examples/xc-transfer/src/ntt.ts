@@ -22,9 +22,13 @@ const { Tag } = tags;
 // 0x82fb02afe02fe5d6c793145a75e6860c4e206682.
 const EVM_ADDRESS = '0x23812ff0cDdd7157C4760E3BB2d39f5f323a7D3c';
 const HYDRATION_ADDRESS = '5F2SeXfnUuvQ7nux5b7dTHgUoePgiCW38Czk78YQuJPfjunb';
+const SOLANA_ADDRESS = 'INSERT_ADDRESS';
 
-const addressOf = (chain: AnyChain) =>
-  chain.isEvmChain() ? EVM_ADDRESS : HYDRATION_ADDRESS;
+const addressOf = (chain: AnyChain): string => {
+  if (chain.isSolana()) return SOLANA_ADDRESS;
+  if (chain.isEvmChain()) return EVM_ADDRESS;
+  return HYDRATION_ADDRESS;
+};
 
 type NttRoute = { source: AnyChain; route: AssetRoute };
 
@@ -38,7 +42,11 @@ const ROUTES: NttRoute[] = Array.from(config.routes.values())
   )
   .sort(
     (a, b) =>
-      Number(b.source.isEvmParachain()) - Number(a.source.isEvmParachain())
+      Number(b.source.isEvmParachain()) - Number(a.source.isEvmParachain()) ||
+      a.source.name.localeCompare(b.source.name) ||
+      a.route.source.asset.originSymbol.localeCompare(
+        b.route.source.asset.originSymbol
+      )
   );
 
 const out = document.getElementById('log')!;
@@ -120,8 +128,11 @@ const claim = {
   out: () => claimWithdraws(HYDRATION_ADDRESS, EVM_ADDRESS),
 };
 
-/** Serialize clicks - every step needs a wallet confirmation. */
-function bind(el: Element, run: () => Promise<unknown>) {
+/**
+ * Serialize clicks - every step needs a wallet confirmation. Buttons
+ * locked for a missing address stay disabled.
+ */
+function bind(el: HTMLButtonElement, run: () => Promise<unknown>) {
   el.addEventListener('click', async () => {
     const all = Array.from(document.querySelectorAll('button'));
     all.forEach((b) => (b.disabled = true));
@@ -131,31 +142,51 @@ function bind(el: Element, run: () => Promise<unknown>) {
       log('Failed:', e instanceof Error ? e.message : String(e));
       console.error(e);
     } finally {
-      all.forEach((b) => (b.disabled = false));
+      all.forEach((b) => (b.disabled = b.dataset.locked === 'true'));
     }
   });
 }
 
-ROUTES.forEach((entry, i) => {
-  const button = document.createElement('button');
-  button.textContent = `${entry.source.name} → ${entry.route.destination.chain.name}`;
-  if (i === 0) button.className = 'primary';
-  routesEl.appendChild(button);
-  bind(button, () => transfer(entry, amountInput.value));
+// Grouped by source chain - a chain pair alone isn't unique, six tokens
+// share hydration -> ethereum.
+const groups = new Map<AnyChain, NttRoute[]>();
+ROUTES.forEach((entry) => {
+  const group = groups.get(entry.source) ?? [];
+  group.push(entry);
+  groups.set(entry.source, group);
 });
 
-bind(document.getElementById('claim-out')!, () => claim.out());
-bind(document.getElementById('claim-in')!, () => claim.in());
+groups.forEach((entries, chain) => {
+  const heading = document.createElement('h2');
+  heading.textContent = 'From ' + chain.name;
+  routesEl.appendChild(heading);
 
-log('Ready.', ROUTES.length, 'ntt route(s), self-redeem delivery.');
-ROUTES.forEach(({ source, route }) =>
-  log(
-    ' ',
-    source.key,
-    '->',
-    route.destination.chain.key,
-    `(${route.source.asset.key} -> ${route.destination.asset.key})`
-  )
-);
+  const row = document.createElement('div');
+  row.className = 'row';
+  entries.forEach((entry) => {
+    const { asset } = entry.route.source;
+    const dst = entry.route.destination;
+
+    const button = document.createElement('button');
+    button.textContent = `${asset.originSymbol} → ${dst.chain.name}`;
+
+    const missing = [entry.source, dst.chain]
+      .map(addressOf)
+      .some((a) => a.startsWith('INSERT'));
+    if (missing) {
+      button.disabled = true;
+      button.dataset.locked = 'true';
+      button.title = `No address set for ${dst.chain.name}`;
+    } else {
+      button.title = `${asset.key} → ${dst.asset.key}`;
+    }
+
+    row.appendChild(button);
+    bind(button, () => transfer(entry, amountInput.value));
+  });
+  routesEl.appendChild(row);
+});
+
+log('Ready.', ROUTES.length, 'ntt routes, self-redeem delivery.');
 
 (window as any).ntt = { transfer, claim, routes: ROUTES };
