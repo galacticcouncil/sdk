@@ -8,6 +8,7 @@ import {
   bnc,
   cfg_new,
   cru,
+  dai,
   dai_mwh,
   dot,
   ena,
@@ -76,6 +77,7 @@ import {
   toMoonbeamErc20Template,
   toParaTemplate,
   toTransferTemplate,
+  viaNttTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
 } from './templates';
@@ -311,6 +313,10 @@ const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
 
 const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
 
+const toEthereumViaNtt: AssetRoute[] = [
+  viaNttTemplate(dai_mwh, dai, ethereum),
+];
+
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
   viaSnowbridgeTemplate(aave, aave, ethereum),
@@ -367,6 +373,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toBifrost,
     ...toCex,
     ...toCrust,
+    ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toEthereumViaSnowbridgeV1,
     ...toInterlay,

@@ -3,6 +3,8 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 import {
   apyusd,
   cfg_new,
+  dai,
+  dai_mwh,
   ena,
   eth,
   usdc,
@@ -25,9 +27,14 @@ import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { Tag } from '../../../tags';
 
 import {
+  toHydrationViaNttTemplate,
   toHydrationViaSnowbridgeTemplate,
   toHydrationViaSnowbridgeV1Template,
 } from './templates';
+
+const toHydrationViaNtt: AssetRoute[] = [
+  toHydrationViaNttTemplate(dai, dai_mwh),
+];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
   new AssetRoute({
@@ -111,6 +118,7 @@ const toHydrationViaSnowbridgeV1: AssetRoute[] = [
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
   routes: [
+    ...toHydrationViaNtt,
     ...toHydrationViaSnowbridge,
     ...toHydrationViaSnowbridgeV1,
   ],

@@ -1251,7 +1251,16 @@ export const hydration = new EvmParachain({
     id: 73,
     coreBridge: '0x3792a6d63c31941B2805181771795D9176fA82A1',
     executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
-    ntt: {},
+    ntt: {
+      // Burning manager - token is the erc20 precompile of asset 18.
+      [dai_mwh.key]: {
+        token: '0x0000000000000000000000000000000100000012',
+        manager: '0xcFd576F88C90844AEBF45378Fd09931281D8b14d',
+        transceiver: {
+          wormhole: '0xe8660CA48f6f4D98BC48DB7Dd07C1a8E555801eA',
+        },
+      },
+    },
   },
   ws: rpcWebsocketList,
   rpcs: rpcHttpList,
