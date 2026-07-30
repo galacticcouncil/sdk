@@ -303,7 +303,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private syncStructuralEffect(): PoolEventEffect {
     return {
       match: (e) => e.pallet === 'Omnipool' && STRUCTURAL_EVENTS.has(e.method),
-      apply: async () => {
+      apply: async (e) => {
+        this.log.debug('resync', { event: e.method });
         this.requestResync();
       },
     };

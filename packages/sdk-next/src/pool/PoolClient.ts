@@ -152,11 +152,11 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
         if (prev.length === 0) return curr;
         return this.store.applyChangeset(curr);
       }),
-      filter((arr) => arr.length > 0),
+      filter((arr) => arr.length > 0)
       /**
        * Rate-limit consumer emissions to ~1s, but first immediately
        */
-      throttleTime(1_000, undefined, { leading: true, trailing: true })
+      //throttleTime(1_000, undefined, { leading: true, trailing: true })
     );
   }
 
@@ -259,16 +259,41 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
         concatMap(async ({ block, events }) => {
           this.block = block.number;
           this.blockHash = block.hash;
-          const effectsRes = events.flatMap((e) =>
-            effects.filter((x) => x.match(e)).map((x) => x.apply(e, block))
-          );
-          const handlersRes = events.flatMap((e) =>
-            handlers.filter((h) => h.match(e)).map((h) => h.resolve(e, block))
-          );
+
+          const matched: string[] = [];
+          const effectsRes: Promise<void>[] = [];
+          const handlersRes: Promise<PoolMutation<T>[]>[] = [];
+
+          for (const e of events) {
+            const kind = `${e.pallet}.${e.method}`;
+            for (const x of effects) {
+              if (x.match(e)) {
+                matched.push(kind);
+                effectsRes.push(x.apply(e, block));
+              }
+            }
+            for (const h of handlers) {
+              if (h.match(e)) {
+                matched.push(kind);
+                handlersRes.push(h.resolve(e, block));
+              }
+            }
+          }
+
           await Promise.all(effectsRes);
-          const eventMuts = await Promise.all(handlersRes);
+          const eventMuts = (await Promise.all(handlersRes)).flat();
           const tickMuts = await this.tickMutations(block);
-          return { muts: [...eventMuts.flat(), ...tickMuts] };
+          const muts = [...eventMuts, ...tickMuts];
+
+          if (matched.length > 0) {
+            this.log.trace('sync', {
+              block: block.number,
+              events: matched,
+              muts: muts.length,
+            });
+          }
+
+          return { muts };
         }),
         filter(({ muts }) => muts.length > 0),
         this.watchGuard('events')
