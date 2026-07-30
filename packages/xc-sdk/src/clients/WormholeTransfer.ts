@@ -1,6 +1,8 @@
 import {
   addr,
+  Abi,
   AnyChain,
+  AnyEvmChain,
   ConfigService,
   EvmParachain,
   Ntt,
@@ -10,6 +12,10 @@ import {
   SuiChain,
   Wormhole,
 } from '@galacticcouncil/xc-core';
+
+import { keccak256 } from 'viem';
+
+import { encoding } from '@wormhole-foundation/sdk-base';
 
 import { EvmClaim, SolanaClaim, SubstrateClaim, SuiClaim } from '../platforms';
 
@@ -27,6 +33,19 @@ type NttContext = {
 /** Hex addresses match case-insensitive. */
 const isSameAddress = (a: string, b: string): boolean =>
   a.toLowerCase() === b.toLowerCase();
+
+/**
+ * Wormhole vaa hash, the identity a transceiver marks as consumed.
+ *
+ * Double keccak of the body alone - the signatures are stripped, so the
+ * hash is stable no matter which guardian subset attested.
+ */
+function getVaaHash(vaaRaw: string): `0x${string}` {
+  const vaa = encoding.b64.decode(vaaRaw);
+  const signatures = vaa[5];
+  const body = vaa.subarray(6 + signatures * 66);
+  return keccak256(keccak256(body));
+}
 
 export class WormholeTransfer {
   private parachainId: number;
@@ -135,12 +154,15 @@ export class WormholeTransfer {
       )
       .forEach((o) => operations.set(o.id, o));
 
-    return Array.from(operations.values())
-      .map((o) => this.toTransfer(o))
-      .filter((t): t is WhTransfer => !!t);
+    const transfers = await Promise.all(
+      Array.from(operations.values()).map((o) => this.toTransfer(o))
+    );
+    return transfers.filter((t): t is WhTransfer => !!t);
   }
 
-  private toTransfer(operation: Operation): WhTransfer | undefined {
+  private async toTransfer(
+    operation: Operation
+  ): Promise<WhTransfer | undefined> {
     const { content, emitterChain, emitterAddress, sourceChain } = operation;
     const { standarizedProperties } = content;
 
@@ -154,28 +176,32 @@ export class WormholeTransfer {
       return undefined;
     }
 
-    const status = this.getStatus(operation);
+    let status = this.getStatus(operation);
 
     let redeem;
     const destination = this.findDestinationNtt(source, toChain);
     if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
       const vaaRaw = operation.vaa.raw;
-      redeem = async (from: string) => {
-        if (toChain instanceof SolanaChain) {
-          const claim = new SolanaClaim(toChain);
+      if (await this.isRedeemed(toChain, destination, vaaRaw)) {
+        status = WhStatus.Completed;
+      } else {
+        redeem = async (from: string) => {
+          if (toChain instanceof SolanaChain) {
+            const claim = new SolanaClaim(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
+          if (toChain instanceof SuiChain) {
+            const claim = new SuiClaim(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
+          if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
+            const claim = await SubstrateClaim.create(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
+          const claim = new EvmClaim();
           return claim.redeem(from, vaaRaw, destination);
-        }
-        if (toChain instanceof SuiChain) {
-          const claim = new SuiClaim(toChain);
-          return claim.redeem(from, vaaRaw, destination);
-        }
-        if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
-          const claim = await SubstrateClaim.create(toChain);
-          return claim.redeem(from, vaaRaw, destination);
-        }
-        const claim = new EvmClaim();
-        return claim.redeem(from, vaaRaw, destination);
-      };
+        };
+      }
     }
 
     return {
@@ -190,6 +216,33 @@ export class WormholeTransfer {
       redeem: redeem,
       operation: operation,
     };
+  }
+
+  /**
+   * Whether the destination transceiver already consumed the vaa.
+   *
+   * Wormholescan doesn't observe the redeem on every chain (`targetChain`
+   * stays empty for hydration), so a delivered transfer would otherwise
+   * keep offering a claim that reverts. Evm destinations only - solana &
+   * sui still rely on the indexer.
+   */
+  private async isRedeemed(
+    toChain: AnyChain,
+    ntt: NttTokenDef,
+    vaaRaw: string
+  ): Promise<boolean> {
+    if (!toChain.isEvmChain() && !toChain.isEvmParachain()) {
+      return false;
+    }
+
+    const { evmClient } = toChain as AnyEvmChain;
+    const consumed = await evmClient.getProvider().readContract({
+      abi: Abi.WormholeTransceiver,
+      address: ntt.transceiver.wormhole as `0x${string}`,
+      args: [getVaaHash(vaaRaw)],
+      functionName: 'isVAAConsumed',
+    });
+    return consumed as boolean;
   }
 
   private findChainByWormholeId(wormholeId: number): AnyChain | undefined {

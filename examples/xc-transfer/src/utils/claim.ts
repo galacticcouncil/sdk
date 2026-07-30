@@ -18,20 +18,30 @@ const describe = (transfer: WhTransfer) =>
   ].join(' ');
 
 /**
- * Report the operations wormholescan returned for the account.
+ * Report every wormhole operation of the account, both directions.
  *
  * An operation never becomes a transfer when its emitter matches no
  * registered ntt deployment, so an empty claim run is otherwise
- * indistinguishable from having nothing to claim.
+ * indistinguishable from having nothing to claim. Wormholescan filters
+ * by sender, hence the separate lookup of what targets the parachain.
  */
 async function survey(account: string, matched: number, log: Logger) {
   const hydration = config.getChain('hydration') as EvmParachain;
   const { filters, whScan } = wormhole.transfer;
 
   const address = await hydration.getDerivatedAddress(account);
-  const operations = await whScan.getOperations({ ...filters, address });
+  const [sent, received] = await Promise.all([
+    whScan.getOperations({ ...filters, address }),
+    whScan.getOperations({ ...filters, targetChain: '73' }),
+  ]);
+  const inbound = received.filter(
+    (o) =>
+      o.content.standarizedProperties.toAddress.toLowerCase() ===
+      address.toLowerCase()
+  );
 
-  log(operations.length, 'operation(s) for', address, '(last 6 days)');
+  log(address, '- sent', sent.length + ',', 'received', inbound.length);
+  const operations = [...sent, ...inbound];
   if (operations.length > matched) {
     log('Emitters seen - unmatched ones have no ntt registry entry:');
     operations.forEach((o) =>
