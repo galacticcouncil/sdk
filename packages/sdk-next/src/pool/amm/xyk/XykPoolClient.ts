@@ -169,7 +169,8 @@ export class XykPoolClient extends PoolClient<PoolBase> {
   private syncStructuralEffect(): PoolEventEffect {
     return {
       match: (e) => e.pallet === 'XYK' && STRUCTURAL_EVENTS.has(e.method),
-      apply: async () => {
+      apply: async (e) => {
+        this.log.debug('resync', { event: e.method });
         this.requestResync();
       },
     };

@@ -492,7 +492,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       match: (e) =>
         e.pallet === 'Stableswap' &&
         (e.method === 'PoolCreated' || e.method === 'PoolDestroyed'),
-      apply: async () => {
+      apply: async (e) => {
+        this.log.debug('resync', { event: e.method });
         this.requestResync();
       },
     };
