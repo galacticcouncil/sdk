@@ -40,8 +40,9 @@ export const solana = new SolanaChain({
     id: 1,
     coreBridge: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
     // Locking managers - the spl token is escrowed here, minted on
-    // hydration. `emitter` (the transceiver's pda) is unset: outbound
-    // solana transfers need a program builder that doesn't exist yet.
+    // hydration. Solana signs a vaa with a pda, not the transceiver
+    // program itself, so `emitter` (seed "emitter" of the transceiver)
+    // has to be spelled out or inbound transfers never match.
     ntt: {
       [sol.key]: {
         token: 'So11111111111111111111111111111111111111112',
@@ -49,6 +50,7 @@ export const solana = new SolanaChain({
         transceiver: {
           wormhole: '5J12e7mMcbbN3VkCrUPfZp2bDHMH3t1rKvxGcwuN53wx',
         },
+        emitter: '2WUYeRrK2JctBEvNVXY4mRG2ewMzhidi7L4Y5dCwqY9D',
       },
       [jito_sol.key]: {
         token: 'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
@@ -56,6 +58,7 @@ export const solana = new SolanaChain({
         transceiver: {
           wormhole: 'HgxvrPomT84AxgxknddAcC1iW9ysqHxmeoiKNZmQcovs',
         },
+        emitter: '9Ss1eMHE8iDv9kCxERH5nabp9tx75AVoUWWEKaGgMrh9',
       },
       [prime.key]: {
         token: '3b8X44fLF9ooXaUm3hhSgjpmVs6rZZ3pPoGnGahc3Uu7',
@@ -63,6 +66,7 @@ export const solana = new SolanaChain({
         transceiver: {
           wormhole: 'GiTY93vtrK4jZZchrxdV9r28JByRs7Ary2rsTPyPabJc',
         },
+        emitter: 'HuvSXe6hQaSMgo5dc8GYzavcS3aB4Bix9XYgVdfsq2sY',
       },
     },
     platformAddressFormat: 'base58',
