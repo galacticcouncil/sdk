@@ -124,8 +124,8 @@ async function transfer({ source, route }: NttRoute, amount: string) {
  * claim is paid there; withdrawals are redeemed on the evm side.
  */
 const claim = {
-  in: () => claimDeposits(HYDRATION_ADDRESS, HYDRATION_ADDRESS),
-  out: () => claimWithdraws(HYDRATION_ADDRESS, EVM_ADDRESS),
+  in: () => claimDeposits(HYDRATION_ADDRESS, HYDRATION_ADDRESS, log),
+  out: () => claimWithdraws(HYDRATION_ADDRESS, EVM_ADDRESS, log),
 };
 
 /**
@@ -187,6 +187,12 @@ groups.forEach((entries, chain) => {
   routesEl.appendChild(row);
 });
 
+// Delivery is self-redeem, so the claim buttons are the second half of
+// every transfer - deposits are paid on hydration, withdrawals on the
+// evm side.
+bind(document.getElementById('claim-in') as HTMLButtonElement, claim.in);
+bind(document.getElementById('claim-out') as HTMLButtonElement, claim.out);
+
 log('Ready.', ROUTES.length, 'ntt routes, self-redeem delivery.');
 
-(window as any).ntt = { transfer, claim, routes: ROUTES };
+(window as any).ntt = { transfer, claim, routes: ROUTES, xc };

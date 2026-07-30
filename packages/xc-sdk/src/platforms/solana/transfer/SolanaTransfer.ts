@@ -20,6 +20,9 @@ const DEFAULT_MAX_PRIORITY_FEE = 1e6;
 
 const DEFAULT_COMPUTE_BUDGET = 250_000;
 
+const BASE_FEE_LAMPORTS = 5_000n;
+const MICRO_LAMPORTS_PER_LAMPORT = 1_000_000n;
+
 export class SolanaTransfer {
   readonly connection: Connection;
   readonly config: ProgramConfig;

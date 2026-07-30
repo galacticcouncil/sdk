@@ -24,6 +24,10 @@ type NttContext = {
   def: NttTokenDef;
 };
 
+/** Hex addresses match case-insensitive. */
+const isSameAddress = (a: string, b: string): boolean =>
+  a.toLowerCase() === b.toLowerCase();
+
 export class WormholeTransfer {
   private parachainId: number;
   private config: ConfigService;
@@ -107,13 +111,31 @@ export class WormholeTransfer {
    */
   async getTransfers(address: string): Promise<WhTransfer[]> {
     const h160 = await this.parachain.getDerivatedAddress(address);
+    const chainWh = Wormhole.fromChain(this.parachain);
 
-    const operations = await this.whScan.getOperations({
-      ...this.filters,
-      address: h160,
-    });
+    // Wormholescan matches `address` against the sender only, so an
+    // inbound transfer is never returned for the receiving account.
+    // Scan what targets the parachain and keep the user's own.
+    const [sent, received] = await Promise.all([
+      this.whScan.getOperations({
+        ...this.filters,
+        address: h160,
+      }),
+      this.whScan.getOperations({
+        ...this.filters,
+        targetChain: chainWh.getWormholeId().toString(),
+      }),
+    ]);
 
-    return operations
+    const operations = new Map<string, Operation>();
+    sent.forEach((o) => operations.set(o.id, o));
+    received
+      .filter((o) =>
+        isSameAddress(o.content.standarizedProperties.toAddress, h160)
+      )
+      .forEach((o) => operations.set(o.id, o));
+
+    return Array.from(operations.values())
       .map((o) => this.toTransfer(o))
       .filter((t): t is WhTransfer => !!t);
   }
