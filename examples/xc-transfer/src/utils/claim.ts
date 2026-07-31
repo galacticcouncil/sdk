@@ -1,4 +1,4 @@
-import { EvmParachain } from '@galacticcouncil/xc-core';
+import { AnyChain, EvmParachain } from '@galacticcouncil/xc-core';
 import { WhStatus, WhTransfer } from '@galacticcouncil/xc-sdk';
 
 import { sign, signSolanaBundle } from '../signers';
@@ -7,6 +7,9 @@ import { xc } from '../setup';
 const { config, wormhole } = xc;
 
 export type Logger = (...args: unknown[]) => void;
+
+/** Claim payer, resolved per destination chain. */
+export type PayerOf = (chain: AnyChain) => string;
 
 const describe = (transfer: WhTransfer) =>
   [
@@ -60,7 +63,7 @@ async function survey(account: string, matched: number, log: Logger) {
 async function claim(
   transfers: WhTransfer[],
   account: string,
-  payer: string,
+  payerOf: PayerOf,
   log: Logger
 ) {
   for (const transfer of transfers) {
@@ -69,9 +72,13 @@ async function claim(
       continue;
     }
 
+    const chain = transfer.toChain;
+    // The claim is a transaction on the destination chain, so the payer is
+    // whatever account signs there - an evm, solana or sui one.
+    const payer = payerOf(chain);
+
     log('Claim', describe(transfer), 'paid by', payer);
     const calls = await transfer.redeem(payer);
-    const chain = transfer.toChain;
 
     if (!Array.isArray(calls)) {
       await sign(calls, chain);
@@ -102,12 +109,12 @@ async function claim(
  */
 export async function claimWithdraws(
   account: string,
-  payer: string,
+  payerOf: PayerOf,
   log: Logger = console.log
 ) {
   const withdraws = await wormhole.transfer.getWithdraws(account);
   log('Withdrawals:', withdraws.length);
-  await claim(withdraws, account, payer, log);
+  await claim(withdraws, account, payerOf, log);
 }
 
 /**
@@ -119,10 +126,10 @@ export async function claimWithdraws(
  */
 export async function claimDeposits(
   account: string,
-  payer: string,
+  payerOf: PayerOf,
   log: Logger = console.log
 ) {
   const deposits = await wormhole.transfer.getDeposits(account);
   log('Deposits:', deposits.length);
-  await claim(deposits, account, payer, log);
+  await claim(deposits, account, payerOf, log);
 }

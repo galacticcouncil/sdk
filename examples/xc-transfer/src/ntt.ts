@@ -18,14 +18,24 @@ const { Tag } = tags;
  */
 
 // Evm chains sign with the h160; hydration takes an ss58 (bound on chain,
-// see EnsureAddressTruncated) or the same h160. The ss58 below is bound to
-// 0x82fb02afe02fe5d6c793145a75e6860c4e206682.
+// see EnsureAddressTruncated) or the same h160.
+//
+// The two hydration routes are NOT equivalent for wormhole: an ss58 signs
+// one batched `EVM.call` extrinsic, whose logs are missing from the ethereum
+// view of some hydration rpcs - including the one the guardians read - so the
+// message is published on chain but never attested. An h160 signs plain evm
+// txs, which are observed normally. Outbound tests use the h160 until that is
+// fixed. (ss58 5F2SeXfnUuvQ7nux5b7dTHgUoePgiCW38Czk78YQuJPfjunb, bound to
+// 0x82fb02afe02fe5d6c793145a75e6860c4e206682, is the batched route.)
 const EVM_ADDRESS = '0x23812ff0cDdd7157C4760E3BB2d39f5f323a7D3c';
 const HYDRATION_ADDRESS = '5F2SeXfnUuvQ7nux5b7dTHgUoePgiCW38Czk78YQuJPfjunb';
 const SOLANA_ADDRESS = 'INSERT_ADDRESS';
+const SUI_ADDRESS =
+  '0x6a07fa01f106d6b4822007ab2f47270bbf31ee446db302d049b4615c46f01c7d';
 
 const addressOf = (chain: AnyChain): string => {
   if (chain.isSolana()) return SOLANA_ADDRESS;
+  if (chain.isSui()) return SUI_ADDRESS;
   if (chain.isEvmChain()) return EVM_ADDRESS;
   return HYDRATION_ADDRESS;
 };
@@ -124,8 +134,8 @@ async function transfer({ source, route }: NttRoute, amount: string) {
  * claim is paid there; withdrawals are redeemed on the evm side.
  */
 const claim = {
-  in: () => claimDeposits(HYDRATION_ADDRESS, HYDRATION_ADDRESS, log),
-  out: () => claimWithdraws(HYDRATION_ADDRESS, EVM_ADDRESS, log),
+  in: () => claimDeposits(HYDRATION_ADDRESS, addressOf, log),
+  out: () => claimWithdraws(HYDRATION_ADDRESS, addressOf, log),
 };
 
 /**
