@@ -39,8 +39,6 @@ export const sui_chain = new SuiChain({
         },
         emitter:
           '0x25437da9f99dfab32c1a275663f51cd5c99eb867ab4d1f630e3799c5e68215da',
-        coinMetadata:
-          '0x9258181f5ceac8dbffb7030890243caed69a9599d2886d957a9cb7656af3bdb3',
       },
     },
   },

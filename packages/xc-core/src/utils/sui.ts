@@ -1,4 +1,5 @@
 import { SuiClient, SuiMoveNormalizedType } from '@mysten/sui/client';
+import { normalizeStructTag, SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 /**
  * Sui move package resolution.
@@ -26,6 +27,36 @@ export async function getObject(
     throw new Error('Failed to fetch object ' + objectId);
   }
   return { type: data.type, fields: content.fields };
+}
+
+/** CoinMetadata<0x2::sui::SUI> - fixed framework object on mainnet. */
+const SUI_COIN_METADATA_ID =
+  '0x9258181f5ceac8dbffb7030890243caed69a9599d2886d957a9cb7656af3bdb3';
+
+/**
+ * Legacy CoinMetadata object id of a coin type.
+ *
+ * Registry-migrated rpc nodes resolve `getCoinMetadata` to the new
+ * coin_registry Currency object, which the ntt calls (declared against
+ * &CoinMetadata) can't take - the id is only used when it verifies as
+ * the legacy type. Native sui always resolves the new way; its legacy
+ * metadata object is well known.
+ */
+export async function getCoinMetadataId(
+  client: SuiClient,
+  coinType: string
+): Promise<string> {
+  const metadata = await client.getCoinMetadata({ coinType });
+  if (metadata?.id) {
+    const { type } = await getObject(client, metadata.id);
+    if (type.includes('::coin::CoinMetadata<')) {
+      return metadata.id;
+    }
+  }
+  if (normalizeStructTag(coinType) === normalizeStructTag(SUI_TYPE_ARG)) {
+    return SUI_COIN_METADATA_ID;
+  }
+  throw new Error('Unable to resolve coin metadata of ' + coinType);
 }
 
 /** Wormhole core package id (CurrentPackage dynamic field). */

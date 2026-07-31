@@ -35,17 +35,17 @@ const transfer = (): MoveConfigBuilder => ({
     const transceiverStateId = ntt.transceiver.wormhole;
     const coinType = ntt.token;
 
-    const coinMetadataId = ntt.coinMetadata;
-    if (!coinMetadataId) {
-      throw new Error('Missing coin metadata object of ' + coinType);
-    }
-
-    const [coreBridgePackageId, nttPackageId, transceiverPackageId] =
-      await Promise.all([
-        suiPkg.getWormholePackageId(client, coreStateId),
-        suiPkg.getCurrentPackageId(client, managerStateId),
-        suiPkg.getCurrentPackageId(client, transceiverStateId),
-      ]);
+    const [
+      coreBridgePackageId,
+      nttPackageId,
+      transceiverPackageId,
+      coinMetadataId,
+    ] = await Promise.all([
+      suiPkg.getWormholePackageId(client, coreStateId),
+      suiPkg.getCurrentPackageId(client, managerStateId),
+      suiPkg.getCurrentPackageId(client, transceiverStateId),
+      suiPkg.getCoinMetadataId(client, coinType),
+    ]);
 
     const tx = new Transaction();
 

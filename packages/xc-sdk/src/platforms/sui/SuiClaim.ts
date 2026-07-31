@@ -59,21 +59,18 @@ export class SuiClaim {
     const transceiverStateId = ntt.transceiver.wormhole;
     const coinType = ntt.token;
 
-    const coinMetadataId = ntt.coinMetadata;
-    if (!coinMetadataId) {
-      throw new Error('Missing coin metadata object of ' + coinType);
-    }
-
     const [
       coreBridgePackageId,
       nttPackageId,
       transceiverPackageId,
       nttCommonPackageId,
+      coinMetadataId,
     ] = await Promise.all([
       suiPkg.getWormholePackageId(client, coreStateId),
       suiPkg.getCurrentPackageId(client, managerStateId),
       suiPkg.getCurrentPackageId(client, transceiverStateId),
       suiPkg.getNttCommonPackageId(client, managerStateId),
+      suiPkg.getCoinMetadataId(client, coinType),
     ]);
 
     const tx = new Transaction();
