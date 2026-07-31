@@ -35,21 +35,17 @@ const transfer = (): MoveConfigBuilder => ({
     const transceiverStateId = ntt.transceiver.wormhole;
     const coinType = ntt.token;
 
-    const [
-      coreBridgePackageId,
-      nttPackageId,
-      transceiverPackageId,
-      coinMetadata,
-    ] = await Promise.all([
-      suiPkg.getWormholePackageId(client, coreStateId),
-      suiPkg.getCurrentPackageId(client, managerStateId),
-      suiPkg.getCurrentPackageId(client, transceiverStateId),
-      client.getCoinMetadata({ coinType }),
-    ]);
-
-    if (!coinMetadata?.id) {
-      throw new Error('Unable to fetch coin metadata of ' + coinType);
+    const coinMetadataId = ntt.coinMetadata;
+    if (!coinMetadataId) {
+      throw new Error('Missing coin metadata object of ' + coinType);
     }
+
+    const [coreBridgePackageId, nttPackageId, transceiverPackageId] =
+      await Promise.all([
+        suiPkg.getWormholePackageId(client, coreStateId),
+        suiPkg.getCurrentPackageId(client, managerStateId),
+        suiPkg.getCurrentPackageId(client, transceiverStateId),
+      ]);
 
     const tx = new Transaction();
 
@@ -71,7 +67,7 @@ const transfer = (): MoveConfigBuilder => ({
       arguments: [
         tx.object(managerStateId),
         coin!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         tx.pure.u16(rcvWh.getWormholeId()),
         tx.pure.vector('u8', Array.from(recipient)),
         tx.pure.option('vector<u8>', null),
@@ -95,7 +91,7 @@ const transfer = (): MoveConfigBuilder => ({
       arguments: [
         tx.object(managerStateId),
         versionGated!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         transferTicket!,
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],

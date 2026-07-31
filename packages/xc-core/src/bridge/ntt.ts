@@ -22,6 +22,13 @@ export type NttTokenDef = {
   };
   /** VAA emitter, when different from the transceiver address (Solana pda) */
   emitter?: string;
+  /**
+   * Sui `0x2::coin::CoinMetadata<T>` object id, taken by every ntt move
+   * call. Not discoverable over v1 json-rpc: `getCoinMetadata` returns the
+   * newer `0x2::coin_registry::Currency<T>` object, which the manager
+   * rejects with a TypeMismatch.
+   */
+  coinMetadata?: string;
 };
 
 export type NttDef = Record<string, NttTokenDef>;
