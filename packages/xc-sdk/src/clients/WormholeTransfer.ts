@@ -169,7 +169,9 @@ export class WormholeTransfer {
     const { content, data, emitterChain, emitterAddress } = operation;
     const { standarizedProperties } = content;
 
-    const source = this.findNttByEmitter(emitterChain, emitterAddress.native);
+    const emitter = emitterAddress.native ?? '0x' + emitterAddress.hex;
+
+    const source = this.findNttByEmitter(emitterChain, emitter);
     if (!source) {
       return undefined;
     }

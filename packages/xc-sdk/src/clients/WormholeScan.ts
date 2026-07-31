@@ -33,7 +33,7 @@ export interface Operation {
   emitterChain: number;
   emitterAddress: {
     hex: string;
-    native: string;
+    native?: string;
   };
   sequence: string;
   sourceChain: {

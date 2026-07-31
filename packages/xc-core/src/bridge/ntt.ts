@@ -28,6 +28,9 @@ export type NttDef = Record<string, NttTokenDef>;
 
 /** Hex addresses match case-insensitive, base58 (Solana) is exact. */
 function isSameAddress(a: string, b: string): boolean {
+  if (!a || !b) {
+    return false;
+  }
   if (a.startsWith('0x') && b.startsWith('0x')) {
     return a.toLowerCase() === b.toLowerCase();
   }

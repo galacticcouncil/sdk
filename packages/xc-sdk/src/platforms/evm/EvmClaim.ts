@@ -1,4 +1,4 @@
-import { Abi, NttTokenDef } from '@galacticcouncil/xc-core';
+import { Abi, CallType, NttTokenDef } from '@galacticcouncil/xc-core';
 
 import { encodeFunctionData } from 'viem';
 
@@ -34,6 +34,7 @@ export class EvmClaim {
       data: data,
       from: from,
       to: ntt.transceiver.wormhole,
+      type: CallType.Evm,
     } as EvmCall;
   }
 
@@ -65,6 +66,7 @@ export class EvmClaim {
       data: data,
       from: from,
       to: ntt.manager,
+      type: CallType.Evm,
     } as EvmCall;
   }
 }
