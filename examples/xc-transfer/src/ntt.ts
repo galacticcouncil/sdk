@@ -20,9 +20,9 @@ const { Tag } = tags;
 // Evm chains sign with the h160; hydration takes an ss58 (bound on chain,
 // see EnsureAddressTruncated) or the same h160. The ss58 below is bound to
 // 0x82fb02afe02fe5d6c793145a75e6860c4e206682.
-const EVM_ADDRESS = '0x23812ff0cDdd7157C4760E3BB2d39f5f323a7D3c';
-const HYDRATION_ADDRESS = '5F2SeXfnUuvQ7nux5b7dTHgUoePgiCW38Czk78YQuJPfjunb';
-const SOLANA_ADDRESS = 'INSERT_ADDRESS';
+const EVM_ADDRESS = '0x26f5C2370e563e9f4dDA435f03A63D7C109D8D04';
+const HYDRATION_ADDRESS = '12ZuLmUNjTz5HgYneqXpoYh7hVSFNJnwsh6NgivdF2wb9GcH';
+const SOLANA_ADDRESS = 'BptG4GBumjKRonEb2pBGuR2PidYBC1HRDYtWjE5r6yTg';
 
 const addressOf = (chain: AnyChain): string => {
   if (chain.isSolana()) return SOLANA_ADDRESS;
