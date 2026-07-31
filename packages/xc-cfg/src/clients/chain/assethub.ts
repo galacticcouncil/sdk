@@ -62,7 +62,6 @@ export class AssethubClient extends BaseClient<Hub> {
     return response.status.type === 'Frozen' || false;
   }
 
-
   async getBridgeDeliveryFee(
     options = {
       defaultFee: 150_000_000_000n,

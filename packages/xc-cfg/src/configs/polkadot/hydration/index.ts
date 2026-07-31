@@ -2,19 +2,17 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import {
   aave,
-  ajun,
   apyusd,
   astr,
   bnc,
   cfg_new,
-  cru,
   dai,
-  dai_mwh,
+  dai_wh,
   dot,
   ena,
   eth,
   eurc,
-  eurc_mwh,
+  eurc_wh,
   jito_sol,
   prime,
   susds,
@@ -39,33 +37,29 @@ import {
   trac,
   unq,
   usdc,
-  usdc_mwh,
+  usdc_wh,
   usdc_eth,
   usdt,
-  usdt_mwh,
+  usdt_wh,
   usdt_eth,
   vastr,
   vdot,
-  wbtc_mwh,
-  weth_mwh,
+  wbtc_wh,
+  weth_wh,
   wsteth,
   wud,
   lbtc,
-  susds_mwh,
+  susds_wh,
 } from '../../../assets';
 import {
-  ajuna,
   assetHub,
   assetHubCex,
   astar,
   base,
   bifrost,
-  crust,
   energywebx,
   ethereum,
   hydration,
-  interlay,
-  moonbeam,
   mythos,
   neuroweb,
   pendulum,
@@ -84,7 +78,6 @@ import {
   toHubTemplate,
   toHubExtTemplate,
   toKusamaHubTemplate,
-  toMoonbeamErc20Template,
   toParaTemplate,
   toTransferTemplate,
   viaNttTemplate,
@@ -110,7 +103,6 @@ const toKusamaAssethub: AssetRoute[] = [
 const toAstar: AssetRoute[] = [
   toTransferTemplate(astr, astar),
   toTransferTemplate(bnc, astar, bifrost),
-  toTransferTemplate(glmr, astar, moonbeam),
   new AssetRoute({
     source: {
       asset: ibtc,
@@ -152,7 +144,6 @@ const toBifrost: AssetRoute[] = [
   toTransferTemplate(vdot, bifrost),
   toTransferTemplate(vastr, bifrost),
   toTransferTemplate(astr, bifrost, astar),
-  toTransferTemplate(glmr, bifrost, moonbeam),
   new AssetRoute({
     source: {
       asset: ibtc,
@@ -191,60 +182,6 @@ const toBifrost: AssetRoute[] = [
   }),
 ];
 
-const toInterlay: AssetRoute[] = [
-  toParaTemplate(ibtc, interlay, 0.00000062),
-  toParaTemplate(intr, interlay, 0.0019213457),
-  toParaTemplate(hdx, interlay, 0.5),
-  toParaTemplate(usdt, interlay, 0.3),
-  toParaTemplate(usdc, interlay, 0.3),
-  new AssetRoute({
-    source: {
-      asset: vdot,
-      fee: fee(),
-    },
-    destination: {
-      chain: interlay,
-      asset: vdot,
-      fee: {
-        amount: 0.01,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: dot,
-      fee: fee(),
-    },
-    destination: {
-      chain: interlay,
-      asset: dot,
-      fee: {
-        amount: 0.05,
-        asset: dot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.RemoteReserve,
-    }),
-  }),
-];
-
-const toMoonbeam: AssetRoute[] = [
-  toTransferTemplate(hdx, moonbeam),
-  toTransferTemplate(glmr, moonbeam),
-  toTransferTemplate(usdt, moonbeam, assetHub),
-  toTransferTemplate(usdc, moonbeam, assetHub),
-  toMoonbeamErc20Template(dai_mwh),
-  toMoonbeamErc20Template(susds_mwh),
-  toMoonbeamErc20Template(usdc_mwh),
-  toMoonbeamErc20Template(usdt_mwh),
-  toMoonbeamErc20Template(wbtc_mwh),
-  toMoonbeamErc20Template(weth_mwh),
-  toMoonbeamErc20Template(sol),
-];
-
 const toMythos: AssetRoute[] = [
   new AssetRoute({
     source: {
@@ -264,24 +201,6 @@ const toMythos: AssetRoute[] = [
 ];
 
 const toUnique: AssetRoute[] = [toTransferTemplate(unq, unique)];
-
-const toCrust: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: cru,
-      fee: fee(),
-    },
-    destination: {
-      chain: crust,
-      asset: cru,
-      fee: {
-        amount: 0.04,
-        asset: cru,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-];
 
 const toEnergywebx: AssetRoute[] = [
   new AssetRoute({
@@ -321,18 +240,16 @@ const toPendulum: AssetRoute[] = [
 
 const toNeuroweb: AssetRoute[] = [toTransferTemplate(neuro, neuroweb)];
 
-const toAjuna: AssetRoute[] = [toTransferTemplate(ajun, ajuna)];
-
 const toEthereumViaNtt: AssetRoute[] = [
-  viaNttTemplate(dai_mwh, dai, ethereum),
-  viaNttTemplate(susds_mwh, susds, ethereum),
-  viaNttTemplate(usdc_mwh, usdc, ethereum),
-  viaNttTemplate(usdt_mwh, usdt, ethereum),
-  viaNttTemplate(wbtc_mwh, wbtc, ethereum),
-  viaNttTemplate(weth_mwh, eth, ethereum),
+  viaNttTemplate(dai_wh, dai, ethereum),
+  viaNttTemplate(susds_wh, susds, ethereum),
+  viaNttTemplate(usdc_wh, usdc, ethereum),
+  viaNttTemplate(usdt_wh, usdt, ethereum),
+  viaNttTemplate(wbtc_wh, wbtc, ethereum),
+  viaNttTemplate(weth_wh, eth, ethereum),
 ];
 
-const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_mwh, eurc, base)];
+const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
 const toSolanaViaNtt: AssetRoute[] = [
   viaNttTemplate(sol, sol, solana),
@@ -392,22 +309,18 @@ const toCex: AssetRoute[] = [
 export const hydrationConfig = new ChainRoutes({
   chain: hydration,
   routes: [
-    ...toAjuna,
     ...toAssetHub,
     ...toAstar,
     ...toBifrost,
     ...toCex,
     ...toBaseViaNtt,
-    ...toCrust,
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,
     ...toEthereumViaSnowbridgeV1,
-    ...toInterlay,
     ...toEnergywebx,
     ...toKusamaAssethub,
-    ...toMoonbeam,
     ...toMythos,
     ...toNeuroweb,
     ...toPendulum,

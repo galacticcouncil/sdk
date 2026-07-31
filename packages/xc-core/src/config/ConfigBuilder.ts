@@ -63,7 +63,7 @@ export function ConfigBuilder(service: ConfigService) {
                         ? routes.filter((r) => r.tags?.includes(tag))
                         : routes;
 
-                      // Prefer route where dest asset matches source asset (e.g. eth→eth over eth→weth_mwh)
+                      // Prefer route where dest asset matches source asset (e.g. eth→eth over eth→weth_wh)
                       const sameAssetRoute = candidates.find(
                         (r) =>
                           r.destination.asset.originSymbol ===

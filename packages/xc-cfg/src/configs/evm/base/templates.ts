@@ -52,9 +52,7 @@ export function toHydrationViaBasejumpTemplate(
         asset: assetIn,
       },
     },
-    contract: ContractBuilder()
-      .Basejump()
-      .bridgeViaWormhole(),
+    contract: ContractBuilder().Basejump().bridgeViaWormhole(),
     tags: [Tag.Basejump],
   });
 }

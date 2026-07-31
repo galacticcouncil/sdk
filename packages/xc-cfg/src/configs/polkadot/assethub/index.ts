@@ -7,7 +7,6 @@ import {
   bifrost,
   hydration,
   kusamaAssetHub,
-  moonbeam,
   mythos,
 } from '../../../chains';
 import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
@@ -86,11 +85,6 @@ const toKusamaAssethub: AssetRoute[] = [
   }),
 ];
 
-const toMoonbeam: AssetRoute[] = [
-  toParaStablesTemplate(usdt, moonbeam, 0.25),
-  toParaStablesTemplate(usdc, moonbeam, 0.25),
-];
-
 const toBifrost: AssetRoute[] = [
   toParaStablesTemplate(usdt, bifrost, 0.03),
   toParaStablesTemplate(usdc, bifrost, 0.03),
@@ -128,11 +122,5 @@ export const assetHubCexConfig = new ChainRoutes({
 
 export const assetHubConfig = new ChainRoutes({
   chain: assetHub,
-  routes: [
-    ...toHydration,
-    ...toKusamaAssethub,
-    ...toMoonbeam,
-    ...toBifrost,
-    ...toMythos,
-  ],
+  routes: [...toHydration, ...toKusamaAssethub, ...toBifrost, ...toMythos],
 });

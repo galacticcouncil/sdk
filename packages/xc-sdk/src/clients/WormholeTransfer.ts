@@ -273,7 +273,7 @@ export class WormholeTransfer {
    *
    * The emitter identifies the token by its key on the **source** chain,
    * which is not necessarily the key it carries on the destination (`dai`
-   * on ethereum, `dai_mwh` on hydration). The registered route holds that
+   * on ethereum, `dai_wh` on hydration). The registered route holds that
    * mapping, so resolve through it when the key doesn't carry over.
    */
   private findDestinationNtt(

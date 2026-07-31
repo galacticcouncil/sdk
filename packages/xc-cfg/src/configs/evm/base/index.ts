@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { eurc, eurc_mwh } from '../../../assets';
+import { eurc, eurc_wh } from '../../../assets';
 import { base } from '../../../chains';
 import {
   toHydrationViaBasejumpTemplate,
@@ -8,11 +8,11 @@ import {
 } from './templates';
 
 const toHydrationViaBasejump: AssetRoute[] = [
-  toHydrationViaBasejumpTemplate(eurc, eurc_mwh),
+  toHydrationViaBasejumpTemplate(eurc, eurc_wh),
 ];
 
 const toHydrationViaNtt: AssetRoute[] = [
-  toHydrationViaNttTemplate(eurc, eurc_mwh),
+  toHydrationViaNttTemplate(eurc, eurc_wh),
 ];
 
 export const baseConfig = new ChainRoutes({

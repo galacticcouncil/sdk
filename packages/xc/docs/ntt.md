@@ -17,7 +17,7 @@ lives on:
 
 Hydration is a first-class Wormhole chain: id `73`, EVM chain id `222222` (registered in
 `@wormhole-foundation/sdk-base` >= 6.1.4). Transfers Ethereum <-> Hydration are direct —
-no Moonbeam hop, no MRL payloads, no wrapped `_mwh` assets.
+no Moonbeam hop, no MRL payloads, no wrapped `_wh` assets.
 
 ## Registry
 
@@ -37,7 +37,7 @@ Registry contract (breaks silently if violated):
 
 1. **One asset key per token across all chains.** `WormholeTransfer` resolves the
    destination deployment with the *source* asset key — chain-local key variants
-   (the old `usdc` vs `usdc_mwh` convention) would make the destination lookup miss and
+   (the old `usdc` vs `usdc_wh` convention) would make the destination lookup miss and
    the redeem callback silently vanish.
 2. **History matching compares the VAA emitter** (wormholescan `emitterAddress.native`)
    to `emitter ?? transceiver.wormhole`. For EVM chains the transceiver contract IS the

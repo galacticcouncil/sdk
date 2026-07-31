@@ -15,7 +15,7 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, kusamaAssetHub, moonbeam } from '../../../chains';
+import { assetHub, kusamaAssetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { fee } from './configs';
@@ -175,14 +175,6 @@ export function toParaErc20Template(
       })
     ),
   });
-}
-
-export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(
-    asset,
-    moonbeam,
-    XcmTransferType.DestinationReserve
-  );
 }
 
 export function viaNttTemplate(

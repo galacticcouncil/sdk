@@ -10,7 +10,9 @@ import { hydration } from '@galacticcouncil/descriptors';
  * @param client - PolkadotClient instance
  * @returns TypedApi with Hydration types
  */
-export function getTypedApi(client: PolkadotClient): TypedApi<typeof hydration> {
+export function getTypedApi(
+  client: PolkadotClient
+): TypedApi<typeof hydration> {
   return client.getTypedApi(hydration);
 }
 

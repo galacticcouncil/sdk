@@ -85,8 +85,7 @@ const transfer = (): ProgramConfigBuilder => ({
     // The manager locks an spl token. A native gas source (sol) has to be
     // wrapped into it (wSOL) first - upstream yields that as its own
     // transaction, the pair doesn't fit one.
-    const wrapNative =
-      ctx.getBalanceType(asset) === SolanaBalanceType.Native;
+    const wrapNative = ctx.getBalanceType(asset) === SolanaBalanceType.Native;
 
     const outboxItem = Keypair.generate();
     const sequence: ProgramTx[] = [];

@@ -29,9 +29,7 @@ export function toTransferTemplate(
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee(
-            reserve ? { reserve } : undefined
-          ),
+          .calculateDestFee(reserve ? { reserve } : undefined),
         asset: asset,
       },
     },
