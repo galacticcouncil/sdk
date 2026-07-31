@@ -19,7 +19,11 @@ export const sui_chain = new SuiChain({
   balance: SuiBalanceType.Native,
   ecosystem: Ecosystem.Sui,
   explorer: 'https://suiscan.xyz/',
-  rpc: 'https://sui-rpc.publicnode.com',
+  // v1 json-rpc; the public fullnode serves grpc/graphql only since 2026-07.
+  // Not every provider is usable - sui-rpc.publicnode.com answers object
+  // reads but returns an EMPTY dynamic field list, which silently breaks
+  // wormhole package resolution.
+  rpc: 'https://rpc-mainnet.suiscan.xyz',
   wormhole: {
     id: 21,
     coreBridge:
