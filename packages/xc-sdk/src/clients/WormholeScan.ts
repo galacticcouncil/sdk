@@ -25,7 +25,8 @@ export interface Operation {
     payload: OperationPayload;
     standarizedProperties: OperationProperties;
   };
-  data: {
+  /** Indexer enrichment, absent for parachain emitted operations. */
+  data?: {
     symbol: string;
     tokenAmount: string;
   };
@@ -80,6 +81,8 @@ export interface OperationProperties {
   toAddress: string;
   tokenChain: number;
   tokenAddress: string;
+  amount: string;
+  normalizedDecimals: number;
 }
 
 export class WormholeScan {

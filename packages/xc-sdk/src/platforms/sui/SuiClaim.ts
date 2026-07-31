@@ -1,10 +1,11 @@
 import {
   NttTokenDef,
+  suiPkg,
   SuiChain,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
-import { SuiClient, SuiMoveNormalizedType } from '@mysten/sui/client';
+import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
 
@@ -18,11 +19,6 @@ import { nativeTokenTransferLayout } from '@wormhole-foundation/sdk-definitions-
 
 import { SuiCall } from './types';
 import { buildSuiCall } from './utils';
-
-type SuiObject = {
-  type: string;
-  fields: Record<string, any>;
-};
 
 export class SuiClaim {
   readonly #chain: SuiChain;
@@ -70,10 +66,10 @@ export class SuiClaim {
       nttCommonPackageId,
       coinMetadata,
     ] = await Promise.all([
-      this.getWormholePackageId(coreStateId),
-      this.getCurrentPackageId(managerStateId),
-      this.getCurrentPackageId(transceiverStateId),
-      this.getNttCommonPackageId(managerStateId),
+      suiPkg.getWormholePackageId(client, coreStateId),
+      suiPkg.getCurrentPackageId(client, managerStateId),
+      suiPkg.getCurrentPackageId(client, transceiverStateId),
+      suiPkg.getNttCommonPackageId(client, managerStateId),
       client.getCoinMetadata({ coinType }),
     ]);
 
@@ -167,83 +163,5 @@ export class SuiClaim {
     });
 
     return buildSuiCall(from, tx, this.#client);
-  }
-
-  /** Wormhole core package id (CurrentPackage dynamic field). */
-  private async getWormholePackageId(coreStateId: string): Promise<string> {
-    const client = this.#client;
-    let cursor: string | null | undefined;
-    do {
-      const page = await client.getDynamicFields({
-        parentId: coreStateId,
-        cursor: cursor,
-      });
-      const current = page.data.find((f) =>
-        f.name.type.endsWith('CurrentPackage')
-      );
-      if (current) {
-        const obj = await this.getObject(current.objectId);
-        const value = obj.fields['value'];
-        const pkg = value?.fields?.package ?? value?.package;
-        if (pkg) {
-          return pkg;
-        }
-        break;
-      }
-      cursor = page.hasNextPage ? page.nextCursor : null;
-    } while (cursor);
-    throw new Error('Unable to resolve wormhole core package');
-  }
-
-  /** Latest package id of a state object (via its upgrade cap, if any). */
-  private async getCurrentPackageId(stateId: string): Promise<string> {
-    const state = await this.getObject(stateId);
-    const original = state.type.split('::')[0];
-    const upgradeCapId = state.fields['upgrade_cap_id'];
-    if (!upgradeCapId) {
-      return original;
-    }
-    const upgradeCap = await this.getObject(upgradeCapId);
-    const cap = upgradeCap.fields['cap'];
-    return cap?.fields?.package ?? cap?.package ?? original;
-  }
-
-  /** ntt-common package id, from the manager State inbox declared type. */
-  private async getNttCommonPackageId(managerStateId: string): Promise<string> {
-    const state = await this.getObject(managerStateId);
-    const [pkg, module, struct] = state.type.split('<')[0].split('::');
-    const { fields } = await this.#client.getNormalizedMoveStruct({
-      package: pkg,
-      module: module,
-      struct: struct,
-    });
-    // State.inbox is declared Inbox<native_token_transfer::NativeTokenTransfer>;
-    // its type argument address is the ntt-common package.
-    const inbox = fields.find((f) => f.name === 'inbox')?.type;
-    const item = this.asStruct(inbox)?.typeArguments[0];
-    const address = this.asStruct(item)?.address;
-    if (!address) {
-      throw new Error('Unable to resolve ntt common package');
-    }
-    return address;
-  }
-
-  private asStruct(type?: SuiMoveNormalizedType) {
-    if (type && typeof type === 'object' && 'Struct' in type) {
-      return type.Struct;
-    }
-    return undefined;
-  }
-
-  private async getObject(objectId: string): Promise<SuiObject> {
-    const { data } = await this.#client.getObject({
-      id: objectId,
-      options: { showContent: true, showType: true },
-    });
-    const content = data?.content as { fields?: Record<string, any> };
-    if (!data?.type || !content?.fields) {
-      throw new Error('Failed to fetch object ' + objectId);
-    }
-    return { type: data.type, fields: content.fields };
   }
 }

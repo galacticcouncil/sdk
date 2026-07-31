@@ -53,7 +53,7 @@ config object a route references:
 | `contract/ContractConfigBuilder`   | EVM contract call (uses `xc-core/evm/abi/*`) |
 | `extrinsic/ExtrinsicConfigBuilder` | substrate extrinsic                          |
 | `fee/FeeAmount`+`FeeAsset`         | fee sizing / fee asset                       |
-| `move/MoveConfigBuilder`           | the actual cross-chain move (xcm / bridge)   |
+| `move/MoveConfigBuilder`           | Sui move call                                |
 | `program/ProgramConfigBuilder`     | Solana program call                          |
 | `balance/`, `min/`                 | balance query id, min amounts                |
 

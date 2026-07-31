@@ -54,6 +54,12 @@ to mint. Registry entries should agree with it.
 
 ## Transfer flow
 
+One builder per source platform, all tagged `Wormhole` + `Ntt`:
+[contracts/Wormhole/Ntt](packages/xc-cfg/src/builders/contracts/Wormhole/Ntt.ts) (evm,
+below), [programs/Wormhole/Ntt](packages/xc-cfg/src/builders/programs/Wormhole/Ntt.ts)
+(solana) and [moves/Wormhole/Ntt](packages/xc-cfg/src/builders/moves/Wormhole/Ntt.ts)
+(sui).
+
 Route contract builder: [Ntt().transfer()](packages/xc-cfg/src/builders/contracts/Wormhole/Ntt.ts),
 used by the `viaNtt` route templates (tags `Wormhole` + `Ntt`).
 
@@ -122,6 +128,33 @@ larger amount.
 substrate-native accounts **iff bound** (verified against
 `EVMAccounts.AccountExtension`); anything else throws. Never silently derive — an
 unbound-native-derived recipient would receive an unrecoverable mint.
+
+### Sui source ([moves/Wormhole/Ntt](packages/xc-cfg/src/builders/moves/Wormhole/Ntt.ts))
+
+One move transaction, mirroring the reference sui NTT sdk transfer — the published one
+is unusable here (it requires @mysten/sui v2 grpc), same as for
+[SuiClaim](packages/xc-sdk/src/platforms/sui/SuiClaim.ts):
+
+`ntt::prepare_transfer` → `state::get_next_sequence` → `ntt::transfer_tx_sender` →
+`state::create_transceiver_message` → `wormhole_transceiver::release_outbound` →
+`publish_message::publish_message`, with the trimmed remainder handed back by
+`prepare_transfer` merged into gas.
+
+Sui specifics:
+
+- Move calls target the **current** package id of an upgradeable package, not the id its
+  State object was created under — the manager, transceiver and core bridge package ids
+  are resolved from chain per build (`suiPkg` helpers in xc-core, shared with `SuiClaim`).
+  The registry only carries State object ids.
+- The amount is **not** floored: `prepare_transfer` trims to wire precision itself and
+  returns the remainder as a `Balance`, unlike the evm manager which reverts on dust.
+- `should_queue` is always false — a rate-limited transfer aborts rather than parking an
+  outbox item that transfer history can't release.
+- The coin is split off gas: only native SUI is registered on the chain
+  (`SuiBalanceType.Native`). A coin-type source would need the coin selection & merge
+  branch of the reference sdk.
+- Fee is whatever the [SuiPlatform](packages/xc-sdk/src/platforms/sui/SuiPlatform.ts)
+  dry run reports (computation + storage); the wormhole message fee is 0.
 
 ## Tracking & claim
 
@@ -195,21 +228,21 @@ executor-flavored transfer builder, and a signed-quote fetch client.
 | --- | --- | --- | --- |
 | Ethereum / Base | yes (`Ntt().transfer()`) | yes | yes (`EvmClaim`) |
 | Hydration | yes (evm or `EVM.call`-wrapped) | yes | yes (`EvmClaim`/`SubstrateClaim`) |
-| Solana | destination only | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
-| Sui | destination only | yes | yes (`SuiClaim`) |
+| Solana | yes (`ProgramBuilder`) | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
+| Sui | builder ready, no deployment | yes | yes (`SuiClaim`) |
 
-All chains are wired as NTT *destinations*; sending *from* Solana/Sui needs NTT
-program/move transfer builders (the deleted TokenBridge ones were platform-specific) —
-pending, tracked below.
+Every chain is wired both ways. The Sui legs (sui → hydration in
+[configs/sui/sui.ts](packages/xc-cfg/src/configs/sui/sui.ts), hydration → sui in the
+hydration config) are the only routes still commented out: no SUI NttManager is deployed
+on either side yet, so both `wormhole.ntt` registries lack the entry. Uncomment the two
+route lines once the deployment lands.
 
 ## Open items
 
 - Executor wiring (above) — until then, transfers complete via manual redeem only.
-- Registry population — all chain `wormhole.ntt` registries are empty until per-token
-  NttManager deployments land.
-- Solana/Sui **outbound** transfer builders (`program`/`move` route configs) via
-  `@wormhole-foundation/sdk-solana-ntt` on top of the surviving tx scaffolding
-  (`SolanaLilJit`, `serializeV0`, `SolanaSigner`).
+- SUI deployment — the only token with no NttManager pair (`ops/tokens` in the
+  native-token-transfers fork has none). Registry entries + the two commented routes are
+  what it unblocks.
 - Dependency pin: `sdk-solana-ntt`/`sdk-definitions-ntt` 7.2.0 peer on wormhole sdk
   `^5.0.0` while this stack is on 6.1.4 (which added Hydration/chain 73). Lock-driven
   installs (`npm i`/`npm ci` with the committed lockfile) work as-is; only a fresh

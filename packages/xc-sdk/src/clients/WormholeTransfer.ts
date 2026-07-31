@@ -13,6 +13,8 @@ import {
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
+import { big } from '@galacticcouncil/common';
+
 import { keccak256 } from 'viem';
 
 import { encoding } from '@wormhole-foundation/sdk-base';
@@ -130,24 +132,25 @@ export class WormholeTransfer {
    */
   async getTransfers(address: string): Promise<WhTransfer[]> {
     const h160 = await this.parachain.getDerivatedAddress(address);
-    const chainWh = Wormhole.fromChain(this.parachain);
+    const chainId = Wormhole.fromChain(this.parachain)
+      .getWormholeId()
+      .toString();
 
-    // Wormholescan matches `address` against the sender only, so an
-    // inbound transfer is never returned for the receiving account.
-    // Scan what targets the parachain and keep the user's own.
+    // Scoped by chain, not by `address`: wormholescan matches that filter
+    // against the sender it extracted from the source transaction, which is
+    // never the receiver and is left empty for parachain emitted operations.
+    // Both directions are matched on the addresses the operation carries.
     const [sent, received] = await Promise.all([
-      this.whScan.getOperations({
-        ...this.filters,
-        address: h160,
-      }),
-      this.whScan.getOperations({
-        ...this.filters,
-        targetChain: chainWh.getWormholeId().toString(),
-      }),
+      this.whScan.getOperations({ ...this.filters, sourceChain: chainId }),
+      this.whScan.getOperations({ ...this.filters, targetChain: chainId }),
     ]);
 
     const operations = new Map<string, Operation>();
-    sent.forEach((o) => operations.set(o.id, o));
+    sent
+      .filter((o) =>
+        isSameAddress(o.content.standarizedProperties.fromAddress, h160)
+      )
+      .forEach((o) => operations.set(o.id, o));
     received
       .filter((o) =>
         isSameAddress(o.content.standarizedProperties.toAddress, h160)
@@ -163,7 +166,7 @@ export class WormholeTransfer {
   private async toTransfer(
     operation: Operation
   ): Promise<WhTransfer | undefined> {
-    const { content, emitterChain, emitterAddress, sourceChain } = operation;
+    const { content, data, emitterChain, emitterAddress } = operation;
     const { standarizedProperties } = content;
 
     const source = this.findNttByEmitter(emitterChain, emitterAddress.native);
@@ -204,11 +207,21 @@ export class WormholeTransfer {
       }
     }
 
+    // Only the indexer's enriched `data` carries a formatted amount & symbol,
+    // and it stays empty for parachain emitted operations - fall back to the
+    // transfer's own properties and the registry key.
+    const asset = this.config.assets.get(source.assetKey);
+
     return {
       asset: standarizedProperties.tokenAddress,
-      assetSymbol: operation.data.symbol,
-      amount: operation.data.tokenAmount,
-      from: sourceChain.from,
+      assetSymbol: data?.symbol ?? asset?.originSymbol ?? source.assetKey,
+      amount:
+        data?.tokenAmount ??
+        big.toDecimal(
+          BigInt(standarizedProperties.amount),
+          standarizedProperties.normalizedDecimals
+        ),
+      from: standarizedProperties.fromAddress,
       fromChain: source.chain,
       to: standarizedProperties.toAddress,
       toChain: toChain,

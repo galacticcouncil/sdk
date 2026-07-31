@@ -69,6 +69,7 @@ import {
   neuroweb,
   pendulum,
   solana,
+  sui_chain,
   unique,
 } from '../../../chains';
 import {
@@ -332,12 +333,16 @@ const toEthereumViaNtt: AssetRoute[] = [
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_mwh, eurc, base)];
 
-// Solana inbound (solana -> hydration) needs an ntt program builder that
-// doesn't exist yet - only the hydration side is wired.
 const toSolanaViaNtt: AssetRoute[] = [
   viaNttTemplate(sol, sol, solana),
   viaNttTemplate(jito_sol, jito_sol, solana),
   viaNttTemplate(prime, prime, solana),
+];
+
+// Enable once the SUI manager deployment lands & both registries carry it
+// (hydration's wormhole.ntt and sui_chain's, keyed by the same asset key).
+const toSuiViaNtt: AssetRoute[] = [
+  // viaNttTemplate(sui, sui, sui_chain),
 ];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
@@ -400,6 +405,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toSolanaViaNtt,
+    ...toSuiViaNtt,
     ...toEthereumViaSnowbridgeV1,
     ...toInterlay,
     ...toEnergywebx,
