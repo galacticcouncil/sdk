@@ -84,6 +84,12 @@ const objects: Record<string, any> = {
       content: { fields: { cap: { fields: { package: TRANSCEIVER_PKG } } } },
     },
   },
+  [COIN_META]: {
+    data: {
+      type: '0x2::coin::CoinMetadata<0x2::sui::SUI>',
+      content: { fields: { decimals: 9 } },
+    },
+  },
   [Wormhole.fromChain(sui_chain).getCoreBridge()]: {
     data: {
       type: '0xcore::state::State',

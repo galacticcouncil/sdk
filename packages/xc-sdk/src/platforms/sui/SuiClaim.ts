@@ -64,18 +64,14 @@ export class SuiClaim {
       nttPackageId,
       transceiverPackageId,
       nttCommonPackageId,
-      coinMetadata,
+      coinMetadataId,
     ] = await Promise.all([
       suiPkg.getWormholePackageId(client, coreStateId),
       suiPkg.getCurrentPackageId(client, managerStateId),
       suiPkg.getCurrentPackageId(client, transceiverStateId),
       suiPkg.getNttCommonPackageId(client, managerStateId),
-      client.getCoinMetadata({ coinType }),
+      suiPkg.getCoinMetadataId(client, coinType),
     ]);
-
-    if (!coinMetadata?.id) {
-      throw new Error('Unable to fetch coin metadata of ' + coinType);
-    }
 
     const tx = new Transaction();
 
@@ -109,7 +105,7 @@ export class SuiClaim {
       arguments: [
         tx.object(managerStateId),
         versionGated!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         validatedMessage!,
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],
@@ -157,7 +153,7 @@ export class SuiClaim {
         releaseVersionGated!,
         tx.pure.u16(toChainId(vaa.emitterChain)),
         managerMessage!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],
     });

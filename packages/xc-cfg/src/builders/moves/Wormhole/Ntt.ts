@@ -39,17 +39,13 @@ const transfer = (): MoveConfigBuilder => ({
       coreBridgePackageId,
       nttPackageId,
       transceiverPackageId,
-      coinMetadata,
+      coinMetadataId,
     ] = await Promise.all([
       suiPkg.getWormholePackageId(client, coreStateId),
       suiPkg.getCurrentPackageId(client, managerStateId),
       suiPkg.getCurrentPackageId(client, transceiverStateId),
-      client.getCoinMetadata({ coinType }),
+      suiPkg.getCoinMetadataId(client, coinType),
     ]);
-
-    if (!coinMetadata?.id) {
-      throw new Error('Unable to fetch coin metadata of ' + coinType);
-    }
 
     const tx = new Transaction();
 
@@ -71,7 +67,7 @@ const transfer = (): MoveConfigBuilder => ({
       arguments: [
         tx.object(managerStateId),
         coin!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         tx.pure.u16(rcvWh.getWormholeId()),
         tx.pure.vector('u8', Array.from(recipient)),
         tx.pure.option('vector<u8>', null),
@@ -95,7 +91,7 @@ const transfer = (): MoveConfigBuilder => ({
       arguments: [
         tx.object(managerStateId),
         versionGated!,
-        tx.object(coinMetadata.id),
+        tx.object(coinMetadataId),
         transferTicket!,
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],
