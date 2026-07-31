@@ -27,11 +27,7 @@ function toHydrationViaNttTemplate(asset: Asset): AssetRoute {
   });
 }
 
-// Enable once the SUI manager deployment lands & both registries carry it
-// (sui_chain.wormhole.ntt and hydration's, keyed by the same asset key).
-const toHydrationViaNtt: AssetRoute[] = [
-  // toHydrationViaNttTemplate(sui),
-];
+const toHydrationViaNtt: AssetRoute[] = [toHydrationViaNttTemplate(sui)];
 
 export const suiConfig = new ChainRoutes({
   chain: sui_chain,

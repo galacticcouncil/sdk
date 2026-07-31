@@ -33,6 +33,7 @@ import {
   pen,
   sol,
   sky,
+  sui,
   susde,
   tbtc,
   trac,
@@ -339,11 +340,7 @@ const toSolanaViaNtt: AssetRoute[] = [
   viaNttTemplate(prime, prime, solana),
 ];
 
-// Enable once the SUI manager deployment lands & both registries carry it
-// (hydration's wormhole.ntt and sui_chain's, keyed by the same asset key).
-const toSuiViaNtt: AssetRoute[] = [
-  // viaNttTemplate(sui, sui, sui_chain),
-];
+const toSuiViaNtt: AssetRoute[] = [viaNttTemplate(sui, sui, sui_chain)];
 
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),

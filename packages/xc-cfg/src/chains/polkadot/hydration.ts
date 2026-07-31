@@ -1288,6 +1288,13 @@ export const hydration = new EvmParachain({
           wormhole: '0x2F04AcF249091425d51e67EeA3C3161ccE283202',
         },
       },
+      [sui.key]: {
+        token: '0x00000000000000000000000000000001000F4531',
+        manager: '0x978443f00cAB6b09445140321EC73a221ebFF5F8',
+        transceiver: {
+          wormhole: '0xA224D6f4e0E276b34D91bfE6c3A5fE6838322AF7',
+        },
+      },
       [susds_mwh.key]: {
         token: '0x00000000000000000000000000000001000F4529',
         manager: '0x1973E7044d9A7C7bB2d6ea1693A296a9e4B7E448',
