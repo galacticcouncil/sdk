@@ -20,6 +20,12 @@ const DEFAULT_MAX_PRIORITY_FEE = 1e6;
 
 const DEFAULT_COMPUTE_BUDGET = 250_000;
 
+// Builtins bill a flat 150 CU per instruction. The two ComputeBudget ixs
+// are appended after the budget simulation, so their cost never shows up
+// in unitsConsumed - a tiny tx (wrapNative ~220 CU) dies on it while the
+// 20% headroom of a 250k ntt transfer hides it.
+const COMPUTE_BUDGET_IX_COST = 150;
+
 const BASE_FEE_LAMPORTS = 5_000n;
 const MICRO_LAMPORTS_PER_LAMPORT = 1_000_000n;
 
@@ -122,7 +128,7 @@ export class SolanaTransfer {
    *
    * @param transaction - versioned transaction
    * @returns Compute budget to 120% of the units used in the
-   * simulated transaction or default
+   * simulated transaction plus the appended ComputeBudget ixs, or default
    */
   async determineComputeBudget(message: MessageV0): Promise<number> {
     const transaction = new VersionedTransaction(message);
@@ -131,7 +137,7 @@ export class SolanaTransfer {
 
     const { err, unitsConsumed } = simulateResponse.value;
     if (unitsConsumed && !err) {
-      return Math.round(unitsConsumed * 1.2);
+      return Math.round(unitsConsumed * 1.2) + 2 * COMPUTE_BUDGET_IX_COST;
     }
 
     return DEFAULT_COMPUTE_BUDGET;
