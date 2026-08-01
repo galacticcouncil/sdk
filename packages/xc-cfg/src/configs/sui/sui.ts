@@ -1,36 +1,35 @@
-import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
+import { Asset, AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { sui } from '../../assets';
-import { sui_chain, hydration, moonbeam } from '../../chains';
 import { MoveBuilder } from '../../builders';
+import { hydration, sui_chain } from '../../chains';
 import { Tag } from '../../tags';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  new AssetRoute({
+function toHydrationViaNttTemplate(asset: Asset): AssetRoute {
+  return new AssetRoute({
     source: {
-      asset: sui,
-      destinationFee: sui,
-    },
-    destination: {
-      chain: hydration,
-      asset: sui,
+      asset: asset,
       fee: {
-        amount: 0,
         asset: sui,
       },
     },
-    move: MoveBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferNativeWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-];
+    destination: {
+      chain: hydration,
+      asset: asset,
+      fee: {
+        amount: 0,
+        // Ntt delivers the full amount - nothing is taken on the far side.
+        asset: asset,
+      },
+    },
+    move: MoveBuilder().Wormhole().Ntt().transfer(),
+    tags: [Tag.Wormhole, Tag.Ntt],
+  });
+}
+
+const toHydrationViaNtt: AssetRoute[] = [toHydrationViaNttTemplate(sui)];
 
 export const suiConfig = new ChainRoutes({
   chain: sui_chain,
-  routes: [...toHydrationViaWormhole],
+  routes: [...toHydrationViaNtt],
 });

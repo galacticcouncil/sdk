@@ -1,8 +1,8 @@
 export enum Tag {
   Basejump = 'Basejump',
+  Ntt = 'Ntt',
   Wormhole = 'Wormhole',
   Relayer = 'Relayer',
   Snowbridge = 'Snowbridge',
-  Mrl = 'Mrl',
   SnowbridgeV1 = 'SnowbridgeV1',
 }

@@ -7,6 +7,16 @@ export interface Platform<T extends BaseConfig> {
     feeBalance: AssetAmount,
     config: T
   ): Promise<Call>;
+  /**
+   * Ordered call sequence of a transfer, the transfer call being last.
+   * Platforms requiring no prerequisite calls may omit it.
+   */
+  buildCalls?(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    config: T
+  ): Promise<Call[]>;
   estimateFee(
     account: string,
     amount: bigint,

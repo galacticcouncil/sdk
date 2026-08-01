@@ -1,5 +1,11 @@
 # @galacticcouncil/xc
 
+## 2.0.0
+
+### Major Changes
+
+- bump xc swap + factory
+
 ## 1.1.0
 
 ### Minor Changes

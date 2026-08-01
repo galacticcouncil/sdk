@@ -230,10 +230,14 @@ export class Wallet {
       },
       reversible: configs.reversible,
       async buildCall(amount): Promise<Call> {
+        const [call] = await transfer.buildCalls(amount);
+        return call;
+      },
+      async buildCalls(amount): Promise<Call[]> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
         copyCtx.transact = await src.getTransact(copyCtx);
-        return src.getCall(copyCtx);
+        return src.getCalls(copyCtx);
       },
       async estimateFee(amount): Promise<AssetAmount> {
         const copyCtx = Object.assign({}, ctx);

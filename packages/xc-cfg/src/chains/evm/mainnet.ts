@@ -153,6 +153,62 @@ export const ethereum = new EvmChain({
   wormhole: {
     id: 2,
     coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
-    tokenBridge: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
+    executor: '0x84EEe8dBa37C36947397E1E11251cA9A06Fc6F8a',
+    // Locking managers - the token is escrowed here, minted on hydration.
+    ntt: {
+      [dai.key]: {
+        token: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        manager: '0x804F123f75cCa0A9c0Cba341F82f4A4DA86a5259',
+        transceiver: {
+          wormhole: '0x99673a01C5779Ebf59399B4B228c1825c0113571',
+        },
+      },
+      [susds.key]: {
+        token: '0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD',
+        manager: '0x5085A4863f89eC9553F70187EE73B5aAe0fd14b5',
+        transceiver: {
+          wormhole: '0x7C236d237BEbBE1b7902131B31b7b3270005a810',
+        },
+      },
+      [usdc.key]: {
+        token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        manager: '0x447b2c7485A3d6813F8197E605b10BcCD8dd8398',
+        transceiver: {
+          wormhole: '0xA108BD5dBc6CE665aEbB6895351e0609c76F8EFc',
+        },
+      },
+      [usdt.key]: {
+        token: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        manager: '0x9fbd9F16cE7Fa17097E91cc36DC1B7b47aDCa9De',
+        transceiver: {
+          wormhole: '0x45c566f6595CF93e639E77cc1bbE57A8D27901c2',
+        },
+      },
+      [wbtc.key]: {
+        token: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+        manager: '0x081b76AC3cFb65DCe93961d66cea44A74EC8Ef28',
+        transceiver: {
+          wormhole: '0x3FE8fBB8505c8dB2264f6Ebc5559c7C2b2647218',
+        },
+      },
+      [weth.key]: {
+        token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        manager: '0x283B14B5Dd352e32154Df014EA96834F395E04b6',
+        transceiver: {
+          wormhole: '0xbA0Cd32131b8206AF4feB79A1A3aaF0AEfe18b48',
+        },
+      },
+      // Native eth shares the weth deployment - the manager only ever
+      // locks the erc20, so a native source is wrapped upfront
+      // (ContractConfig.wrapNative). Registered after weth so a vaa
+      // emitted by the shared transceiver resolves to the erc20 key.
+      [eth.key]: {
+        token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        manager: '0x283B14B5Dd352e32154Df014EA96834F395E04b6',
+        transceiver: {
+          wormhole: '0xbA0Cd32131b8206AF4feB79A1A3aaF0AEfe18b48',
+        },
+      },
+    },
   },
 });

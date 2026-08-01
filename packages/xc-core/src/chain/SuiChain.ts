@@ -1,4 +1,4 @@
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+import { SuiClient } from '@mysten/sui/client';
 
 import { Observable } from 'rxjs';
 
@@ -17,9 +17,12 @@ import { Wormhole, WormholeDef } from '../bridge';
 const SUI_NATIVE = 'SUI';
 const SUI_DECIMALS = 9;
 
-export interface SuiChainParams
-  extends ChainParams<ChainAssetData, SuiBalanceType> {
+export interface SuiChainParams extends ChainParams<
+  ChainAssetData,
+  SuiBalanceType
+> {
   id: string;
+  rpc: string;
   wormhole?: WormholeDef;
 }
 
@@ -29,11 +32,13 @@ export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
   private clientCache?: SuiClient;
 
   readonly id: string;
+  readonly rpc: string;
   readonly wormhole?: Wormhole;
 
-  constructor({ id, wormhole, ...others }: SuiChainParams) {
+  constructor({ id, rpc, wormhole, ...others }: SuiChainParams) {
     super({ ...others });
     this.id = id;
+    this.rpc = rpc;
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
@@ -43,8 +48,7 @@ export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
    */
   get client(): SuiClient {
     if (!this.clientCache) {
-      const rpcUrl = getFullnodeUrl('mainnet');
-      this.clientCache = new SuiClient({ url: rpcUrl });
+      this.clientCache = new SuiClient({ url: this.rpc });
     }
     return this.clientCache;
   }

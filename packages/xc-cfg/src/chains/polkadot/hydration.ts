@@ -14,11 +14,11 @@ import {
   bnc,
   cfg_new,
   cru,
-  dai_mwh,
+  dai_wh,
   dot,
   ena,
   eth,
-  eurc_mwh,
+  eurc_wh,
   ewt,
   glmr,
   hdx,
@@ -37,22 +37,22 @@ import {
   trac,
   unq,
   usdc,
-  usdc_mwh,
+  usdc_wh,
   usdc_eth,
   usdt,
-  usdt_mwh,
+  usdt_wh,
   usdt_eth,
   vastr,
   vdot,
   wbtc,
-  wbtc_mwh,
+  wbtc_wh,
   weth,
-  weth_mwh,
+  weth_wh,
   wsteth,
   wud,
   susde,
   susds,
-  susds_mwh,
+  susds_wh,
   sol,
   sky,
   tbtc,
@@ -64,7 +64,7 @@ const evmResolver = new HydrationEvmResolver();
 
 const rpcHttpList = [
   'https://hydration-rpc.n.dwellir.com',
-  'https://hydration.dotters.network',
+  'https://rpc.kril.hydration.cloud',
   'https://hydration.rotko.net',
   'https://rpc.sin.hydration.cloud',
   'https://rpc.coke.hydration.cloud',
@@ -72,7 +72,7 @@ const rpcHttpList = [
 
 const rpcWebsocketList = [
   'wss://hydration-rpc.n.dwellir.com',
-  'wss://hydration.dotters.network',
+  'wss://rpc.kril.hydration.cloud',
   'wss://hydration.rotko.net',
   'wss://rpc.sin.hydration.cloud',
   'wss://rpc.coke.hydration.cloud',
@@ -257,24 +257,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: dai_mwh,
+      asset: dai_wh,
       decimals: 18,
       id: 18,
       min: 0.01,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x06e605775296e851ff43b4daa541bb0984e9d6fd',
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000006b175474e89094c44da98b954eedeac495271d0f',
               },
             },
           ],
@@ -420,19 +423,22 @@ export const hydration = new EvmParachain({
       id: 40,
       min: 0.0000027,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 1,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xe9f9a2e3deae4093c00fbc57b22bb51a4c05ad88',
+              GeneralKey: {
+                length: 32,
+                data: '0xfcd141e9832caf10ad917495ca0f271b5b293cd47027ea737007ed40eb39a0bd',
               },
             },
           ],
@@ -445,19 +451,22 @@ export const hydration = new EvmParachain({
       id: 43,
       min: 0.01,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 1,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x52b2f622f5676e92dbea3092004eb9ffb85a8d07',
+              GeneralKey: {
+                length: 32,
+                data: '0x26759f460ee5f743ed66d27c8f2a5623bf39d53ed575955320661e6e13e0e3da',
               },
             },
           ],
@@ -680,19 +689,22 @@ export const hydration = new EvmParachain({
       id: 1000752,
       min: 0.000047,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 1,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x99fec54a5ad36d50a4bba3a41cab983a5bb86a7d',
+              GeneralKey: {
+                length: 32,
+                data: '0x069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f00000000001',
               },
             },
           ],
@@ -705,19 +717,22 @@ export const hydration = new EvmParachain({
       id: 1000753,
       min: 0.003,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 21,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x484ecce6775143d3335ed2c7bcb22151c53b9f49',
+              GeneralKey: {
+                length: 32,
+                data: '0x9258181f5ceac8dbffb7030890243caed69a9599d2886d957a9cb7656af3bdb3',
               },
             },
           ],
@@ -777,24 +792,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: susds_mwh,
+      asset: susds_wh,
       decimals: 18,
       id: 1000745,
       min: 0.01,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xda430218862d3db25de9f61458645dde49a9e9c1',
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000a3931d71877c0e7a3148cb7eb4463524fec27fbd',
               },
             },
           ],
@@ -890,24 +908,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: usdc_mwh,
+      asset: usdc_wh,
       decimals: 6,
       id: 21,
       min: 0.01,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x931715fee2d06333043d11f658c8ce934ac61d0c',
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
               },
             },
           ],
@@ -915,24 +936,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: eurc_mwh,
+      asset: eurc_wh,
       decimals: 6,
       id: 44,
       min: 0.014,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 30,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x3f9610a50630bc7d4530736942ee2bc9e00e8de8',
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000060a3e35cc302bfa44cb288bc5a4f316fdb1adb42',
               },
             },
           ],
@@ -988,24 +1012,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: usdt_mwh,
+      asset: usdt_wh,
       decimals: 6,
       id: 23,
       min: 0.01,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xc30e9ca94cf52f3bf5692aacf81353a27052c46f',
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
               },
             },
           ],
@@ -1109,24 +1136,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: wbtc_mwh,
+      asset: wbtc_wh,
       decimals: 8,
       id: 19,
       min: 0.00000034,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xe57ebd2d67b462e9926e04a8e33f01cd0d64346d',
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599',
               },
             },
           ],
@@ -1160,24 +1190,27 @@ export const hydration = new EvmParachain({
       },
     },
     {
-      asset: weth_mwh,
+      asset: weth_wh,
       decimals: 18,
       id: 20,
       min: 0.0000054,
       xcmLocation: {
-        parents: 1,
+        parents: 0,
         interior: {
           X3: [
             {
-              Parachain: 2004,
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
             },
             {
-              PalletInstance: 110,
+              GeneralIndex: 2,
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xab3f0245b83feb11d15aaffefd7ad465a59817ed',
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
               },
             },
           ],
@@ -1247,6 +1280,91 @@ export const hydration = new EvmParachain({
   name: 'Hydration',
   parachainId: 2034,
   ss58Format: 63,
+  wormhole: {
+    id: 73,
+    coreBridge: '0x3792a6d63c31941B2805181771795D9176fA82A1',
+    executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
+    // Burning managers - token is the erc20 precompile of the asset id.
+    ntt: {
+      [dai_wh.key]: {
+        token: '0x0000000000000000000000000000000100000012',
+        manager: '0xcFd576F88C90844AEBF45378Fd09931281D8b14d',
+        transceiver: {
+          wormhole: '0xe8660CA48f6f4D98BC48DB7Dd07C1a8E555801eA',
+        },
+      },
+      [eurc_wh.key]: {
+        token: '0x000000000000000000000000000000010000002C',
+        manager: '0x8dd1286A29dF5a2785FB638d6fB1598144Cfbc4C',
+        transceiver: {
+          wormhole: '0x2e84fac378D67Dc2e11026fB4919E80263a87375',
+        },
+      },
+      [jito_sol.key]: {
+        token: '0x0000000000000000000000000000000100000028',
+        manager: '0xcE73C15B9ED02413066DE5B904A36F8e8f9B5331',
+        transceiver: {
+          wormhole: '0xF38D9C3bA6999Dc331b32B416083Fd7e02D17B04',
+        },
+      },
+      [prime.key]: {
+        token: '0x000000000000000000000000000000010000002B',
+        manager: '0xFCaF4aA069C565d25539028970703F01e47D3E0B',
+        transceiver: {
+          wormhole: '0x4e7b1E55D2354d4Dc6ABD876096Dc201de0541D1',
+        },
+      },
+      [sol.key]: {
+        token: '0x00000000000000000000000000000001000F4530',
+        manager: '0x9e200C0f28D92D296b201D96C8269d3CAFFfA9FF',
+        transceiver: {
+          wormhole: '0x2F04AcF249091425d51e67EeA3C3161ccE283202',
+        },
+      },
+      [sui.key]: {
+        token: '0x00000000000000000000000000000001000F4531',
+        manager: '0x978443f00cAB6b09445140321EC73a221ebFF5F8',
+        transceiver: {
+          wormhole: '0xA224D6f4e0E276b34D91bfE6c3A5fE6838322AF7',
+        },
+      },
+      [susds_wh.key]: {
+        token: '0x00000000000000000000000000000001000F4529',
+        manager: '0x1973E7044d9A7C7bB2d6ea1693A296a9e4B7E448',
+        transceiver: {
+          wormhole: '0x68Ecadd7934D4FcFEABAfB209C95D379B96400cb',
+        },
+      },
+      [usdc_wh.key]: {
+        token: '0x0000000000000000000000000000000100000015',
+        manager: '0xEcEab64542A875C4472671D9Ed1E690cdD4e28fC',
+        transceiver: {
+          wormhole: '0x0d7488B39AA64468a709eC3b3d354DeFE539eD97',
+        },
+      },
+      [usdt_wh.key]: {
+        token: '0x0000000000000000000000000000000100000017',
+        manager: '0x5E6C488103b47F804824AE15861638af4C436795',
+        transceiver: {
+          wormhole: '0xd2a16B736F32Df7C0DE72838837656FE0f85Ac0F',
+        },
+      },
+      [wbtc_wh.key]: {
+        token: '0x0000000000000000000000000000000100000013',
+        manager: '0x6BFca089916c045b0Ca4A09B655aF9F926189993',
+        transceiver: {
+          wormhole: '0x9a8a1ab288f6749Ce5626DEE1B5d59441BdC187F',
+        },
+      },
+      [weth_wh.key]: {
+        token: '0x0000000000000000000000000000000100000014',
+        manager: '0xB5cEf790D52A57fa619eD96eDd64c5328F3DCFb7',
+        transceiver: {
+          wormhole: '0x8acce9CA511d5D7213F8C3f813B8916087cd00ae',
+        },
+      },
+    },
+  },
   ws: rpcWebsocketList,
   rpcs: rpcHttpList,
 });

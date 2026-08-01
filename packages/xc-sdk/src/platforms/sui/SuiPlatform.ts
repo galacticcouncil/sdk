@@ -1,15 +1,9 @@
-import {
-  AssetAmount,
-  CallType,
-  MoveConfig,
-  SuiChain,
-} from '@galacticcouncil/xc-core';
+import { AssetAmount, MoveConfig, SuiChain } from '@galacticcouncil/xc-core';
 
 import { SuiClient } from '@mysten/sui/client';
-import { toBase64 } from '@mysten/bcs';
 
 import { SuiCall } from './types';
-import { resolveCommandsTyped } from './utils';
+import { buildSuiCall } from './utils';
 
 import { DryRunResult, Platform } from '../types';
 
@@ -28,20 +22,12 @@ export class SuiPlatform implements Platform<MoveConfig> {
   ): Promise<SuiCall> {
     const { transaction } = config;
 
-    transaction.setSender(account);
-
-    const txBytes = await transaction.build({ client: this.#client });
-    const txJson = await transaction.toJSON();
-
-    const commands = resolveCommandsTyped(JSON.parse(txJson));
+    const call = await buildSuiCall(account, transaction, this.#client);
     return {
-      from: account,
-      commands: commands,
-      data: toBase64(txBytes),
-      type: CallType.Sui,
+      ...call,
       dryRun: async () => {
         const sim = await this.#client.dryRunTransactionBlock({
-          transactionBlock: txBytes,
+          transactionBlock: call.data,
         });
 
         return {

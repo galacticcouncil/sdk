@@ -6,7 +6,6 @@ import {
   FeeAmountConfigBuilder,
   Parachain,
   Snowbridge as Sb,
-  Wormhole as Wh,
   Basejump as Bj,
 } from '@galacticcouncil/xc-core';
 
@@ -36,40 +35,6 @@ import {
   SNOWBRIDGE_SUBMIT_GAS,
 } from '../bridges/snowbridge';
 import { BaseClient, AssethubClient, HydrationClient } from '../clients';
-
-function TokenRelayer() {
-  return {
-    calculateRelayerFee: (): FeeAmountConfigBuilder => ({
-      build: async ({ feeAsset, destination, source }) => {
-        const ctx = source as EvmChain;
-        const rcv = destination as EvmChain;
-
-        const ctxWh = Wh.fromChain(ctx);
-        const rcvWh = Wh.fromChain(rcv);
-
-        const feeAssetId = ctx.getAssetId(feeAsset);
-        const feeAssetDecimals = ctx.getAssetDecimals(feeAsset);
-        const relayerFee = await ctx.evmClient.getProvider().readContract({
-          abi: Abi.TokenRelayer,
-          address: ctxWh.getTokenRelayer() as `0x${string}`,
-          args: [
-            rcvWh.getWormholeId(),
-            feeAssetId as `0x${string}`,
-            feeAssetDecimals,
-          ],
-          functionName: 'calculateRelayerFee',
-        });
-        return { amount: relayerFee } as FeeAmount;
-      },
-    }),
-  };
-}
-
-function Wormhole() {
-  return {
-    TokenRelayer,
-  };
-}
 
 type SendFeeOpts = {
   hub: Parachain;
@@ -415,6 +380,5 @@ export function FeeAmountBuilder() {
     Basejump,
     XcmPaymentApi,
     Snowbridge,
-    Wormhole,
   };
 }

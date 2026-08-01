@@ -22,7 +22,7 @@ export class SolanaSigner {
 
   async signAndSend(call: Call, observer: SolanaTxObserver) {
     const { data, signers } = call as SolanaCall;
-    const versioned = this.toVersioned(data, signers);
+    const versioned = await this.toVersioned(data, signers);
 
     try {
       if (this.#wallet instanceof Keypair) {
@@ -51,10 +51,12 @@ export class SolanaSigner {
   }
 
   async signAndSendAll(calls: Call[], observer: SolanaTxObserver) {
-    const versioned = calls.map((c) => {
-      const { data, signers } = c as SolanaCall;
-      return this.toVersioned(data, signers);
-    });
+    const versioned = await Promise.all(
+      calls.map((c) => {
+        const { data, signers } = c as SolanaCall;
+        return this.toVersioned(data, signers);
+      })
+    );
 
     try {
       let encoded: string[];
@@ -90,10 +92,24 @@ export class SolanaSigner {
     }
   }
 
-  private toVersioned(data: string, signers?: Keypair[]): VersionedTransaction {
+  /**
+   * Deserialize a built message & sign it.
+   *
+   * The blockhash is refreshed first: it was minted when the call was
+   * built, and a sequence ([wrapNative, transfer]) signs the second one
+   * only after the first confirms - well into the 150 slot expiry.
+   */
+  private async toVersioned(
+    data: string,
+    signers?: Keypair[]
+  ): Promise<VersionedTransaction> {
     const mssgBuffer = Buffer.from(data, 'hex');
     const mssgArray = Uint8Array.from(mssgBuffer);
     const mssgV0 = MessageV0.deserialize(mssgArray);
+
+    const { blockhash } = await this.#chain.connection.getLatestBlockhash();
+    mssgV0.recentBlockhash = blockhash;
+
     const versioned = new VersionedTransaction(mssgV0);
     if (signers) {
       versioned.sign(signers);

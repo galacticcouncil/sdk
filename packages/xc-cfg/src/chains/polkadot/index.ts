@@ -1,13 +1,9 @@
 import { AnyChain } from '@galacticcouncil/xc-core';
 
-import { ajuna } from './ajuna';
 import { assetHub, assetHubCex } from './assethub';
 import { astar } from './astar';
 import { bifrost } from './bifrost';
-import { crust } from './crust';
 import { hydration } from './hydration';
-import { interlay } from './interlay';
-import { moonbeam } from './moonbeam';
 import { mythos } from './mythos';
 import { neuroweb } from './neuroweb';
 import { pendulum } from './pendulum';
@@ -16,16 +12,12 @@ import { unique } from './unique';
 import { energywebx } from './energywebx';
 
 export const polkadotChains: AnyChain[] = [
-  ajuna,
   assetHub,
   assetHubCex,
   astar,
   bifrost,
-  crust,
   hydration,
   neuroweb,
-  interlay,
-  moonbeam,
   mythos,
   pendulum,
   polkadot,
@@ -34,16 +26,12 @@ export const polkadotChains: AnyChain[] = [
 ];
 
 export {
-  ajuna,
   assetHub,
   assetHubCex,
   astar,
   bifrost,
-  crust,
   hydration,
   neuroweb,
-  interlay,
-  moonbeam,
   mythos,
   pendulum,
   polkadot,

@@ -37,6 +37,15 @@ export class SuiSigner {
         return;
       }
 
+      // Authorizes the origin (no-op when already trusted) - signing
+      // without a connected account is rejected by the wallet.
+      const account = await this.#wallet.requestAccount();
+      if (account.address !== from) {
+        throw new Error(
+          `Connected sui account ${account.address} does not match sender ${from}`
+        );
+      }
+
       const signed = await this.#wallet.signTransaction({
         transaction: data,
         address: from,
