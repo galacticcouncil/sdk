@@ -79,7 +79,15 @@ export class EvmSigner {
       // the wallet uses the chain's (low, flat) price instead of its own
       // base-fee oracle.
       const gasPriceSurplus = gasPrice + (gasPrice * 5n) / 100n;
-      const gasLimit = gas + (gas * 30n) / 100n;
+      let gasLimit = gas + (gas * 30n) / 100n;
+
+      // Hydration eth_estimateGas grossly underestimates the nested ntt
+      // calls (~69k reported, receiveMessage burns past 90k) - floor the
+      // limit like the substrate path does, unused gas is refunded.
+      if (this.#chain instanceof EvmParachain) {
+        const floor = 2_000_000n;
+        gasLimit = gasLimit > floor ? gasLimit : floor;
+      }
 
       txHash = await this.#signer.sendTransaction({
         account: account as `0x${string}`,

@@ -34,25 +34,6 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
-    "@galacticcouncil/xc-core": "^2.0.0",
-    "@mysten/bcs": "^1.9.2",
-    "@mysten/sui": "^1.21.2",
-    "@solana/spl-token": "^0.3.9",
-    "@solana/web3.js": "^1.95.8",
-    "@wormhole-foundation/sdk-base": "6.1.4",
-    "@wormhole-foundation/sdk-definitions": "6.1.4",
-    "@wormhole-foundation/sdk-definitions-ntt": "7.2.0",
-    "@wormhole-foundation/sdk-solana": "6.1.4",
-    "@wormhole-foundation/sdk-solana-core": "6.1.4",
-    "@wormhole-foundation/sdk-solana-ntt": "7.2.0",
-    "big.js": "^6.2.1",
-    "buffer": "^6.0.3"
-  },
-  "peerDependencies": {
-    "@galacticcouncil/common": ">=1.0.0",
-    "@galacticcouncil/descriptors": ">=2.0.0",
-    "polkadot-api": "^2.1.7",
-    "rxjs": "^7.8.0",
-    "viem": "^2.38.3"
+    "@galacticcouncil/xc-core": "^2.0.0"
   }
 }
