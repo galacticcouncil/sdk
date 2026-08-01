@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 2.0.0
+
+### Major Changes
+
+- 8e7401c: Switch from wormhole mrl to wormhole direct integration with ntt
+
+### Patch Changes
+
+- Updated dependencies [8e7401c]
+  - @galacticcouncil/xc-core@2.0.0
+
 ## 1.7.0
 
 ### Minor Changes
