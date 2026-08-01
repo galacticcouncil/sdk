@@ -20,11 +20,14 @@ import { encoding } from '@wormhole-foundation/sdk-base';
 import { deserialize } from '@wormhole-foundation/sdk-definitions';
 import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
 import { SolanaNtt } from '@wormhole-foundation/sdk-solana-ntt';
-import '@wormhole-foundation/sdk-definitions-ntt';
+import { register } from '@wormhole-foundation/sdk-definitions-ntt';
 
 import { SolanaLilJit } from './SolanaLilJit';
 import { SolanaCall } from './types';
 import { getLookupTables, ixToHuman, serializeV0 } from './utils';
+
+// Since 7.2.0 the ntt payload layouts are no longer registered on import.
+register();
 
 const DEFAULT_TIP_LAMPORTS = 1000;
 
