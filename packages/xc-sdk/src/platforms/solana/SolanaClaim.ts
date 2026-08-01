@@ -8,6 +8,7 @@ import {
 import {
   AddressLookupTableAccount,
   Connection,
+  Keypair,
   PublicKey,
   SystemProgram,
   Transaction,
@@ -16,8 +17,20 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 
+import {
+  ACCOUNT_SIZE,
+  NATIVE_MINT,
+  TOKEN_PROGRAM_ID,
+  createCloseAccountInstruction,
+  createInitializeAccountInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddressSync,
+  getMinimumBalanceForRentExemptAccount,
+  getMint,
+} from '@solana/spl-token';
+
 import { encoding } from '@wormhole-foundation/sdk-base';
-import { deserialize } from '@wormhole-foundation/sdk-definitions';
+import { deserialize, VAA } from '@wormhole-foundation/sdk-definitions';
 import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
 import { SolanaNtt } from '@wormhole-foundation/sdk-solana-ntt';
 import { register } from '@wormhole-foundation/sdk-definitions-ntt';
@@ -88,16 +101,23 @@ export class SolanaClaim {
       lamports: DEFAULT_TIP_LAMPORTS,
     });
 
+    const unwrap = await this.getUnwrap(ntt, vaa, payer);
+
     const { blockhash } = await this.#connection.getLatestBlockhash();
 
     const calls: SolanaCall[] = [];
     for (const [i, { transaction, signers }] of txs.entries()) {
+      const isLast = i === txs.length - 1;
       const luts =
         'message' in transaction
           ? await getLookupTables(this.#connection, transaction.message)
           : [];
       const ixs = this.getInstructions(transaction, luts);
-      if (i === txs.length - 1) {
+      if (isLast) {
+        // After the release, so the wSOL is already in the ata.
+        if (unwrap) {
+          ixs.push(...unwrap.ixs);
+        }
         ixs.push(tipIx);
       }
       const mssgV0 = new TransactionMessage({
@@ -109,11 +129,83 @@ export class SolanaClaim {
         from: from,
         data: serializeV0(mssgV0),
         ix: ixToHuman(ixs),
-        signers: signers ?? [],
+        signers:
+          isLast && unwrap
+            ? [...(signers ?? []), unwrap.signer]
+            : (signers ?? []),
         type: CallType.Solana,
       } as SolanaCall);
     }
     return calls;
+  }
+
+  /**
+   * Unwrap the released wSOL back into native sol.
+   *
+   * The manager only ever releases the spl token, so a native sol claim
+   * leaves the recipient holding wSOL instead. Mirrors the token bridge
+   * redeem: move the released amount into a throwaway wSOL account and
+   * close it, which credits the lamports to its owner.
+   *
+   * Self redeem only - the wSOL lands in the recipient ata and nobody
+   * else can move it out.
+   *
+   * @param ntt - NTT token deployment on Solana
+   * @param vaa - deserialized transfer, carries the recipient & amount
+   * @param payer - claim payer
+   * @returns unwrap instructions & the throwaway account signer
+   */
+  private async getUnwrap(
+    ntt: NttTokenDef,
+    vaa: VAA<'Ntt:WormholeTransfer'>,
+    payer: PublicKey
+  ): Promise<{ ixs: TransactionInstruction[]; signer: Keypair } | undefined> {
+    if (!new PublicKey(ntt.token).equals(NATIVE_MINT)) {
+      return undefined;
+    }
+
+    const { recipientAddress, trimmedAmount } =
+      vaa.payload.nttManagerPayload.payload;
+
+    // Ntt carries the recipient wallet, unlike the token bridge which
+    // carries its token account - the ata has to be derived.
+    const recipient = new PublicKey(recipientAddress.toUint8Array());
+    if (!recipient.equals(payer)) {
+      return undefined;
+    }
+
+    const [mint, rent] = await Promise.all([
+      getMint(this.#connection, NATIVE_MINT),
+      getMinimumBalanceForRentExemptAccount(this.#connection),
+    ]);
+
+    // Ntt trims the amount to the smallest decimals of the two chains.
+    const amount =
+      trimmedAmount.amount *
+      10n ** BigInt(mint.decimals - trimmedAmount.decimals);
+
+    const ata = getAssociatedTokenAddressSync(NATIVE_MINT, recipient);
+    const ancillary = Keypair.generate();
+
+    return {
+      signer: ancillary,
+      ixs: [
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: ancillary.publicKey,
+          lamports: rent,
+          space: ACCOUNT_SIZE,
+          programId: TOKEN_PROGRAM_ID,
+        }),
+        createInitializeAccountInstruction(
+          ancillary.publicKey,
+          NATIVE_MINT,
+          payer
+        ),
+        createTransferInstruction(ata, ancillary.publicKey, payer, amount),
+        createCloseAccountInstruction(ancillary.publicKey, payer, payer),
+      ],
+    };
   }
 
   private getInstructions(

@@ -15,7 +15,10 @@ import {
   toChainId,
 } from '@wormhole-foundation/sdk-base';
 import { deserialize } from '@wormhole-foundation/sdk-definitions';
-import { nativeTokenTransferLayout } from '@wormhole-foundation/sdk-definitions-ntt';
+import {
+  nativeTokenTransferLayout,
+  register as registerNttPayloads,
+} from '@wormhole-foundation/sdk-definitions-ntt';
 
 import { SuiCall } from './types';
 import { buildSuiCall } from './utils';
@@ -49,6 +52,10 @@ export class SuiClaim {
   ): Promise<SuiCall> {
     const ctxWh = Wh.fromChain(this.#chain);
     const client = this.#client;
+
+    // The ntt payload layouts stopped registering on import in 7.x, they are
+    // opt-in now - `deserialize` throws without this. Idempotent.
+    registerNttPayloads();
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
     const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
