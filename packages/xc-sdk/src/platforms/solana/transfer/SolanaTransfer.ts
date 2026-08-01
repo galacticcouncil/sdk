@@ -1,7 +1,6 @@
 import { ProgramConfig } from '@galacticcouncil/xc-core';
 
 import {
-  AddressLookupTableAccount,
   Connection,
   ComputeBudgetProgram,
   MessageV0,
@@ -12,12 +11,23 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 
+import { getLookupTables } from '../utils';
+
 const DEFAULT_PRIORITY_FEE_PERCENTILE = 0.5;
 const DEFAULT_PERCENTILE_MULTIPLE = 2;
 const DEFAULT_MIN_PRIORITY_FEE = 1;
 const DEFAULT_MAX_PRIORITY_FEE = 1e6;
 
 const DEFAULT_COMPUTE_BUDGET = 250_000;
+
+// Builtins bill a flat 150 CU per instruction. The two ComputeBudget ixs
+// are appended after the budget simulation, so their cost never shows up
+// in unitsConsumed - a tiny tx (wrapNative ~220 CU) dies on it while the
+// 20% headroom of a 250k ntt transfer hides it.
+const COMPUTE_BUDGET_IX_COST = 150;
+
+const BASE_FEE_LAMPORTS = 5_000n;
+const MICRO_LAMPORTS_PER_LAMPORT = 1_000_000n;
 
 export class SolanaTransfer {
   readonly connection: Connection;
@@ -58,12 +68,14 @@ export class SolanaTransfer {
     instructions: TransactionInstruction[]
   ): Promise<MessageV0> {
     const payerKey = new PublicKey(account);
-    const { blockhash } = await this.connection.getLatestBlockhash('finalized');
+    const { blockhash } = await this.connection.getLatestBlockhash('confirmed');
+    // Compiled against the same tables the instructions were built with -
+    // an ntt transfer overflows the size limit without them.
     return new TransactionMessage({
       payerKey: payerKey,
       recentBlockhash: blockhash,
       instructions: instructions,
-    }).compileToV0Message();
+    }).compileToV0Message(this.config.lookupTables);
   }
 
   private async createPriorityFeeInstructions(
@@ -116,7 +128,7 @@ export class SolanaTransfer {
    *
    * @param transaction - versioned transaction
    * @returns Compute budget to 120% of the units used in the
-   * simulated transaction or default
+   * simulated transaction plus the appended ComputeBudget ixs, or default
    */
   async determineComputeBudget(message: MessageV0): Promise<number> {
     const transaction = new VersionedTransaction(message);
@@ -125,7 +137,7 @@ export class SolanaTransfer {
 
     const { err, unitsConsumed } = simulateResponse.value;
     if (unitsConsumed && !err) {
-      return Math.round(unitsConsumed * 1.2);
+      return Math.round(unitsConsumed * 1.2) + 2 * COMPUTE_BUDGET_IX_COST;
     }
 
     return DEFAULT_COMPUTE_BUDGET;
@@ -179,18 +191,10 @@ export class SolanaTransfer {
   }
 
   private async getTxAccounts(message: MessageV0): Promise<PublicKey[]> {
-    const luts = (
-      await Promise.all(
-        message.addressTableLookups.map((acc) =>
-          this.connection.getAddressLookupTable(acc.accountKey)
-        )
-      )
-    )
-      .map((lut) => lut.value)
-      .filter((val) => val !== null) as AddressLookupTableAccount[];
+    const luts = await getLookupTables(this.connection, message);
 
     const keys = message.getAccountKeys({
-      addressLookupTableAccounts: luts ?? undefined,
+      addressLookupTableAccounts: luts,
     });
 
     return message.compiledInstructions

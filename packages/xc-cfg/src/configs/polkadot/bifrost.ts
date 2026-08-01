@@ -11,7 +11,7 @@ import {
   glmr,
   ibtc,
 } from '../../assets';
-import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
+import { assetHub, astar, bifrost, hydration } from '../../chains';
 import {
   ExtrinsicBuilder,
   FeeAmountBuilder,
@@ -27,9 +27,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: bnc,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: bnc,
       },
     },
@@ -46,9 +44,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vdot,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: vdot,
       },
     },
@@ -65,9 +61,7 @@ const toHydration: AssetRoute[] = [
       chain: hydration,
       asset: vastr,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: vastr,
       },
     },
@@ -109,25 +103,6 @@ const toHydration: AssetRoute[] = [
           .XcmPaymentApi()
           .calculateDestFee({ reserve: astar }),
         asset: astr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      fee: {
-        asset: bnc,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: glmr,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: moonbeam }),
-        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
@@ -201,9 +176,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdt,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdt,
       },
     },
@@ -220,9 +193,7 @@ const toAssetHub: AssetRoute[] = [
       chain: assetHub,
       asset: usdc,
       fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee(),
+        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: usdc,
       },
     },

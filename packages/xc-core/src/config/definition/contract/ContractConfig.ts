@@ -6,6 +6,10 @@ export interface ContractConfigParams extends Omit<BaseConfigParams, 'type'> {
   abi: TAbi;
   args: any[];
   address: string;
+  /** ERC20 token to spend (allowance target), if not derivable from args */
+  token?: string;
+  /** Wrap native gas into {@link token} before spending it */
+  wrapNative?: boolean;
   value?: bigint;
 }
 
@@ -16,13 +20,27 @@ export class ContractConfig extends BaseConfig {
 
   readonly args: any[];
 
+  readonly token?: string;
+
+  readonly wrapNative?: boolean;
+
   readonly value?: bigint;
 
-  constructor({ abi, address, args, value, ...other }: ContractConfigParams) {
+  constructor({
+    abi,
+    address,
+    args,
+    token,
+    wrapNative,
+    value,
+    ...other
+  }: ContractConfigParams) {
     super({ ...other, type: CallType.Evm });
     this.abi = abi;
     this.address = address;
     this.args = args;
+    this.token = token;
+    this.wrapNative = wrapNative;
     this.value = value;
   }
 

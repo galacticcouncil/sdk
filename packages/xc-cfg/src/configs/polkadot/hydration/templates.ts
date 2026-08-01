@@ -3,9 +3,7 @@ import {
   AnyParachain,
   Asset,
   AssetRoute,
-  ContractConfigBuilder,
   ExtrinsicConfigBuilderParams,
-  FeeAmountConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xc-core';
 
@@ -17,13 +15,10 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, kusamaAssetHub, moonbeam } from '../../../chains';
+import { assetHub, kusamaAssetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
 import { fee } from './configs';
-
-export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
-export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
 
 export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
 export const HUB_EXT_USDT_DEST_FEE = 0.02;
@@ -182,79 +177,27 @@ export function toParaErc20Template(
   });
 }
 
-export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(
-    asset,
-    moonbeam,
-    XcmTransferType.DestinationReserve
-  );
-}
-
-function viaWormholeTemplate(
+export function viaNttTemplate(
   assetIn: Asset,
   assetOut: Asset,
-  to: AnyChain,
-  destinationFee: FeeAmountConfigBuilder | number,
-  transact: ContractConfigBuilder,
-  tags: Tag[]
+  to: AnyChain
 ): AssetRoute {
   return new AssetRoute({
     source: {
       asset: assetIn,
       fee: fee(),
-      destinationFee: assetIn,
     },
     destination: {
       chain: to,
       asset: assetOut,
       fee: {
-        amount: destinationFee,
-        asset: assetOut,
+        amount: 0,
+        asset: assetIn,
       },
     },
-    extrinsic: ExtrinsicDecorator(
-      isDestinationFeeSwapSupported,
-      swapExtrinsicBuilder
-    ).priorMulti([
-      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: MRL_EXECUTION_FEE,
-      }),
-    ]),
-    transact: {
-      chain: moonbeam,
-      fee: {
-        amount: MRL_XCM_FEE,
-        asset: glmr,
-      },
-      extrinsic: ExtrinsicBuilder().ethereumXcm().transact(transact),
-    },
-    tags: tags,
+    contract: ContractBuilder().Wormhole().Ntt().transfer(),
+    tags: [Tag.Wormhole, Tag.Ntt],
   });
-}
-
-export function viaWormholeBridgeTemplate(
-  assetIn: Asset,
-  assetOut: Asset,
-  to: AnyChain
-): AssetRoute {
-  return viaWormholeTemplate(
-    assetIn,
-    assetOut,
-    to,
-    0,
-    ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder()
-          .Erc20()
-          .approve((ctx) => ctx.getTokenBridge()),
-        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-      ]),
-    [Tag.Mrl, Tag.Wormhole]
-  );
 }
 
 export function viaSnowbridgeTemplate(

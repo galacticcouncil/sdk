@@ -42,7 +42,7 @@ describe('chains config', () => {
           .filter((c) => h160AddressSpaceOnly(c))
           .map((c) => c.key)
           .sort()
-      ).toEqual(['moonbeam', 'mythos'].sort());
+      ).toEqual(['mythos'].sort());
     });
     it('should match given chains with substrate only address space support', async () => {
       expect(
@@ -52,13 +52,10 @@ describe('chains config', () => {
           .sort()
       ).toEqual(
         [
-          'ajuna',
           'assethub',
           'assethub_cex',
           'astar',
           'bifrost',
-          'crust',
-          'interlay',
           'neuroweb',
           'pendulum',
           'polkadot',

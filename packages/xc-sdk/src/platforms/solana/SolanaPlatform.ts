@@ -2,6 +2,7 @@ import {
   AssetAmount,
   CallType,
   ProgramConfig,
+  ProgramTx,
   SolanaChain,
 } from '@galacticcouncil/xc-core';
 
@@ -24,8 +25,58 @@ export class SolanaPlatform implements Platform<ProgramConfig> {
 
   async buildCall(
     account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    config: ProgramConfig
+  ): Promise<SolanaCall> {
+    const [call] = await this.buildCalls(account, amount, feeBalance, config);
+    return call as SolanaCall;
+  }
+
+  /**
+   * Build the ordered transaction sequence of a transfer.
+   *
+   * All but the last are prerequisites the sender signs & sends first -
+   * [wrapNative?, transfer]. Each is its own transaction because solana
+   * caps transaction size.
+   */
+  async buildCalls(
+    account: string,
     _amount: bigint,
     _feeBalance: AssetAmount,
+    config: ProgramConfig
+  ): Promise<SolanaCall[]> {
+    const sequence: ProgramTx[] = [
+      ...config.prerequisites,
+      {
+        instructions: config.instructions,
+        signers: config.signers,
+        lookupTables: config.lookupTables,
+      },
+    ];
+
+    return Promise.all(
+      sequence.map((tx) => this.buildProgramCall(account, config, tx))
+    );
+  }
+
+  private async buildProgramCall(
+    account: string,
+    config: ProgramConfig,
+    tx: ProgramTx
+  ): Promise<SolanaCall> {
+    const step = new ProgramConfig({
+      instructions: tx.instructions,
+      signers: tx.signers,
+      lookupTables: tx.lookupTables,
+      func: config.func,
+      module: config.module,
+    });
+    return this.buildTx(account, step);
+  }
+
+  private async buildTx(
+    account: string,
     config: ProgramConfig
   ): Promise<SolanaCall> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);

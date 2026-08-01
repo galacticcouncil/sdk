@@ -2,22 +2,22 @@ import type { Abi as TAbi } from 'viem';
 
 import { BATCH } from './Batch';
 import { ERC20 } from './Erc20';
-import { GMP } from './Gmp';
 import { BASEJUMP } from './Basejump';
 import { META } from './Meta';
+import { NTT_MANAGER } from './NttManager';
 import { POLKADOT_XCM } from './PolkadotXcm';
 import { SNOWBRIDGE } from './Snowbridge';
-import { TOKEN_BRIDGE } from './TokenBridge';
-import { TOKEN_RELAYER } from './TokenRelayer';
+import { WETH } from './Weth';
+import { WORMHOLE_TRANSCEIVER } from './WormholeTransceiver';
 
 export const Abi: Record<string, TAbi> = {
   Batch: BATCH,
   Erc20: ERC20,
-  Gmp: GMP,
   Basejump: BASEJUMP,
   Meta: META,
+  NttManager: NTT_MANAGER,
   PolkadotXcm: POLKADOT_XCM,
   Snowbridge: SNOWBRIDGE,
-  TokenBridge: TOKEN_BRIDGE,
-  TokenRelayer: TOKEN_RELAYER,
+  Weth: WETH,
+  WormholeTransceiver: WORMHOLE_TRANSCEIVER,
 };

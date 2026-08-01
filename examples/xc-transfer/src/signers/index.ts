@@ -75,7 +75,7 @@ export async function signEvm(
 
 export async function signSolana(call: Call, chain: AnyChain) {
   const wallet = (window as any).phantom.solana;
-  new SolanaSigner(chain as SolanaChain, wallet).signAndSend(call, {
+  return new SolanaSigner(chain as SolanaChain, wallet).signAndSend(call, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
@@ -90,7 +90,7 @@ export async function signSolana(call: Call, chain: AnyChain) {
 
 export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
   const wallet = (window as any).phantom.solana;
-  new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
+  return new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
     onTransactionSend: (bundleId) => {
       console.log('BundleId: ' + bundleId);
     },
@@ -105,12 +105,14 @@ export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
 
 export async function signSui(call: Call, chain: AnyChain) {
   const wallet = (window as any).phantom.sui;
-  new SuiSigner(chain as SuiChain, wallet).signAndSend(call, {
+  return new SuiSigner(chain as SuiChain, wallet).signAndSend(call, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
+    // SuiSigner swallows failures into the observer - rethrow, or a rejected
+    // signature still reports the transfer as sent.
     onError: (error) => {
-      console.error(error);
+      throw error;
     },
   });
 }
@@ -118,19 +120,15 @@ export async function signSui(call: Call, chain: AnyChain) {
 export async function sign(call: Call, chain: AnyChain) {
   switch (call.type) {
     case CallType.Evm:
-      signEvm(call, chain);
-      break;
+      return signEvm(call, chain);
     case CallType.Solana:
-      signSolana(call, chain);
-      break;
+      return signSolana(call, chain);
     case CallType.Sui:
-      signSui(call, chain);
-      break;
+      return signSui(call, chain);
     default:
       if (isEvmAccount(call.from)) {
-        signEvm(call, chain);
-      } else {
-        signSubstrate(call, chain);
+        return signEvm(call, chain);
       }
+      return signSubstrate(call, chain);
   }
 }

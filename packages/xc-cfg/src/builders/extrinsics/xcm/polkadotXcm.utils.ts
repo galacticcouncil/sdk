@@ -61,9 +61,7 @@ export const isSnowbridgeTransfer = (assetLocation: any) => {
   // ERC20 tokens: X2([GlobalConsensus(Ethereum), AccountKey20])
   if (interior.type === 'X2' && Array.isArray(interior.value)) {
     const first = interior.value[0];
-    return (
-      first.type === 'GlobalConsensus' && first.value.type === 'Ethereum'
-    );
+    return first.type === 'GlobalConsensus' && first.value.type === 'Ethereum';
   }
 
   return false;
@@ -366,7 +364,9 @@ export const toReserveXcmOnDest = (
     parents: 0,
     interior: XcmV3Junctions.X1(account),
   };
-  const heldAssets = XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1));
+  const heldAssets = XcmV4AssetAssetFilter.Wild(
+    XcmV4AssetWildAsset.AllCounted(1)
+  );
 
   const onArrival = [
     XcmV4Instruction.BuyExecution({

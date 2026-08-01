@@ -11,7 +11,7 @@ import {
   ExtrinsicDecorator,
   XcmTransferType,
 } from '../../../builders';
-import { hydration, moonbeam } from '../../../chains';
+import { hydration } from '../../../chains';
 
 // const xcmDeliveryFee = 0.036;
 
@@ -123,8 +123,4 @@ export function toParaStablesTemplate(
 
 export function toHydrationExtTemplate(asset: Asset): AssetRoute {
   return toParaExtTemplate(asset, hydration, 0.02);
-}
-
-export function toMoonbeamExtTemplate(asset: Asset): AssetRoute {
-  return toParaExtTemplate(asset, moonbeam, 0.25);
 }

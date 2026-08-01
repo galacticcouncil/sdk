@@ -1,4 +1,5 @@
 export * from './SubstrateClaim';
+export * from './SubstrateEvm';
 export * from './SubstrateExec';
 export * from './SubstratePlatform';
 export * from './SubstrateService';

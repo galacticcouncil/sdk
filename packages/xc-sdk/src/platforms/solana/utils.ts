@@ -1,6 +1,30 @@
-import { MessageV0, TransactionInstruction } from '@solana/web3.js';
+import {
+  AddressLookupTableAccount,
+  Connection,
+  MessageV0,
+  TransactionInstruction,
+  VersionedMessage,
+} from '@solana/web3.js';
 
 import { HumanizedIx } from './types';
+
+/** Resolve address lookup tables of a versioned (V0) message. */
+export async function getLookupTables(
+  connection: Connection,
+  message: VersionedMessage
+): Promise<AddressLookupTableAccount[]> {
+  if (message.version === 'legacy') {
+    return [];
+  }
+  const luts = await Promise.all(
+    message.addressTableLookups.map((acc) =>
+      connection.getAddressLookupTable(acc.accountKey)
+    )
+  );
+  return luts
+    .map((lut) => lut.value)
+    .filter((val): val is AddressLookupTableAccount => val !== null);
+}
 
 export function ixToHuman(
   instructions: TransactionInstruction[]

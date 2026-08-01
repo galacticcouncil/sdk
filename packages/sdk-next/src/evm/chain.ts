@@ -2,7 +2,7 @@ import { defineChain, Chain } from 'viem';
 
 const rpcWebsocketList = [
   'https://hydration-rpc.n.dwellir.com',
-  'https://hydration.dotters.network',
+  'https://rpc.kril.hydration.cloud',
   'https://rpc.helikon.io/hydradx',
   'https://hydration.ibp.network',
   'https://rpc.cay.hydration.cloud',

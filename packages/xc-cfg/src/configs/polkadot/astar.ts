@@ -11,7 +11,7 @@ import {
   vastr,
   vdot,
 } from '../../assets';
-import { assetHub, astar, bifrost, hydration, moonbeam } from '../../chains';
+import { assetHub, astar, bifrost, hydration } from '../../chains';
 import { ExtrinsicBuilder, FeeAmountBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
@@ -68,25 +68,6 @@ const toHydration: AssetRoute[] = [
           .XcmPaymentApi()
           .calculateDestFee({ reserve: bifrost }),
         asset: bnc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: glmr,
-      fee: {
-        asset: astr,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: glmr,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: moonbeam }),
-        asset: glmr,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),

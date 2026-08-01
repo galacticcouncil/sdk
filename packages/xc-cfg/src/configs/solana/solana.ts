@@ -1,86 +1,39 @@
-import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
+import { Asset, AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { jito_sol, prime, sol } from '../../assets';
-import { solana, hydration, moonbeam } from '../../chains';
 import { ProgramBuilder } from '../../builders';
+import { hydration, solana } from '../../chains';
 import { Tag } from '../../tags';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  new AssetRoute({
+function toHydrationViaNttTemplate(asset: Asset): AssetRoute {
+  return new AssetRoute({
     source: {
-      asset: sol,
-      destinationFee: sol,
-    },
-    destination: {
-      chain: hydration,
-      asset: sol,
+      asset: asset,
       fee: {
-        amount: 0,
         asset: sol,
       },
     },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferNativeWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  new AssetRoute({
-    source: {
-      asset: jito_sol,
-      fee: {
-        asset: sol,
-      },
-      destinationFee: jito_sol,
-    },
     destination: {
       chain: hydration,
-      asset: jito_sol,
+      asset: asset,
       fee: {
         amount: 0,
-        asset: jito_sol,
+        // Ntt delivers the full amount - nothing is taken on the far side.
+        asset: asset,
       },
     },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokenWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  new AssetRoute({
-    source: {
-      asset: prime,
-      fee: {
-        asset: sol,
-      },
-      destinationFee: prime,
-    },
-    destination: {
-      chain: hydration,
-      asset: prime,
-      fee: {
-        amount: 0,
-        asset: prime,
-      },
-    },
-    program: ProgramBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokenWithPayload()
-      .viaMrl({
-        moonchain: moonbeam,
-      }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
+    program: ProgramBuilder().Wormhole().Ntt().transfer(),
+    tags: [Tag.Wormhole, Tag.Ntt],
+  });
+}
+
+const toHydrationViaNtt: AssetRoute[] = [
+  toHydrationViaNttTemplate(sol),
+  toHydrationViaNttTemplate(jito_sol),
+  toHydrationViaNttTemplate(prime),
 ];
 
 export const solanaConfig = new ChainRoutes({
   chain: solana,
-  routes: [...toHydrationViaWormhole],
+  routes: [...toHydrationViaNtt],
 });
