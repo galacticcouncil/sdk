@@ -1,5 +1,14 @@
 # @galacticcouncil/common
 
+## 1.2.0
+
+### Minor Changes
+
+- 9e041f4: Collapses per-asset balance subscriptions onto one account-keyed read where the
+  chain allows it, memoizes platform clients that were being rebuilt on every
+  read, and splits the one-shot (asset picker) case from the live (selected
+  asset) case.
+
 ## 1.1.0
 
 ### Minor Changes
