@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "@galacticcouncil/sdk-next": "^1.5.1",
-    "@galacticcouncil/xc": "^2.0.0"
+    "@galacticcouncil/xc": "^2.1.0"
   }
 }
