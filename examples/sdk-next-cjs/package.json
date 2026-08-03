@@ -10,6 +10,7 @@
     "node": "^25.9.0"
   },
   "dependencies": {
-    "@galacticcouncil/sdk-next": "^1.5.1"
+    "@galacticcouncil/sdk-next": "^1.5.1",
+    "@galacticcouncil/xc": "^2.0.0"
   }
 }

@@ -32,7 +32,6 @@ import {
 import { encoding } from '@wormhole-foundation/sdk-base';
 import { deserialize, VAA } from '@wormhole-foundation/sdk-definitions';
 import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
-import { SolanaNtt } from '@wormhole-foundation/sdk-solana-ntt';
 import { register } from '@wormhole-foundation/sdk-definitions-ntt';
 
 import { SolanaLilJit } from './SolanaLilJit';
@@ -76,6 +75,9 @@ export class SolanaClaim {
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
     const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
+
+    // Lazy - the package esm dist doesn't load under node (broken import).
+    const { SolanaNtt } = await import('@wormhole-foundation/sdk-solana-ntt');
 
     const solanaNtt = new SolanaNtt('Mainnet', 'Solana', this.#connection, {
       coreBridge: ctxWh.getCoreBridge(),

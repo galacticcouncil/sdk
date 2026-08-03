@@ -22,7 +22,7 @@ import {
 import { toChain } from '@wormhole-foundation/sdk-base';
 import { UniversalAddress } from '@wormhole-foundation/sdk-definitions';
 import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
-import { SolanaNtt } from '@wormhole-foundation/sdk-solana-ntt';
+
 import '@wormhole-foundation/sdk-definitions-ntt';
 
 async function getLookupTables(
@@ -72,6 +72,9 @@ const transfer = (): ProgramConfigBuilder => ({
     if (rcv instanceof EvmParachain) {
       rcvAddress = await rcv.getDerivatedAddress(address);
     }
+
+    // Lazy - the package esm dist doesn't load under node (broken import).
+    const { SolanaNtt } = await import('@wormhole-foundation/sdk-solana-ntt');
 
     const solanaNtt = new SolanaNtt('Mainnet', 'Solana', ctx.connection, {
       coreBridge: ctxWh.getCoreBridge(),
