@@ -4,10 +4,10 @@
 
 ### Minor Changes
 
-- 9e041f4: Collapses per-asset balance subscriptions onto one account-keyed read where the
-  chain allows it, memoizes platform clients that were being rebuilt on every
-  read, and splits the one-shot (asset picker) case from the live (selected
-  asset) case.
+- 9e041f4: New rx helpers shared by the balance clients: `rx.debounceAfterFirst`
+  (emit the first value immediately, debounce the rest) and `changedEntries`
+  (drop `watchEntries` emissions that carry no deltas). `rxjs` is now a peer
+  dependency.
 
 ## 1.1.0
 

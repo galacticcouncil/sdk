@@ -4,10 +4,13 @@
 
 ### Minor Changes
 
-- 9e041f4: Collapses per-asset balance subscriptions onto one account-keyed read where the
-  chain allows it, memoizes platform clients that were being rebuilt on every
-  read, and splits the one-shot (asset picker) case from the live (selected
-  asset) case.
+- 9e041f4: New `Wallet.getBalances(address, chain)` — one-shot snapshot of every
+  asset configured on a chain, meant for balance lists / asset pickers that
+  should fetch on demand instead of holding live subscriptions.
+
+  `Wallet.subscribeBalance(address, chain, assets, observer)` now requires an
+  explicit asset list, so live subscriptions stay narrowed to the assets in
+  view — update call sites accordingly.
 
 ### Patch Changes
 

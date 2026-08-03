@@ -4,10 +4,18 @@
 
 ### Minor Changes
 
-- 9e041f4: Collapses per-asset balance subscriptions onto one account-keyed read where the
-  chain allows it, memoizes platform clients that were being rebuilt on every
-  read, and splits the one-shot (asset picker) case from the live (selected
-  asset) case.
+- 9e041f4: Faster, leaner balance reads:
+  - Assets in account-keyed storage (`Tokens` / `OrmlTokens`) are read in batch —
+    one `watchEntries` subscription (or one storage read) covers every asset in
+    the map instead of one per asset.
+  - New `Chain.getBalances(assets, address)` and `Chain.getAssets()` for one-shot
+    snapshots (e.g. asset pickers); `subscribeBalances` stays for live updates.
+  - Per-asset streams are isolated — a failing asset retries, then is logged and
+    omitted instead of erroring the whole composite stream.
+  - Platform clients (viem, Solana, Sui) are memoized instead of rebuilt on every
+    read; the viem provider now batches contract reads via multicall.
+  - Fixed watcher leaks and unhandled rejections in the EVM / Solana / Sui
+    balance subscriptions.
 
 ## 2.1.0
 

@@ -4,10 +4,10 @@
 
 ### Minor Changes
 
-- 9e041f4: Collapses per-asset balance subscriptions onto one account-keyed read where the
-  chain allows it, memoizes platform clients that were being rebuilt on every
-  read, and splits the one-shot (asset picker) case from the live (selected
-  asset) case.
+- 9e041f4: `BalanceClient` uses the shared `debounceAfterFirst` / `changedEntries`
+  helpers from `@galacticcouncil/common`. Fixes a dropped emission in
+  `watchBalance`: the first balance update after the initial snapshot was
+  silently swallowed by the old debounce chain.
 
 ## 1.5.1
 
