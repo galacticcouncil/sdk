@@ -1,22 +1,18 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { log } from '@galacticcouncil/common';
+import { changedEntries, log, rx } from '@galacticcouncil/common';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { type Observable, combineLatest, concat, defer, from } from 'rxjs';
+import { type Observable, combineLatest, defer, from } from 'rxjs';
 
 import {
   bufferCount,
   distinctUntilChanged,
-  debounceTime,
   map,
   retry,
   startWith,
   switchMap,
   tap,
-  take,
-  skip,
-  connect,
 } from 'rxjs/operators';
 
 import { BlockAt, Papi } from '../api';
@@ -68,12 +64,7 @@ export class BalanceClient extends Papi {
        * First emission AS-IS, then debounced
        */
       return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
-        connect((shared$) =>
-          concat(
-            shared$.pipe(take(1)),
-            shared$.pipe(skip(1), debounceTime(250))
-          )
-        )
+        rx.debounceAfterFirst(250)
       );
     })
       .pipe(
@@ -144,10 +135,7 @@ export class BalanceClient extends Papi {
     const query = this.api.query.Tokens.Accounts;
 
     return defer(() => query.watchEntries(address, { at: 'best' })).pipe(
-      /**
-       * Don't emit if no deltas = no balance change
-       */
-      distinctUntilChanged((_, current) => !current.deltas),
+      changedEntries(),
       map(({ deltas }) => {
         const result: AssetBalance[] = [];
 

@@ -56,6 +56,7 @@ export const kusamaAssetHub = new Parachain({
   balance: SubstrateBalanceType.Assets,
   balanceOverrides: {
     [ksm.key]: SubstrateBalanceType.System,
+    [dot.key]: SubstrateBalanceType.ForeignAssets,
   },
   min: SubstrateMinType.Assets,
   ecosystem: Ecosystem.Kusama,

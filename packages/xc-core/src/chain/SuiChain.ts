@@ -29,6 +29,8 @@ export interface SuiChainParams extends ChainParams<
 export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
   private readonly balanceClient = new SuiBalanceClient(this);
 
+  private clientCache?: SuiClient;
+
   readonly id: string;
   readonly rpc: string;
   readonly wormhole?: Wormhole;
@@ -40,8 +42,15 @@ export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. The balance subscription polls on an interval, so building a
+   * client per read means a new client every tick.
+   */
   get client(): SuiClient {
-    return new SuiClient({ url: this.rpc });
+    if (!this.clientCache) {
+      this.clientCache = new SuiClient({ url: this.rpc });
+    }
+    return this.clientCache;
   }
 
   getType(): ChainType {

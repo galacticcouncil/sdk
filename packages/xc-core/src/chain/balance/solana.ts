@@ -1,7 +1,9 @@
+import { log } from '@galacticcouncil/common';
+
 import {
+  defer,
   distinctUntilChanged,
   finalize,
-  shareReplay,
   Observable,
   Subject,
 } from 'rxjs';
@@ -14,6 +16,8 @@ import { Asset, AssetAmount } from '../../asset';
 import { SolanaBalanceType } from './types';
 
 import type { SolanaChain } from '../SolanaChain';
+
+const { logger } = log;
 
 const NATIVE_DECIMALS = 9;
 
@@ -49,13 +53,20 @@ export class SolanaBalanceClient {
         const accounts = await connection.getParsedTokenAccountsByOwner(owner, {
           mint,
         });
-        const amount = accounts.value.reduce((sum: bigint, { account: acc }) => {
-          return sum + BigInt(acc.data.parsed.info.tokenAmount.amount);
-        }, 0n);
-        const supply = await connection.getTokenSupply(mint);
+        const amount = accounts.value.reduce(
+          (sum: bigint, { account: acc }) => {
+            return sum + BigInt(acc.data.parsed.info.tokenAmount.amount);
+          },
+          0n
+        );
+
+        const decimals =
+          accounts.value.at(0)?.account.data.parsed.info.tokenAmount.decimals ??
+          this.chain.getAssetDecimals(asset) ??
+          (await connection.getTokenSupply(mint)).value.decimals;
         return AssetAmount.fromAsset(asset, {
           amount: amount,
-          decimals: supply.value.decimals,
+          decimals: decimals,
         });
       }
       default:
@@ -63,33 +74,45 @@ export class SolanaBalanceClient {
     }
   }
 
+  // Deferred so retry (Chain.isolateBalances) rebuilds the listener.
   subscribe(
     asset: Asset,
     account: string,
     type: SolanaBalanceType
   ): Observable<AssetAmount> {
-    const { connection } = this.chain;
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
+    return defer(() => {
+      const { connection } = this.chain;
+      const subject = new Subject<AssetAmount>();
 
-    const run = async () => {
-      const update = async () =>
-        subject.next(await this.getBalance(asset, account, type));
-      await update();
-      const id = connection.onAccountChange(new PublicKey(account), () =>
-        update()
-      );
-      return () => {
-        connection.removeAccountChangeListener(id);
+      const run = async () => {
+        const update = async () =>
+          subject.next(await this.getBalance(asset, account, type));
+        await update();
+        // Later failures ride the next update; erroring would kill the stream.
+        const id = connection.onAccountChange(new PublicKey(account), () =>
+          update().catch((err) =>
+            logger.warn(`Balance update failed for ${asset.key}:`, err)
+          )
+        );
+        return () => {
+          connection.removeAccountChangeListener(id);
+        };
       };
-    };
 
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
+      let disconnect: (() => void) | undefined;
+      let closed = false;
+      // A failed first read must error, or the subject silently never emits.
+      run()
+        .then((unsub) => (closed ? unsub() : (disconnect = unsub)))
+        .catch((err) => subject.error(err));
 
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
+      return subject.pipe(
+        finalize(() => {
+          closed = true;
+          disconnect?.();
+        }),
+        distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
+      );
+    });
   }
 }

@@ -1,8 +1,13 @@
-import { encodeAssetId, encodeLocation } from '@galacticcouncil/common';
+import {
+  changedEntries,
+  encodeAssetId,
+  encodeLocation,
+} from '@galacticcouncil/common';
 
 import {
   catchError,
   concatMap,
+  defer,
   distinctUntilChanged,
   firstValueFrom,
   map,
@@ -46,6 +51,16 @@ const minBalanceField = (response: any): bigint =>
   BigInt(response?.minBalance?.toString() ?? '0');
 
 /**
+ * Storage maps keyed (account, asset) — i.e. account first, so the account can
+ * be used as a partial key to read every asset it holds in one go. The other
+ * balance types are keyed asset first and have no such prefix.
+ */
+const ACCOUNT_KEYED: Partial<Record<SubstrateBalanceType, string>> = {
+  [SubstrateBalanceType.Tokens]: 'Tokens',
+  [SubstrateBalanceType.OrmlTokens]: 'OrmlTokens',
+};
+
+/**
  * Reads substrate balances (and dynamic minimums) from a parachain's papi
  * client. Owned by {@link Parachain}.
  */
@@ -78,6 +93,102 @@ export class SubstrateBalanceClient {
       catchError((err) => {
         console.error('subscribe fails for:', asset);
         return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Whether {@link subscribeMany} can serve this asset.
+   *
+   * Requires an account-keyed map and a numeric balance id. The numeric check
+   * excludes evm addresses — the one case where {@link EvmParachain} keys
+   * balances by a derived account rather than the address passed in.
+   */
+  supportsMany(asset: Asset, type: SubstrateBalanceType): boolean {
+    if (!ACCOUNT_KEYED[type]) {
+      return false;
+    }
+    const id = this.chain.getBalanceAssetId(asset);
+    return typeof id === 'number' || typeof id === 'bigint';
+  }
+
+  /**
+   * Live balances for many assets on a single subscription.
+   *
+   * papi takes the account as a partial key, so one `watchEntries` covers
+   * every asset the account holds in that map — a chain with N tokens costs
+   * one subscription instead of N.
+   */
+  subscribeMany(
+    assets: Asset[],
+    account: string,
+    type: SubstrateBalanceType
+  ): Observable<AssetAmount[]> {
+    const module = this.manyModule(type);
+
+    return defer(() => {
+      const fn = this.chain.client.getUnsafeApi().query[module].Accounts;
+      return fn.watchEntries(account, { at: 'best' });
+    }).pipe(
+      changedEntries(),
+      concatMap(({ entries }: any) => this.joinMany(assets, entries))
+    );
+  }
+
+  /**
+   * One-shot counterpart of {@link subscribeMany} — same partial key, so a
+   * snapshot of N assets costs one storage read instead of N short-lived
+   * subscriptions.
+   */
+  async getMany(
+    assets: Asset[],
+    account: string,
+    type: SubstrateBalanceType
+  ): Promise<AssetAmount[]> {
+    const module = this.manyModule(type);
+    const fn = this.chain.client.getUnsafeApi().query[module].Accounts;
+
+    // Same key tuple as `watchEntries`, under a different field name.
+    const entries = await fn.getEntries(account, { at: 'best' });
+    return this.joinMany(
+      assets,
+      entries.map(({ keyArgs, value }: any) => ({ args: keyArgs, value }))
+    );
+  }
+
+  private manyModule(type: SubstrateBalanceType): string {
+    const module = ACCOUNT_KEYED[type];
+    if (!module) {
+      throw new Error('Unsupported substrate batch balance type: ' + type);
+    }
+    return module;
+  }
+
+  /**
+   * Joins decoded entries onto the requested assets. The account is a partial
+   * key, so `args[1]` is the asset id.
+   */
+  private joinMany(assets: Asset[], entries: any[]): Promise<AssetAmount[]> {
+    const { chain } = this;
+    const held = new Map<string, bigint>(
+      entries.map(({ args, value }: any) => [
+        args[1].toString(),
+        freeMinusFrozen(value),
+      ])
+    );
+
+    return Promise.all(
+      assets.map(async (asset) => {
+        // Only existing keys come back, so a never-held asset is absent
+        // rather than zero. It still has to emit, or the caller's
+        // combineLatest never receives a first value.
+        const id = chain.getBalanceAssetId(asset).toString();
+        const params = await normalizeAssetAmount(
+          held.get(id) ?? 0n,
+          asset,
+          chain
+        );
+        return AssetAmount.fromAsset(asset, params);
       })
     );
   }
