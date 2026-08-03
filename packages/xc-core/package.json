@@ -43,6 +43,7 @@
     "@wormhole-foundation/sdk-definitions": "6.1.4",
     "@wormhole-foundation/sdk-definitions-ntt": "7.2.0",
     "@wormhole-foundation/sdk-solana": "6.1.4",
+    "@wormhole-foundation/sdk-solana-core": "6.1.4",
     "@wormhole-foundation/sdk-solana-ntt": "7.2.0",
     "big.js": "^6.2.1",
     "bigint-buffer": "^1.1.5",

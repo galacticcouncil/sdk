@@ -4,8 +4,6 @@ import { big, log, SubstrateApis } from '@galacticcouncil/common';
 
 import { combineLatest, map, Observable } from 'rxjs';
 
-const { logger } = log;
-
 import { Asset, AssetAmount } from '../asset';
 import {
   BalanceType,
@@ -21,6 +19,8 @@ import {
   ChainParams,
   ChainType,
 } from './Chain';
+
+const { logger } = log;
 
 /**
  * XCM multi-location objects (JSON-serializable)
