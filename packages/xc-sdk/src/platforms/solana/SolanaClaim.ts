@@ -21,6 +21,7 @@ import {
   ACCOUNT_SIZE,
   NATIVE_MINT,
   TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
   createInitializeAccountInstruction,
   createTransferInstruction,
@@ -103,6 +104,7 @@ export class SolanaClaim {
       lamports: DEFAULT_TIP_LAMPORTS,
     });
 
+    const createAta = this.getCreateAta(ntt, vaa, payer);
     const unwrap = await this.getUnwrap(ntt, vaa, payer);
 
     const { blockhash } = await this.#connection.getLatestBlockhash();
@@ -116,6 +118,8 @@ export class SolanaClaim {
           : [];
       const ixs = this.getInstructions(transaction, luts);
       if (isLast) {
+        // Before the release, which mints/unlocks into the recipient ata.
+        ixs.unshift(createAta);
         // After the release, so the wSOL is already in the ata.
         if (unwrap) {
           ixs.push(...unwrap.ixs);
@@ -139,6 +143,36 @@ export class SolanaClaim {
       } as SolanaCall);
     }
     return calls;
+  }
+
+  /**
+   * Create the recipient ata if missing (idempotent).
+   *
+   * The release only mints/unlocks into an existing token account, the
+   * ntt program never creates it. Payer covers the rent.
+   *
+   * @param ntt - NTT token deployment on Solana
+   * @param vaa - deserialized transfer, carries the recipient
+   * @param payer - claim payer
+   * @returns create ata instruction
+   */
+  private getCreateAta(
+    ntt: NttTokenDef,
+    vaa: VAA<'Ntt:WormholeTransfer'>,
+    payer: PublicKey
+  ): TransactionInstruction {
+    const { recipientAddress } = vaa.payload.nttManagerPayload.payload;
+
+    const mint = new PublicKey(ntt.token);
+    const recipient = new PublicKey(recipientAddress.toUint8Array());
+    const ata = getAssociatedTokenAddressSync(mint, recipient, true);
+
+    return createAssociatedTokenAccountIdempotentInstruction(
+      payer,
+      ata,
+      recipient,
+      mint
+    );
   }
 
   /**
