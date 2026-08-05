@@ -154,6 +154,7 @@ export const ethereum = new EvmChain({
     id: 2,
     coreBridge: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
     executor: '0x84EEe8dBa37C36947397E1E11251cA9A06Fc6F8a',
+    nttExecutor: '0xC079bFA54F348199bA51B2717595fE24e96f1542',
     // Locking managers - the token is escrowed here, minted on hydration.
     ntt: {
       [dai.key]: {

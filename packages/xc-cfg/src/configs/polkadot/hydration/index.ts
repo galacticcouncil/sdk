@@ -80,6 +80,7 @@ import {
   toKusamaHubTemplate,
   toParaTemplate,
   toTransferTemplate,
+  viaNttExecutorTemplate,
   viaNttTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
@@ -259,6 +260,21 @@ const toSolanaViaNtt: AssetRoute[] = [
 
 const toSuiViaNtt: AssetRoute[] = [viaNttTemplate(sui, sui, sui_chain)];
 
+// Executor-delivered counterparts of the ntt routes above, same pairs.
+const viaNttExecutor: AssetRoute[] = [
+  viaNttExecutorTemplate(dai_wh, dai, ethereum),
+  viaNttExecutorTemplate(susds_wh, susds, ethereum),
+  viaNttExecutorTemplate(usdc_wh, usdc, ethereum),
+  viaNttExecutorTemplate(usdt_wh, usdt, ethereum),
+  viaNttExecutorTemplate(wbtc_wh, wbtc, ethereum),
+  viaNttExecutorTemplate(weth_wh, eth, ethereum),
+  viaNttExecutorTemplate(eurc_wh, eurc, base),
+  viaNttExecutorTemplate(sol, sol, solana),
+  viaNttExecutorTemplate(jito_sol, jito_sol, solana),
+  viaNttExecutorTemplate(prime, prime, solana),
+  viaNttExecutorTemplate(sui, sui, sui_chain),
+];
+
 const toEthereumViaSnowbridge: AssetRoute[] = [
   viaSnowbridgeTemplate(eth, eth, ethereum),
   viaSnowbridgeTemplate(aave, aave, ethereum),
@@ -318,6 +334,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaSnowbridge,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,
+    ...viaNttExecutor,
     ...toEthereumViaSnowbridgeV1,
     ...toEnergywebx,
     ...toKusamaAssethub,

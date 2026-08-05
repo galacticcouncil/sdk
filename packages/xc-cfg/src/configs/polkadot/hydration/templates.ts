@@ -7,9 +7,10 @@ import {
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-import { dot, glmr, usdt } from '../../../assets';
+import { dot, glmr, usdt, weth_wh } from '../../../assets';
 import {
   ContractBuilder,
+  ContractDecorator,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
   FeeAmountBuilder,
@@ -197,6 +198,50 @@ export function viaNttTemplate(
     },
     contract: ContractBuilder().Wormhole().Ntt().transfer(),
     tags: [Tag.Wormhole, Tag.Ntt],
+  });
+}
+
+/**
+ * Executor-delivered variant, offered alongside the self-redeem route above
+ * for the same pair - the sender pays for delivery instead of signing a
+ * redeem on the destination.
+ *
+ * Cost is charged in weth, hydration's evm native gas - `EVM.call { value }`
+ * debits the weth balance (asset 20), not hdx - whether the transfer is signed
+ * as h160 or wrapped in EVM.call. Ntt still delivers the full amount.
+ *
+ * Must stay an 18 decimal asset: the builder returns a raw evm value, and hdx
+ * would both name the wrong balance and resolve to 12 decimals.
+ *
+ * A sender holding no weth buys it first: the same destination fee swap the
+ * xcm routes use, batched ahead of the call. Only an ss58 origin needs it -
+ * that one pays its extrinsic fee in hdx and can hold zero weth. An h160 has
+ * nothing to batch into, but pays its own gas in weth, so it already holds
+ * some.
+ */
+export function viaNttExecutorTemplate(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: fee(),
+    },
+    destination: {
+      chain: to,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Wormhole().quoteExecutorCost(),
+        asset: weth_wh,
+      },
+    },
+    contract: ContractDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(ContractBuilder().Wormhole().Ntt().transferViaExecutor()),
+    tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
   });
 }
 
