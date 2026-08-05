@@ -55,10 +55,6 @@
         opacity: 0.4;
         cursor: default;
       }
-      button.primary {
-        background: #2a4a8a;
-        border-color: #4c8dff;
-      }
       h2 {
         font-size: 12px;
         font-weight: 500;
@@ -66,6 +62,13 @@
         letter-spacing: 0.08em;
         opacity: 0.5;
         margin: 16px 0 8px;
+      }
+      .legend {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.6;
+        max-width: 68ch;
+        margin: 16px 0;
       }
       pre {
         margin: 16px 0 0;
@@ -98,8 +101,39 @@
     <div id="routes"></div>
 
     <div class="row">
-      <button id="claim-out">Claim on Ethereum</button>
-      <button id="claim-in">Claim on Hydration</button>
+      <button
+        id="claim-out"
+        title="Withdrawals off hydration, redeemed on whichever chain they target - ethereum, base, solana or sui"
+      >
+        Claim withdrawals
+      </button>
+      <button id="claim-in" title="Deposits, redeemed on hydration">
+        Claim deposits
+      </button>
+    </div>
+
+    <!-- Escape hatch for a transfer the two above never list - addressed to
+         another account, or emitted by something the registry doesn't match.
+         The vaa names its own destination, so the claim is routed by the
+         message: one receiveMessage on evm, a jito bundle on solana, a ptb
+         on sui. -->
+    <div class="row">
+      <textarea
+        id="vaa"
+        rows="3"
+        style="width: 100%; max-width: 68ch; resize: vertical"
+        spellcheck="false"
+        placeholder="signed vaa (base64 or 0x hex), a wormholescan link, or chain/emitter/sequence"
+      ></textarea>
+    </div>
+    <div class="row">
+      <button id="claim-vaa">Claim VAA</button>
+      <label
+        title="Evm destinations only. Send even when the call reverts in simulation - spends gas, mints nothing, leaves the vaa replayable"
+      >
+        <input id="vaa-force" type="checkbox" style="width: auto" />
+        send anyway
+      </label>
     </div>
 
     <pre id="log"></pre>

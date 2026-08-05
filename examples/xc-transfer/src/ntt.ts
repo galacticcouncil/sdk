@@ -5,6 +5,7 @@ import { tags } from '@galacticcouncil/xc-cfg';
 import { sign } from './signers';
 import { xc } from './setup';
 import { claimDeposits, claimWithdraws } from './utils/claim';
+import { claimVaa } from './utils/vaa';
 
 const { config, wallet } = xc;
 const { Tag } = tags;
@@ -29,7 +30,7 @@ const { Tag } = tags;
 // 0x82fb02afe02fe5d6c793145a75e6860c4e206682, is the batched route.)
 const EVM_ADDRESS = '0x23812ff0cDdd7157C4760E3BB2d39f5f323a7D3c';
 const HYDRATION_ADDRESS = '5F2SeXfnUuvQ7nux5b7dTHgUoePgiCW38Czk78YQuJPfjunb';
-const SOLANA_ADDRESS = 'INSERT_ADDRESS';
+const SOLANA_ADDRESS = '5mcfpAMophavx1m15v4YYPNUrv4vqErAUzJV7Ct5wr7v';
 const SUI_ADDRESS =
   '0x6a07fa01f106d6b4822007ab2f47270bbf31ee446db302d049b4615c46f01c7d';
 
@@ -131,11 +132,28 @@ async function transfer({ source, route }: NttRoute, amount: string) {
 
 /**
  * Self-redeem of a delivered transfer. Deposits land on hydration, so the
- * claim is paid there; withdrawals are redeemed on the evm side.
+ * claim is paid there; withdrawals are redeemed on whichever chain they
+ * target - one `receiveMessage` on an evm chain, a jito bundle on solana
+ * (post the vaa, redeem, release), a single ptb on sui.
+ *
+ * Each is paid by whoever signs on that chain, which is what `addressOf`
+ * resolves - the solana payer needs sol for the bundle & the recipient's
+ * token account rent.
  */
 const claim = {
   in: () => claimDeposits(HYDRATION_ADDRESS, addressOf, log),
   out: () => claimWithdraws(HYDRATION_ADDRESS, addressOf, log),
+  // Anything the two above never list - a transfer addressed to someone
+  // else, or one whose emitter matches no registry entry. Hydration is paid
+  // by the h160 rather than the ss58 addressOf hands out, so the claim is a
+  // plain receiveMessage rather than an EVM.call dispatch.
+  vaa: (input: string, force = false) =>
+    claimVaa(
+      input,
+      (chain) => (chain.isEvmParachain() ? EVM_ADDRESS : addressOf(chain)),
+      log,
+      force
+    ),
 };
 
 /**
@@ -199,9 +217,15 @@ groups.forEach((entries, chain) => {
 
 // Delivery is self-redeem, so the claim buttons are the second half of
 // every transfer - deposits are paid on hydration, withdrawals on the
-// evm side.
+// chain they target.
 bind(document.getElementById('claim-in') as HTMLButtonElement, claim.in);
 bind(document.getElementById('claim-out') as HTMLButtonElement, claim.out);
+
+const vaaInput = document.getElementById('vaa') as HTMLTextAreaElement;
+const vaaForce = document.getElementById('vaa-force') as HTMLInputElement;
+bind(document.getElementById('claim-vaa') as HTMLButtonElement, () =>
+  claim.vaa(vaaInput.value, vaaForce.checked)
+);
 
 log('Ready.', ROUTES.length, 'ntt routes, self-redeem delivery.');
 
