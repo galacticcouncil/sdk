@@ -14,6 +14,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { xc } from './setup';
+import { signEvm, signSolanaBundle } from 'signers';
 
 const { config } = xc;
 
@@ -61,6 +62,8 @@ export const redeem = {
   },
   sol: (address: string, vaa: string, asset: string) =>
     new SolanaClaim(solana).redeem(address, vaa, nttOf(solana, asset)),
+  solRelease: (address: string, vaa: string, asset: string) =>
+    new SolanaClaim(solana).release(address, vaa, nttOf(solana, asset)),
   sui: (address: string, vaa: string, asset: string) =>
     new SuiClaim(sui).redeem(address, vaa, nttOf(sui, asset)),
 };

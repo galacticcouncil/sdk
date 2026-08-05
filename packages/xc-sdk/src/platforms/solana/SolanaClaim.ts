@@ -146,6 +146,94 @@ export class SolanaClaim {
   }
 
   /**
+   * Release queued NTT transfer on Solana.
+   *
+   * Delivers the release for a transfer redeemed over the inbound rate
+   * limit. Mints into the recipient ata once the queue timestamp is up,
+   * no-op success before that (revertWhenNotReady is off).
+   *
+   * @param from - payer address
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param ntt - NTT token deployment on Solana
+   * @returns release program call
+   */
+  async release(
+    from: string,
+    vaaRaw: string,
+    ntt: NttTokenDef
+  ): Promise<SolanaCall[]> {
+    const ctxWh = Wh.fromChain(this.#chain);
+
+    const vaaBytes = encoding.b64.decode(vaaRaw);
+    const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
+
+    // Lazy - the package esm dist doesn't load under node (broken import).
+    const { SolanaNtt } = await import('@wormhole-foundation/sdk-solana-ntt');
+
+    const solanaNtt = new SolanaNtt('Mainnet', 'Solana', this.#connection, {
+      coreBridge: ctxWh.getCoreBridge(),
+      ntt: {
+        manager: ntt.manager,
+        token: ntt.token,
+        transceiver: { wormhole: ntt.transceiver.wormhole },
+      },
+    });
+
+    const payer = new PublicKey(from);
+    const payerAddress = new SolanaAddress(from);
+
+    const txs = [];
+    for await (const tx of solanaNtt.completeInboundQueuedTransfer(
+      vaa.emitterChain,
+      vaa.payload.nttManagerPayload,
+      payerAddress
+    )) {
+      txs.push(tx.transaction);
+    }
+
+    const tipAccounts = await this.#lilJit.getTipAccount();
+    const tipIx = SystemProgram.transfer({
+      fromPubkey: payer,
+      toPubkey: new PublicKey(tipAccounts[0]),
+      lamports: DEFAULT_TIP_LAMPORTS,
+    });
+
+    const createAta = this.getCreateAta(ntt, vaa, payer);
+    const unwrap = await this.getUnwrap(ntt, vaa, payer);
+
+    const { blockhash } = await this.#connection.getLatestBlockhash();
+
+    const calls: SolanaCall[] = [];
+    for (const { transaction, signers } of txs) {
+      const luts =
+        'message' in transaction
+          ? await getLookupTables(this.#connection, transaction.message)
+          : [];
+      const ixs = this.getInstructions(transaction, luts);
+      // Before the release, which mints/unlocks into the recipient ata.
+      ixs.unshift(createAta);
+      // After the release, so the wSOL is already in the ata.
+      if (unwrap) {
+        ixs.push(...unwrap.ixs);
+      }
+      ixs.push(tipIx);
+      const mssgV0 = new TransactionMessage({
+        payerKey: payer,
+        recentBlockhash: blockhash,
+        instructions: ixs,
+      }).compileToV0Message(luts);
+      calls.push({
+        from: from,
+        data: serializeV0(mssgV0),
+        ix: ixToHuman(ixs),
+        signers: unwrap ? [...(signers ?? []), unwrap.signer] : (signers ?? []),
+        type: CallType.Solana,
+      } as SolanaCall);
+    }
+    return calls;
+  }
+
+  /**
    * Create the recipient ata if missing (idempotent).
    *
    * The release only mints/unlocks into an existing token account, the
