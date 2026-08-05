@@ -32,23 +32,23 @@ import { SYSTEM_ASSET_ID } from '../consts';
 import { decodeErc20Transfer } from '../evm';
 import { AssetBalance, Balance } from '../types';
 
-const { H160 } = h160;
-
-/**
- * Full ERC20 re-read cadence (in best blocks) as a safety net.
- *
- * - A missed or unmapped Transfer log can't permanently stale a balance
- */
-const ERC20_SAFETY_REREAD_BLOCKS = 20;
-
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
 type TAccount = TSystemAccount['data'] | TTokenAccount;
 
+const { H160 } = h160;
 const { logger } = log;
 
 export class BalanceClient extends Papi {
   private erc20Ids: number[] | null = null;
+
+  /**
+   * Full erc20 re-read cadence (in best blocks) as a safety net.
+   *
+   * - A missed or unmapped Transfer log can't permanently stale a balance
+   * - Shared with the pool driver's periodic reserve reconcile
+   */
+  readonly erc20SafetyRereadBlocks = 20;
 
   constructor(client: PolkadotClient, at?: BlockAt) {
     super(client, at);
@@ -273,7 +273,7 @@ export class BalanceClient extends Papi {
            */
           const safetyIds$ = this.watcher.bestBlock$.pipe(
             skip(1),
-            bufferCount(ERC20_SAFETY_REREAD_BLOCKS),
+            bufferCount(this.erc20SafetyRereadBlocks),
             map(() => null as number[] | null)
           );
 

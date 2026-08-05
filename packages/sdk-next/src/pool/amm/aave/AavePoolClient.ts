@@ -5,7 +5,7 @@ import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { AaveLog } from '../../../aave';
 
-import { PoolEventHandler, PoolMutation } from '../../events';
+import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
@@ -188,6 +188,20 @@ export class AavePoolClient extends PoolClient<PoolBase> {
         return this.reserveMutations(pools, block.hash);
       },
     };
+  }
+
+  // =============================================================================
+  // Reconcile
+  // =============================================================================
+
+  /**
+   * Periodic reconcile — re-read every pool's reserves via the trade executor.
+   *
+   * - Both legs are interest-bearing and drift every block
+   * - Reads pinned at the block being committed
+   */
+  protected reconcileBalances(block: BlockRef): Promise<PoolMutation<PoolBase>[]> {
+    return this.reserveMutations([...this.store.pools], block.hash);
   }
 
   // =============================================================================

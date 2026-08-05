@@ -71,6 +71,8 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected block = 0;
   protected blockHash?: string;
 
+  private reconciledAt = 0;
+
   private shared$?: Observable<T[]>;
 
   private resync$ = new ReplaySubject<void>(1);
@@ -127,6 +129,66 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    */
   protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
     return [];
+  }
+
+  /**
+   * Cadence gate for the periodic reserve reconcile.
+   *
+   * - Delegates to `reconcileBalances` once every `erc20SafetyRereadBlocks`
+   * - Returns no mutations between reconcile blocks
+   *
+   * @param block - the block being committed
+   */
+  private async balanceMutations(block: BlockRef): Promise<PoolMutation<T>[]> {
+    const cadence = this.balance.erc20SafetyRereadBlocks;
+    if (block.number - this.reconciledAt < cadence) return [];
+    this.reconciledAt = block.number;
+    return this.reconcileBalances(block);
+  }
+
+  /**
+   * Periodic re-read of erc20 reserve balances, PINNED at the block.
+   *
+   * - Catches balances that move with no event we handle: aToken interest accrual, direct transfers into a reserve
+   * - Reads every erc20 reserve at `pool.address`; commits only the balances that changed
+   * - Overridden where reserves live off-pool or are read via an executor
+   *
+   * @param block - the block being committed; reads pin at `block.hash`
+   */
+  protected async reconcileBalances(block: BlockRef): Promise<PoolMutation<T>[]> {
+    const muts: PoolMutation<T>[] = [];
+
+    for (const pool of this.store.pools) {
+      const erc20 = pool.tokens.filter((t) => t.type === 'Erc20');
+      if (erc20.length === 0) continue;
+
+      const fresh = await Promise.all(
+        erc20.map(async (t) => ({
+          id: t.id,
+          balance: (
+            await this.balance.getBalanceAt(pool.address, t.id, block.hash)
+          ).transferable,
+        }))
+      );
+      const changed = fresh.filter((f) => {
+        const cur = pool.tokens.find((t) => t.id === f.id);
+        return cur !== undefined && cur.balance !== f.balance;
+      });
+      if (changed.length === 0) continue;
+
+      muts.push({
+        address: pool.address,
+        apply: (p) => ({
+          ...p,
+          tokens: p.tokens.map((t) => {
+            const c = changed.find((x) => x.id === t.id);
+            return c ? { ...t, balance: c.balance } : t;
+          }),
+        }),
+      });
+    }
+
+    return muts;
   }
 
   private async getMemPools(): Promise<T[]> {
@@ -283,7 +345,8 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
           await Promise.all(effectsRes);
           const eventMuts = (await Promise.all(handlersRes)).flat();
           const tickMuts = await this.tickMutations(block);
-          const muts = [...eventMuts, ...tickMuts];
+          const balanceMuts = await this.balanceMutations(block);
+          const muts = [...eventMuts, ...tickMuts, ...balanceMuts];
 
           if (matched.length > 0) {
             this.log.trace('sync', {

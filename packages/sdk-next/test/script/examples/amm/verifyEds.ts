@@ -10,11 +10,17 @@ import { omni, stable, PoolBase } from '../../../../src/pool';
 
 const DURATION_MS = 20 * 60 * 1000;
 
-// Relative tolerance (ppm) for numeric fields — absorbs interest accrual on
-// yield-bearing (aToken) reserves that drift every block with no event.
-const YIELD_DRIFT_PPM = 100n; // 0.01%
+// Relative tolerance (ppm) for fields that converge every block from event-cached
+// inputs — yield-bearing (aToken) reserve balances and oracle-driven pegs. The
+// event-driven store tracks these from caches refreshed on events, so it lags a
+// fresh per-block reload by a bounded, sub-ppm amount.
+const DRIFT_PPM = 100n; // 0.01%
 
 const isInt = (s: string | undefined): s is string => !!s && /^-?\d+$/.test(s);
+
+// Flattened keys whose per-block convergence is expected drift, not a mismatch.
+const isDriftField = (k: string): boolean =>
+  k.endsWith('.balance') || k.startsWith('pegs.');
 
 const { OmniPoolClient } = omni;
 const { StableSwapClient } = stable;
@@ -66,7 +72,7 @@ const flatten = (pool: PoolBase): Record<string, string> => {
 /**
  * Field-level diffs between two pools.
  *
- * - Numeric fields within `YIELD_DRIFT_PPM` are treated as yield drift, not a
+ * - Converging fields within `DRIFT_PPM` are treated as expected drift, not a
  *   mismatch (counted separately)
  * - Everything else is a real diff, reported with its relative delta
  */
@@ -88,8 +94,8 @@ const fieldDiffs = (l: PoolBase, r: PoolBase) => {
       const ref = y < 0n ? -y : y;
       const d = x > y ? x - y : y - x;
       const ppm = ref === 0n ? 1_000_000n : (d * 1_000_000n) / ref;
-      // Only token reserve balances accrue yield; everything else is exact.
-      if (k.endsWith('.balance') && ppm <= YIELD_DRIFT_PPM) {
+      // Converging fields lag a fresh read by a bounded amount; the rest is exact.
+      if (isDriftField(k) && ppm <= DRIFT_PPM) {
         drift++;
         continue;
       }
@@ -230,4 +236,4 @@ class VerifyEds extends PapiExecutor {
   }
 }
 
-new VerifyEds(ApiUrl.Kril, 'Verify event-driven sync').run();
+new VerifyEds(ApiUrl.Catfish1, 'Verify event-driven sync').run();
