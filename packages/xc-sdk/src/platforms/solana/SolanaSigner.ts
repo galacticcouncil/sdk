@@ -75,8 +75,10 @@ export class SolanaSigner {
         );
       }
 
+      // Best effort - the block engine has no simulateBundle, so undefined
+      // means it was never run. Only an actual failure aborts.
       const simulation = await this.#lilJit.simulateBundle(encoded);
-      if (simulation.value.summary !== 'succeeded') {
+      if (simulation && simulation.value.summary !== 'succeeded') {
         throw new Error(
           'Bundle simulation failed! ' + JSON.stringify(simulation, null, 2)
         );
