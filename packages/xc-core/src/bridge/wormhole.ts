@@ -11,6 +11,7 @@ export type WormholeDef = {
   id: number;
   coreBridge: string;
   executor?: string;
+  nttExecutor?: string;
   ntt?: NttDef;
   platformAddressFormat?: PlatformAddressFormat;
 };
@@ -19,6 +20,7 @@ export class Wormhole {
   readonly id: number;
   readonly coreBridge: string;
   readonly executor?: string;
+  readonly nttExecutor?: string;
   readonly ntt: NttDef;
   readonly platformAddressFormat?: PlatformAddressFormat;
 
@@ -26,12 +28,14 @@ export class Wormhole {
     id,
     coreBridge,
     executor,
+    nttExecutor,
     ntt,
     platformAddressFormat,
   }: WormholeDef) {
     this.id = id;
     this.coreBridge = coreBridge;
     this.executor = executor;
+    this.nttExecutor = nttExecutor;
     this.ntt = ntt ?? {};
     this.platformAddressFormat = platformAddressFormat;
   }
@@ -60,6 +64,19 @@ export class Wormhole {
       return this.executor;
     }
     throw new Error('Wormhole executor configuration missing');
+  }
+
+  /**
+   * NttManagerWithExecutor - the wrapper a sender calls to have the Executor
+   * service deliver the transfer. Distinct from {@link executor}, which is the
+   * Executor contract the relayer watches; conflating the two builds a call to
+   * an address with no `transfer` on it.
+   */
+  getNttExecutor(): string {
+    if (this.nttExecutor) {
+      return this.nttExecutor;
+    }
+    throw new Error('Wormhole ntt executor configuration missing');
   }
 
   /**
