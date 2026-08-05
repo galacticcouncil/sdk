@@ -20,12 +20,17 @@ import { pjs } from './extension';
 
 const { isEvmAccount, H160 } = h160;
 
-export async function signSubstrate(call: Call, chain: AnyChain) {
+export async function signSubstrate(
+  call: Call,
+  chain: AnyChain,
+  callback?: (hash: string) => void
+) {
   const ctx = chain as AnyParachain;
   const signer = await pjs.getSignerBySource('polkadot-js', call.from);
   new SubstrateSigner(ctx, signer).signAndSend(call as SubstrateCall, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
+      callback?.(hash);
     },
     onFinalized: (event) => {
       console.log('Finalized:', event);
@@ -117,18 +122,26 @@ export async function signSui(call: Call, chain: AnyChain) {
   });
 }
 
-export async function sign(call: Call, chain: AnyChain) {
+/**
+ * @param callback - source tx hash, once sent. Evm & substrate only; needed
+ * to follow an executor-delivered transfer (see utils/executor).
+ */
+export async function sign(
+  call: Call,
+  chain: AnyChain,
+  callback?: (hash: string) => void
+) {
   switch (call.type) {
     case CallType.Evm:
-      return signEvm(call, chain);
+      return signEvm(call, chain, callback);
     case CallType.Solana:
       return signSolana(call, chain);
     case CallType.Sui:
       return signSui(call, chain);
     default:
       if (isEvmAccount(call.from)) {
-        return signEvm(call, chain);
+        return signEvm(call, chain, callback);
       }
-      return signSubstrate(call, chain);
+      return signSubstrate(call, chain, callback);
   }
 }
