@@ -110,8 +110,24 @@ export class EvmPlatform implements Platform<ContractConfig> {
       },
     } as EvmCall;
 
+    // Runs on the same origin right after the transfer, so it needs no
+    // prerequisites of its own - it spends native value, never the token.
+    const followCall = config.follow
+      ? ({
+          abi: JSON.stringify(config.follow.abi),
+          data: EvmTransferFactory.get(this.#client, config.follow)
+            .calldata as `0x${string}`,
+          from: account as `0x${string}`,
+          to: config.follow.address as `0x${string}`,
+          type: CallType.Evm,
+          value: config.follow.value,
+          dryRun: () => {},
+        } as EvmCall)
+      : undefined;
+    const trailing = followCall ? [transferCall, followCall] : [transferCall];
+
     if (isPrecompile(config) || isNativeEthBridge(config)) {
-      return [transferCall];
+      return trailing;
     }
 
     const prerequisites = await this.getPrerequisites(
@@ -135,7 +151,7 @@ export class EvmPlatform implements Platform<ContractConfig> {
         }) as EvmCall
     );
 
-    return [...calls, transferCall];
+    return [...calls, ...trailing];
   }
 
   /**
@@ -210,8 +226,20 @@ export class EvmPlatform implements Platform<ContractConfig> {
       gas: Gas.transfer,
     };
 
+    const trailing = config.follow
+      ? [
+          transferCall,
+          {
+            to: config.follow.address,
+            data: EvmTransferFactory.get(this.#client, config.follow).calldata,
+            value: config.follow.value,
+            gas: Gas.transfer,
+          },
+        ]
+      : [transferCall];
+
     if (isPrecompile(config) || isNativeEthBridge(config)) {
-      return substrateEvm.buildCall(account, [transferCall]);
+      return substrateEvm.buildCall(account, trailing, config.prior);
     }
 
     const source = await chain.getDerivatedAddress(account);
@@ -222,7 +250,11 @@ export class EvmPlatform implements Platform<ContractConfig> {
       asset
     );
 
-    return substrateEvm.buildCall(account, [...prerequisites, transferCall]);
+    return substrateEvm.buildCall(
+      account,
+      [...prerequisites, ...trailing],
+      config.prior
+    );
   }
 
   /**

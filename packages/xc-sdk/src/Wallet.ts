@@ -142,7 +142,7 @@ export class Wallet {
     ] = await Promise.all([
       src.getBalance(srcAddress),
       src.getFeeBalance(srcAddress),
-      src.getDestinationFee(),
+      src.getDestinationFee(undefined, dstAddress),
       src.getDestinationFeeBalance(srcAddress),
       src.getMin(),
       dst.getBalance(dstAddress),
@@ -247,7 +247,10 @@ export class Wallet {
       },
       async estimateDestinationFee(amount): Promise<AssetAmount> {
         const target = big.toBigInt(amount, srcBalance.decimals);
-        const { fee, feeBreakdown } = await src.getDestinationFee(target);
+        const { fee, feeBreakdown } = await src.getDestinationFee(
+          target,
+          dstAddress
+        );
         ctx.destination.fee = fee;
         ctx.destination.feeBreakdown = feeBreakdown;
         ctx.source.destinationFee = fee;
