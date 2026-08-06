@@ -1,13 +1,15 @@
 import { writeFileSync } from 'fs';
+import path from 'path';
 
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
 
 import { read } from '@changesets/config';
+import * as git from '@changesets/git';
 import { getPackages } from '@manypkg/get-packages';
 
 import { parseArgs } from './common.mjs';
-import { getUpgradeMessage } from './changeset-utils.mjs';
+import { getReleaseMessage, getUpgradeMessage } from './changeset-utils.mjs';
 
 const main = async () => {
   const cwd = process.cwd();
@@ -59,9 +61,30 @@ const main = async () => {
     writeFileSync(output, releaseJson);
   }
   console.log('Executing release plan...');
-  await applyReleasePlan(releasePlan, packages, releaseConfig, true);
+  const touchedFiles = await applyReleasePlan(
+    releasePlan,
+    packages,
+    releaseConfig,
+    true
+  );
+
+  // Note, git gets angry if two git actions run at once, keep this sequential
+  for (const touchedFile of touchedFiles) {
+    await git.add(path.relative(cwd, touchedFile), cwd);
+  }
+
+  const releaseMessage = getReleaseMessage(releasePlan);
+  const committed = await git.commit(releaseMessage, cwd);
+  if (committed) {
+    console.log(releaseMessage);
+  } else {
+    throw new Error('Snapshot version bump could not be committed');
+  }
 };
 
 main()
   .then(() => console.log('Snapshot version bump done ✅'))
-  .catch(console.error);
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
