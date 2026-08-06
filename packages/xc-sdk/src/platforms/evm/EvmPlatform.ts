@@ -268,7 +268,13 @@ export class EvmPlatform implements Platform<ContractConfig> {
    *
    * For an erc20 source the value stays out: it is either reported as the
    * route's destination fee (snowbridge) or drawn from a balance the amount
-   * doesn't compete for.
+   * doesn't compete for. Its prerequisites are charged for all the same -
+   * the approve is a transaction the sender signs and pays gas on.
+   *
+   * Which configs have prerequisites is decided exactly as {@link buildCalls}
+   * decides it. Estimating the transfer alone instead left an erc20 source
+   * reporting no fee at all: the transfer reverts until the approve lands,
+   * and an unmeasurable fee falls back to zero.
    */
   async estimateFee(
     account: string,
@@ -278,7 +284,12 @@ export class EvmPlatform implements Platform<ContractConfig> {
   ): Promise<AssetAmount> {
     const contract = EvmTransferFactory.get(this.#client, config);
 
-    if (!config.wrapNative) {
+    // Nothing is being sent yet, so there is nothing to charge for.
+    if (amount === 0n) {
+      return feeBalance.copyWith({ amount: 0n });
+    }
+
+    if (isPrecompile(config) || isNativeEthBridge(config)) {
       const fee = await contract.estimateFee(account, amount);
       return feeBalance.copyWith({
         amount: fee,
@@ -306,7 +317,7 @@ export class EvmPlatform implements Platform<ContractConfig> {
     );
 
     return feeBalance.copyWith({
-      amount: gas * gasPrice + (config.value ?? 0n),
+      amount: gas * gasPrice + (config.wrapNative ? (config.value ?? 0n) : 0n),
     });
   }
 }

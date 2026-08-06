@@ -192,10 +192,34 @@ describe('EvmPlatform', () => {
       expect(fee.amount).toBe(TRANSFER_GAS * GAS_PRICE + DELIVERY_PRICE);
     });
 
+    // The value is either the route's destination fee or paid from a balance
+    // the amount never competes for, so charging it here would double it.
     it('should charge gas only for an erc20 source', async () => {
-      const fee = await estimateFee(0n, 0n, false);
+      const fee = await estimateFee(AMOUNT, AMOUNT, false);
 
       expect(fee.amount).toBe(TRANSFER_GAS * GAS_PRICE);
+    });
+
+    // The transfer reverts until the approve lands, so estimating it alone
+    // returned nothing at all - a zero source fee, and a max of the whole
+    // balance.
+    it('should charge the pending approve on an erc20 source', async () => {
+      const fee = await estimateFee(0n, 0n, false);
+
+      const gas = FEE_GAS.approve + FEE_GAS.transfer;
+      expect(fee.amount).toBe(gas * GAS_PRICE);
+    });
+
+    // Wallet probes the fee before anything is typed in.
+    it('should charge nothing for a zero amount', async () => {
+      const fee = await platform(0n, 0n).estimateFee(
+        ACCOUNT,
+        0n,
+        feeBalance,
+        buildConfig(false)
+      );
+
+      expect(fee.amount).toBe(0n);
     });
 
     it('should leave the sender able to cover the sequence at max', async () => {
