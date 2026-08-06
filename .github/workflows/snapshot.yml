@@ -27,10 +27,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🖊️ Bump version
-        run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
-          npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA --output release-plan.json
+        run: npm run changeset:snapshot -- --pr $PR --sha $COMMIT_SHA --output release-plan.json
         env:
           PR: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
