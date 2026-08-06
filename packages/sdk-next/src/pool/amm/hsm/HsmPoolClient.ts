@@ -1,7 +1,7 @@
 import { AccountId, CompatibilityLevel, PolkadotClient } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
@@ -11,11 +11,16 @@ import { GhoTokenLog, GhoTokenClient } from '../../../gho';
 import { XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
-import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
+import {
+  BlockRef,
+  DrivenBlock,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
 import { PoolBase, PoolFees, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
-import { StableSwapClient } from '../stable';
+import { StableSwapBase, StableSwapClient } from '../stable';
 
 import { HsmPoolBase } from './HsmPool';
 
@@ -79,15 +84,15 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     );
   }
 
-  async loadPools(): Promise<HsmPoolBase[]> {
+  async loadPools(at: BlockAt): Promise<HsmPoolBase[]> {
     const hollarId = await this.api.constants.HSM.HollarId();
 
     const [hollarLocation, collaterals, stablePools] = await Promise.all([
       this.api.query.AssetRegistry.AssetLocations.getValue(hollarId, {
-        at: this.at,
+        at,
       }),
-      this.api.query.HSM.Collaterals.getEntries({ at: this.at }),
-      this.stableClient.getPools(),
+      this.api.query.HSM.Collaterals.getEntries({ at }),
+      this.stableClient.getPools(at),
     ]);
 
     if (collaterals.length === 0) {
@@ -118,9 +123,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       const stablePool = stablePools.find((p) => p.id === pool_id);
       if (stablePool) {
         const address = this.getPoolId(pool_id);
-        const collateralBalance = await this.balance.getBalance(
+        const collateralBalance = await this.balance.getBalanceAt(
           facilitator,
-          id
+          id,
+          at
         );
 
         return {
@@ -179,6 +185,12 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         ]) {
           ids.add(io.asset);
         }
+        const affected = this.store.pools.filter((p) =>
+          ids.has(p.collateralId)
+        );
+        if (affected.length > 0) {
+          this.log.trace('collateral', { assets: [...ids] });
+        }
         return this.collateralMutations([...ids], block.hash);
       },
     };
@@ -204,6 +216,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         const facilitatorH160 = H160.fromAny(hsmAddress);
         if (facilitatorH160.toLowerCase() !== ev.facilitator) return [];
 
+        this.log.trace('capacity', { event: ev.eventName });
         const hsmMintCapacity = await this.ghoClient.getFacilitatorCapacity(
           hollarH160,
           facilitatorH160
@@ -282,43 +295,50 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   // Snapshot sync
   // =============================================================================
 
-  private subscribeStableswapUpdates(): Subscription {
-    return this.stableClient
-      .getSubscriber()
-      .pipe(this.watchGuard('stableswap.updates'))
-      .subscribe((stablePools) => {
-        const stableMap = new Map(stablePools.map((p) => [p.id, p]));
-
-        this.store.update((hsmPools) => {
-          const updated: HsmPoolBase[] = [];
-
-          for (const hsmPool of hsmPools) {
-            const stablePool = stableMap.get(hsmPool.id);
-            if (stablePool) {
-              updated.push({
-                ...hsmPool,
-                // Merge updated stableswap properties
-                fee: stablePool.fee,
-                tokens: stablePool.tokens.filter((t) => t.id !== hsmPool.id),
-                totalIssuance: stablePool.totalIssuance,
-                pegs: stablePool.pegs,
-                amplification: stablePool.amplification,
-                isRampPeriod: stablePool.isRampPeriod,
-              });
-            }
-          }
-          return updated;
-        });
-      });
+  /**
+   * Drive off the stableswap client's processed feed.
+   *
+   * - Delivers a block only after stableswap committed it, so this pool
+   *   cannot commit a block ahead of the source it derives from
+   */
+  protected blockSource(): Observable<DrivenBlock> {
+    return this.stableClient.processedBlocks();
   }
 
   /**
-   * Merge the underlying stableswap pool's coherent snapshot.
+   * Merge the stableswap pools committed at this block.
    *
-   * - Runs alongside the event driver (disjoint fields)
-   * - Keeps fee/tokens/issuance/pegs/amplification in sync
+   * - `source` belongs to the block being committed, so a stableswap trade
+   *   lands in this block's merge — never a block late
+   * - Nothing changed upstream ⇒ no mutations ⇒ no commit, no emission
+   *
+   * @param _block - the block being committed
+   * @param source - stableswap pools committed at that block
    */
-  protected subscribeUpdates(): Subscription {
-    return this.subscribeStableswapUpdates();
+  protected async tickMutations(
+    _block: BlockRef,
+    source: readonly PoolBase[] = []
+  ): Promise<PoolMutation<HsmPoolBase>[]> {
+    const stablePools = source as readonly StableSwapBase[];
+    if (stablePools.length === 0) return [];
+
+    const muts: PoolMutation<HsmPoolBase>[] = [];
+    for (const pool of this.store.pools) {
+      const stablePool = stablePools.find((s) => s.id === pool.id);
+      if (!stablePool) continue;
+      muts.push({
+        address: pool.address,
+        apply: (p) => ({
+          ...p,
+          fee: stablePool.fee,
+          tokens: stablePool.tokens.filter((t) => t.id !== p.id),
+          totalIssuance: stablePool.totalIssuance,
+          pegs: stablePool.pegs,
+          amplification: stablePool.amplification,
+          isRampPeriod: stablePool.isRampPeriod,
+        }),
+      });
+    }
+    return muts;
   }
 }

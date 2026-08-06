@@ -1,5 +1,7 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
+import { BlockAt } from '../../../api';
+
 import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import {
   PoolBase,
@@ -51,9 +53,9 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     );
   }
 
-  async loadPools(): Promise<PoolBase[]> {
+  async loadPools(at: BlockAt): Promise<PoolBase[]> {
     const [entries, limits] = await Promise.all([
-      this.api.query.XYK.PoolAssets.getEntries({ at: this.at }),
+      this.api.query.XYK.PoolAssets.getEntries({ at }),
       this.getPoolLimits(),
     ]);
 
@@ -62,10 +64,10 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       const [x, y] = value;
 
       const [xBalance, xMeta, yBalance, yMeta] = await Promise.all([
-        this.balance.getBalance(id, x),
-        this.api.query.AssetRegistry.Assets.getValue(x, { at: this.at }),
-        this.balance.getBalance(id, y),
-        this.api.query.AssetRegistry.Assets.getValue(y, { at: this.at }),
+        this.balance.getBalanceAt(id, x, at),
+        this.api.query.AssetRegistry.Assets.getValue(x, { at }),
+        this.balance.getBalanceAt(id, y, at),
+        this.api.query.AssetRegistry.Assets.getValue(y, { at }),
       ]);
 
       return {

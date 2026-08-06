@@ -30,6 +30,23 @@ export interface BlockEvents {
 }
 
 /**
+ * A block delivered to a driver, with any source pools committed at it.
+ *
+ * - From the event bus: `changed` is empty
+ * - From a source client's processed feed: the pools it committed at `block`
+ */
+export interface DrivenBlock extends BlockEvents {
+  changed: readonly PoolBase[];
+}
+
+/** A block applied to the store, with the events that drove it. */
+export interface AppliedBlock {
+  number: number;
+  hash: string;
+  touched: DecodedEvent[];
+}
+
+/**
  * A read-modify-write of a single pool.
  *
  * - Produced by a handler's `resolve`

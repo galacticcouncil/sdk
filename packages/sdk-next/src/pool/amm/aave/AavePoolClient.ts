@@ -3,6 +3,7 @@ import { toHex } from '@polkadot-api/utils';
 
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
+import { BlockAt } from '../../../api';
 import { AaveLog } from '../../../aave';
 
 import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
@@ -40,9 +41,9 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     } as PoolLimits;
   }
 
-  async loadPools(): Promise<PoolBase[]> {
+  async loadPools(at: BlockAt): Promise<PoolBase[]> {
     const entries = await this.api.apis.AaveTradeExecutor.pools({
-      at: this.at,
+      at,
     });
 
     const pools = entries.map(
@@ -50,16 +51,16 @@ export class AavePoolClient extends PoolClient<PoolBase> {
         const [reserveMeta, reserveLocation, aTokenMeta, aTokenLocation] =
           await Promise.all([
             this.api.query.AssetRegistry.Assets.getValue(reserve, {
-              at: this.at,
+              at,
             }),
             this.api.query.AssetRegistry.AssetLocations.getValue(reserve, {
-              at: this.at,
+              at,
             }),
             this.api.query.AssetRegistry.Assets.getValue(atoken, {
-              at: this.at,
+              at,
             }),
             this.api.query.AssetRegistry.AssetLocations.getValue(atoken, {
-              at: this.at,
+              at,
             }),
           ]);
 
@@ -162,6 +163,9 @@ export class AavePoolClient extends PoolClient<PoolBase> {
           const [, aToken] = pool.tokens;
           return aToken.id === assetIn || aToken.id === assetOut;
         });
+        if (pools.length > 0) {
+          this.log.trace('trade', { assetIn, assetOut, pools: pools.length });
+        }
         return this.reserveMutations(pools, block.hash);
       },
     };
@@ -185,6 +189,9 @@ export class AavePoolClient extends PoolClient<PoolBase> {
           const [reserve] = pool.tokens as AavePoolToken[];
           return this.getReserveH160Id(reserve).toLowerCase() === ev.reserve;
         });
+        if (pools.length > 0) {
+          this.log.trace(ev.eventName, { pools: pools.length });
+        }
         return this.reserveMutations(pools, block.hash);
       },
     };
@@ -200,7 +207,9 @@ export class AavePoolClient extends PoolClient<PoolBase> {
    * - Both legs are interest-bearing and drift every block
    * - Reads pinned at the block being committed
    */
-  protected reconcileBalances(block: BlockRef): Promise<PoolMutation<PoolBase>[]> {
+  protected reconcileBalances(
+    block: BlockRef
+  ): Promise<PoolMutation<PoolBase>[]> {
     return this.reserveMutations([...this.store.pools], block.hash);
   }
 

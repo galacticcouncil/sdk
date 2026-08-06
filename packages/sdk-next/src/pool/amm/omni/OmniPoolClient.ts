@@ -9,6 +9,7 @@ import { toHex } from '@polkadot-api/utils';
 
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
+import { BlockAt } from '../../../api';
 import { TEmaOracle, TEmaPair } from '../../../oracle';
 import { fmt } from '../../../utils';
 
@@ -124,7 +125,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     );
   }
 
-  protected async loadPools(): Promise<OmniPoolBase[]> {
+  protected async loadPools(at: BlockAt): Promise<OmniPoolBase[]> {
     const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
     const poolAddress = this.getPoolAddress();
 
@@ -136,12 +137,12 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       limits,
       block,
     ] = await Promise.all([
-      this.api.query.Omnipool.Assets.getEntries({ at: this.at }),
-      this.api.query.Omnipool.HubAssetTradability.getValue({ at: this.at }),
-      this.api.query.AssetRegistry.Assets.getValue(hubAssetId, { at: this.at }),
-      this.balance.getBalance(poolAddress, hubAssetId),
+      this.api.query.Omnipool.Assets.getEntries({ at }),
+      this.api.query.Omnipool.HubAssetTradability.getValue({ at }),
+      this.api.query.AssetRegistry.Assets.getValue(hubAssetId, { at }),
+      this.balance.getBalanceAt(poolAddress, hubAssetId, at),
       this.getPoolLimits(),
-      this.api.query.System.Number.getValue({ at: this.at }),
+      this.api.query.System.Number.getValue({ at }),
     ]);
 
     this.block = block;
@@ -151,8 +152,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
 
       const [meta, balance] = await Promise.all([
-        this.api.query.AssetRegistry.Assets.getValue(id, { at: this.at }),
-        this.balance.getBalance(poolAddress, id),
+        this.api.query.AssetRegistry.Assets.getValue(id, { at }),
+        this.balance.getBalanceAt(poolAddress, id, at),
       ]);
 
       return {
@@ -267,6 +268,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         ]) {
           ids.add(io.asset);
         }
+        this.log.trace('trade', { assets: [...ids] });
         return this.assetMutations([...ids], block.hash);
       },
     };
@@ -279,7 +281,10 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private syncAssetHandler(): PoolEventHandler<OmniPoolBase> {
     return {
       match: (e) => e.pallet === 'Omnipool' && ASSET_EVENTS.has(e.method),
-      resolve: (e, block) => this.assetMutations([e.data.asset_id], block.hash),
+      resolve: (e, block) => {
+        this.log.trace(e.method, { asset: e.data.asset_id });
+        return this.assetMutations([e.data.asset_id], block.hash);
+      },
     };
   }
 
@@ -348,6 +353,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         );
         if (entry) {
           this.emaOracles.set(entry, pair);
+          this.log.trace('ema', { pair });
         }
       },
     };

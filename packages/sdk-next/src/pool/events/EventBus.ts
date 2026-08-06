@@ -2,32 +2,76 @@ import { TypedApi } from 'polkadot-api';
 
 import { hydration } from '@galacticcouncil/descriptors';
 
-import { Observable, map } from 'rxjs';
+import { log } from '@galacticcouncil/common';
 
-import { BlockEvents } from './types';
+import { Observable, filter, map, share } from 'rxjs';
+
+import { BlockEvents, DecodedEvent } from './types';
+
+const { logger } = log;
 
 /**
  * The single upstream event source for pool sync.
- *
- * `System.Events` is one storage item read once per block, so a `watchValue`
- * emission carries that block's whole event vec ATOMICALLY — no cross-sub skew.
- * This is the property the event-driven sync leans on: everything in one
- * emission belongs to the same block, so a coupled multi-storage change can no
- * longer be observed torn across blocks.
  */
 export class EventBus {
-  constructor(private readonly api: TypedApi<typeof hydration>) {}
+  private static instance?: EventBus;
 
-  watchBlockEvents(): Observable<BlockEvents> {
-    return this.api.query.System.Events.watchValue({ at: 'best' }).pipe(
+  /** Multicast per-block stream */
+  private readonly blockEvents$: Observable<BlockEvents>;
+
+  /** Hash of the last delivered block, dedupes follower re-deliveries */
+  private lastHash?: string;
+
+  private constructor(private readonly api: TypedApi<typeof hydration>) {
+    this.blockEvents$ = this.api.query.System.Events.watchValue({
+      at: 'best',
+    }).pipe(
+      /**
+       * The follower re-delivers the current best after a chainHead restart;
+       * a re-delivery would double-apply handlers and pollute reorg history.
+       */
+      filter(({ block }) => {
+        if (block.hash === this.lastHash) {
+          logger.debug('event_bus redelivery :', { block: block.number });
+          return false;
+        }
+        this.lastHash = block.hash;
+        return true;
+      }),
       map(({ block, value }) => ({
         block: { hash: block.hash, number: block.number },
-        events: (value as any[]).map((r) => ({
-          pallet: r.event.type,
-          method: r.event.value.type,
-          data: r.event.value.value,
-        })),
-      }))
+        events: this.decode(value),
+      })),
+      share({ resetOnRefCountZero: false })
     );
+  }
+
+  static shared(api: TypedApi<typeof hydration>): EventBus {
+    if (!EventBus.instance) {
+      EventBus.instance = new EventBus(api);
+    }
+    return EventBus.instance;
+  }
+
+  watchBlockEvents(): Observable<BlockEvents> {
+    return this.blockEvents$;
+  }
+
+  /**
+   * Read a block's decoded events, PINNED at `at`.
+   *
+   * - Used to replay blocks the best-block watch skipped
+   */
+  async eventsAt(at: string): Promise<DecodedEvent[]> {
+    const value = await this.api.query.System.Events.getValue({ at });
+    return this.decode(value);
+  }
+
+  private decode(value: unknown): DecodedEvent[] {
+    return (value as any[]).map((r) => ({
+      pallet: r.event.type,
+      method: r.event.value.type,
+      data: r.event.value.value,
+    }));
   }
 }

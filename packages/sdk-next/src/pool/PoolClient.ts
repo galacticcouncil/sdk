@@ -1,18 +1,14 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { memoize1 } from '@thi.ng/memoize';
-import { TLRUCache } from '@thi.ng/cache';
-
 import {
   Observable,
   OperatorFunction,
   ReplaySubject,
+  Subject,
   Subscription,
   defer,
-  from,
   interval,
   merge,
-  of,
   EMPTY,
 } from 'rxjs';
 
@@ -22,6 +18,7 @@ import {
   concatMap,
   filter,
   finalize,
+  ignoreElements,
   map,
   pairwise,
   repeat,
@@ -42,7 +39,11 @@ import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
 import { PoolLog } from './PoolLog';
 import {
+  AppliedBlock,
   BlockRef,
+  ChainTracker,
+  DecodedEvent,
+  DrivenBlock,
   EventBus,
   PoolEventEffect,
   PoolEventHandler,
@@ -60,7 +61,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected log: PoolLog;
   protected store = new PoolStore<T>();
   protected queryCache = new QueryCache();
-  protected eventBus = new EventBus(this.api);
+  protected eventBus = EventBus.shared(this.api);
 
   /**
    * The block the event stream is currently committing.
@@ -71,6 +72,9 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected block = 0;
   protected blockHash?: string;
 
+  /** Blocks this client processed, with the pools it committed */
+  private processed$ = new Subject<DrivenBlock>();
+
   private reconciledAt = 0;
 
   private shared$?: Observable<T[]>;
@@ -80,14 +84,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   private resyncPending = false;
 
   private mem = 0;
-  private memPoolsCache = new TLRUCache<number, Promise<T[]>>(null, {
-    ttl: 6 * 1000,
-  });
-
-  private memPools = memoize1((mem: number) => {
-    this.log.info('pool_sync', { mem });
-    return this.loadPools();
-  }, this.memPoolsCache);
 
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
     super(client, at);
@@ -99,7 +95,16 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   abstract isSupported(): Promise<boolean>;
   abstract getPoolFees(pair: PoolPair, address: string): Promise<PoolFees>;
   abstract getPoolType(): PoolType;
-  protected abstract loadPools(): Promise<T[]>;
+
+  /**
+   * Load a full, coherent pool set PINNED at one block.
+   *
+   * - All reads use `at` so the snapshot can't tear across blocks
+   * - Drives both the initial seed and consumer `getPools`
+   *
+   * @param at - block hash (or tag) to pin every read to
+   */
+  protected abstract loadPools(at: BlockAt): Promise<T[]>;
 
   /**
    * Event handlers that produce store mutations.
@@ -126,8 +131,14 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    *
    * - e.g. amp & weight ramp, peg convergence
    * - Returned mutations commit in the same block commit as event mutations
+   *
+   * @param _block - the block being committed
+   * @param _source - source pools committed at that block, for a derived pool
    */
-  protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
+  protected async tickMutations(
+    _block: BlockRef,
+    _source: readonly PoolBase[] = []
+  ): Promise<PoolMutation<T>[]> {
     return [];
   }
 
@@ -147,15 +158,18 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
-   * Periodic re-read of erc20 reserve balances, PINNED at the block.
+   * Periodic re-read of erc20 reserve balances that accrue with no event.
    *
-   * - Catches balances that move with no event we handle: aToken interest accrual, direct transfers into a reserve
-   * - Reads every erc20 reserve at `pool.address`; commits only the balances that changed
+   * - The coherent seed + event stream keep everything else exact; only
+   *   interest-bearing (aToken) reserves drift every block without an event
+   * - Reads every erc20 reserve at `pool.address`; commits only what changed
    * - Overridden where reserves live off-pool or are read via an executor
    *
    * @param block - the block being committed; reads pin at `block.hash`
    */
-  protected async reconcileBalances(block: BlockRef): Promise<PoolMutation<T>[]> {
+  protected async reconcileBalances(
+    block: BlockRef
+  ): Promise<PoolMutation<T>[]> {
     const muts: PoolMutation<T>[] = [];
 
     for (const pool of this.store.pools) {
@@ -191,12 +205,16 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     return muts;
   }
 
-  private async getMemPools(): Promise<T[]> {
-    return this.memPools(this.mem);
-  }
-
-  async getPools(): Promise<T[]> {
-    const pools = await this.getMemPools();
+  /**
+   * Load and publish a coherent pool set PINNED at `at`.
+   *
+   * - Defaults to `this.at` (a fixed block for consumer-created clients)
+   * - Seeds the store; used ad-hoc by consumers and by derived clients
+   *
+   * @param at - block hash (or tag) to pin every read to
+   */
+  async getPools(at: BlockAt = this.at): Promise<T[]> {
+    const pools = await this.loadPools(at);
     const valid = pools.filter((p) => this.hasValidAssets(p));
     this.store.set(valid);
     return valid;
@@ -215,11 +233,37 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
         return this.store.applyChangeset(curr);
       }),
       filter((arr) => arr.length > 0)
-      /**
-       * Rate-limit consumer emissions to ~1s, but first immediately
-       */
-      //throttleTime(1_000, undefined, { leading: true, trailing: true })
     );
+  }
+
+  /**
+   * Per-block feed this client drives off.
+   *
+   * - Default: the shared `System.Events` stream, carrying no source pools
+   * - A derived client overrides it with its source's processed feed, so it
+   *   receives a block only after the source committed it
+   */
+  protected blockSource(): Observable<DrivenBlock> {
+    return this.eventBus
+      .watchBlockEvents()
+      .pipe(map((e) => ({ ...e, changed: [] })));
+  }
+
+  /**
+   * Processed-block feed for a derived client.
+   *
+   * - Delivers a block only after this client committed it, carrying what it
+   *   committed — so a derived pool folds source state belonging to THAT
+   *   block, not whatever the source holds by the time it looks
+   * - Ref-counts this client's sync cycle without consuming pool emissions
+   */
+  processedBlocks(): Observable<DrivenBlock> {
+    return defer(() => {
+      if (!this.shared$) {
+        this.shared$ = this.subscribeStore();
+      }
+      return merge(this.shared$.pipe(ignoreElements()), this.processed$);
+    });
   }
 
   private subscribeStore(): Observable<T[]> {
@@ -233,54 +277,19 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
         switchMap(() => {
           const cycle = new Subscription();
 
-          const seed$ = from(
-            withTimeout(this.getMemPools(), 60_000, 'getMemPools stalled')
-          ).pipe(
-            tap(() => this.log.info('pool_synced', { mem: this.mem })),
-            map((pools) => pools.filter((p) => this.hasValidAssets(p))),
-            tap((valid) => this.store.set(valid)),
-            catchError(() => {
-              this.log.error('pool_seed_error', { mem: this.mem });
-              this.requestResync();
-              return EMPTY;
-            })
-          );
+          /**
+           * ONE stream seeds AND drives. Its first block pins the seed, the
+           * rest commit per-block ({@link subscribeEvents}).
+           */
+          cycle.add(this.subscribeEvents());
 
-          return seed$.pipe(
-            /**
-             * After store initialized, attach live writers (fire and forget).
-             *
-             * ONE event-driven writer. One commit per block covering:
-             *  - effects
-             *  - event mutations
-             *  - per-block tick
-             *
-             * Supplementary reactive writer ({@link subscribeUpdates})
-             */
-            tap(() => {
-              cycle.add(
-                this.subscribeEvents(this.syncHandlers(), this.syncEffects())
-              );
-              cycle.add(this.subscribeUpdates());
-            }),
-
-            /**
-             * Emit the fresh seed immediately, then continue with the store
-             * stream, but drop the subject replay (possible stale state)
-             *
-             * This ensures:
-             *  - first subscription gets the fresh seed
-             *  - re-subscriptions also get a fresh seed (ref-count 0)
-             */
-            switchMap((valid) =>
-              merge(of(valid), this.store.asObservable().pipe(skip(1)))
-            ),
-            finalize(() => {
-              /**
-               * Kill internal wiring if no subscription active
-               */
-              cycle.unsubscribe();
-            })
+          /**
+           * Drop the BehaviorSubject replay (stale prior-cycle state); the
+           * first real emission is the fresh pinned seed set by the driver.
+           */
+          return this.store.asObservable().pipe(
+            skip(1),
+            finalize(() => cycle.unsubscribe())
           );
         }),
         finalize(() => session.unsubscribe())
@@ -302,78 +311,228 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
-   * Drives pool sync from `System.Events`, one commit per block.
+   * Seeds AND drives pool sync from a single `System.Events` stream.
    *
-   * - Advance `this.block` to the block being committed
-   * - Run matching `effects` (cache/param refreshes) first
-   * - Resolve matching `handlers` into mutations, reading slices PINNED at `block.hash`
-   * - Append the per-block `tickMutations`
-   * - Commit them all in one `store.update`
-   * - `concatMap` serializes blocks, so commits stay in block order
+   * - The stream's FIRST block pins the seed: `loadPools(block.hash)` is one
+   *   coherent snapshot; its own events aren't re-applied
+   * - Each later block commits effects + handlers + tick in one `update`
+   * - `at:'best'` delivers the latest best (not every block) on a fork-prone
+   *   chain; the {@link ChainTracker} classifies each block into a gap to
+   *   backfill or a reorg whose window is re-derived at the new tip
    */
-  protected subscribeEvents(
-    handlers: PoolEventHandler<T>[],
-    effects: PoolEventEffect[]
-  ): Subscription {
-    return this.eventBus
-      .watchBlockEvents()
+  protected subscribeEvents(): Subscription {
+    let seeded = false;
+    let handlers: PoolEventHandler<T>[] = [];
+    let effects: PoolEventEffect[] = [];
+
+    const chain = new ChainTracker(this.client);
+
+    /**
+     * Resolve one block's mutations: effects + handlers + tick.
+     *
+     * - Reads slices PINNED at `block.hash`
+     * - Runs effects in order (they refresh the caches the tick reads)
+     * - Returns the muts plus the events that drove it (kept for reorg replay);
+     *   the caller commits the whole window in one `update`
+     */
+    const resolve = async (
+      block: BlockRef,
+      events: DecodedEvent[],
+      source: readonly PoolBase[] = []
+    ): Promise<{ muts: PoolMutation<T>[]; touched: DecodedEvent[] }> => {
+      const touched: DecodedEvent[] = [];
+      const effectsRes: Promise<void>[] = [];
+      const handlersRes: Promise<PoolMutation<T>[]>[] = [];
+
+      for (const e of events) {
+        let hit = false;
+        for (const x of effects) {
+          if (x.match(e)) {
+            effectsRes.push(x.apply(e, block));
+            hit = true;
+          }
+        }
+        for (const h of handlers) {
+          if (h.match(e)) {
+            handlersRes.push(h.resolve(e, block));
+            hit = true;
+          }
+        }
+        if (hit) touched.push(e);
+      }
+
+      await Promise.all(effectsRes);
+      const eventMuts = (await Promise.all(handlersRes)).flat();
+      const tickMuts = await this.tickMutations(block, source);
+      const balanceMuts = await this.balanceMutations(block);
+
+      return { muts: [...eventMuts, ...tickMuts, ...balanceMuts], touched };
+    };
+
+    /**
+     * Re-derive `events` at `block`: effects, then handlers.
+     *
+     * - Effects refresh the caches the tick reads (oracles, pegs) at `block`
+     * - Handlers re-read the touched assets at `block`
+     */
+    const reread = async (
+      events: DecodedEvent[],
+      block: BlockRef
+    ): Promise<PoolMutation<T>[]> => {
+      const effectsRes: Promise<void>[] = [];
+      for (const e of events) {
+        for (const x of effects) {
+          if (x.match(e)) effectsRes.push(x.apply(e, block));
+        }
+      }
+      await Promise.all(effectsRes);
+
+      const handlersRes: Promise<PoolMutation<T>[]>[] = [];
+      for (const e of events) {
+        for (const h of handlers) {
+          if (h.match(e)) handlersRes.push(h.resolve(e, block));
+        }
+      }
+      return (await Promise.all(handlersRes)).flat();
+    };
+
+    return this.blockSource()
       .pipe(
-        concatMap(async ({ block, events }) => {
-          this.block = block.number;
-          this.blockHash = block.hash;
-
-          const matched: string[] = [];
-          const effectsRes: Promise<void>[] = [];
-          const handlersRes: Promise<PoolMutation<T>[]>[] = [];
-
-          for (const e of events) {
-            const kind = `${e.pallet}.${e.method}`;
-            for (const x of effects) {
-              if (x.match(e)) {
-                matched.push(kind);
-                effectsRes.push(x.apply(e, block));
-              }
+        concatMap(async ({ block, events, changed }) => {
+          if (!seeded) {
+            try {
+              const pools = await withTimeout(
+                this.loadPools(block.hash),
+                60_000,
+                'seed stalled'
+              );
+              this.block = block.number;
+              this.blockHash = block.hash;
+              this.store.set(pools.filter((p) => this.hasValidAssets(p)));
+              /**
+               * Build after seed so handlers/effects see a populated store.
+               */
+              handlers = this.syncHandlers();
+              effects = this.syncEffects();
+              seeded = true;
+              chain.seed(block);
+              /**
+               * Forward the seed block so a derived client seeds at the same
+               * block; its own pinned seed covers the source state.
+               */
+              this.processed$.next({ block, events, changed: [] });
+              this.log.info('pool_synced', {
+                mem: this.mem,
+                block: block.number,
+              });
+            } catch {
+              this.log.error('pool_seed_error', { mem: this.mem });
+              this.requestResync();
             }
-            for (const h of handlers) {
-              if (h.match(e)) {
-                matched.push(kind);
-                handlersRes.push(h.resolve(e, block));
-              }
-            }
+            return;
           }
 
-          await Promise.all(effectsRes);
-          const eventMuts = (await Promise.all(handlersRes)).flat();
-          const tickMuts = await this.tickMutations(block);
-          const balanceMuts = await this.balanceMutations(block);
-          const muts = [...eventMuts, ...tickMuts, ...balanceMuts];
+          /**
+           * Classify against what we've applied: a forward gap to backfill, or
+           * a reorg where the tip we applied is no longer on chain.
+           */
+          const { missed, reorg } = await chain.classify(block);
 
-          if (matched.length > 0) {
-            this.log.trace('sync', {
-              block: block.number,
-              events: matched,
-              muts: muts.length,
+          const muts: PoolMutation<T>[] = [];
+
+          /**
+           * Canonical blocks between our tip and this one, replayed in order and
+           * committed together (each read pinned at its own block).
+           *
+           * - Remembered only after the reorg heal, so the heal classifies
+           *   against the history that was actually applied
+           */
+          const backfilled: AppliedBlock[] = [];
+          for (const m of missed) {
+            const { muts: mm, touched } = await resolve(
+              m,
+              await this.eventBus.eventsAt(m.hash)
+            );
+            muts.push(...mm);
+            backfilled.push({ number: m.number, hash: m.hash, touched });
+          }
+
+          /**
+           * Heal the reorg at the new tip.
+           *
+           * - Replay BOTH sides of the fork: events applied on the orphaned
+           *   suffix AND events of the canonical blocks that displaced it,
+           *   which this driver never saw
+           * - Handlers re-read absolute state at the tip, so one pass heals
+           *   fork residue and applies the displaced blocks
+           * - Repair the ring: drop orphaned entries, splice in the canonical
+           *   replacements, so a later reorg can't replay stale residue
+           */
+          if (reorg) {
+            const { orphaned, canonical } = await chain.split(block);
+
+            const replaced: AppliedBlock[] = [];
+            for (const c of canonical) {
+              const events = await this.eventBus.eventsAt(c.hash);
+              const touched = events.filter(
+                (e) =>
+                  effects.some((x) => x.match(e)) ||
+                  handlers.some((h) => h.match(e))
+              );
+              replaced.push({ number: c.number, hash: c.hash, touched });
+            }
+
+            const union = [
+              ...orphaned.flatMap((b) => b.touched),
+              ...replaced.flatMap((b) => b.touched),
+            ];
+            const healed = await reread(union, block);
+            this.log.debug('reorg', {
+              at: block.number,
+              depth: orphaned.length,
+              canon: replaced.length,
+              replayed: union.length,
+              muts: healed.length,
+              blocks: orphaned.map((b) => b.number).sort((a, b) => a - b),
             });
+            muts.push(...healed);
+
+            chain.repair(orphaned, replaced);
           }
 
-          return { muts };
+          const { muts: cur, touched } = await resolve(block, events, changed);
+          muts.push(...cur);
+
+          /**
+           * Commit the window in one update; advance the cursor INSIDE it so
+           * `this.block`/`this.blockHash` stay coherent with the emission.
+           *
+           * - Commit on a reorg even with no muts, so the cursor leaves the
+           *   orphaned hash (an empty changeset emits nothing downstream)
+           * - Forward the block once committed, carrying the pools it changed
+           */
+          if (muts.length > 0 || reorg) {
+            this.store.update((state) => {
+              this.block = block.number;
+              this.blockHash = block.hash;
+              const updated = this.applyMutations(state, muts);
+              this.processed$.next({ block, events, changed: updated });
+              return updated;
+            });
+          } else {
+            /**
+             * Processed with nothing to commit — a derived client still needs
+             * the block to apply its OWN events.
+             */
+            this.processed$.next({ block, events, changed: [] });
+          }
+
+          for (const b of backfilled) chain.remember(b);
+          chain.apply(block, touched);
         }),
-        filter(({ muts }) => muts.length > 0),
         this.watchGuard('events')
       )
-      .subscribe(({ muts }) => {
-        this.store.update((state) => this.applyMutations(state, muts));
-      });
-  }
-
-  /**
-   * Supplementary reactive writer, run alongside the event driver.
-   *
-   * - For a derived pool merging a sibling's coherent snapshot (HSM ← Stableswap)
-   * - Writes disjoint fields, so it can't tear against the driver's commits
-   */
-  protected subscribeUpdates(): Subscription {
-    return Subscription.EMPTY;
+      .subscribe();
   }
 
   /**

@@ -1,5 +1,7 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
+import { BlockAt } from '../../../api';
+
 import {
   BlockRef,
   PoolEventEffect,
@@ -71,10 +73,10 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     );
   }
 
-  protected async loadPools(): Promise<LbpPoolBase[]> {
+  protected async loadPools(at: BlockAt): Promise<LbpPoolBase[]> {
     const [entries, validationData, limits] = await Promise.all([
-      this.api.query.LBP.PoolData.getEntries({ at: this.at }),
-      this.api.query.ParachainSystem.ValidationData.getValue({ at: this.at }),
+      this.api.query.LBP.PoolData.getEntries({ at }),
+      this.api.query.ParachainSystem.ValidationData.getValue({ at }),
       this.getPoolLimits(),
     ]);
 
@@ -90,7 +92,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         const poolDelta = await this.getPoolDelta(
           poolAddress,
           value,
-          relayParentNumber
+          relayParentNumber,
+          at
         );
 
         this.poolsData.set(poolAddress, value);
@@ -108,7 +111,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   private async getPoolDelta(
     poolAddress: string,
     poolEntry: TLbpPoolData,
-    relayBlockNumber: number
+    relayBlockNumber: number,
+    at: BlockAt
   ): Promise<Partial<LbpPoolBase>> {
     const { assets, repay_target, fee_collector } = poolEntry;
     const [accumulatedWeight, distributedWeight] = this.getPoolWeights(
@@ -128,15 +132,15 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         accumulated,
         repay_target,
         fee_collector.toString(),
-        this.at
+        at
       ),
-      this.balance.getBalance(poolAddress, accumulated),
+      this.balance.getBalanceAt(poolAddress, accumulated, at),
       this.api.query.AssetRegistry.Assets.getValue(accumulated, {
-        at: this.at,
+        at,
       }),
-      this.balance.getBalance(poolAddress, distributed),
+      this.balance.getBalanceAt(poolAddress, distributed, at),
       this.api.query.AssetRegistry.Assets.getValue(distributed, {
-        at: this.at,
+        at,
       }),
     ]);
 

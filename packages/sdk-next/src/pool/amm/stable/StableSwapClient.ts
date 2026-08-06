@@ -8,6 +8,7 @@ import {
   RUNTIME_DECIMALS,
 } from '@galacticcouncil/common';
 
+import { BlockAt } from '../../../api';
 import { TRADEABLE_DEFAULT } from '../../../consts';
 import {
   MmOracleLog,
@@ -130,16 +131,17 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   private async getPoolTokens(
     poolId: number,
-    poolInfo: TStableswap
+    poolInfo: TStableswap,
+    at: BlockAt
   ): Promise<PoolToken[]> {
     const poolAddress = this.getPoolAddress(poolId);
     const poolTokens = poolInfo.assets.map(async (id) => {
       const [tradeability, meta, balance] = await Promise.all([
         this.api.query.Stableswap.AssetTradability.getValue(poolId, id, {
-          at: this.at,
+          at,
         }),
-        this.api.query.AssetRegistry.Assets.getValue(id, { at: this.at }),
-        this.balance.getBalance(poolAddress, id),
+        this.api.query.AssetRegistry.Assets.getValue(id, { at }),
+        this.balance.getBalanceAt(poolAddress, id, at),
       ]);
 
       return {
@@ -202,11 +204,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     );
   }
 
-  protected async loadPools(): Promise<StableSwapBase[]> {
+  protected async loadPools(at: BlockAt): Promise<StableSwapBase[]> {
     const [pools, pegs, block, poolLimits] = await Promise.all([
-      this.api.query.Stableswap.Pools.getEntries({ at: this.at }),
-      this.api.query.Stableswap.PoolPegs.getEntries({ at: this.at }),
-      this.api.query.System.Number.getValue({ at: this.at }),
+      this.api.query.Stableswap.Pools.getEntries({ at }),
+      this.api.query.Stableswap.PoolPegs.getEntries({ at }),
+      this.api.query.System.Number.getValue({ at }),
       this.getPoolLimits(),
     ]);
 
@@ -221,10 +223,10 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       const [id] = keyArgs;
       const address = this.getPoolAddress(id);
       const [tokens, amplification, pegs, issuance] = await Promise.all([
-        this.getPoolTokens(id, value),
+        this.getPoolTokens(id, value, at),
         this.getPoolAmplification(value, block),
-        this.getPoolPegs(id, value, block, this.at),
-        this.api.query.Tokens.TotalIssuance.getValue(id, { at: this.at }),
+        this.getPoolPegs(id, value, block, at),
+        this.api.query.Tokens.TotalIssuance.getValue(id, { at }),
       ]);
 
       // add virtual share (routing)
@@ -365,6 +367,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         ]) {
           ids.add(io.asset);
         }
+        this.log.trace('trade', { pool: poolId, assets: [...ids] });
         return this.reserveMutations(poolId, [...ids], block.hash, false);
       },
     };
@@ -387,6 +390,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           asset_id: number;
         }[];
         const ids = legs.map((a) => a.asset_id);
+        this.log.trace('liquidity', { pool: poolId, assets: ids });
         return this.reserveMutations(poolId, ids, block.hash, true);
       },
     };
@@ -563,6 +567,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           .filter((p) => this.emaKeys.has(emaKey(name, pair, p)));
 
         if (!periods.length) return;
+        this.log.trace('ema', {
+          oracle: name,
+          pair,
+          periods: periods.map((p) => p.type),
+        });
 
         const keys = periods.map(
           (p) => [name, pair, p] as [TEmaName, TEmaPair, TEmaPeriod]
@@ -638,6 +647,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         if (target) {
           const data = await this.mmOracle.getData(target);
           this.mmOracles.set(data, target);
+          this.log.trace('mm', { event: ev.eventName, target });
         }
       },
     };

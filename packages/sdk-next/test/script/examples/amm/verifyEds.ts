@@ -6,7 +6,7 @@ import { PapiExecutor } from '../../PapiExecutor';
 import { ApiUrl } from '../../types';
 
 import { EvmClient } from '../../../../src/evm';
-import { omni, stable, PoolBase } from '../../../../src/pool';
+import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../../src/pool';
 
 const DURATION_MS = 20 * 60 * 1000;
 
@@ -19,17 +19,23 @@ const DRIFT_PPM = 100n; // 0.01%
 const isInt = (s: string | undefined): s is string => !!s && /^-?\d+$/.test(s);
 
 // Flattened keys whose per-block convergence is expected drift, not a mismatch.
+// aToken balances accrue every block: pool reserves (`*.balance`) and the HSM
+// collateral held at the facilitator (`collateralBalance`).
 const isDriftField = (k: string): boolean =>
-  k.endsWith('.balance') || k.startsWith('pegs.');
+  k.endsWith('.balance') || k === 'collateralBalance' || k.startsWith('pegs.');
 
 const { OmniPoolClient } = omni;
 const { StableSwapClient } = stable;
+const { XykPoolClient } = xyk;
+const { AavePoolClient } = aave;
+const { HsmPoolClient } = hsm;
 
 /**
- * Test probes exposing the committed block cursor.
+ * Test probes exposing the committed block cursor and store.
  *
- * - `blockNo` / `hash` are coherent with a `getSubscriber` emission (the
- *   driver commits and emits synchronously before advancing to the next block)
+ * - `blockNo` / `hash` / `pools` are coherent with a `getSubscriber` emission
+ *   (the driver commits and emits synchronously before advancing)
+ * - `pools` reads the FULL committed set; emissions carry only the changeset
  */
 class OmniProbe extends OmniPoolClient {
   blockNo() {
@@ -37,6 +43,9 @@ class OmniProbe extends OmniPoolClient {
   }
   hash() {
     return this.blockHash;
+  }
+  pools() {
+    return this.store.pools;
   }
 }
 
@@ -46,6 +55,45 @@ class StableProbe extends StableSwapClient {
   }
   hash() {
     return this.blockHash;
+  }
+  pools() {
+    return this.store.pools;
+  }
+}
+
+class XykProbe extends XykPoolClient {
+  blockNo() {
+    return this.block;
+  }
+  hash() {
+    return this.blockHash;
+  }
+  pools() {
+    return this.store.pools;
+  }
+}
+
+class AaveProbe extends AavePoolClient {
+  blockNo() {
+    return this.block;
+  }
+  hash() {
+    return this.blockHash;
+  }
+  pools() {
+    return this.store.pools;
+  }
+}
+
+class HsmProbe extends HsmPoolClient {
+  blockNo() {
+    return this.block;
+  }
+  hash() {
+    return this.blockHash;
+  }
+  pools() {
+    return this.store.pools;
   }
 }
 
@@ -143,14 +191,17 @@ type Stats = {
   skip: number;
 };
 
+const newStats = (): Stats => ({ checks: 0, ok: 0, bad: 0, drift: 0, skip: 0 });
+
 const tally = (s: Stats) =>
   `ok=${s.ok} bad=${s.bad} drift=${s.drift} skip=${s.skip}`;
 
 /**
  * Differential-check one pool client.
  *
- * - Subscribe to the consumer API; each emission is a full, committed snapshot
- * - Reload the same block on a pinned client and compare
+ * - Subscribe to the consumer API; each emission signals a commit
+ * - Diff the FULL committed store (emissions carry only the changeset)
+ *   against a reload of the same block on a pinned client
  * - Log block + running stats; print field diffs only on mismatch
  */
 const verify = <T extends PoolBase>(
@@ -158,19 +209,21 @@ const verify = <T extends PoolBase>(
   subscriber$: () => Observable<T[]>,
   blockNo: () => number,
   hash: () => string | undefined,
-  ref: (at: string) => { getPools(): Promise<PoolBase[]> },
+  livePools: () => readonly T[],
+  ref: { getPools(at: string): Promise<PoolBase[]> },
   stats: Stats
 ): Subscription => {
   let busy = false;
-  return subscriber$().subscribe((snapshot) => {
+  return subscriber$().subscribe(() => {
     const at = hash();
     const no = blockNo();
     if (!at || busy) return; // seed emission, or a check still in flight
     busy = true;
 
-    ref(at)
-      .getPools()
-      .then((actual) => {
+    const snapshot = [...livePools()];
+    ref
+      .getPools(at)
+      .then(async (actual) => {
         stats.checks++;
         const { pools, drift } = diff(snapshot, actual);
         stats.drift += drift;
@@ -200,11 +253,32 @@ const verify = <T extends PoolBase>(
 
 class VerifyEds extends PapiExecutor {
   async script(client: PolkadotClient, evm: EvmClient) {
-    const omniStats: Stats = { checks: 0, ok: 0, bad: 0, drift: 0, skip: 0 };
-    const stableStats: Stats = { checks: 0, ok: 0, bad: 0, drift: 0, skip: 0 };
+    const stats = {
+      omni: newStats(),
+      stable: newStats(),
+      xyk: newStats(),
+      aave: newStats(),
+      hsm: newStats(),
+    };
 
     const omniLive = new OmniProbe(client, evm);
     const stableLive = new StableProbe(client, evm);
+    const xykLive = new XykProbe(client, evm);
+    const aaveLive = new AaveProbe(client, evm);
+    const hsmLive = new HsmProbe(client, evm, stableLive);
+
+    /**
+     * Pinned reference loaders — every check reloads via `getPools(at)`.
+     *
+     * - Deliberately NOT the live probes: `getPools` writes the store and
+     *   cursor, so sharing an instance would diff the store against itself
+     * - HSM shares the stableswap ref instance
+     */
+    const omniRef = new OmniPoolClient(client, evm);
+    const stableRef = new StableSwapClient(client, evm);
+    const xykRef = new XykPoolClient(client, evm);
+    const aaveRef = new AavePoolClient(client, evm);
+    const hsmRef = new HsmPoolClient(client, evm, stableRef);
 
     const session = new Subscription();
     session.add(
@@ -213,8 +287,9 @@ class VerifyEds extends PapiExecutor {
         () => omniLive.getSubscriber(),
         () => omniLive.blockNo(),
         () => omniLive.hash(),
-        (at) => new OmniPoolClient(client, evm, at),
-        omniStats
+        () => omniLive.pools(),
+        omniRef,
+        stats.omni
       )
     );
     session.add(
@@ -223,8 +298,42 @@ class VerifyEds extends PapiExecutor {
         () => stableLive.getSubscriber(),
         () => stableLive.blockNo(),
         () => stableLive.hash(),
-        (at) => new StableSwapClient(client, evm, at),
-        stableStats
+        () => stableLive.pools(),
+        stableRef,
+        stats.stable
+      )
+    );
+    session.add(
+      verify(
+        'XYK ',
+        () => xykLive.getSubscriber(),
+        () => xykLive.blockNo(),
+        () => xykLive.hash(),
+        () => xykLive.pools(),
+        xykRef,
+        stats.xyk
+      )
+    );
+    session.add(
+      verify(
+        'AAVE',
+        () => aaveLive.getSubscriber(),
+        () => aaveLive.blockNo(),
+        () => aaveLive.hash(),
+        () => aaveLive.pools(),
+        aaveRef,
+        stats.aave
+      )
+    );
+    session.add(
+      verify(
+        'HSM ',
+        () => hsmLive.getSubscriber(),
+        () => hsmLive.blockNo(),
+        () => hsmLive.hash(),
+        () => hsmLive.pools(),
+        hsmRef,
+        stats.hsm
       )
     );
 
@@ -232,7 +341,7 @@ class VerifyEds extends PapiExecutor {
     await new Promise((resolve) => setTimeout(resolve, DURATION_MS));
 
     session.unsubscribe();
-    return { omni: omniStats, stable: stableStats };
+    return stats;
   }
 }
 
