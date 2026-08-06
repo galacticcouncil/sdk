@@ -110,8 +110,24 @@ export class EvmPlatform implements Platform<ContractConfig> {
       },
     } as EvmCall;
 
+    // Runs on the same origin right after the transfer, so it needs no
+    // prerequisites of its own - it spends native value, never the token.
+    const followCall = config.follow
+      ? ({
+          abi: JSON.stringify(config.follow.abi),
+          data: EvmTransferFactory.get(this.#client, config.follow)
+            .calldata as `0x${string}`,
+          from: account as `0x${string}`,
+          to: config.follow.address as `0x${string}`,
+          type: CallType.Evm,
+          value: config.follow.value,
+          dryRun: () => {},
+        } as EvmCall)
+      : undefined;
+    const trailing = followCall ? [transferCall, followCall] : [transferCall];
+
     if (isPrecompile(config) || isNativeEthBridge(config)) {
-      return [transferCall];
+      return trailing;
     }
 
     const prerequisites = await this.getPrerequisites(
@@ -135,7 +151,7 @@ export class EvmPlatform implements Platform<ContractConfig> {
         }) as EvmCall
     );
 
-    return [...calls, transferCall];
+    return [...calls, ...trailing];
   }
 
   /**
@@ -210,8 +226,20 @@ export class EvmPlatform implements Platform<ContractConfig> {
       gas: Gas.transfer,
     };
 
+    const trailing = config.follow
+      ? [
+          transferCall,
+          {
+            to: config.follow.address,
+            data: EvmTransferFactory.get(this.#client, config.follow).calldata,
+            value: config.follow.value,
+            gas: Gas.transfer,
+          },
+        ]
+      : [transferCall];
+
     if (isPrecompile(config) || isNativeEthBridge(config)) {
-      return substrateEvm.buildCall(account, [transferCall]);
+      return substrateEvm.buildCall(account, trailing, config.prior);
     }
 
     const source = await chain.getDerivatedAddress(account);
@@ -222,7 +250,11 @@ export class EvmPlatform implements Platform<ContractConfig> {
       asset
     );
 
-    return substrateEvm.buildCall(account, [...prerequisites, transferCall]);
+    return substrateEvm.buildCall(
+      account,
+      [...prerequisites, ...trailing],
+      config.prior
+    );
   }
 
   /**
@@ -236,7 +268,13 @@ export class EvmPlatform implements Platform<ContractConfig> {
    *
    * For an erc20 source the value stays out: it is either reported as the
    * route's destination fee (snowbridge) or drawn from a balance the amount
-   * doesn't compete for.
+   * doesn't compete for. Its prerequisites are charged for all the same -
+   * the approve is a transaction the sender signs and pays gas on.
+   *
+   * Which configs have prerequisites is decided exactly as {@link buildCalls}
+   * decides it. Estimating the transfer alone instead left an erc20 source
+   * reporting no fee at all: the transfer reverts until the approve lands,
+   * and an unmeasurable fee falls back to zero.
    */
   async estimateFee(
     account: string,
@@ -246,7 +284,12 @@ export class EvmPlatform implements Platform<ContractConfig> {
   ): Promise<AssetAmount> {
     const contract = EvmTransferFactory.get(this.#client, config);
 
-    if (!config.wrapNative) {
+    // Nothing is being sent yet, so there is nothing to charge for.
+    if (amount === 0n) {
+      return feeBalance.copyWith({ amount: 0n });
+    }
+
+    if (isPrecompile(config) || isNativeEthBridge(config)) {
       const fee = await contract.estimateFee(account, amount);
       return feeBalance.copyWith({
         amount: fee,
@@ -274,7 +317,7 @@ export class EvmPlatform implements Platform<ContractConfig> {
     );
 
     return feeBalance.copyWith({
-      amount: gas * gasPrice + (config.value ?? 0n),
+      amount: gas * gasPrice + (config.wrapNative ? (config.value ?? 0n) : 0n),
     });
   }
 }

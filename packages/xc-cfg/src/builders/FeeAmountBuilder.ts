@@ -1,12 +1,15 @@
 import {
   Abi,
+  AnyEvmChain,
   AnyParachain,
   EvmChain,
   FeeAmount,
   FeeAmountConfigBuilder,
+  Ntt,
   Parachain,
   Snowbridge as Sb,
   Basejump as Bj,
+  Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -34,7 +37,13 @@ import {
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
 } from '../bridges/snowbridge';
-import { BaseClient, AssethubClient, HydrationClient } from '../clients';
+import { executorBudget, NTT_DEFAULT_INSTRUCTIONS } from '../bridges/wormhole';
+import {
+  BaseClient,
+  AssethubClient,
+  ExecutorClient,
+  HydrationClient,
+} from '../clients';
 
 type SendFeeOpts = {
   hub: Parachain;
@@ -354,6 +363,65 @@ function XcmPaymentApi() {
   };
 }
 
+function Wormhole() {
+  return {
+    /**
+     * Native gas an executor-delivered NTT transfer pays on top of itself -
+     * the wormhole delivery price plus what the Executor charges to redeem
+     * on the far side.
+     *
+     * Declared as the route's destination fee because an erc20 source pays it
+     * out of a balance the amount never competes for, so
+     * {@link EvmPlatform.estimateFee} deliberately leaves the call value out.
+     * A native gas source must NOT use this - there the value is already part
+     * of the source fee, and charging it twice inflates the route minimum.
+     */
+    quoteExecutorCost: (): FeeAmountConfigBuilder => ({
+      build: async ({
+        address,
+        destinationAsset,
+        transferAsset,
+        source,
+        destination,
+      }) => {
+        const ctx = source as AnyEvmChain;
+
+        const ntt = Ntt.fromChain(ctx, transferAsset);
+        const ctxWh = Wh.fromChain(ctx);
+        const rcvWh = Wh.fromChain(destination);
+
+        const budget = await executorBudget({
+          destination: destination,
+          asset: destinationAsset,
+          recipient: address,
+        });
+
+        const [deliveryPrice, quote] = await Promise.all([
+          ctx.evmClient.getProvider().readContract({
+            abi: Abi.NttManager,
+            address: ntt.manager as `0x${string}`,
+            args: [rcvWh.getWormholeId(), NTT_DEFAULT_INSTRUCTIONS],
+            functionName: 'quoteDeliveryPrice',
+          }) as Promise<[bigint[], bigint]>,
+          new ExecutorClient().quote(
+            ctxWh.getWormholeId(),
+            rcvWh.getWormholeId(),
+            budget
+          ),
+        ]);
+
+        return {
+          amount: deliveryPrice[1] + quote.estimatedCost,
+          breakdown: {
+            deliveryPrice: deliveryPrice[1],
+            executorCost: quote.estimatedCost,
+          },
+        } as FeeAmount;
+      },
+    }),
+  };
+}
+
 function Basejump() {
   return {
     quoteFee: (): FeeAmountConfigBuilder => ({
@@ -380,5 +448,6 @@ export function FeeAmountBuilder() {
     Basejump,
     XcmPaymentApi,
     Snowbridge,
+    Wormhole,
   };
 }

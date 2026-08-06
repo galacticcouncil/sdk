@@ -1,4 +1,8 @@
-import { CallType, EvmParachain } from '@galacticcouncil/xc-core';
+import {
+  CallType,
+  EvmParachain,
+  ExtrinsicConfig,
+} from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
 
@@ -54,13 +58,23 @@ export class SubstrateEvm {
     return new SubstrateEvm(substrate, chain);
   }
 
-  async buildCall(from: string, calls: EvmCallData[]): Promise<SubstrateCall> {
+  /**
+   * @param prior - extrinsic to run before the evm calls, batched with them.
+   * Funds the calls that follow (an `EVM.call` value is charged in the evm
+   * gas token, which the sender may only hold after a swap), so it has to
+   * lead the batch.
+   */
+  async buildCall(
+    from: string,
+    calls: EvmCallData[],
+    prior?: ExtrinsicConfig
+  ): Promise<SubstrateCall> {
     const source = await this.#chain.getDerivatedAddress(from);
     const gasPrice = await this.#chain.evmClient.getProvider().getGasPrice();
     const maxFeePerGas = gasPrice + gasPrice / 10n;
 
     const api = this.#substrate.client.getUnsafeApi();
-    const txs = calls.map((call) =>
+    const evmTxs = calls.map((call) =>
       api.tx.EVM.call({
         source: source,
         target: call.to,
@@ -77,6 +91,10 @@ export class SubstrateEvm {
       })
     );
 
+    const txs = prior
+      ? [prior.getTx(this.#substrate.client), ...evmTxs]
+      : evmTxs;
+
     const tx =
       txs.length === 1
         ? txs[0]
@@ -84,7 +102,7 @@ export class SubstrateEvm {
             calls: txs.map((t) => t.decodedCall),
           });
 
-    const callName = calls.length === 1 ? 'EVM.call' : 'Utility.batch_all';
+    const callName = txs.length === 1 ? 'EVM.call' : 'Utility.batch_all';
     const callData = await tx.getEncodedData();
 
     return {

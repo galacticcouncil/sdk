@@ -1284,6 +1284,7 @@ export const hydration = new EvmParachain({
     id: 73,
     coreBridge: '0x3792a6d63c31941B2805181771795D9176fA82A1',
     executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
+    nttExecutor: '0xd3Dda7c8608Ea251C42c6E0A2A686aDc5e9C0C03',
     // Burning managers - token is the erc20 precompile of the asset id.
     ntt: {
       [dai_wh.key]: {

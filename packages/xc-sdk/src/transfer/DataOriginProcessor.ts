@@ -41,7 +41,16 @@ export class DataOriginProcessor extends DataProcessor {
     return this.adapter.buildCalls(sender, amount, source.feeBalance, transfer);
   }
 
-  async getDestinationFee(transferAmount?: bigint): Promise<{
+  /**
+   * @param address - recipient on the destination. Only needed by a fee whose
+   * size depends on the accounts the delivery opens there (an svm redeem
+   * opening the recipient's ata), and it has to match what the transfer is
+   * built with - the executor honours a quote only for what it priced.
+   */
+  async getDestinationFee(
+    transferAmount?: bigint,
+    address?: string
+  ): Promise<{
     fee: AssetAmount;
     feeBreakdown: { [key: string]: bigint };
   }> {
@@ -67,9 +76,11 @@ export class DataOriginProcessor extends DataProcessor {
     const { amount, breakdown } = await feeConfigBuilder.build({
       feeAsset: feeAsset,
       transferAsset: source.asset,
+      destinationAsset: destination.asset,
       source: transact ? transact.chain : chain,
       destination: destination.chain,
       amount: transferAmount,
+      address: address,
     });
 
     const fee = AssetAmount.fromAsset(feeAsset, {

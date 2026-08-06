@@ -55,6 +55,16 @@
         opacity: 0.4;
         cursor: default;
       }
+      /* Executor delivery. Amber rather than the hover blue, so the two
+         delivery models stay apart from the hover state itself. */
+      button.primary {
+        border-color: #6b5426;
+        background: #241d12;
+        color: #f0c674;
+      }
+      button.primary:hover:not(:disabled) {
+        border-color: #e0a44a;
+      }
       h2 {
         font-size: 12px;
         font-weight: 500;
@@ -97,8 +107,15 @@
     </div>
 
     <!-- One button per route the sdk registers under the Ntt tag,
-         grouped by source chain. -->
+         grouped by source chain. Both delivery models appear per pair. -->
     <div id="routes"></div>
+
+    <p class="legend">
+      &#9889; executor delivery &mdash; the sender pays the Executor to redeem
+      on the far side, so there is nothing to claim. Costs source native gas
+      (weth on hydration, eth on ethereum/base) on top of the transfer. Plain
+      buttons are self-redeem and need the claim below.
+    </p>
 
     <div class="row">
       <button

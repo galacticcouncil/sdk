@@ -97,15 +97,11 @@ export class SolanaClaim {
       txs.push(tx.transaction);
     }
 
-    const tipAccounts = await this.#lilJit.getTipAccount();
-    const tipIx = SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: new PublicKey(tipAccounts[0]),
-      lamports: DEFAULT_TIP_LAMPORTS,
-    });
-
-    const createAta = this.getCreateAta(ntt, vaa, payer);
-    const unwrap = await this.getUnwrap(ntt, vaa, payer);
+    const [tipIx, unwrap, openRecipient] = await Promise.all([
+      this.getTip(payer),
+      this.getUnwrap(ntt, vaa, payer),
+      this.getOpenRecipient(ntt, vaa, payer),
+    ]);
 
     const { blockhash } = await this.#connection.getLatestBlockhash();
 
@@ -118,8 +114,7 @@ export class SolanaClaim {
           : [];
       const ixs = this.getInstructions(transaction, luts);
       if (isLast) {
-        // Before the release, which mints/unlocks into the recipient ata.
-        ixs.unshift(createAta);
+        ixs.unshift(openRecipient);
         // After the release, so the wSOL is already in the ata.
         if (unwrap) {
           ixs.push(...unwrap.ixs);
@@ -191,15 +186,11 @@ export class SolanaClaim {
       txs.push(tx.transaction);
     }
 
-    const tipAccounts = await this.#lilJit.getTipAccount();
-    const tipIx = SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: new PublicKey(tipAccounts[0]),
-      lamports: DEFAULT_TIP_LAMPORTS,
-    });
-
-    const createAta = this.getCreateAta(ntt, vaa, payer);
-    const unwrap = await this.getUnwrap(ntt, vaa, payer);
+    const [tipIx, unwrap, openRecipient] = await Promise.all([
+      this.getTip(payer),
+      this.getUnwrap(ntt, vaa, payer),
+      this.getOpenRecipient(ntt, vaa, payer),
+    ]);
 
     const { blockhash } = await this.#connection.getLatestBlockhash();
 
@@ -211,7 +202,7 @@ export class SolanaClaim {
           : [];
       const ixs = this.getInstructions(transaction, luts);
       // Before the release, which mints/unlocks into the recipient ata.
-      ixs.unshift(createAta);
+      ixs.unshift(openRecipient);
       // After the release, so the wSOL is already in the ata.
       if (unwrap) {
         ixs.push(...unwrap.ixs);
@@ -234,32 +225,66 @@ export class SolanaClaim {
   }
 
   /**
-   * Create the recipient ata if missing (idempotent).
+   * Jito tip, paid by the claim payer.
    *
-   * The release only mints/unlocks into an existing token account, the
-   * ntt program never creates it. Payer covers the rent.
+   * A bundle is only picked up if it tips, so this is required rather than
+   * best effort - an unreachable block engine fails the claim here instead
+   * of sending a bundle that would never land.
+   *
+   * @param payer - claim payer, pays the tip
+   * @returns tip instruction
+   */
+  private async getTip(payer: PublicKey): Promise<TransactionInstruction> {
+    const accounts = await this.#lilJit.getTipAccount();
+    return SystemProgram.transfer({
+      fromPubkey: payer,
+      toPubkey: new PublicKey(accounts[0]),
+      lamports: DEFAULT_TIP_LAMPORTS,
+    });
+  }
+
+  /**
+   * Open the recipient's token account.
+   *
+   * `release_inbound_mint` mints into the recipient ata and the program
+   * never initializes it, while the reference sdk only opens one for the
+   * payer - so relaying somebody else's transfer fails at release. Opening
+   * an ata is permissionless, the payer just covers the rent.
+   *
+   * Emitted unconditionally: the idempotent variant is a no-op when the
+   * account already exists, which is cheaper than the round-trip it would
+   * take to find out - and safer, since the account can be closed between
+   * the check and the release.
    *
    * @param ntt - NTT token deployment on Solana
    * @param vaa - deserialized transfer, carries the recipient
-   * @param payer - claim payer
-   * @returns create ata instruction
+   * @param payer - claim payer, pays the rent
+   * @returns create instruction
    */
-  private getCreateAta(
+  private async getOpenRecipient(
     ntt: NttTokenDef,
     vaa: VAA<'Ntt:WormholeTransfer'>,
     payer: PublicKey
-  ): TransactionInstruction {
+  ): Promise<TransactionInstruction> {
     const { recipientAddress } = vaa.payload.nttManagerPayload.payload;
-
-    const mint = new PublicKey(ntt.token);
     const recipient = new PublicKey(recipientAddress.toUint8Array());
-    const ata = getAssociatedTokenAddressSync(mint, recipient, true);
+    const mint = new PublicKey(ntt.token);
 
+    const mintAccount = await this.#connection.getAccountInfo(mint);
+    const tokenProgram = mintAccount?.owner ?? TOKEN_PROGRAM_ID;
+
+    const ata = getAssociatedTokenAddressSync(
+      mint,
+      recipient,
+      true,
+      tokenProgram
+    );
     return createAssociatedTokenAccountIdempotentInstruction(
       payer,
       ata,
       recipient,
-      mint
+      mint,
+      tokenProgram
     );
   }
 

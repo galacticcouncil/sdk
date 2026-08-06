@@ -30,8 +30,23 @@ const feeBalance = {
   copyWith: ({ amount }: { amount: bigint }) => ({ amount }),
 } as unknown as AssetAmount;
 
-const buildConfig = (wrapNative: boolean) =>
+const EXECUTOR = '0x9999999999999999999999999999999999999999';
+const REQUEST_COST = 57578720500000n;
+
+/** Executor request the ntt bypass appends after the manager transfer. */
+const followConfig = () =>
   new ContractConfig({
+    abi: Abi.Executor,
+    address: EXECUTOR,
+    args: [73, RECIPIENT_32, ACCOUNT, '0xdead', '0x45524e31', '0x01'],
+    value: REQUEST_COST,
+    func: 'requestExecution',
+    module: 'Executor',
+  });
+
+const buildConfig = (wrapNative: boolean, follow?: ContractConfig) =>
+  new ContractConfig({
+    follow,
     abi: Abi.NttManager,
     address: MANAGER,
     args: [AMOUNT, 73, RECIPIENT_32],
@@ -64,13 +79,14 @@ const platform = (wrapped: bigint, allowance: bigint) =>
 const buildCalls = (
   wrapped: bigint,
   allowance: bigint,
-  wrapNative = true
+  wrapNative = true,
+  follow?: ContractConfig
 ): Promise<EvmCall[]> =>
   platform(wrapped, allowance).buildCalls(
     ACCOUNT,
     AMOUNT,
     feeBalance,
-    buildConfig(wrapNative)
+    buildConfig(wrapNative, follow)
   ) as Promise<EvmCall[]>;
 
 describe('EvmPlatform', () => {
@@ -103,6 +119,39 @@ describe('EvmPlatform', () => {
     });
 
     it('should transfer only when erc20 source is already approved', async () => {
+      const calls = await buildCalls(0n, AMOUNT, false);
+
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toMatchObject({ to: MANAGER });
+    });
+
+    // The ntt executor bypass: the manager transfer emits the message, then a
+    // second call pays the Executor to deliver it. Reversing them pays for a
+    // message that does not exist yet.
+    it('should append the follow call after the transfer', async () => {
+      const calls = await buildCalls(0n, AMOUNT, false, followConfig());
+
+      expect(calls).toHaveLength(2);
+      expect(calls[0]).toMatchObject({ to: MANAGER });
+      expect(calls[1]).toMatchObject({ to: EXECUTOR, value: REQUEST_COST });
+    });
+
+    it('should keep the follow call last behind prerequisites', async () => {
+      const calls = await buildCalls(0n, 0n, true, followConfig());
+
+      expect(calls).toHaveLength(4);
+      expect(calls.map((c) => c.to)).toEqual([WETH, WETH, MANAGER, EXECUTOR]);
+    });
+
+    // The follow spends native value, never the token, so it must not drag in
+    // an approve of its own.
+    it('should not add prerequisites for the follow call', async () => {
+      const calls = await buildCalls(0n, AMOUNT, false, followConfig());
+
+      expect(calls.filter((c) => c.data.startsWith(APPROVE))).toHaveLength(0);
+    });
+
+    it('should omit the follow call when the config has none', async () => {
       const calls = await buildCalls(0n, AMOUNT, false);
 
       expect(calls).toHaveLength(1);
@@ -143,10 +192,34 @@ describe('EvmPlatform', () => {
       expect(fee.amount).toBe(TRANSFER_GAS * GAS_PRICE + DELIVERY_PRICE);
     });
 
+    // The value is either the route's destination fee or paid from a balance
+    // the amount never competes for, so charging it here would double it.
     it('should charge gas only for an erc20 source', async () => {
-      const fee = await estimateFee(0n, 0n, false);
+      const fee = await estimateFee(AMOUNT, AMOUNT, false);
 
       expect(fee.amount).toBe(TRANSFER_GAS * GAS_PRICE);
+    });
+
+    // The transfer reverts until the approve lands, so estimating it alone
+    // returned nothing at all - a zero source fee, and a max of the whole
+    // balance.
+    it('should charge the pending approve on an erc20 source', async () => {
+      const fee = await estimateFee(0n, 0n, false);
+
+      const gas = FEE_GAS.approve + FEE_GAS.transfer;
+      expect(fee.amount).toBe(gas * GAS_PRICE);
+    });
+
+    // Wallet probes the fee before anything is typed in.
+    it('should charge nothing for a zero amount', async () => {
+      const fee = await platform(0n, 0n).estimateFee(
+        ACCOUNT,
+        0n,
+        feeBalance,
+        buildConfig(false)
+      );
+
+      expect(fee.amount).toBe(0n);
     });
 
     it('should leave the sender able to cover the sequence at max', async () => {

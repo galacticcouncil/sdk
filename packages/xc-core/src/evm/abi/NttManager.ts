@@ -1,5 +1,18 @@
 export const NTT_MANAGER = [
   {
+    inputs: [],
+    name: 'nextMessageSequence',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'uint256',
