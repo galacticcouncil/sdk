@@ -1,11 +1,12 @@
 import { Parachain } from '@galacticcouncil/xc-core';
-import { clients } from '@galacticcouncil/xc-cfg';
+import { clients, tags } from '@galacticcouncil/xc-cfg';
 
 import { xc } from './setup';
 
 const { config } = xc;
+const { Tag } = tags;
 
-const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS } = clients;
+const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS, NttClient } = clients;
 
 const HDX_DECIMALS = 12;
 const BLOCK_TIME_MS = 6_000;
@@ -107,4 +108,86 @@ const rows = Array.from(states.values()).map((s) => {
 console.table(rows);
 console.groupEnd();
 
+console.groupEnd();
+
+// --- Wormhole ntt rate limits ---
+//
+// The circuit breaker only governs the hydration side; an ntt transfer is
+// metered a second time by its manager, per token & per direction. Driven
+// off the `Ntt` tag, so a newly wired token shows up here on its own.
+
+/**
+ * Headroom left right now, out of the limit.
+ *
+ * The hydration legs read in the hundreds of billions, which is a real
+ * metered limit set high enough never to bind - not an opt out. Only
+ * `rateLimitDuration == 0` is that, and it reads as no window at all.
+ */
+function headroom(rl: clients.NttRateLimit, decimals: number): string {
+  if (rl.windowMs === 0) return 'not metered';
+  return `${fmt(rl.capacity, decimals)} / ${fmt(rl.limit, decimals)}`;
+}
+
+/**
+ * How far below the limit the bucket sat the last time it was touched.
+ *
+ * Unlike the circuit breaker above, this is not a windowed counter - the
+ * bucket refills linearly, so headroom is back at the limit within
+ * `amount / (limit / window)` seconds and reads as no traffic ever. This
+ * residual is the only volume the manager still remembers.
+ *
+ * A transfer consumes at both ends *and* backfills the two opposite legs,
+ * so an outbound reading 0 alongside a recent stamp means the traffic went
+ * the other way - which is why the two directions of a pair mirror.
+ */
+function lastTx(rl: clients.NttRateLimit, decimals: number): string {
+  const took = rl.limit - rl.capacityAtLastTx;
+  if (rl.lastTxMs === 0 || took === 0n) return '–';
+  return `${fmt(took, decimals)} (${hours(BigInt(Date.now() - rl.lastTxMs))} ago)`;
+}
+
+const nttRoutes = Array.from(config.routes.values()).flatMap((chainRoutes) =>
+  chainRoutes
+    .getRoutes()
+    .filter((route) => route.tags?.includes(Tag.Ntt))
+    .map((route) => ({ source: chainRoutes.chain, route }))
+);
+
+console.group('Wormhole NTT Rate Limits (capacity / limit per 24h)');
+const nttRows = await Promise.all(
+  nttRoutes.map(async ({ source, route }) => {
+    const destination = route.destination.chain;
+    const sent = route.source.asset;
+    const received = route.destination.asset;
+    const leg = `${source.name} → ${destination.name}`;
+
+    try {
+      const [out, inbound] = await Promise.all([
+        new NttClient(source, sent).getOutboundLimit(),
+        new NttClient(destination, received).getInboundLimit(source),
+      ]);
+
+      const sentDecimals = source.getAssetDecimals(sent) ?? 0;
+      const receivedDecimals = destination.getAssetDecimals(received) ?? 0;
+
+      return {
+        leg: leg,
+        asset: sent.originSymbol,
+        send: headroom(out, sentDecimals),
+        sendLast: lastTx(out, sentDecimals),
+        receive: headroom(inbound, receivedDecimals),
+        receiveLast: lastTx(inbound, receivedDecimals),
+        window: hours(out.windowMs),
+      };
+    } catch (e) {
+      return {
+        leg: leg,
+        asset: sent.originSymbol,
+        send: e instanceof Error ? e.message : String(e),
+      };
+    }
+  })
+);
+
+console.table(nttRows);
 console.groupEnd();

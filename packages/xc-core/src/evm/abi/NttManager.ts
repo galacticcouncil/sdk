@@ -172,6 +172,117 @@ export const NTT_MANAGER = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    inputs: [],
+    name: 'rateLimitDuration',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentOutboundCapacity',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'chainId',
+        type: 'uint16',
+      },
+    ],
+    name: 'getCurrentInboundCapacity',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getOutboundLimitParams',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'TrimmedAmount',
+            name: 'limit',
+            type: 'uint72',
+          },
+          {
+            internalType: 'TrimmedAmount',
+            name: 'currentCapacity',
+            type: 'uint72',
+          },
+          {
+            internalType: 'uint64',
+            name: 'lastTxTimestamp',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IRateLimiter.RateLimitParams',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'chainId',
+        type: 'uint16',
+      },
+    ],
+    name: 'getInboundLimitParams',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'TrimmedAmount',
+            name: 'limit',
+            type: 'uint72',
+          },
+          {
+            internalType: 'TrimmedAmount',
+            name: 'currentCapacity',
+            type: 'uint72',
+          },
+          {
+            internalType: 'uint64',
+            name: 'lastTxTimestamp',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IRateLimiter.RateLimitParams',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
   // `recipient` & `refundAddress` are indexed - they live in the topics,
   // not the data. Decoding them as plain fields silently shifts every
   // value by two (amount reads as the recipient, the chain id as amount).
