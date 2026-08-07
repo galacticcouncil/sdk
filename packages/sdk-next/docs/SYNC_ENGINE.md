@@ -282,7 +282,7 @@ HSM's merge becomes a plain read with a reference check, entirely inside HSM:
 object, so **reference identity is the "did my source change" test** — no dirty set, no
 staged snapshot, and unchanged upstream still means no muts, no commit, no emission. It
 needs a public `get pools()` on `PoolClient` (protected members aren't reachable across
-sibling subclasses), which also lets the `pools()` probe subclasses in `verifyEds.ts` go.
+sibling subclasses), which also lets the `pools()` probe subclasses in `probeAmms.ts` go.
 
 ---
 
@@ -306,7 +306,7 @@ The engine is lazy and shared, like `EventBus`:
   the subscription if idle. A dependency is driven even when nobody subscribes to it.
 - Last unregister stops the subscription and clears the tracker.
 - **Standalone pinned clients are unaffected** — `getPools(at)` never registers, so the
-  `verifyEds` reference loaders and consumer-created clients keep working as-is.
+  `probeAmms` reference loaders and consumer-created clients keep working as-is.
 
 ---
 
@@ -371,7 +371,7 @@ where fork churn already slows the node (see the unincluded-segment note in
 
 ## Migration
 
-Each phase is independently testable, and the probe (`verifyEds.ts`) is the gate.
+Each phase is independently testable, and the probe (`probeAmms.ts`) is the gate.
 
 | phase | change | check |
 |---|---|---|

@@ -1,7 +1,7 @@
 # SOR v2 — Event-Driven Pool Sync
 
 > Design spec / context summary for the `sdk-next` pool sync engine (branch `feat/eds`).
-> Scope: `packages/sdk-next/src/pool/` — `PoolClient`, `EventBus`, the AMM clients, and the `verifyEds` probe.
+> Scope: `packages/sdk-next/src/pool/` — `PoolClient`, `EventBus`, the AMM clients, and the `probeAmms` probe.
 
 ## Abstract
 
@@ -19,7 +19,7 @@ and **heals them inline** at the new tip by replaying recent handlers — no pol
 finality wait, no periodic resync, and without waiting for the next trade to touch the
 stale asset.
 
-Correctness is proven by a differential probe (`verifyEds.ts`) that diffs the live
+Correctness is proven by a differential probe (`probeAmms.ts`) that diffs the live
 event-driven store against a fresh block-pinned reload, field by field, over a 20-minute
 window.
 
@@ -251,7 +251,7 @@ run inside one switch-mapped cycle; the store's `BehaviorSubject` replay is drop
 
 ---
 
-## Validation — `verifyEds.ts`
+## Validation — `probeAmms.ts`
 
 Differential probe (runs against `ApiUrl.Catfish1`):
 

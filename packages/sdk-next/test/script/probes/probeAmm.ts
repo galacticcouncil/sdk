@@ -2,11 +2,11 @@ import { PolkadotClient } from 'polkadot-api';
 
 import { Observable, Subscription } from 'rxjs';
 
-import { PapiExecutor } from '../../PapiExecutor';
-import { ApiUrl } from '../../types';
+import { PapiExecutor } from '../PapiExecutor';
+import { ApiUrl } from '../types';
 
-import { EvmClient } from '../../../../src/evm';
-import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../../src/pool';
+import { EvmClient } from '../../../src/evm';
+import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../src/pool';
 
 const DURATION_MS = 20 * 60 * 1000;
 

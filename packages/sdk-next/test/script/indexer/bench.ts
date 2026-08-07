@@ -1,9 +1,9 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { PapiExecutor } from '../../PapiExecutor';
-import { ApiUrl } from '../../types';
+import { PapiExecutor } from '../PapiExecutor';
+import { ApiUrl } from '../types';
 
-import { IndexerStats, RpcPool, indexBlocks } from '../../../../src/indexer';
+import { IndexerStats, RpcPool, indexBlocks } from '../../../src/indexer';
 
 // Scan everything from FROM_BLOCK up to the current finalized tip.
 const FROM_BLOCK = 70_000;
@@ -63,7 +63,9 @@ class BenchIndexer extends PapiExecutor {
     console.log(`  Blocks processed:  ${s.blocks}`);
     console.log(`  Events (approx):   ${s.events}`);
     console.log(`  Extrinsics:        ${s.extrinsics}`);
-    console.log(`  Data received:     ${(s.bytes / 1024 / 1024).toFixed(1)} MB`);
+    console.log(
+      `  Data received:     ${(s.bytes / 1024 / 1024).toFixed(1)} MB`
+    );
     console.log(`  Errors:            ${s.errors}`);
     console.log(`  Total time:        ${(s.elapsedMs / 1000).toFixed(2)}s`);
     console.log(`  ─────────────────────────────────────────────`);
