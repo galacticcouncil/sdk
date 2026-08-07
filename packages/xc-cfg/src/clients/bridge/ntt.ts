@@ -1,8 +1,8 @@
 import {
   Abi,
   AnyChain,
+  AnyEvmChain,
   Asset,
-  EvmChain,
   Ntt as NttRegistry,
   NttTokenDef,
   SolanaChain,
@@ -10,6 +10,7 @@ import {
   suiPkg,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
+import { big } from '@galacticcouncil/common';
 
 import { PublicKey } from '@solana/web3.js';
 
@@ -46,11 +47,11 @@ function capacityAt(
 function untrim(packed: bigint, decimals: number): bigint {
   const amount = packed >> 8n;
   const trimmedDecimals = Number(packed & 0xffn);
-  return amount * 10n ** BigInt(decimals - trimmedDecimals);
+  return amount * big.pow10(decimals - trimmedDecimals);
 }
 
 async function getEvmLimit(
-  chain: EvmChain,
+  chain: AnyEvmChain,
   ntt: NttTokenDef,
   from?: number
 ): Promise<NttRateLimit> {
@@ -184,12 +185,6 @@ async function getSolanaLimit(
 
 const SUI_RATE_LIMIT_DURATION_MS = 60 * 60 * 24 * 1000;
 
-// Sui stores RateLimitState in *local* token decimals, not as the packed
-// TrimmedAmount the evm manager keeps - so no untrimming here. There is no
-// upstream sui ntt binding to mirror (wormhole-sdk-ts ships no ntt protocol,
-// and native-token-transfers only binds solana), so this is off a live read:
-// the SUI manager reads limit 1e14 against 9 decimals = 100k SUI, and each
-// peer carries its own `token_decimals` for confirmation.
 function toSuiRateLimit(fields: Record<string, any>): NttRateLimit {
   const limit = BigInt(fields['limit']);
   const capacityAtLastTx = BigInt(fields['capacity_at_last_tx']);
@@ -207,7 +202,6 @@ function toSuiRateLimit(fields: Record<string, any>): NttRateLimit {
     limit: limit,
     windowMs: SUI_RATE_LIMIT_DURATION_MS,
     capacityAtLastTx: capacityAtLastTx,
-    // Sui already stamps in milliseconds.
     lastTxMs: Number(lastTxTimestamp),
   };
 }
@@ -240,35 +234,33 @@ async function getSuiLimit(
   return rateLimit ? toSuiRateLimit(rateLimit) : UNMETERED;
 }
 
-function getLimit(
-  chain: AnyChain,
-  ntt: NttTokenDef,
-  from?: number
-): Promise<NttRateLimit> {
-  if (chain instanceof SolanaChain) {
-    return getSolanaLimit(chain, ntt, from);
-  }
-  if (chain instanceof SuiChain) {
-    return getSuiLimit(chain, ntt, from);
-  }
-  return getEvmLimit(chain as EvmChain, ntt, from);
-}
+export class NttClient {
+  readonly chain: AnyChain;
+  protected asset: Asset;
 
-export async function getNttOutboundLimit(
-  chain: AnyChain,
-  asset: Asset
-): Promise<NttRateLimit> {
-  return getLimit(chain, NttRegistry.fromChain(chain, asset));
-}
+  constructor(chain: AnyChain, asset: Asset) {
+    this.chain = chain;
+    this.asset = asset;
+  }
 
-export async function getNttInboundLimit(
-  chain: AnyChain,
-  asset: Asset,
-  from: AnyChain
-): Promise<NttRateLimit> {
-  return getLimit(
-    chain,
-    NttRegistry.fromChain(chain, asset),
-    Wh.fromChain(from).getWormholeId()
-  );
+  getOutboundLimit(): Promise<NttRateLimit> {
+    return this.getLimit();
+  }
+
+  getInboundLimit(from: AnyChain): Promise<NttRateLimit> {
+    return this.getLimit(from);
+  }
+
+  private async getLimit(from?: AnyChain): Promise<NttRateLimit> {
+    const ntt = NttRegistry.fromChain(this.chain, this.asset);
+    const fromId = from && Wh.fromChain(from).getWormholeId();
+
+    if (this.chain instanceof SolanaChain) {
+      return getSolanaLimit(this.chain, ntt, fromId);
+    }
+    if (this.chain instanceof SuiChain) {
+      return getSuiLimit(this.chain, ntt, fromId);
+    }
+    return getEvmLimit(this.chain as AnyEvmChain, ntt, fromId);
+  }
 }

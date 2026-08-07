@@ -6,8 +6,9 @@ import {
   TransferValidation,
   TransferValidationError,
 } from '@galacticcouncil/xc-core';
+import { big } from '@galacticcouncil/common';
 
-import { getNttInboundLimit, getNttOutboundLimit } from '../../clients';
+import { NttClient } from '../../clients';
 
 function unreachable(asset: Asset, chain: AnyChain): never {
   throw new TransferValidationError('Ntt_Limit_Unreachable', {
@@ -15,15 +16,6 @@ function unreachable(asset: Asset, chain: AnyChain): never {
     chain: chain.name,
     error: 'ntt.limitUnreachable',
   });
-}
-
-function rescale(amount: bigint, from: number, to: number): bigint {
-  if (from === to) {
-    return amount;
-  }
-  return to > from
-    ? amount * 10n ** BigInt(to - from)
-    : amount / 10n ** BigInt(from - to);
 }
 
 export class NttRateLimitValidation extends TransferValidation {
@@ -43,14 +35,12 @@ export class NttRateLimitValidation extends TransferValidation {
     const { amount, asset, destination, source } = ctx;
 
     const [outbound, inbound] = await Promise.all([
-      getNttOutboundLimit(source.chain, asset).catch(() =>
-        unreachable(asset, source.chain)
-      ),
-      getNttInboundLimit(
-        destination.chain,
-        destination.balance,
-        source.chain
-      ).catch(() => unreachable(destination.balance, destination.chain)),
+      new NttClient(source.chain, asset)
+        .getOutboundLimit()
+        .catch(() => unreachable(asset, source.chain)),
+      new NttClient(destination.chain, destination.balance)
+        .getInboundLimit(source.chain)
+        .catch(() => unreachable(destination.balance, destination.chain)),
     ]);
 
     if (outbound.windowMs > 0 && amount > outbound.capacity) {
@@ -65,7 +55,7 @@ export class NttRateLimitValidation extends TransferValidation {
       });
     }
 
-    const delivered = rescale(
+    const delivered = big.convertDecimals(
       amount,
       source.balance.decimals,
       destination.balance.decimals

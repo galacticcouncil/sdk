@@ -165,9 +165,10 @@ rate limiter that applies.** The Wormhole Governor governs Token Bridge emitters
 own transceiver, so no governor notional budget is consumed and Hydration isn't even a
 governed chain.
 
-Read via [getNttOutboundLimit / getNttInboundLimit](packages/xc-cfg/src/clients/bridge/ntt.ts)
-(`clients` export of xc-cfg) — `{ capacity, limit, capacityAtLastTx, lastTxMs, windowMs }`,
-amounts in token decimals:
+Read via [NttClient](packages/xc-cfg/src/clients/bridge/ntt.ts) (`clients` export of
+xc-cfg) — `new NttClient(chain, asset)`, then `getOutboundLimit()` /
+`getInboundLimit(from)` returning
+`{ capacity, limit, capacityAtLastTx, lastTxMs, windowMs }`, amounts in token decimals:
 
 | Platform | Source |
 | --- | --- |
