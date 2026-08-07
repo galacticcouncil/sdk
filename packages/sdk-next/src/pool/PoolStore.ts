@@ -30,9 +30,12 @@ export class PoolStore<T extends PoolBase> {
    *
    * Updates are applied one at a time in call order (internally queued).
    *
+   * - The returned promise settles once THIS update has been applied and
+   *   emitted, so a caller can sequence work after the commit
+   *
    * @param patch - update callback
    */
-  update(patch: (state: readonly T[]) => T[] | Promise<T[]>): void {
+  update(patch: (state: readonly T[]) => T[] | Promise<T[]>): Promise<void> {
     this.updateQueue = this.updateQueue
       .then(async () => {
         const prev = this.store$.value;
@@ -60,6 +63,8 @@ export class PoolStore<T extends PoolBase> {
         this.store$.next(next);
       })
       .catch(console.error);
+
+    return this.updateQueue;
   }
 
   destroy(): void {

@@ -1,8 +1,6 @@
 import { AccountId, CompatibilityLevel, PolkadotClient } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
-import { Observable } from 'rxjs';
-
 import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { BlockAt } from '../../../api';
@@ -11,12 +9,7 @@ import { GhoTokenLog, GhoTokenClient } from '../../../gho';
 import { XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
-import {
-  BlockRef,
-  DrivenBlock,
-  PoolEventHandler,
-  PoolMutation,
-} from '../../events';
+import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolBase, PoolFees, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
@@ -35,6 +28,9 @@ const SYNC_BUCKET_EVENTS = [
 export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   private ghoClient: GhoTokenClient;
   private stableClient: StableSwapClient;
+
+  /** Last merged source pool per id; identity check for the per-block merge */
+  private merged = new Map<number, StableSwapBase>();
 
   constructor(
     client: PolkadotClient,
@@ -296,36 +292,30 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   // =============================================================================
 
   /**
-   * Drive off the stableswap client's processed feed.
+   * Derived from the stableswap pool backing each collateral.
    *
-   * - Delivers a block only after stableswap committed it, so this pool
-   *   cannot commit a block ahead of the source it derives from
+   * - The driver commits this pool's block after stableswap's, so the merge
+   *   below always reads stableswap state AT that block
    */
-  protected blockSource(): Observable<DrivenBlock> {
-    return this.stableClient.processedBlocks();
+  dependencies(): StableSwapClient[] {
+    return [this.stableClient];
   }
 
   /**
-   * Merge the stableswap pools committed at this block.
+   * Merge the underlying stableswap pool's coherent slice.
    *
-   * - `source` belongs to the block being committed, so a stableswap trade
-   *   lands in this block's merge — never a block late
+   * - Reference identity is the "did my source change" test: `PoolStore`
+   *   replaces only the pools it touched, leaving the rest as the same object
    * - Nothing changed upstream ⇒ no mutations ⇒ no commit, no emission
-   *
-   * @param _block - the block being committed
-   * @param source - stableswap pools committed at that block
    */
-  protected async tickMutations(
-    _block: BlockRef,
-    source: readonly PoolBase[] = []
-  ): Promise<PoolMutation<HsmPoolBase>[]> {
-    const stablePools = source as readonly StableSwapBase[];
-    if (stablePools.length === 0) return [];
-
+  protected async tickMutations(): Promise<PoolMutation<HsmPoolBase>[]> {
     const muts: PoolMutation<HsmPoolBase>[] = [];
+
     for (const pool of this.store.pools) {
-      const stablePool = stablePools.find((s) => s.id === pool.id);
-      if (!stablePool) continue;
+      const stablePool = this.stableClient.pools.find((s) => s.id === pool.id);
+      if (!stablePool || this.merged.get(pool.id) === stablePool) continue;
+      this.merged.set(pool.id, stablePool);
+
       muts.push({
         address: pool.address,
         apply: (p) => ({
@@ -339,6 +329,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         }),
       });
     }
+
     return muts;
   }
 }

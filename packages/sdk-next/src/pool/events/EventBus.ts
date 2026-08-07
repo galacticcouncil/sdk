@@ -11,20 +11,27 @@ import { BlockEvents, DecodedEvent } from './types';
 const { logger } = log;
 
 /**
- * The single upstream event source for pool sync.
+ * The upstream event source for pool sync.
+ *
+ * - Owned by the pool sync driver, its only consumer
  */
 export class EventBus {
-  private static instance?: EventBus;
-
   /** Multicast per-block stream */
   private readonly blockEvents$: Observable<BlockEvents>;
 
   /** Hash of the last delivered block, dedupes follower re-deliveries */
   private lastHash?: string;
 
-  private constructor(private readonly api: TypedApi<typeof hydration>) {
+  /**
+   * @param api - typed api
+   * @param at - feed to follow; `best` prices the market, `finalized` lags
+   */
+  constructor(
+    private readonly api: TypedApi<typeof hydration>,
+    private readonly at: 'best' | 'finalized' = 'best'
+  ) {
     this.blockEvents$ = this.api.query.System.Events.watchValue({
-      at: 'best',
+      at: this.at,
     }).pipe(
       /**
        * The follower re-delivers the current best after a chainHead restart;
@@ -44,13 +51,6 @@ export class EventBus {
       })),
       share({ resetOnRefCountZero: false })
     );
-  }
-
-  static shared(api: TypedApi<typeof hydration>): EventBus {
-    if (!EventBus.instance) {
-      EventBus.instance = new EventBus(api);
-    }
-    return EventBus.instance;
   }
 
   watchBlockEvents(): Observable<BlockEvents> {

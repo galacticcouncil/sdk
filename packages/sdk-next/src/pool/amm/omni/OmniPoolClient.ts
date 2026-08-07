@@ -277,13 +277,20 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   /**
    * Liquidity + per-asset config — recompute reserves/state of the named
    * asset, pinned at the event's block.
+   *
+   * - Also re-reads the hub asset: liquidity mints/burns hub reserve, so the
+   *   pool's hub balance moves without the event naming it (trades name it)
    */
   private syncAssetHandler(): PoolEventHandler<OmniPoolBase> {
     return {
       match: (e) => e.pallet === 'Omnipool' && ASSET_EVENTS.has(e.method),
       resolve: (e, block) => {
+        const [pool] = this.store.pools;
         this.log.trace(e.method, { asset: e.data.asset_id });
-        return this.assetMutations([e.data.asset_id], block.hash);
+        return this.assetMutations(
+          [e.data.asset_id, pool.hubAssetId],
+          block.hash
+        );
       },
     };
   }

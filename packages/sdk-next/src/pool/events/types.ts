@@ -30,20 +30,18 @@ export interface BlockEvents {
 }
 
 /**
- * A block delivered to a driver, with any source pools committed at it.
+ * One block's sync context, computed once per pass and shared by all clients.
  *
- * - From the event bus: `changed` is empty
- * - From a source client's processed feed: the pools it committed at `block`
+ * - `missed`: canonical blocks to backfill before `block`, ascending
+ * - `orphaned` / `canonical`: the reorg window (empty when `reorg` is false)
+ * - `eventsOf`: pinned events for a referenced block, read once per pass
  */
-export interface DrivenBlock extends BlockEvents {
-  changed: readonly PoolBase[];
-}
-
-/** A block applied to the store, with the events that drove it. */
-export interface AppliedBlock {
-  number: number;
-  hash: string;
-  touched: DecodedEvent[];
+export interface BlockContext extends BlockEvents {
+  missed: BlockRef[];
+  reorg: boolean;
+  orphaned: BlockRef[];
+  canonical: BlockRef[];
+  eventsOf(ref: BlockRef): Promise<DecodedEvent[]>;
 }
 
 /**

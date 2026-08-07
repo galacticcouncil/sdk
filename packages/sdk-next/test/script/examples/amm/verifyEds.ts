@@ -10,6 +10,11 @@ import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../../src/pool';
 
 const DURATION_MS = 20 * 60 * 1000;
 
+// Feed every client follows. `finalized` is canonical, so it must produce ZERO
+// reorgs — a reorg log there means the lineage classification is wrong, not
+// that the chain forked. It exercises gap backfill instead (finality jumps).
+const FOLLOW: 'best' | 'finalized' = 'best';
+
 // Relative tolerance (ppm) for fields that converge every block from event-cached
 // inputs — yield-bearing (aToken) reserve balances and oracle-driven pegs. The
 // event-driven store tracks these from caches refreshed on events, so it lags a
@@ -19,10 +24,20 @@ const DRIFT_PPM = 100n; // 0.01%
 const isInt = (s: string | undefined): s is string => !!s && /^-?\d+$/.test(s);
 
 // Flattened keys whose per-block convergence is expected drift, not a mismatch.
-// aToken balances accrue every block: pool reserves (`*.balance`) and the HSM
-// collateral held at the facilitator (`collateralBalance`).
-const isDriftField = (k: string): boolean =>
-  k.endsWith('.balance') || k === 'collateralBalance' || k.startsWith('pegs.');
+// Only interest-bearing (Erc20/aToken) balances accrue without an event — a
+// plain token balance is event-driven and pinned on both sides, so it must be
+// EXACT. Pegs converge every block by design.
+const isDriftField = (k: string, view: Record<string, string>): boolean => {
+  if (k.startsWith('pegs.')) return true;
+
+  const isYieldBearing = (id: string) => view[`tokens.${id}.type`] === 'Erc20';
+
+  // HSM collateral held at the facilitator
+  if (k === 'collateralBalance') return isYieldBearing(view['collateralId']);
+
+  const token = k.match(/^tokens\.(\d+)\.balance$/);
+  return !!token && isYieldBearing(token[1]);
+};
 
 const { OmniPoolClient } = omni;
 const { StableSwapClient } = stable;
@@ -33,9 +48,8 @@ const { HsmPoolClient } = hsm;
 /**
  * Test probes exposing the committed block cursor and store.
  *
- * - `blockNo` / `hash` / `pools` are coherent with a `getSubscriber` emission
- *   (the driver commits and emits synchronously before advancing)
- * - `pools` reads the FULL committed set; emissions carry only the changeset
+ * - `blockNo` / `hash` are coherent with a `getSubscriber` emission (the
+ *   driver commits before advancing to the next block)
  */
 class OmniProbe extends OmniPoolClient {
   blockNo() {
@@ -43,9 +57,6 @@ class OmniProbe extends OmniPoolClient {
   }
   hash() {
     return this.blockHash;
-  }
-  pools() {
-    return this.store.pools;
   }
 }
 
@@ -56,9 +67,6 @@ class StableProbe extends StableSwapClient {
   hash() {
     return this.blockHash;
   }
-  pools() {
-    return this.store.pools;
-  }
 }
 
 class XykProbe extends XykPoolClient {
@@ -67,9 +75,6 @@ class XykProbe extends XykPoolClient {
   }
   hash() {
     return this.blockHash;
-  }
-  pools() {
-    return this.store.pools;
   }
 }
 
@@ -80,9 +85,6 @@ class AaveProbe extends AavePoolClient {
   hash() {
     return this.blockHash;
   }
-  pools() {
-    return this.store.pools;
-  }
 }
 
 class HsmProbe extends HsmPoolClient {
@@ -91,9 +93,6 @@ class HsmProbe extends HsmPoolClient {
   }
   hash() {
     return this.blockHash;
-  }
-  pools() {
-    return this.store.pools;
   }
 }
 
@@ -143,7 +142,7 @@ const fieldDiffs = (l: PoolBase, r: PoolBase) => {
       const d = x > y ? x - y : y - x;
       const ppm = ref === 0n ? 1_000_000n : (d * 1_000_000n) / ref;
       // Converging fields lag a fresh read by a bounded amount; the rest is exact.
-      if (isDriftField(k) && ppm <= DRIFT_PPM) {
+      if (isDriftField(k, b) && ppm <= DRIFT_PPM) {
         drift++;
         continue;
       }
@@ -202,6 +201,9 @@ const tally = (s: Stats) =>
  * - Subscribe to the consumer API; each emission signals a commit
  * - Diff the FULL committed store (emissions carry only the changeset)
  *   against a reload of the same block on a pinned client
+ * - `ref` builds a FRESH client per check: a reused instance would serve its
+ *   TTL/persistent scopes (MM oracle, fee config) from cache and go blind to
+ *   an update the live client picked up from an event
  * - Log block + running stats; print field diffs only on mismatch
  */
 const verify = <T extends PoolBase>(
@@ -210,7 +212,7 @@ const verify = <T extends PoolBase>(
   blockNo: () => number,
   hash: () => string | undefined,
   livePools: () => readonly T[],
-  ref: { getPools(at: string): Promise<PoolBase[]> },
+  ref: (at: string) => Promise<PoolBase[]>,
   stats: Stats
 ): Subscription => {
   let busy = false;
@@ -221,8 +223,7 @@ const verify = <T extends PoolBase>(
     busy = true;
 
     const snapshot = [...livePools()];
-    ref
-      .getPools(at)
+    ref(at)
       .then(async (actual) => {
         stats.checks++;
         const { pools, drift } = diff(snapshot, actual);
@@ -261,25 +262,23 @@ class VerifyEds extends PapiExecutor {
       hsm: newStats(),
     };
 
-    const omniLive = new OmniProbe(client, evm);
-    const stableLive = new StableProbe(client, evm);
-    const xykLive = new XykProbe(client, evm);
-    const aaveLive = new AaveProbe(client, evm);
-    const hsmLive = new HsmProbe(client, evm, stableLive);
+    const omniLive = new OmniProbe(client, evm, FOLLOW);
+    const stableLive = new StableProbe(client, evm, FOLLOW);
+    const xykLive = new XykProbe(client, evm, FOLLOW);
+    const aaveLive = new AaveProbe(client, evm, FOLLOW);
+    const hsmLive = new HsmProbe(client, evm, stableLive, FOLLOW);
 
     /**
-     * Pinned reference loaders — every check reloads via `getPools(at)`.
+     * Pinned reference loaders — a FRESH client per check, pinned at the
+     * live cursor's block hash.
      *
-     * - Deliberately NOT the live probes: `getPools` writes the store and
-     *   cursor, so sharing an instance would diff the store against itself
-     * - HSM shares the stableswap ref instance
+     * - Never the live probes: `getPools` writes the store and cursor, so a
+     *   shared instance would diff the store against itself
+     * - Never reused across checks: TTL/persistent scopes (MM oracle, fee
+     *   config) would serve a cached value and miss an update the live client
+     *   picked up from an event
+     * - HSM builds its own stableswap ref for that check, not a second live one
      */
-    const omniRef = new OmniPoolClient(client, evm);
-    const stableRef = new StableSwapClient(client, evm);
-    const xykRef = new XykPoolClient(client, evm);
-    const aaveRef = new AavePoolClient(client, evm);
-    const hsmRef = new HsmPoolClient(client, evm, stableRef);
-
     const session = new Subscription();
     session.add(
       verify(
@@ -287,8 +286,8 @@ class VerifyEds extends PapiExecutor {
         () => omniLive.getSubscriber(),
         () => omniLive.blockNo(),
         () => omniLive.hash(),
-        () => omniLive.pools(),
-        omniRef,
+        () => omniLive.pools,
+        (at) => new OmniPoolClient(client, evm, at).getPools(at),
         stats.omni
       )
     );
@@ -298,8 +297,8 @@ class VerifyEds extends PapiExecutor {
         () => stableLive.getSubscriber(),
         () => stableLive.blockNo(),
         () => stableLive.hash(),
-        () => stableLive.pools(),
-        stableRef,
+        () => stableLive.pools,
+        (at) => new StableSwapClient(client, evm, at).getPools(at),
         stats.stable
       )
     );
@@ -309,8 +308,8 @@ class VerifyEds extends PapiExecutor {
         () => xykLive.getSubscriber(),
         () => xykLive.blockNo(),
         () => xykLive.hash(),
-        () => xykLive.pools(),
-        xykRef,
+        () => xykLive.pools,
+        (at) => new XykPoolClient(client, evm, at).getPools(at),
         stats.xyk
       )
     );
@@ -320,8 +319,8 @@ class VerifyEds extends PapiExecutor {
         () => aaveLive.getSubscriber(),
         () => aaveLive.blockNo(),
         () => aaveLive.hash(),
-        () => aaveLive.pools(),
-        aaveRef,
+        () => aaveLive.pools,
+        (at) => new AavePoolClient(client, evm, at).getPools(at),
         stats.aave
       )
     );
@@ -331,8 +330,11 @@ class VerifyEds extends PapiExecutor {
         () => hsmLive.getSubscriber(),
         () => hsmLive.blockNo(),
         () => hsmLive.hash(),
-        () => hsmLive.pools(),
-        hsmRef,
+        () => hsmLive.pools,
+        (at) => {
+          const stable = new StableSwapClient(client, evm, at);
+          return new HsmPoolClient(client, evm, stable, at).getPools(at);
+        },
         stats.hsm
       )
     );

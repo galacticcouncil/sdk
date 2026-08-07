@@ -12,11 +12,17 @@ separately, so no client knows where another is: chain work is repeated per clie
 derived pool (HSM ← Stableswap) needs coordination machinery to borrow its source's state
 for the same block.
 
-Make the driver **one thing**. It owns the subscription and the chain lineage, and per
-block it resolves clients in **dependency stages**, awaiting each stage's commits before
-the next. A derived pool then simply *reads* its source's store: the ordering is the
+Make the driver **one thing** for the work that is genuinely shared: the subscription, the
+chain lineage, and the per-block event reads. Client work stays independent — each keeps
+its own serial queue, exactly as its own `concatMap` does today — and the **only** wait in
+the system is the real dependency edge, where a derived pool waits for its source to finish
+*that block*. A derived pool then simply *reads* its source's store: the ordering is the
 guarantee, so there is nothing to negotiate — no watermark, no staged snapshot, no
 forwarded feed, no second store writer.
+
+Nothing else blocks. A slow AAVE resolve cannot delay OMNI's commit or the next block's
+classification, which is the property today's independent subscriptions give and a naive
+stage barrier would throw away.
 
 ---
 
@@ -58,11 +64,13 @@ flowchart LR
     S1 -. "getSubscriber<br/>2nd writer / watermark / feed" .-> H1
   end
 
-  subgraph proposed["proposed — 1 driver"]
-    B2[EventBus] --> E[PoolSync engine<br/>one ChainTracker]
-    E --> ST1["stage 1 (parallel)<br/>omni · stable · xyk · aave · lbp"]
-    ST1 --> ST2["stage 2<br/>hsm"]
-    ST2 -. "reads stable.pools<br/>(already committed at N)" .-> ST1
+  subgraph proposed["proposed — 1 driver, independent client queues"]
+    B2[EventBus] --> E["PoolSync<br/>lineage + shared reads only"]
+    E --> Q1[omni queue]
+    E --> Q2[stable queue]
+    E --> Q3[aave queue]
+    E --> Q4[hsm queue]
+    Q2 -. "awaits stable's block N<br/>then reads stable.pools" .-> Q4
   end
 ```
 
@@ -87,8 +95,9 @@ sequenceDiagram
   participant Bus as EventBus
   participant Eng as PoolSync
   participant Chain as ChainTracker
-  participant S1 as stage 1 (omni…stable)
-  participant S2 as stage 2 (hsm)
+  participant Omni as omni queue
+  participant Stbl as stable queue
+  participant Hsm as hsm queue
 
   Bus->>Eng: { block, events }
   Eng->>Chain: classify(block)
@@ -98,15 +107,22 @@ sequenceDiagram
     Chain-->>Eng: { orphaned, canonical }
   end
   Eng->>Eng: prefetch eventsAt(missed + canonical) once
-  Eng->>S1: applyBlock(ctx) — parallel
-  S1-->>Eng: committed (awaited)
-  Eng->>S2: applyBlock(ctx)
-  Note over S2: reads stable.pools —<br/>already at block N
-  S2-->>Eng: committed
-  Eng->>Chain: repair / remember / apply
+  Eng->>Chain: remember / repair / apply
+  par dispatch, not awaited
+    Eng->>Omni: enqueue(ctx)
+    Eng->>Stbl: enqueue(ctx)
+    Eng->>Hsm: enqueue(ctx, waitFor: stable@N)
+  end
+  Eng-->>Bus: ready for block N+1
+  Stbl->>Stbl: resolve + commit
+  Stbl-->>Hsm: block N done
+  Hsm->>Hsm: resolve + commit (reads stable.pools)
 ```
 
-Engine body:
+The engine's serial section is **lineage and shared reads only** — typically one
+`getBlockHeader`, plus `d + g` events reads on a reorg or gap, which is the same work one
+client does today rather than `N` times. It then dispatches and returns, so block N+1 is
+classified without waiting for any client.
 
 ```ts
 concatMap(async ({ block, events }) => {
@@ -126,18 +142,47 @@ concatMap(async ({ block, events }) => {
   const ctx = { block, events, missed, reorg, ...window, eventsOf };
 
   /**
-   * Stages run in order; a stage's commits are awaited, so a derived pool
-   * reads its source's store already at this block.
+   * Lineage advances on delivery, independent of client progress — `classify`
+   * compares against the last block DELIVERED, which is what it did per client.
    */
-  for (const stage of this.stages) {
-    await Promise.all(stage.map((c) => this.drive(c, ctx)));
-  }
-
   for (const m of missed) this.chain.remember(m);
   if (reorg) this.chain.repair(window.orphaned, window.canonical);
   this.chain.apply(block);
+
+  /**
+   * Dispatch to per-client queues; NOT awaited. `clients` is topologically
+   * ordered, so a dependency's completion promise exists before its dependents.
+   */
+  const done = new Map<PoolClient<any>, Promise<void>>();
+  for (const c of this.clients) {
+    const deps = c.dependencies().map((d) => done.get(d)!);
+    done.set(c, c.enqueue(ctx, deps));
+  }
 });
 ```
+
+Each client drains its own queue in order, which preserves exactly the per-client
+serialization `concatMap` gives today:
+
+```ts
+  /**
+   * Queue one block behind this client's in-flight work.
+   *
+   * - `deps` are the source clients' completions for THE SAME block
+   * - Passed DOWN rather than awaited here, so this client's own effects and
+   *   handlers run while the source is still resolving; only the merge waits
+   * - Failures are contained: log, reseed, and the queue continues, so a
+   *   dependent is never stuck waiting on a broken source
+   */
+  enqueue(ctx: BlockContext, deps: Promise<void>[]): Promise<void> {
+    this.queue = this.queue
+      .then(() => this.applyBlock(ctx, Promise.all(deps)))
+      .catch((e) => {
+        this.log.error('apply_block', e);
+        this.requestResync();
+      });
+    return this.queue;
+  }
 
 Client side — same work as today's `subscribeEvents` body, minus the lineage:
 
@@ -148,7 +193,7 @@ Client side — same work as today's `subscribeEvents` body, minus the lineage:
    * - Seeds on first call (pinned `loadPools`), then resolves per block
    * - Returns once the commit landed, so dependents can read the store
    */
-  async applyBlock(ctx: BlockContext): Promise<void> {
+  async applyBlock(ctx: BlockContext, ready: Promise<unknown>): Promise<void> {
     if (!this.seeded) return this.seed(ctx.block);
 
     const muts: PoolMutation<T>[] = [];
@@ -157,7 +202,12 @@ Client side — same work as today's `subscribeEvents` body, minus the lineage:
       muts.push(...(await this.resolve(m, await ctx.eventsOf(m))));
     }
     if (ctx.reorg) muts.push(...(await this.heal(ctx)));
-    muts.push(...(await this.resolve(ctx.block, ctx.events)));
+
+    /**
+     * Own effects/handlers already ran; the tick's merge is the only part
+     * that needs the source's commit for this block.
+     */
+    muts.push(...(await this.resolve(ctx.block, ctx.events, ready)));
 
     if (muts.length > 0 || ctx.reorg) {
       await this.store.update((state) => {
@@ -194,7 +244,7 @@ invariant and the pairing rules stay exactly as documented in
 
 ---
 
-## Dependency stages
+## Dependency edges
 
 ```ts
   /** Clients whose committed state this one derives from */
@@ -203,9 +253,15 @@ invariant and the pairing rules stay exactly as documented in
   }
 ```
 
-HSM returns `[this.stableClient]`; everything else returns `[]`. The engine topologically
-sorts registered clients into stages — currently `[[omni, stable, xyk, aave, lbp], [hsm]]`.
-A cycle in the graph is a programming error and should throw at registration.
+HSM returns `[this.stableClient]`; everything else returns `[]`. There are no stages and no
+barrier — the engine topologically **orders** registered clients so each dispatch can hand a
+dependent its sources' completion promises for that block, and a cycle throws at
+registration. The waiting is edge-local: HSM's block N waits for stableswap's block N, and
+nothing else in the system waits for anything.
+
+That leaves the blast radius of a slow client exactly where it belongs. If stableswap is
+slow, HSM lags with it (it cannot price without it) while omni, xyk, aave and lbp are
+untouched. If HSM is slow, nobody waits.
 
 HSM's merge becomes a plain read with a reference check, entirely inside HSM:
 
@@ -292,17 +348,22 @@ where fork churn already slows the node (see the unincluded-segment note in
 
 ## Risks & mitigations
 
-- **One slow client delays the pass.** Today a slow AAVE resolve can't delay OMNI's commit;
-  with stages, the pass ends when the slowest client in each stage finishes, and the next
-  block waits. Mitigation: wrap `applyBlock` in a per-client timeout — on expiry, log,
-  `reseed(client)`, and continue the pass without it. **Open:** should dependents of a
-  timed-out client skip their merge for that block (stay a block behind) or proceed?
-- **Head-of-line blocking on the stream.** The engine's `concatMap` queues, exactly as each
-  client's does today, so a sustained slowdown lags rather than skips; gap backfill covers
-  whatever the bus coalesces. Unchanged in kind, but now shared — worth logging pass
-  duration.
-- **Failure isolation.** A throwing client must not abort the pass for the others:
-  `Promise.allSettled` per stage, with a rejection triggering that client's reseed.
+- **The engine's serial section is now shared.** Lineage classification is sequential by
+  nature, so a slow `getBlockHeader` delays *all* clients' dispatch for that block — where
+  today it would delay only the client that made the call. The section is bounded (one
+  header fetch in the steady state, `d + g` events reads on a reorg or gap) and does
+  strictly less total work than N clients doing it independently, but it is a shared
+  latency floor and should be logged as pass duration.
+- **A lagging client can apply an orphaned block it hasn't reached yet.** Lineage advances
+  on delivery, so the engine may already know block N-1 was orphaned while a slow client is
+  still queued on it. That client applies the fork state, then heals when the reorg context
+  reaches it — per-client ordering is preserved, so this self-corrects exactly as it does
+  today.
+- **Dependents inherit their source's lag by design.** HSM cannot commit block N before
+  stableswap does; that edge is inherent to deriving state, and it is the same edge today's
+  dual writer has. What changes is that it no longer leaks into unrelated clients.
+- **Failure isolation.** A throwing or timing-out client must not wedge its dependents:
+  `enqueue` catches, logs, and reseeds, so its completion promise always settles.
 - **Bigger blast radius.** One engine touching all pool types means a regression hits
   everything; hence the phased migration below, with the differential probe as the gate.
 
@@ -316,7 +377,7 @@ Each phase is independently testable, and the probe (`verifyEds.ts`) is the gate
 |---|---|---|
 | 1 | `PoolStore.update` returns its queued promise | unit tests |
 | 2 | add `PoolSync`; move driver + lineage + watchdog out of `PoolClient`; revert the `processed$` / `blockSource` / `DrivenBlock` feed; one shared `eventsOf` | 20-min probe with omni + stable + xyk + aave through reorg churn |
-| 3 | stages + `dependencies()`; HSM tick reads `stableClient.pools`; public `get pools()`; drop `pools()` probe overrides | probe with **HSM enabled** — one check line per block, no duplicate, `#13488049`-class staleness gone |
+| 3 | `dependencies()` + per-block edge waits; HSM tick reads `stableClient.pools`; public `get pools()`; drop `pools()` probe overrides | probe with **HSM enabled** — one check line per block, no duplicate, `#13488049`-class staleness gone |
 | 4 | fold this document into `SOR_v2.md` as the current design | — |
 
 The interim feed design (`processed$` + `blockSource`, currently in the working tree and
@@ -328,7 +389,8 @@ payload parameter on `tickMutations`. Phase 2 deletes it.
 ## Open questions
 
 1. Dependent behaviour when a source client times out or is mid-reseed — skip the merge
-   this block, or merge the last known state?
+   this block, or merge the last known state? (`enqueue` guarantees the wait *ends*; what
+   the dependent does with a source that failed is still open.)
 2. Should the engine expose pass telemetry (duration, per-client resolve time) as a debug
    log, given fork churn is the dominant latency source right now?
 3. `REORG_DEPTH` currently bounds both tracker lineage and each client's matched-event

@@ -1,11 +1,10 @@
-export { ChainTracker } from './ChainTracker';
+export { ChainTracker, REORG_DEPTH } from './ChainTracker';
 export { EventBus } from './EventBus';
 export {
-  AppliedBlock,
   BlockRef,
   DecodedEvent,
   BlockEvents,
-  DrivenBlock,
+  BlockContext,
   PoolMutation,
   PoolEventHandler,
   PoolEventEffect,
