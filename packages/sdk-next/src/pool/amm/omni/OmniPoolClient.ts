@@ -11,6 +11,7 @@ import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { BlockAt } from '../../../api';
 import { TEmaOracle, TEmaPair } from '../../../oracle';
+import { Balance } from '../../../types';
 import { fmt } from '../../../utils';
 
 import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
@@ -48,6 +49,23 @@ const STRUCTURAL_EVENTS = new Set(['TokenAdded', 'TokenRemoved']);
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   private poolAddress = this.getPoolAddress();
+
+  private assetState = this.queryCache.scope<
+    [number],
+    TOmnipoolAsset | undefined
+  >(
+    'Omnipool.Assets',
+    (at, id) => this.api.query.Omnipool.Assets.getValue(id, { at }),
+    (id) => String(id),
+    'block'
+  );
+
+  private assetBalance = this.queryCache.scope<[number], Balance>(
+    'Omnipool.Balance',
+    (at, id) => this.balance.getBalanceAt(this.poolAddress, id, at),
+    (id) => String(id),
+    'block'
+  );
 
   private dynamicFeesConfig = this.queryCache.scope<
     [number],
@@ -286,7 +304,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       match: (e) => e.pallet === 'Omnipool' && ASSET_EVENTS.has(e.method),
       resolve: (e, block) => {
         const [pool] = this.store.pools;
-        this.log.trace(e.method, { asset: e.data.asset_id });
+        this.log.trace(e.method.toLowerCase(), { asset: e.data.asset_id });
         return this.assetMutations(
           [e.data.asset_id, pool.hubAssetId],
           block.hash
@@ -316,7 +334,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return {
       match: (e) => e.pallet === 'Omnipool' && STRUCTURAL_EVENTS.has(e.method),
       apply: async (e) => {
-        this.log.debug('resync', { event: e.method });
+        this.log.debug('pool_resync', { event: e.method });
         this.requestResync();
       },
     };
@@ -369,7 +387,10 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
   /**
    * Dynamic fee cache — recomputed on-chain per trade for the traded assets.
    *
-   * - Read their `DynamicFees.AssetFee` at the event's block
+   * - Warms `DynamicFees.AssetFee` at the event's block so a later quote reads
+   *   it without a round trip
+   * - Goes through the block-scoped cache, so every hop naming an asset shares
+   *   one read, and the entry can't outlive its block
    */
   private syncDynamicFeeEffect(): PoolEventEffect {
     return {
@@ -386,12 +407,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
           ids.add(io.asset);
         }
         await Promise.all(
-          [...ids].map(async (id) => {
-            const fee = await this.api.query.DynamicFees.AssetFee.getValue(id, {
-              at: block.hash,
-            });
-            this.dynamicFees.set(fee, id);
-          })
+          [...ids].map((id) => this.dynamicFees.get(block.hash, id))
         );
       },
     };
@@ -430,8 +446,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const slices = await Promise.all(
       assetIds.map(async (id) => {
         const [bal, state] = await Promise.all([
-          this.balance.getBalanceAt(this.poolAddress, id, at),
-          this.api.query.Omnipool.Assets.getValue(id, { at }),
+          this.assetBalance.get(at, id),
+          this.assetState.get(at, id),
         ]);
         return { id, balance: bal.transferable, state };
       })

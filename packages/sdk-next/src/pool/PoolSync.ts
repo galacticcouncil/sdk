@@ -7,27 +7,22 @@ import {
   Subscription,
   interval,
   merge,
+  filter,
 } from 'rxjs';
 
 import {
   catchError,
   concatMap,
-  filter,
+  map,
   pairwise,
   repeat,
   tap,
 } from 'rxjs/operators';
 
-import { BlockAt, Papi } from '../api';
+import { Papi } from '../api';
 
 import { PoolLog } from './PoolLog';
-import {
-  BlockContext,
-  BlockRef,
-  ChainTracker,
-  DecodedEvent,
-  EventBus,
-} from './events';
+import { BlockContext, BlockRef, DecodedEvent, EventBus } from './events';
 
 import type { PoolClient } from './PoolClient';
 
@@ -56,31 +51,25 @@ export class PoolSync extends Papi {
   private clients: PoolClient<any>[] = [];
   private refs = new Map<PoolClient<any>, number>();
 
-  private chain?: ChainTracker;
   private session?: Subscription;
   private restartAt = 0;
 
-  private constructor(client: PolkadotClient, at: BlockAt) {
-    super(client, at);
-    /**
-     * A historical `at` is a pinned snapshot, never watched — such a client
-     * only reaches the driver if subscribed directly, so follow best.
-     */
-    this.eventBus = new EventBus(
-      this.api,
-      at === 'finalized' ? 'finalized' : 'best'
-    );
+  private constructor(client: PolkadotClient) {
+    super(client, 'best');
+    this.eventBus = new EventBus(client);
   }
 
   /**
-   * The driver, following the `at` of whoever created it first.
+   * The driver, shared by every client it drives.
+   *
+   * - Always follows the best chain: it is the only feed a live pool can track,
+   *   so there is no per-client target to reconcile
    *
    * @param client - polkadot client
-   * @param at - feed the registering client was created with
    */
-  static shared(client: PolkadotClient, at: BlockAt = 'best'): PoolSync {
+  static shared(client: PolkadotClient): PoolSync {
     if (!PoolSync.instance) {
-      PoolSync.instance = new PoolSync(client, at);
+      PoolSync.instance = new PoolSync(client);
     }
     return PoolSync.instance;
   }
@@ -107,7 +96,7 @@ export class PoolSync extends Papi {
       this.clients.push(client);
       this.order();
       client.syncReset();
-      this.log.debug('register', {
+      this.log.debug('sync_register', {
         pool: client.getPoolType(),
         deps: client.dependencies().map((dep) => dep.getPoolType()),
       });
@@ -125,7 +114,7 @@ export class PoolSync extends Papi {
    * @param client - the client to reseed
    */
   reseed(client: PoolClient<any>): void {
-    this.log.debug('reseed', { pool: client.getPoolType() });
+    this.log.debug('sync_reseed', { pool: client.getPoolType() });
     client.syncReset();
   }
 
@@ -138,7 +127,7 @@ export class PoolSync extends Papi {
 
     this.refs.delete(client);
     this.clients = this.clients.filter((c) => c !== client);
-    this.log.debug('release', {
+    this.log.debug('sync_release', {
       pool: client.getPoolType(),
       driven: this.clients.map((c) => c.getPoolType()),
     });
@@ -147,8 +136,7 @@ export class PoolSync extends Papi {
   }
 
   private start(): void {
-    this.log.debug('start', { at: this.at });
-    this.chain = new ChainTracker(this.client);
+    this.log.debug('sync_start', { at: this.at });
     const session = new Subscription();
     session.add(this.subscribeBlocks());
     session.add(this.startWatchdog());
@@ -158,7 +146,6 @@ export class PoolSync extends Papi {
   private stop(): void {
     this.session?.unsubscribe();
     this.session = undefined;
-    this.chain = undefined;
   }
 
   /**
@@ -190,18 +177,46 @@ export class PoolSync extends Papi {
   }
 
   /**
-   * One pass per delivered block: lineage, shared reads, dispatch.
+   * One pass per feed update: read the tip's events, then dispatch.
    *
-   * - The serial section is lineage only, so the next block is classified
-   *   without waiting for any client's resolve
+   * - The feed already diffed itself, so the serial section is one events read
+   *   and no lineage RPC at all
+   * - Dispatch is not awaited, so the next update is handled without waiting
+   *   for any client's resolve
    */
   private subscribeBlocks(): Subscription {
     return this.eventBus
-      .watchBlockEvents()
+      .watchChain()
       .pipe(
-        concatMap(async ({ block, events }) => {
-          const chain = this.chain;
-          if (!chain) return;
+        concatMap(async ({ applied, orphaned, gap }) => {
+          /**
+           * Lagged past the feed's window — the blocks in between are gone, so
+           * no replay can reconstruct them.
+           */
+          if (gap) {
+            this.log.debug('chain_gap', {
+              at: applied[applied.length - 1].number,
+              from: applied[0].number,
+            });
+            this.reseedAll('gap');
+          }
+
+          const block = applied[applied.length - 1];
+          const below = applied.slice(0, -1);
+
+          if (orphaned.length > 0) {
+            this.log.debug('chain_reorg', {
+              at: block.number,
+              depth: orphaned.length,
+              replaced: below.length,
+              blocks: orphaned.map((b) => b.number),
+            });
+          } else if (below.length > 0) {
+            this.log.debug('chain_backfill', {
+              at: block.number,
+              blocks: below.map((b) => b.number),
+            });
+          }
 
           /**
            * One events read per referenced block, shared by every client.
@@ -216,43 +231,11 @@ export class PoolSync extends Papi {
             return pending;
           };
 
-          /**
-           * The first delivery pins the cursor; clients seed pinned at it.
-           */
-          if (!chain.seeded) {
-            chain.apply(block);
-            this.dispatch({
-              block,
-              events,
-              missed: [],
-              reorg: false,
-              orphaned: [],
-              canonical: [],
-              eventsOf,
-            });
-            return;
-          }
-
-          const { missed, reorg } = await chain.classify(block);
-          const { orphaned, canonical } = reorg
-            ? await chain.split(block)
-            : { orphaned: [], canonical: [] };
-
-          /**
-           * Lineage advances on delivery, independent of client progress —
-           * `classify` compares against the last block DELIVERED.
-           */
-          for (const m of missed) chain.remember(m);
-          if (reorg) chain.repair(orphaned, canonical);
-          chain.apply(block);
-
           this.dispatch({
             block,
-            events,
-            missed,
-            reorg,
+            events: await eventsOf(block),
+            below,
             orphaned,
-            canonical,
             eventsOf,
           });
         }),
@@ -283,18 +266,21 @@ export class PoolSync extends Papi {
   }
 
   /**
-   * Starts the connection and block watchdog.
+   * Starts the block watchdog.
    *
-   * - Reseeds every client on offline → online recovery
+   * - Reseeds when a dropped connection comes back
    * - Reseeds on a finalized block gap (monotonic, so reorgs never trip it)
    * - Reseeds periodically
    * - Errors are swallowed and the watchdog re-subscribes (`repeat`)
    */
   private startWatchdog(): Subscription {
     const recovery$ = this.watcher.connection$.pipe(
+      map((state) => ({ state, at: Date.now() })),
       pairwise(),
-      filter(([prev, curr]) => prev === 'offline' && curr === 'online'),
-      tap(() => this.reseedAll('recovery')),
+      filter(
+        ([prev, curr]) => prev.state === 'offline' && curr.state === 'online'
+      ),
+      tap(([prev, curr]) => this.reseedAll('recovery', curr.at - prev.at)),
       catchError((e) => {
         this.log.error('watchdog_recovery_error', e);
         return EMPTY;
@@ -331,8 +317,12 @@ export class PoolSync extends Papi {
     return merge(recovery$, gap$, periodic$).subscribe();
   }
 
-  private reseedAll(reason: string): void {
-    this.log.debug('reseed_all', { reason, clients: this.clients.length });
+  private reseedAll(reason: string, downMs?: number): void {
+    this.log.debug('sync_reseed_all', {
+      reason,
+      clients: this.clients.length,
+      ...(downMs !== undefined && { downMs }),
+    });
     for (const client of this.clients) client.syncReset();
   }
 
@@ -370,7 +360,7 @@ export class PoolSync extends Papi {
 
     setTimeout(() => {
       if (this.clients.length === 0) return;
-      this.log.debug('restart', { clients: this.clients.length });
+      this.log.debug('sync_restart', { clients: this.clients.length });
       this.session?.unsubscribe();
       this.session = undefined;
       this.reseedAll('restart');

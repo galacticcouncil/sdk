@@ -8,12 +8,7 @@ import { ApiUrl } from '../types';
 import { EvmClient } from '../../../src/evm';
 import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../src/pool';
 
-const DURATION_MS = 20 * 60 * 1000;
-
-// Feed every client follows. `finalized` is canonical, so it must produce ZERO
-// reorgs — a reorg log there means the lineage classification is wrong, not
-// that the chain forked. It exercises gap backfill instead (finality jumps).
-const FOLLOW: 'best' | 'finalized' = 'best';
+const DURATION_MS = 2 * 60 * 60 * 1000;
 
 // Relative tolerance (ppm) for fields that converge every block from event-cached
 // inputs — yield-bearing (aToken) reserve balances and oracle-driven pegs. The
@@ -155,6 +150,17 @@ const fieldDiffs = (l: PoolBase, r: PoolBase) => {
 };
 
 /**
+ * Identify a pool so a failure names it, not just its address.
+ *
+ * - `id` is what the chain keys a stableswap pool by, so it maps straight to
+ *   `Stableswap.PoolPegs` / `Pools` when chasing a diverged input
+ */
+const identify = (pool: PoolBase): string => {
+  const { id, type, address } = pool as PoolBase & { id?: number };
+  return `${type}${id !== undefined ? ` id=${id}` : ''} ${address}`;
+};
+
+/**
  * Readable diffs between the live and reloaded state, per pool.
  */
 const diff = (live: PoolBase[], ref: PoolBase[]) => {
@@ -162,22 +168,22 @@ const diff = (live: PoolBase[], ref: PoolBase[]) => {
   const refByAddr = new Map(ref.map((p) => [p.address, p]));
   const addresses = new Set([...liveByAddr.keys(), ...refByAddr.keys()]);
 
-  const pools: { address: string; fields: string[] }[] = [];
+  const pools: { pool: string; fields: string[] }[] = [];
   let drift = 0;
   for (const address of addresses) {
     const l = liveByAddr.get(address);
     const r = refByAddr.get(address);
     if (!l) {
-      pools.push({ address, fields: ['missing in live'] });
+      pools.push({ pool: identify(r!), fields: ['missing in live'] });
       continue;
     }
     if (!r) {
-      pools.push({ address, fields: ['missing in ref'] });
+      pools.push({ pool: identify(l), fields: ['missing in ref'] });
       continue;
     }
     const { real, drift: d } = fieldDiffs(l, r);
     drift += d;
-    if (real.length) pools.push({ address, fields: real });
+    if (real.length) pools.push({ pool: identify(l), fields: real });
   }
   return { pools, drift };
 };
@@ -222,29 +228,31 @@ const verify = <T extends PoolBase>(
     if (!at || busy) return; // seed emission, or a check still in flight
     busy = true;
 
+    const t0 = performance.now();
     const snapshot = [...livePools()];
     ref(at)
       .then(async (actual) => {
         stats.checks++;
+        const ref = `ref=${Math.round(performance.now() - t0)}ms`;
         const { pools, drift } = diff(snapshot, actual);
         stats.drift += drift;
         if (pools.length === 0) {
           stats.ok++;
-          console.log(`[${label}] #${no} ✓ ${tally(stats)}`);
+          console.log(`[${label}] #${no} ✓ ${tally(stats)} ${ref}`);
         } else {
           stats.bad++;
           console.log(
-            `[${label}] #${no} ✗ ${pools.length} pool(s) ${tally(stats)}`
+            `[${label}] #${no} ✗ ${pools.length} pool(s) ${tally(stats)} ${ref}`
           );
           for (const p of pools) {
-            console.log(`  ${p.address}`);
+            console.log(`  ${p.pool}`);
             for (const f of p.fields) console.log(`    ${f}`);
           }
         }
       })
       .catch((e) => {
         stats.skip++;
-        console.log(`[${label}] #${no} · skip (${(e as Error).message})`);
+        console.log(`[${label}] #${no} skip (${(e as Error).message})`);
       })
       .finally(() => {
         busy = false;
@@ -262,11 +270,11 @@ class VerifyEds extends PapiExecutor {
       hsm: newStats(),
     };
 
-    const omniLive = new OmniProbe(client, evm, FOLLOW);
-    const stableLive = new StableProbe(client, evm, FOLLOW);
-    const xykLive = new XykProbe(client, evm, FOLLOW);
-    const aaveLive = new AaveProbe(client, evm, FOLLOW);
-    const hsmLive = new HsmProbe(client, evm, stableLive, FOLLOW);
+    const omniLive = new OmniProbe(client, evm);
+    const stableLive = new StableProbe(client, evm);
+    const xykLive = new XykProbe(client, evm);
+    const aaveLive = new AaveProbe(client, evm);
+    const hsmLive = new HsmProbe(client, evm, stableLive);
 
     /**
      * Pinned reference loaders — a FRESH client per check, pinned at the
@@ -280,6 +288,7 @@ class VerifyEds extends PapiExecutor {
      * - HSM builds its own stableswap ref for that check, not a second live one
      */
     const session = new Subscription();
+
     session.add(
       verify(
         'OMNI',
@@ -302,17 +311,19 @@ class VerifyEds extends PapiExecutor {
         stats.stable
       )
     );
-    session.add(
-      verify(
-        'XYK ',
-        () => xykLive.getSubscriber(),
-        () => xykLive.blockNo(),
-        () => xykLive.hash(),
-        () => xykLive.pools,
-        (at) => new XykPoolClient(client, evm, at).getPools(at),
-        stats.xyk
-      )
-    );
+    // Heavy for no reason -> there is literally no traffic in XYKs now. Tested.
+    //
+    // session.add(
+    //   verify(
+    //     'XYK ',
+    //     () => xykLive.getSubscriber(),
+    //     () => xykLive.blockNo(),
+    //     () => xykLive.hash(),
+    //     () => xykLive.pools,
+    //     (at) => new XykPoolClient(client, evm, at).getPools(at),
+    //     stats.xyk
+    //   )
+    // );
     session.add(
       verify(
         'AAVE',

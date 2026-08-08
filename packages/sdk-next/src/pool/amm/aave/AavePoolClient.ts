@@ -18,6 +18,17 @@ const { ERC20 } = erc20;
 const SYNC_MM_EVENTS = ['Supply', 'Withdraw', 'Repay', 'Borrow'];
 
 export class AavePoolClient extends PoolClient<PoolBase> {
+  private poolLiquidity = this.queryCache.scope<
+    [number, number],
+    { liqudity_in: bigint; liqudity_out: bigint }
+  >(
+    'AaveTradeExecutor.pool',
+    (at, reserve, atoken) =>
+      this.api.apis.AaveTradeExecutor.pool(reserve, atoken, { at }),
+    (reserve, atoken) => `${reserve}:${atoken}`,
+    'block'
+  );
+
   getPoolType(): PoolType {
     return PoolType.Aave;
   }
@@ -98,10 +109,11 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   ): Promise<AavePoolToken[]> {
     const [reserve, aToken] = pool.tokens;
 
-    const { liqudity_in, liqudity_out } =
-      await this.api.apis.AaveTradeExecutor.pool(reserve.id, aToken.id, {
-        at,
-      });
+    const { liqudity_in, liqudity_out } = await this.poolLiquidity.get(
+      at,
+      reserve.id,
+      aToken.id
+    );
 
     return pool.tokens.map((t) => {
       const balance = t.id === reserve.id ? liqudity_in : liqudity_out;
@@ -174,15 +186,19 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   /**
    * Money-market activity — `EVM.Log` Supply/Withdraw/Repay/Borrow.
    *
+   * - Matched on `topic0`, so an unrelated log is skipped without decoding
    * - Match the pool by its reserve's H160 address
    * - Re-read reserves via the trade executor, pinned at the event's block
    */
   private syncEvmLogHandler(): PoolEventHandler<PoolBase> {
     return {
-      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
+      match: (e) =>
+        e.pallet === 'EVM' &&
+        e.method === 'Log' &&
+        SYNC_MM_EVENTS.includes(AaveLog.eventName(e.data)),
       resolve: (e, block) => {
         const ev = AaveLog.parse(e.data);
-        if (!ev || !SYNC_MM_EVENTS.includes(ev.eventName)) {
+        if (!ev) {
           return Promise.resolve([]);
         }
         const pools = this.store.pools.filter((pool) => {
@@ -190,7 +206,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
           return this.getReserveH160Id(reserve).toLowerCase() === ev.reserve;
         });
         if (pools.length > 0) {
-          this.log.trace(ev.eventName, { pools: pools.length });
+          this.log.trace(ev.eventName.toLowerCase(), { pools: pools.length });
         }
         return this.reserveMutations(pools, block.hash);
       },

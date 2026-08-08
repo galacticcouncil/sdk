@@ -78,12 +78,12 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     ];
   }
 
-  private get isHistorical(): boolean {
-    return this.at !== 'best' && this.at !== 'finalized';
+  private get isSnapshot(): boolean {
+    return this.at !== 'best';
   }
 
   private subscribe<T extends PoolBase>(client: PoolClient<T>) {
-    if (this.isHistorical) {
+    if (this.isSnapshot) {
       return Subscription.EMPTY;
     }
 
@@ -164,7 +164,10 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
         .filter((client) => this.active.has(client.getPoolType()))
         .map((client) => client.getPools())
     );
-    this.isReady = true;
+    /**
+     * Only a subscription keeps the map fresh; a fixed target reads every time.
+     */
+    this.isReady = !this.isSnapshot;
     return pools.flat();
   }
 

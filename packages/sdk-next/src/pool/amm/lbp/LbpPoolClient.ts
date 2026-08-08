@@ -279,7 +279,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     return {
       match: (e) => e.pallet === 'LBP' && STRUCTURAL_EVENTS.has(e.method),
       apply: async (e) => {
-        this.log.debug('resync', { event: e.method });
+        this.log.debug('pool_resync', { event: e.method });
         this.requestResync();
       },
     };

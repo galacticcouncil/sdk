@@ -39,6 +39,8 @@ import {
 } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
+import { Balance } from '../../../types';
+
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 import { StableSwapPeg } from './StableSwapPeg';
@@ -46,6 +48,11 @@ import { StableSwapPeg } from './StableSwapPeg';
 import { TPegLatest, TStableswap, TStableswapPeg } from './types';
 
 const { FeeUtils } = fmt;
+
+const SYNC_MM_ORACLE_EVENTS = [
+  'ManagedOracle.PriceUpdated',
+  'DIA.OracleUpdate',
+];
 
 export class StableSwapClient extends PoolClient<StableSwapBase> {
   protected poolsData: Map<number, TStableswap> = new Map([]);
@@ -72,6 +79,22 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     (_at, h160) => this.mmOracle.getData(h160),
     (h160) => h160.toLowerCase(),
     10 * 60 * 1000
+  );
+
+  private poolBalance = this.queryCache.scope<[number, number], Balance>(
+    'Stableswap.Balance',
+    (at, poolId, assetId) =>
+      this.balance.getBalanceAt(this.getPoolAddress(poolId), assetId, at),
+    (poolId, assetId) => `${poolId}:${assetId}`,
+    'block'
+  );
+
+  private poolIssuance = this.queryCache.scope<[number], bigint | undefined>(
+    'Tokens.TotalIssuance',
+    (at, poolId) =>
+      this.api.query.Tokens.TotalIssuance.getValue(poolId, { at }),
+    (poolId) => String(poolId),
+    'block'
   );
 
   private pegs = this.queryCache.scope<[number], TStableswapPeg | undefined>(
@@ -497,7 +520,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         e.pallet === 'Stableswap' &&
         (e.method === 'PoolCreated' || e.method === 'PoolDestroyed'),
       apply: async (e) => {
-        this.log.debug('resync', { event: e.method });
+        this.log.debug('pool_resync', { event: e.method });
         this.requestResync();
       },
     };
@@ -624,12 +647,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   /**
    * Managed/DIA oracle cache — `EVM.Log` events carrying MM price updates.
    *
+   * - Matched on `topic0`, so an unrelated log is skipped without decoding
    * - Route the emitter/key to its MM address
    * - Refresh that MM oracle
    */
   private syncMmOracleEffect(): PoolEventEffect {
     return {
-      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
+      match: (e) =>
+        e.pallet === 'EVM' &&
+        e.method === 'Log' &&
+        SYNC_MM_ORACLE_EVENTS.includes(MmOracleLog.eventName(e.data)),
       apply: async (e) => {
         const ev = MmOracleLog.parse(e.data);
 
@@ -676,12 +703,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       Promise.all(
         assetIds.map(async (id) => ({
           id,
-          balance: (await this.balance.getBalanceAt(address, id, at))
-            .transferable,
+          balance: (await this.poolBalance.get(at, poolId, id)).transferable,
         }))
       ),
       withIssuance
-        ? this.api.query.Tokens.TotalIssuance.getValue(poolId, { at })
+        ? this.poolIssuance.get(at, poolId)
         : Promise.resolve(undefined),
     ]);
 
@@ -717,23 +743,29 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   protected async tickMutations(
     block: BlockRef
   ): Promise<PoolMutation<StableSwapBase>[]> {
-    const muts: PoolMutation<StableSwapBase>[] = [];
-    for (const pool of this.store.pools) {
-      const data = this.poolsData.get(pool.id);
-      if (data) {
-        const pegs = await this.getPoolPegs(
-          pool.id,
-          data,
-          block.number,
-          block.hash
-        );
-        const amplification = this.getPoolAmplification(data, block.number);
-        muts.push({
-          address: pool.address,
-          apply: (p) => ({ ...p, ...pegs, ...amplification }),
-        });
-      }
-    }
-    return muts;
+    const muts = await Promise.all(
+      this.store.pools.map(
+        async (pool): Promise<PoolMutation<StableSwapBase> | undefined> => {
+          const data = this.poolsData.get(pool.id);
+          if (!data) return undefined;
+
+          const pegs = await this.getPoolPegs(
+            pool.id,
+            data,
+            block.number,
+            block.hash
+          );
+          const amplification = this.getPoolAmplification(data, block.number);
+          return {
+            address: pool.address,
+            apply: (p: StableSwapBase) => ({ ...p, ...pegs, ...amplification }),
+          };
+        }
+      )
+    );
+
+    return muts.filter(
+      (m): m is PoolMutation<StableSwapBase> => m !== undefined
+    );
   }
 }

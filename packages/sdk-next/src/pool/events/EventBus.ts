@@ -1,74 +1,106 @@
-import { TypedApi } from 'polkadot-api';
+import { PolkadotClient, TypedApi } from 'polkadot-api';
 
 import { hydration } from '@galacticcouncil/descriptors';
 
-import { log } from '@galacticcouncil/common';
-
 import { Observable, filter, map, share } from 'rxjs';
 
-import { BlockEvents, DecodedEvent } from './types';
-
-const { logger } = log;
+import { BlockRef, ChainUpdate, DecodedEvent } from './types';
 
 /**
- * The upstream event source for pool sync.
+ * The chain feed for pool sync.
  *
+ * - Follows `bestBlocks$`, NOT a storage watch: it carries the whole
+ *   unfinalized chain (best → finalized) on every change, so one emission
+ *   closes a gap or replaces a reorged suffix
+ * - Diffs each emission against the last, so gaps and reorgs come out of the
+ *   feed itself — no `parentHash` walking, no header reads
  * - Owned by the pool sync driver, its only consumer
  */
 export class EventBus {
-  /** Multicast per-block stream */
-  private readonly blockEvents$: Observable<BlockEvents>;
+  private readonly api: TypedApi<typeof hydration>;
 
-  /** Hash of the last delivered block, dedupes follower re-deliveries */
-  private lastHash?: string;
+  /** Multicast feed updates */
+  private readonly chain$: Observable<ChainUpdate>;
+
+  /** Chain as last delivered, newest-first */
+  private delivered: BlockRef[] = [];
 
   /**
-   * @param api - typed api
-   * @param at - feed to follow; `best` prices the market, `finalized` lags
+   * @param client - polkadot client
    */
-  constructor(
-    private readonly api: TypedApi<typeof hydration>,
-    private readonly at: 'best' | 'finalized' = 'best'
-  ) {
-    this.blockEvents$ = this.api.query.System.Events.watchValue({
-      at: this.at,
-    }).pipe(
+  constructor(private readonly client: PolkadotClient) {
+    this.api = client.getTypedApi(hydration);
+
+    const ref = (b: { hash: string; number: number }): BlockRef => ({
+      hash: b.hash,
+      number: b.number,
+    });
+
+    this.chain$ = this.client.bestBlocks$.pipe(
+      map((bs) => bs.map(ref)),
+      map((chain) => this.diff(chain)),
       /**
-       * The follower re-delivers the current best after a chainHead restart;
-       * a re-delivery would double-apply handlers and pollute reorg history.
+       * A finality-only change prunes the window without adding blocks.
        */
-      filter(({ block }) => {
-        if (block.hash === this.lastHash) {
-          logger.debug('event_bus redelivery :', { block: block.number });
-          return false;
-        }
-        this.lastHash = block.hash;
-        return true;
-      }),
-      map(({ block, value }) => ({
-        block: { hash: block.hash, number: block.number },
-        events: this.decode(value),
-      })),
+      filter(({ applied }) => applied.length > 0),
       share({ resetOnRefCountZero: false })
     );
   }
 
-  watchBlockEvents(): Observable<BlockEvents> {
-    return this.blockEvents$;
+  watchChain(): Observable<ChainUpdate> {
+    return this.chain$;
   }
 
   /**
    * Read a block's decoded events, PINNED at `at`.
    *
-   * - Used to replay blocks the best-block watch skipped
+   * - Used for the blocks under the tip: gap-filled or reorg-replaced
    */
   async eventsAt(at: string): Promise<DecodedEvent[]> {
     const value = await this.api.query.System.Events.getValue({ at });
     return this.decode(value);
   }
 
+  /**
+   * Diff the feed's chain against what it last delivered.
+   *
+   * - First update applies only the head: blocks under it are already
+   *   reflected in the snapshot a client seeds from it
+   * - A height that dropped out of the window was finalized, NOT replaced, so
+   *   orphaning is decided by a differing hash AT the same height
+   */
+  private diff(chain: BlockRef[]): ChainUpdate {
+    const prev = this.delivered;
+    this.delivered = chain;
+
+    if (prev.length === 0) {
+      return { applied: chain.slice(0, 1), orphaned: [], gap: false };
+    }
+
+    const byNumber = new Map(chain.map((b) => [b.number, b.hash]));
+    const seen = new Set(prev.map((b) => b.hash));
+    const ascending = (a: BlockRef, b: BlockRef) => a.number - b.number;
+
+    const applied = chain.filter((b) => !seen.has(b.hash)).sort(ascending);
+    const orphaned = prev
+      .filter((b) => {
+        const canonical = byNumber.get(b.number);
+        return canonical !== undefined && canonical !== b.hash;
+      })
+      .sort(ascending);
+
+    /**
+     * Lagged further than the feed's window: the blocks in between are gone.
+     */
+    const tip = prev.reduce((max, b) => Math.max(max, b.number), 0);
+    const gap = applied.length > 0 && applied[0].number > tip + 1;
+
+    return { applied, orphaned, gap };
+  }
+
   private decode(value: unknown): DecodedEvent[] {
-    return (value as any[]).map((r) => ({
+    return (value as any[]).map((r, index) => ({
+      index,
       pallet: r.event.type,
       method: r.event.value.type,
       data: r.event.value.value,

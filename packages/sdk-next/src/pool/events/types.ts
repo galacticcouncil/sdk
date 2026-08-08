@@ -19,6 +19,8 @@ export interface BlockRef {
  *   event.value.value → payload  (typed per (pallet, method))
  */
 export interface DecodedEvent {
+  /** Position in its block's event list; `block:index` identifies the record */
+  index: number;
   pallet: string;
   method: string;
   data: any;
@@ -30,17 +32,32 @@ export interface BlockEvents {
 }
 
 /**
- * One block's sync context, computed once per pass and shared by all clients.
+ * One feed update, diffed against what the feed last delivered.
  *
- * - `missed`: canonical blocks to backfill before `block`, ascending
- * - `orphaned` / `canonical`: the reorg window (empty when `reorg` is false)
+ * - `applied`: canonical blocks to apply, ASCENDING; the last one is the tip
+ * - `orphaned`: delivered blocks the feed now reports a different hash for
+ * - `gap`: blocks were lost below the feed's window, so state must be reseeded
+ */
+export interface ChainUpdate {
+  applied: BlockRef[];
+  orphaned: BlockRef[];
+  gap: boolean;
+}
+
+/**
+ * One pass's sync context, computed once and shared by all clients.
+ *
+ * - `block` / `events`: the tip, resolved normally
+ * - `below`: canonical blocks under the tip — gap-filled or reorg-replaced
+ * - `orphaned`: blocks replaced at the same height; each client replays what
+ *   IT matched there
+ * - `below` and `orphaned` are replayed at the tip, not per block: handlers
+ *   re-read absolute state, so only the newest read matters
  * - `eventsOf`: pinned events for a referenced block, read once per pass
  */
 export interface BlockContext extends BlockEvents {
-  missed: BlockRef[];
-  reorg: boolean;
+  below: BlockRef[];
   orphaned: BlockRef[];
-  canonical: BlockRef[];
   eventsOf(ref: BlockRef): Promise<DecodedEvent[]>;
 }
 

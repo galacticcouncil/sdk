@@ -6,7 +6,7 @@ import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { BlockAt } from '../../../api';
 import { EvmClient } from '../../../evm';
 import { GhoTokenLog, GhoTokenClient } from '../../../gho';
-import { XcmV3Multilocation } from '../../../types';
+import { Balance, XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
 import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
@@ -28,6 +28,21 @@ const SYNC_BUCKET_EVENTS = [
 export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   private ghoClient: GhoTokenClient;
   private stableClient: StableSwapClient;
+
+  private collateralBalance = this.queryCache.scope<[string, number], Balance>(
+    'HSM.Collateral',
+    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
+    (address, assetId) => `${address}:${assetId}`,
+    'block'
+  );
+
+  private mintCapacity = this.queryCache.scope<[string, string], bigint>(
+    'HSM.MintCapacity',
+    (_at, hollar, facilitator) =>
+      this.ghoClient.getFacilitatorCapacity(hollar, facilitator),
+    (hollar, facilitator) => `${hollar}:${facilitator}`,
+    'block'
+  );
 
   /** Last merged source pool per id; identity check for the per-block merge */
   private merged = new Map<number, StableSwapBase>();
@@ -99,7 +114,8 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     const facilitatorH160 = H160.fromAny(facilitator);
     const hollarH160 = this.getHollarAddress(hollarLocation);
 
-    const hsmMintCapacity = await this.ghoClient.getFacilitatorCapacity(
+    const hsmMintCapacity = await this.mintCapacity.get(
+      at,
       hollarH160,
       facilitatorH160
     );
@@ -195,15 +211,19 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   /**
    * Mint capacity — GHO facilitator bucket `EVM.Log` (capacity/level updated).
    *
+   * - Matched on `topic0`, so an unrelated log is skipped without decoding
    * - Re-read the facilitator capacity when the HSM facilitator's bucket moves
    * - Patch `hsmMintCapacity` across all pools
    */
   private syncMintCapacityHandler(): PoolEventHandler<HsmPoolBase> {
     return {
-      match: (e) => e.pallet === 'EVM' && e.method === 'Log',
-      resolve: async (e) => {
+      match: (e) =>
+        e.pallet === 'EVM' &&
+        e.method === 'Log' &&
+        SYNC_BUCKET_EVENTS.includes(GhoTokenLog.eventName(e.data)),
+      resolve: async (e, block) => {
         const ev = GhoTokenLog.parse(e.data);
-        if (!ev || !SYNC_BUCKET_EVENTS.includes(ev.eventName)) return [];
+        if (!ev) return [];
 
         const pools = this.store.pools;
         if (pools.length === 0) return [];
@@ -213,7 +233,8 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         if (facilitatorH160.toLowerCase() !== ev.facilitator) return [];
 
         this.log.trace('capacity', { event: ev.eventName });
-        const hsmMintCapacity = await this.ghoClient.getFacilitatorCapacity(
+        const hsmMintCapacity = await this.mintCapacity.get(
+          block.hash,
           hollarH160,
           facilitatorH160
         );
@@ -271,10 +292,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
     return Promise.all(
       affected.map(async (pool) => {
-        const balance = await this.balance.getBalanceAt(
+        const balance = await this.collateralBalance.get(
+          at,
           hsmAddress,
-          pool.collateralId,
-          at
+          pool.collateralId
         );
         return {
           address: pool.address,

@@ -14,6 +14,8 @@ import {
 } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
+import { Balance } from '../../../types';
+
 import { XykPoolFees } from './XykPool';
 
 // Composition changes — full reseed (v1).
@@ -21,6 +23,13 @@ const STRUCTURAL_EVENTS = new Set(['PoolCreated', 'PoolDestroyed']);
 
 export class XykPoolClient extends PoolClient<PoolBase> {
   private decimals: Map<number, number> = new Map([]);
+
+  private poolBalance = this.queryCache.scope<[string, number], Balance>(
+    'Xyk.Balance',
+    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
+    (address, assetId) => `${address}:${assetId}`,
+    'block'
+  );
 
   getPoolType(): PoolType {
     return PoolType.XYK;
@@ -172,7 +181,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     return {
       match: (e) => e.pallet === 'XYK' && STRUCTURAL_EVENTS.has(e.method),
       apply: async (e) => {
-        this.log.debug('resync', { event: e.method });
+        this.log.debug('pool_resync', { event: e.method });
         this.requestResync();
       },
     };
@@ -198,8 +207,7 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     const balances = await Promise.all(
       pool.tokens.map(async (t) => ({
         id: t.id,
-        balance: (await this.balance.getBalanceAt(address, t.id, at))
-          .transferable,
+        balance: (await this.poolBalance.get(at, address, t.id)).transferable,
       }))
     );
 
