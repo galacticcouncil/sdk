@@ -13,13 +13,13 @@ import {
 } from 'rxjs/operators';
 
 import { BlockAt, Papi } from '../api';
-import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
-import { async, QueryCache } from '../utils';
+import { async } from '../utils';
 
 import { PoolBase, PoolFees, PoolPair, PoolType } from './types';
 import { PoolStore } from './PoolStore';
 import { PoolLog } from './PoolLog';
+import { PoolQuery } from './PoolQuery';
 import { PoolSync } from './PoolSync';
 import {
   BlockContext,
@@ -42,11 +42,11 @@ const REPLAY_DEPTH = 16;
 
 export abstract class PoolClient<T extends PoolBase> extends Papi {
   protected evm: EvmClient;
-  protected balance: BalanceClient;
+
+  protected abstract readonly query: PoolQuery;
 
   protected log: PoolLog;
   protected store = new PoolStore<T>();
-  protected queryCache = new QueryCache();
 
   /**
    * The block the event stream is currently committing.
@@ -75,7 +75,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
     super(client, at);
     this.evm = evm;
-    this.balance = new BalanceClient(client, at);
     this.log = new PoolLog(this.getPoolType());
   }
 
@@ -86,12 +85,12 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   /**
    * Load a full, coherent pool set PINNED at one block.
    *
-   * - All reads use `at` so the snapshot can't tear across blocks
-   * - Drives both the initial seed and consumer `getPools`
+   * - Every read uses `block.hash`, so the snapshot can't tear
+   * - `block.number` comes with it; nothing reads the height
    *
-   * @param at - block hash (or tag) to pin every read to
+   * @param block - the block every read pins to
    */
-  protected abstract loadPools(at: BlockAt): Promise<T[]>;
+  protected abstract loadPools(block: BlockRef): Promise<T[]>;
 
   /**
    * Clients whose committed state this pool derives from.
@@ -146,7 +145,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    * @param block - the block being committed
    */
   private async balanceMutations(block: BlockRef): Promise<PoolMutation<T>[]> {
-    const cadence = this.balance.erc20SafetyRereadBlocks;
+    const cadence = this.query.rereadBlocks;
     if (block.number - this.reconciledAt < cadence) return [];
     this.reconciledAt = block.number;
     return this.reconcileBalances(block);
@@ -175,7 +174,11 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
             erc20.map(async (t) => ({
               id: t.id,
               balance: (
-                await this.balance.getBalanceAt(pool.address, t.id, block.hash)
+                await this.query.assetBalance.get(
+                  block.hash,
+                  pool.address,
+                  t.id
+                )
               ).transferable,
             }))
           );
@@ -202,6 +205,10 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     return muts.filter((m): m is PoolMutation<T> => m !== undefined);
   }
 
+  get isSnapshot(): boolean {
+    return this.at !== 'best';
+  }
+
   /**
    * The committed pool set.
    *
@@ -213,16 +220,20 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
-   * Load and publish a coherent pool set PINNED at `at`.
+   * Load and publish a coherent pool set.
    *
    * - Defaults to `this.at` (a fixed block for consumer-created clients)
+   * - Advances the cursor, so a later quote reads the same block
    * - Seeds the store; used ad-hoc by consumers and by derived clients
    *
-   * @param at - block hash (or tag) to pin every read to
+   * @param at - block hash to pin every read to
    */
   async getPools(at: BlockAt = this.at): Promise<T[]> {
-    const pools = await this.loadPools(at);
+    const block = await this.resolveBlock(at);
+    const pools = await this.loadPools(block);
     const valid = pools.filter((p) => this.hasValidAssets(p));
+    this.block = block.number;
+    this.blockHash = block.hash;
     this.store.set(valid);
     return valid;
   }
@@ -230,12 +241,12 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   /**
    * Live pool stream, driven by {@link PoolSync}.
    *
-   * - Only the best chain can be followed live; any other `at` is a fixed read
-   *   target whose store would drift off its own pin
+   * - Only the best chain can be followed live; a fixed block is a read target
+   *   whose store would drift off its own pin
    */
   getSubscriber(): Observable<T[]> {
-    if (this.at !== 'best') {
-      throw new Error(`Live sync requires at 'best', got '${this.at}'`);
+    if (this.isSnapshot) {
+      throw new Error(`Live sync requires no fixed block, got '${this.at}'`);
     }
 
     if (!this.pools$) {
@@ -421,7 +432,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   private async seed(block: BlockRef): Promise<void> {
     try {
       const pools = await withTimeout(
-        this.loadPools(block.hash),
+        this.loadPools(block),
         60_000,
         'seed stalled'
       );

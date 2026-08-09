@@ -1,18 +1,17 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { BlockAt } from '../../../api';
-
 import {
   BlockRef,
   PoolEventEffect,
   PoolEventHandler,
   PoolMutation,
 } from '../../events';
-import { PoolType, PoolLimits, PoolFees, PoolFee, PoolPair } from '../../types';
+import { PoolType, PoolFees, PoolFee, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
 import { LbpMath } from './LbpMath';
 import { LbpPoolBase, LbpPoolFees, WeightedPoolToken } from './LbpPool';
+import { LbpQuery } from './LbpQuery';
 
 import { TLbpPoolData } from './types';
 
@@ -24,26 +23,14 @@ const STRUCTURAL_EVENTS = new Set([
 ]);
 
 export class LbpPoolClient extends PoolClient<LbpPoolBase> {
+  protected readonly query = new LbpQuery(this.client, this.evm);
+
   private readonly MAX_FINAL_WEIGHT = 100_000_000n;
 
   private poolsData: Map<string, TLbpPoolData> = new Map([]);
 
   getPoolType(): PoolType {
     return PoolType.LBP;
-  }
-
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.LBP.MaxInRatio(),
-      this.api.constants.LBP.MaxOutRatio(),
-      this.api.constants.LBP.MinTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
   }
 
   private getPoolWeights(
@@ -73,11 +60,12 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     );
   }
 
-  protected async loadPools(at: BlockAt): Promise<LbpPoolBase[]> {
+  protected async loadPools(block: BlockRef): Promise<LbpPoolBase[]> {
+    const at = block.hash;
     const [entries, validationData, limits] = await Promise.all([
-      this.api.query.LBP.PoolData.getEntries({ at }),
-      this.api.query.ParachainSystem.ValidationData.getValue({ at }),
-      this.getPoolLimits(),
+      this.query.poolData.get(at),
+      this.query.validationData.get(at),
+      this.query.limits(),
     ]);
 
     const relayParentNumber = validationData?.relay_parent_number || 0;
@@ -112,7 +100,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     poolAddress: string,
     poolEntry: TLbpPoolData,
     relayBlockNumber: number,
-    at: BlockAt
+    at: string
   ): Promise<Partial<LbpPoolBase>> {
     const { assets, repay_target, fee_collector } = poolEntry;
     const [accumulatedWeight, distributedWeight] = this.getPoolWeights(
@@ -134,14 +122,10 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
         fee_collector.toString(),
         at
       ),
-      this.balance.getBalanceAt(poolAddress, accumulated, at),
-      this.api.query.AssetRegistry.Assets.getValue(accumulated, {
-        at,
-      }),
-      this.balance.getBalanceAt(poolAddress, distributed, at),
-      this.api.query.AssetRegistry.Assets.getValue(distributed, {
-        at,
-      }),
+      this.query.assetBalance.get(at, poolAddress, accumulated),
+      this.query.asset.get(at, accumulated),
+      this.query.assetBalance.get(at, poolAddress, distributed),
+      this.query.asset.get(at, distributed),
     ]);
 
     return {
@@ -189,10 +173,10 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     }
 
     try {
-      const repayFeeCurrent = await this.balance.getBalanceAt(
+      const repayFeeCurrent = await this.query.assetBalance.get(
+        at,
         feeCollector,
-        accumulatedAsset,
-        at
+        accumulatedAsset
       );
       return repayFeeCurrent.transferable < repayTarget;
     } catch (err) {
@@ -201,17 +185,12 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     }
   }
 
-  private async getRepayFee(): Promise<PoolFee> {
-    const repayFee = await this.api.constants.LBP.repay_fee();
-    return repayFee as PoolFee;
-  }
-
   async getPoolFees(_pair: PoolPair, address: string): Promise<PoolFees> {
     const pool = this.store.pools.find(
       (pool) => pool.address === address
     ) as LbpPoolBase;
 
-    const repayFee = await this.getRepayFee();
+    const repayFee = await this.query.repayFee();
     return {
       repayFee: repayFee,
       exchangeFee: pool.fee as PoolFee,
@@ -307,8 +286,8 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     const [accumulated, distributed] = assets;
 
     const [accBal, distBal, repayFeeApplied] = await Promise.all([
-      this.balance.getBalanceAt(address, accumulated, at),
-      this.balance.getBalanceAt(address, distributed, at),
+      this.query.assetBalance.get(at, address, accumulated),
+      this.query.assetBalance.get(at, address, distributed),
       this.isRepayFeeApplied(
         accumulated,
         repay_target,
@@ -346,10 +325,7 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
   ): Promise<PoolMutation<LbpPoolBase>[]> {
     if (this.store.pools.length === 0) return [];
 
-    const validationData =
-      await this.api.query.ParachainSystem.ValidationData.getValue({
-        at: block.hash,
-      });
+    const validationData = await this.query.validationData.get(block.hash);
     const relay = validationData?.relay_parent_number;
     if (relay === undefined) return [];
 

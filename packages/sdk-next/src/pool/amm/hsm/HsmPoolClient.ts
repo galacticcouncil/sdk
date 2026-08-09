@@ -5,8 +5,8 @@ import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { BlockAt } from '../../../api';
 import { EvmClient } from '../../../evm';
-import { GhoTokenLog, GhoTokenClient } from '../../../gho';
-import { Balance, XcmV3Multilocation } from '../../../types';
+import { GhoTokenLog } from '../../../gho';
+import { XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
 import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
@@ -16,6 +16,7 @@ import { PoolClient } from '../../PoolClient';
 import { StableSwapBase, StableSwapClient } from '../stable';
 
 import { HsmPoolBase } from './HsmPool';
+import { HsmQuery } from './HsmQuery';
 
 const { FeeUtils } = fmt;
 const { H160 } = h160;
@@ -26,26 +27,10 @@ const SYNC_BUCKET_EVENTS = [
 ];
 
 export class HsmPoolClient extends PoolClient<HsmPoolBase> {
-  private ghoClient: GhoTokenClient;
+  protected readonly query = new HsmQuery(this.client, this.evm);
+
   private stableClient: StableSwapClient;
-
-  private collateralBalance = this.queryCache.scope<[string, number], Balance>(
-    'HSM.Collateral',
-    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
-    (address, assetId) => `${address}:${assetId}`,
-    'block'
-  );
-
-  private mintCapacity = this.queryCache.scope<[string, string], bigint>(
-    'HSM.MintCapacity',
-    (_at, hollar, facilitator) =>
-      this.ghoClient.getFacilitatorCapacity(hollar, facilitator),
-    (hollar, facilitator) => `${hollar}:${facilitator}`,
-    'block'
-  );
-
-  /** Last merged source pool per id; identity check for the per-block merge */
-  private merged = new Map<number, StableSwapBase>();
+  private stableData = new Map<number, StableSwapBase>();
 
   constructor(
     client: PolkadotClient,
@@ -55,7 +40,6 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   ) {
     super(client, evm, at);
     this.stableClient = stableClient;
-    this.ghoClient = new GhoTokenClient(evm);
   }
 
   getPoolType(): PoolType {
@@ -95,14 +79,13 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     );
   }
 
-  async loadPools(at: BlockAt): Promise<HsmPoolBase[]> {
-    const hollarId = await this.api.constants.HSM.HollarId();
+  async loadPools(block: BlockRef): Promise<HsmPoolBase[]> {
+    const at = block.hash;
+    const hollarId = await this.query.hollarId();
 
     const [hollarLocation, collaterals, stablePools] = await Promise.all([
-      this.api.query.AssetRegistry.AssetLocations.getValue(hollarId, {
-        at,
-      }),
-      this.api.query.HSM.Collaterals.getEntries({ at }),
+      this.query.assetLocation.get(at, hollarId),
+      this.query.collaterals.get(at),
       this.stableClient.getPools(at),
     ]);
 
@@ -114,7 +97,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
     const facilitatorH160 = H160.fromAny(facilitator);
     const hollarH160 = this.getHollarAddress(hollarLocation);
 
-    const hsmMintCapacity = await this.mintCapacity.get(
+    const hsmMintCapacity = await this.query.mintCapacity.get(
       at,
       hollarH160,
       facilitatorH160
@@ -135,10 +118,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       const stablePool = stablePools.find((p) => p.id === pool_id);
       if (stablePool) {
         const address = this.getPoolId(pool_id);
-        const collateralBalance = await this.balance.getBalanceAt(
+        const collateralBalance = await this.query.assetBalance.get(
+          at,
           facilitator,
-          id,
-          at
+          id
         );
 
         return {
@@ -233,7 +216,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         if (facilitatorH160.toLowerCase() !== ev.facilitator) return [];
 
         this.log.trace('capacity', { event: ev.eventName });
-        const hsmMintCapacity = await this.mintCapacity.get(
+        const hsmMintCapacity = await this.query.mintCapacity.get(
           block.hash,
           hollarH160,
           facilitatorH160
@@ -292,7 +275,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
     return Promise.all(
       affected.map(async (pool) => {
-        const balance = await this.collateralBalance.get(
+        const balance = await this.query.assetBalance.get(
           at,
           hsmAddress,
           pool.collateralId
@@ -334,8 +317,8 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
     for (const pool of this.store.pools) {
       const stablePool = this.stableClient.pools.find((s) => s.id === pool.id);
-      if (!stablePool || this.merged.get(pool.id) === stablePool) continue;
-      this.merged.set(pool.id, stablePool);
+      if (!stablePool || this.stableData.get(pool.id) === stablePool) continue;
+      this.stableData.set(pool.id, stablePool);
 
       muts.push({
         address: pool.address,

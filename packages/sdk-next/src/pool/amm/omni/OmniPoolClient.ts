@@ -1,38 +1,29 @@
-import {
-  AccountId,
-  Binary,
-  CompatibilityLevel,
-  Enum,
-  SizedHex,
-} from 'polkadot-api';
+import { AccountId, CompatibilityLevel } from 'polkadot-api';
 import { toHex } from '@polkadot-api/utils';
 
 import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
-import { BlockAt } from '../../../api';
-import { TEmaOracle, TEmaPair } from '../../../oracle';
-import { Balance } from '../../../types';
+import { TEmaPair } from '../../../oracle';
 import { fmt } from '../../../utils';
 
-import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
-import { PoolType, PoolLimits, PoolToken, PoolPair } from '../../types';
+import {
+  BlockRef,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
+import { PoolType, PoolToken, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
 import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 import { OmniPoolFee } from './OmniPoolFee';
+import { OmniQuery } from './OmniQuery';
 
-import {
-  TDynamicFees,
-  TDynamicFeesConfig,
-  TOmnipoolAsset,
-  TSlipFee,
-} from './types';
+import { ORACLE_NAME, ORACLE_PERIOD } from './consts';
+import { TOmnipoolAsset } from './types';
 import { getEmaPair } from './utils';
 
 const { FeeUtils } = fmt;
-
-const ORACLE_NAME = Binary.toHex(Binary.fromText('omnipool')) as SizedHex<8>;
-const ORACLE_PERIOD = Enum('Short');
 
 // Reserve changes — recompute that asset's slice (balance + state).
 const ASSET_EVENTS = new Set([
@@ -48,68 +39,9 @@ const ASSET_EVENTS = new Set([
 const STRUCTURAL_EVENTS = new Set(['TokenAdded', 'TokenRemoved']);
 
 export class OmniPoolClient extends PoolClient<OmniPoolBase> {
+  protected readonly query = new OmniQuery(this.client, this.evm);
+
   private poolAddress = this.getPoolAddress();
-
-  private assetState = this.queryCache.scope<
-    [number],
-    TOmnipoolAsset | undefined
-  >(
-    'Omnipool.Assets',
-    (at, id) => this.api.query.Omnipool.Assets.getValue(id, { at }),
-    (id) => String(id),
-    'block'
-  );
-
-  private assetBalance = this.queryCache.scope<[number], Balance>(
-    'Omnipool.Balance',
-    (at, id) => this.balance.getBalanceAt(this.poolAddress, id, at),
-    (id) => String(id),
-    'block'
-  );
-
-  private dynamicFeesConfig = this.queryCache.scope<
-    [number],
-    TDynamicFeesConfig | undefined
-  >(
-    'DynamicFees.AssetFeeConfiguration',
-    (at, id) =>
-      this.api.query.DynamicFees.AssetFeeConfiguration.getValue(id, { at }),
-    (id) => String(id),
-    'persistent'
-  );
-
-  private dynamicFees = this.queryCache.scope<
-    [number],
-    TDynamicFees | undefined
-  >(
-    'DynamicFees.AssetFee',
-    (at, id) => this.api.query.DynamicFees.AssetFee.getValue(id, { at }),
-    (id) => String(id),
-    'block'
-  );
-
-  private maxSlipFee = this.queryCache.scope<[], TSlipFee | undefined>(
-    'Omnipool.SlipFee',
-    (at) => this.apiNext.query.Omnipool.SlipFee.getValue({ at }),
-    () => String('slipFee'),
-    'persistent'
-  );
-
-  private emaOracles = this.queryCache.scope<
-    [TEmaPair],
-    TEmaOracle | undefined
-  >(
-    'EmaOracle.Oracles.Short',
-    (at, pair) =>
-      this.api.query.EmaOracle.Oracles.getValue(
-        ORACLE_NAME,
-        pair,
-        ORACLE_PERIOD,
-        { at }
-      ),
-    (pair) => pair.join(':'),
-    'block'
-  );
 
   getPoolType(): PoolType {
     return PoolType.Omni;
@@ -122,20 +54,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return AccountId(HYDRATION_SS58_PREFIX).dec(nameHex);
   }
 
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.Omnipool.MaxInRatio(),
-      this.api.constants.Omnipool.MaxOutRatio(),
-      this.api.constants.Omnipool.MinimumTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
-  }
-
   async isSupported(): Promise<boolean> {
     const staticApis = await this.api.getStaticApis();
     return staticApis.compat.query.Omnipool.Assets.isCompatible(
@@ -143,8 +61,9 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     );
   }
 
-  protected async loadPools(at: BlockAt): Promise<OmniPoolBase[]> {
-    const hubAssetId = await this.api.constants.Omnipool.HubAssetId();
+  protected async loadPools(block: BlockRef): Promise<OmniPoolBase[]> {
+    const at = block.hash;
+    const hubAssetId = await this.query.hubAssetId();
     const poolAddress = this.getPoolAddress();
 
     const [
@@ -153,25 +72,21 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       hubAssetMeta,
       hubAssetBalance,
       limits,
-      block,
     ] = await Promise.all([
-      this.api.query.Omnipool.Assets.getEntries({ at }),
-      this.api.query.Omnipool.HubAssetTradability.getValue({ at }),
-      this.api.query.AssetRegistry.Assets.getValue(hubAssetId, { at }),
-      this.balance.getBalanceAt(poolAddress, hubAssetId, at),
-      this.getPoolLimits(),
-      this.api.query.System.Number.getValue({ at }),
+      this.query.assets.get(at),
+      this.query.hubTradability.get(at),
+      this.query.asset.get(at, hubAssetId),
+      this.query.assetBalance.get(at, poolAddress, hubAssetId),
+      this.query.limits(),
     ]);
-
-    this.block = block;
 
     const poolTokens = entries.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
 
       const [meta, balance] = await Promise.all([
-        this.api.query.AssetRegistry.Assets.getValue(id, { at }),
-        this.balance.getBalanceAt(poolAddress, id, at),
+        this.query.asset.get(at, id),
+        this.query.assetBalance.get(at, poolAddress, id),
       ]);
 
       return {
@@ -216,10 +131,13 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const protocolAsset = pair.assetIn;
     const at = this.blockHash ?? this.at;
 
-    const slipFee = await this.maxSlipFee.get(at);
+    const slipFee = await this.query.maxSlipFee.get(at);
     const maxSlipFee = slipFee ?? 0;
 
-    const feeConfiguration = await this.dynamicFeesConfig.get(at, feeAsset);
+    const feeConfiguration = await this.query.dynamicFeesConfig.get(
+      at,
+      feeAsset
+    );
     if (feeConfiguration?.type === 'Fixed') {
       const { asset_fee, protocol_fee } = feeConfiguration.value;
       return {
@@ -236,15 +154,15 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       assetFeeParams,
       protocolFeeParams,
     ] = await Promise.all([
-      this.dynamicFees.get(at, feeAsset),
-      this.emaOracles.get(at, getEmaPair(feeAsset)),
-      this.emaOracles.get(at, getEmaPair(protocolAsset)),
+      this.query.dynamicFees.get(at, feeAsset),
+      this.query.emaOracles.get(at, getEmaPair(feeAsset)),
+      this.query.emaOracles.get(at, getEmaPair(protocolAsset)),
       feeConfiguration
         ? feeConfiguration.value.asset_fee_params
-        : this.api.constants.DynamicFees.AssetFeeParameters(),
+        : this.query.assetFeeParams(),
       feeConfiguration
         ? feeConfiguration.value.protocol_fee_params
-        : this.api.constants.DynamicFees.ProtocolFeeParameters(),
+        : this.query.protocolFeeParams(),
     ]);
 
     return OmniPoolFee.compute(
@@ -347,7 +265,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     return {
       match: (e) => e.pallet === 'Omnipool' && e.method === 'SlipFeeSet',
       apply: async (e) => {
-        this.maxSlipFee.set(e.data.slip_fee);
+        this.query.maxSlipFee.set(e.data.slip_fee);
       },
     };
   }
@@ -377,7 +295,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
           { at: block.hash }
         );
         if (entry) {
-          this.emaOracles.set(entry, pair);
+          this.query.emaOracles.set(entry, pair);
           this.log.trace('ema', { pair });
         }
       },
@@ -407,7 +325,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
           ids.add(io.asset);
         }
         await Promise.all(
-          [...ids].map((id) => this.dynamicFees.get(block.hash, id))
+          [...ids].map((id) => this.query.dynamicFees.get(block.hash, id))
         );
       },
     };
@@ -424,7 +342,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         (e.method === 'AssetFeeConfigSet' ||
           e.method === 'AssetFeeConfigRemoved'),
       apply: async () => {
-        this.dynamicFeesConfig.clear();
+        this.query.dynamicFeesConfig.clear();
       },
     };
   }
@@ -446,8 +364,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const slices = await Promise.all(
       assetIds.map(async (id) => {
         const [bal, state] = await Promise.all([
-          this.assetBalance.get(at, id),
-          this.assetState.get(at, id),
+          this.query.assetBalance.get(at, this.poolAddress, id),
+          this.query.assetState.get(at, id),
         ]);
         return { id, balance: bal.transferable, state };
       })

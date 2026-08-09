@@ -12,12 +12,9 @@ import { BlockAt } from '../../../api';
 import { TRADEABLE_DEFAULT } from '../../../consts';
 import {
   MmOracleLog,
-  MmOracleClient,
-  MmOracleEntry,
   MmRouting,
   emaKey,
   TEmaName,
-  TEmaOracle,
   TEmaPair,
   TEmaPeriod,
 } from '../../../oracle';
@@ -29,21 +26,13 @@ import {
   PoolEventHandler,
   PoolMutation,
 } from '../../events';
-import {
-  PoolType,
-  PoolFee,
-  PoolLimits,
-  PoolFees,
-  PoolToken,
-  PoolPair,
-} from '../../types';
+import { PoolType, PoolFee, PoolFees, PoolToken, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
-
-import { Balance } from '../../../types';
 
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 import { StableSwapPeg } from './StableSwapPeg';
+import { StableSwapQuery } from './StableSwapQuery';
 
 import { TPegLatest, TStableswap, TStableswapPeg } from './types';
 
@@ -55,54 +44,13 @@ const SYNC_MM_ORACLE_EVENTS = [
 ];
 
 export class StableSwapClient extends PoolClient<StableSwapBase> {
+  protected readonly query = new StableSwapQuery(this.client, this.evm);
+
   protected poolsData: Map<number, TStableswap> = new Map([]);
 
   private emaKeys: Set<string> = new Set();
   private mmKeys: Set<string> = new Set();
   private mmRouting = new MmRouting();
-  private mmOracle = new MmOracleClient(this.evm);
-
-  private emaOracles = this.queryCache.scope<
-    [TEmaName, TEmaPair, TEmaPeriod],
-    TEmaOracle | undefined
-  >(
-    'EmaOracle.Oracles',
-    (at, name, pair, period) =>
-      this.api.query.EmaOracle.Oracles.getValue(name, pair, period, { at }),
-    (name, pair, period) =>
-      `${name.toString()}:${pair.join(':')}:${period.type}`,
-    'block'
-  );
-
-  private mmOracles = this.queryCache.scope<[string], MmOracleEntry>(
-    'MmOracle',
-    (_at, h160) => this.mmOracle.getData(h160),
-    (h160) => h160.toLowerCase(),
-    10 * 60 * 1000
-  );
-
-  private poolBalance = this.queryCache.scope<[number, number], Balance>(
-    'Stableswap.Balance',
-    (at, poolId, assetId) =>
-      this.balance.getBalanceAt(this.getPoolAddress(poolId), assetId, at),
-    (poolId, assetId) => `${poolId}:${assetId}`,
-    'block'
-  );
-
-  private poolIssuance = this.queryCache.scope<[number], bigint | undefined>(
-    'Tokens.TotalIssuance',
-    (at, poolId) =>
-      this.api.query.Tokens.TotalIssuance.getValue(poolId, { at }),
-    (poolId) => String(poolId),
-    'block'
-  );
-
-  private pegs = this.queryCache.scope<[number], TStableswapPeg | undefined>(
-    'Stableswap.PoolPegs',
-    (at, id) => this.api.query.Stableswap.PoolPegs.getValue(id, { at }),
-    (id) => String(id),
-    'block'
-  );
 
   getPoolType(): PoolType {
     return PoolType.Stable;
@@ -113,17 +61,6 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     const blake2 = blake2b(name, { dkLen: 32 });
     const blake2Hex = toHex(blake2);
     return AccountId(HYDRATION_SS58_PREFIX).dec(blake2Hex);
-  }
-
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const minTradingLimit =
-      await this.api.constants.Stableswap.MinTradingLimit();
-
-    return {
-      maxInRatio: 0n,
-      maxOutRatio: 0n,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
   }
 
   private getPoolAmplification(
@@ -160,11 +97,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     const poolAddress = this.getPoolAddress(poolId);
     const poolTokens = poolInfo.assets.map(async (id) => {
       const [tradeability, meta, balance] = await Promise.all([
-        this.api.query.Stableswap.AssetTradability.getValue(poolId, id, {
-          at,
-        }),
-        this.api.query.AssetRegistry.Assets.getValue(id, { at }),
-        this.balance.getBalanceAt(poolAddress, id, at),
+        this.query.tradability.get(at, poolId, id),
+        this.query.asset.get(at, id),
+        this.query.assetBalance.get(at, poolAddress, id),
       ]);
 
       return {
@@ -216,7 +151,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           this.emaKeys.add(key);
         }
       });
-      this.pegs.set(value, id);
+      this.query.pegs.set(value, id);
     }
   }
 
@@ -227,12 +162,12 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     );
   }
 
-  protected async loadPools(at: BlockAt): Promise<StableSwapBase[]> {
-    const [pools, pegs, block, poolLimits] = await Promise.all([
-      this.api.query.Stableswap.Pools.getEntries({ at }),
-      this.api.query.Stableswap.PoolPegs.getEntries({ at }),
-      this.api.query.System.Number.getValue({ at }),
-      this.getPoolLimits(),
+  protected async loadPools(block: BlockRef): Promise<StableSwapBase[]> {
+    const at = block.hash;
+    const [pools, pegs, poolLimits] = await Promise.all([
+      this.query.pools.get(at),
+      this.query.poolPegs.get(at),
+      this.query.limits(),
     ]);
 
     const assetsByPool = new Map(
@@ -247,9 +182,9 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       const address = this.getPoolAddress(id);
       const [tokens, amplification, pegs, issuance] = await Promise.all([
         this.getPoolTokens(id, value, at),
-        this.getPoolAmplification(value, block),
-        this.getPoolPegs(id, value, block, at),
-        this.api.query.Tokens.TotalIssuance.getValue(id, { at }),
+        this.getPoolAmplification(value, block.number),
+        this.getPoolPegs(id, value, block),
+        this.query.issuance.get(at, id),
       ]);
 
       // add virtual share (routing)
@@ -290,23 +225,22 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   private async getPoolPegs(
     poolId: number,
     pool: TStableswap,
-    blockNumber: number,
-    at: string
+    block: BlockRef
   ) {
-    const poolPegs = await this.pegs.get(at, poolId);
+    const poolPegs = await this.query.pegs.get(block.hash, poolId);
     if (!poolPegs) {
       return StableSwapPeg.getDefault(pool);
     }
-    const latest = await this.getLatestPegs(pool, poolPegs, blockNumber, at);
-    return StableSwapPeg.compute(pool, poolPegs, latest, blockNumber);
+    const latest = await this.getLatestPegs(pool, poolPegs, block);
+    return StableSwapPeg.compute(pool, poolPegs, latest, block.number);
   }
 
   private async getLatestPegs(
     pool: TStableswap,
     poolPegs: TStableswapPeg,
-    blockNumber: number,
-    at: string
+    block: BlockRef
   ): Promise<TPegLatest[]> {
+    const { hash: at, number: blockNumber } = block;
     const { source } = poolPegs;
     const assets = pool.assets;
 
@@ -321,7 +255,12 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           number,
           number,
         ];
-        const entry = await this.emaOracles.get(at, name, oracleKey, period);
+        const entry = await this.query.emaOracles.get(
+          at,
+          name,
+          oracleKey,
+          period
+        );
         if (!entry) {
           throw new Error('EmaOracle missing for ' + name + ' / ' + oracleKey);
         }
@@ -335,7 +274,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
       if (s.type === 'MMOracle') {
         const h160 = s.value.toString();
-        const { price, decimals, updatedAt } = await this.mmOracles.get(
+        const { price, decimals, updatedAt } = await this.query.mmOracles.get(
           at,
           h160
         );
@@ -544,7 +483,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           at: block.hash,
         });
         if (cfg) {
-          this.pegs.set(cfg, poolId);
+          this.query.pegs.set(cfg, poolId);
         }
       },
     };
@@ -566,7 +505,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           at: block.hash,
         });
         if (cfg) {
-          this.pegs.set(cfg, poolId);
+          this.query.pegs.set(cfg, poolId);
         }
       },
     };
@@ -606,7 +545,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         periods.forEach((period, i) => {
           const entry = entries[i];
           if (entry) {
-            this.emaOracles.set(entry, name, pair, period);
+            this.query.emaOracles.set(entry, name, pair, period);
           }
         });
       },
@@ -637,8 +576,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           }
         }
         for (const h160 of targets) {
-          const data = await this.mmOracle.getData(h160);
-          this.mmOracles.set(data, h160);
+          const data = await this.query.mmOracleData(h160);
+          this.query.mmOracles.set(data, h160);
         }
       },
     };
@@ -672,8 +611,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         }
 
         if (target) {
-          const data = await this.mmOracle.getData(target);
-          this.mmOracles.set(data, target);
+          const data = await this.query.mmOracleData(target);
+          this.query.mmOracles.set(data, target);
           this.log.trace('mm', { event: ev.eventName, target });
         }
       },
@@ -703,11 +642,12 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
       Promise.all(
         assetIds.map(async (id) => ({
           id,
-          balance: (await this.poolBalance.get(at, poolId, id)).transferable,
+          balance: (await this.query.assetBalance.get(at, address, id))
+            .transferable,
         }))
       ),
       withIssuance
-        ? this.poolIssuance.get(at, poolId)
+        ? this.query.issuance.get(at, poolId)
         : Promise.resolve(undefined),
     ]);
 
@@ -749,12 +689,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           const data = this.poolsData.get(pool.id);
           if (!data) return undefined;
 
-          const pegs = await this.getPoolPegs(
-            pool.id,
-            data,
-            block.number,
-            block.hash
-          );
+          const pegs = await this.getPoolPegs(pool.id, data, block);
           const amplification = this.getPoolAmplification(data, block.number);
           return {
             address: pool.address,

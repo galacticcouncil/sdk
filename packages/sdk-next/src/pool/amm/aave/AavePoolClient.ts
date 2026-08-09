@@ -3,7 +3,6 @@ import { toHex } from '@polkadot-api/utils';
 
 import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
-import { BlockAt } from '../../../api';
 import { AaveLog } from '../../../aave';
 
 import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
@@ -11,6 +10,7 @@ import { PoolBase, PoolFees, PoolLimits, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
 import { AavePoolToken } from './AavePool';
+import { AaveQuery } from './AaveQuery';
 import { TRouterEvent, TRouterExecutedPayload } from './types';
 
 const { ERC20 } = erc20;
@@ -18,16 +18,7 @@ const { ERC20 } = erc20;
 const SYNC_MM_EVENTS = ['Supply', 'Withdraw', 'Repay', 'Borrow'];
 
 export class AavePoolClient extends PoolClient<PoolBase> {
-  private poolLiquidity = this.queryCache.scope<
-    [number, number],
-    { liqudity_in: bigint; liqudity_out: bigint }
-  >(
-    'AaveTradeExecutor.pool',
-    (at, reserve, atoken) =>
-      this.api.apis.AaveTradeExecutor.pool(reserve, atoken, { at }),
-    (reserve, atoken) => `${reserve}:${atoken}`,
-    'block'
-  );
+  protected readonly query = new AaveQuery(this.client, this.evm);
 
   getPoolType(): PoolType {
     return PoolType.Aave;
@@ -52,27 +43,18 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     } as PoolLimits;
   }
 
-  async loadPools(at: BlockAt): Promise<PoolBase[]> {
-    const entries = await this.api.apis.AaveTradeExecutor.pools({
-      at,
-    });
+  async loadPools(block: BlockRef): Promise<PoolBase[]> {
+    const at = block.hash;
+    const entries = await this.query.pools.get(at);
 
     const pools = entries.map(
       async ({ reserve, atoken, liqudity_in, liqudity_out }) => {
         const [reserveMeta, reserveLocation, aTokenMeta, aTokenLocation] =
           await Promise.all([
-            this.api.query.AssetRegistry.Assets.getValue(reserve, {
-              at,
-            }),
-            this.api.query.AssetRegistry.AssetLocations.getValue(reserve, {
-              at,
-            }),
-            this.api.query.AssetRegistry.Assets.getValue(atoken, {
-              at,
-            }),
-            this.api.query.AssetRegistry.AssetLocations.getValue(atoken, {
-              at,
-            }),
+            this.query.asset.get(at, reserve),
+            this.query.assetLocation.get(at, reserve),
+            this.query.asset.get(at, atoken),
+            this.query.assetLocation.get(at, atoken),
           ]);
 
         return {
@@ -109,7 +91,7 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   ): Promise<AavePoolToken[]> {
     const [reserve, aToken] = pool.tokens;
 
-    const { liqudity_in, liqudity_out } = await this.poolLiquidity.get(
+    const { liqudity_in, liqudity_out } = await this.query.pool.get(
       at,
       reserve.id,
       aToken.id

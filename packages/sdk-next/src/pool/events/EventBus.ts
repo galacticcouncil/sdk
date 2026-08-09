@@ -4,7 +4,9 @@ import { hydration } from '@galacticcouncil/descriptors';
 
 import { Observable, filter, map, share } from 'rxjs';
 
-import { BlockRef, ChainUpdate, DecodedEvent } from './types';
+import { ChainUpdate, DecodedEvent } from './types';
+
+import { BlockRef } from '../../api';
 
 /**
  * The chain feed for pool sync.

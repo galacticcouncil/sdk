@@ -153,7 +153,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.isReady = false;
   }
 
-  public async getPools(): Promise<PoolBase[]> {
+  public async getPools(at: BlockAt = this.at): Promise<PoolBase[]> {
     if (this.isReady) {
       const pools = this.pools.values();
       return Array.from(pools);
@@ -162,7 +162,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     const pools = await Promise.all(
       this.clients
         .filter((client) => this.active.has(client.getPoolType()))
-        .map((client) => client.getPools())
+        .map((client) => client.getPools(at))
     );
     /**
      * Only a subscription keeps the map fresh; a fixed target reads every time.

@@ -1,35 +1,30 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
-import { BlockAt } from '../../../api';
-
-import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
+import {
+  BlockRef,
+  PoolEventEffect,
+  PoolEventHandler,
+  PoolMutation,
+} from '../../events';
 import {
   PoolBase,
   PoolType,
-  PoolFee,
-  PoolLimits,
   PoolFees,
   PoolToken,
   PoolTokenOverride,
 } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
-import { Balance } from '../../../types';
-
 import { XykPoolFees } from './XykPool';
+import { XykQuery } from './XykQuery';
 
 // Composition changes — full reseed (v1).
 const STRUCTURAL_EVENTS = new Set(['PoolCreated', 'PoolDestroyed']);
 
 export class XykPoolClient extends PoolClient<PoolBase> {
-  private decimals: Map<number, number> = new Map([]);
+  protected readonly query = new XykQuery(this.client, this.evm);
 
-  private poolBalance = this.queryCache.scope<[string, number], Balance>(
-    'Xyk.Balance',
-    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
-    (address, assetId) => `${address}:${assetId}`,
-    'block'
-  );
+  private decimals: Map<number, number> = new Map([]);
 
   getPoolType(): PoolType {
     return PoolType.XYK;
@@ -41,20 +36,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       : new Map();
   }
 
-  private async getPoolLimits(): Promise<PoolLimits> {
-    const [maxInRatio, maxOutRatio, minTradingLimit] = await Promise.all([
-      this.api.constants.XYK.MaxInRatio(),
-      this.api.constants.XYK.MaxOutRatio(),
-      this.api.constants.XYK.MinTradingLimit(),
-    ]);
-
-    return {
-      maxInRatio: maxInRatio,
-      maxOutRatio: maxOutRatio,
-      minTradingLimit: minTradingLimit,
-    } as PoolLimits;
-  }
-
   async isSupported(): Promise<boolean> {
     const staticApis = await this.api.getStaticApis();
     return staticApis.compat.query.XYK.PoolAssets.isCompatible(
@@ -62,10 +43,11 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     );
   }
 
-  async loadPools(at: BlockAt): Promise<PoolBase[]> {
+  async loadPools(block: BlockRef): Promise<PoolBase[]> {
+    const at = block.hash;
     const [entries, limits] = await Promise.all([
-      this.api.query.XYK.PoolAssets.getEntries({ at }),
-      this.getPoolLimits(),
+      this.query.poolAssets.get(at),
+      this.query.limits(),
     ]);
 
     const pools = entries.map(async ({ keyArgs, value }) => {
@@ -73,10 +55,10 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       const [x, y] = value;
 
       const [xBalance, xMeta, yBalance, yMeta] = await Promise.all([
-        this.balance.getBalanceAt(id, x, at),
-        this.api.query.AssetRegistry.Assets.getValue(x, { at }),
-        this.balance.getBalanceAt(id, y, at),
-        this.api.query.AssetRegistry.Assets.getValue(y, { at }),
+        this.query.assetBalance.get(at, id, x),
+        this.query.asset.get(at, x),
+        this.query.assetBalance.get(at, id, y),
+        this.query.asset.get(at, y),
       ]);
 
       return {
@@ -105,15 +87,10 @@ export class XykPoolClient extends PoolClient<PoolBase> {
   }
 
   async getPoolFees(): Promise<PoolFees> {
-    const exchangeFee = await this.getExchangeFee();
+    const exchangeFee = await this.query.exchangeFee();
     return {
       exchangeFee: exchangeFee,
     } as XykPoolFees;
-  }
-
-  private async getExchangeFee(): Promise<PoolFee> {
-    const fee = await this.api.constants.XYK.GetExchangeFee();
-    return fee as PoolFee;
   }
 
   // =============================================================================
@@ -207,7 +184,8 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     const balances = await Promise.all(
       pool.tokens.map(async (t) => ({
         id: t.id,
-        balance: (await this.poolBalance.get(at, address, t.id)).transferable,
+        balance: (await this.query.assetBalance.get(at, address, t.id))
+          .transferable,
       }))
     );
 

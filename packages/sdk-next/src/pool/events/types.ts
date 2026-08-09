@@ -1,15 +1,6 @@
-import { PoolBase } from '../types';
+import { BlockRef } from '../../api';
 
-/**
- * Block reference carried alongside a block's events.
- *
- * - `hash` pins slice reads to the emitting block
- * - `number` feeds the per-block tick and logs
- */
-export interface BlockRef {
-  hash: string;
-  number: number;
-}
+import { PoolBase } from '../types';
 
 /**
  * One decoded `System.Events` record. papi decodes each record as
