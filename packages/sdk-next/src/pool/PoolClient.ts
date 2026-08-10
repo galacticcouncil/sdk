@@ -12,7 +12,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 
-import { BlockAt, Papi } from '../api';
+import { BlockAt, BlockRef, Papi } from '../api';
 import { EvmClient } from '../evm';
 import { async } from '../utils';
 
@@ -23,7 +23,6 @@ import { PoolQuery } from './PoolQuery';
 import { PoolSync } from './PoolSync';
 import {
   BlockContext,
-  BlockRef,
   DecodedEvent,
   PoolEventEffect,
   PoolEventHandler,
@@ -264,49 +263,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
     );
   }
 
-  /**
-   * Queue one block behind this client's in-flight work.
-   *
-   * - Driven by {@link PoolSync}; not a consumer API
-   * - `deps` are the sources' completions for THE SAME block, passed down so
-   *   this client's own effects and handlers run while they resolve
-   * - Failures are contained: log, reseed, and the queue continues, so a
-   *   dependent is never stuck waiting on a broken source
-   *
-   * @param ctx - the pass's shared sync context
-   * @param deps - sources' completion promises for this pass
-   */
-  syncBlock(ctx: BlockContext, deps: Promise<unknown>[]): Promise<void> {
-    this.blockQueue = this.blockQueue
-      .then(() => this.applyBlock(ctx, Promise.all(deps)))
-      .catch((e) => {
-        this.log.error('sync_error', e);
-        this.syncReset();
-      });
-
-    return this.blockQueue;
-  }
-
-  /**
-   * Drop sync state so the next block reseeds.
-   *
-   * - Driven by {@link PoolSync}; not a consumer API
-   */
-  syncReset(): void {
-    this.isSeeded = false;
-    this.blockMatched.clear();
-  }
-
-  /**
-   * Requests a fresh seed on the next delivered block.
-   *
-   * - For structural changes the event stream can't patch (pool added/removed)
-   * - The driver reseeds this client only; siblings keep their state
-   */
-  protected requestResync() {
-    PoolSync.shared(this.client).reseed(this);
-  }
-
   private subscribeStore(): Observable<T[]> {
     return defer(() => {
       const sub = PoolSync.shared(this.client).register(this);
@@ -424,6 +380,49 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   }
 
   /**
+   * Queue one block behind this client's in-flight work.
+   *
+   * - Driven by {@link PoolSync}; not a consumer API
+   * - `deps` are the sources' completions for THE SAME block, passed down so
+   *   this client's own effects and handlers run while they resolve
+   * - Failures are contained: log, reseed, and the queue continues, so a
+   *   dependent is never stuck waiting on a broken source
+   *
+   * @param ctx - the pass's shared sync context
+   * @param deps - sources' completion promises for this pass
+   */
+  syncBlock(ctx: BlockContext, deps: Promise<unknown>[]): Promise<void> {
+    this.blockQueue = this.blockQueue
+      .then(() => this.applyBlock(ctx, Promise.all(deps)))
+      .catch((e) => {
+        this.log.error('sync_error', e);
+        this.syncReset();
+      });
+
+    return this.blockQueue;
+  }
+
+  /**
+   * Drop sync state so the next block reseeds.
+   *
+   * - Driven by {@link PoolSync}; not a consumer API
+   */
+  syncReset(): void {
+    this.isSeeded = false;
+    this.blockMatched.clear();
+  }
+
+  /**
+   * Requests a fresh seed on the next delivered block.
+   *
+   * - For structural changes the event stream can't patch (pool added/removed)
+   * - The driver reseeds this client only; siblings keep their state
+   */
+  protected requestResync() {
+    PoolSync.shared(this.client).reseed(this);
+  }
+
+  /**
    * Build a coherent snapshot PINNED at `block`.
    *
    * - Handlers/effects are built after the seed so they see a populated store
@@ -431,6 +430,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    */
   private async seed(block: BlockRef): Promise<void> {
     try {
+      this.query.clear();
       const pools = await withTimeout(
         this.loadPools(block),
         60_000,

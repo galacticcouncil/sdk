@@ -3,13 +3,13 @@ import { toHex } from '@polkadot-api/utils';
 
 import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
-import { BlockAt } from '../../../api';
+import { BlockAt, BlockRef } from '../../../api';
 import { EvmClient } from '../../../evm';
 import { GhoTokenLog } from '../../../gho';
 import { XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
-import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
+import { PoolEventHandler, PoolMutation } from '../../events';
 import { PoolBase, PoolFees, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 

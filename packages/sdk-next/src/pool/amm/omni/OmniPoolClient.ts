@@ -6,12 +6,9 @@ import { HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { TEmaPair } from '../../../oracle';
 import { fmt } from '../../../utils';
 
-import {
-  BlockRef,
-  PoolEventEffect,
-  PoolEventHandler,
-  PoolMutation,
-} from '../../events';
+import { BlockRef } from '../../../api';
+
+import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolType, PoolToken, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
@@ -19,7 +16,7 @@ import { OmniPoolBase, OmniPoolFees, OmniPoolToken } from './OmniPool';
 import { OmniPoolFee } from './OmniPoolFee';
 import { OmniQuery } from './OmniQuery';
 
-import { ORACLE_NAME, ORACLE_PERIOD } from './consts';
+import { ORACLE_NAME } from './consts';
 import { TOmnipoolAsset } from './types';
 import { getEmaPair } from './utils';
 
@@ -240,7 +237,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
       this.syncStructuralEffect(),
       this.syncSlipFeeEffect(),
       this.syncEmaOracleEffect(),
-      this.syncDynamicFeeEffect(),
       this.syncFeeConfigEffect(),
     ];
   }
@@ -288,16 +284,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         wanted.has((e.data.assets as TEmaPair).join(':')),
       apply: async (e, block) => {
         const pair = e.data.assets as TEmaPair;
-        const entry = await this.api.query.EmaOracle.Oracles.getValue(
-          ORACLE_NAME,
-          pair,
-          ORACLE_PERIOD,
-          { at: block.hash }
-        );
-        if (entry) {
-          this.query.emaOracles.set(entry, pair);
-          this.log.trace('ema', { pair });
-        }
+        await this.query.emaOracles.refresh(block.hash, pair);
+        this.log.trace('ema', { pair });
       },
     };
   }
@@ -309,6 +297,8 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
    *   it without a round trip
    * - Goes through the block-scoped cache, so every hop naming an asset shares
    *   one read, and the entry can't outlive its block
+   *
+   * Disabled!!! No need for pre-warm.
    */
   private syncDynamicFeeEffect(): PoolEventEffect {
     return {

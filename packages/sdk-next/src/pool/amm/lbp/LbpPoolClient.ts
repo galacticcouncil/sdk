@@ -1,7 +1,8 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
+import { BlockRef } from '../../../api';
+
 import {
-  BlockRef,
   PoolEventEffect,
   PoolEventHandler,
   PoolMutation,

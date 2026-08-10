@@ -25,6 +25,18 @@ export type QueryInvalidation = 'block' | 'persistent' | number;
 const isPinned = (at: string) => at.startsWith('0x');
 
 /**
+ * Reads by what served them.
+ *
+ * - `live` / `memo` cost nothing; `fetch` / `unpinned` hit the chain
+ */
+export interface QueryTally {
+  live: number;
+  memo: number;
+  fetch: number;
+  unpinned: number;
+}
+
+/**
  * Keyed cache for auxiliary query results (fees, oracles, pegs).
  *
  * - `live`: values set from events; authoritative, read-your-writes, persistent
@@ -36,12 +48,38 @@ const isPinned = (at: string) => at.startsWith('0x');
 export class QueryCache {
   private debug: boolean;
 
+  /** Every scope's `clear`, so the whole cache can be dropped at once */
+  private scopes: (() => void)[] = [];
+
   constructor(debug?: boolean) {
     this.debug = debug || false;
   }
 
+  private counters: QueryTally = { live: 0, memo: 0, fetch: 0, unpinned: 0 };
+
+  /** Reads served per tier since this cache was created */
+  get tally(): Readonly<QueryTally> {
+    return this.counters;
+  }
+
   private log(op: string, scope: string, key?: string) {
     this.debug && console.log(op, scope, key);
+  }
+
+  /** Count a read and, when debugging, name what served it */
+  private served(tier: keyof QueryTally, scope: string, key?: string) {
+    this.counters[tier]++;
+    this.log(`[${tier}]`, scope, key);
+  }
+
+  /**
+   * Drop every scope's live and cached values.
+   *
+   * - For a reseed: the whole state is re-derived at one block, so nothing an
+   *   earlier event wrote may survive into it
+   */
+  clear() {
+    for (const clear of this.scopes) clear();
   }
 
   /**
@@ -74,17 +112,13 @@ export class QueryCache {
         `${name}[${toKey(...args)}] stalled at ${at}`
       );
 
-    const get = (at: string, ...args: K): Promise<V> => {
+    /** The fetch tier => memoized per the scope's policy */
+    const fetchAt = (at: string, ...args: K): Promise<V> => {
       const key = toKey(...args);
 
-      if (live.has(key)) {
-        this.log('[live]', name, key);
-        return Promise.resolve(live.get(key)!);
-      }
-
-      // A tag moves under a fixed key; read through, never memoize.
+      // A tag moves under a fixed key, read through, never memoize.
       if (!isPinned(at)) {
-        this.log('[unpinned]', name, key);
+        this.served('unpinned', name, key);
         return read(at, ...args);
       }
 
@@ -95,11 +129,11 @@ export class QueryCache {
       }
 
       if (cache.has(key)) {
-        this.log('[memo]', name, key);
+        this.served('memo', name, key);
         return cache.get(key)!;
       }
 
-      this.log('[fetch]', name, key);
+      this.served('fetch', name, key);
       const p = read(at, ...args).catch((err) => {
         cache.delete(key);
         throw err;
@@ -109,21 +143,53 @@ export class QueryCache {
       return p;
     };
 
+    /** Get a value from live if an event wrote one, otherwise read at `at` */
+    const get = (at: string, ...args: K): Promise<V> => {
+      const key = toKey(...args);
+
+      if (live.has(key)) {
+        this.served('live', name, key);
+        return Promise.resolve(live.get(key)!);
+      }
+
+      return fetchAt(at, ...args);
+    };
+
+    /** Promote a value an event already carries to live, no read */
     const set = (v: V, ...args: K) => {
       const key = toKey(...args);
       this.log('[set-live]', name, key);
       live.set(key, v);
     };
 
+    /**
+     * Read at `at` and promote to live.
+     *
+     * - Live shadows `get`, so an event that says the value moved needs this
+     * - A block-scoped memo of the same block is reused: state under a hash is
+     *   immutable, so it is as fresh as a new read
+     * - Any other tier reads through; its entry carries no block identity
+     */
+    const refresh = async (at: string, ...args: K): Promise<V> => {
+      const memoized = invalidation === 'block' && isPinned(at);
+      const value = await (memoized ? fetchAt(at, ...args) : read(at, ...args));
+      set(value, ...args);
+      return value;
+    };
+
+    /** Forget everything this scope knows */
     const clear = () => {
       this.log('[clear]', name);
       live.clear();
       cache.release();
     };
 
+    this.scopes.push(clear);
+
     return {
       get,
       set,
+      refresh,
       clear,
     };
   }

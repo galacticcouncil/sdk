@@ -6,7 +6,7 @@ import { Papi } from '../api';
 import { BalanceClient } from '../client';
 import { EvmClient } from '../evm';
 import { Balance } from '../types';
-import { QueryCache } from '../utils';
+import { QueryCache, QueryTally } from '../utils';
 
 type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
 type TAssetLocation =
@@ -37,20 +37,22 @@ export abstract class PoolQuery extends Papi {
     return this.balance.erc20SafetyRereadBlocks;
   }
 
+  /** Reads served per tier; what the chain was actually asked for */
+  get tally(): Readonly<QueryTally> {
+    return this.cache.tally;
+  }
+
+  /** Drop every cached and live value; the next read re-derives */
+  clear(): void {
+    this.cache.clear();
+  }
+
   /** Asset registry entry (decimals, existential deposit, type) */
   readonly asset = this.cache.scope<[number], TAssetDetails | undefined>(
     'AssetRegistry.Assets',
     (at, id) => this.api.query.AssetRegistry.Assets.getValue(id, { at }),
     (id) => String(id),
-    'block'
-  );
-
-  /** An account's balance of one asset */
-  readonly assetBalance = this.cache.scope<[string, number], Balance>(
-    'CurrenciesApi.account',
-    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
-    (address, assetId) => `${address}:${assetId}`,
-    'block'
+    'persistent'
   );
 
   /** Asset registry location (erc20 assets carry their H160 here) */
@@ -62,6 +64,14 @@ export abstract class PoolQuery extends Papi {
     (at, id) =>
       this.api.query.AssetRegistry.AssetLocations.getValue(id, { at }),
     (id) => String(id),
+    'persistent'
+  );
+
+  /** An account's balance of one asset */
+  readonly assetBalance = this.cache.scope<[string, number], Balance>(
+    'CurrenciesApi.account',
+    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
+    (address, assetId) => `${address}:${assetId}`,
     'block'
   );
 }

@@ -5,7 +5,9 @@ import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 
 import { AaveLog } from '../../../aave';
 
-import { BlockRef, PoolEventHandler, PoolMutation } from '../../events';
+import { BlockRef } from '../../../api';
+
+import { PoolEventHandler, PoolMutation } from '../../events';
 import { PoolBase, PoolFees, PoolLimits, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 

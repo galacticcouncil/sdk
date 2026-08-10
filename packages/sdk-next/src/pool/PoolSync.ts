@@ -19,10 +19,10 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { Papi } from '../api';
+import { BlockRef, Papi } from '../api';
 
 import { PoolLog } from './PoolLog';
-import { BlockContext, BlockRef, DecodedEvent, EventBus } from './events';
+import { BlockContext, DecodedEvent, EventBus } from './events';
 
 import type { PoolClient } from './PoolClient';
 

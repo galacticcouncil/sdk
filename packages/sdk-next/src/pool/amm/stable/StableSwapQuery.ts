@@ -90,11 +90,6 @@ export class StableSwapQuery extends PoolQuery {
     MM_ORACLE_TTL
   );
 
-  /** Fresh MM oracle read; the caller promotes it to live */
-  mmOracleData(h160: string): Promise<MmOracleEntry> {
-    return this.mmOracle.getData(h160);
-  }
-
   async limits(): Promise<PoolLimits> {
     const minTradingLimit =
       await this.api.constants.Stableswap.MinTradingLimit();

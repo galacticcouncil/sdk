@@ -8,7 +8,7 @@ import {
   RUNTIME_DECIMALS,
 } from '@galacticcouncil/common';
 
-import { BlockAt } from '../../../api';
+import { BlockAt, BlockRef } from '../../../api';
 import { TRADEABLE_DEFAULT } from '../../../consts';
 import {
   MmOracleLog,
@@ -20,12 +20,7 @@ import {
 } from '../../../oracle';
 import { fmt } from '../../../utils';
 
-import {
-  BlockRef,
-  PoolEventEffect,
-  PoolEventHandler,
-  PoolMutation,
-} from '../../events';
+import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolType, PoolFee, PoolFees, PoolToken, PoolPair } from '../../types';
 import { PoolClient } from '../../PoolClient';
 
@@ -466,25 +461,25 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   }
 
   /**
-   * Peg cache (trade) — `PoolPegs` `current`/`updated_at` move when traded.
+   * Peg anchor — the chain persists recalculated pegs on every op priced
+   * against them: trades and liquidity add/remove.
    *
-   * - Refresh it at the event's block
-   * - The tick projects from it
+   * - Re-read `PoolPegs` at the event's block
+   * - The tick projects from it toward the oracle target
    */
   private syncPegEffect(): PoolEventEffect {
     return {
       match: (e) =>
-        e.pallet === 'Broadcast' &&
-        e.method === 'Swapped3' &&
-        e.data?.filler_type?.type === 'Stableswap',
+        (e.pallet === 'Broadcast' &&
+          e.method === 'Swapped3' &&
+          e.data?.filler_type?.type === 'Stableswap') ||
+        (e.pallet === 'Stableswap' &&
+          (e.method === 'LiquidityAdded' || e.method === 'LiquidityRemoved')),
       apply: async (e, block) => {
-        const poolId = e.data.filler_type.value as number;
-        const cfg = await this.api.query.Stableswap.PoolPegs.getValue(poolId, {
-          at: block.hash,
-        });
-        if (cfg) {
-          this.query.pegs.set(cfg, poolId);
-        }
+        const poolId = (
+          e.pallet === 'Broadcast' ? e.data.filler_type.value : e.data.pool_id
+        ) as number;
+        await this.query.pegs.refresh(block.hash, poolId);
       },
     };
   }
@@ -501,12 +496,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           e.method === 'PoolMaxPegUpdateUpdated'),
       apply: async (e, block) => {
         const poolId = e.data.pool_id as number;
-        const cfg = await this.api.query.Stableswap.PoolPegs.getValue(poolId, {
-          at: block.hash,
-        });
-        if (cfg) {
-          this.query.pegs.set(cfg, poolId);
-        }
+        await this.query.pegs.refresh(block.hash, poolId);
       },
     };
   }
@@ -561,7 +551,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   private syncEmaHybridMmEffect(): PoolEventEffect {
     return {
       match: (e) => e.pallet === 'EmaOracle' && e.method === 'OracleUpdated',
-      apply: async (e) => {
+      apply: async (e, block) => {
         const name = e.data.source as TEmaName;
         const pair = e.data.assets as TEmaPair;
         const periods = (e.data.updates as [TEmaPeriod, unknown][]).map(
@@ -576,8 +566,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
           }
         }
         for (const h160 of targets) {
-          const data = await this.query.mmOracleData(h160);
-          this.query.mmOracles.set(data, h160);
+          await this.query.mmOracles.refresh(block.hash, h160);
         }
       },
     };
@@ -596,7 +585,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         e.pallet === 'EVM' &&
         e.method === 'Log' &&
         SYNC_MM_ORACLE_EVENTS.includes(MmOracleLog.eventName(e.data)),
-      apply: async (e) => {
+      apply: async (e, block) => {
         const ev = MmOracleLog.parse(e.data);
 
         if (!ev) return;
@@ -611,8 +600,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         }
 
         if (target) {
-          const data = await this.query.mmOracleData(target);
-          this.query.mmOracles.set(data, target);
+          await this.query.mmOracles.refresh(block.hash, target);
           this.log.trace('mm', { event: ev.eventName, target });
         }
       },
