@@ -13,8 +13,8 @@ export function Erc20() {
       getSpender: (ctx: Wh) => string | undefined
     ): ContractConfigBuilder => ({
       build: async (params) => {
-        const { amount, asset, source, transact } = params;
-        const ctx = transact ? transact.chain : source.chain;
+        const { amount, asset, source } = params;
+        const ctx = source.chain;
         const ctxWh = Wh.fromChain(ctx);
         const assetId = ctx.getAssetId(asset);
 

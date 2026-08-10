@@ -9,10 +9,8 @@ import {
   Parachain,
   TransferCtx,
   TransferConfig,
-  TransactCtx,
-  TransactConfig,
 } from '@galacticcouncil/xc-core';
-import { acc, big } from '@galacticcouncil/common';
+import { big } from '@galacticcouncil/common';
 
 import { formatAmount, formatEvmAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';
@@ -60,7 +58,7 @@ export class DataOriginProcessor extends DataProcessor {
     feeBreakdown: { [key: string]: bigint };
   }> {
     const { chain, route } = this.config;
-    const { source, destination, transact } = route;
+    const { source, destination } = route;
 
     const feeAmount = destination.fee.amount;
     const feeAsset = source.destinationFee ?? destination.fee.asset;
@@ -82,7 +80,7 @@ export class DataOriginProcessor extends DataProcessor {
       feeAsset: feeAsset,
       transferAsset: source.asset,
       destinationAsset: destination.asset,
-      source: transact ? transact.chain : chain,
+      source: chain,
       destination: destination.chain,
       amount: transferAmount,
       address: address,
@@ -212,107 +210,5 @@ export class DataOriginProcessor extends DataProcessor {
     throw new Error(
       'AssetRoute transfer config is invalid! Specify contract, extrinsic, move or program instructions.'
     );
-  }
-
-  async getTransact(ctx: TransferCtx): Promise<TransactCtx | undefined> {
-    const { route } = this.config;
-    const { transact } = route;
-
-    if (transact) {
-      // Augment transfer context with transact chain info
-      const ctxTransactBase = Object.assign({
-        transact: {
-          chain: transact.chain,
-        },
-      });
-
-      const context = {
-        ...ctx,
-        ...ctxTransactBase,
-      };
-
-      const data = await this.getTransactData(transact, context);
-      return {
-        ...data,
-        chain: transact.chain,
-      } as TransactCtx;
-    }
-    return undefined;
-  }
-
-  /**
-   * Transact remote execution context
-   *
-   * @param cfg - transact config
-   * @param ctx - augmented transfer context
-   * @returns transact remote call context
-   */
-  private async getTransactData(
-    cfg: TransactConfig,
-    ctx: TransferCtx
-  ): Promise<TransactCtx> {
-    const { chain, extrinsic } = cfg;
-    const config = await extrinsic.build(ctx);
-    const substrate = await SubstrateService.create(chain);
-    const submittable = config.getTx(substrate.client);
-
-    const fromChain = ctx.source.chain as Parachain;
-    const fromAddr = ctx.sender;
-
-    const mda = acc.getMultilocationDerivatedAccount(
-      fromChain.parachainId,
-      fromAddr,
-      chain.parachainId === 0 ? 0 : 1,
-      chain.usesH160Acc
-    );
-
-    const paymentInfo = await submittable.getPaymentInfo(mda);
-    const encodedTx = await submittable.getEncodedData();
-
-    const [transactFee, transactFeeBalance] = await Promise.all([
-      this.getTransactFee(cfg),
-      this.getTransactFeeBalance(cfg, ctx),
-    ]);
-
-    return {
-      call: encodedTx,
-      chain: chain,
-      fee: transactFee,
-      feeBalance: transactFeeBalance,
-      weight: {
-        refTime: paymentInfo.weight.ref_time,
-        proofSize: paymentInfo.weight.proof_size,
-      },
-    } as TransactCtx;
-  }
-
-  /**
-   * Transact fee on source chain
-   *
-   * @param cfg - transact config
-   * @returns transact source chain fee
-   */
-  private async getTransactFee(cfg: TransactConfig): Promise<AssetAmount> {
-    const { fee } = cfg;
-    const decimals = await this.getDecimals(fee.asset);
-    const amount = big.toBigInt(fee.amount, decimals);
-    return AssetAmount.fromAsset(fee.asset, {
-      amount: amount,
-      decimals,
-    });
-  }
-
-  /**
-   * Transact fee balance on source chain
-   *
-   * @param cfg - transact config
-   * @param ctx - augmented transfer context
-   * @returns transact source chain fee balance
-   */
-  private async getTransactFeeBalance(
-    cfg: TransactConfig,
-    ctx: TransferCtx
-  ): Promise<AssetAmount> {
-    return this.config.chain.getBalance(cfg.fee.asset, ctx.sender);
   }
 }

@@ -26,19 +26,19 @@ export class FeeSwap {
   }
 
   get destFee() {
-    const { source, transact } = this.ctx;
-    return transact ? transact.fee : source.destinationFee;
+    const { source } = this.ctx;
+    return source.destinationFee;
   }
 
   /** Chain the destination fee is held & spent on, matching {@link destFee}. */
   get destFeeChain() {
-    const { source, transact } = this.ctx;
-    return transact ? transact.chain : source.chain;
+    const { source } = this.ctx;
+    return source.chain;
   }
 
   get destFeeBalance() {
-    const { source, transact } = this.ctx;
-    return transact ? transact.feeBalance : source.destinationFeeBalance;
+    const { source } = this.ctx;
+    return source.destinationFeeBalance;
   }
 
   get feeBalance() {

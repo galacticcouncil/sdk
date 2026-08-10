@@ -10,14 +10,13 @@ import { evm } from './extrinsics/evm';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
-import { ethereumXcm, polkadotXcm, xTokens } from './extrinsics/xcm';
+import { polkadotXcm, xTokens } from './extrinsics/xcm';
 
 export function ExtrinsicBuilder() {
   return {
     assetConversion,
     assets,
     balances,
-    ethereumXcm,
     evm,
     polkadotXcm,
     router,

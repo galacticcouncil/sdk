@@ -3,7 +3,6 @@ import {
   Asset,
   ChainEcosystem,
   Parachain,
-  TxWeight,
 } from '@galacticcouncil/xc-core';
 
 import { SizedHex } from 'polkadot-api';
@@ -431,115 +430,5 @@ const reanchorLocation = (assetLocation: object) => {
   return {
     parents: 0,
     interior: XcmV3Junctions.Here(),
-  };
-};
-
-/**
- * Instructions are executed in 3 steps:
- *
- * 1) WithdrawAsset - Withdraw fee asset from the target account
- * 2) BuyExecution - Buy execution with the fee asset
- * 3) Transact - Destination (Transact) chain call execution
- *
- * Note that DepositAsset using AllCounted and not All, since All
- * has too high of a gas requirement.
- *
- * @param version - XCM Version
- * @param account - destination account (receiver)
- * @param transactFeeLocation - transact fee xcm location
- * @param transactFeeAmount - transact fee amount
- * @param transactCall - transact calldata
- * @param transactWeight - transact weight
- * @returns xcm transact message instructions
- */
-export const toTransactMessage = (
-  version: XcmVersion,
-  account: any,
-  transactFeeLocation: { parents: number; interior: XcmV3Junctions },
-  transactFeeAmount: any,
-  transactCall: Uint8Array,
-  transactWeight: TxWeight
-) => {
-  return {
-    type: version,
-    value: [
-      XcmV4Instruction.WithdrawAsset([
-        {
-          id: transactFeeLocation,
-          fun: XcmV3MultiassetFungibility.Fungible(transactFeeAmount),
-        },
-      ]),
-      XcmV4Instruction.BuyExecution({
-        fees: {
-          id: transactFeeLocation,
-          fun: XcmV3MultiassetFungibility.Fungible(transactFeeAmount),
-        },
-        weight_limit: XcmV3WeightLimit.Unlimited(),
-      }),
-      XcmV4Instruction.Transact({
-        origin_kind: XcmV2OriginKind.SovereignAccount(),
-        require_weight_at_most: {
-          ref_time: transactWeight.refTime,
-          proof_size: transactWeight.proofSize,
-        },
-        call: transactCall,
-      }),
-      XcmV4Instruction.RefundSurplus(),
-      XcmV4Instruction.DepositAsset({
-        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
-        beneficiary: {
-          parents: 0,
-          interior: XcmV3Junctions.X1(account),
-        },
-      }),
-    ],
-  };
-};
-
-export const toTransferMessage = (
-  version: XcmVersion,
-  account: any,
-  transferAssetLocation: { parents: number; interior: XcmV3Junctions },
-  transferAssetAmount: any,
-  transferFeeAmount: any,
-  receiver: any
-) => {
-  return {
-    type: version,
-    value: [
-      XcmV4Instruction.WithdrawAsset([
-        {
-          id: transferAssetLocation,
-          fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
-        },
-      ]),
-      XcmV4Instruction.BuyExecution({
-        fees: {
-          id: transferAssetLocation,
-          fun: XcmV3MultiassetFungibility.Fungible(transferFeeAmount),
-        },
-        weight_limit: XcmV3WeightLimit.Unlimited(),
-      }),
-      XcmV4Instruction.TransferAsset({
-        assets: [
-          {
-            id: transferAssetLocation,
-            fun: XcmV3MultiassetFungibility.Fungible(transferAssetAmount),
-          },
-        ],
-        beneficiary: {
-          parents: 0,
-          interior: XcmV3Junctions.X1(receiver),
-        },
-      }),
-      XcmV4Instruction.RefundSurplus(),
-      XcmV4Instruction.DepositAsset({
-        assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.AllCounted(1)),
-        beneficiary: {
-          parents: 0,
-          interior: XcmV3Junctions.X1(account),
-        },
-      }),
-    ],
   };
 };

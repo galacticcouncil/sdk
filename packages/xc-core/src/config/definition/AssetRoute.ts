@@ -1,9 +1,9 @@
 import { Asset } from '../../asset';
-import { AnyChain, AnyParachain } from '../../chain';
+import { AnyChain } from '../../chain';
 
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
-import { FeeConfig, DestinationFeeConfig, TransactFeeConfig } from './fee';
+import { FeeConfig, DestinationFeeConfig } from './fee';
 import { ProgramConfigBuilder } from './program';
 import { MoveConfigBuilder } from './move';
 
@@ -21,12 +21,6 @@ export interface DestinationConfig {
   fee: DestinationFeeConfig;
 }
 
-export interface TransactConfig {
-  chain: AnyParachain;
-  fee: TransactFeeConfig;
-  extrinsic: ExtrinsicConfigBuilder;
-}
-
 export interface AssetRouteParams {
   source: SourceConfig;
   destination: DestinationConfig;
@@ -34,7 +28,6 @@ export interface AssetRouteParams {
   extrinsic?: ExtrinsicConfigBuilder;
   move?: MoveConfigBuilder;
   program?: ProgramConfigBuilder;
-  transact?: TransactConfig;
   tags?: string[];
 }
 
@@ -51,8 +44,6 @@ export class AssetRoute {
 
   readonly program?: ProgramConfigBuilder;
 
-  readonly transact?: TransactConfig;
-
   readonly tags?: string[];
 
   constructor({
@@ -62,7 +53,6 @@ export class AssetRoute {
     extrinsic,
     move,
     program,
-    transact,
     tags,
   }: AssetRouteParams) {
     this.source = source;
@@ -71,7 +61,6 @@ export class AssetRoute {
     this.extrinsic = extrinsic;
     this.move = move;
     this.program = program;
-    this.transact = transact;
     this.tags = tags;
   }
 }
