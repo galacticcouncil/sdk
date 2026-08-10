@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import { EvmParachain, ExtrinsicConfig } from '@galacticcouncil/xc-core';
+import { EvmParachain } from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
 
@@ -39,21 +39,12 @@ const chain = {
   },
 } as unknown as EvmParachain;
 
-const swap = new ExtrinsicConfig({
-  module: 'Router',
-  func: 'buy',
-  getTx: () => tagged('Router.buy') as any,
-});
-
 const evmCall = (to: string) => ({ to, data: '0x00', gas: 100_000n });
 
 /** Tags of the batched calls, in order. */
-const batchOf = async (
-  calls: ReturnType<typeof evmCall>[],
-  prior?: ExtrinsicConfig
-) => {
+const batchOf = async (calls: ReturnType<typeof evmCall>[]) => {
   const substrateEvm = await SubstrateEvm.create(chain);
-  await substrateEvm.buildCall(ACCOUNT, calls, prior);
+  await substrateEvm.buildCall(ACCOUNT, calls);
 
   const built = batched.at(-1);
   return built?.map((c) => c.tag);
@@ -78,33 +69,13 @@ describe('SubstrateEvm', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it('should batch the evm calls alone when there is no prior', async () => {
+  it('should batch the evm calls in order', async () => {
     const tags = await batchOf([evmCall(TOKEN), evmCall(SHIM)]);
 
     expect(tags).toEqual(['EVM.call:' + TOKEN, 'EVM.call:' + SHIM]);
   });
 
-  // The prior buys the weth that the EVM.call value is charged in, so a batch
-  // that runs it after the transfer funds nothing.
-  it('should run the prior ahead of every evm call', async () => {
-    const tags = await batchOf([evmCall(TOKEN), evmCall(SHIM)], swap);
-
-    expect(tags).toEqual([
-      'Router.buy',
-      'EVM.call:' + TOKEN,
-      'EVM.call:' + SHIM,
-    ]);
-  });
-
-  // A lone evm call is normally sent unbatched - adding a prior has to
-  // promote it to a batch, or the prior is silently dropped.
-  it('should batch a single evm call once it has a prior', async () => {
-    const tags = await batchOf([evmCall(SHIM)], swap);
-
-    expect(tags).toEqual(['Router.buy', 'EVM.call:' + SHIM]);
-  });
-
-  it('should not batch a single evm call without a prior', async () => {
+  it('should not batch a single evm call', async () => {
     const tags = await batchOf([evmCall(SHIM)]);
 
     expect(tags).toBeUndefined();

@@ -138,7 +138,8 @@ describe('Ntt contract builder', () => {
   describe('transfer', () => {
     it('should build correct config for usdc ntt transfer to hydration', async () => {
       const ctx = buildTransferCtx(usdc);
-      expect(await Ntt().transfer().build(ctx)).toMatchObject({
+      const [config] = await Ntt().transfer().build(ctx);
+      expect(config).toMatchObject({
         address: USDC_NTT.manager,
         args: [1000000n, 73, RECIPIENT_32],
         token: USDC_NTT.token,
@@ -151,26 +152,26 @@ describe('Ntt contract builder', () => {
 
     it('should flag native gas source to be wrapped', async () => {
       const ctx = buildTransferCtx(eth);
-      const config = await Ntt().transfer().build(ctx);
+      const [config] = await Ntt().transfer().build(ctx);
       expect(config.wrapNative).toBe(true);
     });
 
     it('should not flag erc20 source to be wrapped', async () => {
       const ctx = buildTransferCtx(usdc);
-      const config = await Ntt().transfer().build(ctx);
+      const [config] = await Ntt().transfer().build(ctx);
       expect(config.wrapNative).toBe(false);
     });
 
     it('should floor 18 decimals amount to ntt 8 decimals precision', async () => {
       const ctx = buildTransferCtx(aave, 1123456789123456789n);
-      const config = await Ntt().transfer().build(ctx);
+      const [config] = await Ntt().transfer().build(ctx);
       expect(config.args[0]).toBe(1123456780000000000n);
     });
 
     it('should derive recipient for EVM bound ss58 account', async () => {
       const ctx = buildTransferCtx(usdc);
       ctx.address = toBoundSs58(H160);
-      const config = await Ntt().transfer().build(ctx);
+      const [config] = await Ntt().transfer().build(ctx);
       expect(config.args[2]).toBe(RECIPIENT_32);
     });
 
@@ -199,7 +200,7 @@ describe('Ntt contract builder', () => {
 
     it('should call the executor shim, not the manager', async () => {
       const ctx = buildTransferCtx(usdc);
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       expect(config.address).toBe(Wormhole.fromChain(ethereum).nttExecutor);
       expect(config.module).toBe('NttManagerWithExecutor');
@@ -212,7 +213,7 @@ describe('Ntt contract builder', () => {
 
     it('should pay delivery price plus the executor cost', async () => {
       const ctx = buildTransferCtx(usdc);
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       // Delivery price is mocked to 0 - the value is the executor cost.
       expect(config.value).toBe(ESTIMATED_COST);
@@ -224,7 +225,7 @@ describe('Ntt contract builder', () => {
 
     it('should take no referrer fee', async () => {
       const ctx = buildTransferCtx(usdc);
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       expect(config.args[7]).toMatchObject({
         transferTokenFee: 0n,
@@ -234,7 +235,7 @@ describe('Ntt contract builder', () => {
 
     it('should keep the ntt token as the allowance subject', async () => {
       const ctx = buildTransferCtx(usdc);
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       // Spender is config.address (the shim), derived by the platform.
       expect(config.token).toBe(USDC_NTT.token);
@@ -242,7 +243,7 @@ describe('Ntt contract builder', () => {
 
     it('should floor 18 decimals amount to ntt 8 decimals precision', async () => {
       const ctx = buildTransferCtx(aave, 1123456789123456789n);
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
       expect(config.args[1]).toBe(1123456780000000000n);
     });
 
@@ -263,7 +264,7 @@ describe('Ntt contract builder', () => {
     it('should refund destination gas to the recipient, not the sender', async () => {
       const ctx = buildTransferCtx(usdc);
       ctx.sender = '0x1111111111111111111111111111111111111111';
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       expect(config.args[4]).toBe(RECIPIENT_32);
       // Source side refund is separate & stays with the sender.
@@ -272,7 +273,7 @@ describe('Ntt contract builder', () => {
 
     it('should build for a base58 destination out of an h160 sender', async () => {
       const ctx = buildSolanaTransferCtx();
-      const config = await Ntt().transferWithExecutor().build(ctx);
+      const [config] = await Ntt().transferWithExecutor().build(ctx);
 
       expect(config.args[4]).toBe(config.args[3]);
       expect(config.args[4]).toBe(
@@ -299,7 +300,7 @@ describe('Ntt contract builder', () => {
     // only approve is our own exact-amount one. The shim's unbounded approve
     // is what hydration's erc20 precompile rejects.
     it('should call the manager, not the shim', async () => {
-      const config = await Ntt()
+      const [config] = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
@@ -310,7 +311,7 @@ describe('Ntt contract builder', () => {
     });
 
     it('should pay only the delivery price on the transfer', async () => {
-      const config = await Ntt()
+      const [config] = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
@@ -319,25 +320,24 @@ describe('Ntt contract builder', () => {
     });
 
     it('should follow with a paid executor request', async () => {
-      const config = await Ntt()
+      const configs = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
-      expect(config.follow).toBeDefined();
-      expect(config.follow!.module).toBe('Executor');
-      expect(config.follow!.func).toBe('requestExecution');
-      expect(config.follow!.address).toBe(
-        Wormhole.fromChain(ethereum).executor
-      );
-      expect(config.follow!.value).toBe(ESTIMATED_COST);
+      expect(configs).toHaveLength(2);
+      const [, follow] = configs;
+      expect(follow.module).toBe('Executor');
+      expect(follow.func).toBe('requestExecution');
+      expect(follow.address).toBe(Wormhole.fromChain(ethereum).executor);
+      expect(follow.value).toBe(ESTIMATED_COST);
     });
 
     it('should name the message by the manager next sequence', async () => {
-      const config = await Ntt()
+      const [, follow] = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
-      const requestBytes = config.follow!.args[4] as string;
+      const requestBytes = follow.args[4] as string;
       expect(requestBytes).toBe(
         encodeNttRequest(2, USDC_NTT.manager, NEXT_SEQUENCE)
       );
@@ -348,24 +348,24 @@ describe('Ntt contract builder', () => {
     // dstAddr is whom the executor calls to redeem - the far-side manager, not
     // the recipient. Sending the recipient here buys a relay to a wallet.
     it('should target the destination manager, not the recipient', async () => {
-      const config = await Ntt()
+      const [, follow] = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
       const hydrationNtt = Wormhole.fromChain(hydration).ntt[usdc_wh.key];
-      expect(config.follow!.args[1]).toBe(
+      expect(follow.args[1]).toBe(
         Wormhole.fromChain(hydration).normalizeAddress(hydrationNtt.manager)
       );
-      expect(config.follow!.args[1]).not.toBe(RECIPIENT_32);
+      expect(follow.args[1]).not.toBe(RECIPIENT_32);
     });
 
     it('should pass the signed quote & relay instructions through', async () => {
-      const config = await Ntt()
+      const [, follow] = await Ntt()
         .transferViaExecutor()
         .build(buildTransferCtx(usdc));
 
-      expect(config.follow!.args[3]).toBe(SIGNED_QUOTE);
-      expect(config.follow!.args[5]).toMatch(/^0x01/);
+      expect(follow.args[3]).toBe(SIGNED_QUOTE);
+      expect(follow.args[5]).toMatch(/^0x01/);
     });
 
     it('should fail loudly when the quote is unavailable', async () => {

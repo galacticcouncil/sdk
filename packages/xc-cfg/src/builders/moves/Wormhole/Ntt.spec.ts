@@ -144,7 +144,7 @@ describe('Ntt move builder', () => {
 
   describe('transfer', () => {
     it('should build correct config for sui ntt transfer to hydration', async () => {
-      const config = await Ntt().transfer().build(buildTransferCtx());
+      const [config] = await Ntt().transfer().build(buildTransferCtx());
       expect(config).toMatchObject({
         func: 'transfer',
         module: 'NttManager',
@@ -153,7 +153,7 @@ describe('Ntt move builder', () => {
     });
 
     it('should call the resolved packages in ntt transfer order', async () => {
-      const config = await Ntt().transfer().build(buildTransferCtx());
+      const [config] = await Ntt().transfer().build(buildTransferCtx());
       const { commands } = JSON.parse(await config.transaction.toJSON());
       const calls = commands
         .filter((c: any) => !!c.MoveCall)
@@ -176,7 +176,7 @@ describe('Ntt move builder', () => {
     });
 
     it('should cross reference manager & transceiver auth types', async () => {
-      const config = await Ntt().transfer().build(buildTransferCtx());
+      const [config] = await Ntt().transfer().build(buildTransferCtx());
       const { commands } = JSON.parse(await config.transaction.toJSON());
       const typeArgs = (func: string) =>
         commands.find((c: any) => c.MoveCall?.function === func).MoveCall
@@ -192,7 +192,7 @@ describe('Ntt move builder', () => {
     });
 
     it('should target the destination chain & derived recipient', async () => {
-      const config = await Ntt().transfer().build(buildTransferCtx());
+      const [config] = await Ntt().transfer().build(buildTransferCtx());
       const { commands, inputs } = JSON.parse(
         await config.transaction.toJSON()
       );
@@ -212,7 +212,7 @@ describe('Ntt move builder', () => {
     it('should derive recipient for EVM bound ss58 account', async () => {
       const ctx = buildTransferCtx();
       ctx.address = toBoundSs58(H160);
-      const config = await Ntt().transfer().build(ctx);
+      const [config] = await Ntt().transfer().build(ctx);
       const { commands, inputs } = JSON.parse(
         await config.transaction.toJSON()
       );

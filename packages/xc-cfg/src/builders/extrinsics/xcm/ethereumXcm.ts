@@ -17,7 +17,8 @@ const transact = (config: ContractConfigBuilder): ExtrinsicConfigBuilder => {
   const func = 'transact';
   return {
     build: async (params) => {
-      const contract = await config.build(params);
+      // A single `EthereumXcm.transact` carries one evm call.
+      const [contract] = await config.build(params);
       const version = XcmVersion.v1;
       const call = encodeFunctionData({
         abi: Abi[contract.module],

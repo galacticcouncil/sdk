@@ -3,7 +3,6 @@ import {
   Ntt as NttRegistry,
   ProgramConfig,
   ProgramConfigBuilder,
-  ProgramTx,
   SolanaBalanceType,
   SolanaChain,
   Wormhole as Wh,
@@ -43,11 +42,11 @@ async function getLookupTables(
 }
 
 /** Unpack an unsigned tx back into the instructions ProgramConfig carries. */
-async function toProgramTx(
+async function toProgramConfig(
   connection: Connection,
   tx: Transaction | VersionedTransaction,
   signers: Keypair[]
-): Promise<ProgramTx> {
+): Promise<ProgramConfig> {
   const lookupTables = await getLookupTables(connection, tx);
   const instructions =
     'message' in tx
@@ -55,7 +54,13 @@ async function toProgramTx(
           addressLookupTableAccounts: lookupTables,
         }).instructions
       : tx.instructions;
-  return { instructions, signers, lookupTables };
+  return new ProgramConfig({
+    instructions,
+    signers,
+    lookupTables,
+    func: 'transfer',
+    module: 'NttManager',
+  });
 }
 
 const transfer = (): ProgramConfigBuilder => ({
@@ -91,7 +96,7 @@ const transfer = (): ProgramConfigBuilder => ({
     const wrapNative = ctx.getBalanceType(asset) === SolanaBalanceType.Native;
 
     const outboxItem = Keypair.generate();
-    const sequence: ProgramTx[] = [];
+    const sequence: ProgramConfig[] = [];
     for await (const unsigned of solanaNtt.transfer(
       new SolanaAddress(sender),
       amount,
@@ -104,25 +109,28 @@ const transfer = (): ProgramConfigBuilder => ({
     )) {
       const { transaction, signers } = unsigned.transaction;
       sequence.push(
-        await toProgramTx(ctx.connection, transaction, signers ?? [])
+        await toProgramConfig(ctx.connection, transaction, signers ?? [])
       );
     }
 
     // Wrapping opens an associated token account when the sender has none.
+    // Carried on the transfer, the only one the fee is estimated from.
     const rentReserve = wrapNative
       ? BigInt(await getMinimumBalanceForRentExemptAccount(ctx.connection))
       : 0n;
 
     const main = sequence[sequence.length - 1];
-    return new ProgramConfig({
-      instructions: main.instructions,
-      signers: main.signers,
-      lookupTables: main.lookupTables,
-      prerequisites: sequence.slice(0, -1),
-      rentReserve: rentReserve,
-      func: 'transfer',
-      module: 'NttManager',
-    });
+    return [
+      ...sequence.slice(0, -1),
+      new ProgramConfig({
+        instructions: main.instructions,
+        signers: main.signers,
+        lookupTables: main.lookupTables,
+        rentReserve: rentReserve,
+        func: 'transfer',
+        module: 'NttManager',
+      }),
+    ];
   },
 });
 

@@ -10,7 +10,6 @@ import {
 import { dot, glmr, usdt, weth_wh } from '../../../assets';
 import {
   ContractBuilder,
-  ContractDecorator,
   ExtrinsicBuilder,
   ExtrinsicDecorator,
   FeeAmountBuilder,
@@ -178,11 +177,18 @@ export function toParaErc20Template(
   });
 }
 
+/**
+ * Both signer origins are served, and the route declares a config for each:
+ * an ss58 signer takes the `extrinsic` (evm calls wrapped in `EVM.call`, one
+ * signature, fee quoted by the runtime in the sender's fee currency), an h160
+ * signer takes the `contract` and signs plain evm transactions.
+ */
 export function viaNttTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
 ): AssetRoute {
+  const transfer = ContractBuilder().Wormhole().Ntt().transfer();
   return new AssetRoute({
     source: {
       asset: assetIn,
@@ -196,7 +202,8 @@ export function viaNttTemplate(
         asset: assetIn,
       },
     },
-    contract: ContractBuilder().Wormhole().Ntt().transfer(),
+    contract: transfer,
+    extrinsic: ExtrinsicBuilder().evm().call(transfer),
     tags: [Tag.Wormhole, Tag.Ntt],
   });
 }
@@ -214,16 +221,17 @@ export function viaNttTemplate(
  * would both name the wrong balance and resolve to 12 decimals.
  *
  * A sender holding no weth buys it first: the same destination fee swap the
- * xcm routes use, batched ahead of the call. Only an ss58 origin needs it -
- * that one pays its extrinsic fee in hdx and can hold zero weth. An h160 has
- * nothing to batch into, but pays its own gas in weth, so it already holds
- * some.
+ * xcm routes use, batched ahead of the calls. Only an ss58 origin needs it -
+ * that one pays its extrinsic fee in hdx and can hold zero weth, and is the
+ * origin whose config is an extrinsic in the first place. An h160 has nothing
+ * to batch into, but pays its own gas in weth, so it already holds some.
  */
 export function viaNttExecutorTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
 ): AssetRoute {
+  const transfer = ContractBuilder().Wormhole().Ntt().transferViaExecutor();
   return new AssetRoute({
     source: {
       asset: assetIn,
@@ -237,10 +245,11 @@ export function viaNttExecutorTemplate(
         asset: weth_wh,
       },
     },
-    contract: ContractDecorator(
+    contract: transfer,
+    extrinsic: ExtrinsicDecorator(
       isDestinationFeeSwapSupported,
       swapExtrinsicBuilder
-    ).prior(ContractBuilder().Wormhole().Ntt().transferViaExecutor()),
+    ).prior(ExtrinsicBuilder().evm().call(transfer)),
     tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
   });
 }

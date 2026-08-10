@@ -65,9 +65,9 @@ export class PlatformAdapter {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: BaseConfig
+    configs: BaseConfig[]
   ): Promise<Call> {
-    const [call] = await this.buildCalls(account, amount, feeBalance, config);
+    const [call] = await this.buildCalls(account, amount, feeBalance, configs);
     return call;
   }
 
@@ -75,26 +75,29 @@ export class PlatformAdapter {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: BaseConfig
+    configs: BaseConfig[]
   ): Promise<Call[]> {
-    const platform = this.platform[config.type];
-    if (platform.buildCalls) {
-      return platform.buildCalls(account, amount, feeBalance, config);
-    }
-    return [await platform.buildCall(account, amount, feeBalance, config)];
+    const [config] = configs;
+    return this.platform[config.type].buildCalls(
+      account,
+      amount,
+      feeBalance,
+      configs
+    );
   }
 
   async estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: BaseConfig
+    configs: BaseConfig[]
   ): Promise<AssetAmount> {
+    const [config] = configs;
     return this.platform[config.type].estimateFee(
       account,
       amount,
       feeBalance,
-      config
+      configs
     );
   }
 }

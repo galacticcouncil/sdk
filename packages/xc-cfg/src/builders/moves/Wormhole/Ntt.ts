@@ -136,11 +136,13 @@ const transfer = (): MoveConfigBuilder => ({
     });
     tx.mergeCoins(tx.gas, [dustCoin!]);
 
-    return new MoveConfig({
-      transaction: tx,
-      func: 'transfer',
-      module: 'NttManager',
-    });
+    return [
+      new MoveConfig({
+        transaction: tx,
+        func: 'transfer',
+        module: 'NttManager',
+      }),
+    ];
   },
 });
 

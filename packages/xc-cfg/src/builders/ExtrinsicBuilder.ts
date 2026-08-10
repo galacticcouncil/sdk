@@ -6,6 +6,7 @@ import {
 import { assetConversion } from './extrinsics/assetConversion';
 import { assets } from './extrinsics/assets';
 import { balances } from './extrinsics/balances';
+import { evm } from './extrinsics/evm';
 import { router } from './extrinsics/router';
 import { utility } from './extrinsics/utility';
 
@@ -17,6 +18,7 @@ export function ExtrinsicBuilder() {
     assets,
     balances,
     ethereumXcm,
+    evm,
     polkadotXcm,
     router,
     utility,

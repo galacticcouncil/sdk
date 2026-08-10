@@ -1,6 +1,9 @@
 import {
+  addr,
   Asset,
   AssetAmount,
+  BaseConfig,
+  CallType,
   FeeAmountConfigBuilder,
   FeeAssetConfigBuilder,
   Parachain,
@@ -15,6 +18,8 @@ import { formatAmount, formatEvmAddress } from './utils';
 import { Call, PlatformAdapter, SubstrateService } from '../platforms';
 
 import { DataProcessor } from './DataProcessor';
+
+const { EvmAddr } = addr;
 
 /**
  * Resolves origin-side transfer data — balance, minimum and existential
@@ -112,9 +117,14 @@ export class DataOriginProcessor extends DataProcessor {
     const { amount, sender, source } = ctx;
 
     const transfer = await this.getTransfer(ctx);
-    const address = route.contract
-      ? await formatEvmAddress(sender, chain)
-      : sender;
+
+    // Evm calls are signed by (and metered against) the h160, whatever the
+    // origin the route resolved them for.
+    const [config] = transfer;
+    const address =
+      config.type === CallType.Evm
+        ? await formatEvmAddress(sender, chain)
+        : sender;
 
     const networkFee = await this.adapter.estimateFee(
       address,
@@ -162,11 +172,20 @@ export class DataOriginProcessor extends DataProcessor {
     return feeAssetConfig as Asset;
   }
 
-  private async getTransfer(ctx: TransferCtx) {
+  /**
+   * Calls of the transfer, in execution order.
+   *
+   * A route may declare a config per signer origin: an h160 signer takes the
+   * `contract` and signs the evm calls itself, anyone else takes the
+   * `extrinsic`, which on an evm parachain wraps the very same calls in
+   * `EVM.call`. Where only one is declared, that one serves every origin the
+   * chain has.
+   */
+  private async getTransfer(ctx: TransferCtx): Promise<BaseConfig[]> {
     const { chain, route } = this.config;
     const { contract, extrinsic, program, move } = route;
 
-    if (extrinsic) {
+    if (extrinsic && !(contract && EvmAddr.isValid(ctx.sender))) {
       const { address, amount, asset, sender } = ctx;
       const substrate = await SubstrateService.create(chain as Parachain);
       const messageId = await substrate.buildMessageId(
@@ -175,10 +194,12 @@ export class DataOriginProcessor extends DataProcessor {
         asset.originSymbol,
         address
       );
-      return extrinsic.build({
-        ...ctx,
-        messageId: messageId,
-      });
+      return [
+        await extrinsic.build({
+          ...ctx,
+          messageId: messageId,
+        }),
+      ];
     }
 
     const callable = contract || program || move;

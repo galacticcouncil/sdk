@@ -9,7 +9,8 @@ import { encodeFunctionData } from 'viem';
 
 const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
   build: async (params) => {
-    const contracts = await Promise.all(configs.map((c) => c.build(params)));
+    const built = await Promise.all(configs.map((c) => c.build(params)));
+    const contracts = built.flat();
     const to = contracts.map((c) => c.address);
     const value = [0, 0];
     const calldata = contracts.map((c) => {
@@ -20,13 +21,15 @@ const batchAll = (configs: ContractConfigBuilder[]): ContractConfigBuilder => ({
       });
     });
 
-    return new ContractConfig({
-      abi: Abi.Batch,
-      address: Precompile.Batch,
-      args: [to, value, calldata, []],
-      func: 'batchAll',
-      module: 'Batch',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.Batch,
+        address: Precompile.Batch,
+        args: [to, value, calldata, []],
+        func: 'batchAll',
+        module: 'Batch',
+      }),
+    ];
   },
 });
 

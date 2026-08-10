@@ -73,20 +73,22 @@ const transfer = (): ContractConfigBuilder => ({
       wrapNative,
     } = await resolveTransfer(params);
 
-    return new ContractConfig({
-      abi: Abi.NttManager,
-      address: ntt.manager,
-      args: [
-        transferAmount,
-        rcvWh.getWormholeId(),
-        rcvWh.normalizeAddress(rcvAddress),
-      ],
-      token: ntt.token,
-      wrapNative: wrapNative,
-      value: deliveryPrice,
-      func: 'transfer',
-      module: 'NttManager',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.NttManager,
+        address: ntt.manager,
+        args: [
+          transferAmount,
+          rcvWh.getWormholeId(),
+          rcvWh.normalizeAddress(rcvAddress),
+        ],
+        token: ntt.token,
+        wrapNative: wrapNative,
+        value: deliveryPrice,
+        func: 'transfer',
+        module: 'NttManager',
+      }),
+    ];
   },
 });
 
@@ -157,34 +159,38 @@ const transferWithExecutor = (): ContractConfigBuilder => ({
       payee: refund,
     };
 
-    return new ContractConfig({
-      abi: Abi.NttManagerWithExecutor,
-      address: shim,
-      args: [
-        ntt.manager,
-        transferAmount,
-        rcvWh.getWormholeId(),
-        recipient,
-        recipient,
-        NTT_DEFAULT_INSTRUCTIONS,
-        executorArgs,
-        feeArgs,
-      ],
-      token: ntt.token,
-      wrapNative: wrapNative,
-      value: deliveryPrice + estimatedCost,
-      func: 'transfer',
-      module: 'NttManagerWithExecutor',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.NttManagerWithExecutor,
+        address: shim,
+        args: [
+          ntt.manager,
+          transferAmount,
+          rcvWh.getWormholeId(),
+          recipient,
+          recipient,
+          NTT_DEFAULT_INSTRUCTIONS,
+          executorArgs,
+          feeArgs,
+        ],
+        token: ntt.token,
+        wrapNative: wrapNative,
+        value: deliveryPrice + estimatedCost,
+        func: 'transfer',
+        module: 'NttManagerWithExecutor',
+      }),
+    ];
   },
 });
 
 /**
  * Executor delivery without the {@link transferWithExecutor} shim.
  *
- * Same two on-chain effects, made as two calls the sender owns: the manager
- * emits the transfer, then the Executor is paid to deliver that message. The
- * shim only bundles them - and does so by approving the manager for
+ * Same two on-chain effects, returned as the two calls the sender owns: the
+ * manager emits the transfer, then the Executor is paid to deliver that
+ * message. Built together because they share one delivery quote and one
+ * message sequence. The shim only bundles them - and does so by approving the
+ * manager for
  * `type(uint256).max`, which hydration's erc20 precompile rejects ("value too
  * big for type", its balances being u128). Our own approve is exact, so
  * dropping the shim is what makes hydration a usable executor source at all.
@@ -239,20 +245,22 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
       }) as Promise<bigint>,
     ]);
 
-    return new ContractConfig({
-      abi: Abi.NttManager,
-      address: ntt.manager,
-      args: [
-        transferAmount,
-        rcvWh.getWormholeId(),
-        rcvWh.normalizeAddress(rcvAddress),
-      ],
-      token: ntt.token,
-      wrapNative: wrapNative,
-      value: deliveryPrice,
-      func: 'transfer',
-      module: 'NttManager',
-      follow: new ContractConfig({
+    return [
+      new ContractConfig({
+        abi: Abi.NttManager,
+        address: ntt.manager,
+        args: [
+          transferAmount,
+          rcvWh.getWormholeId(),
+          rcvWh.normalizeAddress(rcvAddress),
+        ],
+        token: ntt.token,
+        wrapNative: wrapNative,
+        value: deliveryPrice,
+        func: 'transfer',
+        module: 'NttManager',
+      }),
+      new ContractConfig({
         abi: Abi.Executor,
         address: ctxWh.getExecutor(),
         args: [
@@ -271,7 +279,7 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
         func: 'requestExecution',
         module: 'Executor',
       }),
-    });
+    ];
   },
 });
 

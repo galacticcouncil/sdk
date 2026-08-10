@@ -80,14 +80,21 @@ Build steps:
    token, wrapNative }` — the 3-arg `NttManager.transfer` overload (default `0x00`
    transceiver instructions, sender as refund address).
 
-### Signer paths ([EvmPlatform](packages/xc-sdk/src/platforms/evm/EvmPlatform.ts))
+### Signer paths
 
-`buildCalls` returns the ordered sequence `[wrap?, approve?, transfer]`, the transfer
-call always last. Each prerequisite drops off once executed, so re-building after a
-signed step yields a shorter sequence. `buildCall` is the head of it — consumers
-rendering a multi-step flow should use `buildCalls` instead of re-deriving.
+A contract builder returns its calls as an **ordered vector** — one for the plain
+transfer, two for the executor bypass (`[manager.transfer, executor.requestExecution]`).
+Which config a route serves is picked by signer origin in
+[DataOriginProcessor](packages/xc-sdk/src/transfer/DataOriginProcessor.ts): a route
+declaring both gives its `contract` to an h160 signer and its `extrinsic` to everyone
+else.
 
-- **H160 signer** — plain EVM txs:
+- **H160 signer** — [EvmPlatform](packages/xc-sdk/src/platforms/evm/EvmPlatform.ts),
+  plain EVM txs, one signature each. `buildCalls` returns
+  `[wrap?, approve?, ...calls]`; each prerequisite drops off once executed, so
+  re-building after a signed step yields a shorter sequence. Prerequisites are derived
+  from the **first** config — the one that spends the token; the calls after it pay in
+  native value only.
   - `WETH.deposit()` with `value = amount - wethBalance`, only when `wrapNative` is set
     and the held wrapped balance is short. `NttManager` pulls the erc20 via
     `transferFrom`; NTT core has no `wrapAndTransferETH`, and `NttManagerWethUnwrap`
@@ -95,13 +102,28 @@ rendering a multi-step flow should use `buildCalls` instead of re-deriving.
     wrapped upfront. Pre-existing WETH is consumed first.
   - `approve(manager, amount)` when allowance is short (token address from
     `ContractConfig.token`).
-  - `transfer`.
-- **ss58 signer on an EvmParachain** — wrapped via
-  [SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) into `EVM.call`
-  extrinsic(s), the same sequence batched with `Utility.batch_all` (one signature).
+  - the contract calls, in builder order.
+- **ss58 signer on an EvmParachain** — the route's `extrinsic`, built by
+  [`ExtrinsicBuilder().evm().call()`](packages/xc-cfg/src/builders/extrinsics/evm.ts):
+  the same sequence wrapped in `EVM.call` and batched with `Utility.batch_all` (one
+  signature). Being an `ExtrinsicConfig` it composes with the rest of the substrate
+  world — a destination fee swap batches ahead of it through the ordinary
+  `ExtrinsicDecorator`, and the fee is quoted by the runtime in the sender's fee
+  currency rather than as raw evm gas.
   `EVM.call` runs under `EnsureAddressTruncated`: the evm source must be the signer's
   truncated H160 and the account **must be bound on chain**, otherwise gas/token balances
   resolve to the unrelated `ETH\0` phantom account.
+  ([SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) still does
+  this wrapping for **claims**, which are not route-driven.)
+
+### Binding
+
+`getDerivatedAddress` throws for a substrate native account that is not bound on chain
+([HydrationEvmResolver](packages/xc-cfg/src/resolvers/hydration.ts)) — the truncated h160
+is the unrelated `ETH\0` phantom until `EVMAccounts.bind_evm_address` lands, so deriving
+it silently would mean approving from, metering against, or minting to an account nobody
+controls. Binding is the submitter's job; hydration-ui prepends it to any transaction
+containing an `EVM.call`.
 
 ### Fee of a native-gas source
 
