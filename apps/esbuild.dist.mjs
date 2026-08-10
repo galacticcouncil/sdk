@@ -6,7 +6,6 @@ import { writeFileSync } from 'fs';
 const options = {
   entryPoints: [
     { in: 'src/redeem/app.ts', out: 'redeem' },
-    { in: 'src/moxit/app.ts', out: 'moxit' },
   ],
   bundle: true,
   format: 'esm',
