@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · AMM Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./amm.css" />
+  </head>
+
+  <body>
+    <main class="container container-wide">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>AMM Monitor</h1>
+        <p class="lede">
+          Subscribe to the event-driven pool store and watch it commit. Each
+          highlight is a field the last block actually changed. Logs go to the
+          devtools console — set the level below.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="toolbar">
+          <label class="field inline">
+            <span class="label">Endpoint</span>
+            <select id="endpoint"></select>
+          </label>
+
+          <label class="field inline">
+            <span class="label">Log level</span>
+            <select id="level">
+              <option value="silent">silent</option>
+              <option value="error">error</option>
+              <option value="warn">warn</option>
+              <option value="info">info</option>
+              <option value="debug">debug</option>
+              <option value="trace">trace</option>
+            </select>
+          </label>
+
+          <button id="connect" class="btn-primary" type="button">
+            Connect
+          </button>
+        </div>
+
+        <div id="types" class="pills"></div>
+        <div id="stats" class="stats"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Reserves</h2>
+          <div class="head-tools">
+            <span id="count" class="mono soft">0 / 0</span>
+            <input
+              id="filter"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="filter by pool, symbol or asset id"
+            />
+          </div>
+        </div>
+
+        <div class="table-wrap scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="num">Block</th>
+                <th>Type</th>
+                <th>Pool</th>
+                <th>Asset</th>
+                <th class="num">Balance</th>
+                <th class="num">Δ</th>
+              </tr>
+            </thead>
+            <tbody id="reserves-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>State</h2>
+          <div class="head-tools">
+            <label
+              class="check"
+              title="Pegs converge every block toward the oracle target"
+            >
+              <input id="pegs" type="checkbox" />
+              <span>pegs</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="num">Block</th>
+                <th>Type</th>
+                <th>Pool</th>
+                <th>Field</th>
+                <th class="num">Value</th>
+                <th class="num">Δ</th>
+              </tr>
+            </thead>
+            <tbody id="feed-body"></tbody>
+          </table>
+        </div>
+
+        <div class="table-foot">
+          <span class="hint">
+            E.g. fees, pegs, amplification, tradability, capacity.
+          </span>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/amm.js"></script>
+  </body>
+</html>
