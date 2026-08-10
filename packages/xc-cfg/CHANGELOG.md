@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 2.2.1
+
+### Patch Changes
+
+- xc: update bifrost rpc list
+
 ## 2.2.0
 
 ### Minor Changes
