@@ -2,6 +2,7 @@ import {
   CallType,
   NttTokenDef,
   SolanaChain,
+  spl,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
@@ -270,14 +271,10 @@ export class SolanaClaim {
     const recipient = new PublicKey(recipientAddress.toUint8Array());
     const mint = new PublicKey(ntt.token);
 
-    const mintAccount = await this.#connection.getAccountInfo(mint);
-    const tokenProgram = mintAccount?.owner ?? TOKEN_PROGRAM_ID;
-
-    const ata = getAssociatedTokenAddressSync(
+    const { ata, tokenProgram } = await spl.getTokenAccount(
+      this.#connection,
       mint,
-      recipient,
-      true,
-      tokenProgram
+      recipient
     );
     return createAssociatedTokenAccountIdempotentInstruction(
       payer,
