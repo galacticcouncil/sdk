@@ -156,6 +156,63 @@ Sui specifics:
 - Fee is whatever the [SuiPlatform](packages/xc-sdk/src/platforms/sui/SuiPlatform.ts)
   dry run reports (computation + storage); the wormhole message fee is 0.
 
+## Rate limits
+
+Each manager meters volume per direction over a 24h window that refills linearly —
+outbound on the source, inbound per peer chain on the destination. **This is the only
+rate limiter that applies.** The Wormhole Governor governs Token Bridge emitters only
+(guardian `node/pkg/governor` matches `KnownTokenbridgeEmitters`), and NTT emits from its
+own transceiver, so no governor notional budget is consumed and Hydration isn't even a
+governed chain.
+
+Read via [NttClient](packages/xc-cfg/src/clients/bridge/ntt.ts) (`clients` export of
+xc-cfg) — `new NttClient(chain, asset)`, then `getOutboundLimit()` /
+`getInboundLimit(from)` returning
+`{ capacity, limit, capacityAtLastTx, lastTxMs, windowMs }`, amounts in token decimals:
+
+| Platform | Source |
+| --- | --- |
+| evm | `rateLimitDuration()`, `getCurrent{Out,In}boundCapacity()`, `get{Out,In}boundLimitParams()` |
+| solana | `outbox_rate_limit` / `inbox_rate_limit` pdas, refill computed locally |
+| sui | manager State `outbox.rate_limit` / `peers` table entry, ms timestamps |
+
+Upstream's `SolanaNtt.getCurrentOutboundCapacity()` returns `capacity_at_last_tx` — the
+stored value, **not** refilled — which is why the solana path decodes the account itself.
+The evm limit params are packed `TrimmedAmount`s (`amount << 8 | decimals`) and need
+untrimming to token decimals; the capacity getters already answer untrimmed.
+
+Configured values live in `ops/tokens/<token>/deployment.json` of the ntt repo, but
+on-chain is the truth — the solana limits have already been re-set since. The hub legs
+carry the real limits (Ethereum USDC/USDT/DAI/sUSDS 100k, WBTC 10, WETH 10k; Base EURC
+100k; Sui SUI 100k), Hydration is `uint64` max trimmed on both directions — the "opted
+out" sentinel, worth rendering as unlimited rather than as 184,467,440,737.
+
+`capacity` is nearly always at the limit and says little on its own: the bucket refills at
+`limit / windowMs`, which dwarfs real volume, so a transfer is paid back within
+`amount / (limit / window)`. `capacityAtLastTx` + `lastTxMs` are the only trace of recent
+volume a manager keeps. Note the **backflow** — sending consumes outbound and *refills*
+the destination's inbound by the same amount (and the reverse on redeem), so both buckets
+of a pair carry the same residual.
+
+[NttRateLimitValidation](packages/xc-cfg/src/validations/bridge/ntt.ts) checks both ends
+of a transfer. It gates on **both** sides being ntt-registered — the chain pair alone
+doesn't identify an ntt route, only the destination asset key does (`usdc_wh` for ntt vs
+`usdc_eth` for snowbridge over the same `usdc` source).
+
+The two directions fail very differently, which is why the destination is checked at all:
+
+- **outbound** — every builder sends with `shouldQueue = false`, so an over-limit transfer
+  just reverts (`NotEnoughCapacity` on evm). Nothing is committed; the check only turns a
+  wallet revert into a readable error.
+- **inbound** — no such flag exists. The source has already burned/locked, the delivery
+  sits in the destination queue for the window, and the recipient has to release it with
+  `completeInboundQueuedTransfer` — which is not reachable from transfer history yet (see
+  open items). No cancel.
+
+A limit that can't be read at all (rpc down) fails closed as `Ntt_Limit_Unreachable`,
+naming the side that failed — the inbound outcome is bad enough not to wave through a
+transfer whose headroom is unknown.
+
 ## Tracking & claim
 
 [WormholeTransfer](packages/xc-sdk/src/clients/WormholeTransfer.ts) queries wormholescan
