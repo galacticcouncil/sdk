@@ -8,7 +8,19 @@ import {
   signedQuoteLayout,
 } from '@wormhole-foundation/sdk-definitions';
 
-import { EXECUTOR_API, ExecutorBudget } from '../bridges/wormhole';
+import { EXECUTOR_API } from '../../bridges/wormhole';
+
+/**
+ * What the Executor is asked to reserve to deliver on a destination.
+ *
+ * `gasLimit` budgets execution, `msgValue` budgets what the executor must
+ * hold. Both are destination units - evm gas, svm compute units, sui MIST -
+ * so neither has a value that is meaningful across chains.
+ */
+export interface ExecutorBudget {
+  gasLimit: bigint;
+  msgValue: bigint;
+}
 
 export type ExecutorQuote = {
   /** Quoter-signed cost attestation, passed through to the shim. */
@@ -40,30 +52,22 @@ const expiryOf = (signedQuote: string): number => {
 };
 
 /**
- * Live quotes, keyed by what they were priced for.
- *
- * Shared across instances because the callers construct their own: the route's
- * fee builder quotes to size the funding, the contract builder quotes to spend
- * it, and those two numbers have to be the same one. Quoting twice lets the
- * destination gas price move in between - observed drift was 807e9 wei against
- * a 9e9 margin - and the transfer then reverts underfunded.
- */
-const quotes = new Map<string, ExecutorQuote>();
-
-/**
  * Off-chain Executor quoting service.
  *
  * A signed quote carries its own expiry (an hour, currently) and the executor
  * rejects a stale one, so quotes are reused only while comfortably live.
  */
 export class ExecutorClient {
+  /** Live quotes, keyed by what they were priced for. */
+  private readonly quotes = new Map<string, ExecutorQuote>();
+
   /**
    * Price the delivery of one NTT transfer.
    *
    * @param srcWormholeId - source chain wormhole id
    * @param dstWormholeId - destination chain wormhole id
    * @param budget - what the executor must reserve on the destination, from
-   * {@link executorBudget}. Both halves are keyed here: a quote is only
+   * {@link ExecutorBudget}. Both halves are keyed here: a quote is only
    * honoured for the instructions it priced.
    */
   async quote(
@@ -74,7 +78,7 @@ export class ExecutorClient {
     const { gasLimit, msgValue } = budget;
 
     const key = [srcWormholeId, dstWormholeId, gasLimit, msgValue].join(':');
-    const live = quotes.get(key);
+    const live = this.quotes.get(key);
     if (live && expiryOf(live.signedQuote) - Date.now() > QUOTE_SAFETY_MS) {
       return live;
     }
@@ -122,7 +126,19 @@ export class ExecutorClient {
       relayInstructions,
     };
 
-    quotes.set(key, quote);
+    this.quotes.set(key, quote);
     return quote;
   }
 }
+
+/**
+ * Shared instance - always quote through this, never a fresh client.
+ *
+ * The route's fee builder quotes to size the funding and the contract builder
+ * quotes to spend it, and those two numbers have to be the same one. Quoting
+ * twice lets the destination gas price move in between - observed drift was
+ * 807e9 wei against a 9e9 margin - and the transfer then reverts underfunded.
+ * Separate instances would each hold their own cache and reintroduce exactly
+ * that.
+ */
+export const executorClient = new ExecutorClient();

@@ -165,8 +165,8 @@ rate limiter that applies.** The Wormhole Governor governs Token Bridge emitters
 own transceiver, so no governor notional budget is consumed and Hydration isn't even a
 governed chain.
 
-Read via [NttClient](packages/xc-cfg/src/clients/bridge/ntt.ts) (`clients` export of
-xc-cfg) — `new NttClient(chain, asset)`, then `getOutboundLimit()` /
+Read via [NttClient](packages/xc-cfg/src/clients/ntt/) (`clients` export of
+xc-cfg) — `nttClient(chain, asset)`, then `getOutboundLimit()` /
 `getInboundLimit(from)` returning
 `{ capacity, limit, capacityAtLastTx, lastTxMs, windowMs }`, amounts in token decimals:
 
@@ -323,7 +323,7 @@ the recipient. The sequence comes from `nextMessageSequence()` read at build tim
 transfer through the same manager landing in between leaves the request pointing at the
 wrong message — nothing is relayed and the transfer stays claimable by hand.
 
-### Quoting ([ExecutorClient](packages/xc-cfg/src/clients/executor.ts))
+### Quoting ([ExecutorClient](packages/xc-cfg/src/clients/wormhole/ExecutorClient.ts))
 
 `POST https://executor.labsapis.com/v0/quote {srcChain, dstChain, relayInstructions}` →
 `{signedQuote, estimatedCost}`. `relayInstructions` is one `GasInstruction` carrying a
@@ -335,7 +335,7 @@ never delivered.
 compute units on svm, MIST on sui, where the "gas limit" is a real transaction budget
 rather than an abstract count. Upstream models this as a destination-side
 `estimateMsgValueAndGasLimit(recipient)`; here it is
-[executorBudget](packages/xc-cfg/src/bridges/wormhole/executor/), one builder per
+[NttClient.getRedeemBudget](packages/xc-cfg/src/clients/ntt/), one client per
 destination platform:
 
 | Destination | `gasLimit` | `msgValue` |
@@ -368,7 +368,7 @@ solana), which is why every number above is measured against a real relay.
 
 Signed quotes **expire** (an hour, currently), and one is only honoured for the
 instructions it priced. Both builders quote — the fee builder to size the funding, the
-transfer builder to spend it — so [ExecutorClient](packages/xc-cfg/src/clients/executor.ts)
+transfer builder to spend it — so [ExecutorClient](packages/xc-cfg/src/clients/wormhole/ExecutorClient.ts)
 keeps one live quote per `src:dst:msgValue` and reuses it while over five minutes of its
 own expiry remain. Quoting twice instead let the destination gas price move in between:
 observed drift was 807e9 wei against a 9e9 margin, which underfunds the transfer.

@@ -37,12 +37,13 @@ import {
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
 } from '../bridges/snowbridge';
-import { executorBudget, NTT_DEFAULT_INSTRUCTIONS } from '../bridges/wormhole';
+import { NTT_DEFAULT_INSTRUCTIONS } from '../bridges/wormhole';
 import {
   BaseClient,
   AssethubClient,
-  ExecutorClient,
+  executorClient,
   HydrationClient,
+  nttClient,
 } from '../clients';
 
 type SendFeeOpts = {
@@ -390,11 +391,10 @@ function Wormhole() {
         const ctxWh = Wh.fromChain(ctx);
         const rcvWh = Wh.fromChain(destination);
 
-        const budget = await executorBudget({
-          destination: destination,
-          asset: destinationAsset,
-          recipient: address,
-        });
+        const budget = await nttClient(
+          destination,
+          destinationAsset
+        ).getRedeemBudget(address);
 
         const [deliveryPrice, quote] = await Promise.all([
           ctx.evmClient.getProvider().readContract({
@@ -403,7 +403,7 @@ function Wormhole() {
             args: [rcvWh.getWormholeId(), NTT_DEFAULT_INSTRUCTIONS],
             functionName: 'quoteDeliveryPrice',
           }) as Promise<[bigint[], bigint]>,
-          new ExecutorClient().quote(
+          executorClient.quote(
             ctxWh.getWormholeId(),
             rcvWh.getWormholeId(),
             budget

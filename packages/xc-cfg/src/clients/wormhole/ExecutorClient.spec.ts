@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import { ExecutorClient } from './executor';
+import { executorClient } from './ExecutorClient';
 
 /** Only msgValue varies across these cases; the gas limit is fixed. */
 const budget = (msgValue: bigint) => ({ gasLimit: 500_000n, msgValue });
@@ -40,11 +40,12 @@ describe('ExecutorClient.quote', () => {
 
   // The bug this exists for: the fee builder quotes to size the funding and
   // the contract builder quotes to spend it. Two fetches let the destination
-  // gas price move in between, and the transfer reverts underfunded.
+  // gas price move in between, and the transfer reverts underfunded. Both go
+  // through the shared client, which is what makes them one fetch.
   it('should serve both callers the same live quote', async () => {
     mockQuote(HOUR);
-    const a = await new ExecutorClient().quote(73, 2, budget(0n));
-    const b = await new ExecutorClient().quote(73, 2, budget(0n));
+    const a = await executorClient.quote(73, 2, budget(0n));
+    const b = await executorClient.quote(73, 2, budget(0n));
 
     expect(b.signedQuote).toBe(a.signedQuote);
     expect(b.estimatedCost).toBe(a.estimatedCost);
@@ -53,8 +54,8 @@ describe('ExecutorClient.quote', () => {
 
   it('should refetch once the quote is near expiry', async () => {
     mockQuote(60); // inside the 5 min safety margin
-    await new ExecutorClient().quote(73, 21, budget(0n));
-    await new ExecutorClient().quote(73, 21, budget(0n));
+    await executorClient.quote(73, 21, budget(0n));
+    await executorClient.quote(73, 21, budget(0n));
 
     expect(fetched).toBe(2);
   });
@@ -64,24 +65,24 @@ describe('ExecutorClient.quote', () => {
   // svm-priced payment with evm instructions or vice versa.
   it('should not share a quote across msgValues', async () => {
     mockQuote(HOUR);
-    await new ExecutorClient().quote(73, 1, budget(0n));
-    await new ExecutorClient().quote(73, 1, budget(6_000_000n));
+    await executorClient.quote(73, 1, budget(0n));
+    await executorClient.quote(73, 1, budget(6_000_000n));
 
     expect(fetched).toBe(2);
   });
 
-  // Distinct ids per test: the cache is module level and outlives each case.
+  // Distinct ids per test: the shared client's cache outlives each case.
   it('should not share a quote across routes', async () => {
     mockQuote(HOUR);
-    await new ExecutorClient().quote(73, 901, budget(0n));
-    await new ExecutorClient().quote(73, 902, budget(0n));
+    await executorClient.quote(73, 901, budget(0n));
+    await executorClient.quote(73, 902, budget(0n));
 
     expect(fetched).toBe(2);
   });
 
   it('should encode the requested msgValue', async () => {
     mockQuote(HOUR);
-    const q = await new ExecutorClient().quote(73, 903, budget(6_000_000n));
+    const q = await executorClient.quote(73, 903, budget(6_000_000n));
 
     // GasInstruction: type 01, gasLimit, then msgValue as a u128.
     expect(q.relayInstructions.endsWith((6_000_000).toString(16))).toBe(true);
@@ -92,12 +93,12 @@ describe('ExecutorClient.quote', () => {
       .spyOn(globalThis, 'fetch' as any)
       .mockResolvedValue({ ok: false } as any);
 
-    await expect(
-      new ExecutorClient().quote(73, 8453, budget(0n))
-    ).rejects.toThrow('Executor quote failed');
+    await expect(executorClient.quote(73, 8453, budget(0n))).rejects.toThrow(
+      'Executor quote failed'
+    );
 
     mockQuote(HOUR);
-    const ok = await new ExecutorClient().quote(73, 8453, budget(0n));
+    const ok = await executorClient.quote(73, 8453, budget(0n));
     expect(ok.estimatedCost).toBe(1000n);
   });
 });

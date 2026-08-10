@@ -12,11 +12,10 @@ import {
 
 import {
   encodeNttRequest,
-  executorBudget,
   NTT_DEFAULT_INSTRUCTIONS,
   NTT_TRIMMED_DECIMALS,
 } from '../../../bridges/wormhole';
-import { ExecutorClient } from '../../../clients';
+import { executorClient, nttClient } from '../../../clients';
 
 /**
  * Everything both transfer paths resolve identically - the deployment, the
@@ -126,14 +125,13 @@ const transferWithExecutor = (): ContractConfigBuilder => ({
         ? await ctx.getDerivatedAddress(params.sender)
         : params.sender;
 
-    const budget = await executorBudget({
-      destination: params.destination.chain,
-      asset: params.destination.balance,
-      recipient: params.address,
-    });
+    const budget = await nttClient(
+      params.destination.chain,
+      params.destination.balance
+    ).getRedeemBudget(params.address);
 
     const { signedQuote, estimatedCost, relayInstructions } =
-      await new ExecutorClient().quote(
+      await executorClient.quote(
         ctxWh.getWormholeId(),
         rcvWh.getWormholeId(),
         budget
@@ -223,14 +221,13 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
         ? await ctx.getDerivatedAddress(params.sender)
         : params.sender;
 
-    const budget = await executorBudget({
-      destination: rcv,
-      asset: params.destination.balance,
-      recipient: params.address,
-    });
+    const budget = await nttClient(
+      rcv,
+      params.destination.balance
+    ).getRedeemBudget(params.address);
 
     const [quote, sequence] = await Promise.all([
-      new ExecutorClient().quote(
+      executorClient.quote(
         ctxWh.getWormholeId(),
         rcvWh.getWormholeId(),
         budget

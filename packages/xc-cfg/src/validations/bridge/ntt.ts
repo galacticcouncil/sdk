@@ -8,7 +8,7 @@ import {
 } from '@galacticcouncil/xc-core';
 import { big } from '@galacticcouncil/common';
 
-import { NttClient } from '../../clients';
+import { nttClient } from '../../clients';
 
 function unreachable(asset: Asset, chain: AnyChain): never {
   throw new TransferValidationError('Ntt_Limit_Unreachable', {
@@ -35,10 +35,10 @@ export class NttRateLimitValidation extends TransferValidation {
     const { amount, asset, destination, source } = ctx;
 
     const [outbound, inbound] = await Promise.all([
-      new NttClient(source.chain, asset)
+      nttClient(source.chain, asset)
         .getOutboundLimit()
         .catch(() => unreachable(asset, source.chain)),
-      new NttClient(destination.chain, destination.balance)
+      nttClient(destination.chain, destination.balance)
         .getInboundLimit(source.chain)
         .catch(() => unreachable(destination.balance, destination.chain)),
     ]);

@@ -6,7 +6,7 @@ import { xc } from './setup';
 const { config } = xc;
 const { Tag } = tags;
 
-const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS, NttClient } = clients;
+const { HydrationClient, ASSET_LOCKDOWN_PERIOD_BLOCKS, nttClient } = clients;
 
 const HDX_DECIMALS = 12;
 const BLOCK_TIME_MS = 6_000;
@@ -163,8 +163,8 @@ const nttRows = await Promise.all(
 
     try {
       const [out, inbound] = await Promise.all([
-        new NttClient(source, sent).getOutboundLimit(),
-        new NttClient(destination, received).getInboundLimit(source),
+        nttClient(source, sent).getOutboundLimit(),
+        nttClient(destination, received).getInboundLimit(source),
       ]);
 
       const sentDecimals = source.getAssetDecimals(sent) ?? 0;
