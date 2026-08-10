@@ -4,7 +4,7 @@ import {
   SolanaBalanceType,
 } from '@galacticcouncil/xc-core';
 
-import { jito_sol, prime, sol } from '../../assets';
+import { jito_sol, prime, sol, wsol } from '../../assets';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -13,6 +13,11 @@ export const solana = new SolanaChain({
   assetsData: [
     {
       asset: sol,
+      decimals: 9,
+    },
+    {
+      asset: wsol,
+      id: 'So11111111111111111111111111111111111111112',
       decimals: 9,
     },
     {
@@ -45,6 +50,17 @@ export const solana = new SolanaChain({
     // has to be spelled out or inbound transfers never match.
     ntt: {
       [sol.key]: {
+        token: 'So11111111111111111111111111111111111111112',
+        manager: 'DiGxk55uAQNVzzg2FucPgdrQ4azb5SDvWQvzpzJD3o7J',
+        transceiver: {
+          wormhole: '5J12e7mMcbbN3VkCrUPfZp2bDHMH3t1rKvxGcwuN53wx',
+        },
+        emitter: '2WUYeRrK2JctBEvNVXY4mRG2ewMzhidi7L4Y5dCwqY9D',
+      },
+      // Same deployment as `sol` - the manager escrows the wSOL spl token
+      // either way. Keyed separately because executor delivery stops at the
+      // ata and leaves it wrapped, so that route names wsol as what arrives.
+      [wsol.key]: {
         token: 'So11111111111111111111111111111111111111112',
         manager: 'DiGxk55uAQNVzzg2FucPgdrQ4azb5SDvWQvzpzJD3o7J',
         transceiver: {
