@@ -7,9 +7,6 @@ import { Stats } from './stats';
 
 type PoolBase = pool.PoolBase;
 
-/** Non-balance changes kept in the feed */
-const FEED_SIZE = 60;
-
 const ENDPOINTS = [
   ['wss://rpc-catfish-1.catfish.hydration.cloud', 'Catfish 1'],
   ['wss://rpc-catfish-2.catfish.hydration.cloud', 'Catfish 2'],
@@ -27,18 +24,23 @@ const filterEl = el<HTMLInputElement>('filter');
 const pegsEl = el<HTMLInputElement>('pegs');
 const typesEl = el<HTMLElement>('types');
 const statsEl = el<HTMLElement>('stats');
-const reservesEl = el<HTMLTableSectionElement>('reserves-body');
-const feedEl = el<HTMLTableSectionElement>('feed-body');
+const stateEl = el<HTMLTableSectionElement>('state-body');
 const countEl = el<HTMLElement>('count');
 
-/** One asset's reserve in one pool — the row unit of the reserves table */
-interface Reserve {
+/**
+ * One field of one pool — the row unit.
+ *
+ * - A reserve is a field whose name is its asset; everything else is a scalar
+ * - Reserves exist from the first commit; a scalar appears when it first moves
+ */
+interface Row {
   kind: Kind;
   pool: string;
-  assetId: number;
-  decimals?: number;
-  balance: bigint;
-  delta: bigint;
+  field: string;
+  /** Set where the field is an asset's reserve, or belongs to one asset */
+  assetId?: number;
+  value: string;
+  delta: string;
   block: number;
   seq: number;
 }
@@ -54,34 +56,25 @@ const DENOMINATED: Record<string, string> = {
   hsmMintCapacity: 'hollarId',
 };
 
-/** A change to anything that isn't a reserve: fee, pegs, amp, capacity… */
-interface Change {
-  kind: Kind;
-  pool: string;
-  field: string;
-  /** Set where the field belongs to one asset, as a peg does */
-  assetId?: number;
-  value: string;
-  delta: string;
-  block: number;
-  seq: number;
-}
-
-const reserves = new Map<string, Reserve>();
+const rows = new Map<string, Row>();
 const previous = new Map<string, Record<string, string>>();
-const feed: Change[] = [];
+
+/** Raw balances, kept so a reserve's delta stays exact */
+const balances = new Map<string, bigint>();
 
 const stats = new Stats();
 let commits = 0;
 let seq = 0;
 let head = 0;
 
-/** Chain reads at the last head advance, and how many that block cost */
+/** Chain reads as of the last head advance */
 let reads = 0;
-let readsPerBlock = 0;
 
 /** First head seen, so cumulative counts have a span: `head - start` */
 let start = 0;
+
+/** When this session connected, for the uptime readout */
+let connectedAt = 0;
 
 const engine = new PoolsEngine((commit) => {
   commits++;
@@ -114,7 +107,6 @@ function observe(commit: Commit) {
   /** Sample on head advance, so the count covers exactly one block */
   if (commit.block > head) {
     const { fetch, unpinned } = engine.tally();
-    if (head) readsPerBlock = fetch + unpinned - reads;
     reads = fetch + unpinned;
     head = commit.block;
     if (!start) start = commit.block;
@@ -127,26 +119,26 @@ function observe(commit: Commit) {
     previous.set(poolKey, after);
 
     for (const token of p.tokens) {
-      const key = `${poolKey}:${token.id}`;
-      const prior = reserves.get(key);
+      const key = `${poolKey}:asset:${token.id}`;
+      const prior = rows.get(key);
+      const held = balances.get(key);
 
       /**
        * First sight is a baseline, not a move: it records the block it was seen
-       * at, but has nothing to subtract from, so it neither flashes nor deltas.
+       * at, but has nothing to subtract from, so it carries no delta.
        */
-      const moved = prior !== undefined && prior.balance !== token.balance;
+      const moved = held !== undefined && held !== token.balance;
+      balances.set(key, token.balance);
 
-      const delta = moved
-        ? token.balance - prior.balance
-        : (prior?.delta ?? 0n);
-
-      reserves.set(key, {
+      rows.set(key, {
         kind: commit.kind,
         pool: label(p),
+        field: 'balance',
         assetId: token.id,
-        decimals: token.decimals,
-        balance: token.balance,
-        delta,
+        value: amount(token.balance, token.decimals),
+        delta: moved
+          ? signed(token.balance - held, token.decimals)
+          : (prior?.delta ?? ''),
         block: moved ? commit.block : (prior?.block ?? commit.block),
         seq: moved ? seq : (prior?.seq ?? 0),
       });
@@ -161,10 +153,11 @@ function observe(commit: Commit) {
       const peg = /^pegs\.(\d+)$/.exec(path);
       const decimals = denominated(p, path);
 
-      feed.unshift({
+      const field = peg ? 'pegs' : path;
+      rows.set(`${poolKey}:${field}`, {
         kind: commit.kind,
         pool: label(p),
-        field: peg ? 'pegs' : path,
+        field,
         assetId: peg ? p.tokens[Number(peg[1])]?.id : undefined,
         value:
           decimals === undefined
@@ -182,8 +175,6 @@ function observe(commit: Commit) {
       });
     }
   }
-
-  feed.length = Math.min(feed.length, FEED_SIZE);
 }
 
 /** Balance as a human number; decimals are per token and may be missing */
@@ -280,22 +271,24 @@ const hit = (needle: string, ...fields: string[]) => {
 function render() {
   const needle = filterEl.value.trim().toLowerCase();
 
-  const rows = [...reserves.values()]
-    .filter((r) =>
-      hit(needle, r.kind, r.pool, symbol(r.assetId), String(r.assetId))
+  /** Pegs converge every block, so they are off unless asked for */
+  const visible = [...rows.values()]
+    .filter(
+      (r) =>
+        (pegsEl.checked || r.field !== 'pegs') &&
+        hit(
+          needle,
+          r.kind,
+          r.pool,
+          r.field,
+          r.assetId === undefined ? '' : symbol(r.assetId),
+          r.assetId === undefined ? '' : String(r.assetId)
+        )
     )
     .sort((a, b) => b.seq - a.seq || a.kind.localeCompare(b.kind));
 
-  countEl.textContent = `${rows.length} / ${reserves.size}`;
-  reservesEl.replaceChildren(...rows.map(reserveRow));
-
-  /** Pegs converge every block, so they are off unless asked for */
-  const changes = feed.filter(
-    (c) =>
-      (pegsEl.checked || c.field !== 'pegs') &&
-      hit(needle, c.kind, c.pool, c.field)
-  );
-  feedEl.replaceChildren(...changes.map(changeRow));
+  countEl.textContent = `${visible.length} / ${rows.size}`;
+  stateEl.replaceChildren(...visible.map(rowEl));
 }
 
 /**
@@ -309,31 +302,27 @@ const band = (block: number): string => {
   return age <= 0 ? 'age-0' : age === 1 ? 'age-1' : age === 2 ? 'age-2' : '';
 };
 
-function reserveRow(r: Reserve): HTMLTableRowElement {
+/**
+ * One field of one pool.
+ *
+ * - A reserve names its asset; every other field names itself
+ */
+function rowEl(r: Row): HTMLTableRowElement {
   const tr = document.createElement('tr');
   tr.className = band(r.block);
 
   tr.appendChild(cell(String(r.block), 'mono soft num'));
   tr.appendChild(cell(r.kind, 'kind'));
   tr.appendChild(cell(r.pool, 'mono soft'));
-  tr.appendChild(asset(r.assetId));
-  tr.appendChild(cell(amount(r.balance, r.decimals), 'mono num'));
-  tr.appendChild(delta(r.delta === 0n ? '' : signed(r.delta, r.decimals)));
-  return tr;
-}
-
-function changeRow(c: Change): HTMLTableRowElement {
-  const tr = document.createElement('tr');
-  tr.className = band(c.block);
-
-  tr.appendChild(cell(String(c.block), 'mono soft num'));
-  tr.appendChild(cell(c.kind, 'kind'));
-  tr.appendChild(cell(c.pool, 'mono soft'));
   tr.appendChild(
-    c.assetId === undefined ? cell(c.field, 'mono') : field(c.field, c.assetId)
+    r.assetId === undefined
+      ? cell(r.field, 'mono')
+      : r.field === 'balance'
+        ? asset(r.assetId)
+        : field(r.field, r.assetId)
   );
-  tr.appendChild(cell(c.value, 'mono num'));
-  tr.appendChild(delta(c.delta));
+  tr.appendChild(cell(r.value, 'mono num'));
+  tr.appendChild(delta(r.delta));
   return tr;
 }
 
@@ -369,52 +358,115 @@ function cell(text: string, className = ''): HTMLTableCellElement {
   return td;
 }
 
-/** label, value, warn, what it means */
-type Item = [string, string, boolean, string];
+/** One line of a stats group */
+interface Line {
+  name: string;
+  value: string;
+  /** Second column, where the group reports a rate */
+  rate?: string;
+  warn?: boolean;
+  hint?: string;
+}
+
+/** Blocks elapsed since the first commit, the denominator for any rate */
+const span = () => (start && head > start ? head - start : 0);
+
+/** Coarse and human: the point is the order of magnitude, not the seconds */
+const elapsed = (since: number): string => {
+  const total = Math.floor((Date.now() - since) / 1000);
+  const days = Math.floor(total / 86_400);
+  const hours = Math.floor((total % 86_400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+
+  if (days) return `${days}d ${hours}h`;
+  if (hours) return `${hours}h ${minutes}m`;
+  if (minutes) return `${minutes}m`;
+  return `${total}s`;
+};
+
+/** A group of name/value lines, one layout for every group in the panel */
+function listGroup(title: string, lines: Line[]): HTMLElement {
+  const group = document.createElement('div');
+  group.className = `stat-group compact ${title}`;
+
+  const heading = document.createElement('span');
+  heading.className = 'group-label';
+  heading.textContent = title;
+  group.appendChild(heading);
+
+  const list = document.createElement('div');
+  const wide = lines.some(({ rate }) => rate !== undefined);
+  list.className = `compact-list ${wide ? 'cols-3' : 'cols-2'}`;
+
+  for (const { name, value, rate, warn, hint } of lines) {
+    const row = document.createElement('div');
+    row.className = 'compact-row';
+    if (hint) row.title = hint;
+    row.innerHTML =
+      `<span class="q">${name}</span>` +
+      `<span class="n${warn ? ' is-warn' : ''}">${value}</span>` +
+      (rate === undefined ? '' : `<span class="n">${rate}</span>`);
+    list.appendChild(row);
+  }
+
+  group.appendChild(list);
+  return group;
+}
+
+const rate = (count: number): string => {
+  const blocks = span();
+  return blocks ? (count / blocks).toFixed(1) : '—';
+};
+
+/** The five queries reaching the chain most, total and per block */
+function heaviest(): Line[] {
+  return Object.entries(engine.tally().scopes)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([scope, count]) => ({
+      name: scope,
+      value: String(count),
+      rate: rate(count),
+      hint: `${scope} — ${count} chain reads, ${rate(count)} per block.`,
+    }));
+}
 
 /**
  * What the query layer cost.
  *
- * - `reads` is what reached the chain; `cached` and `live` were served locally
- * - `per block` is the steady-state cost, the number to compare against a
- *   design that re-reads every pool on every block
+ * - `reads` reached the chain; `cached` and `live` were served locally
+ * - The rate column is the steady-state cost per block
  */
-function queryItems(): Item[] {
+function queries(): Line[] {
   const { live, memo, fetch, unpinned } = engine.tally();
   const total = live + memo + fetch + unpinned;
   const served = total ? Math.round(((live + memo) / total) * 100) : 0;
 
   return [
-    [
-      'reads',
-      String(fetch + unpinned),
-      false,
-      'Read requests that reached the chain.',
-    ],
-    [
-      'per block',
-      String(readsPerBlock),
-      false,
-      'Chain reads during the last completed block.',
-    ],
-    [
-      'cached',
-      String(memo),
-      false,
-      'Reads served by the block cache, sharing a read already made at that block.',
-    ],
-    [
-      'live',
-      String(live),
-      false,
-      'Reads served from a value an event wrote, with no RPC.',
-    ],
-    [
-      'served',
-      `${served}%`,
-      false,
-      'Share of read requests answered without touching the chain.',
-    ],
+    {
+      name: 'reads',
+      value: String(fetch + unpinned),
+      rate: rate(reads),
+      hint: 'Read requests that reached the chain.',
+    },
+    {
+      name: 'cached',
+      value: String(memo),
+      rate: rate(memo),
+      hint: 'Served by the block cache, sharing a read already made at that block.',
+    },
+    {
+      name: 'live',
+      value: String(live),
+      rate: rate(live),
+      hint: 'Served from a value an event wrote, with no RPC.',
+    },
+    {
+      name: 'served',
+      value: `${served}%`,
+      rate: '',
+      hint: 'Share of read requests answered without touching the chain.',
+    },
   ];
 }
 
@@ -435,133 +487,101 @@ function renderStats() {
     0
   );
 
-  const groups: [string, Item[]][] = [
-    [
-      'store',
-      [
-        [
-          'commits',
-          String(commits),
-          false,
-          'Store commits received, one per pool type per block that changed something.',
-        ],
-        [
-          'resyncs',
-          String(resyncs),
-          resyncs > 0,
-          'Seeds beyond the first per client — something asked for a re-derivation.',
-        ],
-        [
-          'seed errors',
-          String(sum(s.errorsBy)),
-          sum(s.errorsBy) > 0,
-          'Seeds that gave up, usually a read that hit the query deadline.',
-        ],
-      ],
-    ],
-    [
-      'chain',
-      [
-        [
-          'block',
-          head ? String(head) : '—',
-          false,
-          'Highest block the store has committed.',
-        ],
-        [
-          'blocks',
-          start ? String(head - start) : '—',
-          false,
-          'Blocks elapsed since the first one seen.',
-        ],
-        [
-          'reorgs',
-          String(s.reorgs),
-          false,
-          'Reorgs healed by replaying the affected events at the new tip.',
-        ],
-        [
-          'max depth',
-          String(s.maxDepth),
-          false,
-          'Deepest reorg seen, in blocks replaced.',
-        ],
-        [
-          'gaps',
-          String(s.gaps),
-          s.gaps > 0,
-          "Blocks lost below the feed's window, forcing a reseed.",
-        ],
-      ],
-    ],
-    [
-      'connection',
-      [
-        [
-          'outages',
-          String(s.outages),
-          s.outages > 0,
-          'Times the node stopped answering the health probe.',
-        ],
-        [
-          'last down',
-          s.downLast ? `${s.downLast}ms` : '—',
-          false,
-          'How long the most recent outage lasted.',
-        ],
-        [
-          'stalled reads',
-          String(s.stalls),
-          s.stalls > 0,
-          'Reads that hit the query deadline.',
-        ],
-      ],
-    ],
-    [
-      'watchdog',
-      [
-        [
-          'reseeds',
-          reseeds || '—',
-          false,
-          'Driver-wide reseeds, by what asked for them.',
-        ],
-        [
-          'sync errors',
-          String(s.syncErrors),
-          s.syncErrors > 0,
-          'Passes that threw; the client reseeds and carries on.',
-        ],
-      ],
-    ],
-    ['queries', queryItems()],
+  const store: Line[] = [
+    {
+      name: 'commits',
+      value: String(commits),
+      hint: 'Store commits received, one per pool type per block that changed something.',
+    },
+    {
+      name: 'resyncs',
+      value: String(resyncs),
+      warn: resyncs > 0,
+      hint: 'Seeds beyond the first per client — something asked for a re-derivation.',
+    },
+    {
+      name: 'seed errors',
+      value: String(sum(s.errorsBy)),
+      warn: sum(s.errorsBy) > 0,
+      hint: 'Seeds that gave up, usually a read that hit the query deadline.',
+    },
+  ];
+
+  const chain: Line[] = [
+    {
+      name: 'block',
+      value: head ? String(head) : '—',
+      hint: 'Highest block the store has committed.',
+    },
+    {
+      name: 'blocks',
+      value: start ? String(head - start) : '—',
+      hint: 'Blocks elapsed since the first one seen.',
+    },
+    {
+      name: 'reorgs',
+      value: String(s.reorgs),
+      hint: 'Reorgs healed by replaying the affected events at the new tip.',
+    },
+    {
+      name: 'max depth',
+      value: String(s.maxDepth),
+      hint: 'Deepest reorg seen, in blocks replaced.',
+    },
+    {
+      name: 'gaps',
+      value: String(s.gaps),
+      warn: s.gaps > 0,
+      hint: "Blocks lost below the feed's window, forcing a reseed.",
+    },
+  ];
+
+  const connection: Line[] = [
+    {
+      name: 'uptime',
+      value: connectedAt ? elapsed(connectedAt) : '—',
+      hint: 'How long this session has been subscribed.',
+    },
+    {
+      name: 'outages',
+      value: String(s.outages),
+      warn: s.outages > 0,
+      hint: 'Times the node stopped answering the health probe.',
+    },
+    {
+      name: 'last down',
+      value: s.downLast ? `${s.downLast}ms` : '—',
+      hint: 'How long the most recent outage lasted.',
+    },
+    {
+      name: 'stalled reads',
+      value: String(s.stalls),
+      warn: s.stalls > 0,
+      hint: 'Reads that hit the query deadline.',
+    },
+  ];
+
+  const watchdog: Line[] = [
+    {
+      name: 'reseeds',
+      value: reseeds || '—',
+      hint: 'Driver-wide reseeds, by what asked for them.',
+    },
+    {
+      name: 'sync errors',
+      value: String(s.syncErrors),
+      warn: s.syncErrors > 0,
+      hint: 'Passes that threw; the client reseeds and carries on.',
+    },
   ];
 
   statsEl.replaceChildren(
-    ...groups.map(([title, items]) => {
-      const group = document.createElement('div');
-      group.className = 'stat-group';
-
-      const heading = document.createElement('span');
-      heading.className = 'group-label';
-      heading.textContent = title;
-      group.appendChild(heading);
-
-      const row = document.createElement('div');
-      row.className = 'stat-row';
-      for (const [name, value, warn, hint] of items) {
-        const item = document.createElement('div');
-        item.className = warn ? 'stat is-warn' : 'stat';
-        item.title = hint;
-        item.innerHTML =
-          `<span class="stat-label">${name}</span>` +
-          `<span class="stat-value">${value}</span>`;
-        row.appendChild(item);
-      }
-      group.appendChild(row);
-
-      return group;
-    })
+    listGroup('store', store),
+    listGroup('chain', chain),
+    listGroup('connection', connection),
+    listGroup('watchdog', watchdog),
+    listGroup('queries', queries()),
+    listGroup('heaviest', heaviest())
   );
 }
 
@@ -582,8 +602,10 @@ function renderTypes() {
 function toggle(kind: Kind) {
   if (engine.enabled(kind)) {
     engine.disable(kind);
-    for (const key of [...reserves.keys()]) {
-      if (key.startsWith(`${kind}:`)) reserves.delete(key);
+    for (const key of [...rows.keys()]) {
+      if (!key.startsWith(`${kind}:`)) continue;
+      rows.delete(key);
+      balances.delete(key);
     }
     render();
   } else {
@@ -600,16 +622,16 @@ function setState(on: boolean) {
 connectEl.addEventListener('click', () => {
   if (engine.connected) {
     engine.disconnect();
-    reserves.clear();
+    rows.clear();
+    balances.clear();
     previous.clear();
-    feed.length = 0;
     stats.reset();
     commits = 0;
     seq = 0;
     head = 0;
     start = 0;
     reads = 0;
-    readsPerBlock = 0;
+    connectedAt = 0;
     render();
     renderStats();
     setState(false);
@@ -618,6 +640,7 @@ connectEl.addEventListener('click', () => {
   }
 
   engine.connect(endpointEl.value);
+  connectedAt = Date.now();
   setState(true);
   for (const kind of ['omni', 'stable', 'aave', 'hsm'] as Kind[]) {
     engine.enable(kind);

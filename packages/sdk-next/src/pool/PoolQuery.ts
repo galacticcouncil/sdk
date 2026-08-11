@@ -47,7 +47,7 @@ export abstract class PoolQuery extends Papi {
     this.cache.clear();
   }
 
-  /** Asset registry entry (decimals, existential deposit, type) */
+  /** One asset's registry entry (decimals, existential deposit, type) */
   readonly asset = this.cache.scope<[number], TAssetDetails | undefined>(
     'AssetRegistry.Assets',
     (at, id) => this.api.query.AssetRegistry.Assets.getValue(id, { at }),
@@ -55,7 +55,25 @@ export abstract class PoolQuery extends Papi {
     'persistent'
   );
 
-  /** Asset registry location (erc20 assets carry their H160 here) */
+  /**
+   * Every asset's entry, keyed by id.
+   *
+   * - One storage operation instead of one per asset; for a loader that wants a
+   *   whole set this replaces the fan-out a seed used to do
+   */
+  readonly assets = this.cache.scope<[], Map<number, TAssetDetails>>(
+    'AssetRegistry.Assets.entries',
+    async (at) =>
+      new Map(
+        (await this.api.query.AssetRegistry.Assets.getEntries({ at })).map(
+          ({ keyArgs, value }) => [keyArgs[0], value]
+        )
+      ),
+    () => 'entries',
+    'persistent'
+  );
+
+  /** One asset's location (erc20 assets carry their H160 here) */
   readonly assetLocation = this.cache.scope<
     [number],
     TAssetLocation | undefined
@@ -64,6 +82,19 @@ export abstract class PoolQuery extends Papi {
     (at, id) =>
       this.api.query.AssetRegistry.AssetLocations.getValue(id, { at }),
     (id) => String(id),
+    'persistent'
+  );
+
+  /** Every asset's location, keyed by id; same reasoning as {@link assets} */
+  readonly assetLocations = this.cache.scope<[], Map<number, TAssetLocation>>(
+    'AssetRegistry.AssetLocations.entries',
+    async (at) =>
+      new Map(
+        (
+          await this.api.query.AssetRegistry.AssetLocations.getEntries({ at })
+        ).map(({ keyArgs, value }) => [keyArgs[0], value])
+      ),
+    () => 'entries',
     'persistent'
   );
 

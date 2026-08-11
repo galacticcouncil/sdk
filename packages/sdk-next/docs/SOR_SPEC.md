@@ -2,6 +2,8 @@
 
 > **Package:** `sdk-next` | **Date:** 2026-03-14
 > **Scope:** `src/sor/TradeRouter.ts`, `src/sor/Router.ts`, `src/pool/*`
+> **Related:** [SOR_ENGINE.md](SOR_ENGINE.md) — how the pool stores are kept in sync;
+> this spec covers routing and the consumer surface.
 
 ---
 
@@ -28,10 +30,14 @@ TradeRouter (stateless, except MLR cache)
                 |      |
                 |      +--> PoolStore<T> (BehaviorSubject + queue)
                 |      +--> PoolLog
-                |      +--> QueryBus (TLRU-cached RPC scopes)
-                |      +--> Watchdog (connection recovery, block gap detection)
+                |      +--> PoolQuery (named scopes over QueryCache)
                 |
                 +--> pools: Map<string, PoolBase> (aggregated snapshot)
+
+PoolSync (singleton) -- drives every registered PoolClient per block
+  |
+  +--> EventBus (bestBlocks$ diff + pinned events reads)
+  +--> Watchdog (connection recovery, finalized gap, periodic)
 ```
 
 ### Statefulness Map
@@ -42,9 +48,10 @@ TradeRouter (stateless, except MLR cache)
 | **Router**            | Minimal   | `routeProposals: Map` - BFS result cache, `filter`     |
 | **PoolFactory**       | None      | Pure static factory                                    |
 | **PoolContextProvider** | **Yes** | `pools: Map<string, PoolBase>`, `active: Set`, `isReady` |
-| **PoolClient\<T\>**  | **Yes**   | `PoolStore<T>`, memoized seed, QueryBus live caches, resync state |
+| **PoolClient\<T\>**  | **Yes**   | `PoolStore<T>`, block cursor, matched-event ring, seeded flag |
 | **PoolStore\<T\>**   | **Yes**   | `BehaviorSubject<T[]>`, serialized update queue, changeset |
-| **QueryBus scope**    | **Yes**   | `live: Map` (subscription-fed) + `cache: TLRUCache` (RPC-fed) |
+| **QueryCache scope**  | **Yes**   | `live: Map` (event-fed) + `cache: TLRUCache` (fetch-fed) |
+| **PoolSync**          | **Yes**   | singleton: subscription, registered clients + order, watchdog |
 
 **Verdict:** TradeRouter is effectively stateless from the consumer's perspective. All mutable state lives in `PoolContextProvider` -> `PoolClient` -> `PoolStore` chain. This is already a strong design.
 
@@ -76,18 +83,14 @@ TradeRouter.withCtx()
 PoolContextProvider.withOmnipool()
   -> subscribe(client)
     -> client.getSubscriber()
-      -> subscribeStore() [shared via ReplaySubject(1)]
-        -> resync$.pipe(switchMap(...))
-          1. Seed: getMemPools() -> store.set(valid)
-          2. Attach writers:
-             - subscribeBalances() -> store.update(patch)
-             - subscribeUpdates()  -> store.update(patch) [pool-type specific]
-          3. Emit: merge(seed, store$.pipe(skip(1)))
-      -> getSubscriber() post-processing:
-        -> bufferCount(2,1) + changeset filter
-        -> throttleTime(1000)
+      -> PoolSync.shared(client).register(this)   // engine drives the store
+      -> store.asObservable().pipe(skip(1))       // drop replay; first emission is the seed
+      -> bufferCount(2,1) + changeset delta
+      -> share({ ReplaySubject(1), resetOnRefCountZero: true })
     -> pools.set(address, poolBase) per emission
 ```
+
+Each emission is the **delta** — only pools whose state changed in that block.
 
 ### Trade Execution (`getBestSell`)
 
@@ -162,21 +165,19 @@ TradeRouter.getBestSell(assetIn, assetOut, amountIn)
 
 **State management:**
 - `PoolStore<T>`: reactive store with serialized update queue
-- `memPools`: memoize1 with TLRU (6s TTL) for seed caching
-- `mem` counter: incremented on resync to bust memoization
-- `resync$`: ReplaySubject that triggers full cycle rebuilds
+- `block` / `blockHash`: the committed cursor, assigned inside the commit
+- `blockMatched`: bounded ring of the events this client matched per applied block
+- `seeded` flag: cleared by `requestResync()`; the next pass reseeds pinned
 
-**Subscription lifecycle:**
-1. `subscribeStore()` creates a `share()`d observable with `ReplaySubject(1)` connector
-2. On each `resync$` emission: seed -> attach balance + update writers -> emit store
-3. `subscribeBalances()`: watches token balances per pool, buffers 250ms, batch-updates store
-4. `subscribeUpdates()`: pool-type-specific chain watchers (abstract)
+**Per-block lifecycle** — driven by `PoolSync`, not by a per-client subscription:
+1. `syncBlock(ctx, deps)` queues the pass behind this client's in-flight work
+2. `applyBlock` replays orphaned/gap-filled matches, resolves the tip, awaits sources
+3. Tick + reconcile, then one `store.update` per block
 
-**Resiliency:**
-- **Watchdog**: monitors connection status (offline->online recovery) and block gaps (>= 3 blocks)
-- **watchGuard**: operator that catches errors, logs, triggers forced resync
-- **requestResync**: dedup'd via `resyncPending` flag, deferred to next tick
-- **RESYNC_THROTTLE**: 3s cooldown between resyncs
+**Resiliency:** one engine-level watchdog (connection recovery, finalized gap, periodic),
+and a failing pass is contained — logged, reseeded, queue continues.
+
+See [SOR_ENGINE.md](SOR_ENGINE.md) for the full model.
 
 ### 3.5 PoolStore\<T\> (`src/pool/PoolStore.ts`)
 
@@ -190,13 +191,16 @@ TradeRouter.getBestSell(assetIn, assetOut, amountIn)
 - `update(patch)`: queued merge (used by live writers)
 - Changeset: `Set<string>` of modified addresses, reset per update
 
-### 3.6 QueryBus (`src/utils/QueryBus.ts`)
+### 3.6 QueryCache (`src/utils/QueryCache.ts`)
 
-Two-tier cache per scope:
-1. **`live` Map**: populated by subscription writers (hot, always fresh)
-2. **`cache` TLRUCache**: populated by RPC fetches (cold, TTL-bounded)
+Two tiers per scope:
+1. **`live` Map**: written by an event (`set`/`refresh`), no expiry, checked first
+2. **`cache` TLRUCache**: the fetch tier, memoized per policy — `'block'`, `'persistent'`,
+   or a numeric TTL
 
-Lookup order: live -> cache -> fetch. This is critical for fee lookups during trade execution.
+Lookup order: live -> cache -> fetch, with unpinned reads never memoized. Every read is
+attributed to a tier and, when it hits the chain, to its scope — so the heaviest query is
+visible at runtime via `tally`.
 
 ---
 
@@ -217,16 +221,18 @@ All math modules use WASM bindings for computation - calculations are CPU-bound 
 
 ## 5. Sync / Resilience Model
 
-### Current Sync Model
+### Sync Model
 
 ```
-Chain -> PoolClient subscriptions -> PoolStore -> PoolContextProvider.pools Map -> Router snapshot
+bestBlocks$ -> EventBus -> PoolSync -> PoolClient queues -> PoolStore
+            -> PoolContextProvider.pools Map -> Router snapshot
 ```
 
-Each `getPools()` call takes a **snapshot** of the aggregated map. This is eventually consistent: pool data can be stale by up to:
-- **Balance**: ~250ms (bufferTime) + ~1s (throttleTime) = ~1.25s after on-chain change
-- **Pool state** (e.g., Omni hub_reserve): depends on subscription latency, typically < 1 block
-- **Fees**: QueryBus TLRU TTL (6s for dynamic fees/oracles) or live subscription
+One driver resolves every client per block, so a committed store is block-pinned and cannot
+tear. Each `getPools()` call takes a **snapshot** of the aggregated map. Everything is exact
+as of its client's committed block except two converging fields — oracle-driven `pegs.*` and
+interest-bearing (aToken) reserves — bounded under 1 bp. See
+[SOR_ENGINE.md](SOR_ENGINE.md#accuracy--drift).
 
 ### Sync Characteristics
 
@@ -236,4 +242,8 @@ First `getPools()` call loads from chain (slow, ~seconds). All subsequent calls 
 
 #### Cross-client consistency during aggregation
 
-`PoolContextProvider.pools` aggregates from multiple independent subscription streams. During a multi-pool trade evaluation, the Omni pool data might be from block N while XYK data is from block N-1. This is inherent to the subscription model and acceptable. A block-pinned snapshot would require coordinated reads across all clients, defeating the purpose of reactive updates. The existing throttling (1s) already reduces the window of inconsistency.
+`PoolContextProvider.pools` aggregates per-client stores. Each store is internally coherent
+for its own committed block, but clients commit independently, so a multi-pool evaluation can
+mix block N and block N-1 across pool types. Clients resolve the same pass in parallel, so
+the window is one block and only widens when a client is slow — a derived pool (HSM) is the
+one case that is ordered, since it waits for its source's block before merging.

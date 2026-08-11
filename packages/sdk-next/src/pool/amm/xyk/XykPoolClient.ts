@@ -46,8 +46,9 @@ export class XykPoolClient extends PoolClient<PoolBase> {
 
   async loadPools(block: BlockRef): Promise<PoolBase[]> {
     const at = block.hash;
-    const [entries, limits] = await Promise.all([
+    const [entries, assets, limits] = await Promise.all([
       this.query.poolAssets.get(at),
+      this.query.assets.get(at),
       this.query.limits(),
     ]);
 
@@ -55,11 +56,12 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       const [id] = keyArgs;
       const [x, y] = value;
 
-      const [xBalance, xMeta, yBalance, yMeta] = await Promise.all([
+      const xMeta = assets.get(x);
+      const yMeta = assets.get(y);
+
+      const [xBalance, yBalance] = await Promise.all([
         this.query.assetBalance.get(at, id, x),
-        this.query.asset.get(at, x),
         this.query.assetBalance.get(at, id, y),
-        this.query.asset.get(at, y),
       ]);
 
       return {

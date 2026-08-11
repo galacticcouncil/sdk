@@ -74,10 +74,11 @@
   font-weight: 600;
 }
 
+/* One row, every group sharing the width */
 .stats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px 28px;
+  flex-wrap: nowrap;
+  gap: 24px;
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
@@ -85,8 +86,15 @@
 
 .stat-group {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
+}
+
+/* Query names are long, so this one takes a double share */
+.stat-group.heaviest {
+  flex: 2 1 0;
 }
 
 .group-label {
@@ -122,6 +130,42 @@
 
 .stat.is-warn .stat-value {
   color: var(--danger);
+}
+
+/* Query names are identifiers, so they keep their case and stay small */
+.compact-list {
+  display: grid;
+  gap: 2px 14px;
+}
+
+/* The name absorbs the group's share; numbers stay right-aligned */
+.compact-list.cols-2 {
+  grid-template-columns: 1fr auto;
+}
+
+.compact-list.cols-3 {
+  grid-template-columns: 1fr auto auto;
+}
+
+.compact-row {
+  display: contents;
+}
+
+.compact .q {
+  overflow: hidden;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.compact .n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-head {

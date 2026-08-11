@@ -63,28 +63,23 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const hubAssetId = await this.query.hubAssetId();
     const poolAddress = this.getPoolAddress();
 
-    const [
-      entries,
-      hubAssetTradeability,
-      hubAssetMeta,
-      hubAssetBalance,
-      limits,
-    ] = await Promise.all([
-      this.query.assets.get(at),
-      this.query.hubTradability.get(at),
-      this.query.asset.get(at, hubAssetId),
-      this.query.assetBalance.get(at, poolAddress, hubAssetId),
-      this.query.limits(),
-    ]);
+    const [states, hubAssetTradeability, assets, hubAssetBalance, limits] =
+      await Promise.all([
+        this.query.assetStates.get(at),
+        this.query.hubTradability.get(at),
+        this.query.assets.get(at),
+        this.query.assetBalance.get(at, poolAddress, hubAssetId),
+        this.query.limits(),
+      ]);
 
-    const poolTokens = entries.map(async ({ keyArgs, value }) => {
+    const hubAssetMeta = assets.get(hubAssetId);
+
+    const poolTokens = states.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
 
-      const [meta, balance] = await Promise.all([
-        this.query.asset.get(at, id),
-        this.query.assetBalance.get(at, poolAddress, id),
-      ]);
+      const meta = assets.get(id);
+      const balance = await this.query.assetBalance.get(at, poolAddress, id);
 
       return {
         id: id,

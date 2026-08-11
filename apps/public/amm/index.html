@@ -19,11 +19,7 @@
       <header class="hero">
         <a class="back" href="../">&larr; Utilities</a>
         <h1>AMM Monitor</h1>
-        <p class="lede">
-          Subscribe to the event-driven pool store and watch it commit. Each
-          highlight is a field the last block actually changed. Logs go to the
-          devtools console — set the level below.
-        </p>
+        <p class="lede">Event-driven pool store live stats.</p>
       </header>
 
       <section class="card">
@@ -56,40 +52,9 @@
 
       <section class="card">
         <div class="card-head">
-          <h2>Reserves</h2>
-          <div class="head-tools">
-            <span id="count" class="mono soft">0 / 0</span>
-            <input
-              id="filter"
-              type="search"
-              autocomplete="off"
-              spellcheck="false"
-              placeholder="filter by pool, symbol or asset id"
-            />
-          </div>
-        </div>
-
-        <div class="table-wrap scroll">
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="num">Block</th>
-                <th>Type</th>
-                <th>Pool</th>
-                <th>Asset</th>
-                <th class="num">Balance</th>
-                <th class="num">Δ</th>
-              </tr>
-            </thead>
-            <tbody id="reserves-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
           <h2>State</h2>
           <div class="head-tools">
+            <span id="count" class="mono soft">0 / 0</span>
             <label
               class="check"
               title="Pegs converge every block toward the oracle target"
@@ -97,6 +62,13 @@
               <input id="pegs" type="checkbox" />
               <span>pegs</span>
             </label>
+            <input
+              id="filter"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="filter by pool, field, symbol or asset id"
+            />
           </div>
         </div>
 
@@ -112,13 +84,14 @@
                 <th class="num">Δ</th>
               </tr>
             </thead>
-            <tbody id="feed-body"></tbody>
+            <tbody id="state-body"></tbody>
           </table>
         </div>
 
         <div class="table-foot">
           <span class="hint">
-            E.g. fees, pegs, amplification, tradability, capacity.
+            Reserves plus everything else that moves — fees, pegs,
+            amplification, tradability, capacity.
           </span>
         </div>
       </section>

@@ -29,11 +29,11 @@ const isPinned = (at: string) => at.startsWith('0x');
  *
  * - `live` / `memo` cost nothing; `fetch` / `unpinned` hit the chain
  */
-export interface QueryTally {
-  live: number;
-  memo: number;
-  fetch: number;
-  unpinned: number;
+export type QueryTier = 'live' | 'memo' | 'fetch' | 'unpinned';
+
+export interface QueryTally extends Record<QueryTier, number> {
+  /** Chain reads per scope, so the heaviest query is visible */
+  scopes: Record<string, number>;
 }
 
 /**
@@ -49,13 +49,19 @@ export class QueryCache {
   private debug: boolean;
 
   /** Every scope's `clear`, so the whole cache can be dropped at once */
-  private scopes: (() => void)[] = [];
+  private clears: (() => void)[] = [];
+
+  private counters: QueryTally = {
+    live: 0,
+    memo: 0,
+    fetch: 0,
+    unpinned: 0,
+    scopes: {},
+  };
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
   }
-
-  private counters: QueryTally = { live: 0, memo: 0, fetch: 0, unpinned: 0 };
 
   /** Reads served per tier since this cache was created */
   get tally(): Readonly<QueryTally> {
@@ -66,9 +72,16 @@ export class QueryCache {
     this.debug && console.log(op, scope, key);
   }
 
-  /** Count a read and, when debugging, name what served it */
-  private served(tier: keyof QueryTally, scope: string, key?: string) {
+  /**
+   * Count a read and, when debugging, name what served it.
+   *
+   * - Only the tiers that reached the chain are attributed to their scope
+   */
+  private served(tier: QueryTier, scope: string, key?: string) {
     this.counters[tier]++;
+    if (tier === 'fetch' || tier === 'unpinned') {
+      this.counters.scopes[scope] = (this.counters.scopes[scope] ?? 0) + 1;
+    }
     this.log(`[${tier}]`, scope, key);
   }
 
@@ -79,7 +92,7 @@ export class QueryCache {
    *   earlier event wrote may survive into it
    */
   clear() {
-    for (const clear of this.scopes) clear();
+    for (const clear of this.clears) clear();
   }
 
   /**
@@ -184,7 +197,7 @@ export class QueryCache {
       cache.release();
     };
 
-    this.scopes.push(clear);
+    this.clears.push(clear);
 
     return {
       get,

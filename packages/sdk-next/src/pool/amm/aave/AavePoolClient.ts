@@ -47,17 +47,19 @@ export class AavePoolClient extends PoolClient<PoolBase> {
 
   async loadPools(block: BlockRef): Promise<PoolBase[]> {
     const at = block.hash;
-    const entries = await this.query.pools.get(at);
+
+    const [entries, assets, locations] = await Promise.all([
+      this.query.pools.get(at),
+      this.query.assets.get(at),
+      this.query.assetLocations.get(at),
+    ]);
 
     const pools = entries.map(
       async ({ reserve, atoken, liqudity_in, liqudity_out }) => {
-        const [reserveMeta, reserveLocation, aTokenMeta, aTokenLocation] =
-          await Promise.all([
-            this.query.asset.get(at, reserve),
-            this.query.assetLocation.get(at, reserve),
-            this.query.asset.get(at, atoken),
-            this.query.assetLocation.get(at, atoken),
-          ]);
+        const reserveMeta = assets.get(reserve);
+        const reserveLocation = locations.get(reserve);
+        const aTokenMeta = assets.get(atoken);
+        const aTokenLocation = locations.get(atoken);
 
         return {
           address: this.getPoolId(reserve, atoken),

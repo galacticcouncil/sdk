@@ -18,20 +18,81 @@ const DRIFT_PPM = 100n; // 0.01%
 
 const isInt = (s: string | undefined): s is string => !!s && /^-?\d+$/.test(s);
 
+/**
+ * The two things that converge, counted apart.
+ *
+ * - `pegs` trails its oracle target between refreshes
+ * - `balance` is an interest-bearing reserve accruing with no event
+ */
+type DriftKind = 'pegs' | 'balance';
+
+const DRIFT_KINDS: DriftKind[] = ['pegs', 'balance'];
+
+/** Fields counted, and the worst relative delta seen, for one key */
+type DriftEntry = { n: number; ppm: number };
+
+/**
+ * One kind's tally.
+ *
+ * - `by` is keyed by whoever owns the drifting field: the asset id for a
+ *   balance, the pool id for a peg
+ */
+type DriftTally = { n: number; by: Record<string, DriftEntry> };
+
+type Drift = Record<DriftKind, DriftTally>;
+
+const newDrift = (): Drift => ({
+  pegs: { n: 0, by: {} },
+  balance: { n: 0, by: {} },
+});
+
+/** Merge one entry, keeping the count and the worst ppm */
+const mergeEntry = (into: DriftTally, key: string, e: DriftEntry) => {
+  const cur = (into.by[key] ??= { n: 0, ppm: 0 });
+  cur.n += e.n;
+  cur.ppm = Math.max(cur.ppm, e.ppm);
+};
+
+const addDrift = (into: Drift, from: Drift) => {
+  for (const kind of DRIFT_KINDS) {
+    into[kind].n += from[kind].n;
+    for (const [key, e] of Object.entries(from[kind].by)) {
+      mergeEntry(into[kind], key, e);
+    }
+  }
+};
+
+const hitDrift = (d: Drift, kind: DriftKind, key: string, ppm: bigint) => {
+  d[kind].n++;
+  mergeEntry(d[kind], key, { n: 1, ppm: Number(ppm) });
+};
+
 // Flattened keys whose per-block convergence is expected drift, not a mismatch.
 // Only interest-bearing (Erc20/aToken) balances accrue without an event — a
 // plain token balance is event-driven and pinned on both sides, so it must be
 // EXACT. Pegs converge every block by design.
-const isDriftField = (k: string, view: Record<string, string>): boolean => {
-  if (k.startsWith('pegs.')) return true;
+const driftKind = (
+  k: string,
+  view: Record<string, string>
+): { kind: DriftKind; key: string } | undefined => {
+  // Pegs belong to the pool, not to one asset
+  if (k.startsWith('pegs.')) {
+    return { kind: 'pegs', key: view['id'] ?? view['address'] };
+  }
 
   const isYieldBearing = (id: string) => view[`tokens.${id}.type`] === 'Erc20';
 
   // HSM collateral held at the facilitator
-  if (k === 'collateralBalance') return isYieldBearing(view['collateralId']);
+  if (k === 'collateralBalance') {
+    const id = view['collateralId'];
+    return isYieldBearing(id) ? { kind: 'balance', key: id } : undefined;
+  }
 
   const token = k.match(/^tokens\.(\d+)\.balance$/);
-  return !!token && isYieldBearing(token[1]);
+  if (token && isYieldBearing(token[1])) {
+    return { kind: 'balance', key: token[1] };
+  }
+  return undefined;
 };
 
 const { OmniPoolClient } = omni;
@@ -115,7 +176,7 @@ const flatten = (pool: PoolBase): Record<string, string> => {
  * Field-level diffs between two pools.
  *
  * - Converging fields within `DRIFT_PPM` are treated as expected drift, not a
- *   mismatch (counted separately)
+ *   mismatch (counted separately, per kind)
  * - Everything else is a real diff, reported with its relative delta
  */
 const fieldDiffs = (l: PoolBase, r: PoolBase) => {
@@ -124,7 +185,7 @@ const fieldDiffs = (l: PoolBase, r: PoolBase) => {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
 
   const real: string[] = [];
-  let drift = 0;
+  const drift = newDrift();
   for (const k of keys) {
     const av = a[k];
     const bv = b[k];
@@ -137,8 +198,9 @@ const fieldDiffs = (l: PoolBase, r: PoolBase) => {
       const d = x > y ? x - y : y - x;
       const ppm = ref === 0n ? 1_000_000n : (d * 1_000_000n) / ref;
       // Converging fields lag a fresh read by a bounded amount; the rest is exact.
-      if (isDriftField(k, b) && ppm <= DRIFT_PPM) {
-        drift++;
+      const hit = driftKind(k, b);
+      if (hit && ppm <= DRIFT_PPM) {
+        hitDrift(drift, hit.kind, hit.key, ppm);
         continue;
       }
       real.push(`${k}: ${av} → ${bv} (${ppm} ppm)`);
@@ -169,7 +231,7 @@ const diff = (live: PoolBase[], ref: PoolBase[]) => {
   const addresses = new Set([...liveByAddr.keys(), ...refByAddr.keys()]);
 
   const pools: { pool: string; fields: string[] }[] = [];
-  let drift = 0;
+  const drift = newDrift();
   for (const address of addresses) {
     const l = liveByAddr.get(address);
     const r = refByAddr.get(address);
@@ -182,7 +244,7 @@ const diff = (live: PoolBase[], ref: PoolBase[]) => {
       continue;
     }
     const { real, drift: d } = fieldDiffs(l, r);
-    drift += d;
+    addDrift(drift, d);
     if (real.length) pools.push({ pool: identify(l), fields: real });
   }
   return { pools, drift };
@@ -192,14 +254,32 @@ type Stats = {
   checks: number;
   ok: number;
   bad: number;
-  drift: number;
+  drift: Drift;
   skip: number;
 };
 
-const newStats = (): Stats => ({ checks: 0, ok: 0, bad: 0, drift: 0, skip: 0 });
+const newStats = (): Stats => ({
+  checks: 0,
+  ok: 0,
+  bad: 0,
+  drift: newDrift(),
+  skip: 0,
+});
 
 const tally = (s: Stats) =>
-  `ok=${s.ok} bad=${s.bad} drift=${s.drift} skip=${s.skip}`;
+  `ok=${s.ok} bad=${s.bad} pegs=${s.drift.pegs.n} bal=${s.drift.balance.n} ` +
+  `skip=${s.skip}`;
+
+/**
+ * Worst offenders for one kind, heaviest first.
+ *
+ * - `key` is the asset id for a balance, the pool id for a peg
+ */
+const offenders = (t: DriftTally): string =>
+  Object.entries(t.by)
+    .sort(([, a], [, b]) => b.n - a.n)
+    .map(([key, e]) => `${key}: n=${e.n} max=${e.ppm}ppm`)
+    .join('\n    ') || 'none';
 
 /**
  * Differential-check one pool client.
@@ -235,7 +315,7 @@ const verify = <T extends PoolBase>(
         stats.checks++;
         const ref = `ref=${Math.round(performance.now() - t0)}ms`;
         const { pools, drift } = diff(snapshot, actual);
-        stats.drift += drift;
+        addDrift(stats.drift, drift);
         if (pools.length === 0) {
           stats.ok++;
           console.log(`[${label}] #${no} ✓ ${tally(stats)} ${ref}`);
@@ -354,6 +434,15 @@ class VerifyEds extends PapiExecutor {
     await new Promise((resolve) => setTimeout(resolve, DURATION_MS));
 
     session.unsubscribe();
+
+    /** Who drifted, so a count turns into a named asset or pool */
+    for (const [label, s] of Object.entries(stats)) {
+      for (const kind of DRIFT_KINDS) {
+        if (s.drift[kind].n === 0) continue;
+        console.log(`[${label}] ${kind}\n    ${offenders(s.drift[kind])}`);
+      }
+    }
+
     return stats;
   }
 }

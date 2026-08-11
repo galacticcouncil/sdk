@@ -23,7 +23,7 @@ import {
  */
 export class OmniQuery extends PoolQuery {
   /** Every asset's state */
-  readonly assets = this.cache.scope(
+  readonly assetStates = this.cache.scope(
     'Omnipool.Assets.entries',
     (at) => this.api.query.Omnipool.Assets.getEntries({ at }),
     () => 'entries',

@@ -90,10 +90,12 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     at: BlockAt
   ): Promise<PoolToken[]> {
     const poolAddress = this.getPoolAddress(poolId);
+    const assets = await this.query.assets.get(at);
+
     const poolTokens = poolInfo.assets.map(async (id) => {
-      const [tradeability, meta, balance] = await Promise.all([
+      const meta = assets.get(id);
+      const [tradeability, balance] = await Promise.all([
         this.query.tradability.get(at, poolId, id),
-        this.query.asset.get(at, id),
         this.query.assetBalance.get(at, poolAddress, id),
       ]);
 
@@ -122,6 +124,17 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
   ) {
     this.mmKeys.clear();
     this.emaKeys.clear();
+
+    /**
+     * A pool with no peg config needs its absence cached too, or every tick
+     * re-reads `PoolPegs` to learn there is still nothing there.
+     */
+    const configured = new Set(pegs.map(({ keyArgs }) => keyArgs[0]));
+    for (const id of assetsByPool.keys()) {
+      if (!configured.has(id)) {
+        this.query.pegs.set(undefined, id);
+      }
+    }
 
     for (const { keyArgs, value } of pegs) {
       const [id] = keyArgs;
@@ -589,6 +602,8 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         const ev = MmOracleLog.parse(e.data);
 
         if (!ev) return;
+
+        console.log(ev);
 
         let target: string | undefined;
         if (ev.eventName === 'ManagedOracle.PriceUpdated') {

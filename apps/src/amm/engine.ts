@@ -151,7 +151,13 @@ export class PoolsEngine {
    *   served by the block cache or by an event-written value
    */
   tally(): QueryTally {
-    const total: QueryTally = { live: 0, memo: 0, fetch: 0, unpinned: 0 };
+    const total: QueryTally = {
+      live: 0,
+      memo: 0,
+      fetch: 0,
+      unpinned: 0,
+      scopes: {},
+    };
 
     for (const [kind, client] of this.clients) {
       if (!this.subs.has(kind)) continue;
@@ -161,6 +167,10 @@ export class PoolsEngine {
       total.memo += one.memo;
       total.fetch += one.fetch;
       total.unpinned += one.unpinned;
+
+      for (const [scope, count] of Object.entries(one.scopes)) {
+        total.scopes[scope] = (total.scopes[scope] ?? 0) + count;
+      }
     }
 
     return total;

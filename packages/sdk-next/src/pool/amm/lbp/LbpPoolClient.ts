@@ -110,24 +110,21 @@ export class LbpPoolClient extends PoolClient<LbpPoolBase> {
     );
     const [accumulated, distributed] = assets;
 
-    const [
-      repayFeeApplied,
-      accumulatedBalance,
-      accumulatedMeta,
-      distributedBalance,
-      distributedMeta,
-    ] = await Promise.all([
-      this.isRepayFeeApplied(
-        accumulated,
-        repay_target,
-        fee_collector.toString(),
-        at
-      ),
-      this.query.assetBalance.get(at, poolAddress, accumulated),
-      this.query.asset.get(at, accumulated),
-      this.query.assetBalance.get(at, poolAddress, distributed),
-      this.query.asset.get(at, distributed),
-    ]);
+    const [repayFeeApplied, accumulatedBalance, distributedBalance, assetMeta] =
+      await Promise.all([
+        this.isRepayFeeApplied(
+          accumulated,
+          repay_target,
+          fee_collector.toString(),
+          at
+        ),
+        this.query.assetBalance.get(at, poolAddress, accumulated),
+        this.query.assetBalance.get(at, poolAddress, distributed),
+        this.query.assets.get(at),
+      ]);
+
+    const accumulatedMeta = assetMeta.get(accumulated);
+    const distributedMeta = assetMeta.get(distributed);
 
     return {
       repayFeeApply: repayFeeApplied,
