@@ -123,7 +123,7 @@ for (const client of this.clients) {
    state, so only the newest read matters.
 4. **Resolve the tip** — effects, then handlers.
 5. **Await sources** — only the tick can need a source's block.
-6. **Tick + reconcile.**
+6. **Tick** — per-block recompute for values that move between events.
 7. **Commit** — one `store.update`, with the cursor advanced *inside* it so `block` /
    `blockHash` stay coherent with the emission. A reorg commits even with no mutations, so
    the cursor leaves the orphaned hash.
@@ -135,7 +135,6 @@ for (const client of this.clients) {
 | **Effects** | `syncEffects()` → `apply(e, block)` | side effects only — cache refresh, param stash, `requestResync`; run first so the caches the tick reads are fresh |
 | **Handlers** | `syncHandlers()` → `resolve(e, block)` | `PoolMutation[]`, by re-reading absolute state pinned at `block.hash` |
 | **Tick** | `tickMutations(block)` | per-block recompute for values that move between events — peg convergence, amp/weight ramp |
-| **Reconcile** | `balanceMutations(block)` → `reconcileBalances(block)` | cadenced re-read of interest-bearing reserves |
 
 Events are **pointers to dirty state**, never payloads: a handler re-reads rather than
 applying a delta, so a replayed or duplicated event is idempotent.
@@ -281,29 +280,24 @@ understates a reserve, quotes come out conservative, and a user receives at leas
 quoted. A max-withdraw computed off it is a hair short of the true max, so it succeeds
 rather than reverting.
 
-### The dial
+### What bounds it
 
-`BalanceClient.erc20SafetyRereadBlocks` is the reconcile cadence and the only knob. At ~5%
-aToken APY that is 0.0086 ppm/block, against ~13 erc20 legs and a ~6 reads/block baseline:
+Two mechanisms, neither of them dedicated to accrual:
 
-| cadence | worst case | reads/block | budget |
-|---|---|---|---|
-| 20 | 0.2 ppm | 0.65 | **+11%** |
-| 100 | 0.9 ppm | 0.13 | +2% |
-| 300 | 2.6 ppm | 0.04 | +0.7% |
-| 600 | 5.2 ppm | 0.02 | +0.4% |
-| reseed only | 5.7 ppm | 0 | 0% |
+- **Event traffic.** Any trade or liquidity op touching a pool re-reads its erc20 legs pinned
+  at that block, so an actively traded pool is refreshed continuously. This is why aave never
+  drifts at all and why the measured maxima are 2–3 ppm rather than an hour's worth.
+- **`RESEED_INTERVAL` (60 min).** A full pinned reload, which caps an *untouched* pool at one
+  hour of accrual: **5.7 ppm** at ~5% aToken APY, and 57 ppm even at an absurd 50%.
 
-The measured 2–3 ppm was recorded with the reconcile effectively **off**, i.e. trade traffic
-and the hourly reseed doing all the work. Tightening to cadence 20 spends 11% of the read
-budget to move 2.6 ppm → 0.2 ppm, which is invisible at every trade size above. So a coarse
-cadence is the operating point, and the reconcile is insurance for a low-traffic regime
-rather than the primary bound.
+There is deliberately no periodic erc20 re-read. One existed on a block cadence, but with the
+reseed at 60 min it could never be the binding constraint — whenever it fired, the store had
+already been fully refreshed more recently — so it spent reads to tighten a bound that was
+already irrelevant. Its worth was ~0.2 ppm for ~11% of the read budget at a tight cadence.
 
-**The guarantee to hold:** drift stays under **1 bp** as long as `RESEED_INTERVAL ≤ 60 min`,
-with wide headroom — even an absurd 50% APY yields 57 ppm over an hour. The bound scales
-linearly with that interval, so `RESEED_INTERVAL` is the constant to guard, not the
-reconcile cadence.
+**The guarantee to hold:** drift stays under **1 bp** as long as `RESEED_INTERVAL ≤ 60 min`.
+The bound scales linearly with that interval, so it is the constant to guard — at 10 hours an
+untouched leg would reach ~57 ppm and start to matter.
 
 ---
 
@@ -383,7 +377,6 @@ Both probes run against `ApiUrl.Catfish1`, live, and are the gate for any change
 | `PoolEventEffect` | `{ match(e), apply(e, block) }` — side effect, no store write |
 | seed | first-pass `loadPools(block)`; one coherent pinned snapshot |
 | tick | per-block recompute for between-event movement (pegs, amp ramp) |
-| reconcile | cadenced re-read of eventless interest-bearing reserves |
 | replay | re-run of matched events at the tip, healing orphaned and gap-filled blocks |
 | cursor | `block` / `blockHash`, assigned inside the commit |
 
@@ -396,9 +389,6 @@ Both probes run against `ApiUrl.Catfish1`, live, and are the gate for any change
    representation divergence, not a value one. Episodes last several blocks and self-heal.
    Denominator is a function of the anchor alone, so an elapsed off-by-one is ruled out.
    Under investigation; `probePegs` shows every compared input matching.
-2. **Reconcile skip for touched pools.** `reconcileBalances` re-reads every pool, including
-   ones an event already refreshed in the window. Gating on last-touched would remove most
-   of its reads without moving the drift bound.
 3. **`HOLLAR` drift tolerance.** `probeAmm` keys its balance allowance off
    `type === 'Erc20'`, which also covers HOLLAR — an erc20 that does not accrue and should
    be held exact.

@@ -230,30 +230,6 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
   }
 
   // =============================================================================
-  // Reconcile
-  // =============================================================================
-
-  /**
-   * Periodic reconcile — re-read erc20 collateral held at the facilitator.
-   *
-   * - Stableswap reserves stay fresh via the sibling snapshot merge
-   * - Only erc20 collateral accrues with no event, so reconcile just those
-   */
-  protected reconcileBalances(
-    block: BlockRef
-  ): Promise<PoolMutation<HsmPoolBase>[]> {
-    const ids = new Set<number>();
-    for (const pool of this.store.pools) {
-      const collateral = pool.tokens.find((t) => t.id === pool.collateralId);
-      if (collateral?.type === 'Erc20') {
-        ids.add(pool.collateralId);
-      }
-    }
-    if (ids.size === 0) return Promise.resolve([]);
-    return this.collateralMutations([...ids], block.hash);
-  }
-
-  // =============================================================================
   // Mutations
   // =============================================================================
 

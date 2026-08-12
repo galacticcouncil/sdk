@@ -46,7 +46,6 @@ export class BalanceClient extends Papi {
    * Full erc20 re-read cadence (in best blocks) as a safety net.
    *
    * - A missed or unmapped Transfer log can't permanently stale a balance
-   * - Shared with the pool driver's periodic reserve reconcile
    */
   readonly erc20SafetyRereadBlocks = 20;
 

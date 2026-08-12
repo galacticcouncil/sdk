@@ -172,7 +172,7 @@ TradeRouter.getBestSell(assetIn, assetOut, amountIn)
 **Per-block lifecycle** — driven by `PoolSync`, not by a per-client subscription:
 1. `syncBlock(ctx, deps)` queues the pass behind this client's in-flight work
 2. `applyBlock` replays orphaned/gap-filled matches, resolves the tip, awaits sources
-3. Tick + reconcile, then one `store.update` per block
+3. Tick, then one `store.update` per block
 
 **Resiliency:** one engine-level watchdog (connection recovery, finalized gap, periodic),
 and a failing pass is contained — logged, reseeded, queue continues.

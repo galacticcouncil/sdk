@@ -67,8 +67,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
   private eventHandlers: PoolEventHandler<T>[] = [];
   private eventEffects: PoolEventEffect[] = [];
 
-  private reconciledAt = 0;
-
   private pools$?: Observable<T[]>;
 
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
@@ -133,75 +131,6 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
    */
   protected async tickMutations(_block: BlockRef): Promise<PoolMutation<T>[]> {
     return [];
-  }
-
-  /**
-   * Cadence gate for the periodic reserve reconcile.
-   *
-   * - Delegates to `reconcileBalances` once every `erc20SafetyRereadBlocks`
-   * - Returns no mutations between reconcile blocks
-   *
-   * @param block - the block being committed
-   */
-  private async balanceMutations(block: BlockRef): Promise<PoolMutation<T>[]> {
-    const cadence = this.query.rereadBlocks;
-    if (block.number - this.reconciledAt < cadence) return [];
-    this.reconciledAt = block.number;
-    return this.reconcileBalances(block);
-  }
-
-  /**
-   * Periodic re-read of erc20 reserve balances that accrue with no event.
-   *
-   * - The coherent seed + event stream keep everything else exact; only
-   *   interest-bearing (aToken) reserves drift every block without an event
-   * - Reads every erc20 reserve at `pool.address`; commits only what changed
-   * - Overridden where reserves live off-pool or are read via an executor
-   *
-   * @param block - the block being committed; reads pin at `block.hash`
-   */
-  protected async reconcileBalances(
-    block: BlockRef
-  ): Promise<PoolMutation<T>[]> {
-    const muts = await Promise.all(
-      this.store.pools.map(
-        async (pool): Promise<PoolMutation<T> | undefined> => {
-          const erc20 = pool.tokens.filter((t) => t.type === 'Erc20');
-          if (erc20.length === 0) return undefined;
-
-          const fresh = await Promise.all(
-            erc20.map(async (t) => ({
-              id: t.id,
-              balance: (
-                await this.query.assetBalance.get(
-                  block.hash,
-                  pool.address,
-                  t.id
-                )
-              ).transferable,
-            }))
-          );
-          const changed = fresh.filter((f) => {
-            const cur = pool.tokens.find((t) => t.id === f.id);
-            return cur !== undefined && cur.balance !== f.balance;
-          });
-          if (changed.length === 0) return undefined;
-
-          return {
-            address: pool.address,
-            apply: (p: T) => ({
-              ...p,
-              tokens: p.tokens.map((t) => {
-                const c = changed.find((x) => x.id === t.id);
-                return c ? { ...t, balance: c.balance } : t;
-              }),
-            }),
-          };
-        }
-      )
-    );
-
-    return muts.filter((m): m is PoolMutation<T> => m !== undefined);
   }
 
   get isSnapshot(): boolean {
@@ -356,9 +285,7 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
      */
     await ready;
 
-    const tickMuts = await this.tickMutations(ctx.block);
-    const balanceMuts = await this.balanceMutations(ctx.block);
-    muts.push(...tickMuts, ...balanceMuts);
+    muts.push(...(await this.tickMutations(ctx.block)));
 
     /**
      * Commit the pass in one update; advance the cursor INSIDE it so

@@ -141,7 +141,11 @@ export class AavePoolClient extends PoolClient<PoolBase> {
   // =============================================================================
 
   protected syncHandlers(): PoolEventHandler<PoolBase>[] {
-    return [this.syncRouterHandler(), this.syncEvmLogHandler()];
+    return [
+      this.syncRouterHandler(),
+      this.syncEvmLogHandler(),
+      this.syncLiquidationHandler(),
+    ];
   }
 
   /**
@@ -199,20 +203,34 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     };
   }
 
-  // =============================================================================
-  // Reconcile
-  // =============================================================================
-
   /**
-   * Periodic reconcile — re-read every pool's reserves via the trade executor.
+   * Liquidations — `Liquidation.Liquidated`.
    *
-   * - Both legs are interest-bearing and drift every block
-   * - Reads pinned at the block being committed
+   * - Repaid debt raises its reserve's liquidity, seized collateral lowers it,
+   *   so both legs are re-read
+   * - The event names both assets as registry ids, so no log decode is needed
+   * - Re-read reserves via the trade executor, pinned at the event's block
    */
-  protected reconcileBalances(
-    block: BlockRef
-  ): Promise<PoolMutation<PoolBase>[]> {
-    return this.reserveMutations([...this.store.pools], block.hash);
+  private syncLiquidationHandler(): PoolEventHandler<PoolBase> {
+    return {
+      match: (e) => e.pallet === 'Liquidation' && e.method === 'Liquidated',
+      resolve: (e, block) => {
+        const collateral = e.data.collateral_asset as number;
+        const debt = e.data.debt_asset as number;
+
+        const pools = this.store.pools.filter((pool) => {
+          const [reserve] = pool.tokens;
+          return reserve.id === collateral || reserve.id === debt;
+        });
+        if (pools.length > 0) {
+          this.log.trace('liquidation', {
+            assets: [collateral, debt],
+            pools: pools.length,
+          });
+        }
+        return this.reserveMutations(pools, block.hash);
+      },
+    };
   }
 
   // =============================================================================

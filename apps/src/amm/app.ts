@@ -12,6 +12,7 @@ const ENDPOINTS = [
   ['wss://rpc-catfish-2.catfish.hydration.cloud', 'Catfish 2'],
   ['wss://rpc-catfish-3.catfish.hydration.cloud', 'Catfish 3'],
   ['wss://rpc-catfish-4.catfish.hydration.cloud', 'Catfish 4'],
+  ['wss://3.lark.hydration.cloud', 'Lark 3'],
 ];
 
 const el = <T extends HTMLElement>(id: string) =>

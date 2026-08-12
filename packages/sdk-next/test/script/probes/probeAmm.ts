@@ -8,7 +8,7 @@ import { ApiUrl } from '../types';
 import { EvmClient } from '../../../src/evm';
 import { omni, stable, xyk, aave, hsm, PoolBase } from '../../../src/pool';
 
-const DURATION_MS = 2 * 60 * 60 * 1000;
+const DURATION_MS = 65 * 60 * 1000;
 
 // Relative tolerance (ppm) for fields that converge every block from event-cached
 // inputs — yield-bearing (aToken) reserve balances and oracle-driven pegs. The

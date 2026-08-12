@@ -32,11 +32,6 @@ export abstract class PoolQuery extends Papi {
     this.balance = new BalanceClient(client);
   }
 
-  /** Full erc20 re-read cadence, in blocks */
-  get rereadBlocks(): number {
-    return this.balance.erc20SafetyRereadBlocks;
-  }
-
   /** Reads served per tier; what the chain was actually asked for */
   get tally(): Readonly<QueryTally> {
     return this.cache.tally;
