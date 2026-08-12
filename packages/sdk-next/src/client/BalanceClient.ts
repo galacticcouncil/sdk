@@ -16,7 +16,6 @@ import {
 import {
   bufferCount,
   distinctUntilChanged,
-  debounceTime,
   filter,
   map,
   mergeMap,
@@ -31,6 +30,7 @@ import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { decodeErc20Transfer } from '../evm';
 import { AssetBalance, Balance } from '../types';
+import { Erc20Client } from './Erc20Client';
 
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
@@ -40,7 +40,7 @@ const { H160 } = h160;
 const { logger } = log;
 
 export class BalanceClient extends Papi {
-  private erc20Ids: number[] | null = null;
+  readonly erc20: Erc20Client;
 
   /**
    * Full erc20 re-read cadence (in best blocks) as a safety net.
@@ -51,6 +51,7 @@ export class BalanceClient extends Papi {
 
   constructor(client: PolkadotClient, at?: BlockAt) {
     super(client, at);
+    this.erc20 = new Erc20Client(client);
   }
 
   async getBalance(account: string, assetId: number): Promise<Balance> {
@@ -203,23 +204,6 @@ export class BalanceClient extends Papi {
     address: string,
     includeOnly?: number[]
   ): Observable<AssetBalance[]> {
-    const getErc20s = async () => {
-      if (this.erc20Ids) {
-        return this.erc20Ids;
-      }
-
-      const assets = await this.api.query.AssetRegistry.Assets.getEntries({
-        at: 'best',
-      });
-      this.erc20Ids = assets
-        .filter(({ value }) => value.asset_type.type === 'Erc20')
-        .map(({ keyArgs }) => {
-          const [id] = keyArgs;
-          return id as number;
-        });
-      return this.erc20Ids;
-    };
-
     const fetchBalance = async (ids: number[]) => {
       const balances: [number, Balance][] = await Promise.all(
         ids.map(
@@ -230,13 +214,21 @@ export class BalanceClient extends Papi {
     };
 
     return defer(() =>
-      from(includeOnly ? Promise.resolve(includeOnly) : getErc20s()).pipe(
-        switchMap((ids) => {
+      from(
+        Promise.all([
+          includeOnly ? Promise.resolve(includeOnly) : this.erc20.getIds(),
+          this.erc20.getContracts(),
+        ])
+      ).pipe(
+        switchMap(([ids, byContract]) => {
           if (ids.length === 0) {
             return from(Promise.resolve([] as AssetBalance[]));
           }
 
           const watched = new Set(ids);
+
+          /** The log names a contract; only the registry knows its asset */
+          const assetOf = (contract: string) => byContract.get(contract);
 
           let owner: string | null = null;
           try {
@@ -251,16 +243,22 @@ export class BalanceClient extends Papi {
            */
           const eventIds$ = owner
             ? this.api.event.EVM.Log.watchBest().pipe(
+                /**
+                 * Only blocks entering the best chain.
+                 *
+                 * - `drop` would show the balance reverting mid-reorg
+                 * - `finalized` re-reports what `new` already read
+                 */
+                filter(({ type }) => type === 'new'),
                 mergeMap(({ events }) => events),
                 map(({ payload }) => decodeErc20Transfer(payload)),
-                filter(
-                  (t): t is NonNullable<typeof t> =>
-                    t !== undefined &&
-                    t.assetId !== null &&
-                    watched.has(t.assetId) &&
-                    (t.from === owner || t.to === owner)
-                ),
-                map((t) => [t.assetId as number] as number[] | null)
+                filter((t): t is NonNullable<typeof t> => {
+                  if (t === undefined) return false;
+                  if (t.from !== owner && t.to !== owner) return false;
+                  const id = assetOf(t.contract);
+                  return id !== undefined && watched.has(id);
+                }),
+                map((t) => [assetOf(t.contract) as number] as number[] | null)
               )
             : EMPTY;
 

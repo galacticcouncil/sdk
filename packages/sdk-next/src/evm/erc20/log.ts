@@ -1,7 +1,3 @@
-import { erc20 as utils } from '@galacticcouncil/common';
-
-const { ERC20 } = utils;
-
 /**
  * keccak256("Transfer(address,address,uint256)") — the topic0 of every
  * ERC20 Transfer event.
@@ -10,8 +6,8 @@ export const ERC20_TRANSFER_TOPIC =
   '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 export type Erc20Transfer = {
-  /** asset id the emitting precompile maps to, or null if not an asset ERC20 */
-  assetId: number | null;
+  /** lower-cased 0x H160 of the emitting contract */
+  contract: string;
   /** lower-cased 0x H160 sender */
   from: string;
   /** lower-cased 0x H160 receiver */
@@ -44,10 +40,12 @@ const topicToAddress = (topic: string): string => {
 };
 
 /**
- * Decode an EVM.Log payload as an ERC20 Transfer. Returns undefined for any
- * non-Transfer log (wrong topic0, malformed topics). The emitting contract
- * address is mapped to an asset id via the structural ERC20 precompile prefix
- * (ERC20.toAssetId) — no RPC, same mapping AavePoolClient uses in reverse.
+ * Decode an EVM.Log payload as an ERC20 Transfer.
+ *
+ * - Returns undefined for any non-Transfer log (wrong topic0, malformed topics)
+ * - The emitting contract is returned as-is: an asset's contract address is
+ *   arbitrary (a deployment), so resolving it to an id needs the registry and
+ *   belongs to the caller
  */
 export function decodeErc20Transfer(
   payload: EvmLogLike
@@ -58,10 +56,8 @@ export function decodeErc20Transfer(
   const topic0 = normalize(topics[0]);
   if (topic0 !== ERC20_TRANSFER_TOPIC) return undefined;
 
-  const contract = normalize(address);
-
   return {
-    assetId: ERC20.toAssetId(contract),
+    contract: normalize(address),
     from: topicToAddress(topics[1]),
     to: topicToAddress(topics[2]),
   };
