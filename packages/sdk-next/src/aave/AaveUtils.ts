@@ -20,21 +20,26 @@ const RAY = 10n ** 27n;
 
 export class AaveUtils {
   private client: AaveClient;
+  private blockTime: () => Promise<number>;
 
-  constructor(evm: EvmClient) {
+  constructor(evm: EvmClient, blockTime: () => Promise<number>) {
     this.client = new AaveClient(evm);
+    this.blockTime = blockTime;
   }
 
   async getSummary(user: string): Promise<AaveSummary> {
     const to = H160.fromAny(user);
 
-    const [poolReserves, userReserves, userData, blockTimestamp] =
+    const [poolReserves, userReserves, userData, blockTimestamp, blockTimeMs] =
       await Promise.all([
         this.client.getReservesData(),
         this.client.getUserReservesData(to),
         this.client.getUserAccountData(to),
         this.client.getBlockTimestamp(),
+        this.blockTime(),
       ]);
+
+    const blockTimeInSec = Math.max(1, Math.round(blockTimeMs / 1000));
 
     const [pReserves] = poolReserves;
     const [uReserves, userEmodeCategoryId] = userReserves;
@@ -68,7 +73,7 @@ export class AaveUtils {
 
       const priceInRef = pReserve.priceInMarketReferenceCurrency;
 
-      const nextBlockTimestamp = blockTimestamp + 6; // adding 6 sec (blocktime)
+      const nextBlockTimestamp = blockTimestamp + blockTimeInSec;
       const linearInterest = this.calculateLinearInterest(
         liquidityRate,
         pReserve.lastUpdateTimestamp,

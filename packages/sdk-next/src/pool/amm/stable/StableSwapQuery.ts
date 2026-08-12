@@ -7,6 +7,8 @@ import {
   TEmaPeriod,
 } from '../../../oracle';
 
+import { ChainParams } from '../../../client';
+
 import { PoolLimits } from '../../types';
 import { PoolQuery } from '../../PoolQuery';
 
@@ -23,7 +25,10 @@ const MM_ORACLE_TTL = 10 * 60 * 1000;
  *   projects from the cached value, an event replaces it
  */
 export class StableSwapQuery extends PoolQuery {
-  private mmOracle = new MmOracleClient(this.evm);
+  private params = new ChainParams(this.client);
+  private mmOracle = new MmOracleClient(this.evm, () =>
+    this.params.getBlockTime()
+  );
 
   /** Every pool's config (assets, fee, amplification ramp) */
   readonly pools = this.cache.scope(

@@ -5,12 +5,14 @@ import { MmOracleEntry } from './types';
 
 export class MmOracleClient {
   private adapter: EvmRpcAdapter;
+  private blockTime: () => Promise<number>;
 
-  constructor(evm: EvmClient) {
+  constructor(evm: EvmClient, blockTime: () => Promise<number>) {
     this.adapter = evm.getRPCAdapter();
+    this.blockTime = blockTime;
   }
 
-  async getData(address: string, blockTimeInSec = 6): Promise<MmOracleEntry> {
+  async getData(address: string): Promise<MmOracleEntry> {
     const [data, decimals, block] = await Promise.all([
       this.adapter.readContract({
         abi: AGGREGATOR_V3_ABI,
@@ -26,8 +28,12 @@ export class MmOracleClient {
     ]);
 
     const [_roundId, answer, _startedAt, updatedAt] = data;
+
+    const blockTimeMs = await this.blockTime();
+    const secsPerBlock = BigInt(Math.max(1, Math.round(blockTimeMs / 1000)));
+
     const updatedAtBlock =
-      block.number - (block.timestamp - updatedAt) / BigInt(blockTimeInSec);
+      block.number - (block.timestamp - updatedAt) / secsPerBlock;
     const updatedAtNum = Number(updatedAtBlock);
 
     return {

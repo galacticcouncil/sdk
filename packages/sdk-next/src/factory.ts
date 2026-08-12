@@ -44,9 +44,9 @@ export async function createSdkContext(
   const params = new ChainParams(client);
   const evm = new EvmClient(client, at);
 
-  const [blockTime, minOrderBudget] = await Promise.all([
-    params.getBlockTime(),
+  const [minOrderBudget, minimalPeriod] = await Promise.all([
     params.getMinOrderBudget(),
+    params.getMinimalPeriod(),
   ]);
 
   // Initialize pool context
@@ -62,17 +62,16 @@ export async function createSdkContext(
   const farmClient = new LiquidityMiningClient(client);
 
   // Initialize APIs
-  const aave = new AaveUtils(evm);
+  const aave = new AaveUtils(evm, () => params.getBlockTime());
   const router = new TradeRouter(poolCtx);
   const scheduler = new TradeScheduler(poolCtx, {
-    blockTime: blockTime,
+    blockTime: () => params.getBlockTime(),
     minBudgetInNative: minOrderBudget,
+    minimalPeriod: minimalPeriod,
   });
 
   const staking = new StakingApi(stakingClient, balance);
-  const farm = new LiquidityMiningApi(farmClient, balance, {
-    blockTime: blockTime,
-  });
+  const farm = new LiquidityMiningApi(farmClient, balance);
 
   return {
     api: {

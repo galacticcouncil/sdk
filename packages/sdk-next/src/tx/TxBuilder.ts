@@ -4,7 +4,7 @@ import { PublicClient } from 'viem';
 
 import { AAVE_GAS_LIMIT, AaveUtils } from '../aave';
 import { BlockAt, Papi } from '../api';
-import { BalanceClient } from '../client';
+import { BalanceClient, ChainParams } from '../client';
 import { EvmClient } from '../evm';
 import { PoolType } from '../pool';
 import { Swap } from '../sor';
@@ -17,6 +17,7 @@ export abstract class TxBuilder extends Papi {
   protected readonly evmClient: PublicClient;
 
   protected readonly balance: BalanceClient;
+  protected readonly params: ChainParams;
   protected readonly aaveUtils: AaveUtils;
 
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
@@ -24,7 +25,8 @@ export abstract class TxBuilder extends Papi {
     this.evm = evm;
     this.evmClient = evm.getWsProvider();
     this.balance = new BalanceClient(client, at);
-    this.aaveUtils = new AaveUtils(evm);
+    this.params = new ChainParams(client);
+    this.aaveUtils = new AaveUtils(evm, () => this.params.getBlockTime());
   }
 
   protected wrapTx(name: string, tx: Transaction): Tx {

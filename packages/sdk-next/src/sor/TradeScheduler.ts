@@ -2,10 +2,8 @@ import { big } from '@galacticcouncil/common';
 
 import {
   DCA_TIME_RESERVE,
-  DEFAULT_BLOCK_TIME,
   DEFAULT_MIN_BUDGET,
-  ORDER_MIN_BLOCK_PERIOD,
-  TWAP_EXECUTION_INTERVAL,
+  TWAP_EXECUTION_INTERVAL_MS,
   TWAP_MAX_PRICE_IMPACT,
   TWAP_MAX_DURATION,
 } from './const';
@@ -26,7 +24,8 @@ import { IPoolCtxProvider, PoolType } from '../pool';
 import { calc } from '../utils';
 
 export type TradeSchedulerOptions = {
-  blockTime?: number;
+  blockTime: number | (() => Promise<number>);
+  minimalPeriod: number;
   minBudgetInNative?: bigint;
 };
 
@@ -35,21 +34,37 @@ export class TradeScheduler {
 
   protected readonly router: TradeRouter;
 
-  constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions = {}) {
+  private _blockTime: number;
+
+  constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions) {
     this.router = new TradeRouter(ctx);
     this.router.withFilter({ exclude: [PoolType.HSM] });
     this.schedulerOptions = Object.freeze({
-      blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
+      ...options,
       minBudgetInNative: options.minBudgetInNative ?? DEFAULT_MIN_BUDGET,
     });
+
+    const { blockTime } = options;
+    this._blockTime = typeof blockTime === 'number' ? blockTime : 0;
   }
 
   get blockTime(): number {
-    return this.schedulerOptions.blockTime!;
+    return this._blockTime;
+  }
+
+  get minimalPeriod(): number {
+    return this.schedulerOptions.minimalPeriod!;
   }
 
   get minOrderBudget(): bigint {
     return this.schedulerOptions.minBudgetInNative!;
+  }
+
+  private async resolveBlockTime(): Promise<void> {
+    const blockTime = this.schedulerOptions.blockTime;
+    if (typeof blockTime === 'function') {
+      this._blockTime = await blockTime();
+    }
   }
 
   /**
@@ -69,6 +84,8 @@ export class TradeScheduler {
     duration: number,
     noOfTrades?: number
   ): Promise<TradeDcaOrder> {
+    await this.resolveBlockTime();
+
     const trade = await this.router.getBestSell(
       assetIn,
       assetOut,
@@ -254,6 +271,8 @@ export class TradeScheduler {
     amountIn: string,
     periodMs: number
   ): Promise<TradeDcaOrder> {
+    await this.resolveBlockTime();
+
     const trade = await this.router.getBestSell(assetIn, assetOut, amountIn);
 
     const { swaps } = trade;
@@ -326,6 +345,8 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
+    await this.resolveBlockTime();
+
     const sell = await this.router.getBestSell(
       assetIn,
       assetOut,
@@ -377,7 +398,7 @@ export class TradeScheduler {
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
-      tradePeriod: TWAP_EXECUTION_INTERVAL,
+      tradePeriod: this.toBlockPeriod(TWAP_EXECUTION_INTERVAL_MS),
       tradeRoute: tradeRoute,
       type: TradeOrderType.TwapSell,
     } as Partial<TradeOrder>;
@@ -416,6 +437,8 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
+    await this.resolveBlockTime();
+
     const buy = await this.router.getBestBuy(assetIn, assetOut, amountInTotal);
 
     const { amountOut, swaps, priceImpactPct } = buy;
@@ -464,7 +487,7 @@ export class TradeScheduler {
       errors: errors,
       tradeCount: tradeCount,
       tradeImpactPct: twap.priceImpactPct,
-      tradePeriod: TWAP_EXECUTION_INTERVAL,
+      tradePeriod: this.toBlockPeriod(TWAP_EXECUTION_INTERVAL_MS),
       tradeRoute: tradeRoute,
       type: TradeOrderType.TwapBuy,
     } as Partial<TradeOrder>;
@@ -504,8 +527,7 @@ export class TradeScheduler {
     const executionTime = this.getTwapExecutionTime(optTradeCount);
 
     if (executionTime > TWAP_MAX_DURATION) {
-      const maxTradeCount =
-        TWAP_MAX_DURATION / (this.blockTime * TWAP_EXECUTION_INTERVAL);
+      const maxTradeCount = TWAP_MAX_DURATION / TWAP_EXECUTION_INTERVAL_MS;
       return Math.round(maxTradeCount);
     }
     return optTradeCount;
@@ -518,7 +540,7 @@ export class TradeScheduler {
    * @returns unix representation of execution time
    */
   getTwapExecutionTime(tradeCount: number): number {
-    return tradeCount * TWAP_EXECUTION_INTERVAL * this.blockTime;
+    return tradeCount * TWAP_EXECUTION_INTERVAL_MS;
   }
 
   /**
@@ -530,7 +552,7 @@ export class TradeScheduler {
   private toBlockPeriod(periodMsec: number): number {
     const noOfBlocks = periodMsec / this.blockTime;
     const estPeriod = Math.round(noOfBlocks);
-    return Math.max(estPeriod, ORDER_MIN_BLOCK_PERIOD);
+    return Math.max(estPeriod, this.minimalPeriod);
   }
 
   /**
