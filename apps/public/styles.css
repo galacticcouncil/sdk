@@ -263,34 +263,21 @@ select {
   text-align: center;
 }
 
-/* landing launcher grid — uniform buttons, one per hosted tool, inside a
-   dashed frame that reads as a container rather than a card. */
-.panel {
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 24px;
+/* landing tile grid */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
   margin-top: 24px;
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-}
-
 .tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 64px;
-  padding: 18px 20px;
+  display: block;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
   color: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
   text-decoration: none;
   transition:
     border-color 120ms ease,
@@ -303,6 +290,18 @@ select {
   transform: translateY(-1px);
   box-shadow: var(--shadow);
   text-decoration: none;
+}
+
+.tile h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tile p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
 }
 
 /* card header row (title + action) */
