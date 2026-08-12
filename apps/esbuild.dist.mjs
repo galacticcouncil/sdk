@@ -5,7 +5,7 @@ import { writeFileSync } from 'fs';
 
 const options = {
   entryPoints: [
-    { in: 'src/redeem/app.ts', out: 'redeem' },
+    { in: 'src/rescue/app.ts', out: 'rescue' },
     { in: 'src/amm/app.ts', out: 'amm' },
   ],
   bundle: true,
