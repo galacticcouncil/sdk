@@ -27,7 +27,16 @@ export class SubstratePlatform implements Platform<ExtrinsicConfig> {
     return substrate.chain.usesSignerFee && !asset.isEqual(fee);
   }
 
-  async buildCall(
+  async buildCalls(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    configs: ExtrinsicConfig[]
+  ): Promise<SubstrateCall[]> {
+    return [await this.buildCall(account, amount, feeBalance, configs[0])];
+  }
+
+  private async buildCall(
     account: string,
     _amount: bigint,
     feeBalance: AssetAmount,
@@ -85,8 +94,9 @@ export class SubstratePlatform implements Platform<ExtrinsicConfig> {
     account: string,
     _amount: bigint,
     feeBalance: AssetAmount,
-    config: ExtrinsicConfig
+    configs: ExtrinsicConfig[]
   ): Promise<AssetAmount> {
+    const [config] = configs;
     const substrate = await this.#substrate;
     const networkFee = await substrate.estimateNetworkFee(account, config);
     const deliveryFee = await substrate.estimateDeliveryFee(account, config);

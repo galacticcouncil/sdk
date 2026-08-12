@@ -115,7 +115,10 @@ export function formatAmount(decimals: number, amount?: number): bigint {
  * @param asset - asset to resolve decimals for
  * @returns asset decimals
  */
-export async function getDecimals(chain: AnyChain, asset: Asset): Promise<number> {
+export async function getDecimals(
+  chain: AnyChain,
+  asset: Asset
+): Promise<number> {
   const decimals = chain.getAssetDecimals(asset);
   if (decimals) {
     return decimals;

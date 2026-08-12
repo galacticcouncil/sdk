@@ -35,6 +35,8 @@ import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { Tag } from '../../../tags';
 
 import {
+  toHydrationViaNttExecutorNativeTemplate,
+  toHydrationViaNttExecutorTemplate,
   toHydrationViaNttTemplate,
   toHydrationViaSnowbridgeTemplate,
   toHydrationViaSnowbridgeV1Template,
@@ -48,6 +50,16 @@ const toHydrationViaNtt: AssetRoute[] = [
   toHydrationViaNttTemplate(wbtc, wbtc_wh),
   toHydrationViaNttTemplate(weth, weth_wh),
   toHydrationViaNttTemplate(eth, weth_wh),
+];
+
+const toHydrationViaNttExecutor: AssetRoute[] = [
+  toHydrationViaNttExecutorTemplate(dai, dai_wh),
+  toHydrationViaNttExecutorTemplate(susds, susds_wh),
+  toHydrationViaNttExecutorTemplate(usdc, usdc_wh),
+  toHydrationViaNttExecutorTemplate(usdt, usdt_wh),
+  toHydrationViaNttExecutorTemplate(wbtc, wbtc_wh),
+  toHydrationViaNttExecutorTemplate(weth, weth_wh),
+  toHydrationViaNttExecutorNativeTemplate(eth, weth_wh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
@@ -133,6 +145,7 @@ export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
   routes: [
     ...toHydrationViaNtt,
+    ...toHydrationViaNttExecutor,
     ...toHydrationViaSnowbridge,
     ...toHydrationViaSnowbridgeV1,
   ],

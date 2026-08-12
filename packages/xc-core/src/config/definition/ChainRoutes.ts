@@ -27,7 +27,6 @@ export class ChainRoutes {
           extrinsic: route.extrinsic,
           move: route.move,
           program: route.program,
-          transact: route.transact,
           tags: route.tags,
         })
       );

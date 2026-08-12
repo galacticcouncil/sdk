@@ -40,6 +40,7 @@ export const base = new EvmChain({
     id: 30,
     coreBridge: '0xbebdb6C8ddC678FfA9f8748f85C815C556Dd8ac6',
     executor: '0x9E1936E91A4a5AE5A5F75fFc472D6cb8e93597ea',
+    nttExecutor: '0x27db1967D469D89318B7119Ced5609f327095de4',
     // Locking manager - eurc is escrowed here, minted on hydration.
     ntt: {
       [eurc.key]: {

@@ -80,14 +80,21 @@ Build steps:
    token, wrapNative }` — the 3-arg `NttManager.transfer` overload (default `0x00`
    transceiver instructions, sender as refund address).
 
-### Signer paths ([EvmPlatform](packages/xc-sdk/src/platforms/evm/EvmPlatform.ts))
+### Signer paths
 
-`buildCalls` returns the ordered sequence `[wrap?, approve?, transfer]`, the transfer
-call always last. Each prerequisite drops off once executed, so re-building after a
-signed step yields a shorter sequence. `buildCall` is the head of it — consumers
-rendering a multi-step flow should use `buildCalls` instead of re-deriving.
+A contract builder returns its calls as an **ordered vector** — one for the plain
+transfer, two for the executor bypass (`[manager.transfer, executor.requestExecution]`).
+Which config a route serves is picked by signer origin in
+[DataOriginProcessor](packages/xc-sdk/src/transfer/DataOriginProcessor.ts): a route
+declaring both gives its `contract` to an h160 signer and its `extrinsic` to everyone
+else.
 
-- **H160 signer** — plain EVM txs:
+- **H160 signer** — [EvmPlatform](packages/xc-sdk/src/platforms/evm/EvmPlatform.ts),
+  plain EVM txs, one signature each. `buildCalls` returns
+  `[wrap?, approve?, ...calls]`; each prerequisite drops off once executed, so
+  re-building after a signed step yields a shorter sequence. Prerequisites are derived
+  from the **first** config — the one that spends the token; the calls after it pay in
+  native value only.
   - `WETH.deposit()` with `value = amount - wethBalance`, only when `wrapNative` is set
     and the held wrapped balance is short. `NttManager` pulls the erc20 via
     `transferFrom`; NTT core has no `wrapAndTransferETH`, and `NttManagerWethUnwrap`
@@ -95,13 +102,28 @@ rendering a multi-step flow should use `buildCalls` instead of re-deriving.
     wrapped upfront. Pre-existing WETH is consumed first.
   - `approve(manager, amount)` when allowance is short (token address from
     `ContractConfig.token`).
-  - `transfer`.
-- **ss58 signer on an EvmParachain** — wrapped via
-  [SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) into `EVM.call`
-  extrinsic(s), the same sequence batched with `Utility.batch_all` (one signature).
+  - the contract calls, in builder order.
+- **ss58 signer on an EvmParachain** — the route's `extrinsic`, built by
+  [`ExtrinsicBuilder().evm().call()`](packages/xc-cfg/src/builders/extrinsics/evm.ts):
+  the same sequence wrapped in `EVM.call` and batched with `Utility.batch_all` (one
+  signature). Being an `ExtrinsicConfig` it composes with the rest of the substrate
+  world — a destination fee swap batches ahead of it through the ordinary
+  `ExtrinsicDecorator`, and the fee is quoted by the runtime in the sender's fee
+  currency rather than as raw evm gas.
   `EVM.call` runs under `EnsureAddressTruncated`: the evm source must be the signer's
   truncated H160 and the account **must be bound on chain**, otherwise gas/token balances
   resolve to the unrelated `ETH\0` phantom account.
+  ([SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) still does
+  this wrapping for **claims**, which are not route-driven.)
+
+### Binding
+
+`getDerivatedAddress` throws for a substrate native account that is not bound on chain
+([HydrationEvmResolver](packages/xc-cfg/src/resolvers/hydration.ts)) — the truncated h160
+is the unrelated `ETH\0` phantom until `EVMAccounts.bind_evm_address` lands, so deriving
+it silently would mean approving from, metering against, or minting to an account nobody
+controls. Binding is the submitter's job; hydration-ui prepends it to any transaction
+containing an `EVM.call`.
 
 ### Fee of a native-gas source
 
@@ -156,6 +178,63 @@ Sui specifics:
 - Fee is whatever the [SuiPlatform](packages/xc-sdk/src/platforms/sui/SuiPlatform.ts)
   dry run reports (computation + storage); the wormhole message fee is 0.
 
+## Rate limits
+
+Each manager meters volume per direction over a 24h window that refills linearly —
+outbound on the source, inbound per peer chain on the destination. **This is the only
+rate limiter that applies.** The Wormhole Governor governs Token Bridge emitters only
+(guardian `node/pkg/governor` matches `KnownTokenbridgeEmitters`), and NTT emits from its
+own transceiver, so no governor notional budget is consumed and Hydration isn't even a
+governed chain.
+
+Read via [NttClient](packages/xc-cfg/src/clients/ntt/) (`clients` export of
+xc-cfg) — `nttClient(chain, asset)`, then `getOutboundLimit()` /
+`getInboundLimit(from)` returning
+`{ capacity, limit, capacityAtLastTx, lastTxMs, windowMs }`, amounts in token decimals:
+
+| Platform | Source |
+| --- | --- |
+| evm | `rateLimitDuration()`, `getCurrent{Out,In}boundCapacity()`, `get{Out,In}boundLimitParams()` |
+| solana | `outbox_rate_limit` / `inbox_rate_limit` pdas, refill computed locally |
+| sui | manager State `outbox.rate_limit` / `peers` table entry, ms timestamps |
+
+Upstream's `SolanaNtt.getCurrentOutboundCapacity()` returns `capacity_at_last_tx` — the
+stored value, **not** refilled — which is why the solana path decodes the account itself.
+The evm limit params are packed `TrimmedAmount`s (`amount << 8 | decimals`) and need
+untrimming to token decimals; the capacity getters already answer untrimmed.
+
+Configured values live in `ops/tokens/<token>/deployment.json` of the ntt repo, but
+on-chain is the truth — the solana limits have already been re-set since. The hub legs
+carry the real limits (Ethereum USDC/USDT/DAI/sUSDS 100k, WBTC 10, WETH 10k; Base EURC
+100k; Sui SUI 100k), Hydration is `uint64` max trimmed on both directions — the "opted
+out" sentinel, worth rendering as unlimited rather than as 184,467,440,737.
+
+`capacity` is nearly always at the limit and says little on its own: the bucket refills at
+`limit / windowMs`, which dwarfs real volume, so a transfer is paid back within
+`amount / (limit / window)`. `capacityAtLastTx` + `lastTxMs` are the only trace of recent
+volume a manager keeps. Note the **backflow** — sending consumes outbound and *refills*
+the destination's inbound by the same amount (and the reverse on redeem), so both buckets
+of a pair carry the same residual.
+
+[NttRateLimitValidation](packages/xc-cfg/src/validations/bridge/ntt.ts) checks both ends
+of a transfer. It gates on **both** sides being ntt-registered — the chain pair alone
+doesn't identify an ntt route, only the destination asset key does (`usdc_wh` for ntt vs
+`usdc_eth` for snowbridge over the same `usdc` source).
+
+The two directions fail very differently, which is why the destination is checked at all:
+
+- **outbound** — every builder sends with `shouldQueue = false`, so an over-limit transfer
+  just reverts (`NotEnoughCapacity` on evm). Nothing is committed; the check only turns a
+  wallet revert into a readable error.
+- **inbound** — no such flag exists. The source has already burned/locked, the delivery
+  sits in the destination queue for the window, and the recipient has to release it with
+  `completeInboundQueuedTransfer` — which is not reachable from transfer history yet (see
+  open items). No cancel.
+
+A limit that can't be read at all (rpc down) fails closed as `Ntt_Limit_Unreachable`,
+naming the side that failed — the inbound outcome is bad enough not to wave through a
+transfer whose headroom is unknown.
+
 ## Tracking & claim
 
 [WormholeTransfer](packages/xc-sdk/src/clients/WormholeTransfer.ts) queries wormholescan
@@ -199,37 +278,195 @@ history alone.
 
 ## Delivery: self-redeem vs executor
 
-Current model is **self-redeem**: plain `NttManager.transfer` relies on the transceiver's
-built-in relaying config for delivery; with none configured, `quoteDeliveryPrice` is ~0
-and nobody delivers the VAA — the user (or an own relayer) completes via `receiveMessage`.
-This is why the redeem callback is offered immediately.
+Two delivery models, one builder each, **both offered for the same pair**. The route
+registry groups by `sourceAsset-destChain-destAsset` into a list ([ChainRoutes](packages/xc-core/src/config/definition/ChainRoutes.ts)),
+so each ntt pair carries two routes and the consumer picks by tag — the executor one is
+tagged `Ntt` **and** `NttExecutor`, so anything already matching on `Ntt` still sees both.
+Same shape as the Snowbridge V1/V2 pair.
 
-The upstream alternative is the **executor** flow (`nttWithExecutor.ts` upstream): call
-the `NttManagerWithExecutor` wrapper —
+Plain `NttManager.transfer`
+([Ntt().transfer()](packages/xc-cfg/src/builders/contracts/Wormhole/Ntt.ts)) is
+**self-redeem**: it relies on the transceiver's built-in relaying config; with none
+configured `quoteDeliveryPrice` is ~0 and nobody delivers the VAA — the user (or an own
+relayer) completes via `receiveMessage`.
+
+`Ntt().transferWithExecutor()` calls the **`NttManagerWithExecutor`** shim instead —
 `transfer(nttManager, amount, dstChain, recipient32, refund32, instructions,
 executorArgs { value, refundAddress, signedQuote, instructions },
-feeArgs { transferTokenFee, nativeTokenFee, payee })` — paying
-`msgValue = deliveryPrice + executor cost (+ fees)`; the Executor service then delivers
-on destination. The `signedQuote` comes from the off-chain Executor quote API.
+feeArgs { transferTokenFee, nativeTokenFee, payee })`, selector `0xce972e0e` — paying
+`msgValue = deliveryPrice + estimatedCost`, after which the Executor service delivers on
+destination. Referrer fees are both zero, so the full amount bridges and `payee` is inert.
+
+Only the erc20 `transfer` overload is used. The shim's `transferETH` wraps the attached
+value itself, but a native gas source is already wrapped upfront by the same prerequisite
+the plain manager needs — so that path never comes up, and the platform's allowance
+derivation (spender = `ContractConfig.address`) lands on the shim unchanged.
 
 Two distinct contracts — don't conflate:
 
 | Contract | Where declared | Hydration mainnet |
 | --- | --- | --- |
 | Executor service (relayer watches it) | chain def `wormhole.executor`, `Wormhole.getExecutor()` | `0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9` |
-| `NttManagerWithExecutor` wrapper (user calls it) | upstream `nttManagerWithExecutorAddresses` registry — not in SDK config yet | `0xd3Dda7c8608Ea251C42c6E0A2A686aDc5e9C0C03` |
+| `NttManagerWithExecutor` shim (user calls it) | chain def `wormhole.nttExecutor`, `Wormhole.getNttExecutor()` | `0xd3Dda7c8608Ea251C42c6E0A2A686aDc5e9C0C03` |
 
-Wiring the executor path is the main open decision: wrapper addresses in chain defs, an
-executor-flavored transfer builder, and a signed-quote fetch client.
+Ethereum `0xC079bFA54F348199bA51B2717595fE24e96f1542`, Base
+`0x27db1967D469D89318B7119Ced5609f327095de4`. The `NttManagerWithExecutorWithToken`
+variant (relay fee paid in an ERC20, EQ03) is Tempo-only and unused here.
+
+### The shim does not work from hydration
+
+`NttManagerWithExecutor` approves the manager for `type(uint256).max`. Hydration's erc20
+precompile carries a **u128** balance and reverts anything above `uint128` max with
+`"value too big for type"`, so every shim call from hydration fails — inside `EVM.call`,
+which swallows the revert and reports `Utility.BatchCompleted` over an
+`EVM.ExecutedFailed`. `allowance(shim → manager)` on hydration is still 0: it has never
+once succeeded. Ethereum and Base are unaffected, their tokens being real erc20s.
+
+`Ntt().transferViaExecutor()` is the way around it — the same two effects as two calls
+the sender owns, so the only approve is our own exact-amount one:
+
+```
+1. approve(manager, amount)          exact, from getPrerequisites
+2. NttManager.transfer(...)          emits the wormhole message   (value = deliveryPrice)
+3. Executor.requestExecution(...)    pays to deliver it           (value = estimatedCost)
+```
+
+Step 3 rides on `ContractConfig.follow`, the mirror of `prior`: `EvmPlatform` appends it
+after the transfer and `SubstrateEvm` batches the lot. `requestExecution` is generic — it
+moves no tokens and knows nothing about ntt — so `requestBytes` is what names the message:
+
+```
+ERN1 || srcChain(u16) || srcNttManager(bytes32) || sequence(u256)      70 bytes
+```
+
+decoded off a live base relay, since the wormhole sdk ships the prefix enum and no body
+layout. `dstAddr` is the **destination** manager (whom the executor calls to redeem), not
+the recipient. The sequence comes from `nextMessageSequence()` read at build time, so a
+transfer through the same manager landing in between leaves the request pointing at the
+wrong message — nothing is relayed and the transfer stays claimable by hand.
+
+### Quoting ([ExecutorClient](packages/xc-cfg/src/clients/wormhole/ExecutorClient.ts))
+
+`POST https://executor.labsapis.com/v0/quote {srcChain, dstChain, relayInstructions}` →
+`{signedQuote, estimatedCost}`. `relayInstructions` is one `GasInstruction` carrying a
+`gasLimit` (what the redeem may spend) and a `msgValue` (what the executor must *hold* to
+run it). Under-budgeting either makes the relay simulation revert and the transfer is
+never delivered.
+
+**Neither is uniform, and neither unit survives a chain boundary** — evm gas on evm,
+compute units on svm, MIST on sui, where the "gas limit" is a real transaction budget
+rather than an abstract count. Upstream models this as a destination-side
+`estimateMsgValueAndGasLimit(recipient)`; here it is
+[NttClient.getRedeemBudget](packages/xc-cfg/src/clients/ntt/), one client per
+destination platform:
+
+| Destination | `gasLimit` | `msgValue` |
+| --- | --- | --- |
+| evm | 500,000 (upstream default) | 0 — the redeem holds nothing |
+| solana | 250,000 (26 sampled redeems peaked at 87,592 CU) | 10,000,000 lamports, +2,039,280 when the recipient has no ata |
+| sui | 10,000,000 MIST | 0 |
+
+Keyed on the **destination**, not the source: hydration → sui is an evm source that must
+meet sui's budget. It is the one place either number is decided, so the fee builder and
+the transfer builder cannot disagree — and both are in the `ExecutorClient` cache key,
+since a signed quote is only honoured for the instructions it priced.
+
+The solana figures are measured, not upstream's. A redeem is four transactions —
+`verify_signatures` ×2, `post_vaa`, then receive/redeem/release — and permanently creates
+the transceiver-message and inbox-item pdas: 9,292,040 lamports with the recipient ata
+already open, 11,351,320 when it must be created. Upstream's own estimator sums 9,705,000
++ 2,039,280. The ata rent is charged only when the account is actually missing (the
+builder reads it), because the executor charges source native for lamports it fronts.
+
+Sui's 10,000,000 comes from live redeems on the sui manager, which settle at ~6.48M MIST
+net against a 7,556,176 budget; upstream pads the same estimate to 20,000,000.
+
+The quoting API prices what you ask for; it does not tell you what you need. A
+`msgValue: 0` request for solana returns a signed, HTTP-200, perfectly valid quote for a
+delivery that cannot run — `amtPaid == estimatedCost`, then `aborted`. A short `gasLimit`
+does the same and reports `underpaid`. There is no endpoint, formula or sdk helper for
+the required values (`/v0/capabilities` publishes only ceilings: 30M evm, 1e9 sui, 1e6
+solana), which is why every number above is measured against a real relay.
+
+Signed quotes **expire** (an hour, currently), and one is only honoured for the
+instructions it priced. Both builders quote — the fee builder to size the funding, the
+transfer builder to spend it — so [ExecutorClient](packages/xc-cfg/src/clients/wormhole/ExecutorClient.ts)
+keeps one live quote per `src:dst:msgValue` and reuses it while over five minutes of its
+own expiry remain. Quoting twice instead let the destination gas price move in between:
+observed drift was 807e9 wei against a 9e9 margin, which underfunds the transfer.
+
+### Fee
+
+`estimatedCost` is denominated in **source chain native gas** and is charged as the
+route's destination fee via `FeeAmountBuilder().Wormhole().quoteExecutorCost()`
+(`deliveryPrice + estimatedCost`), because an erc20 source pays it from a balance the
+amount never competes for — which is exactly why `EvmPlatform.estimateFee` leaves the
+call value out there.
+
+A **native gas source is the exception**: its value is already folded into the source fee
+(see above), so `toHydrationViaNttExecutorNativeTemplate` declares no destination fee.
+Charging both would double-count and inflate the route minimum. Ethereum's
+`eth → weth_wh` is the only such route.
+
+The self-redeem routes keep `amount: 0`, which stays honest for them — nothing is charged
+beyond gas. Note both routes of a pair are quoted when a consumer prices all of them, so
+listing a pair costs one executor API call.
+
+**On Hydration that native gas is `weth_wh` (asset 20), not `hdx`.** `pallet_evm`'s
+currency is WETH, so `EVM.call { value }` debits the weth balance — `eth_getBalance`
+returns it net of the ED. Two reasons the fee asset must not be `hdx`: `DestFeeValidation`
+would check a balance the transfer never touches, and `hdx` declares no `decimals` in
+`assetsData`, so `Chain.getDecimals` falls back to the 12-decimal chain currency and
+renders an 18-decimal evm value 10^6x too large. Only the substrate extrinsic fee
+(`source.fee`, via the multi-transaction-payment currency map) can be paid in hdx.
+
+### Paying the hydration cost in hdx
+
+A sender holding no weth buys it first, via the same destination fee swap the xcm routes
+use — `FeeSwap.getDestinationSwap` enables it when the weth balance is short and the hdx
+reserves cover twice the quote, and `viaNttExecutorTemplate` wraps its builder in
+[ContractDecorator](packages/xc-cfg/src/builders/ContractBuilder.ts) so the `Router.buy`
+leads the batch: `[Router.buy(hdx→weth), EVM.call approve, EVM.call transfer]`.
+
+This is the contract-route counterpart of `ExtrinsicDecorator`. The difference is where
+the batching happens: an extrinsic decorator can wrap both sides in `Utility.batch_all`
+itself, while a contract call only becomes a substrate call once the platform knows the
+origin is ss58 — so the decorator just carries the extrinsic on `ContractConfig.prior`
+and [SubstrateEvm](packages/xc-sdk/src/platforms/substrate/SubstrateEvm.ts) assembles it.
+
+**Only an ss58 origin gets this, and only it needs it.** An h160 signs a plain evm
+transaction with nothing to batch into — but it also pays that transaction's gas in weth,
+so an h160 that can transact at all already holds some. The swap exists for the ss58
+origin precisely because that one pays its extrinsic fee in hdx and can otherwise hold
+zero weth.
+
+The failure modes differ the same way. An h160 short on weth reverts in evm simulation —
+surfaced by the call's own `dryRun` and again by the wallet's gas estimate before signing.
+The ss58 path is the one that hides it: `EVM.call` captures the revert, so a failed
+transfer arrives as `EVM.ExecutedFailed` inside a `Utility.BatchCompleted` and the
+extrinsic reports success.
+
+Two rough edges left. `DestFeeValidation.skipFor` skips whenever
+`destinationFeeSwap.enabled` is set, which `FeeSwap` decides without knowing the origin
+format — so an h160 holding enough weth for gas but not for gas plus the executor cost,
+and enough hdx to look swappable, loses the check (the evm dry run still catches it). And
+`EvmPlatform.estimateFee` prices only the evm side, so the `Router.buy` weight is missing
+from the quoted source fee.
 
 ## Support matrix
 
-| Chain | Send (source side) | Tracking | Manual claim |
-| --- | --- | --- | --- |
-| Ethereum / Base | yes (`Ntt().transfer()`) | yes | yes (`EvmClaim`) |
-| Hydration | yes (evm or `EVM.call`-wrapped) | yes | yes (`EvmClaim`/`SubstrateClaim`) |
-| Solana | yes (`ProgramBuilder`) | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
-| Sui | builder ready, no deployment | yes | yes (`SuiClaim`) |
+| Chain | Send (source side) | Delivery | Tracking | Manual claim |
+| --- | --- | --- | --- | --- |
+| Ethereum / Base | yes (`Ntt().transfer()` + `transferWithExecutor()`) | both | yes | yes (`EvmClaim`) |
+| Hydration | yes (evm or `EVM.call`-wrapped) | both | yes | yes (`EvmClaim`/`SubstrateClaim`) |
+| Solana | yes (`ProgramBuilder`) | self-redeem | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
+| Sui | builder ready, no deployment | self-redeem | yes | yes (`SuiClaim`) |
+
+Every evm **source** offers both models side by side; Solana and Sui sources self-redeem
+only (their shims — solana program `nex1gkSWtRBheEJuQZMqHhbMG5A45qPU76KqnCZNVHR`, sui
+`executorId` — are deployed but unwired here, and upstream's sui path needs
+`@mysten/sui` v2 grpc). Every chain in the table is a supported executor **destination**
+(all advertise the `ERN1` prefix), so hydration → solana/sui gets the executor option too.
 
 Every chain is wired both ways. The Sui legs (sui → hydration in
 [configs/sui/sui.ts](packages/xc-cfg/src/configs/sui/sui.ts), hydration → sui in the
@@ -239,7 +476,20 @@ route lines once the deployment lands.
 
 ## Open items
 
-- Executor wiring (above) — until then, transfers complete via manual redeem only.
+- Transfer history still offers the redeem callback as soon as the VAA is emitted, which
+  is now redundant on an executor-delivered transfer — the Executor is already redeeming
+  it. Gate it on `POST /v0/status/tx` (`{chainId, txHash}`; a `GET` on that path 404s)
+  and re-offer only on a `failed`/`underpaid`/`aborted` relay. The xc-transfer example
+  polls it in `src/utils/executor.ts`.
+- Solana & Sui **source** executor wiring — both shims exist upstream (above) but the
+  program/move builders still emit the self-redeem call.
+- Hydration `weth_wh → eth` is the one executor route whose transfer asset equals its
+  destination fee asset (both `weth_wh`), so `DestFeeValidation.skipFor` treats it as
+  self-funding and skips the check — while `calculateMax` only ever subtracts the
+  *source* fee. `max` therefore overstates by `deliveryPrice + estimatedCost` and a
+  bridge-everything transfer reverts. The skip is right for xcm routes that pay the
+  destination fee out of the delivered amount; this one pays it separately from the
+  same balance, which the sdk has no shape for yet.
 - SUI deployment — the only token with no NttManager pair (`ops/tokens` in the
   native-token-transfers fork has none). Registry entries + the two commented routes are
   what it unblocks.
@@ -252,13 +502,5 @@ route lines once the deployment lands.
   release.
 - Queued-transfer digest derivation (NTT message digest from the VAA payload) — unlocks
   `completeInboundQueuedTransfer` from transfer history.
-- For an **erc20** source the delivery price (`value`) is still not surfaced as a fee, so
-  `FeeValidation` can pass on an ETH balance too small to cover it. Harmless while
-  self-redeem keeps the quote at ~0, and `max` is unaffected there (fee asset ≠ transfer
-  asset). Fix it **with the executor wiring**, which is what makes the value large: the
-  Snowbridge shape — destination fee in `eth` via a `FeeAmountBuilder().Wormhole()
-  .quoteDeliveryPrice()` instead of `{ amount: 0 }`. Only the erc20 routes need it; a
-  native source already charges the value through the source fee (above), and applying
-  both to one route would double-count it and inflate `min`.
 - Wrapping leaves sub-`TrimmedAmount` dust wrapped (≤1e10 wei), as the amount is
   floored for the manager args but wrapped in full.

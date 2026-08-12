@@ -14,7 +14,20 @@ export class SuiPlatform implements Platform<MoveConfig> {
     this.#client = chain.client;
   }
 
-  async buildCall(
+  async buildCalls(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    configs: MoveConfig[]
+  ): Promise<SuiCall[]> {
+    return Promise.all(
+      configs.map((config) =>
+        this.buildCall(account, amount, feeBalance, config)
+      )
+    );
+  }
+
+  private async buildCall(
     account: string,
     _amount: bigint,
     _feeBalance: AssetAmount,
@@ -42,9 +55,9 @@ export class SuiPlatform implements Platform<MoveConfig> {
     account: string,
     _amount: bigint,
     feeBalance: AssetAmount,
-    config: MoveConfig
+    configs: MoveConfig[]
   ): Promise<AssetAmount> {
-    const { transaction } = config;
+    const { transaction } = configs[configs.length - 1];
 
     transaction.setSender(account);
     const txBytes = await transaction.build({ client: this.#client });
