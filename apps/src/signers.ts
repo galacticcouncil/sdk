@@ -1,91 +1,68 @@
-import {
-  Call,
-  EvmSigner,
-  SolanaSigner,
-  SuiSigner,
-} from '@galacticcouncil/xc-sdk';
-import {
-  AnyEvmChain,
-  SolanaChain,
-  SuiChain,
-} from '@galacticcouncil/xc-core';
-import { h160 } from '@galacticcouncil/common';
+import { Call, SubstrateCall, SubstrateSigner } from '@galacticcouncil/xc-sdk';
+import { AnyParachain } from '@galacticcouncil/xc-core';
 
-const { H160 } = h160;
+import { AccountId } from 'polkadot-api';
+import {
+  connectInjectedExtension,
+  getInjectedExtensions,
+} from 'polkadot-api/pjs-signer';
 
 export type SignEvents = {
   onSubmit?: (id: string) => void;
   onConfirmed?: (info: string) => void;
-  onStatus?: (info: string) => void;
   onError?: (error: unknown) => void;
 };
 
-export async function signEvm(
+/** Same account across ss58 prefixes - compare public keys, not strings. */
+const isSameAccount = (a: string, b: string) => {
+  try {
+    const enc = AccountId();
+    return (
+      Buffer.from(enc.enc(a)).toString('hex') ===
+      Buffer.from(enc.enc(b)).toString('hex')
+    );
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Resolve `address` to a signer across every injected extension.
+ *
+ * Deliberately not keyed to one wallet - whichever extension holds the
+ * account signs.
+ */
+async function signerFor(address: string) {
+  const extensions = getInjectedExtensions();
+  if (!extensions.length) {
+    throw new Error('No polkadot extension found - install one and reload.');
+  }
+
+  for (const name of extensions) {
+    const extension = await connectInjectedExtension(name);
+    const account = extension
+      .getAccounts()
+      .find((a) => isSameAccount(a.address, address));
+    if (account) {
+      return account.polkadotSigner;
+    }
+  }
+
+  throw new Error(address + ' is not in any connected extension.');
+}
+
+export async function signSubstrate(
   call: Call,
-  chain: AnyEvmChain,
+  chain: AnyParachain,
   events: SignEvents = {}
 ) {
-  const client = chain.evmClient;
-  const account = H160.fromAny(call.from);
-  const wallet = client.getSigner(account);
-
-  await wallet.switchChain({ id: client.chain.id });
-  await wallet.request({ method: 'eth_requestAccounts' });
+  const signer = await signerFor(call.from);
 
   return new Promise<void>((resolve, reject) => {
-    new EvmSigner(chain, wallet).signAndSend(call, {
+    new SubstrateSigner(chain, signer).signAndSend(call as SubstrateCall, {
       onTransactionSend: (hash) => events.onSubmit?.(hash),
-      onTransactionReceipt: (receipt) => {
-        events.onConfirmed?.('Block: ' + receipt.blockNumber);
-        resolve();
-      },
-      onError: (error) => {
-        events.onError?.(error);
-        reject(error);
-      },
-    });
-  });
-}
-
-export async function signSolanaBundle(
-  calls: Call[],
-  chain: SolanaChain,
-  events: SignEvents = {}
-) {
-  const wallet = (window as any).phantom?.solana;
-  if (!wallet) throw new Error('Phantom (Solana) wallet not detected.');
-
-  return new Promise<void>((resolve, reject) => {
-    new SolanaSigner(chain, wallet).signAndSendAll(calls, {
-      onTransactionSend: (bundleId) => events.onSubmit?.(bundleId),
-      onBundleStatus: (status) => {
-        const first = (status as any)?.[0];
-        const summary = first?.status
-          ? `${first.status}${first.landed_slot ? ` @ slot ${first.landed_slot}` : ''}`
-          : JSON.stringify(status);
-        events.onStatus?.(summary);
-        resolve();
-      },
-      onError: (error) => {
-        events.onError?.(error);
-        reject(error);
-      },
-    });
-  });
-}
-
-export async function signSui(
-  call: Call,
-  chain: SuiChain,
-  events: SignEvents = {}
-) {
-  const wallet = (window as any).phantom?.sui;
-  if (!wallet) throw new Error('Phantom (Sui) wallet not detected.');
-
-  return new Promise<void>((resolve, reject) => {
-    new SuiSigner(chain, wallet).signAndSend(call, {
-      onTransactionSend: (hash) => {
-        events.onConfirmed?.('TxHash: ' + hash);
+      onFinalized: (event) => {
+        events.onConfirmed?.('Block: ' + (event as any).block?.number);
         resolve();
       },
       onError: (error) => {
