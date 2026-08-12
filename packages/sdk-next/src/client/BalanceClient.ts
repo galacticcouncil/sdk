@@ -250,7 +250,7 @@ export class BalanceClient extends Papi {
            * watched account as from/to. null = full read.
            */
           const eventIds$ = owner
-            ? this.api.event.EVM.Log.watch().pipe(
+            ? this.api.event.EVM.Log.watchBest().pipe(
                 mergeMap(({ events }) => events),
                 map(({ payload }) => decodeErc20Transfer(payload)),
                 filter(
