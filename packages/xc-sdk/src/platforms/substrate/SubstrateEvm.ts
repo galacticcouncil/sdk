@@ -1,4 +1,4 @@
-import { CallType, EvmParachain } from '@galacticcouncil/xc-core';
+import { CallType, EvmCallData, EvmParachain } from '@galacticcouncil/xc-core';
 
 import { Binary } from 'polkadot-api';
 
@@ -8,15 +8,6 @@ import { SubstrateCall, SubstrateDryRunResult } from './types';
 
 const U64_MASK = (1n << 64n) - 1n;
 
-// Conservative gas ceilings, unused gas is refunded by the evm runner.
-export const Gas = {
-  approve: 200_000n,
-  deposit: 200_000n,
-  transfer: 1_200_000n,
-  redeem: 2_000_000n,
-  queued: 600_000n,
-} as const;
-
 /** U256 as 4 little-endian u64 limbs (papi wire format) */
 const toU256 = (value: bigint): bigint[] => [
   value & U64_MASK,
@@ -25,20 +16,16 @@ const toU256 = (value: bigint): bigint[] => [
   (value >> 192n) & U64_MASK,
 ];
 
-export type EvmCallData = {
-  to: string;
-  data: string;
-  value?: bigint;
-  gas: bigint;
-};
-
 /**
- * EVM.call extrinsic wrapper.
+ * EVM.call extrinsic wrapper for claims.
  *
  * Executes evm contract calls from a substrate signed origin. The evm
  * source must be the signer truncated H160 (EnsureAddressTruncated) and
  * the account has to be bound on chain (EVMAccounts) so gas & token
  * balances resolve to the real account.
+ *
+ * Transfers reach the same wrapping through the `evm().call()` extrinsic
+ * builder instead, so a route composes it with the rest of its batch.
  */
 export class SubstrateEvm {
   readonly #substrate: SubstrateService;
@@ -60,7 +47,7 @@ export class SubstrateEvm {
     const maxFeePerGas = gasPrice + gasPrice / 10n;
 
     const api = this.#substrate.client.getUnsafeApi();
-    const txs = calls.map((call) =>
+    const evmTxs = calls.map((call) =>
       api.tx.EVM.call({
         source: source,
         target: call.to,
@@ -78,13 +65,13 @@ export class SubstrateEvm {
     );
 
     const tx =
-      txs.length === 1
-        ? txs[0]
+      evmTxs.length === 1
+        ? evmTxs[0]
         : api.tx.Utility.batch_all({
-            calls: txs.map((t) => t.decodedCall),
+            calls: evmTxs.map((t) => t.decodedCall),
           });
 
-    const callName = calls.length === 1 ? 'EVM.call' : 'Utility.batch_all';
+    const callName = evmTxs.length === 1 ? 'EVM.call' : 'Utility.batch_all';
     const callData = await tx.getEncodedData();
 
     return {

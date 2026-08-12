@@ -13,8 +13,3 @@ export interface DestinationFeeConfig {
   amount: number | FeeAmountConfigBuilder;
   asset: Asset;
 }
-
-export interface TransactFeeConfig {
-  amount: number;
-  asset: Asset;
-}

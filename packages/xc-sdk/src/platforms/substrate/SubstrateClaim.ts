@@ -1,8 +1,8 @@
-import { EvmParachain, NttTokenDef } from '@galacticcouncil/xc-core';
+import { EvmParachain, Gas, NttTokenDef } from '@galacticcouncil/xc-core';
 
 import { EvmClaim } from '../evm/EvmClaim';
 
-import { Gas, SubstrateEvm } from './SubstrateEvm';
+import { SubstrateEvm } from './SubstrateEvm';
 import { SubstrateCall } from './types';
 
 /**

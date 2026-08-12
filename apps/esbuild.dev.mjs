@@ -7,7 +7,6 @@ const plugins = [wasmLoader({ mode: 'deferred' })];
 const options = {
   entryPoints: [
     { in: 'src/redeem/app.ts', out: 'redeem' },
-    { in: 'src/moxit/app.ts', out: 'moxit' },
   ],
   bundle: true,
   format: 'esm',

@@ -6,6 +6,7 @@ import { sign } from './signers';
 import { xc } from './setup';
 import { claimDeposits, claimWithdraws } from './utils/claim';
 import { claimVaa } from './utils/vaa';
+import { getStatus, waitForDelivery } from './utils/executor';
 
 const { config, wallet } = xc;
 const { Tag } = tags;
@@ -14,8 +15,18 @@ const { Tag } = tags;
  * NTT transfer test — drives whatever the sdk registers under the `Ntt`
  * tag, so wiring a new token in xc-cfg shows up here without changes.
  *
- * Delivery is self-redeem: nothing relays the VAA, so a transfer only
- * completes once `claim` is run against the destination chain.
+ * Both delivery models are offered per pair:
+ *
+ *  - self-redeem — nothing relays the VAA, so the transfer only completes
+ *    once `claim` is run against the destination chain.
+ *  - executor — the sender pays the Executor to redeem on the far side, so
+ *    there is nothing to claim. Costs source native gas on top of the
+ *    transfer (weth on hydration, eth on ethereum/base).
+ *
+ * The executor routes carry both tags, so `Tag.NttExecutor` picks one
+ * unambiguously. Plain `Tag.Ntt` resolves to whichever route the config
+ * registers first, which is the self-redeem one on every chain — see
+ * ConfigBuilder.build, it takes the first candidate rather than the only one.
  */
 
 // Evm chains sign with the h160; hydration takes an ss58 (bound on chain,
@@ -41,7 +52,7 @@ const addressOf = (chain: AnyChain): string => {
   return HYDRATION_ADDRESS;
 };
 
-type NttRoute = { source: AnyChain; route: AssetRoute };
+type NttRoute = { source: AnyChain; route: AssetRoute; executor: boolean };
 
 /** Whatever the sdk registers under the Ntt tag, hydration side first. */
 const ROUTES: NttRoute[] = Array.from(config.routes.values())
@@ -49,7 +60,11 @@ const ROUTES: NttRoute[] = Array.from(config.routes.values())
     chainRoutes
       .getRoutes()
       .filter((route) => route.tags?.includes(Tag.Ntt))
-      .map((route) => ({ source: chainRoutes.chain, route }))
+      .map((route) => ({
+        source: chainRoutes.chain,
+        route,
+        executor: !!route.tags?.includes(Tag.NttExecutor),
+      }))
   )
   .sort(
     (a, b) =>
@@ -57,7 +72,8 @@ const ROUTES: NttRoute[] = Array.from(config.routes.values())
       a.source.name.localeCompare(b.source.name) ||
       a.route.source.asset.originSymbol.localeCompare(
         b.route.source.asset.originSymbol
-      )
+      ) ||
+      Number(a.executor) - Number(b.executor)
   );
 
 const out = document.getElementById('log')!;
@@ -81,14 +97,23 @@ function log(...args: unknown[]) {
 const fmt = (amount: { toDecimal(): string; originSymbol: string }) =>
   [amount.toDecimal(), amount.originSymbol].join(' ');
 
-async function transfer({ source, route }: NttRoute, amount: string) {
+async function transfer({ source, route, executor }: NttRoute, amount: string) {
   const destination = route.destination.chain;
   const asset = route.source.asset;
 
-  log('---', source.key, '->', destination.key, amount, asset.originSymbol);
+  log(
+    '---',
+    source.key,
+    '->',
+    destination.key,
+    amount,
+    asset.originSymbol,
+    executor ? '(executor)' : '(self-redeem)'
+  );
 
   // Pinned to the ntt route & its destination asset - another bridge may
-  // serve the same pair (eth goes via snowbridge too).
+  // serve the same pair (eth goes via snowbridge too). NttExecutor narrows
+  // further, both delivery models being tagged Ntt.
   const transfer = await TransferBuilder(wallet)
     .withAsset(asset)
     .withSource(source)
@@ -97,7 +122,7 @@ async function transfer({ source, route }: NttRoute, amount: string) {
       srcAddress: addressOf(source),
       dstAddress: addressOf(destination),
       dstAsset: route.destination.asset,
-      tag: Tag.Ntt,
+      tag: executor ? Tag.NttExecutor : Tag.Ntt,
     });
 
   log('Balance:', fmt(transfer.source.balance));
@@ -109,6 +134,14 @@ async function transfer({ source, route }: NttRoute, amount: string) {
     transfer.estimateFee(amount),
   ]);
   log('Estimated fee:', fmt(fee));
+
+  // What the executor charges to redeem on the far side, on top of the
+  // transfer. Declared as the destination fee & paid in source native gas,
+  // so it never comes out of the bridged amount.
+  if (executor) {
+    const dstFee = await transfer.estimateDestinationFee(amount);
+    log('Executor + delivery:', fmt(dstFee));
+  }
 
   // [approve?, transfer] on an evm chain - the manager pulls the erc20 via
   // transferFrom. From an ss58 origin the same sequence arrives batched in
@@ -122,12 +155,35 @@ async function transfer({ source, route }: NttRoute, amount: string) {
     log('Dry run:', await calls[0].dryRun());
   }
 
+  // The executor indexes whichever call emits RequestForExecution, and that
+  // is always the last one - the shim transfer on ethereum/base, the separate
+  // requestExecution on the hydration bypass. Everything ahead of it is a
+  // wrap/approve prerequisite whose hash the executor knows nothing of.
+  let txHash: string | undefined;
   for (const [i, call] of calls.entries()) {
     log('Sign', i + 1, 'of', calls.length, '- confirm in wallet');
-    await sign(call, source);
+    const isLast = i === calls.length - 1;
+    await sign(call, source, (hash) => {
+      if (isLast) txHash = hash;
+    });
   }
 
-  log('Sent. Claim once the vaa is signed (~15m from ethereum).');
+  if (!executor) {
+    log('Sent. Claim once the vaa is signed (~15m from ethereum).');
+    return;
+  }
+
+  log('Sent. Executor is delivering - nothing to claim.');
+  if (!txHash) {
+    log('No source tx hash captured; poll with ntt.status(source, txHash).');
+    return;
+  }
+
+  // Indexed by the evm tx hash. An ss58 origin signs a batched EVM.call, so
+  // the substrate extrinsic hash reported here is not what the executor
+  // knows - use the h160 from hydration if this never resolves.
+  log('Following delivery of', txHash);
+  await waitForDelivery(source, txHash, log);
 }
 
 /**
@@ -196,7 +252,14 @@ groups.forEach((entries, chain) => {
     const dst = entry.route.destination;
 
     const button = document.createElement('button');
-    button.textContent = `${asset.originSymbol} → ${dst.chain.name}`;
+    // Both delivery models serve the same pair, so the label has to say
+    // which one - otherwise the two buttons are indistinguishable.
+    button.textContent =
+      `${asset.originSymbol} → ${dst.chain.name}` +
+      (entry.executor ? ' ⚡' : '');
+    if (entry.executor) {
+      button.className = 'primary';
+    }
 
     const missing = [entry.source, dst.chain]
       .map(addressOf)
@@ -206,7 +269,9 @@ groups.forEach((entries, chain) => {
       button.dataset.locked = 'true';
       button.title = `No address set for ${dst.chain.name}`;
     } else {
-      button.title = `${asset.key} → ${dst.asset.key}`;
+      button.title =
+        `${asset.key} → ${dst.asset.key} ` +
+        (entry.executor ? '(executor delivery)' : '(self-redeem)');
     }
 
     row.appendChild(button);
@@ -227,6 +292,22 @@ bind(document.getElementById('claim-vaa') as HTMLButtonElement, () =>
   claim.vaa(vaaInput.value, vaaForce.checked)
 );
 
-log('Ready.', ROUTES.length, 'ntt routes, self-redeem delivery.');
+log(
+  'Ready.',
+  ROUTES.length,
+  'ntt routes,',
+  ROUTES.filter((r) => r.executor).length,
+  'executor delivered.'
+);
 
-(window as any).ntt = { transfer, claim, routes: ROUTES, xc };
+(window as any).ntt = {
+  transfer,
+  claim,
+  routes: ROUTES,
+  xc,
+  // ntt.status(chain, txHash) - follow a delivery by hand when the button
+  // flow was interrupted.
+  status: getStatus,
+  follow: (chain: AnyChain, txHash: string) =>
+    waitForDelivery(chain, txHash, log),
+};

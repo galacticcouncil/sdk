@@ -1,9 +1,8 @@
-import { acc, big, log } from '@galacticcouncil/common';
+import { big, log } from '@galacticcouncil/common';
 
 import {
   Asset,
   AnyChain,
-  AnyParachain,
   AssetAmount,
   ConfigBuilder,
   ConfigService,
@@ -18,13 +17,7 @@ import { Subscription } from 'rxjs';
 
 const { logger } = log;
 
-import {
-  Call,
-  PlatformAdapter,
-  SubstrateCall,
-  SubstrateExec,
-  SubstrateService,
-} from './platforms';
+import { Call, PlatformAdapter } from './platforms';
 import {
   calculateMax,
   calculateMin,
@@ -65,57 +58,6 @@ export class Wallet {
     return this.getTransferData(transfer, srcAddress, dstAddress);
   }
 
-  async remoteXcm(
-    srcAddress: string,
-    srcChain: string | AnyParachain,
-    dstChain: string | AnyParachain,
-    dstCall: SubstrateCall,
-    opts: {
-      srcFeeAsset?: Asset;
-    } = {}
-  ): Promise<SubstrateCall> {
-    const src = this.config.getChain(srcChain) as AnyParachain;
-    const dst = this.config.getChain(dstChain) as AnyParachain;
-
-    const isSubstrateExec = src.isSubstrate() && dst.isSubstrate();
-    if (!isSubstrateExec)
-      throw Error('RemoteXcm is supported only between parachains');
-
-    const [srcSub, dstSub] = await Promise.all([
-      SubstrateService.create(src),
-      SubstrateService.create(dst),
-    ]);
-
-    const exec = new SubstrateExec(srcSub, dstSub);
-
-    const dstAddress = acc.getMultilocationDerivatedAccount(
-      src.parachainId,
-      srcAddress,
-      1,
-      dst.usesH160Acc
-    );
-
-    const dstAsset = await dstSub.getAsset();
-    const transfer = await this.transfer(
-      dstAsset,
-      srcAddress,
-      srcChain,
-      dstAddress,
-      dstChain
-    );
-
-    return exec.remoteExec(
-      srcAddress,
-      dstAddress,
-      dstCall,
-      (fees) => {
-        const feesFmt = fees.toDecimal();
-        return transfer.buildCall(feesFmt);
-      },
-      opts
-    );
-  }
-
   async getTransferData(
     configs: TransferConfigs,
     srcAddress: string,
@@ -142,7 +84,7 @@ export class Wallet {
     ] = await Promise.all([
       src.getBalance(srcAddress),
       src.getFeeBalance(srcAddress),
-      src.getDestinationFee(),
+      src.getDestinationFee(undefined, dstAddress),
       src.getDestinationFeeBalance(srcAddress),
       src.getMin(),
       dst.getBalance(dstAddress),
@@ -179,8 +121,6 @@ export class Wallet {
         destinationFeeBalance: srcDestinationFeeBalance,
       },
     };
-
-    ctx.transact = await src.getTransact(ctx);
 
     const swap = new FeeSwap(ctx);
 
@@ -236,18 +176,19 @@ export class Wallet {
       async buildCalls(amount): Promise<Call[]> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
-        copyCtx.transact = await src.getTransact(copyCtx);
         return src.getCalls(copyCtx);
       },
       async estimateFee(amount): Promise<AssetAmount> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
-        copyCtx.transact = await src.getTransact(copyCtx);
         return src.getFee(copyCtx);
       },
       async estimateDestinationFee(amount): Promise<AssetAmount> {
         const target = big.toBigInt(amount, srcBalance.decimals);
-        const { fee, feeBreakdown } = await src.getDestinationFee(target);
+        const { fee, feeBreakdown } = await src.getDestinationFee(
+          target,
+          dstAddress
+        );
         ctx.destination.fee = fee;
         ctx.destination.feeBreakdown = feeBreakdown;
         ctx.source.destinationFee = fee;

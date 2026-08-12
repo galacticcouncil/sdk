@@ -29,13 +29,15 @@ const bridgeViaWormhole = (): ContractConfigBuilder => ({
     const ctxBj = Bj.fromChain(ctx);
 
     const assetId = ctx.getAssetId(asset);
-    return new ContractConfig({
-      abi: Abi.Basejump,
-      address: ctxBj.getAddress(),
-      args: [parseAssetId(assetId), amount, toAccountId32(address)],
-      func: 'bridgeViaWormhole',
-      module: 'Basejump',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.Basejump,
+        address: ctxBj.getAddress(),
+        args: [parseAssetId(assetId), amount, toAccountId32(address)],
+        func: 'bridgeViaWormhole',
+        module: 'Basejump',
+      }),
+    ];
   },
 });
 

@@ -1,27 +1,25 @@
 import { AssetAmount, BaseConfig, CallType } from '@galacticcouncil/xc-core';
 
 export interface Platform<T extends BaseConfig> {
-  buildCall(
-    account: string,
-    amount: bigint,
-    feeBalance: AssetAmount,
-    config: T
-  ): Promise<Call>;
   /**
-   * Ordered call sequence of a transfer, the transfer call being last.
-   * Platforms requiring no prerequisite calls may omit it.
+   * Ordered call sequence of a transfer.
+   *
+   * Takes the configs the route's builder produced, in execution order, and
+   * returns one call per signature the sender has to give - which is not
+   * one per config: a platform that can batch (substrate) collapses them,
+   * one that can't (evm, solana) may also prepend account prerequisites.
    */
-  buildCalls?(
+  buildCalls(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: T
+    configs: T[]
   ): Promise<Call[]>;
   estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: T
+    configs: T[]
   ): Promise<AssetAmount>;
 }
 

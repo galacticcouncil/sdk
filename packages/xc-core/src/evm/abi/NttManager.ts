@@ -1,5 +1,18 @@
 export const NTT_MANAGER = [
   {
+    inputs: [],
+    name: 'nextMessageSequence',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'uint256',
@@ -167,6 +180,117 @@ export const NTT_MANAGER = [
         internalType: 'uint8',
         name: '',
         type: 'uint8',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'rateLimitDuration',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentOutboundCapacity',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'chainId',
+        type: 'uint16',
+      },
+    ],
+    name: 'getCurrentInboundCapacity',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getOutboundLimitParams',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'TrimmedAmount',
+            name: 'limit',
+            type: 'uint72',
+          },
+          {
+            internalType: 'TrimmedAmount',
+            name: 'currentCapacity',
+            type: 'uint72',
+          },
+          {
+            internalType: 'uint64',
+            name: 'lastTxTimestamp',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IRateLimiter.RateLimitParams',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'chainId',
+        type: 'uint16',
+      },
+    ],
+    name: 'getInboundLimitParams',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'TrimmedAmount',
+            name: 'limit',
+            type: 'uint72',
+          },
+          {
+            internalType: 'TrimmedAmount',
+            name: 'currentCapacity',
+            type: 'uint72',
+          },
+          {
+            internalType: 'uint64',
+            name: 'lastTxTimestamp',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IRateLimiter.RateLimitParams',
+        name: '',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',

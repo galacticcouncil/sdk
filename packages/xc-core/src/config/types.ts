@@ -1,6 +1,6 @@
 import { Asset, AssetAmount } from '../asset';
 import { AnyChain } from '../chain';
-import { AssetRoute, TransactCtx } from './definition';
+import { AssetRoute } from './definition';
 
 export interface SwapCtx {
   aIn: AssetAmount;
@@ -30,7 +30,6 @@ export interface TransferCtx {
     fee: AssetAmount;
     feeBreakdown: { [key: string]: bigint };
   };
-  transact?: TransactCtx;
 }
 
 export interface TransferConfig {

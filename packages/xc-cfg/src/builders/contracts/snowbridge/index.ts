@@ -93,14 +93,16 @@ const v2SendMessage = (): ContractConfigBuilder => ({
     );
     const claimerBytes = toHex(claimerVersioned.slice(1));
 
-    return new ContractConfig({
-      abi: Abi.Snowbridge,
-      address: ctxSb.getGateway(),
-      args: [xcmBytes, assets, claimerBytes, executionFee, relayerFee],
-      value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
-      func: 'v2_sendMessage',
-      module: 'Snowbridge',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.Snowbridge,
+        address: ctxSb.getGateway(),
+        args: [xcmBytes, assets, claimerBytes, executionFee, relayerFee],
+        value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
+        func: 'v2_sendMessage',
+        module: 'Snowbridge',
+      }),
+    ];
   },
 });
 
@@ -123,20 +125,22 @@ const sendToken = (): ContractConfigBuilder => ({
     const bridgeFeeInDot = destination.feeBreakdown['bridgeFeeInDot'];
     const bridgeFeeInWei = destination.fee.amount;
 
-    return new ContractConfig({
-      abi: Abi.Snowbridge,
-      address: ctxSb.getGateway(),
-      args: [
-        parsedAssetId,
-        rcv.parachainId,
-        [1, Ss58Addr.getPubKey(address) as `0x${string}`],
-        bridgeFeeInDot,
-        amount,
-      ],
-      value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
-      func: 'sendToken',
-      module: 'Snowbridge',
-    });
+    return [
+      new ContractConfig({
+        abi: Abi.Snowbridge,
+        address: ctxSb.getGateway(),
+        args: [
+          parsedAssetId,
+          rcv.parachainId,
+          [1, Ss58Addr.getPubKey(address) as `0x${string}`],
+          bridgeFeeInDot,
+          amount,
+        ],
+        value: isNativeTransfer ? bridgeFeeInWei + amount : bridgeFeeInWei,
+        func: 'sendToken',
+        module: 'Snowbridge',
+      }),
+    ];
   },
 });
 
