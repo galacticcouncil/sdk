@@ -1,18 +1,20 @@
 import { AGGREGATOR_V3_ABI } from './abi';
 
+import { BLOCK_TIME_TARGET } from '../consts';
 import { EvmClient, EvmRpcAdapter } from '../evm';
 import { MmOracleEntry } from './types';
 
 export class MmOracleClient {
   private adapter: EvmRpcAdapter;
-  private blockTime: () => Promise<number>;
 
-  constructor(evm: EvmClient, blockTime: () => Promise<number>) {
+  constructor(evm: EvmClient) {
     this.adapter = evm.getRPCAdapter();
-    this.blockTime = blockTime;
   }
 
-  async getData(address: string): Promise<MmOracleEntry> {
+  async getData(
+    address: string,
+    blockTimeMs: number = BLOCK_TIME_TARGET
+  ): Promise<MmOracleEntry> {
     const [data, decimals, block] = await Promise.all([
       this.adapter.readContract({
         abi: AGGREGATOR_V3_ABI,
@@ -29,7 +31,6 @@ export class MmOracleClient {
 
     const [_roundId, answer, _startedAt, updatedAt] = data;
 
-    const blockTimeMs = await this.blockTime();
     const msPerBlock = BigInt(Math.max(1, Math.round(blockTimeMs)));
 
     const elapsedMs = (block.timestamp - updatedAt) * 1000n;
