@@ -59,6 +59,8 @@ export class OrderTxBuilder extends TxBuilder {
     switch (type) {
       case TradeOrderType.Dca:
         return this.buildDcaTx();
+      case TradeOrderType.DcaSell:
+        return this.buildDcaSellTx();
       case TradeOrderType.TwapSell:
         return this.buildTwapSellTx();
       case TradeOrderType.TwapBuy:
@@ -103,6 +105,43 @@ export class OrderTxBuilder extends TxBuilder {
     }
 
     return this.wrapTx('DcaSchedule', tx);
+  }
+
+  private async buildDcaSellTx(): Promise<Tx> {
+    const {
+      amountIn,
+      assetIn,
+      assetOut,
+      tradeAmountIn,
+      tradePeriod,
+      tradeRoute,
+    } = this.order;
+
+    let tx: Transaction = this.api.tx.DCA.schedule({
+      schedule: {
+        owner: this.beneficiary,
+        period: tradePeriod,
+        max_retries: this.maxRetries,
+        total_amount: amountIn,
+        slippage: this.slippagePct * 10000,
+        stability_threshold: undefined,
+        order: Enum('Sell', {
+          asset_in: assetIn,
+          asset_out: assetOut,
+          amount_in: tradeAmountIn,
+          min_amount_out: 0n,
+          route: tradeRoute as any,
+        }),
+      },
+      start_execution_block: undefined,
+    });
+
+    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
+    if (hasDebt) {
+      tx = await this.dispatchWithExtraGas(tx);
+    }
+
+    return this.wrapTx('DcaSchedule.dcaSell', tx);
   }
 
   private async buildTwapSellTx(): Promise<Tx> {
