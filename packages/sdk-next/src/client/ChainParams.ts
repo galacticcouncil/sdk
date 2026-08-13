@@ -1,11 +1,10 @@
 import { PolkadotClient } from 'polkadot-api';
 
 import { Papi } from '../api';
+import { BLOCK_TIME_TARGET } from '../consts';
 
 const BLOCK_TIME_SAMPLE = 100;
 const BLOCK_TIME_TTL = 60_000;
-const BLOCK_TIME_MIN = 250;
-const BLOCK_TIME_MAX = 60_000;
 
 export class ChainParams extends Papi {
   private _minOrderBudget?: bigint;
@@ -18,15 +17,23 @@ export class ChainParams extends Papi {
     super(client);
   }
 
+  /**
+   * Block time in ms, cached for the TTL.
+   *
+   * - A failed derivation caches the target rate, so a chain that cannot serve
+   *   the sample is re-probed once per window rather than on every call
+   */
   async getBlockTime(): Promise<number> {
-    const now = Date.now();
     const isFresh =
-      this._blockTime !== undefined && now - this._blockTimeAt < BLOCK_TIME_TTL;
+      this._blockTime !== undefined &&
+      Date.now() - this._blockTimeAt < BLOCK_TIME_TTL;
 
     if (isFresh) return this._blockTime!;
 
-    this._blockTime = await this.deriveBlockTime();
-    this._blockTimeAt = now;
+    const derived = await this.deriveBlockTime();
+
+    this._blockTime = derived ?? BLOCK_TIME_TARGET;
+    this._blockTimeAt = Date.now();
     return this._blockTime;
   }
 
@@ -46,28 +53,18 @@ export class ChainParams extends Papi {
   }
 
   /**
-   * Block time in ms, derived over the last blocks.
+   * Block time in ms, averaged over the last blocks.
    *
-   * - Several blocks are authored per slot, so the slot duration alone is not
-   *   the block time; the timestamp advances once per slot, not once per block
-   * - Rounding the blocks-per-slot to an integer yields the nominal rate the
-   *   runtime derives its own block-denominated periods from
-   * - Falls back to the slot duration if the span is unavailable
+   * - Undefined signals the span was unavailable
    */
-  private async deriveBlockTime(): Promise<number> {
-    const slot = await this.getSlotDuration();
-
+  private async deriveBlockTime(): Promise<number | undefined> {
     try {
       const tip = await this.resolveBlock();
       const from = tip.number - BLOCK_TIME_SAMPLE;
 
-      if (from < 1) return slot;
-
       const fromHash = await this.api.query.System.BlockHash.getValue(from, {
         at: tip.hash,
       });
-
-      if (!fromHash || /^0x0+$/.test(fromHash)) return slot;
 
       const [to, at] = await Promise.all([
         this.api.query.Timestamp.Now.getValue({ at: tip.hash }),
@@ -75,20 +72,10 @@ export class ChainParams extends Papi {
       ]);
 
       const elapsed = Number(to - at);
-      if (elapsed <= 0) return slot;
 
-      const blockTime = elapsed / BLOCK_TIME_SAMPLE;
-
-      if (blockTime < BLOCK_TIME_MIN || blockTime > BLOCK_TIME_MAX) return slot;
-
-      return blockTime;
+      return elapsed > 0 ? elapsed / BLOCK_TIME_SAMPLE : undefined;
     } catch {
-      return slot;
+      return undefined;
     }
-  }
-
-  private async getSlotDuration(): Promise<number> {
-    const slot = await this.api.constants.Aura.SlotDuration();
-    return Number(slot);
   }
 }

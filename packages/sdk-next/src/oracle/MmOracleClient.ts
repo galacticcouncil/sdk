@@ -30,10 +30,10 @@ export class MmOracleClient {
     const [_roundId, answer, _startedAt, updatedAt] = data;
 
     const blockTimeMs = await this.blockTime();
-    const secsPerBlock = BigInt(Math.max(1, Math.round(blockTimeMs / 1000)));
+    const msPerBlock = BigInt(Math.max(1, Math.round(blockTimeMs)));
 
-    const updatedAtBlock =
-      block.number - (block.timestamp - updatedAt) / secsPerBlock;
+    const elapsedMs = (block.timestamp - updatedAt) * 1000n;
+    const updatedAtBlock = block.number - elapsedMs / msPerBlock;
     const updatedAtNum = Number(updatedAtBlock);
 
     return {

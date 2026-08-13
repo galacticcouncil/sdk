@@ -5,12 +5,14 @@ import { big, erc20, h160 } from '@galacticcouncil/common';
 import { AaveClient } from './AaveClient';
 import { AaveSummary, AaveReserveData } from './types';
 
+import { BLOCK_TIME_TARGET } from '../consts';
 import { EvmClient } from '../evm';
 import { Amount } from '../types';
 
 const { ERC20 } = erc20;
 const { H160 } = h160;
 
+const BLOCK_TIME_SEC = BLOCK_TIME_TARGET / 1000;
 const TARGET_WITHDRAW_HF = 1.01;
 const SECONDS_PER_YEAR = 31536000n;
 const LTV_PRECISION = 4;
@@ -20,26 +22,21 @@ const RAY = 10n ** 27n;
 
 export class AaveUtils {
   private client: AaveClient;
-  private blockTime: () => Promise<number>;
 
-  constructor(evm: EvmClient, blockTime: () => Promise<number>) {
+  constructor(evm: EvmClient) {
     this.client = new AaveClient(evm);
-    this.blockTime = blockTime;
   }
 
   async getSummary(user: string): Promise<AaveSummary> {
     const to = H160.fromAny(user);
 
-    const [poolReserves, userReserves, userData, blockTimestamp, blockTimeMs] =
+    const [poolReserves, userReserves, userData, blockTimestamp] =
       await Promise.all([
         this.client.getReservesData(),
         this.client.getUserReservesData(to),
         this.client.getUserAccountData(to),
         this.client.getBlockTimestamp(),
-        this.blockTime(),
       ]);
-
-    const blockTimeInSec = Math.max(1, Math.round(blockTimeMs / 1000));
 
     const [pReserves] = poolReserves;
     const [uReserves, userEmodeCategoryId] = userReserves;
@@ -73,7 +70,7 @@ export class AaveUtils {
 
       const priceInRef = pReserve.priceInMarketReferenceCurrency;
 
-      const nextBlockTimestamp = blockTimestamp + blockTimeInSec;
+      const nextBlockTimestamp = blockTimestamp + BLOCK_TIME_SEC;
       const linearInterest = this.calculateLinearInterest(
         liquidityRate,
         pReserve.lastUpdateTimestamp,

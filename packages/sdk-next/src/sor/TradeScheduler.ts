@@ -2,6 +2,7 @@ import { big } from '@galacticcouncil/common';
 
 import {
   DCA_TIME_RESERVE,
+  ORDER_MIN_BLOCK_PERIOD,
   DEFAULT_MIN_BUDGET,
   TWAP_EXECUTION_INTERVAL_MS,
   TWAP_MAX_PRICE_IMPACT,
@@ -19,52 +20,42 @@ import { TradeRouter } from './TradeRouter';
 
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
-import { SYSTEM_ASSET_DECIMALS, SYSTEM_ASSET_ID } from '../consts';
+import {
+  BLOCK_TIME_TARGET,
+  SYSTEM_ASSET_DECIMALS,
+  SYSTEM_ASSET_ID,
+} from '../consts';
 import { IPoolCtxProvider, PoolType } from '../pool';
 import { calc } from '../utils';
 
 export type TradeSchedulerOptions = {
-  blockTime: number | (() => Promise<number>);
-  minimalPeriod: number;
+  blockTime?: number;
+  minimalPeriod?: number;
   minBudgetInNative?: bigint;
 };
 
+/**
+ * Order cadence is denominated in the target rate, not the observed one.
+ *
+ * - The chain schedules in blocks and derives its own block-denominated
+ *   constants from the target, so a period must be built on the same basis
+ * - A missed block stretches an order in wall clock; it does not change the
+ *   period the order was written with
+ */
 export class TradeScheduler {
-  private readonly schedulerOptions: TradeSchedulerOptions;
-
   protected readonly router: TradeRouter;
 
-  private _blockTime: number;
+  readonly blockTime: number;
+  readonly minimalPeriod: number;
+  readonly minOrderBudget: bigint;
 
-  constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions) {
+  constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions = {}) {
     this.router = new TradeRouter(ctx);
     this.router.withFilter({ exclude: [PoolType.HSM] });
-    this.schedulerOptions = Object.freeze({
-      ...options,
-      minBudgetInNative: options.minBudgetInNative ?? DEFAULT_MIN_BUDGET,
-    });
 
-    const { blockTime } = options;
-    this._blockTime = typeof blockTime === 'number' ? blockTime : 0;
-  }
-
-  get blockTime(): number {
-    return this._blockTime;
-  }
-
-  get minimalPeriod(): number {
-    return this.schedulerOptions.minimalPeriod!;
-  }
-
-  get minOrderBudget(): bigint {
-    return this.schedulerOptions.minBudgetInNative!;
-  }
-
-  private async resolveBlockTime(): Promise<void> {
-    const blockTime = this.schedulerOptions.blockTime;
-    if (typeof blockTime === 'function') {
-      this._blockTime = await blockTime();
-    }
+    this.blockTime = options.blockTime ?? BLOCK_TIME_TARGET;
+    this.minimalPeriod = options.minimalPeriod ?? ORDER_MIN_BLOCK_PERIOD;
+    this.minOrderBudget = options.minBudgetInNative ?? DEFAULT_MIN_BUDGET;
   }
 
   /**
@@ -84,8 +75,6 @@ export class TradeScheduler {
     duration: number,
     noOfTrades?: number
   ): Promise<TradeDcaOrder> {
-    await this.resolveBlockTime();
-
     const trade = await this.router.getBestSell(
       assetIn,
       assetOut,
@@ -232,7 +221,8 @@ export class TradeScheduler {
     if (minAmountIn === 0n) return 0;
 
     const maxByBudget = Number(amountIn / minAmountIn);
-    const maxByTimeRaw = Math.floor(duration / this.blockTime);
+    const minSpacing = this.blockTime * this.minimalPeriod;
+    const maxByTimeRaw = Math.floor(duration / minSpacing);
 
     const maxByTime = Math.max(
       0,
@@ -271,8 +261,6 @@ export class TradeScheduler {
     amountIn: string,
     periodMs: number
   ): Promise<TradeDcaOrder> {
-    await this.resolveBlockTime();
-
     const trade = await this.router.getBestSell(assetIn, assetOut, amountIn);
 
     const { swaps } = trade;
@@ -345,8 +333,6 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
-    await this.resolveBlockTime();
-
     const sell = await this.router.getBestSell(
       assetIn,
       assetOut,
@@ -437,8 +423,6 @@ export class TradeScheduler {
     assetOut: number,
     amountInTotal: string
   ): Promise<TradeOrder> {
-    await this.resolveBlockTime();
-
     const buy = await this.router.getBestBuy(assetIn, assetOut, amountInTotal);
 
     const { amountOut, swaps, priceImpactPct } = buy;
@@ -527,8 +511,7 @@ export class TradeScheduler {
     const executionTime = this.getTwapExecutionTime(optTradeCount);
 
     if (executionTime > TWAP_MAX_DURATION) {
-      const maxTradeCount = TWAP_MAX_DURATION / TWAP_EXECUTION_INTERVAL_MS;
-      return Math.round(maxTradeCount);
+      return Math.floor(TWAP_MAX_DURATION / this.twapInterval());
     }
     return optTradeCount;
   }
@@ -540,7 +523,17 @@ export class TradeScheduler {
    * @returns unix representation of execution time
    */
   getTwapExecutionTime(tradeCount: number): number {
-    return tradeCount * TWAP_EXECUTION_INTERVAL_MS;
+    return tradeCount * this.twapInterval();
+  }
+
+  /**
+   * Twap interval in ms, as scheduled.
+   *
+   * - The block period is what the chain executes on, so the wall clock it
+   *   maps back to is the interval orders actually run at
+   */
+  private twapInterval(): number {
+    return this.toBlockPeriod(TWAP_EXECUTION_INTERVAL_MS) * this.blockTime;
   }
 
   /**

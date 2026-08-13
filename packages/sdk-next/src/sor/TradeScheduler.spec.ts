@@ -1,8 +1,22 @@
 import { TradeScheduler } from './TradeScheduler';
 
-import { DCA_TIME_RESERVE, TWAP_EXECUTION_INTERVAL_MS } from './const';
+import {
+  DCA_TIME_RESERVE,
+  TWAP_EXECUTION_INTERVAL_MS,
+  TWAP_MAX_DURATION,
+} from './const';
 
-const BLOCK_TIME = 6_000;
+/** Nominal rate and floor of the 2s runtime */
+const BLOCK_TIME = 2_000;
+const MINIMAL_PERIOD = 15;
+
+/** Nominal rate and floor of the 6s runtime, still live on mainnet */
+const BLOCK_TIME_6S = 6_000;
+const MINIMAL_PERIOD_6S = 5;
+
+/** Shortest spacing the chain accepts, in ms */
+const MIN_SPACING = BLOCK_TIME * MINIMAL_PERIOD;
+const MIN_SPACING_6S = BLOCK_TIME_6S * MINIMAL_PERIOD_6S;
 
 class TestScheduler extends TradeScheduler {
   public maxTradeCount(
@@ -22,7 +36,7 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
   const routerMock: any = {};
   const scheduler = new TestScheduler(routerMock, {
     blockTime: BLOCK_TIME,
-    minimalPeriod: 6,
+    minimalPeriod: MINIMAL_PERIOD,
   });
 
   it('returns 0 when amountInMin is 0 (minPerTrade becomes 0)', () => {
@@ -48,7 +62,7 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
     const amountInMin = 100n;
     const amountIn = 10_000_000n;
 
-    const maxByTimeRaw = Math.floor(duration / BLOCK_TIME);
+    const maxByTimeRaw = Math.floor(duration / MIN_SPACING);
     const expected = Math.max(
       0,
       Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
@@ -56,6 +70,9 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
 
     const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
     expect(res).toBe(expected);
+
+    /** the cap must be schedulable: every trade needs minimalPeriod blocks */
+    expect(res * MIN_SPACING).toBeLessThanOrEqual(duration);
   });
 
   it('handles exact budget division', () => {
@@ -84,7 +101,7 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
     const amountInMin = 100n;
     const amountIn = 10_000_000n;
 
-    const maxByTimeRaw = Math.floor(duration / BLOCK_TIME);
+    const maxByTimeRaw = Math.floor(duration / MIN_SPACING);
     const maxByTime = Math.max(
       0,
       Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
@@ -101,58 +118,111 @@ class CadenceScheduler extends TradeScheduler {
   }
 }
 
-const build = (blockTime: number, minimalPeriod = 6) =>
+const build = (blockTime: number, minimalPeriod = MINIMAL_PERIOD) =>
   new CadenceScheduler({} as any, { blockTime, minimalPeriod });
 
 /**
- * The cadence must be invariant in WALL CLOCK, not in blocks: the same order
- * has to span the same time whatever the block rate is.
+ * The cadence must hold in WALL CLOCK, not in blocks.
+ *
+ * - The chain rejects a period below minimalPeriod blocks, so that floor caps
+ *   how short an interval can be asked for
+ * - Above the floor the requested duration is met; below it the floor governs,
+ *   and every quote has to report the floor rather than what was asked
  */
 describe('TradeScheduler cadence across block rates', () => {
-  const SIX = 6_000;
-  const TWO = 2_000;
+  const TARGET = BLOCK_TIME;
 
-  it('twap interval is the same duration at 6s and 2s', () => {
-    const at6 = build(SIX);
-    const at2 = build(TWO);
+  it('meets the requested twap interval', () => {
+    const blocks = build(TARGET).toBlocks(TWAP_EXECUTION_INTERVAL_MS);
 
-    const blocks6 = at6.toBlocks(TWAP_EXECUTION_INTERVAL_MS);
-    const blocks2 = at2.toBlocks(TWAP_EXECUTION_INTERVAL_MS);
-
-    expect(blocks6).toBe(6);
-    expect(blocks2).toBe(18);
-
-    expect(blocks6 * SIX).toBe(TWAP_EXECUTION_INTERVAL_MS);
-    expect(blocks2 * TWO).toBe(TWAP_EXECUTION_INTERVAL_MS);
+    expect(blocks).toBe(18);
+    expect(blocks * TARGET).toBe(TWAP_EXECUTION_INTERVAL_MS);
   });
 
-  it('quotes the same twap execution time at any block rate', () => {
-    expect(build(SIX).getTwapExecutionTime(50)).toBe(
-      build(TWO).getTwapExecutionTime(50)
-    );
-    expect(build(SIX).getTwapExecutionTime(50)).toBe(50 * 36_000);
+  it('floors a sub-minimum period at the chain minimum', () => {
+    /** 20s is 10 blocks at 2s, under the 15 the chain accepts */
+    expect(build(TARGET).toBlocks(20_000)).toBe(MINIMAL_PERIOD);
   });
 
-  it('caps twap trade count identically at any block rate', () => {
-    expect(build(SIX).getTwapTradeCount(500)).toBe(
-      build(TWO).getTwapTradeCount(500)
-    );
+  it('quotes the interval it actually scheduled', () => {
+    const s = build(TARGET);
+    const realized = 50 * s.toBlocks(TWAP_EXECUTION_INTERVAL_MS) * TARGET;
+
+    expect(s.getTwapExecutionTime(50)).toBe(realized);
+  });
+
+  it('keeps the twap trade count within the max duration', () => {
+    const s = build(TARGET);
+    const count = s.getTwapTradeCount(500);
+    const span = count * s.toBlocks(TWAP_EXECUTION_INTERVAL_MS) * TARGET;
+
+    expect(span).toBeLessThanOrEqual(TWAP_MAX_DURATION);
   });
 
   it('converts a wall-clock dca period to the same duration', () => {
-    expect(build(SIX).toBlocks(HOUR) * SIX).toBe(HOUR);
-    expect(build(TWO).toBlocks(HOUR) * TWO).toBe(HOUR);
+    expect(build(TARGET).toBlocks(HOUR) * TARGET).toBe(HOUR);
   });
 
   it('never returns a period under the chain minimum', () => {
-    // 2s chain raises DCA.MinimalPeriod to 15
-    const at2 = build(TWO, 15);
-    expect(at2.toBlocks(1_000)).toBe(15);
-    expect(at2.toBlocks(60_000)).toBe(30);
+    const at = build(TARGET);
+    expect(at.toBlocks(1_000)).toBe(MINIMAL_PERIOD);
+    expect(at.toBlocks(60_000)).toBe(30);
   });
 
   it('floors at the chain minimum, not a hardcoded 6', () => {
-    expect(build(TWO, 15).toBlocks(0)).toBe(15);
-    expect(build(SIX, 5).toBlocks(0)).toBe(5);
+    expect(build(TARGET, 15).toBlocks(0)).toBe(15);
+    expect(build(6_000, 5).toBlocks(0)).toBe(5);
+  });
+});
+
+/**
+ * The 6s runtime mainnet still serves.
+ *
+ * - The same wall-clock cadence must hold there, with its own floor
+ * - Kept alongside the 2s cases until the upgrade lands everywhere
+ */
+describe('TradeScheduler cadence on the 6s runtime', () => {
+  const scheduler = new TestScheduler({} as any, {
+    blockTime: BLOCK_TIME_6S,
+    minimalPeriod: MINIMAL_PERIOD_6S,
+  });
+
+  const cadence = build(BLOCK_TIME_6S, MINIMAL_PERIOD_6S);
+
+  it('meets the requested twap interval', () => {
+    const blocks = cadence.toBlocks(TWAP_EXECUTION_INTERVAL_MS);
+
+    expect(blocks).toBe(6);
+    expect(blocks * BLOCK_TIME_6S).toBe(TWAP_EXECUTION_INTERVAL_MS);
+  });
+
+  it('converts a wall-clock dca period to the same duration', () => {
+    expect(cadence.toBlocks(HOUR) * BLOCK_TIME_6S).toBe(HOUR);
+  });
+
+  it('quotes the interval it actually scheduled', () => {
+    const realized =
+      50 * cadence.toBlocks(TWAP_EXECUTION_INTERVAL_MS) * BLOCK_TIME_6S;
+
+    expect(cadence.getTwapExecutionTime(50)).toBe(realized);
+  });
+
+  it('keeps the twap trade count within the max duration', () => {
+    const count = cadence.getTwapTradeCount(500);
+    const span =
+      count * cadence.toBlocks(TWAP_EXECUTION_INTERVAL_MS) * BLOCK_TIME_6S;
+
+    expect(span).toBeLessThanOrEqual(TWAP_MAX_DURATION);
+  });
+
+  it('caps trade count by the shortest schedulable spacing', () => {
+    const res = scheduler.maxTradeCount(10_000_000n, 100n, HOUR);
+
+    expect(res).toBe(
+      Math.floor(Math.floor(HOUR / MIN_SPACING_6S) * (1 - DCA_TIME_RESERVE))
+    );
+
+    /** the cap must be schedulable: every trade needs minimalPeriod blocks */
+    expect(res * MIN_SPACING_6S).toBeLessThanOrEqual(HOUR);
   });
 });

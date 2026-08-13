@@ -27,6 +27,7 @@ export type SdkCtx = {
     asset: AssetClient;
     balance: BalanceClient;
     evm: EvmClient;
+    params: ChainParams;
   };
   ctx: {
     pool: PoolContextProvider;
@@ -62,10 +63,9 @@ export async function createSdkContext(
   const farmClient = new LiquidityMiningClient(client);
 
   // Initialize APIs
-  const aave = new AaveUtils(evm, () => params.getBlockTime());
+  const aave = new AaveUtils(evm);
   const router = new TradeRouter(poolCtx);
   const scheduler = new TradeScheduler(poolCtx, {
-    blockTime: () => params.getBlockTime(),
     minBudgetInNative: minOrderBudget,
     minimalPeriod: minimalPeriod,
   });
@@ -85,6 +85,7 @@ export async function createSdkContext(
       asset: new AssetClient(client),
       balance: balance,
       evm: evm,
+      params: params,
     },
     ctx: {
       pool: poolCtx,

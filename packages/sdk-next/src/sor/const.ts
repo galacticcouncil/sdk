@@ -6,3 +6,5 @@ export const TWAP_MAX_DURATION = 6 * 60 * 60 * 1000;
 export const TWAP_TX_MULTIPLIER = 3;
 
 export const DCA_TIME_RESERVE = 0.1; // 10% slack
+
+export const ORDER_MIN_BLOCK_PERIOD = 15;
