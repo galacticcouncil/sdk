@@ -55,6 +55,6 @@ describe('Router with mocked pool ctx', () => {
 
   it('Should return all tradeable assets', async () => {
     const result = await sor.getTradeableAssets();
-    expect(result).toStrictEqual([0, 1, 2]);
+    expect(result).toStrictEqual([0, 1, 2, 3, 222]);
   });
 });
