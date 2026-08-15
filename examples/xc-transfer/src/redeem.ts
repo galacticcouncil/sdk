@@ -14,7 +14,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { xc } from './setup';
-import { signEvm, signSolanaBundle } from 'signers';
+import { signEvm, signSolanaAll } from 'signers';
 
 const { config } = xc;
 
@@ -46,7 +46,7 @@ const nttOf = (chain: AnyChain, assetKey: string) =>
  *
  * ```ts
  * const claim = await redeem.sol("INSERT_YOUR_ADDRESS", "INSERT_VAA", "w")
- * await signSolanaBundle(claim, solana)
+ * await signSolanaAll(claim, solana)
  * ```
  */
 export const redeem = {

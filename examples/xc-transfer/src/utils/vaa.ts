@@ -18,7 +18,7 @@ import { chainToChainId, encoding } from '@wormhole-foundation/sdk-base';
 import { deserialize } from '@wormhole-foundation/sdk-definitions';
 import { register } from '@wormhole-foundation/sdk-definitions-ntt';
 
-import { sign, signSolanaBundle } from '../signers';
+import { sign, signSolanaAll } from '../signers';
 import { xc } from '../setup';
 
 import { Logger, PayerOf } from './claim';
@@ -279,7 +279,7 @@ export async function claimVaa(
     const calls = await new SolanaClaim(chain).redeem(payer, vaaRaw, ntt);
     log('  redeem on', ntt.manager, 'paid by', payer);
     log(' ', calls.length, 'txs as one bundle - confirm in wallet');
-    await signSolanaBundle(calls, chain);
+    await signSolanaAll(calls, chain);
     log('Claimed', id);
     return;
   }

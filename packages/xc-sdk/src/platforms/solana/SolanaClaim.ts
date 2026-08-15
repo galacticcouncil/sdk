@@ -36,24 +36,19 @@ import { deserialize, VAA } from '@wormhole-foundation/sdk-definitions';
 import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
 import { register } from '@wormhole-foundation/sdk-definitions-ntt';
 
-import { SolanaLilJit } from './SolanaLilJit';
 import { SolanaCall } from './types';
 import { getLookupTables, ixToHuman, serializeV0 } from './utils';
 
 // Since 7.2.0 the ntt payload layouts are no longer registered on import.
 register();
 
-const DEFAULT_TIP_LAMPORTS = 1000;
-
 export class SolanaClaim {
   readonly #chain: SolanaChain;
   readonly #connection: Connection;
-  readonly #lilJit: SolanaLilJit;
 
   constructor(chain: SolanaChain) {
     this.#chain = chain;
     this.#connection = chain.connection;
-    this.#lilJit = new SolanaLilJit(chain);
   }
 
   /**
@@ -98,8 +93,7 @@ export class SolanaClaim {
       txs.push(tx.transaction);
     }
 
-    const [tipIx, unwrap, openRecipient] = await Promise.all([
-      this.getTip(payer),
+    const [unwrap, openRecipient] = await Promise.all([
       this.getUnwrap(ntt, vaa, payer),
       this.getOpenRecipient(ntt, vaa, payer),
     ]);
@@ -120,7 +114,6 @@ export class SolanaClaim {
         if (unwrap) {
           ixs.push(...unwrap.ixs);
         }
-        ixs.push(tipIx);
       }
       const mssgV0 = new TransactionMessage({
         payerKey: payer,
@@ -187,8 +180,7 @@ export class SolanaClaim {
       txs.push(tx.transaction);
     }
 
-    const [tipIx, unwrap, openRecipient] = await Promise.all([
-      this.getTip(payer),
+    const [unwrap, openRecipient] = await Promise.all([
       this.getUnwrap(ntt, vaa, payer),
       this.getOpenRecipient(ntt, vaa, payer),
     ]);
@@ -208,7 +200,6 @@ export class SolanaClaim {
       if (unwrap) {
         ixs.push(...unwrap.ixs);
       }
-      ixs.push(tipIx);
       const mssgV0 = new TransactionMessage({
         payerKey: payer,
         recentBlockhash: blockhash,
@@ -223,25 +214,6 @@ export class SolanaClaim {
       } as SolanaCall);
     }
     return calls;
-  }
-
-  /**
-   * Jito tip, paid by the claim payer.
-   *
-   * A bundle is only picked up if it tips, so this is required rather than
-   * best effort - an unreachable block engine fails the claim here instead
-   * of sending a bundle that would never land.
-   *
-   * @param payer - claim payer, pays the tip
-   * @returns tip instruction
-   */
-  private async getTip(payer: PublicKey): Promise<TransactionInstruction> {
-    const accounts = await this.#lilJit.getTipAccount();
-    return SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: new PublicKey(accounts[0]),
-      lamports: DEFAULT_TIP_LAMPORTS,
-    });
   }
 
   /**
