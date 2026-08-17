@@ -11,4 +11,5 @@ export enum ApiUrl {
   Lark2 = 'wss://node2.lark.hydration.cloud',
   Lark3 = 'wss://node3.lark.hydration.cloud',
   Lark4 = 'wss://node4.lark.hydration.cloud',
+  Lark_3 = 'wss://3.lark.hydration.cloud',
 }
