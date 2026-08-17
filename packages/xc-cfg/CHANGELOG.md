@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 2.4.0
+
+### Minor Changes
+
+- bump to sdk 2.x peer
+
 ## 2.3.0
 
 ### Minor Changes

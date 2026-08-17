@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-swap
 
+## 0.7.0
+
+### Minor Changes
+
+- bump to sdk 2.x peer
+
 ## 0.6.0
 
 ### Minor Changes

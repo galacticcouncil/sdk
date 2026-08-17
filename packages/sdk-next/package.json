@@ -106,7 +106,7 @@
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.2.0",
-    "@galacticcouncil/descriptors": ">=2.6.0",
+    "@galacticcouncil/descriptors": ">=2.7.0",
     "polkadot-api": "^2.1.7",
     "viem": "^2.38.3"
   }

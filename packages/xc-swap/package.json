@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-swap",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Cross-chain swap SDK (NEAR Intent Routing)",
   "author": "GalacticCouncil",
   "repository": {
@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.1.0",
-    "@galacticcouncil/sdk-next": ">=1.5.0",
+    "@galacticcouncil/sdk-next": ">=2.0.0",
     "@galacticcouncil/xc-core": ">=2.0.0",
     "@galacticcouncil/xc-sdk": ">=2.0.0",
     "viem": "^2.38.3"
