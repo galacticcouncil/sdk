@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.7.0
+
+### Minor Changes
+
+- 1e0db91: sor v2
+
 ## 2.6.0
 
 ### Minor Changes

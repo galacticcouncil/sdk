@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-cfg",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Cross-chain hydradx & basilisk dapp configuration",
   "author": "GalacticCouncil",
   "repository": {
@@ -35,6 +35,6 @@
     "@thi.ng/memoize": "^4.0.2"
   },
   "peerDependencies": {
-    "@galacticcouncil/sdk-next": ">=1.5.0"
+    "@galacticcouncil/sdk-next": ">=2.0.0"
   }
 }

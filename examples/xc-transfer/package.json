@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@defuse-protocol/one-click-sdk-typescript": "^0.1.17",
-    "@galacticcouncil/sdk-next": "^1.6.0",
+    "@galacticcouncil/sdk-next": "^2.0.0",
     "@galacticcouncil/xc": "^2.1.0",
     "@galacticcouncil/xc-scan": "^0.5.0",
-    "@galacticcouncil/xc-swap": "^0.6.0",
+    "@galacticcouncil/xc-swap": "^0.7.0",
     "@talismn/connect-wallets": "^1.2.8"
   }
 }
