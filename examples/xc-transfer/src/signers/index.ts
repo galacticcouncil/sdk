@@ -93,13 +93,13 @@ export async function signSolana(call: Call, chain: AnyChain) {
   });
 }
 
-export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
+export async function signSolanaAll(calls: Call[], chain: AnyChain) {
   const wallet = (window as any).phantom.solana;
   return new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
-    onTransactionSend: (bundleId) => {
-      console.log('BundleId: ' + bundleId);
+    onTransactionSend: (signature) => {
+      console.log('Signature: ' + signature);
     },
-    onBundleStatus: (status) => {
+    onStatus: (status) => {
       console.log(status);
     },
     onError: (error) => {

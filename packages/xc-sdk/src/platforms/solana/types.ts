@@ -35,12 +35,5 @@ export interface SolanaWallet {
 export interface SolanaTxObserver {
   onTransactionSend: (hash: string) => void;
   onStatus?: (status: any) => void;
-  onBundleStatus?: (
-    status: Array<{
-      bundle_id: string;
-      landed_slot: number;
-      status: string;
-    }>
-  ) => void;
   onError: (error: unknown) => void;
 }

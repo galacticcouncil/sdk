@@ -1,7 +1,7 @@
 import { AnyChain, EvmParachain } from '@galacticcouncil/xc-core';
 import { WhStatus, WhTransfer } from '@galacticcouncil/xc-sdk';
 
-import { sign, signSolanaBundle } from '../signers';
+import { sign, signSolanaAll } from '../signers';
 import { xc } from '../setup';
 
 const { config, wormhole } = xc;
@@ -84,7 +84,7 @@ async function claim(
       await sign(calls, chain);
     } else if (chain.isSolana()) {
       // Jito bundle execution
-      await signSolanaBundle(calls, chain);
+      await signSolanaAll(calls, chain);
     } else {
       // Sequential batch execution
       for (const call of calls) {
