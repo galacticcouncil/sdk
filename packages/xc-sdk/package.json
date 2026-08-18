@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-sdk",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Cross-chain sdk",
   "author": "GalacticCouncil",
   "type": "module",

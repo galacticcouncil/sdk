@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-cfg
 
+## 2.4.1
+
+### Patch Changes
+
+- bdb7f55: Drop jitobundle from solana signer and fix base check
+
 ## 2.4.0
 
 ### Minor Changes
