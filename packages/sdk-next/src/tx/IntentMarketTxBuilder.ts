@@ -1,6 +1,6 @@
 import { Enum } from 'polkadot-api';
 
-import { Trade } from '../sor';
+import { Trade, TradeType } from '../sor';
 import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
@@ -45,17 +45,56 @@ export class IntentMarketTxBuilder extends TxBuilder {
   }
 
   async build(): Promise<Tx> {
-    const { amountIn, amountOut, swaps } = this.trade;
+    const { type } = this.trade;
+
+    if (type === TradeType.Buy) {
+      return this.buildBuyTx();
+    }
+    return this.buildSellTx();
+  }
+
+  /**
+   * Sell intent: user commits an exact amount_in, slippage lowers the
+   * amount_out floor below the quote so the intent is fillable right
+   * away within the user's tolerance.
+   */
+  private async buildSellTx(): Promise<Tx> {
+    const { amountIn, amountOut } = this.trade;
+
+    const slippage = calc.getFraction(amountOut, this.slippagePct);
+    const minAmountOut = amountOut - slippage;
+
+    return this.buildSwapTx(amountIn, minAmountOut);
+  }
+
+  /**
+   * Buy intent translated to sell semantics: amount_out floor is the
+   * exact amount the user asked to receive (never lowered), slippage
+   * pads amount_in above the quote so the intent is fillable right
+   * away within the user's tolerance. Worst case matches a classic
+   * buy with max_amount_in; any surplus is delivered as extra
+   * amount_out.
+   */
+  private async buildBuyTx(): Promise<Tx> {
+    const { amountIn, amountOut } = this.trade;
+
+    const slippage = calc.getFraction(amountIn, this.slippagePct);
+    const maxAmountIn = amountIn + slippage;
+
+    return this.buildSwapTx(maxAmountIn, amountOut);
+  }
+
+  private async buildSwapTx(
+    amountIn: bigint,
+    minAmountOut: bigint
+  ): Promise<Tx> {
+    const { swaps } = this.trade;
 
     const firstSwap = swaps[0];
     const lastSwap = swaps[swaps.length - 1];
 
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;
-
-    const slippage = calc.getFraction(amountOut, this.slippagePct);
-
-    const minAmountOut = amountOut - slippage;
 
     const swap = Enum('Swap', {
       asset_in: assetIn,
