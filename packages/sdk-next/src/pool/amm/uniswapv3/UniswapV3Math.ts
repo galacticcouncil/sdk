@@ -19,6 +19,14 @@ type SwapResult = {
   sqrtPriceX96: JSBI;
   liquidity: JSBI;
   tick: number;
+  /**
+   * Whether the requested amount was fully consumed.
+   *
+   * The walk stops for two different reasons: the order filled, or the pool ran
+   * out of liquidity in that direction and the price reached its limit. Only the
+   * first is a usable quote.
+   */
+  filled: boolean;
 };
 
 export class UniswapV3Math {
@@ -27,12 +35,14 @@ export class UniswapV3Math {
     zeroForOne: boolean,
     amountIn: bigint
   ): bigint {
-    if (amountIn <= 0n || state.liquidity <= 0n) return 0n;
+    if (amountIn <= 0n) return 0n;
     const result = UniswapV3Math.computeSwap(
       state,
       zeroForOne,
       JSBI.BigInt(amountIn.toString())
     );
+    // Exact-in is a best-effort sell: an input the pool cannot fully absorb still
+    // yields whatever it bought, which is what the chain would do too.
     const out = JSBI.multiply(result.amountCalculated, NEGATIVE_ONE);
     return BigInt(out.toString());
   }
@@ -42,12 +52,16 @@ export class UniswapV3Math {
     zeroForOne: boolean,
     amountOut: bigint
   ): bigint {
-    if (amountOut <= 0n || state.liquidity <= 0n) return 0n;
+    if (amountOut <= 0n) return 0n;
     const result = UniswapV3Math.computeSwap(
       state,
       zeroForOne,
       JSBI.multiply(JSBI.BigInt(amountOut.toString()), NEGATIVE_ONE)
     );
+    // A partial fill is not a cheap quote, it is a trade that reverts on-chain:
+    // the router would compare an input priced for less than `amountOut` against
+    // venues that can actually deliver it, pick this one, and fail at execution.
+    if (!result.filled) return 0n;
     return BigInt(result.amountCalculated.toString());
   }
 
@@ -145,6 +159,7 @@ export class UniswapV3Math {
       sqrtPriceX96,
       liquidity,
       tick,
+      filled: JSBI.equal(amountSpecifiedRemaining, ZERO),
     };
   }
 

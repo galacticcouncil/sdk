@@ -134,3 +134,46 @@ describe.each([
     );
   });
 });
+
+describe('quotes the chain would reject', () => {
+  // Liquidity only ABOVE the current price: a band the price has fallen out of,
+  // which is where a Gamma vault sits between a band exit and the next rebalance.
+  const outOfRange: Fixture = {
+    sqrtPriceX96: encodeSqrtRatioX96(1, 1),
+    liquidity: 0n,
+    ticks: [
+      { index: 1200, liquidityNet: UNIT, liquidityGross: UNIT },
+      { index: 3000, liquidityNet: -UNIT, liquidityGross: UNIT },
+    ],
+  };
+
+  it('returns 0 for an exact-out larger than the pool can fill', () => {
+    const state = toState(fullRange);
+    // Far more than the fixture's 1e18 of liquidity can deliver.
+    const huge = 1_000_000n * UNIT;
+    expect(UniswapV3Math.calculateInGivenOut(state, true, huge)).toBe(0n);
+  });
+
+  it('still quotes an exact-out the pool CAN fill', () => {
+    const state = toState(fullRange);
+    const small = UNIT / 1_000n;
+    expect(UniswapV3Math.calculateInGivenOut(state, true, small)).toBeGreaterThan(
+      0n
+    );
+  });
+
+  it('quotes a swap back INTO an exited band, where liquidity() is 0', () => {
+    const state = toState(outOfRange);
+    expect(state.liquidity).toBe(0n);
+
+    // oneForZero walks the price UP into the band at [1200, 3000] and trades there.
+    const out = UniswapV3Math.calculateOutGivenIn(state, false, UNIT / 100n);
+    expect(out).toBeGreaterThan(0n);
+  });
+
+  it('still returns 0 when there is no liquidity in the traded direction', () => {
+    const state = toState(outOfRange);
+    // zeroForOne walks the price DOWN, away from the band — nothing to trade.
+    expect(UniswapV3Math.calculateOutGivenIn(state, true, UNIT / 100n)).toBe(0n);
+  });
+});

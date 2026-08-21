@@ -11,14 +11,40 @@ import { V3Tick } from './types';
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 /**
- * Bitmap words read on each side of the current tick.
+ * Ticks to cover on each side of the current price when loading a pool.
  *
- * - One word spans `256 * tickSpacing` ticks, so this covers a wide price range
- *   at every fee tier
- * - A trade beyond the loaded ticks quotes against the outermost loaded
- *   liquidity; the on-chain re-quote at execution stays authoritative
+ * ~20k ticks is a ~7.4x price move — far beyond any band a managed vault runs,
+ * and beyond what a single trade would cross before the on-chain re-quote takes
+ * over.
  */
-const TICK_WINDOW_WORDS = 5;
+const TICK_WINDOW_TICKS = 20_000;
+
+/** Hard cap on bitmap words per side, so one tight-spacing pool cannot flood the RPC */
+const MAX_TICK_WINDOW_WORDS = 12;
+
+/**
+ * Bitmap words to read on each side of the current tick.
+ *
+ * A word spans `256 * tickSpacing` ticks, so a FIXED word count means wildly
+ * different price coverage per tier — at spacing 60 five words is ~2000x, at
+ * spacing 1 it is ±13.7%. Sizing from a tick target instead keeps coverage
+ * comparable across tiers.
+ *
+ * Beyond the loaded ticks the walk meets zero-liquidity sentinels, so it quotes
+ * as if liquidity continued unchanged — it over-quotes rather than under-quotes.
+ * That is why the window is sized generously and why `windowWords` reports when
+ * the cap binds rather than truncating in silence.
+ */
+export function windowWords(tickSpacing: number): {
+  words: number;
+  covers: number;
+  capped: boolean;
+} {
+  const perWord = 256 * tickSpacing;
+  const wanted = Math.max(1, Math.ceil(TICK_WINDOW_TICKS / perWord));
+  const words = Math.min(wanted, MAX_TICK_WINDOW_WORDS);
+  return { words, covers: words * perWord, capped: words < wanted };
+}
 
 /**
  * Decode one tick-bitmap word into the tick indices it marks initialized.
@@ -195,12 +221,16 @@ export class UniswapV3Query extends PoolQuery {
     const client = this.evm.getWsProvider();
 
     const currentWord = Math.floor(currentTick / tickSpacing) >> 8;
+    const { words, covers, capped } = windowWords(tickSpacing);
+    if (capped) {
+      console.warn(
+        `[uniswapv3] tickSpacing ${tickSpacing}: tick window capped at ` +
+          `${words} words (±${covers} ticks) — liquidity beyond that is not ` +
+          `loaded and quotes there over-state available depth`
+      );
+    }
     const wordPositions: number[] = [];
-    for (
-      let w = currentWord - TICK_WINDOW_WORDS;
-      w <= currentWord + TICK_WINDOW_WORDS;
-      w++
-    ) {
+    for (let w = currentWord - words; w <= currentWord + words; w++) {
       wordPositions.push(w);
     }
 
