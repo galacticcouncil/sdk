@@ -3,34 +3,40 @@ import {
   UniversalAddress,
 } from '@wormhole-foundation/sdk-connect';
 
+import type { NttDef } from './ntt';
+
 import { AnyChain } from '../chain';
 
 export type WormholeDef = {
   id: number;
   coreBridge: string;
-  tokenBridge: string;
-  tokenRelayer?: string;
+  executor?: string;
+  nttExecutor?: string;
+  ntt?: NttDef;
   platformAddressFormat?: PlatformAddressFormat;
 };
 
 export class Wormhole {
   readonly id: number;
   readonly coreBridge: string;
-  readonly tokenBridge: string;
-  readonly tokenRelayer?: string;
+  readonly executor?: string;
+  readonly nttExecutor?: string;
+  readonly ntt: NttDef;
   readonly platformAddressFormat?: PlatformAddressFormat;
 
   constructor({
     id,
     coreBridge,
-    tokenBridge,
-    tokenRelayer,
+    executor,
+    nttExecutor,
+    ntt,
     platformAddressFormat,
   }: WormholeDef) {
     this.id = id;
     this.coreBridge = coreBridge;
-    this.tokenBridge = tokenBridge;
-    this.tokenRelayer = tokenRelayer;
+    this.executor = executor;
+    this.nttExecutor = nttExecutor;
+    this.ntt = ntt ?? {};
     this.platformAddressFormat = platformAddressFormat;
   }
 
@@ -53,15 +59,24 @@ export class Wormhole {
     return this.coreBridge;
   }
 
-  getTokenBridge(): string {
-    return this.tokenBridge;
+  getExecutor(): string {
+    if (this.executor) {
+      return this.executor;
+    }
+    throw new Error('Wormhole executor configuration missing');
   }
 
-  getTokenRelayer(): string | undefined {
-    if (this.tokenRelayer) {
-      return this.tokenRelayer;
+  /**
+   * NttManagerWithExecutor - the wrapper a sender calls to have the Executor
+   * service deliver the transfer. Distinct from {@link executor}, which is the
+   * Executor contract the relayer watches; conflating the two builds a call to
+   * an address with no `transfer` on it.
+   */
+  getNttExecutor(): string {
+    if (this.nttExecutor) {
+      return this.nttExecutor;
     }
-    throw new Error('Wormhole relayer configuration missing');
+    throw new Error('Wormhole ntt executor configuration missing');
   }
 
   /**

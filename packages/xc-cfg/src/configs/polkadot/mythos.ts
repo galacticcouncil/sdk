@@ -2,20 +2,12 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { myth } from '../../assets';
 import { assetHub, hydration, mythos } from '../../chains';
-import {
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  XcmTransferType,
-} from '../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: myth,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,
@@ -35,10 +27,6 @@ const toAssethub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: myth,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: assetHub,

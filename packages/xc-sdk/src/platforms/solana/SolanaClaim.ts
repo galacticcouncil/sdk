@@ -1,18 +1,21 @@
 import {
   CallType,
+  NttTokenDef,
   SolanaChain,
+  spl,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
 import {
+  AddressLookupTableAccount,
   Connection,
   Keypair,
-  MessageV0,
   PublicKey,
-  PublicKeyInitData,
   SystemProgram,
+  Transaction,
   TransactionInstruction,
   TransactionMessage,
+  VersionedTransaction,
 } from '@solana/web3.js';
 
 import {
@@ -28,269 +31,310 @@ import {
   getMint,
 } from '@solana/spl-token';
 
-import { utils as tutils } from '@wormhole-foundation/sdk-solana';
-import { utils as cutils } from '@wormhole-foundation/sdk-solana-core';
-
 import { encoding } from '@wormhole-foundation/sdk-base';
 import { deserialize, VAA } from '@wormhole-foundation/sdk-definitions';
-
-import {
-  createCompleteTransferNativeInstruction,
-  createCompleteTransferWrappedInstruction,
-} from '@wormhole-foundation/sdk-solana-tokenbridge';
+import { SolanaAddress } from '@wormhole-foundation/sdk-solana';
+import { register } from '@wormhole-foundation/sdk-definitions-ntt';
 
 import { SolanaCall } from './types';
-import { chunkBySize, ixToHuman, serializeV0 } from './utils';
+import { getLookupTables, ixToHuman, serializeV0 } from './utils';
 
-import { SolanaLilJit } from './SolanaLilJit';
+// Since 7.2.0 the ntt payload layouts are no longer registered on import.
+register();
 
 export class SolanaClaim {
   readonly #chain: SolanaChain;
   readonly #connection: Connection;
-  readonly #lilJit: SolanaLilJit;
 
   constructor(chain: SolanaChain) {
     this.#chain = chain;
     this.#connection = chain.connection;
-    this.#lilJit = new SolanaLilJit(chain);
   }
 
+  /**
+   * Redeem NTT transfer on Solana.
+   *
+   * Posts the signed VAA to the core bridge & delivers it to the token
+   * NTT program (receive + redeem + release). Yields multiple calls,
+   * sign & send in order.
+   *
+   * @param from - payer address
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param ntt - NTT token deployment on Solana
+   * @returns claim program calls
+   */
   async redeem(
     from: string,
     vaaRaw: string,
-    recipient?: string
+    ntt: NttTokenDef
   ): Promise<SolanaCall[]> {
-    const ctx = Wh.fromChain(this.#chain);
+    const ctxWh = Wh.fromChain(this.#chain);
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
-    // We don't check for TokenBridge:TransferWithPayload because claim (complete_wrapped_with_payload)
-    // must be called via CPI from the redeemer program only if using TokenRelayer
-    const vaa = deserialize('TokenBridge:Transfer', vaaBytes);
-    const vaaU8a = deserialize('Uint8Array', vaaBytes);
-    const postedVaaAddress = this.derivePostedVaaKey(
-      ctx.getCoreBridge(),
-      Buffer.from(vaa.hash)
-    );
+    const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
+
+    // Lazy - the package esm dist doesn't load under node (broken import).
+    const { SolanaNtt } = await import('@wormhole-foundation/sdk-solana-ntt');
+
+    const solanaNtt = new SolanaNtt('Mainnet', 'Solana', this.#connection, {
+      coreBridge: ctxWh.getCoreBridge(),
+      ntt: {
+        manager: ntt.manager,
+        token: ntt.token,
+        transceiver: { wormhole: ntt.transceiver.wormhole },
+      },
+    });
 
     const payer = new PublicKey(from);
-    const payee = recipient ? new PublicKey(recipient) : payer;
-    const isSelfRedeem = payer.equals(payee);
+    const payerAddress = new SolanaAddress(from);
+
+    const txs = [];
+    for await (const tx of solanaNtt.redeem([vaa], payerAddress)) {
+      txs.push(tx.transaction);
+    }
+
+    const [unwrap, openRecipient] = await Promise.all([
+      this.getUnwrap(ntt, vaa, payer),
+      this.getOpenRecipient(ntt, vaa, payer),
+    ]);
+
+    const { blockhash } = await this.#connection.getLatestBlockhash();
 
     const calls: SolanaCall[] = [];
-
-    const posted = await this.#connection.getAccountInfo(postedVaaAddress);
-    if (!posted) {
-      const signatureSet = Keypair.generate();
-      const verifyIxs = await cutils.createVerifySignaturesInstructions(
-        this.#chain.connection,
-        ctx.getCoreBridge(),
-        payer,
-        vaaU8a,
-        signatureSet.publicKey
-      );
-
-      const chunks = chunkBySize(verifyIxs, 1000);
-      for (let i = 0; i < chunks.length; i++) {
-        const sigIx = chunks[i];
-        const sigV0 = await this.getV0Message(payer, sigIx);
-        const sigTx = serializeV0(sigV0);
-        calls.push({
-          from: from,
-          data: sigTx,
-          ix: ixToHuman(sigIx),
-          signers: [signatureSet],
-          type: CallType.Solana,
-        } as SolanaCall);
+    for (const [i, { transaction, signers }] of txs.entries()) {
+      const isLast = i === txs.length - 1;
+      const luts =
+        'message' in transaction
+          ? await getLookupTables(this.#connection, transaction.message)
+          : [];
+      const ixs = this.getInstructions(transaction, luts);
+      if (isLast) {
+        ixs.unshift(openRecipient);
+        // After the release, so the wSOL is already in the ata.
+        if (unwrap) {
+          ixs.push(...unwrap.ixs);
+        }
       }
-
-      const postVaaIx = cutils.createPostVaaInstruction(
-        this.#connection,
-        ctx.getCoreBridge(),
-        payer,
-        vaaU8a,
-        signatureSet.publicKey
-      );
-      const postVaaV0 = await this.getV0Message(payer, [postVaaIx]);
-      const postVaaTx = serializeV0(postVaaV0);
+      const mssgV0 = new TransactionMessage({
+        payerKey: payer,
+        recentBlockhash: blockhash,
+        instructions: ixs,
+      }).compileToV0Message(luts);
       calls.push({
         from: from,
-        data: postVaaTx,
-        ix: ixToHuman([postVaaIx]),
+        data: serializeV0(mssgV0),
+        ix: ixToHuman(ixs),
+        signers:
+          isLast && unwrap
+            ? [...(signers ?? []), unwrap.signer]
+            : (signers ?? []),
         type: CallType.Solana,
       } as SolanaCall);
     }
-
-    const isNative = vaa.payload.token.chain === 'Solana';
-    const mint = new PublicKey(vaa.payload.token.address.toUint8Array());
-    const isNativeSol = isNative && mint.equals(NATIVE_MINT);
-
-    const tipAccounts = await this.#lilJit.getTipAccount();
-    const tipIx = SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: new PublicKey(tipAccounts[0]),
-      lamports: 1000,
-    });
-
-    if (isNativeSol && isSelfRedeem) {
-      const completeCall = await this.redeemAndUnwrap(ctx, payer, vaa, tipIx);
-      calls.push(completeCall);
-    } else {
-      const completeCall = await this.redeemToken(
-        ctx,
-        payer,
-        payee,
-        mint,
-        isNative,
-        vaa,
-        tipIx
-      );
-      calls.push(completeCall);
-    }
-
     return calls;
   }
 
-  private async redeemToken(
-    ctx: Wh,
-    payer: PublicKey,
-    payee: PublicKey,
-    mint: PublicKey,
-    isNative: boolean,
-    vaa: VAA<'TokenBridge:Transfer'>,
-    tipIx: TransactionInstruction
-  ): Promise<SolanaCall> {
-    const createCompleteTransferInstruction = isNative
-      ? createCompleteTransferNativeInstruction
-      : createCompleteTransferWrappedInstruction;
-    const completeIx = createCompleteTransferInstruction(
-      this.#connection,
-      ctx.getTokenBridge(),
-      ctx.getCoreBridge(),
-      payer,
-      vaa
-    );
+  /**
+   * Release queued NTT transfer on Solana.
+   *
+   * Delivers the release for a transfer redeemed over the inbound rate
+   * limit. Mints into the recipient ata once the queue timestamp is up,
+   * no-op success before that (revertWhenNotReady is off).
+   *
+   * @param from - payer address
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param ntt - NTT token deployment on Solana
+   * @returns release program call
+   */
+  async release(
+    from: string,
+    vaaRaw: string,
+    ntt: NttTokenDef
+  ): Promise<SolanaCall[]> {
+    const ctxWh = Wh.fromChain(this.#chain);
 
-    const ata = getAssociatedTokenAddressSync(mint, payee);
-    const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
-      payer,
-      ata,
-      payee,
-      mint
-    );
+    const vaaBytes = encoding.b64.decode(vaaRaw);
+    const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
 
-    const completeV0 = await this.getV0Message(payer, [
-      createAtaIx,
-      completeIx,
-      tipIx,
-    ]);
-    const completeTx = serializeV0(completeV0);
-    return {
-      from: payer.toBase58(),
-      data: completeTx,
-      ix: ixToHuman([createAtaIx, completeIx]),
-      type: CallType.Solana,
-    } as SolanaCall;
-  }
+    // Lazy - the package esm dist doesn't load under node (broken import).
+    const { SolanaNtt } = await import('@wormhole-foundation/sdk-solana-ntt');
 
-  private async redeemAndUnwrap(
-    ctx: Wh,
-    payer: PublicKey,
-    vaa: VAA<'TokenBridge:Transfer'>,
-    tipIx: TransactionInstruction
-  ): Promise<SolanaCall> {
-    const ata = new PublicKey(vaa.payload.to.address.toUint8Array());
-    const mintInfo = await getMint(this.#connection, NATIVE_MINT);
-    const targetAmount =
-      vaa.payload.token.amount * BigInt(Math.pow(10, mintInfo.decimals - 8));
-    const rentBalance = await getMinimumBalanceForRentExemptAccount(
-      this.#connection
-    );
-
-    const ancillaryKeypair = Keypair.generate();
-
-    const createAtaIx = createAssociatedTokenAccountIdempotentInstruction(
-      payer,
-      ata,
-      payer,
-      NATIVE_MINT
-    );
-
-    const completeIx = createCompleteTransferNativeInstruction(
-      this.#connection,
-      ctx.getTokenBridge(),
-      ctx.getCoreBridge(),
-      payer,
-      vaa
-    );
-
-    const createAncillaryIx = SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: ancillaryKeypair.publicKey,
-      lamports: rentBalance,
-      space: ACCOUNT_SIZE,
-      programId: TOKEN_PROGRAM_ID,
+    const solanaNtt = new SolanaNtt('Mainnet', 'Solana', this.#connection, {
+      coreBridge: ctxWh.getCoreBridge(),
+      ntt: {
+        manager: ntt.manager,
+        token: ntt.token,
+        transceiver: { wormhole: ntt.transceiver.wormhole },
+      },
     });
 
-    const initAncillaryIx = createInitializeAccountInstruction(
-      ancillaryKeypair.publicKey,
-      NATIVE_MINT,
-      payer
-    );
+    const payer = new PublicKey(from);
+    const payerAddress = new SolanaAddress(from);
 
-    const transferIx = createTransferInstruction(
+    const txs = [];
+    for await (const tx of solanaNtt.completeInboundQueuedTransfer(
+      vaa.emitterChain,
+      vaa.payload.nttManagerPayload,
+      payerAddress
+    )) {
+      txs.push(tx.transaction);
+    }
+
+    const [unwrap, openRecipient] = await Promise.all([
+      this.getUnwrap(ntt, vaa, payer),
+      this.getOpenRecipient(ntt, vaa, payer),
+    ]);
+
+    const { blockhash } = await this.#connection.getLatestBlockhash();
+
+    const calls: SolanaCall[] = [];
+    for (const { transaction, signers } of txs) {
+      const luts =
+        'message' in transaction
+          ? await getLookupTables(this.#connection, transaction.message)
+          : [];
+      const ixs = this.getInstructions(transaction, luts);
+      // Before the release, which mints/unlocks into the recipient ata.
+      ixs.unshift(openRecipient);
+      // After the release, so the wSOL is already in the ata.
+      if (unwrap) {
+        ixs.push(...unwrap.ixs);
+      }
+      const mssgV0 = new TransactionMessage({
+        payerKey: payer,
+        recentBlockhash: blockhash,
+        instructions: ixs,
+      }).compileToV0Message(luts);
+      calls.push({
+        from: from,
+        data: serializeV0(mssgV0),
+        ix: ixToHuman(ixs),
+        signers: unwrap ? [...(signers ?? []), unwrap.signer] : (signers ?? []),
+        type: CallType.Solana,
+      } as SolanaCall);
+    }
+    return calls;
+  }
+
+  /**
+   * Open the recipient's token account.
+   *
+   * `release_inbound_mint` mints into the recipient ata and the program
+   * never initializes it, while the reference sdk only opens one for the
+   * payer - so relaying somebody else's transfer fails at release. Opening
+   * an ata is permissionless, the payer just covers the rent.
+   *
+   * Emitted unconditionally: the idempotent variant is a no-op when the
+   * account already exists, which is cheaper than the round-trip it would
+   * take to find out - and safer, since the account can be closed between
+   * the check and the release.
+   *
+   * @param ntt - NTT token deployment on Solana
+   * @param vaa - deserialized transfer, carries the recipient
+   * @param payer - claim payer, pays the rent
+   * @returns create instruction
+   */
+  private async getOpenRecipient(
+    ntt: NttTokenDef,
+    vaa: VAA<'Ntt:WormholeTransfer'>,
+    payer: PublicKey
+  ): Promise<TransactionInstruction> {
+    const { recipientAddress } = vaa.payload.nttManagerPayload.payload;
+    const recipient = new PublicKey(recipientAddress.toUint8Array());
+    const mint = new PublicKey(ntt.token);
+
+    const { ata, tokenProgram } = await spl.getTokenAccount(
+      this.#connection,
+      mint,
+      recipient
+    );
+    return createAssociatedTokenAccountIdempotentInstruction(
+      payer,
       ata,
-      ancillaryKeypair.publicKey,
-      payer,
-      targetAmount
+      recipient,
+      mint,
+      tokenProgram
     );
+  }
 
-    const closeIx = createCloseAccountInstruction(
-      ancillaryKeypair.publicKey,
-      payer,
-      payer
-    );
+  /**
+   * Unwrap the released wSOL back into native sol.
+   *
+   * The manager only ever releases the spl token, so a native sol claim
+   * leaves the recipient holding wSOL instead. Mirrors the token bridge
+   * redeem: move the released amount into a throwaway wSOL account and
+   * close it, which credits the lamports to its owner.
+   *
+   * Self redeem only - the wSOL lands in the recipient ata and nobody
+   * else can move it out.
+   *
+   * @param ntt - NTT token deployment on Solana
+   * @param vaa - deserialized transfer, carries the recipient & amount
+   * @param payer - claim payer
+   * @returns unwrap instructions & the throwaway account signer
+   */
+  private async getUnwrap(
+    ntt: NttTokenDef,
+    vaa: VAA<'Ntt:WormholeTransfer'>,
+    payer: PublicKey
+  ): Promise<{ ixs: TransactionInstruction[]; signer: Keypair } | undefined> {
+    if (!new PublicKey(ntt.token).equals(NATIVE_MINT)) {
+      return undefined;
+    }
 
-    const ixs = [
-      createAtaIx,
-      completeIx,
-      createAncillaryIx,
-      initAncillaryIx,
-      transferIx,
-      closeIx,
-      tipIx,
-    ];
+    const { recipientAddress, trimmedAmount } =
+      vaa.payload.nttManagerPayload.payload;
 
-    const completeV0 = await this.getV0Message(payer, ixs);
-    const completeTx = serializeV0(completeV0);
+    // Ntt carries the recipient wallet, unlike the token bridge which
+    // carries its token account - the ata has to be derived.
+    const recipient = new PublicKey(recipientAddress.toUint8Array());
+    if (!recipient.equals(payer)) {
+      return undefined;
+    }
+
+    const [mint, rent] = await Promise.all([
+      getMint(this.#connection, NATIVE_MINT),
+      getMinimumBalanceForRentExemptAccount(this.#connection),
+    ]);
+
+    // Ntt trims the amount to the smallest decimals of the two chains.
+    const amount =
+      trimmedAmount.amount *
+      10n ** BigInt(mint.decimals - trimmedAmount.decimals);
+
+    const ata = getAssociatedTokenAddressSync(NATIVE_MINT, recipient);
+    const ancillary = Keypair.generate();
+
     return {
-      from: payer.toBase58(),
-      data: completeTx,
-      ix: ixToHuman(ixs),
-      signers: [ancillaryKeypair],
-      type: CallType.Solana,
-    } as SolanaCall;
+      signer: ancillary,
+      ixs: [
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: ancillary.publicKey,
+          lamports: rent,
+          space: ACCOUNT_SIZE,
+          programId: TOKEN_PROGRAM_ID,
+        }),
+        createInitializeAccountInstruction(
+          ancillary.publicKey,
+          NATIVE_MINT,
+          payer
+        ),
+        createTransferInstruction(ata, ancillary.publicKey, payer, amount),
+        createCloseAccountInstruction(ancillary.publicKey, payer, payer),
+      ],
+    };
   }
 
-  private derivePostedVaaKey(
-    wormholeProgramId: PublicKeyInitData,
-    hash: Buffer
-  ): PublicKey {
-    return tutils.deriveAddress(
-      [Buffer.from('PostedVAA'), hash],
-      wormholeProgramId
-    );
-  }
-
-  private async getV0Message(
-    payer: PublicKey,
-    ixs: TransactionInstruction[]
-  ): Promise<MessageV0> {
-    const { blockhash } =
-      await this.#connection.getLatestBlockhash('finalized');
-    return new TransactionMessage({
-      payerKey: payer,
-      recentBlockhash: blockhash,
-      instructions: ixs,
-    }).compileToV0Message();
+  private getInstructions(
+    tx: Transaction | VersionedTransaction,
+    luts: AddressLookupTableAccount[]
+  ): TransactionInstruction[] {
+    if ('message' in tx) {
+      return TransactionMessage.decompile(tx.message, {
+        addressLookupTableAccounts: luts,
+      }).instructions;
+    }
+    return tx.instructions;
   }
 }

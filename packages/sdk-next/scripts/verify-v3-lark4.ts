@@ -12,9 +12,9 @@
  */
 import { createPublicClient, http, parseAbi } from 'viem';
 
-import { UniswapV3Math } from '../src/pool/uniswapv3/UniswapV3Math';
-import { ticksInWord } from '../src/pool/uniswapv3/UniswapV3PoolClient';
-import type { V3PoolState, V3Tick } from '../src/pool/uniswapv3/types';
+import { UniswapV3Math } from '../src/pool/amm/uniswapv3/UniswapV3Math';
+import { ticksInWord } from '../src/pool/amm/uniswapv3/UniswapV3Query';
+import type { V3PoolState, V3Tick } from '../src/pool/amm/uniswapv3/types';
 
 const RPC = process.env.RPC ?? 'https://node4.lark.hydration.cloud';
 const FACTORY = (process.env.FACTORY ??
@@ -67,7 +67,7 @@ async function main() {
   ]);
   const tick = slot0[1];
 
-  // mirror UniswapV3PoolClient.loadTicks
+  // mirror UniswapV3Query.readTicks
   const currentWord = Math.floor(tick / tickSpacing) >> 8;
   const words: number[] = [];
   for (let w = currentWord - TICK_WINDOW_WORDS; w <= currentWord + TICK_WINDOW_WORDS; w++) words.push(w);

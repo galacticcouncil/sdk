@@ -1,76 +1,77 @@
-import {
-  Abi,
-  CallType,
-  EvmParachain,
-  Precompile,
-  Wormhole as Wh,
-} from '@galacticcouncil/xc-core';
+import { EvmParachain, Gas, NttTokenDef } from '@galacticcouncil/xc-core';
 
-import { encoding } from '@wormhole-foundation/sdk-base';
+import { EvmClaim } from '../evm/EvmClaim';
 
-import { encodeFunctionData } from 'viem';
-
-import { Binary } from 'polkadot-api';
-
+import { SubstrateEvm } from './SubstrateEvm';
 import { SubstrateCall } from './types';
-import { EvmCall } from '../evm';
 
+/**
+ * NTT claim for substrate signed origins.
+ *
+ * Wraps the evm claim calls in EVM.call extrinsic so bound substrate
+ * accounts can redeem without an evm signer.
+ */
 export class SubstrateClaim {
-  readonly #chain: EvmParachain;
+  readonly #substrateEvm: SubstrateEvm;
+  readonly #evmClaim = new EvmClaim();
 
-  constructor(chain: EvmParachain) {
-    this.#chain = chain;
-    Wh.fromChain(this.#chain);
+  private constructor(substrateEvm: SubstrateEvm) {
+    this.#substrateEvm = substrateEvm;
   }
 
-  redeemMrl(from: string, vaaBytes: string): EvmCall {
-    const vaaArray = encoding.b64.decode(vaaBytes);
-    const vaaHex = encoding.hex.encode(vaaArray);
-
-    const abi = Abi.Gmp;
-    const data = encodeFunctionData({
-      abi: abi,
-      functionName: 'wormholeTransferERC20',
-      args: ['0x' + vaaHex],
-    });
-    return {
-      abi: JSON.stringify(abi),
-      data: data,
-      from: from,
-      to: Precompile.Bridge,
-    } as EvmCall;
+  static async create(chain: EvmParachain): Promise<SubstrateClaim> {
+    const substrateEvm = await SubstrateEvm.create(chain);
+    return new SubstrateClaim(substrateEvm);
   }
 
-  async redeemMrlViaXcm(
+  /**
+   * Redeem NTT transfer (see {@link EvmClaim.redeem}).
+   *
+   * @param from - claimer address (ss58)
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param ntt - NTT token deployment on the destination chain
+   * @returns claim (receiveMessage) substrate call
+   */
+  async redeem(
     from: string,
-    vaaBytes: string
+    vaaRaw: string,
+    ntt: NttTokenDef
   ): Promise<SubstrateCall> {
-    const client = this.#chain.client;
-    const api = client.getUnsafeApi();
-    const claim = this.redeemMrl(from, vaaBytes);
-    const tx = (api.tx as any).EthereumXcm.transact({
-      xcm_transaction: {
-        type: 'V2',
-        value: {
-          gas_limit: [5_000_000n, 0n, 0n, 0n],
-          action: {
-            type: 'Call',
-            value: claim.to,
-          },
-          value: [0n, 0n, 0n, 0n],
-          input: Binary.fromHex(claim.data),
-          access_list: undefined,
-        },
+    const call = this.#evmClaim.redeem(from, vaaRaw, ntt);
+    return this.#substrateEvm.buildCall(from, [
+      {
+        to: call.to,
+        data: call.data,
+        gas: Gas.redeem,
       },
-    });
+    ]);
+  }
 
-    const encoded = await tx.getEncodedData();
-    return {
-      data: Binary.toHex(encoded),
-      from: from,
-      type: CallType.Substrate,
-      dryRun: async () => undefined,
-      txOptions: undefined,
-    } as SubstrateCall;
+  /**
+   * Complete an inbound transfer queued by the manager rate limit
+   * (see {@link EvmClaim.completeInboundQueuedTransfer}).
+   *
+   * @param from - claimer address (ss58)
+   * @param digest - queued transfer message digest
+   * @param ntt - NTT token deployment on the destination chain
+   * @returns complete transfer substrate call
+   */
+  async completeInboundQueuedTransfer(
+    from: string,
+    digest: string,
+    ntt: NttTokenDef
+  ): Promise<SubstrateCall> {
+    const call = this.#evmClaim.completeInboundQueuedTransfer(
+      from,
+      digest,
+      ntt
+    );
+    return this.#substrateEvm.buildCall(from, [
+      {
+        to: call.to,
+        data: call.data,
+        gas: Gas.queued,
+      },
+    ]);
   }
 }

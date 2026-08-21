@@ -4,18 +4,20 @@ import {
   apyusd,
   cfg_new,
   dai,
-  dai_mwh,
+  dai_wh,
   ena,
   eth,
-  susds_mwh,
+  susds,
+  susds_wh,
+  usdc_wh,
+  usdt_wh,
   wbtc,
-  wbtc_mwh,
-  weth_mwh,
+  wbtc_wh,
+  weth,
+  weth_wh,
   usdc,
-  usdc_mwh,
   usdc_eth,
   usdt,
-  usdt_mwh,
   usdt_eth,
   aave,
   paxg,
@@ -27,65 +29,45 @@ import {
   trac,
   wsteth,
   lbtc,
-  susds,
 } from '../../../assets';
-import { assetHub, ethereum, hydration, moonbeam } from '../../../chains';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../../builders';
+import { assetHub, ethereum, hydration } from '../../../chains';
+import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
 import { Tag } from '../../../tags';
 
 import {
-  toHydrationViaWormholeTemplate,
+  toHydrationViaNttExecutorNativeTemplate,
+  toHydrationViaNttExecutorTemplate,
+  toHydrationViaNttTemplate,
   toHydrationViaSnowbridgeTemplate,
   toHydrationViaSnowbridgeV1Template,
 } from './templates';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: eth,
-      balance: BalanceBuilder().evm().native(),
-      destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: weth_mwh,
-      fee: {
-        amount: 0,
-        asset: weth_mwh,
-      },
-    },
-    contract: ContractBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .wrapAndTransferETHWithPayload()
-      .viaMrl({ moonchain: moonbeam }),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  toHydrationViaWormholeTemplate(dai, dai_mwh),
-  toHydrationViaWormholeTemplate(wbtc, wbtc_mwh),
-  toHydrationViaWormholeTemplate(usdc, usdc_mwh),
-  toHydrationViaWormholeTemplate(usdt, usdt_mwh),
-  toHydrationViaWormholeTemplate(susds, susds_mwh),
+const toHydrationViaNtt: AssetRoute[] = [
+  toHydrationViaNttTemplate(dai, dai_wh),
+  toHydrationViaNttTemplate(susds, susds_wh),
+  toHydrationViaNttTemplate(usdc, usdc_wh),
+  toHydrationViaNttTemplate(usdt, usdt_wh),
+  toHydrationViaNttTemplate(wbtc, wbtc_wh),
+  toHydrationViaNttTemplate(weth, weth_wh),
+  toHydrationViaNttTemplate(eth, weth_wh),
+];
+
+const toHydrationViaNttExecutor: AssetRoute[] = [
+  toHydrationViaNttExecutorTemplate(dai, dai_wh),
+  toHydrationViaNttExecutorTemplate(susds, susds_wh),
+  toHydrationViaNttExecutorTemplate(usdc, usdc_wh),
+  toHydrationViaNttExecutorTemplate(usdt, usdt_wh),
+  toHydrationViaNttExecutorTemplate(wbtc, wbtc_wh),
+  toHydrationViaNttExecutorTemplate(weth, weth_wh),
+  toHydrationViaNttExecutorNativeTemplate(eth, weth_wh),
 ];
 
 const toHydrationViaSnowbridge: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -125,13 +107,8 @@ const toHydrationViaSnowbridgeV1: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: eth,
-      balance: BalanceBuilder().evm().native(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -164,57 +141,11 @@ const toHydrationViaSnowbridgeV1: AssetRoute[] = [
   toHydrationViaSnowbridgeV1Template(usdt, usdt_eth),
 ];
 
-const toMoonbeamViaWormhole: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: eth,
-      balance: BalanceBuilder().evm().native(),
-      destinationFee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: weth_mwh,
-      fee: {
-        amount: 0,
-        asset: weth_mwh,
-      },
-    },
-    contract: ContractBuilder().Wormhole().TokenBridge().wrapAndTransferETH(),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-  new AssetRoute({
-    source: {
-      asset: dai,
-      balance: BalanceBuilder().evm().erc20(),
-      fee: {
-        asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        asset: dai,
-        balance: BalanceBuilder().evm().erc20(),
-      },
-    },
-    destination: {
-      chain: moonbeam,
-      asset: dai_mwh,
-      fee: {
-        amount: 0,
-        asset: dai_mwh,
-      },
-    },
-    contract: ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-    tags: [Tag.Mrl, Tag.Wormhole],
-  }),
-];
-
 export const ethereumConfig = new ChainRoutes({
   chain: ethereum,
   routes: [
-    ...toHydrationViaWormhole,
+    ...toHydrationViaNtt,
+    ...toHydrationViaNttExecutor,
     ...toHydrationViaSnowbridge,
     ...toHydrationViaSnowbridgeV1,
   ],

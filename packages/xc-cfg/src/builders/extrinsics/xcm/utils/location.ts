@@ -1,5 +1,6 @@
 import { encodeLocation } from '@galacticcouncil/common';
 import {
+  AnyParachain,
   Asset,
   Parachain,
   XcmLocation,
@@ -93,7 +94,7 @@ export function validateReserveChain(
   asset: Asset,
   source: Parachain,
   destination: Parachain,
-  reserve?: Parachain
+  reserve?: AnyParachain
 ): void {
   const xcmLocation = source.getAssetXcmLocation(asset);
 

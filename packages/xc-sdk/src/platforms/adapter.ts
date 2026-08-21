@@ -1,7 +1,6 @@
 import {
   AnyChain,
   AnyEvmChain,
-  Asset,
   AssetAmount,
   BaseConfig,
   ChainType,
@@ -10,8 +9,6 @@ import {
   SuiChain,
 } from '@galacticcouncil/xc-core';
 
-import { Observable } from 'rxjs';
-
 import { EvmPlatform } from './evm';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
@@ -19,7 +16,7 @@ import { SuiPlatform } from './sui';
 import { Call, Platform } from './types';
 
 export class PlatformAdapter {
-  readonly platform: Record<string, Platform<BaseConfig, BaseConfig>> = {};
+  readonly platform: Record<string, Platform<BaseConfig>> = {};
 
   constructor(chain: AnyChain) {
     switch (chain.getType()) {
@@ -68,13 +65,24 @@ export class PlatformAdapter {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: BaseConfig
+    configs: BaseConfig[]
   ): Promise<Call> {
-    return this.platform[config.type].buildCall(
+    const [call] = await this.buildCalls(account, amount, feeBalance, configs);
+    return call;
+  }
+
+  async buildCalls(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    configs: BaseConfig[]
+  ): Promise<Call[]> {
+    const [config] = configs;
+    return this.platform[config.type].buildCalls(
       account,
       amount,
       feeBalance,
-      config
+      configs
     );
   }
 
@@ -82,24 +90,14 @@ export class PlatformAdapter {
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: BaseConfig
+    configs: BaseConfig[]
   ): Promise<AssetAmount> {
+    const [config] = configs;
     return this.platform[config.type].estimateFee(
       account,
       amount,
       feeBalance,
-      config
+      configs
     );
-  }
-
-  async getBalance(asset: Asset, config: BaseConfig): Promise<AssetAmount> {
-    return this.platform[config.type].getBalance(asset, config);
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: BaseConfig
-  ): Promise<Observable<AssetAmount>> {
-    return this.platform[config.type].subscribeBalance(asset, config);
   }
 }

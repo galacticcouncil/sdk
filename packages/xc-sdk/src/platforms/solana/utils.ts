@@ -1,6 +1,30 @@
-import { MessageV0, TransactionInstruction } from '@solana/web3.js';
+import {
+  AddressLookupTableAccount,
+  Connection,
+  MessageV0,
+  TransactionInstruction,
+  VersionedMessage,
+} from '@solana/web3.js';
 
 import { HumanizedIx } from './types';
+
+/** Resolve address lookup tables of a versioned (V0) message. */
+export async function getLookupTables(
+  connection: Connection,
+  message: VersionedMessage
+): Promise<AddressLookupTableAccount[]> {
+  if (message.version === 'legacy') {
+    return [];
+  }
+  const luts = await Promise.all(
+    message.addressTableLookups.map((acc) =>
+      connection.getAddressLookupTable(acc.accountKey)
+    )
+  );
+  return luts
+    .map((lut) => lut.value)
+    .filter((val): val is AddressLookupTableAccount => val !== null);
+}
 
 export function ixToHuman(
   instructions: TransactionInstruction[]
@@ -14,25 +38,11 @@ export function ixToHuman(
   });
 }
 
-export function chunkBySize(
-  instructions: TransactionInstruction[],
-  maxBytes = 1000
-): TransactionInstruction[][] {
-  const out: TransactionInstruction[][] = [];
-  let cur: TransactionInstruction[] = [];
-  let sz = 0;
-
-  for (const ix of instructions) {
-    const add = ix.data?.length ?? 0;
-    if (cur.length && sz + add > maxBytes) {
-      out.push(cur);
-      cur = [];
-      sz = 0;
-    }
-    cur.push(ix);
-    sz += add;
+export function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
   }
-  if (cur.length) out.push(cur);
   return out;
 }
 

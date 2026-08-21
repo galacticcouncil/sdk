@@ -30,11 +30,16 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'const.Staking.*',
   'const.XYK.*',
   'const.XYKLiquidityMining.*',
+  'const.GigaHdx.*',
   // event
-  'event.EVM.Log',
-  'event.Proxy.PureCreated',
-  'event.Router.Executed',
+  'event.Broadcast.*',
+  'event.EVM.*',
+  'event.LBP.*',
+  'event.Omnipool.*',
+  'event.Proxy.*',
+  'event.Router.*',
   'event.Stableswap.*',
+  'event.XYK.*',
   // query
   'query.AssetRegistry.*',
   'query.Balances.*',
@@ -58,6 +63,7 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.Proxy.*',
   'query.Referenda.*',
   'query.Referrals.*',
+  'query.Router.*',
   'query.Stableswap.*',
   'query.Staking.*',
   'query.Timestamp.*',
@@ -65,6 +71,8 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'query.Uniques.Account',
   'query.XYK.*',
   'query.XYKWarehouseLM.*',
+  'query.GigaHdx.*',
+  'query.GigaHdxRewards.*',
   // tx
   'tx.Bonds.*',
   'tx.ConvictionVoting.*',
@@ -86,9 +94,12 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'tx.Stableswap.*',
   'tx.Staking.*',
   'tx.Tokens.*',
+  'tx.TechnicalCommittee.*',
   'tx.Utility.*',
   'tx.XYK.*',
   'tx.XYKLiquidityMining.*',
+  'tx.GigaHdx.*',
+  'tx.GigaHdxRewards.*',
 ];
 
 const hydrationIceWhitelist: HydrationIceWhitelistEntry[] = [

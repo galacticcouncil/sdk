@@ -1,21 +1,30 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { eurc, eurc_mwh } from '../../../assets';
+import { eurc, eurc_wh } from '../../../assets';
 import { base } from '../../../chains';
 import {
   toHydrationViaBasejumpTemplate,
-  toHydrationViaWormholeTemplate,
+  toHydrationViaNttExecutorTemplate,
+  toHydrationViaNttTemplate,
 } from './templates';
 
-const toHydrationViaWormhole: AssetRoute[] = [
-  toHydrationViaWormholeTemplate(eurc, eurc_mwh),
+const toHydrationViaBasejump: AssetRoute[] = [
+  toHydrationViaBasejumpTemplate(eurc, eurc_wh),
 ];
 
-const toHydrationViaBasejump: AssetRoute[] = [
-  toHydrationViaBasejumpTemplate(eurc, eurc_mwh),
+const toHydrationViaNtt: AssetRoute[] = [
+  toHydrationViaNttTemplate(eurc, eurc_wh),
+];
+
+const toHydrationViaNttExecutor: AssetRoute[] = [
+  toHydrationViaNttExecutorTemplate(eurc, eurc_wh),
 ];
 
 export const baseConfig = new ChainRoutes({
   chain: base,
-  routes: [...toHydrationViaWormhole, ...toHydrationViaBasejump],
+  routes: [
+    ...toHydrationViaNtt,
+    ...toHydrationViaNttExecutor,
+    ...toHydrationViaBasejump,
+  ],
 });

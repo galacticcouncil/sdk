@@ -1,6 +1,9 @@
+import { big } from '@galacticcouncil/common';
+
 import {
   AssetAmount,
   FeeConfig,
+  Parachain,
   SwapCtx,
   TransferCtx,
 } from '@galacticcouncil/xc-core';
@@ -23,13 +26,19 @@ export class FeeSwap {
   }
 
   get destFee() {
-    const { source, transact } = this.ctx;
-    return transact ? transact.fee : source.destinationFee;
+    const { source } = this.ctx;
+    return source.destinationFee;
+  }
+
+  /** Chain the destination fee is held & spent on, matching {@link destFee}. */
+  get destFeeChain() {
+    const { source } = this.ctx;
+    return source.chain;
   }
 
   get destFeeBalance() {
-    const { source, transact } = this.ctx;
-    return transact ? transact.feeBalance : source.destinationFeeBalance;
+    const { source } = this.ctx;
+    return source.destinationFeeBalance;
   }
 
   get feeBalance() {
@@ -88,23 +97,44 @@ export class FeeSwap {
    * @returns destination fee swap context
    */
   async getDestinationSwap(fee: AssetAmount): Promise<SwapCtx | undefined> {
-    const { amount, route } = await this.dex!.getQuote(
-      fee,
-      this.destFee,
-      this.destFee
-    );
+    // Buying exactly the fee lands an amount the account cannot spend: the
+    // last `min` of it is not withdrawable, and on hydration `EVM.call` reads
+    // the weth balance net of it (`eth_getBalance` returns free - ed), so the
+    // call value comes up short by that much. Buy the fee plus the min, which
+    // is what DestFeeValidation already checks the balance against.
+    const min = await this.getDestFeeMin();
+    const target = this.destFee.copyWith({
+      amount: this.destFee.amount + min,
+    });
 
-    const hasNotEnoughDestFee =
-      this.destFeeBalance.amount < this.destFee.amount;
+    const { amount, route } = await this.dex!.getQuote(fee, target, target);
+
+    const hasNotEnoughDestFee = this.destFeeBalance.amount < target.amount;
     const hasEnoughReservesToSwap =
       this.feeBalance.amount - fee.amount > amount * 2n;
 
     return {
       aIn: fee.copyWith({ amount: amount }),
-      aOut: this.destFee,
+      aOut: target,
       enabled: hasNotEnoughDestFee && hasEnoughReservesToSwap,
       route: route,
     } as SwapCtx;
+  }
+
+  /**
+   * Existential deposit of the destination fee asset, on the chain holding it.
+   *
+   * Parachains resolve their own min (dynamic read or static assetsData min);
+   * other chains expose only the static value. Mirrors
+   * `DestFeeValidation.getMin` - the two have to agree, or the swap buys an
+   * amount the validation then rejects.
+   */
+  private async getDestFeeMin(): Promise<bigint> {
+    const chain = this.destFeeChain;
+    if (chain instanceof Parachain) {
+      return (await chain.getMin(this.destFee)).amount;
+    }
+    return big.toBigInt(chain.getAssetMin(this.destFee), this.destFee.decimals);
   }
 
   /**

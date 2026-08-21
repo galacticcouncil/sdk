@@ -1,15 +1,15 @@
 import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../consts';
+import { TEmaOracle } from '../oracle';
 
-import { LbpPoolBase } from './lbp';
+import { LbpPoolBase } from './amm/lbp';
 import {
   OmniPoolBase,
   OmniPoolFees,
   TAssetFeeParams,
   TDynamicFees,
-  TEmaOracle,
   TProtocolFeeParams,
-} from './omni';
-import { StableSwapBase } from './stable';
+} from './amm/omni';
+import { StableSwapBase } from './amm/stable';
 import {
   SnapshotPoolCtx,
   SnapshotPoolCtxProvider,

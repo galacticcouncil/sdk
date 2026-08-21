@@ -10,14 +10,14 @@ export type XcmMessageBuilder = (params: ExtrinsicConfigBuilderParams) => any;
 
 import {
   isSnowbridgeTransfer,
+  resolveBridgeRoute,
   toAsset,
   toBeneficiary,
   toBridgeXcmOnDest,
   toDepositXcmOnDest,
   toDest,
+  toReserveXcmOnDest,
   toTransferType,
-  toTransactMessage,
-  toTransferMessage,
 } from './polkadotXcm.utils';
 
 import {
@@ -40,12 +40,15 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
     const rcv = destination.chain as Parachain;
     const version = XcmVersion.v4;
 
+    const transferAssetRawLocation = locationOrError(ctx, asset);
+    const transferFeeRawLocation = locationOrError(ctx, destination.fee);
+
     const transferAssetLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, asset),
+      transferAssetRawLocation,
       version
     );
     const transferFeeLocation = getExtrinsicAssetLocation(
-      locationOrError(ctx, destination.fee),
+      transferFeeRawLocation,
       version
     );
 
@@ -75,7 +78,12 @@ const limitedReserveTransferAssets = (): ExtrinsicConfigBuilder => ({
         }
 
         // Flip asset order if general index of asset greater than fee asset
-        if (shouldFeeAssetPrecede(transferAssetLocation, transferFeeLocation)) {
+        if (
+          shouldFeeAssetPrecede(
+            transferAssetRawLocation,
+            transferFeeRawLocation
+          )
+        ) {
           return tx({
             dest: toDest(version, ctx, rcv),
             beneficiary: toBeneficiary(version, account),
@@ -223,6 +231,7 @@ const transferAssets = (): ExtrinsicConfigBuilder => ({
 
 type TransferOpts = {
   transferType: XcmTransferType;
+  executionFee?: number;
 };
 
 const transferAssetsUsingTypeAndThen = (
@@ -236,27 +245,19 @@ const transferAssetsUsingTypeAndThen = (
     messageId,
     sender,
     source,
-    transact,
   }) => {
     const version = XcmVersion.v4;
 
     const ctx = source.chain as Parachain;
 
-    let rcv = destination.chain as Parachain;
-    let feeAmount = destination.fee.amount;
-    let feeAsset = destination.fee;
-
-    if (transact) {
-      rcv = transact.chain as Parachain;
-      feeAmount = big.toBigInt(transact.fee.amount, transact.fee.decimals);
-      feeAsset = transact.fee;
-    }
+    const rcv = destination.chain as Parachain;
+    const feeAmount = destination.fee.amount;
+    const feeAsset = destination.fee;
 
     const from = getExtrinsicAccount(sender);
-    const receiver =
-      transact || rcv.usesCexForwarding
-        ? getDerivativeAccount(ctx, sender, rcv)
-        : address;
+    const receiver = rcv.usesCexForwarding
+      ? getDerivativeAccount(ctx, sender, rcv)
+      : address;
     const account = getExtrinsicAccount(receiver);
 
     const { transferType } = opts;
@@ -276,7 +277,8 @@ const transferAssetsUsingTypeAndThen = (
 
     const isSufficientPaymentAsset = asset.isEqual(feeAsset);
 
-    const dest = toDest(version, ctx, rcv);
+    const bridgeRoute = resolveBridgeRoute(version, ctx, rcv, asset);
+    const dest = bridgeRoute?.dest ?? toDest(version, ctx, rcv);
 
     const assets = {
       type: version,
@@ -316,6 +318,23 @@ const transferAssetsUsingTypeAndThen = (
         transferAssetLocation,
         messageId
       );
+    } else if (bridgeRoute) {
+      const executionFeeAmount = big.toBigInt(
+        opts.executionFee ?? destination.fee.amount,
+        destination.fee.decimals
+      );
+      const destAssetLocation = getExtrinsicAssetLocation(
+        locationOrError(rcv, asset),
+        version
+      );
+      customXcmOnDest = toReserveXcmOnDest(
+        version,
+        account,
+        rcv,
+        bridgeRoute.mode,
+        destAssetLocation,
+        executionFeeAmount
+      );
     } else {
       customXcmOnDest = toDepositXcmOnDest(
         version,
@@ -345,105 +364,7 @@ const transferAssetsUsingTypeAndThen = (
   },
 });
 
-type TransactOpts = {
-  fee: number;
-};
-
-const send = () => {
-  const func = 'send';
-  return {
-    transact: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
-      build: async (params) => {
-        const { sender, source, transact } = params;
-
-        const version = XcmVersion.v4;
-
-        if (!transact) {
-          throw new Error('Transact ctx configuration is missing.');
-        }
-
-        const ctx = source.chain as Parachain;
-        const rcv = transact.chain as Parachain;
-        const mda = getDerivativeAccount(ctx, sender, rcv);
-        const account = getExtrinsicAccount(mda);
-
-        const { fee } = transact;
-        const transactFeeLocation = getExtrinsicAssetLocation(
-          locationOrError(rcv, fee),
-          version
-        );
-        const transactFeeAmount = big.toBigInt(opts.fee, fee.decimals);
-
-        return new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getTx: (client) => {
-            return client.getUnsafeApi().tx[pallet][func]({
-              dest: toDest(version, ctx, rcv),
-              message: toTransactMessage(
-                version,
-                account,
-                transactFeeLocation,
-                transactFeeAmount,
-                transact.call,
-                transact.weight
-              ),
-            });
-          },
-        });
-      },
-    }),
-    transferAsset: (opts: TransactOpts): ExtrinsicConfigBuilder => ({
-      build: async (params) => {
-        const { amount, address, asset, sender, source, destination } = params;
-
-        const version = XcmVersion.v4;
-
-        const ctx = source.chain as Parachain;
-        const rcv = destination.chain as Parachain;
-        const mda = getDerivativeAccount(ctx, sender, rcv);
-        const account = getExtrinsicAccount(mda);
-
-        const receiver = getExtrinsicAccount(address);
-
-        const transferAsset = getExtrinsicAssetLocation(
-          locationOrError(rcv, asset),
-          version
-        );
-
-        const { fee } = destination;
-
-        const transferFeeAmount = big.toBigInt(opts.fee, fee.decimals);
-        const transferAmount =
-          amount > fee.amount
-            ? amount - (fee.amount + transferFeeAmount)
-            : amount;
-
-        return new ExtrinsicConfig({
-          module: pallet,
-          func,
-          getTx: (client) => {
-            return client.getUnsafeApi().tx[pallet][func]({
-              dest: toDest(version, ctx, rcv),
-              message: toTransferMessage(
-                version,
-                account,
-                transferAsset,
-                transferAmount,
-                transferFeeAmount,
-                receiver
-              ),
-            });
-          },
-        });
-      },
-    }),
-  };
-};
-
-function execute(
-  messageBuilder: XcmMessageBuilder
-): ExtrinsicConfigBuilder;
+function execute(messageBuilder: XcmMessageBuilder): ExtrinsicConfigBuilder;
 function execute(): { viaSnowbridge: () => ExtrinsicConfigBuilder };
 function execute(messageBuilder?: XcmMessageBuilder) {
   const buildExecute = (
@@ -477,7 +398,7 @@ function execute(messageBuilder?: XcmMessageBuilder) {
     viaSnowbridge: (): ExtrinsicConfigBuilder =>
       buildExecute(snowbridgeOutboundMessage),
   };
-};
+}
 
 export const polkadotXcm = () => {
   return {
@@ -487,6 +408,5 @@ export const polkadotXcm = () => {
     transferAssets,
     transferAssetsUsingTypeAndThen,
     execute,
-    send,
   };
 };

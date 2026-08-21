@@ -63,12 +63,41 @@ export class EvmSigner {
       });
     } else {
       const { data, to, value } = call as EvmCall;
+
+      const [gas, gasPrice] = await Promise.all([
+        provider.estimateGas({
+          account: account as `0x${string}`,
+          data: data as `0x${string}`,
+          to: to as `0x${string}`,
+          value: value,
+        }),
+        provider.getGasPrice(),
+      ]);
+
+      // Fee math mirrors hydration-ui's EthereumSigner: gas price + 5% surplus,
+      // gas limit + 30% surplus, with maxFeePerGas == maxPriorityFeePerGas so
+      // the wallet uses the chain's (low, flat) price instead of its own
+      // base-fee oracle.
+      const gasPriceSurplus = gasPrice + (gasPrice * 5n) / 100n;
+      let gasLimit = gas + (gas * 30n) / 100n;
+
+      // Hydration eth_estimateGas grossly underestimates the nested ntt
+      // calls (~69k reported, receiveMessage burns past 90k) - floor the
+      // limit like the substrate path does, unused gas is refunded.
+      if (this.#chain instanceof EvmParachain) {
+        const floor = 2_000_000n;
+        gasLimit = gasLimit > floor ? gasLimit : floor;
+      }
+
       txHash = await this.#signer.sendTransaction({
         account: account as `0x${string}`,
         chain: this.#client.chain,
         data: data as `0x${string}`,
         to: to as `0x${string}`,
         value: value,
+        gas: gasLimit,
+        maxFeePerGas: gasPriceSurplus,
+        maxPriorityFeePerGas: gasPriceSurplus,
       });
     }
 

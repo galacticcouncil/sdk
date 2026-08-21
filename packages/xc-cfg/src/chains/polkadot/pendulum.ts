@@ -2,6 +2,7 @@ import {
   ChainEcosystem as Ecosystem,
   Parachain,
   XcmVersion,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { pen } from '../../assets';
@@ -21,6 +22,7 @@ export const pendulum = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://pendulum.subscan.io',
   genesisHash:

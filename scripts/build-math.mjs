@@ -22,7 +22,11 @@ const BUILD_FOLDER = 'build';
 
 const fetchResource = async (math, target, file) => {
   const path = [REPO, BRANCH, REPO_BUILD, math, target, file];
-  const resp = await fetch(path.join('/'));
+  const url = path.join('/');
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch ${url}: ${resp.status} ${resp.statusText}`);
+  }
   const arrayBuffer = await resp.arrayBuffer();
   return Buffer.from(arrayBuffer);
 };
@@ -32,6 +36,11 @@ const fetchTree = async () => {
     method: 'GET',
     headers: {},
   });
+  if (!resp.ok) {
+    throw new Error(
+      `Failed to fetch git tree: ${resp.status} ${resp.statusText}`
+    );
+  }
 
   const json = await resp.json();
   return json.tree;

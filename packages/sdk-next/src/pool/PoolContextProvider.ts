@@ -8,13 +8,13 @@ import { BlockAt, Papi } from '../api';
 import { EvmClient } from '../evm';
 import { PoolNotFound } from '../errors';
 
-import { AavePoolClient } from './aave';
-import { HsmPoolClient } from './hsm';
-import { LbpPoolClient } from './lbp';
-import { OmniPoolClient } from './omni';
-import { XykPoolClient } from './xyk';
-import { StableSwapClient } from './stable';
-import { UniswapV3PoolClient } from './uniswapv3';
+import { AavePoolClient } from './amm/aave';
+import { HsmPoolClient } from './amm/hsm';
+import { LbpPoolClient } from './amm/lbp';
+import { OmniPoolClient } from './amm/omni';
+import { XykPoolClient } from './amm/xyk';
+import { StableSwapClient } from './amm/stable';
+import { UniswapV3PoolClient } from './amm/uniswapv3';
 import {
   IPoolCtxProvider,
   Pool,
@@ -84,12 +84,12 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     ];
   }
 
-  private get isHistorical(): boolean {
-    return this.at !== 'best' && this.at !== 'finalized';
+  private get isSnapshot(): boolean {
+    return this.at !== 'best';
   }
 
   private subscribe<T extends PoolBase>(client: PoolClient<T>) {
-    if (this.isHistorical) {
+    if (this.isSnapshot) {
       return Subscription.EMPTY;
     }
 
@@ -166,7 +166,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.isReady = false;
   }
 
-  public async getPools(): Promise<PoolBase[]> {
+  public async getPools(at: BlockAt = this.at): Promise<PoolBase[]> {
     if (this.isReady) {
       const pools = this.pools.values();
       return Array.from(pools);
@@ -175,9 +175,12 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     const pools = await Promise.all(
       this.clients
         .filter((client) => this.active.has(client.getPoolType()))
-        .map((client) => client.getPools())
+        .map((client) => client.getPools(at))
     );
-    this.isReady = true;
+    /**
+     * Only a subscription keeps the map fresh; a fixed target reads every time.
+     */
+    this.isReady = !this.isSnapshot;
     return pools.flat();
   }
 

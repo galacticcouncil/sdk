@@ -113,7 +113,7 @@ export interface Pool extends PoolBase {
 }
 
 export interface IPoolCtxProvider {
-  getPools(): Promise<PoolBase[]>;
+  getPools(at?: string): Promise<PoolBase[]>;
   getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees>;
 }
 

@@ -5,12 +5,12 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { FeeValidation, DestFeeValidation } from './base';
+import { NttRateLimitValidation } from './bridge';
 import {
   HubEdValidation,
   HubFrozenValidation,
   HydrationDepositLimitValidation,
   HydrationEdValidation,
-  HydrationMrlFeeValidation,
   HydrationWithdrawLimitValidation,
 } from './chain';
 
@@ -29,7 +29,7 @@ export const validations: TransferValidation[] = [
   new HubEdValidation(Matchers.isAny, Matchers.isHub),
   new HubFrozenValidation(Matchers.isHub, Matchers.isAny),
   new HydrationEdValidation(Matchers.isAny, Matchers.isHydration),
-  new HydrationMrlFeeValidation(Matchers.isHydration, Matchers.isAny),
   new HydrationDepositLimitValidation(Matchers.isAny, Matchers.isHydration),
   new HydrationWithdrawLimitValidation(Matchers.isHydration, Matchers.isAny),
+  new NttRateLimitValidation(Matchers.isAny, Matchers.isAny),
 ];

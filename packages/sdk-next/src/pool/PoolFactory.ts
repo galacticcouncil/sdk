@@ -1,10 +1,10 @@
-import { LbpPool, LbpPoolBase } from './lbp';
-import { OmniPool, OmniPoolBase } from './omni';
-import { StableSwap, StableSwapBase } from './stable';
-import { XykPool } from './xyk';
-import { AavePool } from './aave';
-import { HsmPool, HsmPoolBase } from './hsm';
-import { UniswapV3Pool, UniswapV3PoolBase } from './uniswapv3';
+import { LbpPool, LbpPoolBase } from './amm/lbp';
+import { OmniPool, OmniPoolBase } from './amm/omni';
+import { StableSwap, StableSwapBase } from './amm/stable';
+import { XykPool } from './amm/xyk';
+import { AavePool } from './amm/aave';
+import { HsmPool, HsmPoolBase } from './amm/hsm';
+import { UniswapV3Pool, UniswapV3PoolBase } from './amm/uniswapv3';
 
 import { Pool, PoolBase, PoolType } from './types';
 

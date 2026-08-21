@@ -1,9 +1,11 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  SubstrateBalanceType,
+  SubstrateMinType,
 } from '@galacticcouncil/xc-core';
 
-import { ksm, usdt } from '../../assets';
+import { dot, ksm, usdt } from '../../assets';
 
 export const kusamaAssetHub = new Parachain({
   assetsData: [
@@ -14,6 +16,22 @@ export const kusamaAssetHub = new Parachain({
       xcmLocation: {
         parents: 1,
         interior: 'Here',
+      },
+    },
+    // bridged (foreign asset)
+    {
+      asset: dot,
+      decimals: 10,
+      min: 0.001,
+      xcmLocation: {
+        parents: 2,
+        interior: {
+          X1: [
+            {
+              GlobalConsensus: 'Polkadot',
+            },
+          ],
+        },
       },
     },
     {
@@ -35,6 +53,12 @@ export const kusamaAssetHub = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.Assets,
+  balanceOverrides: {
+    [ksm.key]: SubstrateBalanceType.System,
+    [dot.key]: SubstrateBalanceType.ForeignAssets,
+  },
+  min: SubstrateMinType.Assets,
   ecosystem: Ecosystem.Kusama,
   explorer: 'https://assethub-kusama.subscan.io',
   genesisHash:

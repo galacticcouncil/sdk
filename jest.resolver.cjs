@@ -1,3 +1,5 @@
+const path = require('path');
+
 const localPackages = new Set([
   '@galacticcouncil/common',
   '@galacticcouncil/sdk-next',
@@ -6,21 +8,16 @@ const localPackages = new Set([
   '@galacticcouncil/xc-sdk',
 ]);
 
-function resolver(path, options) {
-  if (localPackages.has(path)) {
-    return options.defaultResolver(path, {
-      ...options,
-      packageFilter(pkg) {
-        return {
-          ...pkg,
-          main: './src/index.ts',
-        };
-      },
-    });
+// Return the source path directly: jest's ESM resolution ignores the
+// packageFilter `main` override and would pick the built entrypoints.
+function resolver(request, options) {
+  if (localPackages.has(request)) {
+    const [, name] = request.split('/');
+    return path.join(__dirname, 'packages', name, 'src', 'index.ts');
   }
 
   // default for everything else
-  return options.defaultResolver(path, options);
+  return options.defaultResolver(request, options);
 }
 
 module.exports = resolver;

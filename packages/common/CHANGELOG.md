@@ -1,5 +1,20 @@
 # @galacticcouncil/common
 
+## 1.2.0
+
+### Minor Changes
+
+- 9e041f4: New rx helpers shared by the balance clients: `rx.debounceAfterFirst`
+  (emit the first value immediately, debounce the rest) and `changedEntries`
+  (drop `watchEntries` emissions that carry no deltas). `rxjs` is now a peer
+  dependency.
+
+## 1.1.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.0.0
 
 ### Major Changes

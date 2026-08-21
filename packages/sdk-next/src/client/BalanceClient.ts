@@ -1,45 +1,74 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { log } from '@galacticcouncil/common';
+import { changedEntries, h160, log, rx } from '@galacticcouncil/common';
 import { HydrationQueries } from '@galacticcouncil/descriptors';
 
-import { type Observable, combineLatest, concat, defer, from } from 'rxjs';
+import {
+  type Observable,
+  EMPTY,
+  combineLatest,
+  concat,
+  defer,
+  from,
+  merge,
+} from 'rxjs';
 
 import {
   bufferCount,
   distinctUntilChanged,
-  debounceTime,
+  filter,
   map,
+  mergeMap,
   retry,
+  skip,
   startWith,
   switchMap,
   tap,
-  take,
-  skip,
-  connect,
 } from 'rxjs/operators';
 
 import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
+import { decodeErc20Transfer } from '../evm';
 import { AssetBalance, Balance } from '../types';
+import { Erc20Client } from './Erc20Client';
 
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
 type TTokenAccount = HydrationQueries['Tokens']['Accounts']['Value'];
 type TAccount = TSystemAccount['data'] | TTokenAccount;
 
+const { H160 } = h160;
 const { logger } = log;
 
 export class BalanceClient extends Papi {
-  private erc20Ids: number[] | null = null;
+  readonly erc20: Erc20Client;
+
+  /**
+   * Full erc20 re-read cadence (in best blocks) as a safety net.
+   *
+   * - A missed or unmapped Transfer log can't permanently stale a balance
+   */
+  readonly erc20SafetyRereadBlocks = 20;
 
   constructor(client: PolkadotClient, at?: BlockAt) {
     super(client, at);
+    this.erc20 = new Erc20Client(client);
   }
 
   async getBalance(account: string, assetId: number): Promise<Balance> {
     return assetId === SYSTEM_ASSET_ID
       ? this.getSystemBalance(account)
       : this.getBalanceData(account, assetId);
+  }
+
+  async getBalanceAt(
+    account: string,
+    assetId: number,
+    at: BlockAt
+  ): Promise<Balance> {
+    const data = await this.api.apis.CurrenciesApi.account(assetId, account, {
+      at,
+    });
+    return this.getBreakdown(data);
   }
 
   async getSystemBalance(account: string): Promise<Balance> {
@@ -68,12 +97,7 @@ export class BalanceClient extends Papi {
        * First emission AS-IS, then debounced
        */
       return combineLatest([systemOb, tokensOb, erc20Ob]).pipe(
-        connect((shared$) =>
-          concat(
-            shared$.pipe(take(1)),
-            shared$.pipe(skip(1), debounceTime(250))
-          )
-        )
+        rx.debounceAfterFirst(250)
       );
     })
       .pipe(
@@ -126,9 +150,7 @@ export class BalanceClient extends Papi {
   ): Observable<AssetBalance> {
     const query = this.api.query.Tokens.Accounts;
 
-    return defer(() =>
-      query.watchValue(address, assetId, { at: 'best' })
-    ).pipe(
+    return defer(() => query.watchValue(address, assetId, { at: 'best' })).pipe(
       map(
         ({ value }) =>
           ({
@@ -146,10 +168,7 @@ export class BalanceClient extends Papi {
     const query = this.api.query.Tokens.Accounts;
 
     return defer(() => query.watchEntries(address, { at: 'best' })).pipe(
-      /**
-       * Don't emit if no deltas = no balance change
-       */
-      distinctUntilChanged((_, current) => !current.deltas),
+      changedEntries(),
       map(({ deltas }) => {
         const result: AssetBalance[] = [];
 
@@ -185,23 +204,6 @@ export class BalanceClient extends Papi {
     address: string,
     includeOnly?: number[]
   ): Observable<AssetBalance[]> {
-    const getErc20s = async () => {
-      if (this.erc20Ids) {
-        return this.erc20Ids;
-      }
-
-      const assets = await this.api.query.AssetRegistry.Assets.getEntries({
-        at: 'best',
-      });
-      this.erc20Ids = assets
-        .filter(({ value }) => value.asset_type.type === 'Erc20')
-        .map(({ keyArgs }) => {
-          const [id] = keyArgs;
-          return id as number;
-        });
-      return this.erc20Ids;
-    };
-
     const fetchBalance = async (ids: number[]) => {
       const balances: [number, Balance][] = await Promise.all(
         ids.map(
@@ -212,10 +214,100 @@ export class BalanceClient extends Papi {
     };
 
     return defer(() =>
-      from(includeOnly ? Promise.resolve(includeOnly) : getErc20s()).pipe(
-        switchMap((ids) =>
-          this.watcher.bestBlock$.pipe(switchMap(() => from(fetchBalance(ids))))
-        ),
+      from(
+        Promise.all([
+          includeOnly ? Promise.resolve(includeOnly) : this.erc20.getIds(),
+          this.erc20.getContracts(),
+        ])
+      ).pipe(
+        switchMap(([ids, byContract]) => {
+          if (ids.length === 0) {
+            return from(Promise.resolve([] as AssetBalance[]));
+          }
+
+          const watched = new Set(ids);
+
+          /** The log names a contract; only the registry knows its asset */
+          const assetOf = (contract: string) => byContract.get(contract);
+
+          let owner: string | null = null;
+          try {
+            owner = H160.fromAny(address).toLowerCase();
+          } catch {
+            owner = null;
+          }
+
+          /**
+           * Event gate: emit the ids to re-read when an ERC20 Transfer names the
+           * watched account as from/to. null = full read.
+           */
+          const eventIds$ = owner
+            ? this.api.event.EVM.Log.watchBest().pipe(
+                /**
+                 * Only blocks entering the best chain.
+                 *
+                 * - `drop` would show the balance reverting mid-reorg
+                 * - `finalized` re-reports what `new` already read
+                 */
+                filter(({ type }) => type === 'new'),
+                mergeMap(({ events }) => events),
+                map(({ payload }) => decodeErc20Transfer(payload)),
+                filter((t): t is NonNullable<typeof t> => {
+                  if (t === undefined) return false;
+                  if (t.from !== owner && t.to !== owner) return false;
+                  const id = assetOf(t.contract);
+                  return id !== undefined && watched.has(id);
+                }),
+                map((t) => [assetOf(t.contract) as number] as number[] | null)
+              )
+            : EMPTY;
+
+          /**
+           * Safety net: a full re-read every N blocks.
+           *
+           * - A missed/unmapped log can't permanently stale a balance
+           * - Skips block 0, already covered by the seed
+           */
+          const safetyIds$ = this.watcher.bestBlock$.pipe(
+            skip(1),
+            bufferCount(this.erc20SafetyRereadBlocks),
+            map(() => null as number[] | null)
+          );
+
+          /**
+           * Seed with a full read (null), then re-read on triggers.
+           *
+           * - A running snapshot merges each partial read
+           * - Every emission is the complete ERC20 balance set (downstream-diffed)
+           */
+          return concat(
+            from(Promise.resolve(null as number[] | null)),
+            merge(eventIds$, safetyIds$)
+          ).pipe(
+            // serialise reads to keep snapshot updates consistent
+            mergeMap(
+              (toRead) =>
+                from(fetchBalance(toRead ?? ids)).pipe(
+                  map((part) => part as AssetBalance[])
+                ),
+              1
+            ),
+            // accumulate into a full id->balance snapshot, emit the full array
+            (source$) => {
+              const snapshot = new Map<number, Balance>();
+              return source$.pipe(
+                map((part) => {
+                  for (const { id, balance } of part) {
+                    snapshot.set(id, balance);
+                  }
+                  return Array.from(snapshot.entries()).map(
+                    ([id, balance]) => ({ id, balance }) as AssetBalance
+                  );
+                })
+              );
+            }
+          );
+        }),
         startWith([] as AssetBalance[]),
         bufferCount(2, 1),
         map(([prev, curr], i) => {
@@ -241,8 +333,11 @@ export class BalanceClient extends Papi {
   }
 
   private getBreakdown(data: TAccount): Balance {
+    const freezeExcess = data.frozen - data.reserved;
+    const netFreezeConstraint = freezeExcess > 0n ? freezeExcess : 0n;
+
     const transferable =
-      data.free >= data.frozen ? data.free - data.frozen : 0n;
+      data.free >= netFreezeConstraint ? data.free - netFreezeConstraint : 0n;
     const total = data.free + data.reserved;
 
     return {

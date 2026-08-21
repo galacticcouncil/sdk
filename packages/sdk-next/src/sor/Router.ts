@@ -8,7 +8,7 @@ import {
   PoolFactory,
   PoolFilter,
 } from '../pool';
-import { UniswapV3Pool } from '../pool/uniswapv3';
+import { UniswapV3Pool } from '../pool/amm/uniswapv3';
 
 export class Router {
   private readonly routeSuggester: RouteSuggester;

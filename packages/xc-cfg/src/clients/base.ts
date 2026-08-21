@@ -1,6 +1,6 @@
 import { ChainDefinition, TypedApi } from 'polkadot-api';
 
-import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { Asset, AnyParachain } from '@galacticcouncil/xc-core';
 import { encodeLocation } from '@galacticcouncil/common';
 import {
   hub,
@@ -10,10 +10,10 @@ import {
 } from '@galacticcouncil/descriptors';
 
 export class BaseClient<C extends ChainDefinition = typeof hub> {
-  readonly chain: Parachain;
+  readonly chain: AnyParachain;
   protected descriptor: C;
 
-  constructor(chain: Parachain, descriptor?: C) {
+  constructor(chain: AnyParachain, descriptor?: C) {
     this.chain = chain;
     this.descriptor = descriptor ?? (hub as C);
   }

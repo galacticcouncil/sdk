@@ -10,6 +10,8 @@ export const findNestedKey = (multilocation: object, keyToFind: any) => {
       typeof nestedValue === 'bigint' ? nestedValue.toString() : nestedValue;
     if (nestedValue && nestedValue[keyToFind]) {
       foundObj.push(v);
+    } else if (nestedValue && nestedValue['type'] === keyToFind) {
+      foundObj.push({ [keyToFind]: nestedValue['value'] });
     }
     return v;
   });

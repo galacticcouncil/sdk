@@ -1,4 +1,4 @@
-[
+export const WETH = [
   {
     constant: true,
     inputs: [],
@@ -150,4 +150,4 @@
     name: 'Withdrawal',
     type: 'event',
   },
-];
+] as const;

@@ -45,9 +45,9 @@ export const dai = new Asset({
   originSymbol: 'DAI',
 });
 
-export const dai_mwh = new Asset({
+export const dai_wh = new Asset({
   ...dai,
-  key: 'dai_mwh',
+  key: 'dai_wh',
 });
 
 export const dot = new Asset({
@@ -70,9 +70,9 @@ export const eurc = new Asset({
   originSymbol: 'EURC',
 });
 
-export const eurc_mwh = new Asset({
+export const eurc_wh = new Asset({
   ...eurc,
-  key: 'eurc_mwh',
+  key: 'eurc_wh',
 });
 
 export const glmr = new Asset({
@@ -175,9 +175,9 @@ export const susds = new Asset({
   originSymbol: 'sUSDS',
 });
 
-export const susds_mwh = new Asset({
+export const susds_wh = new Asset({
   ...susds,
-  key: 'susds_mwh',
+  key: 'susds_wh',
 });
 
 export const tbtc = new Asset({
@@ -200,9 +200,9 @@ export const usdt = new Asset({
   originSymbol: 'USDT',
 });
 
-export const usdt_mwh = new Asset({
+export const usdt_wh = new Asset({
   ...usdt,
-  key: 'usdt_mwh',
+  key: 'usdt_wh',
 });
 
 export const usdt_eth = new Asset({
@@ -215,9 +215,9 @@ export const usdc = new Asset({
   originSymbol: 'USDC',
 });
 
-export const usdc_mwh = new Asset({
+export const usdc_wh = new Asset({
   ...usdc,
-  key: 'usdc_mwh',
+  key: 'usdc_wh',
 });
 
 export const usdc_eth = new Asset({
@@ -240,9 +240,9 @@ export const weth = new Asset({
   originSymbol: 'WETH',
 });
 
-export const weth_mwh = new Asset({
+export const weth_wh = new Asset({
   ...weth,
-  key: 'weth_mwh',
+  key: 'weth_wh',
 });
 
 export const wbtc = new Asset({
@@ -250,9 +250,14 @@ export const wbtc = new Asset({
   originSymbol: 'WBTC',
 });
 
-export const wbtc_mwh = new Asset({
+export const wbtc_wh = new Asset({
   ...wbtc,
-  key: 'wbtc_mwh',
+  key: 'wbtc_wh',
+});
+
+export const wsol = new Asset({
+  key: 'wsol',
+  originSymbol: 'wSOL',
 });
 
 export const wsteth = new Asset({
@@ -275,11 +280,11 @@ export const assets: Asset[] = [
   cru,
   bnc,
   dai,
-  dai_mwh,
+  dai_wh,
   dot,
   ena,
   eurc,
-  eurc_mwh,
+  eurc_wh,
   eth,
   glmr,
   hdx,
@@ -301,22 +306,23 @@ export const assets: Asset[] = [
   sui,
   susde,
   susds,
-  susds_mwh,
+  susds_wh,
   trac,
   tbtc,
   unq,
   usdc,
-  usdc_mwh,
+  usdc_wh,
   usdc_eth,
   usdt,
-  usdt_mwh,
+  usdt_wh,
   usdt_eth,
   vastr,
   vdot,
   wbtc,
-  wbtc_mwh,
+  wbtc_wh,
   weth,
-  weth_mwh,
+  weth_wh,
+  wsol,
   wsteth,
   wud,
 ];

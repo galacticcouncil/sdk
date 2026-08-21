@@ -1,4 +1,3 @@
-export { ethereumXcm } from './ethereumXcm';
 export { polkadotXcm } from './polkadotXcm';
 export { xTokens } from './xTokens';
 

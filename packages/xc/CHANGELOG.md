@@ -1,5 +1,32 @@
 # @galacticcouncil/xc
 
+## 2.1.0
+
+### Minor Changes
+
+- xc: fix node/esm imports
+
+## 2.0.0
+
+### Major Changes
+
+- bump xc swap + factory
+
+## 1.1.0
+
+### Minor Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@1.3.0
+  - @galacticcouncil/xc-sdk@1.3.0
+  - @galacticcouncil/xc-cfg@1.7.0
+
+## 1.0.2
+
+### Patch Changes
+
+- reuse sigling chain dexes
+
 ## 1.0.1
 
 ### Patch Changes

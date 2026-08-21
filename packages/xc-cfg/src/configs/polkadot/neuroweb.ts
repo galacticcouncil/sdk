@@ -2,16 +2,12 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { neuro } from '../../assets';
 import { neuroweb, hydration } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: neuro,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,

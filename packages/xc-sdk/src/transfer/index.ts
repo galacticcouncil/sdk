@@ -1,4 +1,4 @@
 export { DataOriginProcessor } from './DataOriginProcessor';
-export { DataReverseProcessor } from './DataReverseProcessor';
+export { DataDestinationProcessor } from './DataDestinationProcessor';
 
 export * from './utils';

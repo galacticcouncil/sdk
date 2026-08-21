@@ -1,5 +1,80 @@
 # @galacticcouncil/xc-core
 
+## 2.3.0
+
+### Minor Changes
+
+- c9684bd: Wormhole NTT executor delivery & rate limits.
+  - **Executor delivery** — the sender pays for destination delivery instead of signing a
+    redeem there. Offered alongside the self-redeem route for the same pair. Hydration
+    calls the manager and the Executor directly rather than through the shim, whose
+    unbounded approve its erc20 precompile rejects.
+  - **Rate limits** — per-token NttManager 24h inbound/outbound limits are read and
+    validated before a transfer is built, so a capped transfer fails up front instead of
+    reverting on redeem.
+  - **NTT clients per platform** — one client interface over the evm, solana and sui
+    deployments, replacing the per-call-site branching.
+  - **Solana** — jito bundle endpoints, token-2022 associated token accounts, and ata
+    derivation shared through `xc-core`. A redeem now opens the recipient's ata, not only
+    the payer's.
+  - Destination fee swap is sized to the fee plus existential deposit, and source fee
+    estimation covers the whole call sequence rather than the transfer alone.
+
+  Call builders return an ordered config vector instead of hanging
+  `prior`/`follow`/`prerequisites` off the configs themselves, and hydration's ss58 leg
+  becomes an `ExtrinsicBuilder().evm().call()` extrinsic, so a route composes it with the
+  rest of its batch and the fee is quoted by the runtime in the sender's fee currency.
+
+  The MRL transact surface is dropped along with it — nothing has declared
+  `AssetRoute.transact` since MRL was removed, so every path behind it was dead.
+
+## 2.2.0
+
+### Minor Changes
+
+- 9e041f4: Faster, leaner balance reads:
+  - Assets in account-keyed storage (`Tokens` / `OrmlTokens`) are read in batch —
+    one `watchEntries` subscription (or one storage read) covers every asset in
+    the map instead of one per asset.
+  - New `Chain.getBalances(assets, address)` and `Chain.getAssets()` for one-shot
+    snapshots (e.g. asset pickers); `subscribeBalances` stays for live updates.
+  - Per-asset streams are isolated — a failing asset retries, then is logged and
+    omitted instead of erroring the whole composite stream.
+  - Platform clients (viem, Solana, Sui) are memoized instead of rebuilt on every
+    read; the viem provider now batches contract reads via multicall.
+  - Fixed watcher leaks and unhandled rejections in the EVM / Solana / Sui
+    balance subscriptions.
+
+## 2.1.0
+
+### Minor Changes
+
+- xc: fix node/esm imports
+
+## 2.0.0
+
+### Major Changes
+
+- 8e7401c: Switch from wormhole mrl to wormhole direct integration with ntt
+
+## 1.3.0
+
+### Minor Changes
+
+- 23af67e: Unidirectional routes & chain-native balance reads
+
+## 1.2.1
+
+### Patch Changes
+
+- 5d923e6: WUD xcm fix and assethub_cex routes fix
+
+## 1.2.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.1.1
 
 ### Patch Changes

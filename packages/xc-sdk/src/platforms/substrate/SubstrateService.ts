@@ -3,7 +3,6 @@ import {
   multiloc,
   AnyParachain,
   Asset,
-  AssetAmount,
   ChainCurrency,
   Extrinsic,
   ExtrinsicConfig,
@@ -60,21 +59,6 @@ export class SubstrateService {
   async getDecimals(): Promise<number> {
     const currency = await this.getCurrency();
     return currency.decimals;
-  }
-
-  async getExistentialDeposit(): Promise<AssetAmount> {
-    let ed: bigint;
-    try {
-      const result = await this.api.constants.Balances.ExistentialDeposit();
-      ed = typeof result === 'bigint' ? result : BigInt(String(result));
-    } catch {
-      ed = 0n;
-    }
-    const { asset, decimals } = await this.getCurrency();
-    return AssetAmount.fromAsset(asset, {
-      amount: ed,
-      decimals,
-    });
   }
 
   isDryRunSupported(): boolean {
@@ -198,7 +182,8 @@ export class SubstrateService {
       }
 
       // Upward (use chain treasury account if any)
-      if (interior && interior['interior'] === 'Here') {
+      const interiorValue = interior && interior['interior'];
+      if (interiorValue === 'Here' || interiorValue?.type === 'Here') {
         return this.chain.treasury || account;
       }
     }

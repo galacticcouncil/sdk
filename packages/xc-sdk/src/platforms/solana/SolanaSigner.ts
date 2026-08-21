@@ -4,7 +4,6 @@ import { Keypair, MessageV0, VersionedTransaction } from '@solana/web3.js';
 
 import { Buffer } from 'buffer';
 
-import { SolanaLilJit } from './SolanaLilJit';
 import { SolanaCall, SolanaWallet, SolanaTxObserver } from './types';
 
 import { Call } from '../types';
@@ -12,17 +11,15 @@ import { Call } from '../types';
 export class SolanaSigner {
   readonly #chain: SolanaChain;
   readonly #wallet: SolanaWallet | Keypair;
-  readonly #lilJit: SolanaLilJit;
 
   constructor(chain: SolanaChain, wallet: SolanaWallet | Keypair) {
     this.#chain = chain;
     this.#wallet = wallet;
-    this.#lilJit = new SolanaLilJit(chain);
   }
 
   async signAndSend(call: Call, observer: SolanaTxObserver) {
     const { data, signers } = call as SolanaCall;
-    const versioned = this.toVersioned(data, signers);
+    const versioned = await this.toVersioned(data, signers);
 
     try {
       if (this.#wallet instanceof Keypair) {
@@ -51,49 +48,66 @@ export class SolanaSigner {
   }
 
   async signAndSendAll(calls: Call[], observer: SolanaTxObserver) {
-    const versioned = calls.map((c) => {
-      const { data, signers } = c as SolanaCall;
-      return this.toVersioned(data, signers);
-    });
-
     try {
-      let encoded: string[];
+      const { blockhash, lastValidBlockHeight } =
+        await this.#chain.connection.getLatestBlockhash();
+
+      const versioned = await Promise.all(
+        calls.map((c) => {
+          const { data, signers } = c as SolanaCall;
+          return this.toVersioned(data, signers, blockhash);
+        })
+      );
+
+      let signed: VersionedTransaction[];
 
       if (this.#wallet instanceof Keypair) {
         versioned.forEach((tx) => tx.sign([this.#wallet as Keypair]));
-        encoded = versioned.map((tx) =>
-          Buffer.from(tx.serialize()).toString('base64')
-        );
+        signed = versioned;
       } else {
         const wallet = this.#wallet;
         await wallet.connect();
-        const signed = await wallet.signAllTransactions(versioned);
-        encoded = signed.map((s) =>
-          Buffer.from(s.serialize()).toString('base64')
-        );
+        signed = await wallet.signAllTransactions(versioned);
       }
 
-      const simulation = await this.#lilJit.simulateBundle(encoded);
-      if (simulation.value.summary !== 'succeeded') {
-        throw new Error(
-          'Bundle simulation failed! ' + JSON.stringify(simulation, null, 2)
-        );
+      for (const tx of signed) {
+        const signature = await this.#chain.connection.sendTransaction(tx);
+        observer.onTransactionSend(signature);
+        const status = await this.#chain.connection
+          .confirmTransaction(
+            { signature, blockhash, lastValidBlockHeight },
+            'confirmed'
+          )
+          .catch((err) => {
+            throw err instanceof Error
+              ? err
+              : new Error(signature + ' failed: ' + JSON.stringify(err));
+          });
+        observer.onStatus?.(status);
+        if (status.value.err) {
+          throw new Error(
+            signature + ' failed: ' + JSON.stringify(status.value.err)
+          );
+        }
       }
-
-      const bundleId = await this.#lilJit.sendBundle(encoded);
-      observer.onTransactionSend(bundleId);
-
-      const status = await this.#lilJit.getInflightBundleStatuses([bundleId]);
-      observer.onBundleStatus?.(status.value);
     } catch (err) {
       observer.onError(err);
     }
   }
 
-  private toVersioned(data: string, signers?: Keypair[]): VersionedTransaction {
+  private async toVersioned(
+    data: string,
+    signers?: Keypair[],
+    recentBlockhash?: string
+  ): Promise<VersionedTransaction> {
     const mssgBuffer = Buffer.from(data, 'hex');
     const mssgArray = Uint8Array.from(mssgBuffer);
     const mssgV0 = MessageV0.deserialize(mssgArray);
+
+    mssgV0.recentBlockhash =
+      recentBlockhash ??
+      (await this.#chain.connection.getLatestBlockhash()).blockhash;
+
     const versioned = new VersionedTransaction(mssgV0);
     if (signers) {
       versioned.sign(signers);

@@ -5,6 +5,7 @@ export interface SuiCall extends Call {
 }
 
 export interface SuiWallet {
+  requestAccount(): Promise<{ address: string }>;
   signTransaction(params: {
     transaction: string;
     address: string;

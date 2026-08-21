@@ -1,6 +1,5 @@
-export * from './SolanaPlatform';
 export * from './SolanaClaim';
-export * from './SolanaLilJit';
+export * from './SolanaPlatform';
 export * from './SolanaSigner';
 
 export * from './types';

@@ -1,5 +1,38 @@
 # @galacticcouncil/sdk-next
 
+## 2.0.0
+
+### Major Changes
+
+- 1e0db91: sor v2
+
+## 1.6.0
+
+### Minor Changes
+
+- 9e041f4: `BalanceClient` uses the shared `debounceAfterFirst` / `changedEntries`
+  helpers from `@galacticcouncil/common`. Fixes a dropped emission in
+  `watchBalance`: the first balance update after the initial snapshot was
+  silently swallowed by the old debounce chain.
+
+## 1.5.1
+
+### Patch Changes
+
+- b6ea527: Fix transferable balance
+
+## 1.5.0
+
+### Minor Changes
+
+- bump papi to latest
+
+## 1.4.0
+
+### Minor Changes
+
+- bump papi to latest
+
 ## 1.3.0
 
 ### Minor Changes

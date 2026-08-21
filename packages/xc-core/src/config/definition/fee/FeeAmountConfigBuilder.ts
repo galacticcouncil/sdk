@@ -12,6 +12,16 @@ export interface FeeAmountConfigParams {
   source: AnyChain;
   destination: AnyChain;
   amount?: bigint;
+  /** Asset the transfer lands as, when it differs from {@link transferAsset} */
+  destinationAsset?: Asset;
+  /**
+   * Recipient on the destination.
+   *
+   * For a fee whose size depends on the accounts the delivery has to open -
+   * an svm redeem opening the recipient's ata - so it must be the same value
+   * the transfer is later built with.
+   */
+  address?: string;
 }
 
 export interface FeeAmountConfigBuilder {

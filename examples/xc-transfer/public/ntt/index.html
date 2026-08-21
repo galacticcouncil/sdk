@@ -1,0 +1,165 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XC Transfer Example - NTT</title>
+    <style>
+      body {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: 0;
+        padding: 24px;
+        background: #14161c;
+        color: #e6e8ee;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 13px;
+        opacity: 0.7;
+      }
+      input {
+        font: inherit;
+        width: 96px;
+        padding: 6px 8px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        padding: 8px 14px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: #4c8dff;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      /* Executor delivery. Amber rather than the hover blue, so the two
+         delivery models stay apart from the hover state itself. */
+      button.primary {
+        border-color: #6b5426;
+        background: #241d12;
+        color: #f0c674;
+      }
+      button.primary:hover:not(:disabled) {
+        border-color: #e0a44a;
+      }
+      h2 {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.5;
+        margin: 16px 0 8px;
+      }
+      .legend {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.6;
+        max-width: 68ch;
+        margin: 16px 0;
+      }
+      pre {
+        margin: 16px 0 0;
+        padding: 12px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 60vh;
+        overflow: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <h1>NTT &mdash; DAI</h1>
+
+    <div class="row">
+      <label for="amount">Amount</label>
+      <input id="amount" value="0.1" />
+    </div>
+
+    <!-- One button per route the sdk registers under the Ntt tag,
+         grouped by source chain. Both delivery models appear per pair. -->
+    <div id="routes"></div>
+
+    <p class="legend">
+      &#9889; executor delivery &mdash; the sender pays the Executor to redeem
+      on the far side, so there is nothing to claim. Costs source native gas
+      (weth on hydration, eth on ethereum/base) on top of the transfer. Plain
+      buttons are self-redeem and need the claim below.
+    </p>
+
+    <div class="row">
+      <button
+        id="claim-out"
+        title="Withdrawals off hydration, redeemed on whichever chain they target - ethereum, base, solana or sui"
+      >
+        Claim withdrawals
+      </button>
+      <button id="claim-in" title="Deposits, redeemed on hydration">
+        Claim deposits
+      </button>
+    </div>
+
+    <!-- Escape hatch for a transfer the two above never list - addressed to
+         another account, or emitted by something the registry doesn't match.
+         The vaa names its own destination, so the claim is routed by the
+         message: one receiveMessage on evm, a jito bundle on solana, a ptb
+         on sui. -->
+    <div class="row">
+      <textarea
+        id="vaa"
+        rows="3"
+        style="width: 100%; max-width: 68ch; resize: vertical"
+        spellcheck="false"
+        placeholder="signed vaa (base64 or 0x hex), a wormholescan link, or chain/emitter/sequence"
+      ></textarea>
+    </div>
+    <div class="row">
+      <button id="claim-vaa">Claim VAA</button>
+      <label
+        title="Evm destinations only. Send even when the call reverts in simulation - spends gas, mints nothing, leaves the vaa replayable"
+      >
+        <input id="vaa-force" type="checkbox" style="width: auto" />
+        send anyway
+      </label>
+    </div>
+
+    <pre id="log"></pre>
+
+    <script>
+      new EventSource('/esbuild').addEventListener('change', () =>
+        location.reload()
+      );
+    </script>
+    <script type="module" src="/out/ntt.js"></script>
+  </body>
+</html>

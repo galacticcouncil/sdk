@@ -1,3 +1,4 @@
+import { encodeLocation } from '@galacticcouncil/common';
 import {
   ExtrinsicConfig,
   ExtrinsicConfigBuilder,
@@ -24,8 +25,8 @@ const swapTokensForExactTokens = (opts: SwapOpts): ExtrinsicConfigBuilder => {
       const { aIn, aOut } = swapCtx;
 
       const ctx = chain as Parachain;
-      const aInLocation = ctx.getAssetXcmLocation(aIn);
-      const aOutLocation = ctx.getAssetXcmLocation(aOut);
+      const aInLocation = encodeLocation(ctx.getAssetXcmLocation(aIn));
+      const aOutLocation = encodeLocation(ctx.getAssetXcmLocation(aOut));
 
       const maxAmountIn =
         aIn.amount + (aIn.amount * BigInt(opts.slippage)) / 100n;

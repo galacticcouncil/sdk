@@ -1,35 +1,24 @@
 import { Asset } from '../../asset';
-import { AnyChain, Parachain } from '../../chain';
+import { AnyChain } from '../../chain';
 
-import { BalanceConfigBuilder } from './balance';
 import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
-import { FeeConfig, DestinationFeeConfig, TransactFeeConfig } from './fee';
-import { MinConfigBuilder } from './min';
+import { FeeConfig, DestinationFeeConfig } from './fee';
 import { ProgramConfigBuilder } from './program';
 import { MoveConfigBuilder } from './move';
 
 export interface SourceConfig {
   asset: Asset;
-  balance: BalanceConfigBuilder;
-  destinationFee: {
-    asset?: Asset;
-    balance: BalanceConfigBuilder;
-  };
+  // Optional fee-asset override. When unset, the destination fee is paid in
+  // `destination.fee.asset`. Balance/min are read from the chain registry.
+  destinationFee?: Asset;
   fee?: FeeConfig;
-  min?: MinConfigBuilder;
 }
 
 export interface DestinationConfig {
   chain: AnyChain;
   asset: Asset;
   fee: DestinationFeeConfig;
-}
-
-export interface TransactConfig {
-  chain: Parachain;
-  fee: TransactFeeConfig;
-  extrinsic: ExtrinsicConfigBuilder;
 }
 
 export interface AssetRouteParams {
@@ -39,7 +28,6 @@ export interface AssetRouteParams {
   extrinsic?: ExtrinsicConfigBuilder;
   move?: MoveConfigBuilder;
   program?: ProgramConfigBuilder;
-  transact?: TransactConfig;
   tags?: string[];
 }
 
@@ -56,8 +44,6 @@ export class AssetRoute {
 
   readonly program?: ProgramConfigBuilder;
 
-  readonly transact?: TransactConfig;
-
   readonly tags?: string[];
 
   constructor({
@@ -67,7 +53,6 @@ export class AssetRoute {
     extrinsic,
     move,
     program,
-    transact,
     tags,
   }: AssetRouteParams) {
     this.source = source;
@@ -76,7 +61,6 @@ export class AssetRoute {
     this.extrinsic = extrinsic;
     this.move = move;
     this.program = program;
-    this.transact = transact;
     this.tags = tags;
   }
 }

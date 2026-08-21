@@ -14,6 +14,8 @@ export class EvmClient {
   readonly chain: Chain;
   readonly rpcs: string[];
 
+  private provider?: PublicClient;
+
   constructor(chain: Chain, rpcs?: string[]) {
     this.chain = chain;
     this.rpcs = rpcs || [];
@@ -35,9 +37,19 @@ export class EvmClient {
     return this.chain.blockExplorers?.default.url;
   }
 
+  /**
+   * Memoized. Viem keys both the block-watch dedupe and the multicall
+   * scheduler on client identity, so a fresh client per call turns N asset
+   * reads into N pollers and defeats batching.
+   */
   getProvider(): PublicClient {
+    if (this.provider) {
+      return this.provider;
+    }
+
     const withFallback = this.rpcs.map((rpc) => http(rpc));
-    return createPublicClient({
+    this.provider = createPublicClient({
+      batch: { multicall: true },
       chain: this.chain,
       transport:
         this.rpcs.length > 0
@@ -46,6 +58,7 @@ export class EvmClient {
             })
           : http(),
     });
+    return this.provider;
   }
 
   getWsProvider(): PublicClient {

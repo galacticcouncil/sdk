@@ -2,16 +2,12 @@ import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { pen } from '../../assets';
 import { hydration, pendulum } from '../../chains';
-import { BalanceBuilder, ExtrinsicBuilder } from '../../builders';
+import { ExtrinsicBuilder } from '../../builders';
 
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: pen,
-      balance: BalanceBuilder().substrate().system().account(),
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
     },
     destination: {
       chain: hydration,

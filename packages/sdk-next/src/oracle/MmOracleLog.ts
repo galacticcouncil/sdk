@@ -1,10 +1,26 @@
 import { Binary } from 'polkadot-api';
-import { decodeEventLog } from 'viem';
+import { decodeEventLog, toEventSelector } from 'viem';
 
 import { DIA_ORACLE_ABI, MANAGED_ORACLE_ABI } from './abi';
 import { TEvmPayload, MmOracleEvent } from './types';
 
+const EVENT_SELECTORS = new Map<string, string>([
+  ...MANAGED_ORACLE_ABI.flatMap((x) =>
+    x.type === 'event'
+      ? [[toEventSelector(x), `ManagedOracle.${x.name}`] as const]
+      : []
+  ),
+  ...DIA_ORACLE_ABI.flatMap((x) =>
+    x.type === 'event' ? [[toEventSelector(x), `DIA.${x.name}`] as const] : []
+  ),
+]);
+
 export class MmOracleLog {
+  static eventName(payload: TEvmPayload): string {
+    const [topic0] = payload.log.topics;
+    return EVENT_SELECTORS.get(String(topic0)) ?? '';
+  }
+
   static parse(payload: TEvmPayload): MmOracleEvent | undefined {
     const { address, topics, data } = payload.log;
     const emitter = address.toLowerCase();
