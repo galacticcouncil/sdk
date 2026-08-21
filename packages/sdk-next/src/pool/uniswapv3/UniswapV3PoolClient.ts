@@ -1,4 +1,5 @@
 import { PublicClient } from 'viem';
+import { SizedHex } from 'polkadot-api';
 import { Subscription, filter, map, mergeMap } from 'rxjs';
 
 import { erc20 } from '@galacticcouncil/common';
@@ -14,7 +15,7 @@ import { PoolFees, PoolPair, PoolType } from '../types';
 import { PoolClient } from '../PoolClient';
 
 import { ERC20_ABI, FACTORY_ABI, POOL_ABI } from './abi';
-import { UNISWAP_V3_FACTORY, V3PoolConfig, V3_POOLS } from './const';
+import { V3PoolConfig, V3_POOLS } from './const';
 import { UniswapV3PoolBase, UniswapV3PoolFees, V3Tick } from './types';
 
 const { ERC20 } = erc20;
@@ -53,20 +54,66 @@ export function ticksInWord(
 /**
  * Router venue for Uniswap v3 pools on Hydration's EVM.
  *
- * Pools come from a curated per-chain config (`V3_POOLS`) and are resolved via
- * the v3 factory — mirroring the on-chain design where v3 routes are
- * governance-gated rather than permissionless. Concentrated-liquidity state
- * (`slot0`, `liquidity`, and initialized ticks via the tick bitmap) is read
- * directly over the EVM; quoting itself is client-side in
- * `UniswapV3Pool`/`UniswapV3Math`.
+ * Pools come from a curated config (`V3_POOLS`) and are resolved via the v3
+ * factory — mirroring the on-chain design where v3 routes are governance-gated
+ * rather than permissionless. Concentrated-liquidity state (`slot0`,
+ * `liquidity`, and initialized ticks via the tick bitmap) is read directly over
+ * the EVM; quoting itself is client-side in `UniswapV3Pool`/`UniswapV3Math`.
+ *
+ * The factory address is read from `Parameters.UniswapV3Factory`, the same
+ * governance-set storage the runtime's trade executor uses. It cannot be a
+ * constant here: each deployment lands its contracts at different addresses (they
+ * are plain CREATE, so one extra transaction shifts every one of them), and the
+ * chain id does not disambiguate — lark is a fork of mainnet and reports the same
+ * 222222. Reading it from chain state is the only source that is right by
+ * construction, and it makes the venue disable itself cleanly on chains where
+ * Uniswap v3 was never deployed.
  */
 export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
+  /** Cached governance-set factory address; `null` = looked up, not configured. */
+  private factory?: `0x${string}` | null;
+
   getPoolType(): PoolType {
     return PoolType.V3;
   }
 
   async isSupported(): Promise<boolean> {
-    return true;
+    return (await this.getFactory()) !== null;
+  }
+
+  /**
+   * Resolve the v3 factory from `Parameters.UniswapV3Factory`.
+   *
+   * Read through the unsafe (metadata-driven) API rather than the generated
+   * descriptors: the storage item only exists on runtimes carrying the Uniswap v3
+   * router, so a typed read would not compile against chains without it. A missing
+   * pallet, a missing entry or an unset value all mean the same thing — v3 is not
+   * configured here — and are reported once rather than per refresh.
+   */
+  private async getFactory(): Promise<`0x${string}` | null> {
+    if (this.factory !== undefined) return this.factory;
+
+    try {
+      const value = (await this.client
+        .getUnsafeApi()
+        .query.Parameters.UniswapV3Factory.getValue({ at: this.at })) as
+        | SizedHex<20>
+        | undefined;
+      const address = value as `0x${string}` | undefined;
+      // Treat an unset OR zeroed address the same: not configured.
+      this.factory =
+        address && address.toLowerCase() !== ADDRESS_ZERO
+          ? (address as `0x${string}`)
+          : null;
+    } catch {
+      // Runtime predates the Uniswap v3 router (no Parameters.UniswapV3Factory).
+      this.factory = null;
+    }
+
+    if (this.factory === null) {
+      this.log.debug('v3_not_configured', 'Parameters.UniswapV3Factory unset');
+    }
+    return this.factory;
   }
 
   /** Fixed per-pool fee tier as a `[numerator, denominator]` fraction. */
@@ -78,15 +125,19 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
 
   /** Resolve and load every configured pool; pools that fail to load are skipped. */
   async loadPools(): Promise<UniswapV3PoolBase[]> {
+    const factory = await this.getFactory();
+    if (!factory) return [];
+
     const client = this.evm.getWsProvider();
     const loaded = await Promise.all(
-      V3_POOLS.map((cfg) => this.loadPool(client, cfg))
+      V3_POOLS.map((cfg) => this.loadPool(client, factory, cfg))
     );
     return loaded.filter((p): p is UniswapV3PoolBase => p !== undefined);
   }
 
   private async loadPool(
     client: PublicClient,
+    factory: `0x${string}`,
     cfg: V3PoolConfig
   ): Promise<UniswapV3PoolBase | undefined> {
     try {
@@ -104,7 +155,7 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
 
       const poolAddress = await client.readContract({
         abi: FACTORY_ABI,
-        address: UNISWAP_V3_FACTORY as `0x${string}`,
+        address: factory,
         functionName: 'getPool',
         args: [addr0, addr1, fee],
       });
