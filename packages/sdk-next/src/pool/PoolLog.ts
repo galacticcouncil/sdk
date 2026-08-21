@@ -9,6 +9,7 @@ const LogLabel: Record<PoolType, string> = {
   [PoolType.Stable]: 'STBL',
   [PoolType.XYK]: 'XYK',
   [PoolType.HSM]: 'HSM',
+  [PoolType.V3]: 'UNIV3',
 };
 
 const { logger } = log;
