@@ -4,7 +4,7 @@ import { Papi } from '../api';
 import { BLOCK_TIME_TARGET } from '../consts';
 
 const BLOCK_TIME_SAMPLE = 100;
-const BLOCK_TIME_TTL = 60_000;
+const BLOCK_TIME_TTL = 60 * 60 * 1000;
 
 export class ChainParams extends Papi {
   private _minOrderBudget?: bigint;
