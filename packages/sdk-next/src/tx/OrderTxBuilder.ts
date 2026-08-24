@@ -61,8 +61,6 @@ export class OrderTxBuilder extends TxBuilder {
         return this.buildDcaTx();
       case TradeOrderType.TwapSell:
         return this.buildTwapSellTx();
-      case TradeOrderType.TwapBuy:
-        return this.buildTwapBuyTx();
       default:
         throw new Error(`Unsupported TradeOrderType: ${type}`);
     }
@@ -144,46 +142,5 @@ export class OrderTxBuilder extends TxBuilder {
     }
 
     return this.wrapTx('DcaSchedule.twapSell', tx);
-  }
-
-  private async buildTwapBuyTx(): Promise<Tx> {
-    const {
-      amountIn,
-      assetIn,
-      assetOut,
-      tradeAmountIn,
-      tradeAmountOut,
-      tradePeriod,
-      tradeRoute,
-    } = this.order;
-
-    const slippage = calc.getFraction(tradeAmountIn, this.slippagePct);
-    const maxAmountIn = tradeAmountIn + slippage;
-
-    let tx: Transaction = this.api.tx.DCA.schedule({
-      schedule: {
-        owner: this.beneficiary,
-        period: tradePeriod,
-        max_retries: this.maxRetries,
-        total_amount: amountIn,
-        slippage: this.slippagePct * 10000,
-        stability_threshold: undefined,
-        order: Enum('Buy', {
-          asset_in: assetIn,
-          asset_out: assetOut,
-          amount_out: tradeAmountOut,
-          max_amount_in: maxAmountIn,
-          route: tradeRoute as any,
-        }),
-      },
-      start_execution_block: undefined,
-    });
-
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
-      tx = await this.dispatchWithExtraGas(tx);
-    }
-
-    return this.wrapTx('DcaSchedule.twapBuy', tx);
   }
 }
