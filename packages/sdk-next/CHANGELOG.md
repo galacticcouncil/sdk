@@ -1,5 +1,12 @@
 # @galacticcouncil/sdk-next
 
+## 2.1.0
+
+### Minor Changes
+
+- 9e1dc0d: next: support for 2 sec blocks
+  next: twap buy support removal
+
 ## 2.0.0
 
 ### Major Changes
