@@ -70,6 +70,24 @@ export function ticksInWord(
   return ticks;
 }
 
+/**
+ * Does this error mean the runtime has no such storage entry, rather than that
+ * we failed to ask?
+ *
+ * Only the first is a real answer ("v3 is not deployed on this chain"). A
+ * dropped connection, a timeout or an RPC error must propagate, or a cached
+ * `undefined` turns a blip into a session-long outage.
+ */
+function isMissingStorageEntry(err: unknown): boolean {
+  const msg = String((err as Error)?.message ?? err).toLowerCase();
+  return (
+    msg.includes('not found') ||
+    msg.includes('unknown') ||
+    msg.includes('no entry') ||
+    msg.includes('cannot read properties of undefined')
+  );
+}
+
 /** The usable min/max ticks for a spacing — the bounds of any swap walk */
 const boundTicks = (tickSpacing: number): number[] => [
   nearestUsableTick(TickMath.MIN_TICK, tickSpacing),
@@ -101,23 +119,32 @@ export class UniswapV3Query extends PoolQuery {
    *   the v3 router, so a typed read would not compile against the ones without
    * - A missing pallet, a missing entry and a zeroed address all say the same
    *   thing, so all three read as `undefined`
+   *
+   * A TRANSPORT failure says something different and must not be flattened into
+   * the same answer. This result is cached `persistent`, so returning
+   * `undefined` for a dropped websocket would memoize "v3 is not deployed" for
+   * the rest of the session — one flaky read during startup and the venue stays
+   * silently off until the client reseeds. Anything that is not a
+   * missing-storage-entry error is rethrown so the cache never stores it.
    */
   readonly factory = this.cache.scope<[], `0x${string}` | undefined>(
     'Parameters.UniswapV3Factory',
     async (at) => {
+      let value: SizedHex<20> | undefined;
       try {
-        const value = (await this.client
+        value = (await this.client
           .getUnsafeApi()
           .query.Parameters.UniswapV3Factory.getValue({ at })) as
           | SizedHex<20>
           | undefined;
-        const address = value as `0x${string}` | undefined;
-        return address && address.toLowerCase() !== ADDRESS_ZERO
-          ? address
-          : undefined;
-      } catch {
-        return undefined;
+      } catch (err) {
+        if (isMissingStorageEntry(err)) return undefined;
+        throw err;
       }
+      const address = value as `0x${string}` | undefined;
+      return address && address.toLowerCase() !== ADDRESS_ZERO
+        ? address
+        : undefined;
     },
     () => 'factory',
     'persistent'
