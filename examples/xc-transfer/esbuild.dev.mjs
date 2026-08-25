@@ -12,6 +12,7 @@ const options = {
     'src/redeem.ts',
     'src/scan.ts',
     'src/circuitbreaker.ts',
+    'src/wormhole-ratelimit.ts',
   ],
   bundle: true,
   format: 'esm',
