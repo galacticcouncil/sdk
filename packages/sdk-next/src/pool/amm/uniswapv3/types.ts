@@ -18,6 +18,15 @@ export type V3PoolState = {
 export interface UniswapV3PoolBase extends PoolBase, V3PoolState {
   token0: number;
   token1: number;
+  /**
+   * The token contracts this pool is actually built on, in pool order.
+   *
+   * Carried rather than recomputed from the asset ids: an `Erc20` asset does not
+   * live at its `0x…01 ++ id` alias, so deriving these again would address a
+   * different pool than the one that was loaded.
+   */
+  addr0: `0x${string}`;
+  addr1: `0x${string}`;
 }
 
 export type UniswapV3PoolFees = PoolFees & {

@@ -1,5 +1,3 @@
-import { erc20 } from '@galacticcouncil/common';
-
 import { FeeAmount, TICK_SPACINGS } from '@uniswap/v3-sdk';
 
 import { BlockRef } from '../../../api';
@@ -7,12 +5,12 @@ import { BlockRef } from '../../../api';
 import { PoolEventHandler, PoolMutation } from '../../events';
 import { PoolFees, PoolPair, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
+import { TAssetDetails, TAssetLocation } from '../../PoolQuery';
 
+import { assetAddress } from './assetAddress';
 import { V3PoolConfig, V3_POOLS } from './const';
 import { UniswapV3Query, V3PoolSlice } from './UniswapV3Query';
 import { UniswapV3PoolBase, UniswapV3PoolFees } from './types';
-
-const { ERC20 } = erc20;
 
 const FEE_DENOMINATOR = 1_000_000;
 
@@ -58,9 +56,10 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   async loadPools(block: BlockRef): Promise<UniswapV3PoolBase[]> {
     const at = block.hash;
 
-    const [factory, assets] = await Promise.all([
+    const [factory, assets, locations] = await Promise.all([
       this.query.factory.get(at),
       this.query.assets.get(at),
+      this.query.assetLocations.get(at),
     ]);
 
     if (!factory) {
@@ -71,7 +70,7 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     const pools = await Promise.all(
       V3_POOLS.map(async (cfg) => {
         try {
-          const ref = await this.resolvePool(at, factory, cfg);
+          const ref = await this.resolvePool(at, factory, cfg, assets, locations);
           if (!ref) return undefined;
 
           const slice = await this.query.poolSlice.get(
@@ -92,6 +91,8 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
             token1: ref.token1,
             fee: ref.fee,
             tickSpacing: ref.tickSpacing,
+            addr0: ref.addr0,
+            addr1: ref.addr1,
             sqrtPriceX96: slice.sqrtPriceX96,
             tick: slice.tick,
             liquidity: slice.liquidity,
@@ -127,28 +128,55 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   }
 
   /**
+   * The EVM address the RUNTIME uses for an asset — see {@link assetAddress}.
+   * Same rule as `AavePoolClient.getReserveH160Id`.
+   */
+  private resolveAssetAddress(
+    id: number,
+    assets: Map<number, TAssetDetails>,
+    locations: Map<number, TAssetLocation>
+  ): `0x${string}` {
+    const r = assetAddress(
+      id,
+      assets.get(id)?.asset_type.type,
+      locations.get(id)
+    );
+    if (r.problem) this.log.error('v3_asset_address', r.problem);
+    return r.address;
+  }
+
+  /**
    * Resolve one configured pool to the deployment it names.
    *
    * - v3 orders a pair by token address, so which asset is token0 is a property
-   *   of the deployment, not of the config
+   *   of the deployment, not of the config — and for two `Erc20` assets that is
+   *   the CONTRACT sort, which can invert the id sort. aDOT/HOLLAR is exactly
+   *   that case: by alias HOLLAR sorts first, by contract aDOT does
    * - An unknown fee tier or a pair with no pool at that tier yields nothing
    *
    * @param at - block the factory read is scoped to
    * @param factory - the v3 factory address
    * @param cfg - the configured pair and fee tier
+   * @param assets - registry entries, for each asset's kind
+   * @param locations - registry locations, carrying an `Erc20` asset's H160
    */
   private async resolvePool(
     at: string,
     factory: `0x${string}`,
-    cfg: V3PoolConfig
+    cfg: V3PoolConfig,
+    assets: Map<number, TAssetDetails>,
+    locations: Map<number, TAssetLocation>
   ): Promise<V3PoolRef | undefined> {
     const { assetA, assetB, fee } = cfg;
 
     const tickSpacing = TICK_SPACINGS[fee as FeeAmount];
-    if (tickSpacing === undefined) return undefined;
+    if (tickSpacing === undefined) {
+      this.log.error('v3_resolve_pool', `unknown fee tier ${fee}`, cfg);
+      return undefined;
+    }
 
-    const addrA = ERC20.fromAssetId(assetA).toLowerCase() as `0x${string}`;
-    const addrB = ERC20.fromAssetId(assetB).toLowerCase() as `0x${string}`;
+    const addrA = this.resolveAssetAddress(assetA, assets, locations);
+    const addrB = this.resolveAssetAddress(assetB, assets, locations);
     const aIsToken0 = addrA < addrB;
 
     const addr0 = aIsToken0 ? addrA : addrB;
@@ -161,7 +189,18 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
       addr1,
       fee
     );
-    if (!address) return undefined;
+    // A configured pool that does not resolve used to vanish here: `undefined` is
+    // filtered out by the caller, so the venue simply carried no route through it
+    // and said nothing. Say it — a curated entry that finds no pool is either a
+    // config error or a pool nobody created.
+    if (!address) {
+      this.log.error(
+        'v3_resolve_pool',
+        `no pool for assets ${assetA}/${assetB} at fee ${fee} ` +
+          `(token0 ${addr0}, token1 ${addr1}) — factory ${factory}`
+      );
+      return undefined;
+    }
 
     return {
       address,
@@ -225,14 +264,15 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     pool: UniswapV3PoolBase,
     at: string
   ): Promise<PoolMutation<UniswapV3PoolBase>[]> {
-    const addr0 = ERC20.fromAssetId(pool.token0).toLowerCase() as `0x${string}`;
-    const addr1 = ERC20.fromAssetId(pool.token1).toLowerCase() as `0x${string}`;
-
+    // Reuse the addresses the pool was loaded with. Rebuilding them from the
+    // asset ids would go through the alias, which for an `Erc20` asset is not
+    // where the token lives — the re-read would then miss the pool it is meant
+    // to refresh.
     const slice = await this.query.poolSlice.get(
       at,
       pool.address as `0x${string}`,
-      addr0,
-      addr1,
+      pool.addr0,
+      pool.addr1,
       pool.tickSpacing
     );
 

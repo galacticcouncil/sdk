@@ -38,6 +38,9 @@ function base(overrides: Partial<UniswapV3PoolBase> = {}): UniswapV3PoolBase {
     fee: 3000,
     token0: 1,
     token1: 2,
+    // Both are Token-kind here, so the alias IS the address.
+    addr0: '0x0000000000000000000000000000000100000001',
+    addr1: '0x0000000000000000000000000000000100000002',
     sqrtPriceX96: Q96,
     tick: 0,
     liquidity: 10n * UNIT,
