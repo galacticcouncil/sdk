@@ -127,12 +127,12 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
 
   /**
    * EVM parachains key balances by the derived h160 account when the asset's
-   * balance id is an evm address.
+   * balance id is an evm address, and by the normalized account otherwise.
    */
   private async resolveAccount(asset: Asset, address: string): Promise<string> {
     const assetId = this.getBalanceAssetId(asset);
     return EvmAddr.isValid(assetId.toString())
       ? this.getDerivatedAddress(address)
-      : address;
+      : this.getNormalizedAddress(address);
   }
 }

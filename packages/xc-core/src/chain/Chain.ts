@@ -3,12 +3,10 @@ import { log, rx } from '@galacticcouncil/common';
 import { catchError, combineLatest, map, of, retry, Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
-import { addr } from '../utils';
 import { BalanceType } from './balance';
 import { Dex } from './dex';
 
 const { logger } = log;
-const { EvmAddr, SolanaAddr, SuiAddr } = addr;
 
 /** Attempts to recover a dropped balance stream before giving up on it. */
 const BALANCE_RETRY = { count: 3, delay: 1000 };
@@ -180,13 +178,25 @@ export abstract class Chain<
     return this.getType() === ChainType.Parachain;
   }
 
+  /**
+   * Whether this chain can hold balances for a given address.
+   *
+   * - Answers the address space the chain accepts, not whether it is funded
+   * - Overridden per platform
+   *
+   * @param address - address to check
+   */
   isValidAddress(address: string): boolean {
-    if (this.isEvmChain()) return EvmAddr.isValid(address);
-    if (this.isSolana()) return SolanaAddr.isValid(address);
-    if (this.isSui()) return SuiAddr.isValid(address);
     return false;
   }
 
+  /**
+   * The account this chain keys balances under for a given address.
+   *
+   * - Identity here, overridden where an address needs deriving
+   *
+   * @param address - address valid on this chain
+   */
   getNormalizedAddress(address: string): string {
     return address;
   }

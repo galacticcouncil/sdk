@@ -203,7 +203,7 @@ export class Parachain<
   async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
     return this.balanceClient.getBalance(
       asset,
-      address,
+      this.getNormalizedAddress(address),
       this.getBalanceType(asset) as SubstrateBalanceType
     );
   }
@@ -211,7 +211,7 @@ export class Parachain<
   subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
     return this.balanceClient.subscribe(
       asset,
-      address,
+      this.getNormalizedAddress(address),
       this.getBalanceType(asset) as SubstrateBalanceType
     );
   }
@@ -234,7 +234,11 @@ export class Parachain<
     const streams = [
       ...[...batched].map(([type, group]) =>
         this.isolateBalances(
-          this.balanceClient.subscribeMany(group, address, type),
+          this.balanceClient.subscribeMany(
+            group,
+            this.getNormalizedAddress(address),
+            type
+          ),
           `${this.key} ${type} batch`
         )
       ),
@@ -271,7 +275,11 @@ export class Parachain<
     const [groups, single] = await Promise.all([
       Promise.allSettled(
         [...batched].map(([type, group]) =>
-          this.balanceClient.getMany(group, address, type)
+          this.balanceClient.getMany(
+            group,
+            this.getNormalizedAddress(address),
+            type
+          )
         )
       ),
       super.getBalances(rest, address),

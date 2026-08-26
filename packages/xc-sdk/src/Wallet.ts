@@ -248,9 +248,7 @@ export class Wallet {
       chains ?? [...this.config.chains.values()]
     );
     const results = await Promise.allSettled(
-      eligibleChains.map((chain) =>
-        chain.getBalances(chain.getAssets(), chain.getNormalizedAddress(address))
-      )
+      eligibleChains.map((chain) => this.getBalances(address, chain))
     );
 
     return results.map((result, i) => {
