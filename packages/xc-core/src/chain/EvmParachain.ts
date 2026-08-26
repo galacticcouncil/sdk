@@ -1,3 +1,5 @@
+import { h160 } from '@galacticcouncil/common';
+
 import { Chain as EvmChainDef } from 'viem';
 
 import { from, switchMap, Observable } from 'rxjs';
@@ -16,7 +18,8 @@ import { Wormhole, WormholeDef } from '../bridge';
 import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
-const { EvmAddr } = addr;
+const { EvmAddr, Ss58Addr } = addr;
+const { H160 } = h160;
 
 type EvmParachainBalanceType = SubstrateBalanceType | EvmBalanceType;
 
@@ -64,6 +67,26 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
 
   getType(): ChainType {
     return ChainType.EvmParachain;
+  }
+
+  /**
+   * Both ss58 and h160 resolve to the same account here, so either is valid.
+   * H160 native chains take h160 only.
+   */
+  override isValidAddress(address: string): boolean {
+    return this.usesH160Acc
+      ? EvmAddr.isValid(address)
+      : Ss58Addr.isValid(address) || EvmAddr.isValid(address);
+  }
+
+  /**
+   * H160 addresses map to their derived ss58 account. H160 native chains keep
+   * the address as is.
+   */
+  override getNormalizedAddress(address: string): string {
+    return !this.usesH160Acc && EvmAddr.isValid(address)
+      ? H160.toAccount(address)
+      : address;
   }
 
   async getDerivatedAddress(address: string): Promise<string> {

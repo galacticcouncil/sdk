@@ -24,7 +24,7 @@ import {
   DataOriginProcessor,
   DataDestinationProcessor,
 } from './transfer';
-import { Transfer } from './types';
+import { ChainBalancesResult, Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
 
@@ -221,6 +221,51 @@ export class Wallet {
   ): Promise<AssetAmount[]> {
     const target = this.config.getChain(chain);
     return target.getBalances(target.getAssets(), address);
+  }
+
+  /**
+   * Chains the address can hold a balance on
+   */
+  getChainsForAddress(
+    address: string,
+    chains: (string | AnyChain)[]
+  ): AnyChain[] {
+    return chains
+      .map((chain) => this.config.getChain(chain))
+      .filter((chain) => chain.isValidAddress(address));
+  }
+
+  /**
+   * Read balances in parallel across every chain the address is valid on.
+   * Defaults to all configured chains.
+   */
+  async getAllBalances(
+    address: string,
+    chains?: (string | AnyChain)[]
+  ): Promise<ChainBalancesResult[]> {
+    const eligibleChains = this.getChainsForAddress(
+      address,
+      chains ?? [...this.config.chains.values()]
+    );
+    const results = await Promise.allSettled(
+      eligibleChains.map((chain) =>
+        chain.getBalances(chain.getAssets(), chain.getNormalizedAddress(address))
+      )
+    );
+
+    return results.map((result, i) => {
+      const chainKey = eligibleChains[i].key;
+      return result.status === 'fulfilled'
+        ? { chainKey, balances: result.value }
+        : {
+            chainKey,
+            balances: [],
+            error:
+              result.reason instanceof Error
+                ? result.reason
+                : new Error(String(result.reason)),
+          };
+    });
   }
 
   /**

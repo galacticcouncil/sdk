@@ -5,6 +5,7 @@ import { big, log, SubstrateApis } from '@galacticcouncil/common';
 import { combineLatest, map, Observable } from 'rxjs';
 
 import { Asset, AssetAmount } from '../asset';
+import { addr } from '../utils';
 import {
   BalanceType,
   SubstrateBalanceClient,
@@ -21,6 +22,7 @@ import {
 } from './Chain';
 
 const { logger } = log;
+const { EvmAddr, Ss58Addr } = addr;
 
 /**
  * XCM multi-location objects (JSON-serializable)
@@ -150,6 +152,12 @@ export class Parachain<
 
   getType(): ChainType {
     return ChainType.Parachain;
+  }
+
+  override isValidAddress(address: string): boolean {
+    return this.usesH160Acc
+      ? EvmAddr.isValid(address)
+      : Ss58Addr.isValid(address);
   }
 
   async getSpec(): Promise<ParachainSpec> {
