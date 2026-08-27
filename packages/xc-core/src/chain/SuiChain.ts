@@ -13,6 +13,9 @@ import {
 } from './Chain';
 
 import { Wormhole, WormholeDef } from '../bridge';
+import { addr } from '../utils';
+
+const { SuiAddr } = addr;
 
 const SUI_NATIVE = 'SUI';
 const SUI_DECIMALS = 9;
@@ -55,6 +58,11 @@ export class SuiChain extends Chain<ChainAssetData, SuiBalanceType> {
 
   getType(): ChainType {
     return ChainType.SuiChain;
+  }
+
+  /** Sui keys balances by a 32-byte hex address. */
+  override isValidAddress(address: string): boolean {
+    return SuiAddr.isValid(address);
   }
 
   async getCurrency(): Promise<ChainCurrency> {

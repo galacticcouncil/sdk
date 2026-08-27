@@ -21,6 +21,9 @@ import {
   WormholeDef,
 } from '../bridge';
 import { EvmClient } from '../evm';
+import { addr } from '../utils';
+
+const { EvmAddr } = addr;
 
 export interface EvmChainParams extends ChainParams<
   ChainAssetData,
@@ -77,6 +80,11 @@ export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
 
   getType(): ChainType {
     return ChainType.EvmChain;
+  }
+
+  /** Evm chains key balances by an h160 address. */
+  override isValidAddress(address: string): boolean {
+    return EvmAddr.isValid(address);
   }
 
   async getCurrency(): Promise<ChainCurrency> {

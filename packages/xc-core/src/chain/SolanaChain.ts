@@ -14,12 +14,17 @@ import {
 } from './Chain';
 
 import { Wormhole, WormholeDef } from '../bridge';
+import { addr } from '../utils';
+
+const { SolanaAddr } = addr;
 
 const SOLANA_NATIVE = 'SOL';
 const SOLANA_DECIMALS = 9;
 
-export interface SolanaChainParams
-  extends ChainParams<ChainAssetData, SolanaBalanceType> {
+export interface SolanaChainParams extends ChainParams<
+  ChainAssetData,
+  SolanaBalanceType
+> {
   id: number;
   rpcUrls: ChainRpcs;
   wormhole?: WormholeDef;
@@ -59,6 +64,11 @@ export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
 
   getType(): ChainType {
     return ChainType.SolanaChain;
+  }
+
+  /** Solana keys balances by a base58 ed25519 public key. */
+  override isValidAddress(address: string): boolean {
+    return SolanaAddr.isValid(address);
   }
 
   async getCurrency(): Promise<ChainCurrency> {
