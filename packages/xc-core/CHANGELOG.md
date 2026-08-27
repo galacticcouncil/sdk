@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 2.4.0
+
+### Minor Changes
+
+- 4e62a17: feat(xc-sdk): multichain balances
+
 ## 2.3.0
 
 ### Minor Changes

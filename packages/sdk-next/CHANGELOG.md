@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 2.1.1
+
+### Patch Changes
+
+- fed8a50: staking periods account for the 2s block-time switch and ttl change to 1 hour
+
 ## 2.1.0
 
 ### Minor Changes
