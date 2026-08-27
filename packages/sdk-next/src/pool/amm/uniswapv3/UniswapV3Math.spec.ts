@@ -1,4 +1,3 @@
-import JSBI from 'jsbi';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
@@ -35,7 +34,7 @@ const MAX = nearestUsableTick(TickMath.MAX_TICK, SPACING);
 const UNIT = 10n ** 18n;
 
 type Fixture = {
-  sqrtPriceX96: JSBI;
+  sqrtPriceX96: ReturnType<typeof encodeSqrtRatioX96>;
   liquidity: bigint;
   ticks: V3Tick[];
 };
@@ -157,9 +156,9 @@ describe('quotes the chain would reject', () => {
   it('still quotes an exact-out the pool CAN fill', () => {
     const state = toState(fullRange);
     const small = UNIT / 1_000n;
-    expect(UniswapV3Math.calculateInGivenOut(state, true, small)).toBeGreaterThan(
-      0n
-    );
+    expect(
+      UniswapV3Math.calculateInGivenOut(state, true, small)
+    ).toBeGreaterThan(0n);
   });
 
   it('quotes a swap back INTO an exited band, where liquidity() is 0', () => {
@@ -174,6 +173,8 @@ describe('quotes the chain would reject', () => {
   it('still returns 0 when there is no liquidity in the traded direction', () => {
     const state = toState(outOfRange);
     // zeroForOne walks the price DOWN, away from the band — nothing to trade.
-    expect(UniswapV3Math.calculateOutGivenIn(state, true, UNIT / 100n)).toBe(0n);
+    expect(UniswapV3Math.calculateOutGivenIn(state, true, UNIT / 100n)).toBe(
+      0n
+    );
   });
 });

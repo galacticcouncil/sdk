@@ -91,7 +91,8 @@
   "devDependencies": {
     "@types/big.js": "^6.2.2",
     "@uniswap/sdk-core": "^7.17.0",
-    "@uniswap/v3-sdk": "^3.30.4"
+    "@uniswap/v3-sdk": "^3.30.4",
+    "jsbi": "^3.2.5"
   },
   "dependencies": {
     "@galacticcouncil/math-hsm": "^1.2.0",
