@@ -1,5 +1,3 @@
-import { FeeAmount, TICK_SPACINGS } from '@uniswap/v3-sdk';
-
 import { BlockRef } from '../../../api';
 
 import { PoolEventHandler, PoolMutation } from '../../events';
@@ -70,7 +68,13 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     const pools = await Promise.all(
       V3_POOLS.map(async (cfg) => {
         try {
-          const ref = await this.resolvePool(at, factory, cfg, assets, locations);
+          const ref = await this.resolvePool(
+            at,
+            factory,
+            cfg,
+            assets,
+            locations
+          );
           if (!ref) return undefined;
 
           const slice = await this.query.poolSlice.get(
@@ -169,9 +173,13 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   ): Promise<V3PoolRef | undefined> {
     const { assetA, assetB, fee } = cfg;
 
-    const tickSpacing = TICK_SPACINGS[fee as FeeAmount];
+    const tickSpacing = await this.query.tickSpacing.get(at, factory, fee);
     if (tickSpacing === undefined) {
-      this.log.error('v3_resolve_pool', `unknown fee tier ${fee}`, cfg);
+      this.log.error(
+        'v3_resolve_pool',
+        `fee tier ${fee} is not enabled on factory ${factory}`,
+        cfg
+      );
       return undefined;
     }
 

@@ -1,10 +1,9 @@
 import { SizedHex } from 'polkadot-api';
 
-import { TickMath, nearestUsableTick } from '@uniswap/v3-sdk';
-
 import { PoolQuery } from '../../PoolQuery';
 
 import { ERC20_ABI, FACTORY_ABI, POOL_ABI } from './abi';
+import { MAX_TICK, MIN_TICK, nearestUsableTick } from './math';
 import { V3Tick } from './types';
 
 /** The zero H160 — what an unset address and a missing pool both read as */
@@ -90,8 +89,8 @@ function isMissingStorageEntry(err: unknown): boolean {
 
 /** The usable min/max ticks for a spacing — the bounds of any swap walk */
 const boundTicks = (tickSpacing: number): number[] => [
-  nearestUsableTick(TickMath.MIN_TICK, tickSpacing),
-  nearestUsableTick(TickMath.MAX_TICK, tickSpacing),
+  nearestUsableTick(MIN_TICK, tickSpacing),
+  nearestUsableTick(MAX_TICK, tickSpacing),
 ];
 
 /** A pool's concentrated-liquidity state together with its reserves */
@@ -171,6 +170,32 @@ export class UniswapV3Query extends PoolQuery {
       return address.toLowerCase() === ADDRESS_ZERO ? undefined : address;
     },
     (factory, token0, token1, fee) => `${factory}:${token0}:${token1}:${fee}`,
+    'persistent'
+  );
+
+  /**
+   * The tick spacing the factory has enabled for a fee tier.
+   *
+   * - Read from the deployment rather than a hardcoded table: a factory owner
+   *   can enable a tier the canonical deployment never had, and an unenabled
+   *   tier reads as 0
+   * - A tier is never disabled once enabled, so the answer holds until reseed
+   */
+  readonly tickSpacing = this.cache.scope<
+    [`0x${string}`, number],
+    number | undefined
+  >(
+    'UniswapV3Factory.feeAmountTickSpacing',
+    async (_at, factory, fee) => {
+      const spacing = await this.evm.getWsProvider().readContract({
+        abi: FACTORY_ABI,
+        address: factory,
+        functionName: 'feeAmountTickSpacing',
+        args: [fee],
+      });
+      return spacing > 0 ? spacing : undefined;
+    },
+    (factory, fee) => `${factory}:${fee}`,
     'persistent'
   );
 

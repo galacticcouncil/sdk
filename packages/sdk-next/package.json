@@ -89,7 +89,9 @@
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
-    "@types/big.js": "^6.2.2"
+    "@types/big.js": "^6.2.2",
+    "@uniswap/sdk-core": "^7.17.0",
+    "@uniswap/v3-sdk": "^3.30.4"
   },
   "dependencies": {
     "@galacticcouncil/math-hsm": "^1.2.0",
@@ -102,10 +104,7 @@
     "@noble/hashes": "^1.6.1",
     "@thi.ng/cache": "^2.1.35",
     "@thi.ng/memoize": "^4.0.2",
-    "@uniswap/sdk-core": "^7.17.0",
-    "@uniswap/v3-sdk": "^3.30.4",
-    "big.js": "^6.2.1",
-    "jsbi": "^3.2.5"
+    "big.js": "^6.2.1"
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.2.0",

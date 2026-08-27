@@ -2,6 +2,7 @@ import { parseAbi } from 'viem';
 
 export const FACTORY_ABI = parseAbi([
   'function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)',
+  'function feeAmountTickSpacing(uint24 fee) view returns (int24 tickSpacing)',
 ]);
 
 export const POOL_ABI = parseAbi([

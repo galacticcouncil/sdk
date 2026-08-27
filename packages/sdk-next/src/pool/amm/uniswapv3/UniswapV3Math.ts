@@ -1,23 +1,20 @@
-import JSBI from 'jsbi';
-import {
-  FeeAmount,
-  LiquidityMath,
-  SwapMath,
-  Tick,
-  TickList,
-  TickMath,
-} from '@uniswap/v3-sdk';
-
 import { V3PoolState, V3Tick } from './types';
-
-const ZERO = JSBI.BigInt(0);
-const ONE = JSBI.BigInt(1);
-const NEGATIVE_ONE = JSBI.BigInt(-1);
+import {
+  MAX_SQRT_RATIO,
+  MAX_TICK,
+  MIN_SQRT_RATIO,
+  MIN_TICK,
+  computeSwapStep,
+  getSqrtRatioAtTick,
+  getTick,
+  getTickAtSqrtRatio,
+  nextInitializedTickWithinOneWord,
+} from './math';
 
 type SwapResult = {
-  amountCalculated: JSBI;
-  sqrtPriceX96: JSBI;
-  liquidity: JSBI;
+  amountCalculated: bigint;
+  sqrtPriceX96: bigint;
+  liquidity: bigint;
   tick: number;
   /**
    * Whether the requested amount was fully consumed.
@@ -36,15 +33,10 @@ export class UniswapV3Math {
     amountIn: bigint
   ): bigint {
     if (amountIn <= 0n) return 0n;
-    const result = UniswapV3Math.computeSwap(
-      state,
-      zeroForOne,
-      JSBI.BigInt(amountIn.toString())
-    );
+    const result = UniswapV3Math.computeSwap(state, zeroForOne, amountIn);
     // Exact-in is a best-effort sell: an input the pool cannot fully absorb still
     // yields whatever it bought, which is what the chain would do too.
-    const out = JSBI.multiply(result.amountCalculated, NEGATIVE_ONE);
-    return BigInt(out.toString());
+    return -result.amountCalculated;
   }
 
   static calculateInGivenOut(
@@ -53,67 +45,63 @@ export class UniswapV3Math {
     amountOut: bigint
   ): bigint {
     if (amountOut <= 0n) return 0n;
-    const result = UniswapV3Math.computeSwap(
-      state,
-      zeroForOne,
-      JSBI.multiply(JSBI.BigInt(amountOut.toString()), NEGATIVE_ONE)
-    );
+    const result = UniswapV3Math.computeSwap(state, zeroForOne, -amountOut);
     // A partial fill is not a cheap quote, it is a trade that reverts on-chain:
     // the router would compare an input priced for less than `amountOut` against
     // venues that can actually deliver it, pick this one, and fail at execution.
     if (!result.filled) return 0n;
-    return BigInt(result.amountCalculated.toString());
+    return result.amountCalculated;
   }
 
   private static computeSwap(
     state: V3PoolState,
     zeroForOne: boolean,
-    amountSpecified: JSBI
+    amountSpecified: bigint
   ): SwapResult {
-    const ticks = UniswapV3Math.buildTicks(state.ticks);
+    const ticks = UniswapV3Math.sortTicks(state.ticks);
     const tickSpacing = state.tickSpacing;
-    const fee = state.fee as FeeAmount;
+    const fee = state.fee;
 
     const sqrtPriceLimitX96 = zeroForOne
-      ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
-      : JSBI.subtract(TickMath.MAX_SQRT_RATIO, ONE);
+      ? MIN_SQRT_RATIO + 1n
+      : MAX_SQRT_RATIO - 1n;
 
-    const exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO);
+    const exactInput = amountSpecified >= 0n;
 
     let amountSpecifiedRemaining = amountSpecified;
-    let amountCalculated = ZERO;
-    let sqrtPriceX96 = JSBI.BigInt(state.sqrtPriceX96.toString());
+    let amountCalculated = 0n;
+    let sqrtPriceX96 = state.sqrtPriceX96;
     let tick = state.tick;
-    let liquidity = JSBI.BigInt(state.liquidity.toString());
+    let liquidity = state.liquidity;
 
     while (
-      JSBI.notEqual(amountSpecifiedRemaining, ZERO) &&
-      JSBI.notEqual(sqrtPriceX96, sqrtPriceLimitX96)
+      amountSpecifiedRemaining !== 0n &&
+      sqrtPriceX96 !== sqrtPriceLimitX96
     ) {
       const sqrtPriceStartX96 = sqrtPriceX96;
 
-      let [tickNext, initialized] = TickList.nextInitializedTickWithinOneWord(
+      let [tickNext, initialized] = nextInitializedTickWithinOneWord(
         ticks,
         tick,
         zeroForOne,
         tickSpacing
       );
 
-      if (tickNext < TickMath.MIN_TICK) tickNext = TickMath.MIN_TICK;
-      else if (tickNext > TickMath.MAX_TICK) tickNext = TickMath.MAX_TICK;
+      if (tickNext < MIN_TICK) tickNext = MIN_TICK;
+      else if (tickNext > MAX_TICK) tickNext = MAX_TICK;
 
-      const sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(tickNext);
+      const sqrtPriceNextX96 = getSqrtRatioAtTick(tickNext);
 
       const sqrtPriceTargetX96 = (
         zeroForOne
-          ? JSBI.lessThan(sqrtPriceNextX96, sqrtPriceLimitX96)
-          : JSBI.greaterThan(sqrtPriceNextX96, sqrtPriceLimitX96)
+          ? sqrtPriceNextX96 < sqrtPriceLimitX96
+          : sqrtPriceNextX96 > sqrtPriceLimitX96
       )
         ? sqrtPriceLimitX96
         : sqrtPriceNextX96;
 
       const [nextSqrtPriceX96, amountInStep, amountOutStep, feeStep] =
-        SwapMath.computeSwapStep(
+        computeSwapStep(
           sqrtPriceX96,
           sqrtPriceTargetX96,
           liquidity,
@@ -124,33 +112,21 @@ export class UniswapV3Math {
       sqrtPriceX96 = nextSqrtPriceX96;
 
       if (exactInput) {
-        amountSpecifiedRemaining = JSBI.subtract(
-          amountSpecifiedRemaining,
-          JSBI.add(amountInStep, feeStep)
-        );
-        amountCalculated = JSBI.subtract(amountCalculated, amountOutStep);
+        amountSpecifiedRemaining -= amountInStep + feeStep;
+        amountCalculated -= amountOutStep;
       } else {
-        amountSpecifiedRemaining = JSBI.add(
-          amountSpecifiedRemaining,
-          amountOutStep
-        );
-        amountCalculated = JSBI.add(
-          amountCalculated,
-          JSBI.add(amountInStep, feeStep)
-        );
+        amountSpecifiedRemaining += amountOutStep;
+        amountCalculated += amountInStep + feeStep;
       }
 
-      if (JSBI.equal(sqrtPriceX96, sqrtPriceNextX96)) {
+      if (sqrtPriceX96 === sqrtPriceNextX96) {
         if (initialized) {
-          let liquidityNet = TickList.getTick(ticks, tickNext).liquidityNet;
-          if (zeroForOne) {
-            liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE);
-          }
-          liquidity = LiquidityMath.addDelta(liquidity, liquidityNet);
+          const liquidityNet = getTick(ticks, tickNext).liquidityNet;
+          liquidity += zeroForOne ? -liquidityNet : liquidityNet;
         }
         tick = zeroForOne ? tickNext - 1 : tickNext;
-      } else if (JSBI.notEqual(sqrtPriceX96, sqrtPriceStartX96)) {
-        tick = TickMath.getTickAtSqrtRatio(sqrtPriceX96);
+      } else if (sqrtPriceX96 !== sqrtPriceStartX96) {
+        tick = getTickAtSqrtRatio(sqrtPriceX96);
       }
     }
 
@@ -159,20 +135,11 @@ export class UniswapV3Math {
       sqrtPriceX96,
       liquidity,
       tick,
-      filled: JSBI.equal(amountSpecifiedRemaining, ZERO),
+      filled: amountSpecifiedRemaining === 0n,
     };
   }
 
-  private static buildTicks(ticks: V3Tick[]): Tick[] {
-    return ticks
-      .map(
-        (t) =>
-          new Tick({
-            index: t.index,
-            liquidityGross: t.liquidityGross.toString(),
-            liquidityNet: t.liquidityNet.toString(),
-          })
-      )
-      .sort((a, b) => a.index - b.index);
+  private static sortTicks(ticks: V3Tick[]): V3Tick[] {
+    return [...ticks].sort((a, b) => a.index - b.index);
   }
 }
