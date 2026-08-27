@@ -1,5 +1,5 @@
 import { UniswapV3PoolClient } from './UniswapV3PoolClient';
-import { ticksInWord, windowWords } from './UniswapV3Query';
+import { ticksInWord, virtualReserves, windowWords } from './UniswapV3Query';
 
 describe('Uniswap V3 Pool Client', () => {
   it('Should expose the client class', () => {
@@ -51,5 +51,34 @@ describe('windowWords', () => {
 
   it('never asks for zero words', () => {
     expect(windowWords(200).words).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('virtualReserves', () => {
+  const Q96 = 2n ** 96n;
+  const UNIT = 10n ** 18n;
+
+  it('reports L in both tokens at a price of one', () => {
+    const { reserve0, reserve1 } = virtualReserves(Q96, 10n * UNIT);
+    expect(reserve0).toBe(10n * UNIT);
+    expect(reserve1).toBe(10n * UNIT);
+  });
+
+  it('matches the runtime liquidity_depth formula', () => {
+    // token0 = L * 2^96 / sqrtP, token1 = L * sqrtP / 2^96
+    const sqrtPriceX96 = 2n ** 97n; // price 4, token1 per token0
+    const liquidity = 7n * UNIT;
+    const { reserve0, reserve1 } = virtualReserves(sqrtPriceX96, liquidity);
+
+    expect(reserve0).toBe((liquidity << 96n) / sqrtPriceX96);
+    expect(reserve1).toBe((liquidity * sqrtPriceX96) >> 96n);
+    // sqrt(4) = 2, so half as much token0 and twice as much token1.
+    expect(reserve0).toBe(liquidity / 2n);
+    expect(reserve1).toBe(liquidity * 2n);
+  });
+
+  it('collapses to zero when the price is outside every position', () => {
+    expect(virtualReserves(Q96, 0n)).toEqual({ reserve0: 0n, reserve1: 0n });
+    expect(virtualReserves(0n, UNIT)).toEqual({ reserve0: 0n, reserve1: 0n });
   });
 });

@@ -80,8 +80,6 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
           const slice = await this.query.poolSlice.get(
             at,
             ref.address,
-            ref.addr0,
-            ref.addr1,
             ref.tickSpacing
           );
 
@@ -106,19 +104,22 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
                 id: ref.token0,
                 decimals: meta0?.decimals,
                 existentialDeposit: meta0?.existential_deposit ?? 0n,
-                balance: slice.balance0,
+                balance: slice.reserve0,
                 type: meta0?.asset_type.type,
               },
               {
                 id: ref.token1,
                 decimals: meta1?.decimals,
                 existentialDeposit: meta1?.existential_deposit ?? 0n,
-                balance: slice.balance1,
+                balance: slice.reserve1,
                 type: meta1?.asset_type.type,
               },
             ],
-            maxInRatio: 3n,
-            maxOutRatio: 3n,
+            // Nothing on chain caps a v3 trade by pool size. Same sentinel the
+            // Aave venue uses; `UniswapV3Pool` skips the ratio checks entirely
+            // and reports an unfillable order instead.
+            maxInRatio: 0n,
+            maxOutRatio: 0n,
             minTradingLimit: 0n,
           } as UniswapV3PoolBase;
         } catch (e) {
@@ -272,15 +273,9 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     pool: UniswapV3PoolBase,
     at: string
   ): Promise<PoolMutation<UniswapV3PoolBase>[]> {
-    // Reuse the addresses the pool was loaded with. Rebuilding them from the
-    // asset ids would go through the alias, which for an `Erc20` asset is not
-    // where the token lives — the re-read would then miss the pool it is meant
-    // to refresh.
     const slice = await this.query.poolSlice.get(
       at,
       pool.address as `0x${string}`,
-      pool.addr0,
-      pool.addr1,
       pool.tickSpacing
     );
 
@@ -297,14 +292,14 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     pool: UniswapV3PoolBase,
     slice: V3PoolSlice
   ): UniswapV3PoolBase {
-    const { balance0, balance1, ...state } = slice;
+    const { reserve0, reserve1, ...state } = slice;
     return {
       ...pool,
       ...state,
       tokens: pool.tokens.map((t) =>
         t.id === pool.token0
-          ? { ...t, balance: balance0 }
-          : { ...t, balance: balance1 }
+          ? { ...t, balance: reserve0 }
+          : { ...t, balance: reserve1 }
       ),
     };
   }

@@ -1,5 +1,5 @@
 import { PoolFactory } from '../../PoolFactory';
-import { PoolType } from '../../types';
+import { PoolError, PoolType } from '../../types';
 
 import { UniswapV3Math } from './UniswapV3Math';
 import { UniswapV3Pool } from './UniswapV3Pool';
@@ -32,8 +32,8 @@ function base(overrides: Partial<UniswapV3PoolBase> = {}): UniswapV3PoolBase {
         type: 'Token',
       },
     ],
-    maxInRatio: 3n,
-    maxOutRatio: 3n,
+    maxInRatio: 0n,
+    maxOutRatio: 0n,
     minTradingLimit: 1n,
     fee: 3000,
     token0: 1,
@@ -47,7 +47,11 @@ function base(overrides: Partial<UniswapV3PoolBase> = {}): UniswapV3PoolBase {
     tickSpacing: 60,
     ticks: [
       { index: MIN_TICK, liquidityNet: 10n * UNIT, liquidityGross: 10n * UNIT },
-      { index: MAX_TICK, liquidityNet: -10n * UNIT, liquidityGross: 10n * UNIT },
+      {
+        index: MAX_TICK,
+        liquidityNet: -10n * UNIT,
+        liquidityGross: 10n * UNIT,
+      },
     ],
     ...overrides,
   };
@@ -83,7 +87,9 @@ describe('Uniswap V3 Pool', () => {
     const b = base();
     const pool = UniswapV3Pool.fromPool(b);
     const actual = pool.calculateOutGivenIn(pool.parsePair(1, 2), UNIT, NET);
-    expect(actual).toBe(UniswapV3Math.calculateOutGivenIn(state(b), true, UNIT));
+    expect(actual).toBe(
+      UniswapV3Math.calculateOutGivenIn(state(b), true, UNIT)
+    );
     expect(actual).toBeGreaterThan(0n);
   });
 
@@ -91,7 +97,9 @@ describe('Uniswap V3 Pool', () => {
     const b = base();
     const pool = UniswapV3Pool.fromPool(b);
     const actual = pool.calculateOutGivenIn(pool.parsePair(2, 1), UNIT, NET);
-    expect(actual).toBe(UniswapV3Math.calculateOutGivenIn(state(b), false, UNIT));
+    expect(actual).toBe(
+      UniswapV3Math.calculateOutGivenIn(state(b), false, UNIT)
+    );
   });
 
   it('Should report gross output, net output and effective fee on sell', () => {
@@ -112,6 +120,29 @@ describe('Uniswap V3 Pool', () => {
     expect(ctx.amountIn).toBe(pool.calculateInGivenOut(pair, UNIT / 2n, NET));
     expect(ctx.amountIn > ctx.calculatedIn).toBe(true);
     expect(ctx.feePct).toBeCloseTo(0.3, 1);
+  });
+
+  it('Should not cap a trade by a fraction of the pool balance', () => {
+    // Half the pool's reported depth — a max-in/max-out ratio of 3 would have
+    // rejected this, but nothing on chain caps a v3 trade by pool size.
+    const pool = UniswapV3Pool.fromPool(base());
+    const pair = pool.parsePair(1, 2);
+    const half = pair.balanceIn / 2n;
+
+    const ctx = pool.validateAndSell(pair, half, null);
+    expect(ctx.errors).toEqual([]);
+    expect(ctx.amountOut).toBeGreaterThan(0n);
+  });
+
+  it('Should reject an exact-out the pool cannot fill', () => {
+    const pool = UniswapV3Pool.fromPool(base());
+    const pair = pool.parsePair(1, 2);
+    // Far beyond what the fixture's liquidity can deliver, so the tick walk
+    // never fills and prices it at zero.
+    const ctx = pool.validateAndBuy(pair, 1_000_000n * UNIT, null);
+
+    expect(ctx.amountIn).toBe(0n);
+    expect(ctx.errors).toContain(PoolError.TradeNotAllowed);
   });
 
   it('Should return unit spot in both directions for a 1:1 pool', () => {

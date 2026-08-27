@@ -11,7 +11,3 @@ export const POOL_ABI = parseAbi([
   'function tickBitmap(int16 wordPosition) view returns (uint256)',
   'function ticks(int24 tick) view returns (uint128 liquidityGross, int128 liquidityNet, uint256 feeGrowthOutside0X128, uint256 feeGrowthOutside1X128, int56 tickCumulativeOutside, uint160 secondsPerLiquidityOutsideX128, uint32 secondsOutside, bool initialized)',
 ]);
-
-export const ERC20_ABI = parseAbi([
-  'function balanceOf(address account) view returns (uint256)',
-]);

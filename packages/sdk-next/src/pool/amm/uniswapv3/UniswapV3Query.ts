@@ -2,7 +2,7 @@ import { SizedHex } from 'polkadot-api';
 
 import { PoolQuery } from '../../PoolQuery';
 
-import { ERC20_ABI, FACTORY_ABI, POOL_ABI } from './abi';
+import { FACTORY_ABI, POOL_ABI } from './abi';
 import { MAX_TICK, MIN_TICK, nearestUsableTick } from './math';
 import { V3Tick } from './types';
 
@@ -93,14 +93,51 @@ const boundTicks = (tickSpacing: number): number[] => [
   nearestUsableTick(MAX_TICK, tickSpacing),
 ];
 
-/** A pool's concentrated-liquidity state together with its reserves */
+/**
+ * The constant-product reserves equivalent to the ACTIVE liquidity at the
+ * current price:
+ *
+ * ```text
+ * token0 = L / sqrt(P) = L * 2^96 / sqrtPriceX96
+ * token1 = L * sqrt(P) = L * sqrtPriceX96 / 2^96
+ * ```
+ *
+ * This is what depth means for a concentrated pool, and it is what the runtime's
+ * `UniswapV3TradeExecutor::liquidity_depth` reports. `balanceOf` is the wrong
+ * quantity: it counts liquidity parked outside the current tick range and fees
+ * not yet collected, neither of which a trade at this price can touch — a
+ * managed vault holding a wide base band plus a one-sided limit order reports
+ * several times what is actually swappable. It is also skewed at a band edge,
+ * where the pool holds almost none of the token it can absorb the most of.
+ *
+ * Still an upper bound — the real amount is bounded by the band edge — but an
+ * upper bound on the right quantity, and it collapses to zero exactly when the
+ * price sits outside every position.
+ *
+ * @param sqrtPriceX96 - the pool's current Q64.96 sqrt price
+ * @param liquidity - the pool's active liquidity
+ */
+export function virtualReserves(
+  sqrtPriceX96: bigint,
+  liquidity: bigint
+): { reserve0: bigint; reserve1: bigint } {
+  if (liquidity <= 0n || sqrtPriceX96 <= 0n) {
+    return { reserve0: 0n, reserve1: 0n };
+  }
+  return {
+    reserve0: (liquidity << 96n) / sqrtPriceX96,
+    reserve1: (liquidity * sqrtPriceX96) >> 96n,
+  };
+}
+
+/** A pool's concentrated-liquidity state together with its depth */
 export type V3PoolSlice = {
   sqrtPriceX96: bigint;
   tick: number;
   liquidity: bigint;
   ticks: V3Tick[];
-  balance0: bigint;
-  balance1: bigint;
+  reserve0: bigint;
+  reserve1: bigint;
 };
 
 /**
@@ -200,61 +237,45 @@ export class UniswapV3Query extends PoolQuery {
   );
 
   /**
-   * A pool's price, liquidity, initialized ticks and reserves.
+   * A pool's price, liquidity, initialized ticks and depth.
    *
    * - Read as one slice so a quote can't be assembled from two EVM tips
    * - Block-scoped: one read per pool per block, dropped when the block moves
    */
-  readonly poolSlice = this.cache.scope<
-    [`0x${string}`, `0x${string}`, `0x${string}`, number],
-    V3PoolSlice
-  >(
+  readonly poolSlice = this.cache.scope<[`0x${string}`, number], V3PoolSlice>(
     'UniswapV3Pool.slice',
-    (_at, address, token0, token1, tickSpacing) =>
-      this.readSlice(address, token0, token1, tickSpacing),
+    (_at, address, tickSpacing) => this.readSlice(address, tickSpacing),
     (address) => address,
     'block'
   );
 
   private async readSlice(
     address: `0x${string}`,
-    token0: `0x${string}`,
-    token1: `0x${string}`,
     tickSpacing: number
   ): Promise<V3PoolSlice> {
     const client = this.evm.getWsProvider();
 
-    const [slot0, liquidity, balance0, balance1] = await Promise.all([
+    const [slot0, liquidity] = await Promise.all([
       client.readContract({ abi: POOL_ABI, address, functionName: 'slot0' }),
       client.readContract({
         abi: POOL_ABI,
         address,
         functionName: 'liquidity',
       }),
-      client.readContract({
-        abi: ERC20_ABI,
-        address: token0,
-        functionName: 'balanceOf',
-        args: [address],
-      }),
-      client.readContract({
-        abi: ERC20_ABI,
-        address: token1,
-        functionName: 'balanceOf',
-        args: [address],
-      }),
     ]);
 
+    const sqrtPriceX96 = slot0[0];
     const tick = slot0[1];
     const ticks = await this.readTicks(address, tick, tickSpacing);
+    const { reserve0, reserve1 } = virtualReserves(sqrtPriceX96, liquidity);
 
     return {
-      sqrtPriceX96: slot0[0],
+      sqrtPriceX96,
       tick,
       liquidity,
       ticks,
-      balance0,
-      balance1,
+      reserve0,
+      reserve1,
     };
   }
 

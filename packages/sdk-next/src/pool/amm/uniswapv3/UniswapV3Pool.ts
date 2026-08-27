@@ -135,6 +135,15 @@ export class UniswapV3Pool implements Pool {
     return this.normalizeSpot(spot, poolPair.decimalsOut, poolPair.decimalsIn);
   }
 
+  /**
+   * Sell `amountIn`, reporting gross output, net output and effective fee.
+   *
+   * - No max-in/max-out ratio: nothing on chain caps a v3 trade by pool size,
+   *   and there is no reserve to take a fraction of — a concentrated pool's
+   *   depth is its active liquidity, which the tick walk already respects
+   * - An input the pool cannot fully absorb simply buys less, which is what the
+   *   chain would do too
+   */
   validateAndSell(
     poolPair: PoolPair,
     amountIn: bigint,
@@ -146,18 +155,11 @@ export class UniswapV3Pool implements Pool {
 
     const errors: PoolError[] = [];
 
-    if (amountIn < this.minTradingLimit || calculatedOut < poolPair.assetOutEd) {
+    if (
+      amountIn < this.minTradingLimit ||
+      calculatedOut < poolPair.assetOutEd
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
-    }
-
-    const poolInReserve = poolPair.balanceIn / this.maxInRatio;
-    if (amountIn > poolInReserve) {
-      errors.push(PoolError.MaxInRatioExceeded);
-    }
-
-    const poolOutReserve = poolPair.balanceOut / this.maxOutRatio;
-    if (amountOut > poolOutReserve) {
-      errors.push(PoolError.MaxOutRatioExceeded);
     }
 
     return {
@@ -169,6 +171,14 @@ export class UniswapV3Pool implements Pool {
     } as SellCtx;
   }
 
+  /**
+   * Buy `amountOut`, reporting gross input, net input and effective fee.
+   *
+   * - No max-in/max-out ratio, for the reason in {@link validateAndSell}
+   * - An exact-out the pool cannot fill prices at zero — the size guard that
+   *   matters here, since a zero-priced route would otherwise out-bid every
+   *   venue that can actually deliver and then revert on chain
+   */
   validateAndBuy(
     poolPair: PoolPair,
     amountOut: bigint,
@@ -180,18 +190,13 @@ export class UniswapV3Pool implements Pool {
 
     const errors: PoolError[] = [];
 
-    if (amountOut < this.minTradingLimit || calculatedIn < poolPair.assetInEd) {
+    if (amountIn === 0n || calculatedIn === 0n) {
+      errors.push(PoolError.TradeNotAllowed);
+    } else if (
+      amountOut < this.minTradingLimit ||
+      calculatedIn < poolPair.assetInEd
+    ) {
       errors.push(PoolError.InsufficientTradingAmount);
-    }
-
-    const poolOutReserve = poolPair.balanceOut / this.maxOutRatio;
-    if (amountOut > poolOutReserve) {
-      errors.push(PoolError.MaxOutRatioExceeded);
-    }
-
-    const poolInReserve = poolPair.balanceIn / this.maxInRatio;
-    if (amountIn > poolInReserve) {
-      errors.push(PoolError.MaxInRatioExceeded);
     }
 
     return {
