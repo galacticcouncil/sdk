@@ -51,6 +51,18 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
     return { fee: [pool?.fee ?? 0, FEE_DENOMINATOR] } as UniswapV3PoolFees;
   }
 
+  /**
+   * The configured pools, resolved and read at one block.
+   *
+   * - A configured pool the factory has no deployment for is skipped; that is
+   *   an answer, and {@link resolvePool} says so
+   * - A read that FAILS is not an answer and is not swallowed. Publishing a
+   *   pool set that quietly omits a pool the venue routes through hands the
+   *   router a complete-looking answer computed without it, and the resulting
+   *   quote is indistinguishable from a healthy one
+   *
+   * @param block - block every read pins to
+   */
   async loadPools(block: BlockRef): Promise<UniswapV3PoolBase[]> {
     const at = block.hash;
 
@@ -67,65 +79,54 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
 
     const pools = await Promise.all(
       V3_POOLS.map(async (cfg) => {
-        try {
-          const ref = await this.resolvePool(
-            at,
-            factory,
-            cfg,
-            assets,
-            locations
-          );
-          if (!ref) return undefined;
+        const ref = await this.resolvePool(at, factory, cfg, assets, locations);
+        if (!ref) return undefined;
 
-          const slice = await this.query.poolSlice.get(
-            at,
-            ref.address,
-            ref.tickSpacing
-          );
+        const slice = await this.query.poolSlice.get(
+          at,
+          ref.address,
+          ref.tickSpacing
+        );
 
-          const meta0 = assets.get(ref.token0);
-          const meta1 = assets.get(ref.token1);
+        const meta0 = assets.get(ref.token0);
+        const meta1 = assets.get(ref.token1);
 
-          return {
-            address: ref.address,
-            type: PoolType.V3,
-            token0: ref.token0,
-            token1: ref.token1,
-            fee: ref.fee,
-            tickSpacing: ref.tickSpacing,
-            addr0: ref.addr0,
-            addr1: ref.addr1,
-            sqrtPriceX96: slice.sqrtPriceX96,
-            tick: slice.tick,
-            liquidity: slice.liquidity,
-            ticks: slice.ticks,
-            tokens: [
-              {
-                id: ref.token0,
-                decimals: meta0?.decimals,
-                existentialDeposit: meta0?.existential_deposit ?? 0n,
-                balance: slice.reserve0,
-                type: meta0?.asset_type.type,
-              },
-              {
-                id: ref.token1,
-                decimals: meta1?.decimals,
-                existentialDeposit: meta1?.existential_deposit ?? 0n,
-                balance: slice.reserve1,
-                type: meta1?.asset_type.type,
-              },
-            ],
-            // Nothing on chain caps a v3 trade by pool size. Same sentinel the
-            // Aave venue uses; `UniswapV3Pool` skips the ratio checks entirely
-            // and reports an unfillable order instead.
-            maxInRatio: 0n,
-            maxOutRatio: 0n,
-            minTradingLimit: 0n,
-          } as UniswapV3PoolBase;
-        } catch (e) {
-          this.log.error('v3_load_pool', cfg, e);
-          return undefined;
-        }
+        return {
+          address: ref.address,
+          type: PoolType.V3,
+          token0: ref.token0,
+          token1: ref.token1,
+          fee: ref.fee,
+          tickSpacing: ref.tickSpacing,
+          addr0: ref.addr0,
+          addr1: ref.addr1,
+          sqrtPriceX96: slice.sqrtPriceX96,
+          tick: slice.tick,
+          liquidity: slice.liquidity,
+          ticks: slice.ticks,
+          tokens: [
+            {
+              id: ref.token0,
+              decimals: meta0?.decimals,
+              existentialDeposit: meta0?.existential_deposit ?? 0n,
+              balance: slice.reserve0,
+              type: meta0?.asset_type.type,
+            },
+            {
+              id: ref.token1,
+              decimals: meta1?.decimals,
+              existentialDeposit: meta1?.existential_deposit ?? 0n,
+              balance: slice.reserve1,
+              type: meta1?.asset_type.type,
+            },
+          ],
+          // Nothing on chain caps a v3 trade by pool size. Same sentinel the
+          // Aave venue uses; `UniswapV3Pool` skips the ratio checks entirely
+          // and reports an unfillable order instead.
+          maxInRatio: 0n,
+          maxOutRatio: 0n,
+          minTradingLimit: 0n,
+        } as UniswapV3PoolBase;
       })
     );
 
@@ -174,7 +175,19 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   ): Promise<V3PoolRef | undefined> {
     const { assetA, assetB, fee } = cfg;
 
-    const tickSpacing = await this.query.tickSpacing.get(at, factory, fee);
+    const addrA = this.resolveAssetAddress(assetA, assets, locations);
+    const addrB = this.resolveAssetAddress(assetB, assets, locations);
+    const aIsToken0 = addrA < addrB;
+
+    const addr0 = aIsToken0 ? addrA : addrB;
+    const addr1 = aIsToken0 ? addrB : addrA;
+
+    // Both ask the factory and neither needs the other's answer.
+    const [tickSpacing, address] = await Promise.all([
+      this.query.tickSpacing.get(at, factory, fee),
+      this.query.poolAddress.get(at, factory, addr0, addr1, fee),
+    ]);
+
     if (tickSpacing === undefined) {
       this.log.error(
         'v3_resolve_pool',
@@ -183,21 +196,6 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
       );
       return undefined;
     }
-
-    const addrA = this.resolveAssetAddress(assetA, assets, locations);
-    const addrB = this.resolveAssetAddress(assetB, assets, locations);
-    const aIsToken0 = addrA < addrB;
-
-    const addr0 = aIsToken0 ? addrA : addrB;
-    const addr1 = aIsToken0 ? addrB : addrA;
-
-    const address = await this.query.poolAddress.get(
-      at,
-      factory,
-      addr0,
-      addr1,
-      fee
-    );
     // A configured pool that does not resolve used to vanish here: `undefined` is
     // filtered out by the caller, so the venue simply carried no route through it
     // and said nothing. Say it — a curated entry that finds no pool is either a

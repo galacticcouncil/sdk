@@ -42,6 +42,16 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
 
   private readonly active: Set<PoolType> = new Set([]);
   private readonly pools: Map<string, PoolBase> = new Map([]);
+
+  /**
+   * Venues whose pool set the map already holds.
+   *
+   * - A venue joins once ONE load has established its set, empty included: a
+   *   venue with no pools on this chain emits nothing, so subscription traffic
+   *   alone cannot tell "none here" from "not read yet"
+   * - A venue whose load fails never joins, so the next read tries again
+   */
+  private readonly loaded: Set<PoolType> = new Set([]);
   private readonly clients: (
     | AavePoolClient
     | OmniPoolClient
@@ -60,7 +70,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private lbpSub: Subscription = Subscription.EMPTY;
   private v3Sub: Subscription = Subscription.EMPTY;
 
-  private isReady: boolean = false;
+  private pending?: Promise<PoolBase[]>;
   private isDestroyed = new Subject<boolean>();
 
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
@@ -97,10 +107,32 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
       .subscribe((pools: T[]) => {
-        pools.forEach((p) => {
-          this.pools.set(p.address, p);
-        });
+        this.absorb(client.getPoolType(), pools);
       });
+  }
+
+  /** Fold a venue's pools into the map and record that it has been read */
+  private absorb(type: PoolType, pools: readonly PoolBase[]): void {
+    for (const pool of pools) {
+      this.pools.set(pool.address, pool);
+    }
+    this.loaded.add(type);
+  }
+
+  /**
+   * Whether the map holds every active venue.
+   *
+   * - Serving a partial set as if it were complete routes around a venue that
+   *   is merely slow, and the quote looks perfectly healthy
+   * - A fixed block has no subscription keeping the map fresh, so it is never
+   *   ready and every read loads again
+   */
+  private get isReady(): boolean {
+    if (this.isSnapshot) return false;
+    for (const type of this.active) {
+      if (!this.loaded.has(type)) return false;
+    }
+    return true;
   }
 
   public withAave(): this {
@@ -163,7 +195,8 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.isDestroyed.complete();
     this.active.clear();
     this.pools.clear();
-    this.isReady = false;
+    this.loaded.clear();
+    this.pending = undefined;
   }
 
   public async getPools(at: BlockAt = this.at): Promise<PoolBase[]> {
@@ -171,17 +204,40 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       const pools = this.pools.values();
       return Array.from(pools);
     }
+    return this.loadAll(at);
+  }
 
-    const pools = await Promise.all(
-      this.clients
-        .filter((client) => this.active.has(client.getPoolType()))
-        .map((client) => client.getPools(at))
+  /**
+   * Read every active venue at one block.
+   *
+   * - Concurrent callers share one pass; a venue that is slow to seed would
+   *   otherwise be re-read once per quote
+   * - Folds the result in directly rather than waiting for it to arrive back
+   *   through the venue's subscription
+   *
+   * @param at - block to read at
+   */
+  private loadAll(at: BlockAt): Promise<PoolBase[]> {
+    if (this.pending) return this.pending;
+
+    const clients = this.clients.filter((client) =>
+      this.active.has(client.getPoolType())
     );
-    /**
-     * Only a subscription keeps the map fresh; a fixed target reads every time.
-     */
-    this.isReady = !this.isSnapshot;
-    return pools.flat();
+
+    this.pending = Promise.all(clients.map((client) => client.getPools(at)))
+      .then((sets) => {
+        if (!this.isSnapshot) {
+          clients.forEach((client, i) =>
+            this.absorb(client.getPoolType(), sets[i])
+          );
+        }
+        return sets.flat();
+      })
+      .finally(() => {
+        this.pending = undefined;
+      });
+
+    return this.pending;
   }
 
   public async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {
