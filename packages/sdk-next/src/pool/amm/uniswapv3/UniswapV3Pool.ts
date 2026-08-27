@@ -25,14 +25,10 @@ const SPOT_SCALE = 10n ** BigInt(RUNTIME_DECIMALS);
 const Q192 = 192n;
 
 /**
- * Concrete Uniswap v3 pool. Implements the synchronous router `Pool` interface
- * by delegating swap math to `UniswapV3Math` (a tick-walk over the pool's
- * loaded concentrated liquidity) and deriving the spot price from `sqrtPriceX96`.
+ * Concrete Uniswap v3 pool, quoting by a tick walk over the loaded liquidity.
  *
- * The v3 fee is taken inside the swap, so — mirroring `OmniPool`/`StableSwap` —
- * `calculate*` returns the gross (fee-less) amount when called without `fees`
- * and the net amount when called with them; `validateAndSell/Buy` use the two
- * to report the effective fee.
+ * The fee is taken inside the swap, so `calculate*` returns the gross amount
+ * without `fees` and the net amount with them; the pair gives the effective fee.
  */
 export class UniswapV3Pool implements Pool {
   type: PoolType;
@@ -138,11 +134,9 @@ export class UniswapV3Pool implements Pool {
   /**
    * Sell `amountIn`, reporting gross output, net output and effective fee.
    *
-   * - No max-in/max-out ratio: nothing on chain caps a v3 trade by pool size,
-   *   and there is no reserve to take a fraction of — a concentrated pool's
-   *   depth is its active liquidity, which the tick walk already respects
-   * - An input the pool cannot fully absorb simply buys less, which is what the
-   *   chain would do too
+   * - No size cap: a concentrated pool's depth is its active liquidity, which
+   *   the tick walk already respects
+   * - An input the pool cannot fully absorb simply buys less
    */
   validateAndSell(
     poolPair: PoolPair,
@@ -174,10 +168,9 @@ export class UniswapV3Pool implements Pool {
   /**
    * Buy `amountOut`, reporting gross input, net input and effective fee.
    *
-   * - No max-in/max-out ratio, for the reason in {@link validateAndSell}
-   * - An exact-out the pool cannot fill prices at zero — the size guard that
-   *   matters here, since a zero-priced route would otherwise out-bid every
-   *   venue that can actually deliver and then revert on chain
+   * - No size cap, as in {@link validateAndSell}
+   * - An exact-out the pool cannot fill prices at zero, and is rejected: it
+   *   would otherwise out-bid every venue that can deliver, then revert
    */
   validateAndBuy(
     poolPair: PoolPair,

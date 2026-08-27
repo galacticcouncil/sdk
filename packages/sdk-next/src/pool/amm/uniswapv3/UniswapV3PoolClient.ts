@@ -26,12 +26,8 @@ type V3PoolRef = {
 /**
  * Router venue for Uniswap v3 pools on Hydration's EVM.
  *
- * - Pools come from a curated config, resolved through the v3 factory, the way
- *   the runtime gates v3 routes by governance rather than by discovery
- * - Concentrated-liquidity state is read over the EVM; quoting itself is
- *   client-side, in `UniswapV3Pool` / `UniswapV3Math`
- * - The factory address is read from chain state, so the venue disables itself
- *   on chains where v3 was never deployed
+ * Pools come from a curated config resolved through the factory; state is read
+ * over the EVM and quoted client-side, in `UniswapV3Pool`.
  */
 export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   protected readonly query = new UniswapV3Query(this.client, this.evm);
@@ -54,12 +50,9 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   /**
    * The configured pools, resolved and read at one block.
    *
-   * - A configured pool the factory has no deployment for is skipped; that is
-   *   an answer, and {@link resolvePool} says so
-   * - A read that FAILS is not an answer and is not swallowed. Publishing a
-   *   pool set that quietly omits a pool the venue routes through hands the
-   *   router a complete-looking answer computed without it, and the resulting
-   *   quote is indistinguishable from a healthy one
+   * - A pool the factory has no deployment for is skipped; that is an answer
+   * - A read that FAILS is not, and propagates: a pool set that quietly omits a
+   *   routed pool gives the router a complete-looking answer computed without it
    *
    * @param block - block every read pins to
    */
@@ -120,9 +113,7 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
               type: meta1?.asset_type.type,
             },
           ],
-          // Nothing on chain caps a v3 trade by pool size. Same sentinel the
-          // Aave venue uses; `UniswapV3Pool` skips the ratio checks entirely
-          // and reports an unfillable order instead.
+          // No on-chain size cap; same sentinel the Aave venue uses.
           maxInRatio: 0n,
           maxOutRatio: 0n,
           minTradingLimit: 0n,
@@ -154,11 +145,9 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   /**
    * Resolve one configured pool to the deployment it names.
    *
-   * - v3 orders a pair by token address, so which asset is token0 is a property
-   *   of the deployment, not of the config — and for two `Erc20` assets that is
-   *   the CONTRACT sort, which can invert the id sort. aDOT/HOLLAR is exactly
-   *   that case: by alias HOLLAR sorts first, by contract aDOT does
-   * - An unknown fee tier or a pair with no pool at that tier yields nothing
+   * - v3 orders a pair by token address, so token0 is a property of the
+   *   deployment rather than of the config, and can invert the id sort
+   * - An unenabled fee tier or a pair with no pool at that tier yields nothing
    *
    * @param at - block the factory read is scoped to
    * @param factory - the v3 factory address
@@ -196,10 +185,8 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
       );
       return undefined;
     }
-    // A configured pool that does not resolve used to vanish here: `undefined` is
-    // filtered out by the caller, so the venue simply carried no route through it
-    // and said nothing. Say it — a curated entry that finds no pool is either a
-    // config error or a pool nobody created.
+    // A curated entry with no pool is either a config error or a pool nobody
+    // created; either way it should not vanish silently.
     if (!address) {
       this.log.error(
         'v3_resolve_pool',
@@ -229,10 +216,8 @@ export class UniswapV3PoolClient extends PoolClient<UniswapV3PoolBase> {
   }
 
   /**
-   * Pool activity — any `EVM.Log` emitted by a pool this venue routes through.
-   *
-   * - Matched on the emitting address, so swap/mint/burn need no decode
-   * - Price, liquidity, ticks and reserves are re-read as one slice
+   * Pool activity — any `EVM.Log` from a routed pool, matched on the emitting
+   * address, so swap/mint/burn need no decode.
    */
   private syncEvmLogHandler(): PoolEventHandler<UniswapV3PoolBase> {
     return {

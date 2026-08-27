@@ -15,13 +15,9 @@ import {
 } from './tickMath';
 
 /**
- * The venue owns its tick math, so the reference implementation is kept as a
- * dev dependency purely to diff against here.
- *
- * `getSqrtRatioAtTick` selects from 20 magic constants by tick bit, so a single
- * mistyped hex digit is invisible unless that bit is set. The tick set below
- * therefore exercises every bit ALONE and with a neighbour — the constants are
- * covered by construction, not by luck — with a seeded random sweep on top.
+ * `getSqrtRatioAtTick` picks from 20 constants by tick bit, so a mistyped digit
+ * is invisible unless that bit is set. The tick set exercises every bit alone
+ * and with a neighbour, plus a seeded sweep.
  */
 
 const toBig = (x: JSBI): bigint => BigInt(x.toString());

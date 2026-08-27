@@ -1,14 +1,8 @@
 /**
  * Tick <-> sqrt-price conversion, in native `bigint`.
  *
- * - Ports Uniswap's `TickMath` so the venue owns its own math
+ * - Ports Uniswap's `TickMath`; the constant ladder is the on-chain one
  * - Q64.96 fixed point throughout, matching the pool contract
- *
- * The constant ladder below is the on-chain one verbatim; it is what makes
- * `getSqrtRatioAtTick` exact rather than a floating-point approximation of
- * `sqrt(1.0001)^tick`. `UniswapV3Math.spec.ts` diffs the whole venue against the
- * reference implementation, and `scripts/verify-v3-lark4.ts` diffs it against
- * QuoterV2 on a live pool.
  */
 
 const Q32 = 1n << 32n;
@@ -114,7 +108,6 @@ function mostSignificantBit(x: bigint): number {
  * The greatest tick whose sqrt ratio does not exceed `sqrtRatioX96`.
  *
  * - Binary log of the ratio, then a scale into tick space
- * - The two candidates it lands between are resolved by one exact conversion
  *
  * @param sqrtRatioX96 - the Q64.96 sqrt ratio to convert
  */

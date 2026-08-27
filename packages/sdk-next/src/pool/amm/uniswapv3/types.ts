@@ -19,11 +19,9 @@ export interface UniswapV3PoolBase extends PoolBase, V3PoolState {
   token0: number;
   token1: number;
   /**
-   * The token contracts this pool is actually built on, in pool order.
+   * The token contracts this pool is built on, in pool order.
    *
-   * Carried rather than derivable: an `Erc20` asset does not live at its
-   * `0x…01 ++ id` alias, so these are the only way back from the pool to the
-   * ERC20s it holds.
+   * Not derivable: an `Erc20` asset does not live at its `0x…01 ++ id` alias.
    */
   addr0: `0x${string}`;
   addr1: `0x${string}`;

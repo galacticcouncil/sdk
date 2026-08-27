@@ -9,13 +9,7 @@ import { V3Tick } from './types';
 /** The zero H160 — what an unset address and a missing pool both read as */
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
-/**
- * Ticks to cover on each side of the current price when loading a pool.
- *
- * ~20k ticks is a ~7.4x price move — far beyond any band a managed vault runs,
- * and beyond what a single trade would cross before the on-chain re-quote takes
- * over.
- */
+/** Ticks to cover each side of the current price; ~20k is a ~7.4x price move */
 const TICK_WINDOW_TICKS = 20_000;
 
 /** Hard cap on bitmap words per side, so one tight-spacing pool cannot flood the RPC */
@@ -24,15 +18,10 @@ const MAX_TICK_WINDOW_WORDS = 12;
 /**
  * Bitmap words to read on each side of the current tick.
  *
- * A word spans `256 * tickSpacing` ticks, so a FIXED word count means wildly
- * different price coverage per tier — at spacing 60 five words is ~2000x, at
- * spacing 1 it is ±13.7%. Sizing from a tick target instead keeps coverage
- * comparable across tiers.
- *
- * Beyond the loaded ticks the walk meets zero-liquidity sentinels, so it quotes
- * as if liquidity continued unchanged — it over-quotes rather than under-quotes.
- * That is why the window is sized generously and why `windowWords` reports when
- * the cap binds rather than truncating in silence.
+ * - A word spans `256 * tickSpacing`, so sizing from a tick target keeps
+ *   coverage comparable across fee tiers
+ * - Past the loaded ticks the walk meets zero-liquidity sentinels and
+ *   over-quotes, so `capped` reports a window cut short
  */
 export function windowWords(tickSpacing: number): {
   words: number;
@@ -47,9 +36,6 @@ export function windowWords(tickSpacing: number): {
 
 /**
  * Decode one tick-bitmap word into the tick indices it marks initialized.
- *
- * - Bit `i` of the word at `wordPos` is compressed tick `wordPos * 256 + i`
- * - Its absolute tick is that, scaled by `tickSpacing`
  *
  * @param bitmap - the word read from `tickBitmap`
  * @param wordPos - the word's position in the bitmap
@@ -70,12 +56,10 @@ export function ticksInWord(
 }
 
 /**
- * Does this error mean the runtime has no such storage entry, rather than that
- * we failed to ask?
+ * Whether the runtime has no such storage entry, as opposed to the read failing.
  *
- * Only the first is a real answer ("v3 is not deployed on this chain"). A
- * dropped connection, a timeout or an RPC error must propagate, or a cached
- * `undefined` turns a blip into a session-long outage.
+ * Only the first means v3 is absent; a transport failure must propagate, or the
+ * cache memoizes a blip for the rest of the session.
  */
 function isMissingStorageEntry(err: unknown): boolean {
   const msg = String((err as Error)?.message ?? err).toLowerCase();
@@ -94,25 +78,12 @@ const boundTicks = (tickSpacing: number): number[] => [
 ];
 
 /**
- * The constant-product reserves equivalent to the ACTIVE liquidity at the
- * current price:
+ * Depth as the constant-product reserves equivalent to the ACTIVE liquidity:
+ * `L * 2^96 / sqrtPriceX96` and `L * sqrtPriceX96 / 2^96`.
  *
- * ```text
- * token0 = L / sqrt(P) = L * 2^96 / sqrtPriceX96
- * token1 = L * sqrt(P) = L * sqrtPriceX96 / 2^96
- * ```
- *
- * This is what depth means for a concentrated pool, and it is what the runtime's
- * `UniswapV3TradeExecutor::liquidity_depth` reports. `balanceOf` is the wrong
- * quantity: it counts liquidity parked outside the current tick range and fees
- * not yet collected, neither of which a trade at this price can touch — a
- * managed vault holding a wide base band plus a one-sided limit order reports
- * several times what is actually swappable. It is also skewed at a band edge,
- * where the pool holds almost none of the token it can absorb the most of.
- *
- * Still an upper bound — the real amount is bounded by the band edge — but an
- * upper bound on the right quantity, and it collapses to zero exactly when the
- * price sits outside every position.
+ * - Mirrors the runtime's `UniswapV3TradeExecutor::liquidity_depth`
+ * - `balanceOf` counts liquidity parked outside the current range, and skews at
+ *   a band edge
  *
  * @param sqrtPriceX96 - the pool's current Q64.96 sqrt price
  * @param liquidity - the pool's active liquidity
@@ -141,27 +112,17 @@ export type V3PoolSlice = {
 };
 
 /**
- * Uniswap v3 reads.
+ * Uniswap v3 reads. The factory address is chain state, everything below it EVM.
  *
- * - The factory address is chain state; everything below it is EVM
- * - An EVM read names no block, so `at` scopes its memo to one block rather
- *   than pinning the value
+ * An EVM read names no block, so `at` scopes its memo rather than pinning it.
  */
 export class UniswapV3Query extends PoolQuery {
   /**
-   * The governance-set v3 factory; `undefined` when v3 is not deployed here.
+   * The governance-set v3 factory; `undefined` where v3 is not deployed.
    *
-   * - Read through the unsafe api: the item only exists on runtimes carrying
-   *   the v3 router, so a typed read would not compile against the ones without
-   * - A missing pallet, a missing entry and a zeroed address all say the same
-   *   thing, so all three read as `undefined`
-   *
-   * A TRANSPORT failure says something different and must not be flattened into
-   * the same answer. This result is cached `persistent`, so returning
-   * `undefined` for a dropped websocket would memoize "v3 is not deployed" for
-   * the rest of the session — one flaky read during startup and the venue stays
-   * silently off until the client reseeds. Anything that is not a
-   * missing-storage-entry error is rethrown so the cache never stores it.
+   * Unsafe api, since the item is absent on runtimes without the v3 router. A
+   * transport failure is rethrown, or the `persistent` cache stores a blip as
+   * "not deployed" for the session.
    */
   readonly factory = this.cache.scope<[], `0x${string}` | undefined>(
     'Parameters.UniswapV3Factory',
@@ -186,12 +147,7 @@ export class UniswapV3Query extends PoolQuery {
     'persistent'
   );
 
-  /**
-   * The canonical pool for a `(token0, token1, fee)` triple.
-   *
-   * - `getPool` is deterministic and a pool is never redeployed, so the answer
-   *   holds until the client reseeds
-   */
+  /** The canonical pool for a `(token0, token1, fee)` triple */
   readonly poolAddress = this.cache.scope<
     [`0x${string}`, `0x${string}`, `0x${string}`, number],
     `0x${string}` | undefined
@@ -211,12 +167,9 @@ export class UniswapV3Query extends PoolQuery {
   );
 
   /**
-   * The tick spacing the factory has enabled for a fee tier.
+   * The tick spacing the factory has enabled for a fee tier, 0 when unenabled.
    *
-   * - Read from the deployment rather than a hardcoded table: a factory owner
-   *   can enable a tier the canonical deployment never had, and an unenabled
-   *   tier reads as 0
-   * - A tier is never disabled once enabled, so the answer holds until reseed
+   * Read from the deployment, which can carry tiers the canonical one does not.
    */
   readonly tickSpacing = this.cache.scope<
     [`0x${string}`, number],
@@ -236,12 +189,7 @@ export class UniswapV3Query extends PoolQuery {
     'persistent'
   );
 
-  /**
-   * A pool's price, liquidity, initialized ticks and depth.
-   *
-   * - Read as one slice so a quote can't be assembled from two EVM tips
-   * - Block-scoped: one read per pool per block, dropped when the block moves
-   */
+  /** Price, liquidity, ticks and depth, read as one slice per pool per block */
   readonly poolSlice = this.cache.scope<[`0x${string}`, number], V3PoolSlice>(
     'UniswapV3Pool.slice',
     (_at, address, tickSpacing) => this.readSlice(address, tickSpacing),
@@ -280,11 +228,8 @@ export class UniswapV3Query extends PoolQuery {
   }
 
   /**
-   * The initialized ticks in a window around the current tick.
-   *
-   * - Read through the tick bitmap, one word at a time
-   * - Bounded by the usable min/max ticks as zero-liquidity sentinels, so the
-   *   swap walk always terminates
+   * The initialized ticks around the current tick, bounded by the usable
+   * min/max as zero-liquidity sentinels so the swap walk terminates.
    */
   private async readTicks(
     address: `0x${string}`,

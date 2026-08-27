@@ -46,10 +46,9 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   /**
    * Venues whose pool set the map already holds.
    *
-   * - A venue joins once ONE load has established its set, empty included: a
-   *   venue with no pools on this chain emits nothing, so subscription traffic
-   *   alone cannot tell "none here" from "not read yet"
-   * - A venue whose load fails never joins, so the next read tries again
+   * - Empty counts: a venue with no pools here emits nothing, so emissions
+   *   alone cannot tell "none" from "not read yet"
+   * - A failed load never joins, so the next read tries again
    */
   private readonly loaded: Set<PoolType> = new Set([]);
   private readonly clients: (
@@ -122,10 +121,9 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   /**
    * Whether the map holds every active venue.
    *
-   * - Serving a partial set as if it were complete routes around a venue that
-   *   is merely slow, and the quote looks perfectly healthy
-   * - A fixed block has no subscription keeping the map fresh, so it is never
-   *   ready and every read loads again
+   * - A partial set served as complete routes around a venue that is merely
+   *   slow, and the quote still looks healthy
+   * - A fixed block has no subscription, so it is never ready
    */
   private get isReady(): boolean {
     if (this.isSnapshot) return false;
@@ -210,10 +208,8 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   /**
    * Read every active venue at one block.
    *
-   * - Concurrent callers share one pass; a venue that is slow to seed would
-   *   otherwise be re-read once per quote
-   * - Folds the result in directly rather than waiting for it to arrive back
-   *   through the venue's subscription
+   * - Concurrent callers share one pass
+   * - Folds the result in directly, rather than via the venue's subscription
    *
    * @param at - block to read at
    */
