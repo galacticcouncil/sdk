@@ -84,4 +84,26 @@ export class StakingClient extends Papi {
     const value = await query.getValue();
     return value.toString();
   }
+
+  /**
+   * `Parameters.TwoSecBlocksSince` — block of the 6s→2s switch, set once
+   * by the runtime migration (`u32::MAX` until then). Read via the unsafe
+   * api: the Parameters pallet is newer than the generated descriptors.
+   * Falls back to the sentinel on pre-2s runtimes, which reduces
+   * `calculatePeriodNumber` to the legacy 3-arg behaviour.
+   */
+  async getTwoSecBlocksSince(): Promise<string> {
+    const U32_MAX = '4294967295';
+    try {
+      const query = this.client.getUnsafeApi().query as unknown as {
+        Parameters: {
+          TwoSecBlocksSince: { getValue: () => Promise<number | undefined> };
+        };
+      };
+      const value = await query.Parameters.TwoSecBlocksSince.getValue();
+      return value === undefined ? U32_MAX : value.toString();
+    } catch {
+      return U32_MAX;
+    }
+  }
 }
