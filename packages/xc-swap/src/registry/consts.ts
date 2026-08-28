@@ -1,19 +1,29 @@
 /** Hydration runtime asset id of bridged WETH (the asset the emitter bridges out). */
 export const WETH_ID = 20;
 
-/** Hydration runtime asset id of GLMR (used to pay the cross-chain XCM fee). */
-export const GLMR_ID = 16;
+/** Wormhole chain id of the settlement destination. */
+export const ETHEREUM_WORMHOLE_ID = 2;
+
+/**
+ * Rail precision, mirroring `IntentEmitter.TRIM_UNIT`.
+ *
+ * - NTT trims to 8 decimals, WETH carries 18
+ * - The remainder accrues in the emitter as sweepable dust
+ */
+export const TRIM_UNIT = 10_000_000_000n;
+
+/**
+ * Transceiver instructions for a delivery-price quote.
+ *
+ * - Zero-count prefix; empty bytes reverts `LengthMismatch(0,1)`
+ */
+export const NO_TRANSCEIVER_INSTRUCTIONS = '0x00';
 
 /** Minimum bridged WETH for a viable swap (0.0004 WETH, 18 dp). */
 export const MIN_WETH = 400_000_000_000_000n;
 
-/**
- * Default cross-chain XCM fee reserved in GLMR by the emitter.
- */
-export const DEFAULT_XCM_FEE = 3_000_000_000_000_000_000n;
-
 /** Default relay-fee quoter endpoint. */
-export const DEFAULT_QUOTER_URL = 'https://quoter-api.play.hydration.cloud';
+export const DEFAULT_QUOTER_URL = 'https://quoter-intent.play.hydration.cloud';
 
 /** Default 1Click base URL. */
 export const DEFAULT_ONE_CLICK_BASE_URL = 'https://1click.chaindefuser.com';
@@ -23,6 +33,14 @@ export const DEFAULT_RELAY_MARGIN_PCT = 20;
 
 /** Default slippage tolerance, percent (1 = 1%). */
 export const DEFAULT_SLIPPAGE_PCT = 1;
+
+/**
+ * How long the emitter's rail state stays cached, milliseconds.
+ *
+ * - Delivery price and message fee are governance parameters
+ * - Pause state and outbound capacity move with rail activity
+ */
+export const DEFAULT_RAIL_TTL_MS = 30_000;
 
 /** Convert a percent (1 = 1%) to basis points (1% = 100 bps). */
 export function pctToBps(pct: number): number {

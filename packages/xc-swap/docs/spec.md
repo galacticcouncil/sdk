@@ -1,197 +1,209 @@
-# Plan: `xc-swap` — cross-chain swap SDK (NEAR Intent Routing, phase 1)
+# SPEC — `xc-swap`: Hydration → NEAR Intents
 
-## Context
+Lets a Hydration user buy any NEAR-Intents-supported asset (NEAR, ZEC, …) in one transaction.
+Asset `A` is sold for WETH on Hydration, settled to Ethereum over NTT, and forwarded into a 1Click
+deposit address that NEAR Intents credits.
 
-WHM (`galacticcouncil/whm`) ships a "NEAR Intent Routing" (NIR) flow that lets a Hydration
-user buy a NEAR asset in **one transaction**: sell asset A on Hydration → WETH, bridge WETH
-via Wormhole/Moonbeam to Ethereum where it becomes native ETH at a 1Click deposit address,
-and 1Click swaps ETH → the destination NEAR asset. The on-chain entry point is
-`IntentEmitter.swapAndBridge(...)` on Hydration's EVM layer (see
-`/Users/PaloTropiHlouposti/Workspace/evm/whm/contracts/src/intents/IntentEmitter.sol`,
-`IntentEmitterWtt.sol`, and the driver `contracts/scripts/nirViaWtt.ts`).
+The on-chain entry point is `IntentEmitter.placeOrder(...)` on Hydration's EVM layer
+(`galacticcouncil/whm`, `contracts/src/intents/IntentEmitter.sol`). This package is the off-chain
+half: it quotes the swap, prices both fees, and returns ready-to-sign EVM calls.
 
-Today this flow only exists as Solidity + ad-hoc scripts and a POC example
-(`examples/xc-transfer/src/intent.ts`). There is no reusable SDK: a frontend wanting to
-quote and execute the swap has to hand-roll the 1Click quote, the relay-fee lookup, the
-intentId/payload encoding, the Hydration sell/fee quoting, and the EVM calls.
-
-**Goal:** a new `@galacticcouncil/xc-swap` package that (1) exposes the supported
-assets/routes/chains and (2) provides `estimateTrade(params): Promise<XcSwapTrade>` plus a
-builder that returns the ready-to-sign EVM calls (`approve` + `swapAndBridge`).
-
-**Phase-1 scope (per user):**
-- Destination asset: **only** `nep141:wrap.near` (wrapped NEAR), recipient = a NEAR account.
-- Origin asset A: **any Hydration asset** (Omnipool always routes A → WETH / A → GLMR).
-- Executable tx: the Hydration `IntentEmitter.swapAndBridge(...)` EVM call (chain 222222),
-  preceded by the ERC-20 `approve` of A to the emitter. WTT variant semantics (uses
-  `maxRelayFee`).
-- Lives in the **SDK monorepo** as a sibling of `xc`, published `@galacticcouncil/xc-swap`.
-
-## Reference flow (verified)
-
-`swapAndBridge(assetIn, amountIn, minEthOut, maxFeeIn, intentId, intentDepositAddress, maxRelayFee)`
-(`IIntentEmitter.sol`). Internally: buy `xcmFee` GLMR with ≤`maxFeeIn` of A (withheld if
-A==GLMR), sell remaining A → WETH (skipped if A==WETH), enforce `wethOut >= minEthOut`,
-reserve-transfer [GLMR, WETH] to the MDA on Moonbeam and bridge WETH→ETH to the 1Click
-`intentDepositAddress` on Ethereum.
-
-`nirViaWtt.ts` shows the off-chain pieces the SDK must reproduce:
-1. `maxRelayFee` = `GET {quoter}/relay-fee?chain=ethereum&marginBps=<n>` → `{ feeRequested }`,
-   default quoter `https://quoter-api.play.hydration.cloud`.
-2. 1Click `getQuote` with `swapType=FLEX_INPUT`, `originAsset='nep141:eth.omft.near'`,
-   `destinationAsset='nep141:wrap.near'`, `amount = bridgedWeth − maxRelayFee` (the fee is
-   skimmed on Ethereum), `recipientType=DESTINATION_CHAIN`, `refundType=ORIGIN_CHAIN`.
-3. `intentId = keccak256(abi.encode(correlationId:string, depositAddress:address,
-   amountIn:uint256, deadline:string))` (matches `nirViaWtt.ts:119-124`).
-
-**Asset-id reconciliation (build-time verify):** `swapAndBridge` and `sdk-next`'s
-`TradeRouter` both key on **Hydration runtime asset ids**. `HydrationConsts.sol` uses
-`WETH_ID=20`, `GLMR_ID=16`. `xc-cfg`'s display ids (`eth=34`, `weth=1000189`) are NOT these —
-phase 1 must use the runtime ids from `sdk-next`'s asset registry / `HydrationConsts`, and
-confirm `20`/`16` against the live runtime before wiring.
-
-## Package layout (mirrors `packages/xc`)
+## Flow
 
 ```
-packages/xc-swap/
-  package.json          # @galacticcouncil/xc-swap, main/module/types, dual build, files:[build]
-  tsconfig.json         # extends ../../tsconfig.json, baseUrl src
-  turbo.json            # build dependsOn xc-core#postbuild, sdk-next#postbuild, ^build/^postbuild
-  esbuild.dist.mjs / esbuild.dev.mjs   # copy from packages/xc
-  jest.config.mjs
-  README.md
-  src/
-    index.ts            # barrel: factory, types, registry
-    types.ts            # XcSwapParams, XcSwapTrade, XcSwapAsset, XcSwapRoute, XcSwapCall
-    factory.ts          # createXcSwap(opts) -> XcSwapClient
-    client.ts           # XcSwapClient: listing APIs + estimateTrade
-    registry/
-      consts.ts         # HydrationConsts mirror (WETH_ID, GLMR_ID, toErc20, ETHEREUM_WORMHOLE_ID,
-                         #   emitter addr, default quoter URL, ORIGIN_ASSET='nep141:eth.omft.near')
-      assets.ts         # origin assets (Hydration runtime ids/decimals/erc20) + dest NEAR asset(s)
-      chains.ts         # supported chains meta (hydration origin, near destination)
-      routes.ts         # route metadata (hydration -> near via WTT)
-    quote/
-      relayFee.ts       # fetchMaxRelayFee(quoterUrl, chain, marginBps)
-      oneClick.ts       # getOneClickQuote(...) wrapper over OneClickService.getQuote
-    trade/
-      estimate.ts       # estimateTrade orchestration (Hydration legs + 1Click + intentId)
-      build.ts          # buildCalls(trade) -> [approve, swapAndBridge] EvmCall[]
-      abi.ts            # swapAndBridge ABI fragment + erc20 approve ABI
-    *.spec.ts           # co-located unit tests
+HYDRATION   placeOrder(assetIn, amountIn, minEthOut, depositAddress, maxRelayFee)
+              1. sell assetIn → WETH via the router   (no-op when assetIn is WETH)
+              2. deduct cost = NTT deliveryPrice + wormhole messageFee
+              3. quantize to TRIM_UNIT (1e10) — NTT trims to 8dp, WETH is 18dp
+              4. nttManager.transfer(amount, 2, IntentReceiver)   → transferSequence
+              5. publishMessage(abi.encode(
+                     transferSequence, depositAddress, amount, maxRelayFee))
+              → emits OrderPlaced
+
+ETHEREUM    IntentReceiver.processOrder(nttVaa, instructionVaa, feeRequested)
+              pairs the two messages on the NTT manager sequence, delivers the
+              settlement, forwards (amount − feeRequested) to depositAddress
+              → emits OrderProcessed, RelayFeePaid
+
+NEAR        POA credits the deposit address; 1Click's solver network settles
+            ETH → destination asset and delivers to the recipient
 ```
 
-Add the package to root build/test (it's picked up by npm workspaces + turbo automatically).
-Update `jest.resolver.cjs` only if cross-package source tests are needed (likely not for unit tests).
+Two Wormhole messages leave the same Hydration transaction, because NTT carries no payload of its
+own — the destination has to travel separately. They are joined by the **NTT manager's sequence**,
+which is neither a Wormhole sequence nor chain-global.
 
-## Public API
+Relaying and the 1Click deposit notification are handled out-of-band by WHM's `relayer` and
+`nintent` agents. This SDK's responsibility ends at the signed Hydration transaction.
 
-```ts
-// factory.ts
-export function createXcSwap(opts: XcSwapOpts): XcSwapClient;
+## Entry point
 
-interface XcSwapOpts {
-  router: sor.TradeRouter;        // injected sdk-next router (caller owns papi connection)
-  evmChainId?: number;            // default 222222 (Hydration EVM)
-  emitter: string;               // IntentEmitter proxy address on Hydration EVM
-  quoterUrl?: string;            // default https://quoter-api.play.hydration.cloud
-  relayMarginBps?: number;       // default 2000 (matches nirViaWtt MAX_FEE_MARGIN_BPS)
-  oneClick?: { baseUrl?: string; jwt?: string };
-}
-
-// client.ts
-class XcSwapClient {
-  getOriginAssets(): XcSwapAsset[];          // all Hydration assets
-  getDestinationAssets(): XcSwapAsset[];     // phase 1: [wrap.near]
-  getChains(): XcSwapChain[];                // hydration, near
-  getRoutes(): XcSwapRoute[];                // metadata: origin/dest assets+chains, oneClick ids, decimals
-  estimateTrade(params: XcSwapParams): Promise<XcSwapTrade>;
-}
-
-interface XcSwapParams {
-  assetIn: number | XcSwapAsset;   // Hydration runtime asset id of A
-  amountIn: bigint | string;       // smallest unit of A
-  destinationAsset?: string;       // default 'nep141:wrap.near'
-  recipient: string;               // NEAR account id (dest chain)
-  refundTo: string;                // Hydration EVM (origin) refund address; also tx `from`
-  slippageBps?: number;            // default 100
-  deadline?: Date;                 // default now + 30m
-}
-
-interface XcSwapTrade {
-  // origin (Hydration) legs
-  amountIn: AssetAmount;           // A pulled from caller
-  maxFeeIn: AssetAmount;           // ≤ A spent buying the GLMR xcmFee (slippage-bounded)
-  wethOut: AssetAmount;            // expected WETH bridged
-  minEthOut: AssetAmount;          // slippage floor passed to swapAndBridge
-  maxRelayFee: bigint;             // from quoter
-  // 1Click leg
-  depositAddress: string;          // intentDepositAddress on Ethereum
-  amountOut: AssetAmount;          // expected wrap.near out
-  minAmountOut: AssetAmount;
-  intentId: `0x${string}`;
-  correlationId: string;
-  deadline: string;
-  timeEstimate: number;
-  priceImpactPct: number;
-  // executable
-  buildCalls(): XcSwapCall[];      // [approve, swapAndBridge] as EvmCall on Hydration EVM
-}
+```solidity
+function placeOrder(
+    uint32  assetIn,        // Hydration runtime asset id sold
+    uint256 amountIn,       // pulled from the caller
+    uint256 minEthOut,      // floor on the settled amount, post-cost and post-trim
+    address depositAddress, // Ethereum recipient (1Click quote address)
+    uint256 maxRelayFee     // ceiling a redeemer may claim on Ethereum
+) external returns (uint64 transferSequence);
 ```
 
-`XcSwapCall` reuses `EvmCall`/`CallType` from `xc-sdk`/`xc-core` (as in `intent.ts`) so output
-plugs into the existing signer path; `buildCalls` builds data via viem `encodeFunctionData`.
+Selector `0xb3218305`. Not payable: both fees come out of the swap output, which works because
+Hydration's native currency *is* WETH — one balance behind two interfaces.
 
-## estimateTrade orchestration (`trade/estimate.ts`)
+`maxRelayFee` is committed by the caller rather than operator-set. Paired with a colluding relayer a
+ceiling is a claim on the order's value, so it belongs to whoever's funds are at risk.
 
-1. Resolve A (runtime id, decimals, erc20 addr via `toErc20`) and destination (wrap.near,
-   24 dp, NEAR account recipient).
-2. `maxRelayFee = fetchMaxRelayFee(quoterUrl, 'ethereum', relayMarginBps)`.
-3. Hydration quote legs via injected `router` (`sor.TradeRouter`):
-   - **fee buy:** `getBestBuy(A, GLMR_ID, xcmFee)` → `maxFeeIn` (+slippage). If A==GLMR, skip;
-     fee is withheld (`maxFeeIn=0`, effective amount = amountIn − xcmFee).
-   - **sell:** `getBestSell(A, WETH_ID, amountIn − feeSpent)` → `wethOut`. If A==WETH, skip
-     sell; `wethOut = amountIn − feeSpent`.
-   - `minEthOut = wethOut · (1 − slippageBps/1e4)`; carry `priceImpactPct` from the sell trade.
-   - `xcmFee` default mirrors the contract (`1e18` GLMR); expose as a const, refine in build.
-4. `swapAmount = wethOut − maxRelayFee` (guard `> 0`).
-5. 1Click `getQuote` (FLEX_INPUT, originAsset `nep141:eth.omft.near`, destinationAsset
-   param, `amount=swapAmount`, recipient, refundTo, deadline) → `depositAddress`,
-   `amountOut`, `minAmountOut`, `correlationId`.
-6. `intentId` = keccak256 over `(correlationId, depositAddress, BigInt(quote.amountIn),
-   deadline)` per `nirViaWtt.ts`.
-7. Assemble `XcSwapTrade`; `buildCalls()` closes over the resolved values.
+## Fee model
 
-`buildCalls()` (`trade/build.ts`): `approve(emitter, amountIn)` on A's erc20, then
-`swapAndBridge(A, amountIn, minEthOut, maxFeeIn, intentId, depositAddress, maxRelayFee)` on the
-emitter — both `EvmCall { from: refundTo, to, data, type: CallType.Evm, dryRun }`.
+The rail's cost is charged against the swap **output**, not bought from the input:
 
-## Dependencies (peers, matching repo convention)
+```
+wethOut    = router.getBestSell(assetIn, WETH_ID, amountIn)
+cost       = nttManager.quoteDeliveryPrice(2, 0x00).total + wormhole.messageFee()
+bridged    = trim(wethOut − cost)                    // trim(x) = x − x % TRIM_UNIT
+minEthOut  = trim(padDown(bridged, slippageBps))
+swapAmount = bridged − maxRelayFee                   // what lands at depositAddress
+```
 
-- peer: `@galacticcouncil/sdk-next` (TradeRouter), `@galacticcouncil/xc-core` (Asset/AssetAmount/CallType),
-  `@galacticcouncil/xc-sdk` (EvmCall type), `viem`, `polkadot-api`.
-- dep: `@defuse-protocol/one-click-sdk-typescript` (already in the repo lockfile via the example).
-- Reuse `AssetAmount` from `xc-core` for human-readable amounts; reuse `keccak256`,
-  `encodeAbiParameters`, `encodeFunctionData`, `erc20Abi` from `viem`.
+`fee` on the returned trade is `wethOut − swapAmount` — the delivery price, the quantization dust,
+and the relay fee ceiling, all valued in WETH.
+
+`minEthOut` is expressed against what actually bridges. The emitter trims it and raises the router's
+own floor by `cost`, so a floor computed against the raw swap output would be too high by `cost`.
+
+**`cost` is currently zero on the prod rail** — the WHM relayer takes its compensation on the
+Ethereum side via `maxRelayFee`, so the Wormhole rail itself charges nothing. It is read at runtime
+rather than assumed, so a re-priced rail does not silently overstate the output or produce a floor
+that reverts.
+
+### Quantization dust
+
+NTT trims to 8 decimals and WETH carries 18, so the remainder is left in the emitter as sweepable
+dust rather than refunded — refunding would cost more than the dust is worth. At most `1e10` wei
+(0.00000001 WETH) per order.
+
+## Estimate orchestration (`trade/swap.ts`)
+
+1. **Sell leg** — `getBestSell(assetIn, WETH_ID, amountIn)` for the whole input. Skipped when
+   `assetIn` is WETH, in which case the emitter settles it as-is.
+2. **In parallel** — relay-fee quote, rail state, asset descriptors, and a dry 1Click quote priced
+   at the full `wethOut`. The dry quote's API errors are mapped to `XcSwapError`, not thrown.
+3. **Derive** `bridged`, `minEthOut`, `swapAmount`; scale the quote's outputs to the net that
+   actually lands. The quoted rate is linear in the input, so scaling is exact.
+4. **Collect viability errors** — reported on the trade rather than thrown.
+5. `buildCall()` — requests a firm quote sized to `swapAmount` (yields the deposit address), reads
+   the emitter's allowance over `A`, and returns `[approve, placeOrder]` (or just `[placeOrder]`
+   when already approved).
+
+The two-quote split exists so estimation runs concurrently with the relay-fee fetch and mints no
+deposit address; only `buildCall()` commits to one.
+
+## Rail reads
+
+Settlement contracts are read from the emitter's own getters rather than hardcoded, so they survive
+a re-point via `setNttManager` / `setIntentReceiver`.
+
+| Read | Source | Cached |
+| ---- | ------ | ------ |
+| `nttManager`, `wormhole` | `IntentEmitter` | client lifetime |
+| `quoteDeliveryPrice`, `messageFee` | manager, core bridge | `railTtl` (default 30s) |
+| `isPaused`, `getCurrentOutboundCapacity` | manager | `railTtl` |
+
+A failed read is not cached, so the next estimate retries. Governance parameters and rail activity
+move on very different timescales, hence the split.
+
+## Viability errors
+
+Reported on the trade rather than thrown, so a UI can render a non-viable quote. Most pre-empt a
+specific on-chain revert:
+
+| `XcSwapError` | Guard | Pre-empts |
+| ------------- | ----- | --------- |
+| `BelowDeliveryPrice` | `wethOut <= cost` | `AmountBelowDeliveryPrice` |
+| `BelowTrimUnit` | `trim(wethOut − cost) == 0` | `AmountBelowTrimUnit` |
+| `RelayFeeExceedsAmount` | `maxRelayFee >= bridged` | `RelayFeeExceedsAmount` |
+| `RailPaused` | `nttManager.isPaused()` | NTT transfer revert |
+| `RailRateLimited` | `bridged > outbound capacity` | NTT rate-limit revert |
+| `MinWethNotMet` | `minEthOut < MIN_WETH` | — |
+| `RelayFeeTooHigh` | `bridged < 2 × maxRelayFee` | — |
+| `AmountTooLow`, `RecipientInvalid`, `QuoteFailed` | 1Click quote | — |
+
+`RailRateLimited` matters because the emitter's `transfer` overload pins `shouldQueue = false`: an
+oversized settlement **reverts** rather than queueing. The limit is currently set to the u64-max
+sentinel (uncapped) over a 24h window.
+
+`InsufficientOutput` (`bridged < minEthOut`) is not pre-checkable — it depends on the sell's actual
+execution, which is the point of the floor.
+
+## Tracking an order
+
+`transferSequence` is the join key on-chain, but it only exists once the transaction lands. Before
+submission the correlation key is **`depositAddress`**: unique per 1Click quote and indexed on both
+`OrderPlaced` (Hydration) and `OrderProcessed` (Ethereum).
+
+`ORDER_PLACED_ABI` is exported so a consumer can decode `transferSequence` from the receipt.
+
+## Constants
+
+```
+Hydration EVM chain id       222222
+Hydration Wormhole chain id  73
+Ethereum Wormhole chain id   2
+
+IntentEmitter   (Hydration)  0x98f1ebc9dcc8ab7ba54d83c98500e9e313f793f2
+IntentReceiver  (Ethereum)   0x2173F6ecE25768e7EFc5199f70f8783d88Ba63c8
+WETH NttManager (Hydration)  0xB5cEf790D52A57fa619eD96eDd64c5328F3DCFb7
+Wormhole core   (Hydration)  0x3792a6d63c31941B2805181771795D9176fA82A1
+
+WETH_ID     20            confirmed against nttManager.token()
+TRIM_UNIT   1e10          NTT 8dp vs WETH 18dp
+MIN_WETH    4e14          0.0004 WETH
+ORIGIN      nep141:eth.omft.near     native ETH on Ethereum, credited by POA
+```
+
+Asset ids are Hydration **runtime** ids, shared by `sdk-next`'s `TradeRouter` and the emitter.
+`xc-cfg`'s display ids (`eth=34`, `weth=1000189`) are a different namespace — do not mix them.
+
+The ERC-20 precompile address of a runtime asset is `0x0100000000 | assetId`.
+
+## Layout
+
+```
+src/
+  factory.ts            createXcSwap(opts) -> XcSwapClient
+  client.ts             listing APIs, swap(), rail caching
+  types.ts              public types and XcSwapError
+  registry/
+    consts.ts           ids, rail precision, defaults
+    chains.ts           origin/destination chain metadata
+    assets.ts           1Click token ↔ asset descriptor mapping
+    routes.ts           route metadata
+  quote/
+    relayFee.ts         GET {quoter}/relay-fee -> maxRelayFee
+    oneClick.ts         1Click client config, tokens, getQuote
+  trade/
+    swap.ts             estimate orchestration
+    rail.ts             emitter config + live NTT rail state
+    builder.ts          [approve, placeOrder] EvmCall[]
+    abi.ts              placeOrder, OrderPlaced, NTT + Wormhole reads
+    types.ts            SwapContext, BuildCallsParams
+    utils.ts            AssetAmount helper, padDown, trim
+```
 
 ## Verification
 
-1. `cd packages/xc-swap && npm run build` (dual ESM/CJS) and `npm run build` at root (turbo
-   rebuilds dependents) — clean build confirms types.
-2. Unit tests (`*.spec.ts`, Jest): registry listings non-empty and well-formed; `estimateTrade`
-   with mocked `TradeRouter` + mocked `fetch` (relay-fee) + mocked `OneClickService.getQuote`
-   produces a consistent `XcSwapTrade` (swapAmount = wethOut − maxRelayFee; minEthOut applies
-   slippage; intentId matches the keccak256 of known inputs vs a `nirViaWtt.ts` fixture).
-   `buildCalls()` returns `[approve, swapAndBridge]` with `data` decodable back to expected args.
-3. Add an `examples/xc-transfer/src/intent_swap.ts` (or extend `intent.ts`) that wires a real
-   `sor.TradeRouter` + emitter address and logs an estimate end-to-end (dry, no signing) — the
-   manual smoke test that mirrors `nirViaWtt.ts`.
-4. Add a changeset (`npm run changeset`) — new package, minor.
+- `npm run build` (dual ESM/CJS + declarations) and `npm test` in the package.
+- Unit tests mock the `TradeRouter`, the relay-fee `fetch`, `OneClickService.getQuote`, and the EVM
+  provider's `readContract` (which dispatches on `functionName` to serve both rail reads and the
+  ERC-20 allowance).
+- The `placeOrder` encoding is checked against the deployed proxy rather than only against itself: a
+  staticcall with `amountIn = 0` reverts `ZeroAmount()` (`0x1f2a2005`), the first guard inside the
+  function, which proves the signature resolves on-chain.
 
-## Open items to confirm during build (not blocking the plan)
+## Known gap
 
-- Live Hydration runtime ids for WETH/GLMR (expect 20/16 per `HydrationConsts`); confirm the
-  deployed Hydration-side `IntentEmitter` proxy address (prod alpha deployed the **Bjp**
-  variant on Ethereum; the Hydration emitter address is supplied via `XcSwapOpts.emitter`).
-- Exact `xcmFee`/`maxFeeIn` sizing (contract default 1 GLMR) and whether to read it from the
-  deployed emitter (`xcmFee()` view) rather than hard-coding.
+The **Ethereum-side inbound** rate limit is not checked. NTT *queues* rather than reverts on the
+receiving end, so a settlement above that limit lands in `IntentReceiver` uncredited and
+`processOrder` reverts `SettlementNotReleased` until the queued transfer is completed. That is a
+worse failure than a clean revert, but it needs an Ethereum connection the SDK does not hold.

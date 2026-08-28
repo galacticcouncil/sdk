@@ -1,6 +1,6 @@
 import type { XcSwapChain } from '../types';
 
-/** Origin chain — Hydration's EVM execution layer (where `swapAndBridge` runs). */
+/** Origin chain — Hydration's EVM execution layer (where `placeOrder` runs). */
 export const HYDRATION: XcSwapChain = {
   key: 'hydration',
   name: 'Hydration',

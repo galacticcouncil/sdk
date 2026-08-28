@@ -56,7 +56,7 @@ export async function signEvm(
   await wallet.request({ method: 'eth_requestAccounts' });
 
   // Resolve once the tx is CONFIRMED so callers can `await` and chain txs
-  // (approve → swapAndBridge). Reject on send/estimate/receipt errors so a
+  // (approve → placeOrder). Reject on send/estimate/receipt errors so a
   // failure surfaces instead of the loop hanging silently.
   await new Promise<void>((resolve, reject) => {
     new EvmSigner(ctx, wallet)

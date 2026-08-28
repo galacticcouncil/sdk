@@ -83,6 +83,16 @@ export enum XcSwapError {
   MinWethNotMet = 'MinWethNotMet',
   /** Bridged WETH does not cover at least 2× the relay fee. */
   RelayFeeTooHigh = 'RelayFeeTooHigh',
+  /** Swap output does not cover the rail's delivery price — nothing bridges. */
+  BelowDeliveryPrice = 'BelowDeliveryPrice',
+  /** What remains after the delivery price is below one unit of rail precision. */
+  BelowTrimUnit = 'BelowTrimUnit',
+  /** Relay fee ceiling swallows the settlement, leaving nothing to forward. */
+  RelayFeeExceedsAmount = 'RelayFeeExceedsAmount',
+  /** NTT rail is paused — the settlement would revert. */
+  RailPaused = 'RailPaused',
+  /** Settlement exceeds the rail's outbound capacity; it reverts, not queues. */
+  RailRateLimited = 'RailRateLimited',
   /** 1Click rejected the amount as too low for the bridge. */
   AmountTooLow = 'AmountTooLow',
   /** 1Click rejected the recipient address. */
@@ -103,7 +113,7 @@ export interface XcSwapTrade {
   minAmountOut: AssetAmount;
   /** Effective exchange rate — destination units per 1 unit of A. */
   spotPrice: number;
-  /** Total fee (GLMR xcm fee + relay fee). */
+  /** Total fee (rail delivery price + quantization dust + relay fee). */
   fee: XcSwapFee;
   /** Per-leg time estimates (seconds). */
   timeEstimate: XcSwapTimeEstimate;
@@ -123,12 +133,15 @@ export interface XcSwapTrade {
  * Submit `calls` on Hydration EVM, then track settlement via `depositAddress`.
  */
 export interface XcSwapRequest {
-  /** Executable EVM calls on Hydration EVM: `[approve(A → emitter), swapAndBridge(...)]`. */
+  /** Executable EVM calls on Hydration EVM: `[approve(A → emitter), placeOrder(...)]`. */
   calls: EvmCall[];
-  /** Ethereum deposit address the bridged ETH lands at */
+  /**
+   * Ethereum deposit address the bridged ETH lands at.
+   *
+   * - Unique per 1Click quote, so it correlates the flow before submission
+   * - Indexed on both `OrderPlaced` and `OrderProcessed`
+   */
   depositAddress: string;
-  /** UI correlation hash threaded into the bridge payload. */
-  intentId: `0x${string}`;
   /** 1Click correlation id. */
   correlationId: string;
   /** Quote deadline (ISO). */
@@ -146,8 +159,8 @@ export interface XcSwapOpts {
   relayMargin?: number;
   /** Default slippage tolerance, percent (1 = 1%). Default 1. */
   slippage?: number;
-  /** XCM fee reserved in GLMR (smallest unit). Default 1 GLMR. */
-  xcmFee?: bigint;
+  /** How long the emitter's rail state stays cached, ms. Default 30000. */
+  railTtl?: number;
   /** 1Click asset ids exposed as destinations. */
   destinationAssets?: string[];
   /** 1Click API config. */

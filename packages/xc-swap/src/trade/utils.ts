@@ -15,12 +15,20 @@ export function amount(asset: XcSwapAsset, amount: bigint): AssetAmount {
   });
 }
 
-/** Apply a positive slippage pad (round up). */
-export function padUp(value: bigint, bps: number): bigint {
-  return (value * (BPS + BigInt(bps))) / BPS;
-}
-
 /** Apply a negative slippage floor (round down). */
 export function padDown(value: bigint, bps: number): bigint {
   return (value * (BPS - BigInt(bps))) / BPS;
+}
+
+/**
+ * Quantize down to the rail's precision.
+ *
+ * - Mirrors the emitter's own trimming of both the floor and the settlement
+ * - The remainder is left as dust rather than refunded
+ *
+ * @param value - amount to quantize
+ * @param unit - rail precision (`TRIM_UNIT`)
+ */
+export function trim(value: bigint, unit: bigint): bigint {
+  return value - (value % unit);
 }
