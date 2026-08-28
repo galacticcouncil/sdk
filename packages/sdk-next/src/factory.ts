@@ -55,7 +55,8 @@ export async function createSdkContext(
     .withAave()
     .withOmnipool()
     .withStableswap()
-    .withXyk();
+    .withXyk()
+    .withV3();
 
   // Initialize clients
   const balance = new BalanceClient(client, at);
