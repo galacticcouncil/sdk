@@ -130,6 +130,11 @@ export const myth = new Asset({
   originSymbol: 'MYTH',
 });
 
+export const near = new Asset({
+  key: 'near',
+  originSymbol: 'NEAR',
+});
+
 export const neuro = new Asset({
   key: 'neuro',
   originSymbol: 'NEURO',
@@ -270,6 +275,11 @@ export const wud = new Asset({
   originSymbol: 'WUD',
 });
 
+export const zec = new Asset({
+  key: 'zec',
+  originSymbol: 'ZEC',
+});
+
 export const assets: Asset[] = [
   aave,
   ajun,
@@ -297,6 +307,7 @@ export const assets: Asset[] = [
   jito_sol,
   link,
   myth,
+  near,
   neuro,
   paxg,
   pen,
@@ -325,6 +336,7 @@ export const assets: Asset[] = [
   wsol,
   wsteth,
   wud,
+  zec,
 ];
 
 export const assetsMap = new Map<string, Asset>(

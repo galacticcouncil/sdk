@@ -24,12 +24,28 @@ export enum SuiBalanceType {
   Native = 'SuiNative',
 }
 
+/** Near balance storages. Owned by {@link NearChain}. */
+export enum NearBalanceType {
+  Native = 'NearNative',
+}
+
+/**
+ * Zcash balance storages. Owned by {@link ZecChain}.
+ *
+ * - Transparent only — a shielded balance is not publicly readable
+ */
+export enum ZecBalanceType {
+  Transparent = 'ZecTransparent',
+}
+
 /** Any platform's balance storage type. */
 export type BalanceType =
   | SubstrateBalanceType
   | EvmBalanceType
   | SolanaBalanceType
-  | SuiBalanceType;
+  | SuiBalanceType
+  | NearBalanceType
+  | ZecBalanceType;
 
 /**
  * Declarative dynamic-minimum storage type. Substrate-only — optional per

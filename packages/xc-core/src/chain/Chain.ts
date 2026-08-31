@@ -31,6 +31,8 @@ export enum ChainEcosystem {
   Kusama = 'Kusama',
   Solana = 'Solana',
   Sui = 'Sui',
+  Near = 'Near',
+  Zcash = 'Zcash',
 }
 
 export type ChainRpcs = {
@@ -44,6 +46,8 @@ export enum ChainType {
   'EvmChain' = 'evm-chain',
   'SolanaChain' = 'solana-chain',
   'SuiChain' = 'sui-chain',
+  'NearChain' = 'near-chain',
+  'ZecChain' = 'zec-chain',
 }
 
 /**
@@ -164,6 +168,14 @@ export abstract class Chain<
 
   isSui(): boolean {
     return this.getType() === ChainType.SuiChain;
+  }
+
+  isNear(): boolean {
+    return this.getType() === ChainType.NearChain;
+  }
+
+  isZec(): boolean {
+    return this.getType() === ChainType.ZecChain;
   }
 
   isEvmChain(): boolean {
