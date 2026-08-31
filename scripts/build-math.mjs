@@ -2,11 +2,11 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import { parseArgs } from './common.mjs';
 
-const REPO = 'https://raw.githubusercontent.com/galacticcouncil/HydraDX-wasm';
+const REPO = 'https://raw.githubusercontent.com/galacticcouncil/hydration-wasm';
 const REPO_BUILD = 'build';
 const BRANCH = 'main';
 const API =
-  'https://api.github.com/repos/galacticcouncil/HydraDX-wasm/git/trees/main?recursive=1';
+  'https://api.github.com/repos/galacticcouncil/hydration-wasm/git/trees/main?recursive=1';
 
 // Build matrix [origin-target, origin-file, out]
 const BUILD_MATRIX = [
@@ -25,7 +25,9 @@ const fetchResource = async (math, target, file) => {
   const url = path.join('/');
   const resp = await fetch(url);
   if (!resp.ok) {
-    throw new Error(`Failed to fetch ${url}: ${resp.status} ${resp.statusText}`);
+    throw new Error(
+      `Failed to fetch ${url}: ${resp.status} ${resp.statusText}`
+    );
   }
   const arrayBuffer = await resp.arrayBuffer();
   return Buffer.from(arrayBuffer);
