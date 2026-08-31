@@ -102,6 +102,25 @@ export enum XcSwapError {
 }
 
 /**
+ * The Ethereum settlement leg, valued in WETH.
+ *
+ * - Covers the span between the Hydration sell and the 1Click swap
+ * - Every figure is what the emitter and the receiver actually act on
+ */
+export interface XcSwapSettlement {
+  /** WETH out of the Hydration sell, before the rail's cost. */
+  wethOut: AssetAmount;
+  /** What the settlement carries — net of the rail's cost, quantized. */
+  bridged: AssetAmount;
+  /** Net ETH landing at the deposit address, after the relay fee. */
+  amount: AssetAmount;
+  /** Floor passed to `placeOrder`. */
+  minEthOut: AssetAmount;
+  /** Relay fee ceiling carried in the forwarding instruction. */
+  maxRelayFee: AssetAmount;
+}
+
+/**
  * An estimated cross-chain swap.
  */
 export interface XcSwapTrade {
@@ -115,6 +134,8 @@ export interface XcSwapTrade {
   spotPrice: number;
   /** Total fee (rail delivery price + quantization dust + relay fee). */
   fee: XcSwapFee;
+  /** The Ethereum settlement leg, valued in WETH. */
+  settlement: XcSwapSettlement;
   /** Per-leg time estimates (seconds). */
   timeEstimate: XcSwapTimeEstimate;
   /** Price impact of the on-Hydration sell leg, percent. */

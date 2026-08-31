@@ -189,6 +189,46 @@ describe('swap', () => {
     expect(trade.errors).toEqual([]);
   });
 
+  it('exposes the settlement leg, matching the encoded call', async () => {
+    const deliveryPrice = 20_000_000_000_000_000n; // 0.02 WETH
+    const xcSwap = createXcSwap({
+      sdk: mockSdk(0n, mockRouter(), { deliveryPrice }),
+      emitter: EMITTER,
+    });
+
+    const trade = await xcSwap.swap(PARAMS);
+    const { settlement } = trade;
+
+    const bridged = trim(WETH_OUT - deliveryPrice - MESSAGE_FEE);
+    expect(settlement.wethOut.amount).toBe(WETH_OUT);
+    expect(settlement.bridged.amount).toBe(bridged);
+    expect(settlement.amount.amount).toBe(bridged - RELAY_FEE);
+    expect(settlement.maxRelayFee.amount).toBe(RELAY_FEE);
+    // all five are WETH-denominated
+    expect(settlement.bridged.decimals).toBe(18);
+
+    // the exposed floor is the one actually encoded into placeOrder
+    const request = await trade.buildCall();
+    const { args } = decodeFunctionData({
+      abi: PLACE_ORDER_ABI,
+      data: request.calls[1].data as `0x${string}`,
+    });
+    const [, , minEthOut, , maxRelayFee] = args as readonly [
+      number,
+      bigint,
+      bigint,
+      string,
+      bigint,
+    ];
+    expect(settlement.minEthOut.amount).toBe(minEthOut);
+    expect(settlement.maxRelayFee.amount).toBe(maxRelayFee);
+
+    // and the fee reconciles: wethOut − net
+    expect(trade.fee.amount.amount).toBe(
+      settlement.wethOut.amount - settlement.amount.amount
+    );
+  });
+
   it('sells the whole input — no GLMR fee leg', async () => {
     const router = mockRouter();
     const xcSwap = createXcSwap({

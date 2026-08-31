@@ -181,6 +181,13 @@ export async function swap(
     minAmountOut: minAmountOutAmount,
     spotPrice,
     fee: { amount: feeAmount, usd: feeUsd, pct: feePct },
+    settlement: {
+      wethOut: amount(wethAsset, wethOut),
+      bridged: amount(wethAsset, bridged),
+      amount: amount(wethAsset, swapAmount),
+      minEthOut: amount(wethAsset, minEthOut),
+      maxRelayFee: amount(wethAsset, maxRelayFee),
+    },
     timeEstimate: { quote: quote?.timeEstimate ?? 0 },
     priceImpactPct,
     errors,
