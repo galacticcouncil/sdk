@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 2.5.0
+
+### Minor Changes
+
+- xc: settlement breakdown. zcash, near support
+
 ## 2.4.0
 
 ### Minor Changes

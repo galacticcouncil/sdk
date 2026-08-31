@@ -1,5 +1,16 @@
 # @galacticcouncil/xc-cfg
 
+## 2.6.0
+
+### Minor Changes
+
+- xc: settlement breakdown. zcash, near support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@2.5.0
+
 ## 2.5.0
 
 ### Minor Changes

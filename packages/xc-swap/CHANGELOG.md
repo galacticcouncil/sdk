@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-swap
 
+## 0.9.0
+
+### Minor Changes
+
+- xc: settlement breakdown. zcash, near support
+
 ## 0.8.0
 
 ### Minor Changes
