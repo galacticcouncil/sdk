@@ -20,12 +20,17 @@ import { pjs } from './extension';
 
 const { isEvmAccount, H160 } = h160;
 
-export async function signSubstrate(call: Call, chain: AnyChain) {
+export async function signSubstrate(
+  call: Call,
+  chain: AnyChain,
+  callback?: (hash: string) => void
+) {
   const ctx = chain as AnyParachain;
   const signer = await pjs.getSignerBySource('polkadot-js', call.from);
   new SubstrateSigner(ctx, signer).signAndSend(call as SubstrateCall, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
+      callback?.(hash);
     },
     onFinalized: (event) => {
       console.log('Finalized:', event);
@@ -51,7 +56,7 @@ export async function signEvm(
   await wallet.request({ method: 'eth_requestAccounts' });
 
   // Resolve once the tx is CONFIRMED so callers can `await` and chain txs
-  // (approve → swapAndBridge). Reject on send/estimate/receipt errors so a
+  // (approve → placeOrder). Reject on send/estimate/receipt errors so a
   // failure surfaces instead of the loop hanging silently.
   await new Promise<void>((resolve, reject) => {
     new EvmSigner(ctx, wallet)
@@ -75,7 +80,7 @@ export async function signEvm(
 
 export async function signSolana(call: Call, chain: AnyChain) {
   const wallet = (window as any).phantom.solana;
-  new SolanaSigner(chain as SolanaChain, wallet).signAndSend(call, {
+  return new SolanaSigner(chain as SolanaChain, wallet).signAndSend(call, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
@@ -88,13 +93,13 @@ export async function signSolana(call: Call, chain: AnyChain) {
   });
 }
 
-export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
+export async function signSolanaAll(calls: Call[], chain: AnyChain) {
   const wallet = (window as any).phantom.solana;
-  new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
-    onTransactionSend: (bundleId) => {
-      console.log('BundleId: ' + bundleId);
+  return new SolanaSigner(chain as SolanaChain, wallet).signAndSendAll(calls, {
+    onTransactionSend: (signature) => {
+      console.log('Signature: ' + signature);
     },
-    onBundleStatus: (status) => {
+    onStatus: (status) => {
       console.log(status);
     },
     onError: (error) => {
@@ -105,32 +110,38 @@ export async function signSolanaBundle(calls: Call[], chain: AnyChain) {
 
 export async function signSui(call: Call, chain: AnyChain) {
   const wallet = (window as any).phantom.sui;
-  new SuiSigner(chain as SuiChain, wallet).signAndSend(call, {
+  return new SuiSigner(chain as SuiChain, wallet).signAndSend(call, {
     onTransactionSend: (hash) => {
       console.log('TxHash: ' + hash);
     },
+    // SuiSigner swallows failures into the observer - rethrow, or a rejected
+    // signature still reports the transfer as sent.
     onError: (error) => {
-      console.error(error);
+      throw error;
     },
   });
 }
 
-export async function sign(call: Call, chain: AnyChain) {
+/**
+ * @param callback - source tx hash, once sent. Evm & substrate only; needed
+ * to follow an executor-delivered transfer (see utils/executor).
+ */
+export async function sign(
+  call: Call,
+  chain: AnyChain,
+  callback?: (hash: string) => void
+) {
   switch (call.type) {
     case CallType.Evm:
-      signEvm(call, chain);
-      break;
+      return signEvm(call, chain, callback);
     case CallType.Solana:
-      signSolana(call, chain);
-      break;
+      return signSolana(call, chain);
     case CallType.Sui:
-      signSui(call, chain);
-      break;
+      return signSui(call, chain);
     default:
       if (isEvmAccount(call.from)) {
-        signEvm(call, chain);
-      } else {
-        signSubstrate(call, chain);
+        return signEvm(call, chain, callback);
       }
+      return signSubstrate(call, chain, callback);
   }
 }

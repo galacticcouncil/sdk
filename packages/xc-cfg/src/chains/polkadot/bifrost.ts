@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import {
@@ -16,9 +17,8 @@ import {
 } from '../../assets';
 
 const rpcWebsocketList = [
-  'wss://bifrost-polkadot.ibp.network',
   'wss://eu.bifrost-polkadot-rpc.liebi.com/ws',
-  //'wss://hk.p.bifrost-rpc.liebi.com/ws',
+  'wss://hk.p.bifrost-rpc.liebi.com/ws',
   'wss://bifrost-polkadot.dotters.network',
 ];
 
@@ -189,6 +189,10 @@ export const bifrost = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.Tokens,
+  balanceOverrides: {
+    [bnc.key]: SubstrateBalanceType.System,
+  },
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://bifrost.subscan.io',
   genesisHash:

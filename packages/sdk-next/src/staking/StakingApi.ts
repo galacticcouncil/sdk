@@ -1,7 +1,6 @@
 import {
   calculate_accumulated_rps,
   calculate_percentage_amount,
-  calculate_period_number,
   calculate_points,
   calculate_rewards,
   sigmoid,
@@ -14,7 +13,7 @@ import { SYSTEM_ASSET_ID } from '../consts';
 import { Balance } from '../types';
 
 import { isConviction, CONVICTIONS, TVote } from './types';
-import { getAccountAddress } from './utils';
+import { calculatePeriodNumber, getAccountAddress } from './utils';
 
 import { StakingClient } from './StakingClient';
 
@@ -217,6 +216,7 @@ export class StakingApi {
       timePointsWeight,
       actionPointsWeight,
       sixBlockSince,
+      twoSecBlocksSince,
     ] = await Promise.all([
       this.getPotBalance(),
       this.client.getPeriodLength(),
@@ -225,6 +225,7 @@ export class StakingApi {
       this.client.getTimePointsWeight(),
       this.client.getActionPointsWeight(),
       this.client.getSixBlockSince(),
+      this.client.getTwoSecBlocksSince(),
     ]);
 
     const pendingRewards = Big(potBalance.transferable.toString()).minus(
@@ -240,17 +241,22 @@ export class StakingApi {
           )
         : accumulatedRewardPerStake.toString();
 
-    const currentPeriod = calculate_period_number(
-      periodLength.toString(),
-      blockNumber,
-      sixBlockSince
-    );
+    // TS port of the 4-arg runtime math — the published wasm
+    // `calculate_period_number` predates the 2s switch anchor and would
+    // count 2s blocks with 6s-era weight (periods accruing 3× too fast).
+    const currentPeriod = calculatePeriodNumber(
+      BigInt(periodLength),
+      BigInt(blockNumber),
+      BigInt(sixBlockSince),
+      BigInt(twoSecBlocksSince)
+    ).toString();
 
-    const enteredAt = calculate_period_number(
-      periodLength.toString(),
-      stakePosition.createdAt.toString(),
-      sixBlockSince
-    );
+    const enteredAt = calculatePeriodNumber(
+      BigInt(periodLength),
+      BigInt(stakePosition.createdAt),
+      BigInt(sixBlockSince),
+      BigInt(twoSecBlocksSince)
+    ).toString();
 
     const maxRewards = calculate_rewards(
       rewardPerStake,

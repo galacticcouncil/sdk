@@ -1,4 +1,4 @@
-import { Asset, Parachain } from '@galacticcouncil/xc-core';
+import { Asset, AnyParachain } from '@galacticcouncil/xc-core';
 import { hydration } from '@galacticcouncil/descriptors';
 
 import { BaseClient } from '../../base';
@@ -12,7 +12,7 @@ import {
 } from './circuit-breaker';
 
 export class HydrationClient extends BaseClient<typeof hydration> {
-  constructor(chain: Parachain) {
+  constructor(chain: AnyParachain) {
     super(chain, hydration);
   }
 

@@ -1,44 +1,45 @@
 import {
-  Asset,
   AssetAmount,
   CallType,
   ProgramConfig,
   SolanaChain,
-  SolanaQueryConfig,
 } from '@galacticcouncil/xc-core';
 
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 
 import { Buffer } from 'buffer';
-import {
-  distinctUntilChanged,
-  finalize,
-  shareReplay,
-  Observable,
-  Subject,
-} from 'rxjs';
 
-import { SolanaBalanceFactory } from './balance';
 import { SolanaTransferFactory } from './transfer';
 import { SolanaCall, SolanaDryRunResult } from './types';
 import { ixToHuman } from './utils';
 
 import { Platform } from '../types';
 
-export class SolanaPlatform implements Platform<
-  ProgramConfig,
-  SolanaQueryConfig
-> {
+export class SolanaPlatform implements Platform<ProgramConfig> {
   readonly #connection: Connection;
 
   constructor(chain: SolanaChain) {
     this.#connection = chain.connection;
   }
 
-  async buildCall(
+  /**
+   * Build the ordered transaction sequence of a transfer.
+   *
+   * All but the last are prerequisites the sender signs & sends first -
+   * [wrapNative?, transfer]. Each is its own transaction because solana
+   * caps transaction size.
+   */
+  async buildCalls(
     account: string,
     _amount: bigint,
     _feeBalance: AssetAmount,
+    configs: ProgramConfig[]
+  ): Promise<SolanaCall[]> {
+    return Promise.all(configs.map((config) => this.buildTx(account, config)));
+  }
+
+  private async buildTx(
+    account: string,
     config: ProgramConfig
   ): Promise<SolanaCall> {
     const transfer = SolanaTransferFactory.get(this.#connection, config);
@@ -67,12 +68,19 @@ export class SolanaPlatform implements Platform<
     } as SolanaCall;
   }
 
+  /**
+   * Fee of a transfer.
+   *
+   * Read off the transfer transaction alone - it is the last of the sequence
+   * and the only one whose simulation reports the sender's final balance.
+   */
   async estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: ProgramConfig
+    configs: ProgramConfig[]
   ): Promise<AssetAmount> {
+    const config = configs[configs.length - 1];
     const transfer = SolanaTransferFactory.get(this.#connection, config);
     const fee = await transfer.estimateFee(account, amount);
     const mssgV0 = await transfer.getPriorityMessage(account);
@@ -98,51 +106,5 @@ export class SolanaPlatform implements Platform<
     return feeBalance.copyWith({
       amount: fee + config.rentReserve,
     });
-  }
-
-  async getBalance(
-    asset: Asset,
-    config: SolanaQueryConfig
-  ): Promise<AssetAmount> {
-    const query = SolanaBalanceFactory.get(this.#connection, config);
-    const [balance, decimals] = await Promise.all([
-      query.getBalance(),
-      query.getDecimals(),
-    ]);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: SolanaQueryConfig
-  ): Promise<Observable<AssetAmount>> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
-
-    const run = async () => {
-      const updateBalance = async () => {
-        const balance = await this.getBalance(asset, config);
-        subject.next(balance);
-      };
-      await updateBalance();
-      const sender = new PublicKey(config.address);
-      const id = this.#connection.onAccountChange(sender, () =>
-        updateBalance()
-      );
-      return () => {
-        this.#connection.removeAccountChangeListener(id);
-      };
-    };
-
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
   }
 }

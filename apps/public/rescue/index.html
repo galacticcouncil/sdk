@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Rescue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Rescue</h1>
+        <p class="lede">
+          A bridge deposit addressed to a substrate account that has never been
+          bound to its EVM address is credited to a phantom account instead,
+          where nothing on the substrate side shows it. This finds it and moves
+          it back.
+        </p>
+      </header>
+
+      <section class="card">
+        <form id="scan-form" novalidate>
+          <label class="field">
+            <span class="label">Address</span>
+            <input
+              id="address"
+              name="address"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="7… / 5… (substrate) or 0x… (EVM)"
+              required
+            />
+            <span class="hint"
+              >The address the deposit was sent to. You have to be able to sign
+              with it.</span
+            >
+          </label>
+
+          <button id="submit" class="btn-primary" type="submit">
+            <span class="btn-label">Scan</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <div id="result"></div>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/rescue.js"></script>
+  </body>
+</html>

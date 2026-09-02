@@ -1,10 +1,8 @@
-import { acc, big } from '@galacticcouncil/common';
+import { big, log } from '@galacticcouncil/common';
 
 import {
-  addr,
   Asset,
   AnyChain,
-  AnyParachain,
   AssetAmount,
   ConfigBuilder,
   ConfigService,
@@ -15,27 +13,20 @@ import {
   TransferValidationReport,
 } from '@galacticcouncil/xc-core';
 
-import { combineLatest, debounceTime, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-import {
-  Call,
-  PlatformAdapter,
-  SubstrateCall,
-  SubstrateExec,
-  SubstrateService,
-} from './platforms';
+const { logger } = log;
+
+import { Call, PlatformAdapter } from './platforms';
 import {
   calculateMax,
   calculateMin,
-  formatEvmAddress,
   DataOriginProcessor,
-  DataReverseProcessor,
+  DataDestinationProcessor,
 } from './transfer';
-import { Transfer } from './types';
+import { ChainBalancesResult, Transfer } from './types';
 
 import { FeeSwap } from './FeeSwap';
-
-const { EvmAddr } = addr;
 
 export interface WalletOptions {
   configService: ConfigService;
@@ -67,70 +58,19 @@ export class Wallet {
     return this.getTransferData(transfer, srcAddress, dstAddress);
   }
 
-  async remoteXcm(
-    srcAddress: string,
-    srcChain: string | AnyParachain,
-    dstChain: string | AnyParachain,
-    dstCall: SubstrateCall,
-    opts: {
-      srcFeeAsset?: Asset;
-    } = {}
-  ): Promise<SubstrateCall> {
-    const src = this.config.getChain(srcChain) as AnyParachain;
-    const dst = this.config.getChain(dstChain) as AnyParachain;
-
-    const isSubstrateExec = src.isSubstrate() && dst.isSubstrate();
-    if (!isSubstrateExec)
-      throw Error('RemoteXcm is supported only between parachains');
-
-    const [srcSub, dstSub] = await Promise.all([
-      SubstrateService.create(src),
-      SubstrateService.create(dst),
-    ]);
-
-    const exec = new SubstrateExec(srcSub, dstSub);
-
-    const dstAddress = acc.getMultilocationDerivatedAccount(
-      src.parachainId,
-      srcAddress,
-      1,
-      dst.usesH160Acc
-    );
-
-    const dstAsset = await dstSub.getAsset();
-    const transfer = await this.transfer(
-      dstAsset,
-      srcAddress,
-      srcChain,
-      dstAddress,
-      dstChain
-    );
-
-    return exec.remoteExec(
-      srcAddress,
-      dstAddress,
-      dstCall,
-      (fees) => {
-        const feesFmt = fees.toDecimal();
-        return transfer.buildCall(feesFmt);
-      },
-      opts
-    );
-  }
-
   async getTransferData(
     configs: TransferConfigs,
     srcAddress: string,
     dstAddress: string
   ): Promise<Transfer> {
     const srcConf = configs.origin;
-    const dstConf = configs.reverse;
+    const { chain: dstChain, asset: dstAsset } = srcConf.route.destination;
 
     const srcAdapter = new PlatformAdapter(srcConf.chain);
-    const dstAdapter = new PlatformAdapter(dstConf.chain);
+    const dstAdapter = new PlatformAdapter(dstChain);
 
     const src = new DataOriginProcessor(srcAdapter, srcConf);
-    const dst = new DataReverseProcessor(dstAdapter, dstConf);
+    const dst = new DataDestinationProcessor(dstAdapter, dstChain, dstAsset);
     const validator = new TransferValidator(...this.validations);
 
     const [
@@ -144,7 +84,7 @@ export class Wallet {
     ] = await Promise.all([
       src.getBalance(srcAddress),
       src.getFeeBalance(srcAddress),
-      src.getDestinationFee(),
+      src.getDestinationFee(undefined, dstAddress),
       src.getDestinationFeeBalance(srcAddress),
       src.getMin(),
       dst.getBalance(dstAddress),
@@ -167,7 +107,7 @@ export class Wallet {
       asset: source.asset,
       destination: {
         balance: dstBalance,
-        chain: dstConf.chain,
+        chain: dstChain,
         fee: dstFee,
         feeBreakdown: dstFeeBreakdown,
       },
@@ -181,8 +121,6 @@ export class Wallet {
         destinationFeeBalance: srcDestinationFeeBalance,
       },
     };
-
-    ctx.transact = await src.getTransact(ctx);
 
     const swap = new FeeSwap(ctx);
 
@@ -230,21 +168,27 @@ export class Wallet {
         balance: dstBalance,
         fee: dstFee,
       },
+      reversible: configs.reversible,
       async buildCall(amount): Promise<Call> {
+        const [call] = await transfer.buildCalls(amount);
+        return call;
+      },
+      async buildCalls(amount): Promise<Call[]> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
-        copyCtx.transact = await src.getTransact(copyCtx);
-        return src.getCall(copyCtx);
+        return src.getCalls(copyCtx);
       },
       async estimateFee(amount): Promise<AssetAmount> {
         const copyCtx = Object.assign({}, ctx);
         copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
-        copyCtx.transact = await src.getTransact(copyCtx);
         return src.getFee(copyCtx);
       },
       async estimateDestinationFee(amount): Promise<AssetAmount> {
         const target = big.toBigInt(amount, srcBalance.decimals);
-        const { fee, feeBreakdown } = await src.getDestinationFee(target);
+        const { fee, feeBreakdown } = await src.getDestinationFee(
+          target,
+          dstAddress
+        );
         ctx.destination.fee = fee;
         ctx.destination.feeBreakdown = feeBreakdown;
         ctx.source.destinationFee = fee;
@@ -263,31 +207,104 @@ export class Wallet {
     return transfer;
   }
 
+  /**
+   * One-shot snapshot of every asset configured on a chain.
+   *
+   * Intended for balance lists (asset/chain pickers) that should fetch once and
+   * re-fetch on demand rather than hold N live subscriptions open. Chains that
+   * can serve the whole set in a single read do so; the rest fall back to a
+   * per-asset read, where a single failing asset can't blank the snapshot.
+   */
+  async getBalances(
+    address: string,
+    chain: string | AnyChain
+  ): Promise<AssetAmount[]> {
+    const target = this.config.getChain(chain);
+    return target.getBalances(target.getAssets(), address);
+  }
+
+  /**
+   * Chains the address can hold a balance on
+   */
+  getChainsForAddress(
+    address: string,
+    chains: (string | AnyChain)[]
+  ): AnyChain[] {
+    return chains
+      .map((chain) => this.config.getChain(chain))
+      .filter((chain) => chain.isValidAddress(address));
+  }
+
+  /**
+   * Read balances in parallel across every chain the address is valid on.
+   * Defaults to all configured chains.
+   */
+  async getAllBalances(
+    address: string,
+    chains?: (string | AnyChain)[]
+  ): Promise<ChainBalancesResult[]> {
+    const eligibleChains = this.getChainsForAddress(
+      address,
+      chains ?? [...this.config.chains.values()]
+    );
+    const results = await Promise.allSettled(
+      eligibleChains.map((chain) => this.getBalances(address, chain))
+    );
+
+    return results.map((result, i) => {
+      const chainKey = eligibleChains[i].key;
+      return result.status === 'fulfilled'
+        ? { chainKey, balances: result.value }
+        : {
+            chainKey,
+            balances: [],
+            error:
+              result.reason instanceof Error
+                ? result.reason
+                : new Error(String(result.reason)),
+          };
+    });
+  }
+
+  /**
+   * Live subscription for an explicit set of assets on a chain.
+   *
+   * Only the given assets are subscribed — callers should narrow this to the
+   * asset(s) actually in view (e.g. the selected transfer asset) rather than the
+   * whole chain, since each asset holds an open subscription.
+   */
   async subscribeBalance(
     address: string,
     chain: string | AnyChain,
+    assets: (string | Asset)[],
     observer: (balances: AssetAmount[]) => void
   ): Promise<Subscription> {
-    const chainRoutes = this.config.getChainRoutes(chain);
-    const adapter = new PlatformAdapter(chainRoutes.chain);
-    const observables = chainRoutes
-      .getUniqueRoutes()
-      .map(async ({ source }) => {
-        const { asset, balance } = source;
-        const assetId = chainRoutes.chain.getBalanceAssetId(asset);
-        const account = EvmAddr.isValid(assetId.toString())
-          ? await formatEvmAddress(address, chainRoutes.chain)
-          : address;
-        const balanceConfig = balance.build({
-          address: account,
-          asset: asset,
-          chain: chainRoutes.chain,
-        });
-        return adapter.subscribeBalance(asset, balanceConfig);
-      });
+    const target = this.config.getChain(chain);
 
-    const ob = await Promise.all(observables);
-    const observable = combineLatest(ob);
-    return observable.pipe(debounceTime(500)).subscribe(observer);
+    // Resolved against the chain's asset registry rather than its routes — a
+    // chain is also a destination, and on a one-way route the received asset
+    // has no outgoing route to look up.
+    const resolved = assets.flatMap((asset) => {
+      const key = typeof asset === 'string' ? asset : asset.key;
+      const match = target.getAsset(key);
+      if (!match) {
+        logger.warn(
+          `Asset ${key} not configured on ${target.key}, skipping balance subscription`
+        );
+        return [];
+      }
+      return [match];
+    });
+
+    // Every asset dropped would otherwise hand back a subscription that never
+    // fires — indistinguishable from one that is still loading.
+    if (assets.length > 0 && resolved.length === 0) {
+      throw new Error(
+        `No assets configured on ${target.key} for any requested: ` +
+          assets.map((a) => (typeof a === 'string' ? a : a.key)).join(', ')
+      );
+    }
+
+    return target.subscribeBalances(resolved, address).subscribe(observer);
   }
 }

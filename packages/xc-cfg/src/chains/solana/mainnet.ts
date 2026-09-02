@@ -1,9 +1,10 @@
 import {
   ChainEcosystem as Ecosystem,
   SolanaChain,
+  SolanaBalanceType,
 } from '@galacticcouncil/xc-core';
 
-import { jito_sol, prime, sol } from '../../assets';
+import { jito_sol, prime, sol, wsol } from '../../assets';
 
 export const solana = new SolanaChain({
   id: 101,
@@ -12,6 +13,11 @@ export const solana = new SolanaChain({
   assetsData: [
     {
       asset: sol,
+      decimals: 9,
+    },
+    {
+      asset: wsol,
+      id: 'So11111111111111111111111111111111111111112',
       decimals: 9,
     },
     {
@@ -25,6 +31,10 @@ export const solana = new SolanaChain({
       decimals: 6,
     },
   ],
+  balance: SolanaBalanceType.Token,
+  balanceOverrides: {
+    [sol.key]: SolanaBalanceType.Native,
+  },
   ecosystem: Ecosystem.Solana,
   explorer: 'https://explorer.solana.com/',
   rpcUrls: {
@@ -34,7 +44,47 @@ export const solana = new SolanaChain({
   wormhole: {
     id: 1,
     coreBridge: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
-    tokenBridge: 'wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb',
+    // Locking managers - the spl token is escrowed here, minted on
+    // hydration. Solana signs a vaa with a pda, not the transceiver
+    // program itself, so `emitter` (seed "emitter" of the transceiver)
+    // has to be spelled out or inbound transfers never match.
+    ntt: {
+      [sol.key]: {
+        token: 'So11111111111111111111111111111111111111112',
+        manager: 'DiGxk55uAQNVzzg2FucPgdrQ4azb5SDvWQvzpzJD3o7J',
+        transceiver: {
+          wormhole: '5J12e7mMcbbN3VkCrUPfZp2bDHMH3t1rKvxGcwuN53wx',
+        },
+        emitter: '2WUYeRrK2JctBEvNVXY4mRG2ewMzhidi7L4Y5dCwqY9D',
+      },
+      // Same deployment as `sol` - the manager escrows the wSOL spl token
+      // either way. Keyed separately because executor delivery stops at the
+      // ata and leaves it wrapped, so that route names wsol as what arrives.
+      [wsol.key]: {
+        token: 'So11111111111111111111111111111111111111112',
+        manager: 'DiGxk55uAQNVzzg2FucPgdrQ4azb5SDvWQvzpzJD3o7J',
+        transceiver: {
+          wormhole: '5J12e7mMcbbN3VkCrUPfZp2bDHMH3t1rKvxGcwuN53wx',
+        },
+        emitter: '2WUYeRrK2JctBEvNVXY4mRG2ewMzhidi7L4Y5dCwqY9D',
+      },
+      [jito_sol.key]: {
+        token: 'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
+        manager: '9HFvXujdkXubvmf93gyzkH1g3VPowDrmp85sWsfdcBTh',
+        transceiver: {
+          wormhole: 'HgxvrPomT84AxgxknddAcC1iW9ysqHxmeoiKNZmQcovs',
+        },
+        emitter: '9Ss1eMHE8iDv9kCxERH5nabp9tx75AVoUWWEKaGgMrh9',
+      },
+      [prime.key]: {
+        token: '3b8X44fLF9ooXaUm3hhSgjpmVs6rZZ3pPoGnGahc3Uu7',
+        manager: '4T5m5NtRVewiCVzP2mnfeUoMYRqncfkrS21X2dhVCNRT',
+        transceiver: {
+          wormhole: 'GiTY93vtrK4jZZchrxdV9r28JByRs7Ary2rsTPyPabJc',
+        },
+        emitter: 'HuvSXe6hQaSMgo5dc8GYzavcS3aB4Bix9XYgVdfsq2sY',
+      },
+    },
     platformAddressFormat: 'base58',
   },
 });

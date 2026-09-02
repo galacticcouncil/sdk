@@ -49,14 +49,38 @@ export interface TransferDestinationData {
  * @interface Transfer
  * @member {TransferSourceData} source Source chain data
  * @member {TransferDestinationData} destination Destination chain data
+ * @member {boolean} reversible True if a return-trip route is registered.
+ * Consumers may use this to gate UI affordances (swap-direction button, etc.).
  */
 export interface Transfer {
   source: TransferSourceData;
   destination: TransferDestinationData;
+  reversible: boolean;
+  /** Next call the sender has to sign, the head of {@link buildCalls}. */
   buildCall(amount: bigint | number | string): Promise<Call>;
+  /**
+   * Ordered call sequence to execute the transfer, the transfer call being
+   * last. Preceded by prerequisite calls (native wrap, erc20 approve) the
+   * sender has to sign first, each dropping off once executed.
+   */
+  buildCalls(amount: bigint | number | string): Promise<Call[]>;
   estimateFee(amount: bigint | number | string): Promise<AssetAmount>;
   estimateDestinationFee(
     amount: bigint | number | string
   ): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
+}
+
+/**
+ * Chain balances snapshot
+ *
+ * @interface ChainBalancesResult
+ * @member {string} chainKey Chain the balances were read from
+ * @member {AssetAmount[]} balances Balances read, empty if the read failed
+ * @member {Error} error Reason the chain could not be read
+ */
+export interface ChainBalancesResult {
+  chainKey: string;
+  balances: AssetAmount[];
+  error?: Error;
 }

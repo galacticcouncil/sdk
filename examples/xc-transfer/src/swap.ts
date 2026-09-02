@@ -7,7 +7,7 @@ import { xc, sdk } from './setup';
 
 const { config } = xc;
 
-const EMITTER = '0x059ed5658c988976e73adb6597418970414f3dd0';
+const EMITTER = '0x98f1ebc9dcc8ab7ba54d83c98500e9e313f793f2';
 
 // Origin asset A (Hydration runtime asset id) and amount in smallest units.
 const ASSET_IN = 5; // USDt
@@ -46,13 +46,13 @@ console.log(trade);
 async function sign() {
   const tx = await trade.buildCall();
   console.log('Deposit address:', tx.depositAddress);
-  console.log('Intent id:', tx.intentId);
+  console.log('Correlation id:', tx.correlationId);
 
   tx.calls.forEach((c) => {
     console.log(c.to, c.data);
   });
 
-  // Sign approve → swapAndBridge sequentially. Allowance is per-asset, so an
+  // Sign approve → placeOrder sequentially. Allowance is per-asset, so an
   // earlier approve of a different asset doesn't carry over — approve the current
   // assetIn first. signEvm resolves on the receipt, so a plain await orders them.
   const srcChain = config.getChain('hydration') as EvmParachain;

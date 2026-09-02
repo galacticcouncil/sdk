@@ -14,14 +14,17 @@ const LogLabel: Record<PoolType, string> = {
 const { logger } = log;
 
 export class PoolLog {
-  private readonly type: PoolType;
+  private readonly label: string;
 
-  constructor(type: PoolType) {
-    this.type = type;
+  /**
+   * @param type - pool type, or a plain label for a non-pool component
+   */
+  constructor(type: PoolType | string) {
+    this.label = LogLabel[type as PoolType] ?? type;
   }
 
   private prefix(): string {
-    return this.pad(`pool(${LogLabel[this.type]})`, 10);
+    return this.pad(`pool(${this.label})`, 10);
   }
 
   trace(label: string, ...args: any[]) {

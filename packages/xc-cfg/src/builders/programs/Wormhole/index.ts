@@ -1,7 +1,7 @@
-import { TokenBridge } from './TokenBridge';
+import { Ntt } from './Ntt';
 
 export function Wormhole() {
   return {
-    TokenBridge,
+    Ntt,
   };
 }

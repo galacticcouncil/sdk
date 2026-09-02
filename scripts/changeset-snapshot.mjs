@@ -1,4 +1,5 @@
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
 
 import applyReleasePlan from '@changesets/apply-release-plan';
 import getReleasePlan from '@changesets/get-release-plan';
@@ -8,6 +9,45 @@ import { getPackages } from '@manypkg/get-packages';
 
 import { parseArgs } from './common.mjs';
 import { getUpgradeMessage } from './changeset-utils.mjs';
+
+const DEP_FIELDS = [
+  'dependencies',
+  'devDependencies',
+  'peerDependencies',
+  'optionalDependencies',
+];
+
+/**
+ * Snapshot versions are prereleases, and semver ranges (^2.2.0) never match a
+ * prerelease. Workspace packages depending on a bumped package are not part of
+ * the release plan, so they keep a range that no longer resolves, which drops
+ * the internal dependency edge from turbo's build graph and breaks build order.
+ * Pin those ranges to the exact snapshot version.
+ */
+const pinSnapshotDependents = (packages, releases) => {
+  const bumped = new Map(releases.map((r) => [r.name, r.newVersion]));
+
+  for (const pkg of packages.packages) {
+    const pkgJsonPath = path.join(pkg.dir, 'package.json');
+    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+
+    let changed = false;
+    for (const field of DEP_FIELDS) {
+      const deps = pkgJson[field];
+      if (!deps) continue;
+      for (const name of Object.keys(deps)) {
+        const version = bumped.get(name);
+        if (!version || deps[name] === version) continue;
+        deps[name] = version;
+        changed = true;
+        console.log(`Pinned ${pkgJson.name} ${field}.${name} -> ${version}`);
+      }
+    }
+    if (changed) {
+      writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+    }
+  }
+};
 
 const main = async () => {
   const cwd = process.cwd();
@@ -60,6 +100,8 @@ const main = async () => {
   }
   console.log('Executing release plan...');
   await applyReleasePlan(releasePlan, packages, releaseConfig, true);
+
+  pinSnapshotDependents(packages, releasePlan.releases);
 };
 
 main()

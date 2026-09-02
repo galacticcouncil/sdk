@@ -16,5 +16,6 @@
   "editor.tabSize": 2,
   "github-actions.use-enterprise": true,
   "prettier.printWidth": 100,
-  "rust-analyzer.linkedProjects": ["crates/Cargo.toml"]
+  "rust-analyzer.linkedProjects": ["crates/Cargo.toml"],
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

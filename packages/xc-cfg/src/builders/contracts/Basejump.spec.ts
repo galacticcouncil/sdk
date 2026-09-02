@@ -24,7 +24,7 @@ describe('Basejump contract builder', () => {
     it('should encode EVM H160 address with ETH\\0 prefix', async () => {
       const h160 = '0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0';
       const ctx = buildCtx(h160);
-      const config = await Basejump().bridgeViaWormhole().build(ctx);
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
       const recipient = config.args[2] as string;
       // ETH\0 = 0x45544800, then H160 lowercase, then 16 zero hex chars
@@ -39,7 +39,7 @@ describe('Basejump contract builder', () => {
       // This SS58 address is the Hydration mapping of 0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0
       const ss58 = H160.toAccount('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
       const ctx = buildCtx(ss58);
-      const config = await Basejump().bridgeViaWormhole().build(ctx);
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
       const recipient = config.args[2] as string;
       expect(recipient.toLowerCase()).toBe(
@@ -53,7 +53,7 @@ describe('Basejump contract builder', () => {
       // Alice's well-known AccountId32
       const alice = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
       const ctx = buildCtx(alice);
-      const config = await Basejump().bridgeViaWormhole().build(ctx);
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
       const recipient = config.args[2] as string;
       // Alice's raw AccountId32
@@ -64,7 +64,7 @@ describe('Basejump contract builder', () => {
 
     it('should produce correct contract config', async () => {
       const ctx = buildCtx('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
-      const config = await Basejump().bridgeViaWormhole().build(ctx);
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
       expect(config.func).toBe('bridgeViaWormhole');
       expect(config.module).toBe('Basejump');
@@ -73,7 +73,7 @@ describe('Basejump contract builder', () => {
 
     it('should pass asset address as first arg', async () => {
       const ctx = buildCtx('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
-      const config = await Basejump().bridgeViaWormhole().build(ctx);
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
       // First arg is the asset ERC20 address on the source chain
       const assetArg = (config.args[0] as string).toLowerCase();

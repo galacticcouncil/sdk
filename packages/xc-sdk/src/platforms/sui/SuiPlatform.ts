@@ -1,37 +1,33 @@
-import {
-  Asset,
-  AssetAmount,
-  CallType,
-  MoveConfig,
-  SuiChain,
-  SuiQueryConfig,
-} from '@galacticcouncil/xc-core';
+import { AssetAmount, MoveConfig, SuiChain } from '@galacticcouncil/xc-core';
 
 import { SuiClient } from '@mysten/sui/client';
-import { toBase64 } from '@mysten/bcs';
 
-import {
-  distinctUntilChanged,
-  finalize,
-  shareReplay,
-  Observable,
-  Subject,
-} from 'rxjs';
-
-import { SuiBalanceFactory } from './balance';
 import { SuiCall } from './types';
-import { resolveCommandsTyped } from './utils';
+import { buildSuiCall } from './utils';
 
 import { DryRunResult, Platform } from '../types';
 
-export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
+export class SuiPlatform implements Platform<MoveConfig> {
   readonly #client: SuiClient;
 
   constructor(chain: SuiChain) {
     this.#client = chain.client;
   }
 
-  async buildCall(
+  async buildCalls(
+    account: string,
+    amount: bigint,
+    feeBalance: AssetAmount,
+    configs: MoveConfig[]
+  ): Promise<SuiCall[]> {
+    return Promise.all(
+      configs.map((config) =>
+        this.buildCall(account, amount, feeBalance, config)
+      )
+    );
+  }
+
+  private async buildCall(
     account: string,
     _amount: bigint,
     _feeBalance: AssetAmount,
@@ -39,20 +35,12 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
   ): Promise<SuiCall> {
     const { transaction } = config;
 
-    transaction.setSender(account);
-
-    const txBytes = await transaction.build({ client: this.#client });
-    const txJson = await transaction.toJSON();
-
-    const commands = resolveCommandsTyped(JSON.parse(txJson));
+    const call = await buildSuiCall(account, transaction, this.#client);
     return {
-      from: account,
-      commands: commands,
-      data: toBase64(txBytes),
-      type: CallType.Sui,
+      ...call,
       dryRun: async () => {
         const sim = await this.#client.dryRunTransactionBlock({
-          transactionBlock: txBytes,
+          transactionBlock: call.data,
         });
 
         return {
@@ -67,9 +55,9 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
     account: string,
     _amount: bigint,
     feeBalance: AssetAmount,
-    config: MoveConfig
+    configs: MoveConfig[]
   ): Promise<AssetAmount> {
-    const { transaction } = config;
+    const { transaction } = configs[configs.length - 1];
 
     transaction.setSender(account);
     const txBytes = await transaction.build({ client: this.#client });
@@ -84,43 +72,5 @@ export class SuiPlatform implements Platform<MoveConfig, SuiQueryConfig> {
     const mist = computation + storage;
 
     return feeBalance.copyWith({ amount: mist });
-  }
-
-  async getBalance(asset: Asset, config: SuiQueryConfig): Promise<AssetAmount> {
-    const query = SuiBalanceFactory.get(this.#client, config);
-    const [balance, decimals] = await Promise.all([
-      query.getBalance(),
-      query.getDecimals(),
-    ]);
-    return AssetAmount.fromAsset(asset, {
-      amount: balance,
-      decimals: decimals,
-    });
-  }
-
-  async subscribeBalance(
-    asset: Asset,
-    config: SuiQueryConfig
-  ): Promise<Observable<AssetAmount>> {
-    const subject = new Subject<AssetAmount>();
-    const observable = subject.pipe(shareReplay(1));
-
-    const run = async () => {
-      const updateBalance = async () => {
-        const balance = await this.getBalance(asset, config);
-        subject.next(balance);
-      };
-      await updateBalance();
-      const intervalId = setInterval(() => {}, 3000);
-      return () => clearInterval(intervalId);
-    };
-
-    let disconnect: () => void;
-    run().then((unsub) => (disconnect = unsub));
-
-    return observable.pipe(
-      finalize(() => disconnect?.()),
-      distinctUntilChanged((prev, curr) => prev.amount === curr.amount)
-    ) as Observable<AssetAmount>;
   }
 }

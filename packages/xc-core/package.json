@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-core",
-  "version": "1.2.1",
+  "version": "2.5.0",
   "description": "Cross-chain sdk core",
   "author": "GalacticCouncil",
   "type": "module",
@@ -36,24 +36,26 @@
     "@types/big.js": "^6.2.2"
   },
   "dependencies": {
+    "@mysten/sui": "^1.21.2",
     "@noble/hashes": "^1.6.1",
-    "@wormhole-foundation/sdk-base": "3.2.0",
-    "@wormhole-foundation/sdk-connect": "3.2.0",
-    "@wormhole-foundation/sdk-definitions": "3.2.0",
-    "@wormhole-foundation/sdk-solana": "3.2.0",
-    "@wormhole-foundation/sdk-solana-core": "3.2.0",
-    "@wormhole-foundation/sdk-solana-tokenbridge": "3.2.0",
-    "@wormhole-foundation/sdk-sui": "3.2.0",
-    "@wormhole-foundation/sdk-sui-tokenbridge": "3.2.0",
+    "@scure/base": "^2.2.0",
+    "@wormhole-foundation/sdk-base": "6.1.4",
+    "@wormhole-foundation/sdk-connect": "6.1.4",
+    "@wormhole-foundation/sdk-definitions": "6.1.4",
+    "@wormhole-foundation/sdk-definitions-ntt": "8.0.1",
+    "@wormhole-foundation/sdk-solana": "6.1.4",
+    "@wormhole-foundation/sdk-solana-core": "6.1.4",
+    "@wormhole-foundation/sdk-solana-ntt": "8.0.1",
     "big.js": "^6.2.1",
     "bigint-buffer": "^1.1.5",
-    "buffer": "^6.0.3",
-    "bs58": "^6.0.0"
+    "bs58": "^6.0.0",
+    "buffer": "^6.0.3"
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.0.0",
     "@galacticcouncil/descriptors": ">=2.0.0",
     "polkadot-api": "^2.1.7",
+    "rxjs": "^7.8.0",
     "viem": "^2.38.3"
   }
 }

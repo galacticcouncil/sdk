@@ -1,5 +1,123 @@
 # @galacticcouncil/xc-cfg
 
+## 2.6.0
+
+### Minor Changes
+
+- xc: settlement breakdown. zcash, near support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@2.5.0
+
+## 2.5.0
+
+### Minor Changes
+
+- 4e62a17: feat(xc-sdk): multichain balances
+
+### Patch Changes
+
+- Updated dependencies [4e62a17]
+  - @galacticcouncil/xc-core@2.4.0
+
+## 2.4.1
+
+### Patch Changes
+
+- bdb7f55: Drop jitobundle from solana signer and fix base check
+
+## 2.4.0
+
+### Minor Changes
+
+- bump to sdk 2.x peer
+
+## 2.3.0
+
+### Minor Changes
+
+- c9684bd: Wormhole NTT executor delivery & rate limits.
+  - **Executor delivery** — the sender pays for destination delivery instead of signing a
+    redeem there. Offered alongside the self-redeem route for the same pair. Hydration
+    calls the manager and the Executor directly rather than through the shim, whose
+    unbounded approve its erc20 precompile rejects.
+  - **Rate limits** — per-token NttManager 24h inbound/outbound limits are read and
+    validated before a transfer is built, so a capped transfer fails up front instead of
+    reverting on redeem.
+  - **NTT clients per platform** — one client interface over the evm, solana and sui
+    deployments, replacing the per-call-site branching.
+  - **Solana** — jito bundle endpoints, token-2022 associated token accounts, and ata
+    derivation shared through `xc-core`. A redeem now opens the recipient's ata, not only
+    the payer's.
+  - Destination fee swap is sized to the fee plus existential deposit, and source fee
+    estimation covers the whole call sequence rather than the transfer alone.
+
+  Call builders return an ordered config vector instead of hanging
+  `prior`/`follow`/`prerequisites` off the configs themselves, and hydration's ss58 leg
+  becomes an `ExtrinsicBuilder().evm().call()` extrinsic, so a route composes it with the
+  rest of its batch and the fee is quoted by the runtime in the sender's fee currency.
+
+  The MRL transact surface is dropped along with it — nothing has declared
+  `AssetRoute.transact` since MRL was removed, so every path behind it was dead.
+
+### Patch Changes
+
+- Updated dependencies [c9684bd]
+  - @galacticcouncil/xc-core@2.3.0
+
+## 2.2.1
+
+### Patch Changes
+
+- xc: update bifrost rpc list
+
+## 2.2.0
+
+### Minor Changes
+
+- 9e041f4: Kusama AssetHub: DOT balance is read via the `ForeignAssets` pallet
+  (it was previously misread through `Assets`).
+
+### Patch Changes
+
+- Updated dependencies [9e041f4]
+  - @galacticcouncil/xc-core@2.2.0
+
+## 2.1.0
+
+### Minor Changes
+
+- xc: fix node/esm imports
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@2.1.0
+
+## 2.0.0
+
+### Major Changes
+
+- 8e7401c: Switch from wormhole mrl to wormhole direct integration with ntt
+
+### Patch Changes
+
+- Updated dependencies [8e7401c]
+  - @galacticcouncil/xc-core@2.0.0
+
+## 1.7.0
+
+### Minor Changes
+
+- 23af67e: Unidirectional routes & chain-native balance reads
+
+### Patch Changes
+
+- Updated dependencies [23af67e]
+  - @galacticcouncil/xc-core@1.3.0
+
 ## 1.6.0
 
 ### Minor Changes

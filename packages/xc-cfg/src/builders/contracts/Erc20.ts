@@ -13,18 +13,20 @@ export function Erc20() {
       getSpender: (ctx: Wh) => string | undefined
     ): ContractConfigBuilder => ({
       build: async (params) => {
-        const { amount, asset, source, transact } = params;
-        const ctx = transact ? transact.chain : source.chain;
+        const { amount, asset, source } = params;
+        const ctx = source.chain;
         const ctxWh = Wh.fromChain(ctx);
         const assetId = ctx.getAssetId(asset);
 
-        return new ContractConfig({
-          abi: Abi.Erc20,
-          address: parseAssetId(assetId).toString(),
-          args: [getSpender(ctxWh), amount],
-          func: 'approve',
-          module: 'Erc20',
-        });
+        return [
+          new ContractConfig({
+            abi: Abi.Erc20,
+            address: parseAssetId(assetId).toString(),
+            args: [getSpender(ctxWh), amount],
+            func: 'approve',
+            module: 'Erc20',
+          }),
+        ];
       },
     }),
   };

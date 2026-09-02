@@ -1,5 +1,9 @@
 import { Connection } from '@solana/web3.js';
 
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import { SolanaBalanceClient, SolanaBalanceType } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -10,17 +14,27 @@ import {
 } from './Chain';
 
 import { Wormhole, WormholeDef } from '../bridge';
+import { addr } from '../utils';
+
+const { SolanaAddr } = addr;
 
 const SOLANA_NATIVE = 'SOL';
 const SOLANA_DECIMALS = 9;
 
-export interface SolanaChainParams extends ChainParams<ChainAssetData> {
+export interface SolanaChainParams extends ChainParams<
+  ChainAssetData,
+  SolanaBalanceType
+> {
   id: number;
   rpcUrls: ChainRpcs;
   wormhole?: WormholeDef;
 }
 
-export class SolanaChain extends Chain<ChainAssetData> {
+export class SolanaChain extends Chain<ChainAssetData, SolanaBalanceType> {
+  private readonly balanceClient = new SolanaBalanceClient(this);
+
+  private connectionCache?: Connection;
+
   readonly id: number;
   readonly rpcUrls: ChainRpcs;
   readonly wormhole?: Wormhole;
@@ -32,17 +46,29 @@ export class SolanaChain extends Chain<ChainAssetData> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. Each connection opens its own websocket, so building one per
+   * balance read means one socket per asset.
+   */
   get connection(): Connection {
-    const { http, webSocket } = this.rpcUrls;
+    if (!this.connectionCache) {
+      const { http, webSocket } = this.rpcUrls;
 
-    return new Connection(http[0], {
-      wsEndpoint: webSocket[0],
-      commitment: 'confirmed',
-    });
+      this.connectionCache = new Connection(http[0], {
+        wsEndpoint: webSocket[0],
+        commitment: 'confirmed',
+      });
+    }
+    return this.connectionCache;
   }
 
   getType(): ChainType {
     return ChainType.SolanaChain;
+  }
+
+  /** Solana keys balances by a base58 ed25519 public key. */
+  override isValidAddress(address: string): boolean {
+    return SolanaAddr.isValid(address);
   }
 
   async getCurrency(): Promise<ChainCurrency> {
@@ -51,5 +77,21 @@ export class SolanaChain extends Chain<ChainAssetData> {
       return { asset, decimals: SOLANA_DECIMALS } as ChainCurrency;
     }
     throw Error('Chain currency configuration not found');
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
   }
 }

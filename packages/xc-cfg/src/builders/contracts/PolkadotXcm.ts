@@ -35,18 +35,20 @@ export function PolkadotXcm() {
       build: async ({ address, amount, asset, destination, source }) => {
         const assetAddress = getAssetERC20Address(source.chain, asset);
 
-        return new ContractConfig({
-          abi: Abi.PolkadotXcm,
-          address: Precompile.PolkadotXcm,
-          args: [
-            (destination.chain as Parachain).parachainId,
-            Ss58Addr.getPubKey(address) as `0x${string}`,
-            [{ asset: assetAddress, amount }],
-            0,
-          ],
-          func: 'transferAssetsToPara32',
-          module: 'PolkadotXcm',
-        });
+        return [
+          new ContractConfig({
+            abi: Abi.PolkadotXcm,
+            address: Precompile.PolkadotXcm,
+            args: [
+              (destination.chain as Parachain).parachainId,
+              Ss58Addr.getPubKey(address) as `0x${string}`,
+              [{ asset: assetAddress, amount }],
+              0,
+            ],
+            func: 'transferAssetsToPara32',
+            module: 'PolkadotXcm',
+          }),
+        ];
       },
     }),
     transferAssetsToPara32WithFee: (): ContractConfigBuilder => ({
@@ -61,21 +63,23 @@ export function PolkadotXcm() {
           destination.fee.decimals
         );
 
-        return new ContractConfig({
-          abi: Abi.PolkadotXcm,
-          address: Precompile.PolkadotXcm,
-          args: [
-            (destination.chain as Parachain).parachainId,
-            Ss58Addr.getPubKey(address) as `0x${string}`,
-            [
-              { asset: assetAddress, amount },
-              { asset: feeAssetAddress, amount: feeAmount },
+        return [
+          new ContractConfig({
+            abi: Abi.PolkadotXcm,
+            address: Precompile.PolkadotXcm,
+            args: [
+              (destination.chain as Parachain).parachainId,
+              Ss58Addr.getPubKey(address) as `0x${string}`,
+              [
+                { asset: assetAddress, amount },
+                { asset: feeAssetAddress, amount: feeAmount },
+              ],
+              1,
             ],
-            1,
-          ],
-          func: 'transferAssetsToPara32',
-          module: 'PolkadotXcm',
-        });
+            func: 'transferAssetsToPara32',
+            module: 'PolkadotXcm',
+          }),
+        ];
       },
     }),
   };

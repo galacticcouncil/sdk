@@ -4,6 +4,9 @@ export * from './EvmParachain';
 export * from './EvmChain';
 export * from './SolanaChain';
 export * from './SuiChain';
+export * from './NearChain';
+export * from './ZecChain';
 
+export * from './balance';
 export * from './dex';
 export * from './types';

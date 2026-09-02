@@ -1,27 +1,26 @@
-import {
-  Asset,
-  AssetAmount,
-  BaseConfig,
-  CallType,
-} from '@galacticcouncil/xc-core';
+import { AssetAmount, BaseConfig, CallType } from '@galacticcouncil/xc-core';
 
-import { Observable } from 'rxjs';
-
-export interface Platform<T extends BaseConfig, B extends BaseConfig> {
-  buildCall(
+export interface Platform<T extends BaseConfig> {
+  /**
+   * Ordered call sequence of a transfer.
+   *
+   * Takes the configs the route's builder produced, in execution order, and
+   * returns one call per signature the sender has to give - which is not
+   * one per config: a platform that can batch (substrate) collapses them,
+   * one that can't (evm, solana) may also prepend account prerequisites.
+   */
+  buildCalls(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: T
-  ): Promise<Call>;
+    configs: T[]
+  ): Promise<Call[]>;
   estimateFee(
     account: string,
     amount: bigint,
     feeBalance: AssetAmount,
-    config: T
+    configs: T[]
   ): Promise<AssetAmount>;
-  getBalance(asset: Asset, config: B): Promise<AssetAmount>;
-  subscribeBalance(asset: Asset, config: B): Promise<Observable<AssetAmount>>;
 }
 
 export interface Call {

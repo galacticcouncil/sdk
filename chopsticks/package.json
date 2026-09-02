@@ -1,0 +1,30 @@
+{
+  "name": "chopsticks",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "wallet",
+    "xc",
+    "integration",
+    "e2e",
+    "chopsticks",
+    "test"
+  ],
+  "scripts": {
+    "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
+    "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts",
+    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts"
+  },
+  "devDependencies": {
+    "@acala-network/chopsticks": "^1.4.0",
+    "@acala-network/chopsticks-testing": "^1.4.0",
+    "@polkadot-labs/hdkd": "^0.0.19",
+    "@polkadot-labs/hdkd-helpers": "^0.0.19"
+  },
+  "dependencies": {
+    "@galacticcouncil/sdk-next": "^2.1.1",
+    "@galacticcouncil/xc-cfg": "^2.6.0",
+    "@galacticcouncil/xc-core": "^2.5.0",
+    "@galacticcouncil/xc-sdk": "^2.4.0"
+  }
+}

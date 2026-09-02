@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-sdk",
-  "version": "1.2.2",
+  "version": "2.4.1",
   "description": "Cross-chain sdk",
   "author": "GalacticCouncil",
   "type": "module",
@@ -30,9 +30,10 @@
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build",
     "clean": "rimraf build",
-    "link": "npm ln"
+    "link": "npm ln",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --silent"
   },
   "dependencies": {
-    "@galacticcouncil/xc-core": "^1.2.1"
+    "@galacticcouncil/xc-core": "^2.5.0"
   }
 }

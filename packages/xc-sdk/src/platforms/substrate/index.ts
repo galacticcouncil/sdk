@@ -1,5 +1,5 @@
 export * from './SubstrateClaim';
-export * from './SubstrateExec';
+export * from './SubstrateEvm';
 export * from './SubstratePlatform';
 export * from './SubstrateService';
 export * from './SubstrateSigner';

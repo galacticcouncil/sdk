@@ -1,5 +1,7 @@
 import { PolkadotClient, TypedApi } from 'polkadot-api';
 
+import { firstValueFrom } from 'rxjs';
+
 import {
   hydration,
   hydrationNext,
@@ -8,7 +10,14 @@ import {
 
 import { Watcher } from './Watcher';
 
-export type BlockAt = 'best' | 'finalized' | (string & {});
+/** Block hash to read at; unset follows the best chain */
+export type BlockAt = string;
+
+/** A block, by both of the things a read may need */
+export interface BlockRef {
+  hash: string;
+  number: number;
+}
 
 export abstract class Papi {
   readonly client: PolkadotClient;
@@ -26,5 +35,27 @@ export abstract class Papi {
     this.apiIce = this.client.getTypedApi(hydrationIce);
     this.watcher = Watcher.getInstance(this.client);
     this.at = at ?? 'best';
+  }
+
+  /**
+   * Resolve a read target to the block it names.
+   *
+   * - No fixed block takes the best chain's tip, off the followed stream
+   * - A hash needs its height; every read below can then pin
+   *
+   * @param at - block hash, or `best` for the tip
+   */
+  protected async resolveBlock(at: BlockAt = this.at): Promise<BlockRef> {
+    if (at === 'best') {
+      const [tip] = await firstValueFrom(this.client.bestBlocks$);
+      return { hash: tip.hash, number: tip.number };
+    }
+
+    if (at.startsWith('0x')) {
+      const number = await this.api.query.System.Number.getValue({ at });
+      return { hash: at, number: number };
+    }
+
+    throw new Error(`Block hash expected, got '${at}'`);
   }
 }

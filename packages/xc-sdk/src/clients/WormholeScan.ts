@@ -1,5 +1,3 @@
-import { Precompile } from '@galacticcouncil/xc-core';
-
 const DEFAULT_URL = 'https://api.wormholescan.io';
 
 export interface Vaa {
@@ -27,14 +25,15 @@ export interface Operation {
     payload: OperationPayload;
     standarizedProperties: OperationProperties;
   };
-  data: {
+  /** Indexer enrichment, absent for parachain emitted operations. */
+  data?: {
     symbol: string;
     tokenAmount: string;
   };
   emitterChain: number;
   emitterAddress: {
     hex: string;
-    native: string;
+    native?: string;
   };
   sequence: string;
   sourceChain: {
@@ -82,6 +81,8 @@ export interface OperationProperties {
   toAddress: string;
   tokenChain: number;
   tokenAddress: string;
+  amount: string;
+  normalizedDecimals: number;
 }
 
 export class WormholeScan {
@@ -134,15 +135,5 @@ export class WormholeScan {
     const operation = await fetch(url);
     const resp = await operation.json();
     return resp as Operation;
-  }
-
-  isMrlTransfer(payload: OperationPayload): boolean {
-    const { payloadType, toAddress, toChain } = payload;
-    const nativeToAddress = '0x' + toAddress.substring(26);
-    return (
-      payloadType === 3 &&
-      toChain === 16 &&
-      nativeToAddress === Precompile.Bridge
-    );
   }
 }

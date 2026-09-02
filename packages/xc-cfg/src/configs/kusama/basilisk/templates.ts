@@ -11,7 +11,7 @@ import {
   XcmTransferType,
 } from '../../../builders';
 
-import { balance, fee } from './configs';
+import { fee } from './configs';
 
 export function toTransferTemplate(
   asset: Asset,
@@ -21,11 +21,7 @@ export function toTransferTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -33,9 +29,7 @@ export function toTransferTemplate(
       fee: {
         amount: FeeAmountBuilder()
           .XcmPaymentApi()
-          .calculateDestFee(
-            reserve ? { reserve } : undefined
-          ),
+          .calculateDestFee(reserve ? { reserve } : undefined),
         asset: asset,
       },
     },

@@ -60,7 +60,6 @@ export class IntentOrderTxBuilder extends TxBuilder {
       case TradeOrderType.Dca:
         return this.buildDcaTx();
       case TradeOrderType.TwapSell:
-      case TradeOrderType.TwapBuy:
         return this.buildTwapTx();
       default:
         throw new Error(`Unsupported TradeOrderType: ${type}`);

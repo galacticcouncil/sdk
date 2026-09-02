@@ -1,14 +1,14 @@
 import { erc20 } from '@galacticcouncil/common';
 import type { Quote } from '@defuse-protocol/one-click-sdk-typescript';
 
-import { keccak256, encodePacked, erc20Abi } from 'viem';
+import { erc20Abi } from 'viem';
 
 import { buildCalls } from './builder';
 import type { SwapContext } from './types';
-import { amount, padUp, padDown } from './utils';
+import { amount, padDown, trim } from './utils';
 import { fetchMaxRelayFee } from '../quote/relayFee';
 import { getOneClickQuote } from '../quote/oneClick';
-import { WETH_ID, GLMR_ID, MIN_WETH, pctToBps } from '../registry/consts';
+import { WETH_ID, MIN_WETH, TRIM_UNIT, pctToBps } from '../registry/consts';
 import {
   XcSwapError,
   type XcSwapParams,
@@ -48,55 +48,36 @@ export async function swap(
     typeof params.assetIn === 'number' ? params.assetIn : params.assetIn.id!;
   const amountIn = BigInt(params.amountIn);
 
-  // Buy the GLMR xcm fee, then sell the rest for WETH.
-  let maxFeeIn = 0n;
-  let feeSpent = 0n;
-  if (assetInId !== GLMR_ID) {
-    const feeBuy = await ctx.router.getBestBuy(assetInId, GLMR_ID, ctx.xcmFee);
-    feeSpent = feeBuy.amountIn;
-    maxFeeIn = padUp(feeBuy.amountIn, slippageBps);
-  } else {
-    // A is GLMR: the fee is withheld, not bought.
-    feeSpent = ctx.xcmFee;
-  }
-
-  const sellAmount = amountIn - feeSpent;
-
+  // The whole input is sold: the rail's cost is charged against the swap
+  // output, so there is nothing to carve out of A up front.
   let wethOut = 0n;
   let priceImpactPct = 0;
-  if (sellAmount > 0n) {
-    if (assetInId !== WETH_ID) {
-      const sell = await ctx.router.getBestSell(assetInId, WETH_ID, sellAmount);
-      wethOut = sell.amountOut;
-      priceImpactPct = sell.priceImpactPct;
-    } else {
-      // A is already WETH: nothing to sell, the remainder is bridged.
-      wethOut = sellAmount;
-    }
+  if (assetInId !== WETH_ID) {
+    const sell = await ctx.router.getBestSell(assetInId, WETH_ID, amountIn);
+    wethOut = sell.amountOut;
+    priceImpactPct = sell.priceImpactPct;
+  } else {
+    // A is already WETH: the emitter skips the swap and settles it as-is.
+    wethOut = amountIn;
   }
 
-  // Reference: full A → WETH with no fee carve-out (drives the fee breakdown).
-  const idealSell =
-    assetInId === WETH_ID
-      ? undefined
-      : await ctx.router.getBestSell(assetInId, WETH_ID, amountIn);
-  const idealWeth = idealSell ? idealSell.amountOut : amountIn;
-
   /*
-   * Concurrent HTTP/metadata:
+   * Concurrent HTTP/chain reads:
    * - relay fee (gas-based)
+   * - rail state (delivery price, pause, outbound capacity)
    * - dry quote (priced at the full WETH; skipped when there's nothing to
    *   bridge, and its API errors are mapped to XcSwapError, not thrown)
    *
-   * The fee is subtracted from the result afterwards via the quoted rate.
+   * Both fees are subtracted from the result afterwards via the quoted rate.
    */
-  const [maxRelayFee, assetIn, wethAsset, destinationAsset, quoteRes] =
+  const [maxRelayFee, rail, assetIn, wethAsset, destinationAsset, quoteRes] =
     await Promise.all([
       fetchMaxRelayFee({
         quoterUrl: ctx.quoterUrl,
         chain: 'ethereum',
         marginBps: pctToBps(ctx.relayMarginPct),
       }),
+      ctx.rail(),
       ctx.resolveAsset(assetInId),
       ctx.resolveAsset(WETH_ID),
       ctx.resolveDestination(destinationAssetId),
@@ -117,18 +98,38 @@ export async function swap(
     ]);
   const quote = quoteRes.quote;
 
-  const minEthOut = padDown(wethOut, slippageBps);
+  // What the settlement carries: the swap output less the rail's delivery
+  // price, quantized to the rail's precision.
+  const bridged =
+    wethOut > rail.cost ? trim(wethOut - rail.cost, TRIM_UNIT) : 0n;
+
+  // Floor on the settled amount. The emitter trims it and raises the router's
+  // own floor by the cost, so it is expressed against what actually bridges.
+  const minEthOut = trim(padDown(bridged, slippageBps), TRIM_UNIT);
 
   // Net WETH that lands after the relay fee is skimmed on Ethereum.
-  const swapAmount = wethOut > maxRelayFee ? wethOut - maxRelayFee : 0n;
+  const swapAmount = bridged > maxRelayFee ? bridged - maxRelayFee : 0n;
 
   // Viability + quote errors — reported, not thrown (router-style).
   const errors: XcSwapError[] = [];
+  if (rail.paused) {
+    errors.push(XcSwapError.RailPaused);
+  }
+  if (wethOut <= rail.cost) {
+    errors.push(XcSwapError.BelowDeliveryPrice);
+  } else if (bridged === 0n) {
+    errors.push(XcSwapError.BelowTrimUnit);
+  }
+  if (bridged > rail.capacity) {
+    errors.push(XcSwapError.RailRateLimited);
+  }
+  if (maxRelayFee >= bridged) {
+    errors.push(XcSwapError.RelayFeeExceedsAmount);
+  } else if (bridged < 2n * maxRelayFee) {
+    errors.push(XcSwapError.RelayFeeTooHigh);
+  }
   if (minEthOut < MIN_WETH) {
     errors.push(XcSwapError.MinWethNotMet);
-  }
-  if (wethOut < 2n * maxRelayFee) {
-    errors.push(XcSwapError.RelayFeeTooHigh);
   }
   if (quoteRes.error) {
     errors.push(quoteRes.error);
@@ -149,12 +150,13 @@ export async function swap(
     quote ? scaleToNet(BigInt(quote.minAmountOut)) : 0n
   );
 
-  // Fee = value lost between the full input (idealWeth, no fees) and the WETH
-  // that actually enters the swap (swapAmount): GLMR xcm fee + relay fee.
-  const feeWeth = idealWeth > swapAmount ? idealWeth - swapAmount : 0n;
+  // Fee = value lost between the full swap output and the WETH that actually
+  // enters the 1Click swap: the rail's cost, quantization dust, and the relay
+  // fee ceiling.
+  const feeWeth = wethOut > swapAmount ? wethOut - swapAmount : 0n;
   const feeAmount = amount(wethAsset, feeWeth);
   const feePct =
-    idealWeth > 0n ? Number((feeWeth * 10_000n) / idealWeth) / 100 : 0;
+    wethOut > 0n ? Number((feeWeth * 10_000n) / wethOut) / 100 : 0;
 
   // USD per WETH from the (full-WETH) quote valuation; rate = dest per 1 A.
   const wethOutDecimal = Number(amount(wethAsset, wethOut).toDecimal());
@@ -179,6 +181,13 @@ export async function swap(
     minAmountOut: minAmountOutAmount,
     spotPrice,
     fee: { amount: feeAmount, usd: feeUsd, pct: feePct },
+    settlement: {
+      wethOut: amount(wethAsset, wethOut),
+      bridged: amount(wethAsset, bridged),
+      amount: amount(wethAsset, swapAmount),
+      minEthOut: amount(wethAsset, minEthOut),
+      maxRelayFee: amount(wethAsset, maxRelayFee),
+    },
     timeEstimate: { quote: quote?.timeEstimate ?? 0 },
     priceImpactPct,
     errors,
@@ -201,13 +210,6 @@ export async function swap(
         throw new Error('1Click did not return a deposit address');
       }
 
-      const intentId = keccak256(
-        encodePacked(
-          ['address', 'uint256'],
-          [depositAddress as `0x${string}`, amountIn]
-        )
-      );
-
       // Skip the approve when the emitter already has sufficient allowance.
       const allowance = (await ctx.evm.getProvider().readContract({
         abi: erc20Abi,
@@ -223,9 +225,7 @@ export async function swap(
         assetIn: assetInId,
         amountIn,
         minEthOut,
-        maxFeeIn,
-        intentId,
-        intentDepositAddress: depositAddress,
+        depositAddress,
         maxRelayFee,
         approved: allowance >= amountIn,
       });
@@ -233,7 +233,6 @@ export async function swap(
       return {
         calls,
         depositAddress,
-        intentId,
         correlationId,
         deadline: deadlineIso,
       };

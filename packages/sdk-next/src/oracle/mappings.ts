@@ -1,3 +1,5 @@
+import { TEmaName, TEmaPair, TEmaPeriod } from './types';
+
 // Static mappings used to route MM-oracle events to the correct mmAddress.
 //
 // MM oracles come in three kinds (see docs/ORACLE_SPEC.md):
@@ -34,6 +36,13 @@ export const HYBRID_MM_BY_EMA: Record<string, string> = {
   // bifrosto · (DOT=5, vDOT=15) · LastBlock → vDOT-Discount-HybridOracleAggregator
   'bifrosto:5:15:LastBlock': '0xaafd758688cefd0a7b7770a825f1aad551e16185',
 };
+
+/** Full EmaOracle.Oracles cache key: `name:pair:period`. */
+export const emaKey = (
+  name: TEmaName,
+  pair: TEmaPair,
+  period: TEmaPeriod
+): string => `${name.toString()}:${pair.join(':')}:${period.type}`;
 
 /**
  * Build the canonical routing key for `HYBRID_MM_BY_EMA`.

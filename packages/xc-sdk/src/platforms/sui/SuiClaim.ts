@@ -1,97 +1,170 @@
-import { CallType, SuiChain, Wormhole as Wh } from '@galacticcouncil/xc-core';
+import {
+  NttTokenDef,
+  suiPkg,
+  SuiChain,
+  Wormhole as Wh,
+} from '@galacticcouncil/xc-core';
 
+import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
-import { toBase64 } from '@mysten/bcs';
+
 import {
   encoding,
-  serialize,
+  serializeLayout,
   toChainId,
-} from '@wormhole-foundation/sdk-connect';
+} from '@wormhole-foundation/sdk-base';
 import { deserialize } from '@wormhole-foundation/sdk-definitions';
-import { getPackageId } from '@wormhole-foundation/sdk-sui';
-import { getTokenCoinType } from '@wormhole-foundation/sdk-sui-tokenbridge';
+import {
+  nativeTokenTransferLayout,
+  register as registerNttPayloads,
+} from '@wormhole-foundation/sdk-definitions-ntt';
 
 import { SuiCall } from './types';
-import { resolveCommandsTyped } from './utils';
+import { buildSuiCall } from './utils';
 
 export class SuiClaim {
   readonly #chain: SuiChain;
+  readonly #client: SuiClient;
 
   constructor(chain: SuiChain) {
     this.#chain = chain;
+    this.#client = chain.client;
   }
 
-  async redeem(from: string, vaaRaw: string): Promise<SuiCall> {
+  /**
+   * Redeem NTT transfer on Sui.
+   *
+   * Single transaction, mirroring the reference sui NTT sdk redeem:
+   * verify the VAA against the core bridge, validate it through the
+   * wormhole transceiver, redeem to the manager inbox & release the
+   * inbox item to the recipient.
+   *
+   * @param from - payer address
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param ntt - NTT token deployment on Sui (state object ids)
+   * @returns claim move call
+   */
+  async redeem(
+    from: string,
+    vaaRaw: string,
+    ntt: NttTokenDef
+  ): Promise<SuiCall> {
     const ctxWh = Wh.fromChain(this.#chain);
-    const client = this.#chain.client;
+    const client = this.#client;
+
+    // The ntt payload layouts stopped registering on import in 7.x, they are
+    // opt-in now - `deserialize` throws without this. Idempotent.
+    registerNttPayloads();
 
     const vaaBytes = encoding.b64.decode(vaaRaw);
-    const vaa = deserialize('TokenBridge:Transfer', vaaBytes);
+    const vaa = deserialize('Ntt:WormholeTransfer', vaaBytes);
+    const nttPayload = vaa.payload.nttManagerPayload;
 
-    const coreBridgeObjectId = ctxWh.getCoreBridge();
-    const tokenBridgeObjectId = ctxWh.getTokenBridge();
+    const coreStateId = ctxWh.getCoreBridge();
+    const managerStateId = ntt.manager;
+    const transceiverStateId = ntt.transceiver.wormhole;
+    const coinType = ntt.token;
 
-    const coinType = await getTokenCoinType(
-      client,
-      tokenBridgeObjectId,
-      vaa.payload.token.address.toUint8Array(),
-      toChainId(vaa.payload.token.chain)
-    );
-
-    if (!coinType) {
-      throw new Error('Unable to fetch token coinType');
-    }
-
-    const [coreBridgePackageId, tokenBridgePackageId] = await Promise.all([
-      getPackageId(client, coreBridgeObjectId),
-      getPackageId(client, tokenBridgeObjectId),
+    const [
+      coreBridgePackageId,
+      nttPackageId,
+      transceiverPackageId,
+      nttCommonPackageId,
+      coinMetadataId,
+    ] = await Promise.all([
+      suiPkg.getWormholePackageId(client, coreStateId),
+      suiPkg.getCurrentPackageId(client, managerStateId),
+      suiPkg.getCurrentPackageId(client, transceiverStateId),
+      suiPkg.getNttCommonPackageId(client, managerStateId),
+      suiPkg.getCoinMetadataId(client, coinType),
     ]);
 
     const tx = new Transaction();
-    tx.setSender(from);
 
-    const [verifiedVAA] = tx.moveCall({
+    // Verify VAA, validate through transceiver & redeem to manager inbox
+    const [verifiedVaa] = tx.moveCall({
       target: `${coreBridgePackageId}::vaa::parse_and_verify`,
       arguments: [
-        tx.object(coreBridgeObjectId),
-        tx.pure.vector('u8', serialize(vaa)),
+        tx.object(coreStateId),
+        tx.pure.vector('u8', Array.from(vaaBytes)),
         tx.object(SUI_CLOCK_OBJECT_ID),
       ],
     });
 
-    const [tokenBridgeMessage] = tx.moveCall({
-      target: `${tokenBridgePackageId}::vaa::verify_only_once`,
-      arguments: [tx.object(tokenBridgeObjectId), verifiedVAA!],
+    const [validatedMessage] = tx.moveCall({
+      target: `${transceiverPackageId}::wormhole_transceiver::validate_message`,
+      typeArguments: [`${nttPackageId}::auth::ManagerAuth`],
+      arguments: [tx.object(transceiverStateId), verifiedVaa!],
     });
 
-    const [relayerReceipt] = tx.moveCall({
-      target: `${tokenBridgePackageId}::complete_transfer::authorize_transfer`,
-      arguments: [tx.object(tokenBridgeObjectId), tokenBridgeMessage!],
-      typeArguments: [coinType],
-    });
-
-    const [coins] = tx.moveCall({
-      target: `${tokenBridgePackageId}::complete_transfer::redeem_relayer_payout`,
-      arguments: [relayerReceipt!],
-      typeArguments: [coinType],
+    const [versionGated] = tx.moveCall({
+      target: `${nttPackageId}::upgrades::new_version_gated`,
+      arguments: [],
     });
 
     tx.moveCall({
-      target: `${tokenBridgePackageId}::coin_utils::return_nonzero`,
-      arguments: [coins!],
-      typeArguments: [coinType],
+      target: `${nttPackageId}::ntt::redeem`,
+      typeArguments: [
+        coinType,
+        `${transceiverPackageId}::wormhole_transceiver::TransceiverAuth`,
+      ],
+      arguments: [
+        tx.object(managerStateId),
+        versionGated!,
+        tx.object(coinMetadataId),
+        validatedMessage!,
+        tx.object(SUI_CLOCK_OBJECT_ID),
+      ],
     });
 
-    const txBytes = await tx.build({ client });
-    const txJson = await tx.toJSON();
-    const commands = resolveCommandsTyped(JSON.parse(txJson));
+    // Reconstruct the manager message & release the inbox item
+    const payloadBytes = serializeLayout(
+      nativeTokenTransferLayout,
+      nttPayload.payload
+    );
 
-    return {
-      from: from,
-      commands: commands,
-      data: toBase64(txBytes),
-      type: CallType.Sui,
-    } as SuiCall;
+    const [nativeTokenTransfer] = tx.moveCall({
+      target: `${nttCommonPackageId}::native_token_transfer::parse`,
+      arguments: [tx.pure.vector('u8', Array.from(payloadBytes))],
+    });
+
+    const [messageId] = tx.moveCall({
+      target: `${coreBridgePackageId}::bytes32::from_bytes`,
+      arguments: [tx.pure.vector('u8', Array.from(nttPayload.id))],
+    });
+
+    const [sender] = tx.moveCall({
+      target: `${coreBridgePackageId}::external_address::from_address`,
+      arguments: [tx.pure.address(nttPayload.sender.toString())],
+    });
+
+    const [managerMessage] = tx.moveCall({
+      target: `${nttCommonPackageId}::ntt_manager_message::new`,
+      typeArguments: [
+        `${nttCommonPackageId}::native_token_transfer::NativeTokenTransfer`,
+      ],
+      arguments: [messageId!, sender!, nativeTokenTransfer!],
+    });
+
+    const [releaseVersionGated] = tx.moveCall({
+      target: `${nttPackageId}::upgrades::new_version_gated`,
+      arguments: [],
+    });
+
+    tx.moveCall({
+      target: `${nttPackageId}::ntt::release`,
+      typeArguments: [coinType],
+      arguments: [
+        tx.object(managerStateId),
+        releaseVersionGated!,
+        tx.pure.u16(toChainId(vaa.emitterChain)),
+        managerMessage!,
+        tx.object(coinMetadataId),
+        tx.object(SUI_CLOCK_OBJECT_ID),
+      ],
+    });
+
+    return buildSuiCall(from, tx, this.#client);
   }
 }

@@ -3,41 +3,39 @@ import type { EvmCall } from '@galacticcouncil/xc-sdk';
 
 import { encodeFunctionData, erc20Abi } from 'viem';
 
-import { SWAP_AND_BRIDGE_ABI } from './abi';
+import { PLACE_ORDER_ABI } from './abi';
 import type { BuildCallsParams } from './types';
 
 /**
  * Build the executable EVM calls on Hydration EVM:
  *   1. `approve(emitter, amountIn)` on A's ERC-20 precompile — skipped when
  *      `approved` (the emitter already has sufficient allowance).
- *   2. `swapAndBridge(...)` on the `IntentEmitter`.
+ *   2. `placeOrder(...)` on the `IntentEmitter`.
  */
 export function buildCalls(params: BuildCallsParams): EvmCall[] {
-  const swapData = encodeFunctionData({
-    abi: SWAP_AND_BRIDGE_ABI,
-    functionName: 'swapAndBridge',
+  const orderData = encodeFunctionData({
+    abi: PLACE_ORDER_ABI,
+    functionName: 'placeOrder',
     args: [
       params.assetIn,
       params.amountIn,
       params.minEthOut,
-      params.maxFeeIn,
-      params.intentId,
-      params.intentDepositAddress as `0x${string}`,
+      params.depositAddress as `0x${string}`,
       params.maxRelayFee,
     ],
   });
 
-  const swapAndBridge: EvmCall = {
+  const placeOrder: EvmCall = {
     from: params.from,
     to: params.emitter as `0x${string}`,
-    data: swapData,
-    abi: JSON.stringify(SWAP_AND_BRIDGE_ABI),
+    data: orderData,
+    abi: JSON.stringify(PLACE_ORDER_ABI),
     type: CallType.Evm,
     dryRun: async () => undefined,
   };
 
   if (params.approved) {
-    return [swapAndBridge];
+    return [placeOrder];
   }
 
   const approveData = encodeFunctionData({
@@ -56,5 +54,5 @@ export function buildCalls(params: BuildCallsParams): EvmCall[] {
     dryRun: async () => undefined,
   };
 
-  return [approve, swapAndBridge];
+  return [approve, placeOrder];
 }

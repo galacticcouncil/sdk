@@ -1,6 +1,7 @@
 import {
   ChainEcosystem as Ecosystem,
   Parachain,
+  SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
 
 import { neuro } from '../../assets';
@@ -19,6 +20,7 @@ export const neuroweb = new Parachain({
       },
     },
   ],
+  balance: SubstrateBalanceType.System,
   ecosystem: Ecosystem.Polkadot,
   explorer: 'https://neuroweb.subscan.io',
   genesisHash:

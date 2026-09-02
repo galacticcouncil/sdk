@@ -1,14 +1,13 @@
 import {
   AnyChain,
+  AnyParachain,
   Asset,
   AssetRoute,
-  ContractConfigBuilder,
   ExtrinsicConfigBuilderParams,
-  FeeAmountConfigBuilder,
   Parachain,
 } from '@galacticcouncil/xc-core';
 
-import { dot, glmr, usdt } from '../../../assets';
+import { dot, glmr, usdt, weth_wh } from '../../../assets';
 import {
   ContractBuilder,
   ExtrinsicBuilder,
@@ -16,13 +15,10 @@ import {
   FeeAmountBuilder,
   XcmTransferType,
 } from '../../../builders';
-import { assetHub, kusamaAssetHub, moonbeam } from '../../../chains';
+import { assetHub, kusamaAssetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
-import { balance, fee } from './configs';
-
-export const MRL_EXECUTION_FEE = 0.9; // Remote execution fee (< 0.9)
-export const MRL_XCM_FEE = 1; // Destination fee (< 0.1) + Remote execution fee (< 0.9)
+import { fee } from './configs';
 
 export const GLMR_MIN_DEST_FEE = 1; // Minimum GLMR fee to meet swap threshold
 export const HUB_EXT_USDT_DEST_FEE = 0.02;
@@ -40,16 +36,12 @@ const swapExtrinsicBuilder = ExtrinsicBuilder().router().buy({ slippage: 30 });
 export function toTransferTemplate(
   asset: Asset,
   destination: AnyChain,
-  reserve?: Parachain
+  reserve?: AnyParachain
 ): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -73,11 +65,7 @@ export function toParaTemplate(
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -95,11 +83,7 @@ export function toHubTemplate(asset: Asset, hub: Parachain): AssetRoute {
   return new AssetRoute({
     source: {
       asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: hub,
@@ -119,11 +103,7 @@ export function toHubExtTemplate(asset: Asset): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: assetHub,
@@ -151,11 +131,7 @@ export function toKusamaHubTemplate(
   return new AssetRoute({
     source: {
       asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: kusamaAssetHub,
@@ -174,17 +150,13 @@ export function toKusamaHubTemplate(
 
 export function toParaErc20Template(
   asset: Asset,
-  destination: Parachain,
+  destination: AnyParachain,
   transferType: XcmTransferType = XcmTransferType.LocalReserve
 ): AssetRoute {
   return new AssetRoute({
     source: {
       asset: asset,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: destination,
@@ -205,84 +177,81 @@ export function toParaErc20Template(
   });
 }
 
-export function toMoonbeamErc20Template(asset: Asset): AssetRoute {
-  return toParaErc20Template(
-    asset,
-    moonbeam,
-    XcmTransferType.DestinationReserve
-  );
-}
-
-function viaWormholeTemplate(
+/**
+ * Both signer origins are served, and the route declares a config for each:
+ * an ss58 signer takes the `extrinsic` (evm calls wrapped in `EVM.call`, one
+ * signature, fee quoted by the runtime in the sender's fee currency), an h160
+ * signer takes the `contract` and signs plain evm transactions.
+ */
+export function viaNttTemplate(
   assetIn: Asset,
   assetOut: Asset,
-  to: AnyChain,
-  destinationFee: FeeAmountConfigBuilder | number,
-  transact: ContractConfigBuilder,
-  tags: Tag[]
+  to: AnyChain
 ): AssetRoute {
+  const transfer = ContractBuilder().Wormhole().Ntt().transfer();
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        asset: assetIn,
-        balance: balance(),
-      },
     },
     destination: {
       chain: to,
       asset: assetOut,
       fee: {
-        amount: destinationFee,
-        asset: assetOut,
+        amount: 0,
+        asset: assetIn,
       },
     },
-    extrinsic: ExtrinsicDecorator(
-      isDestinationFeeSwapSupported,
-      swapExtrinsicBuilder
-    ).priorMulti([
-      ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-        transferType: XcmTransferType.DestinationReserve,
-      }),
-      ExtrinsicBuilder().polkadotXcm().send().transact({
-        fee: MRL_EXECUTION_FEE,
-      }),
-    ]),
-    transact: {
-      chain: moonbeam,
-      fee: {
-        amount: MRL_XCM_FEE,
-        asset: glmr,
-        balance: balance(),
-      },
-      extrinsic: ExtrinsicBuilder().ethereumXcm().transact(transact),
-    },
-    tags: tags,
+    contract: transfer,
+    extrinsic: ExtrinsicBuilder().evm().call(transfer),
+    tags: [Tag.Wormhole, Tag.Ntt],
   });
 }
 
-export function viaWormholeBridgeTemplate(
+/**
+ * Executor-delivered variant, offered alongside the self-redeem route above
+ * for the same pair - the sender pays for delivery instead of signing a
+ * redeem on the destination.
+ *
+ * Cost is charged in weth, hydration's evm native gas - `EVM.call { value }`
+ * debits the weth balance (asset 20), not hdx - whether the transfer is signed
+ * as h160 or wrapped in EVM.call. Ntt still delivers the full amount.
+ *
+ * Must stay an 18 decimal asset: the builder returns a raw evm value, and hdx
+ * would both name the wrong balance and resolve to 12 decimals.
+ *
+ * A sender holding no weth buys it first: the same destination fee swap the
+ * xcm routes use, batched ahead of the calls. Only an ss58 origin needs it -
+ * that one pays its extrinsic fee in hdx and can hold zero weth, and is the
+ * origin whose config is an extrinsic in the first place. An h160 has nothing
+ * to batch into, but pays its own gas in weth, so it already holds some.
+ */
+export function viaNttExecutorTemplate(
   assetIn: Asset,
   assetOut: Asset,
   to: AnyChain
 ): AssetRoute {
-  return viaWormholeTemplate(
-    assetIn,
-    assetOut,
-    to,
-    0,
-    ContractBuilder()
-      .Batch()
-      .batchAll([
-        ContractBuilder()
-          .Erc20()
-          .approve((ctx) => ctx.getTokenBridge()),
-        ContractBuilder().Wormhole().TokenBridge().transferTokens(),
-      ]),
-    [Tag.Mrl, Tag.Wormhole]
-  );
+  const transfer = ContractBuilder().Wormhole().Ntt().transferViaExecutor();
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: fee(),
+    },
+    destination: {
+      chain: to,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Wormhole().quoteExecutorCost(),
+        asset: weth_wh,
+      },
+    },
+    contract: transfer,
+    extrinsic: ExtrinsicDecorator(
+      isDestinationFeeSwapSupported,
+      swapExtrinsicBuilder
+    ).prior(ExtrinsicBuilder().evm().call(transfer)),
+    tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
+  });
 }
 
 export function viaSnowbridgeTemplate(
@@ -293,11 +262,7 @@ export function viaSnowbridgeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: to,
@@ -328,11 +293,7 @@ export function viaSnowbridgeV1Template(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: balance(),
       fee: fee(),
-      destinationFee: {
-        balance: balance(),
-      },
     },
     destination: {
       chain: to,

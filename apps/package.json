@@ -14,13 +14,13 @@
     "esbuild-plugin-wasm": "^1.0.0"
   },
   "dependencies": {
-    "@galacticcouncil/common": "^1.1.0",
-    "@galacticcouncil/descriptors": "^2.5.0",
-    "@galacticcouncil/sdk-next": "^1.5.0",
-    "@galacticcouncil/xc": "^1.0.1",
-    "@galacticcouncil/xc-cfg": "^1.6.0",
-    "@galacticcouncil/xc-core": "^1.2.1",
-    "@galacticcouncil/xc-sdk": "^1.2.2",
+    "@galacticcouncil/common": "^1.2.0",
+    "@galacticcouncil/descriptors": "^2.7.0",
+    "@galacticcouncil/sdk-next": "^2.0.0",
+    "@galacticcouncil/xc": "^2.1.0",
+    "@galacticcouncil/xc-cfg": "^2.4.0",
+    "@galacticcouncil/xc-core": "^2.3.0",
+    "@galacticcouncil/xc-sdk": "^2.3.0",
     "polkadot-api": "^2.1.7",
     "viem": "^2.38.3"
   }

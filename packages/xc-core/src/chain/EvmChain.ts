@@ -1,5 +1,9 @@
 import { Chain as EvmChainDef } from 'viem';
 
+import { Observable } from 'rxjs';
+
+import { Asset, AssetAmount } from '../asset';
+import { EvmBalanceClient, EvmBalanceType } from './balance';
 import {
   Chain,
   ChainAssetData,
@@ -17,8 +21,14 @@ import {
   WormholeDef,
 } from '../bridge';
 import { EvmClient } from '../evm';
+import { addr } from '../utils';
 
-export interface EvmChainParams extends ChainParams<ChainAssetData> {
+const { EvmAddr } = addr;
+
+export interface EvmChainParams extends ChainParams<
+  ChainAssetData,
+  EvmBalanceType
+> {
   evmChain: EvmChainDef;
   id: number;
   rpcs?: string[];
@@ -27,7 +37,11 @@ export interface EvmChainParams extends ChainParams<ChainAssetData> {
   wormhole?: WormholeDef;
 }
 
-export class EvmChain extends Chain<ChainAssetData> {
+export class EvmChain extends Chain<ChainAssetData, EvmBalanceType> {
+  private readonly balanceClient = new EvmBalanceClient(this);
+
+  private clientCache?: EvmClient;
+
   readonly evmChain: EvmChainDef;
   readonly id: number;
   readonly rpcs?: string[];
@@ -53,12 +67,24 @@ export class EvmChain extends Chain<ChainAssetData> {
     this.wormhole = wormhole && new Wormhole(wormhole);
   }
 
+  /**
+   * Memoized. Viem keys block-watch dedupe and multicall batching on client
+   * identity, so a fresh client per read defeats both.
+   */
   get evmClient(): EvmClient {
-    return new EvmClient(this.evmChain, this.rpcs);
+    if (!this.clientCache) {
+      this.clientCache = new EvmClient(this.evmChain, this.rpcs);
+    }
+    return this.clientCache;
   }
 
   getType(): ChainType {
     return ChainType.EvmChain;
+  }
+
+  /** Evm chains key balances by an h160 address. */
+  override isValidAddress(address: string): boolean {
+    return EvmAddr.isValid(address);
   }
 
   async getCurrency(): Promise<ChainCurrency> {
@@ -70,5 +96,21 @@ export class EvmChain extends Chain<ChainAssetData> {
       return { asset, decimals } as ChainCurrency;
     }
     throw Error('Chain currency configuration not found');
+  }
+
+  async getBalance(asset: Asset, address: string): Promise<AssetAmount> {
+    return this.balanceClient.getBalance(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
+  }
+
+  subscribeBalance(asset: Asset, address: string): Observable<AssetAmount> {
+    return this.balanceClient.subscribe(
+      asset,
+      address,
+      this.getBalanceType(asset)
+    );
   }
 }

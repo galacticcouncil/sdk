@@ -7,15 +7,9 @@ import {
   bifrost,
   hydration,
   kusamaAssetHub,
-  moonbeam,
   mythos,
 } from '../../../chains';
-import {
-  AssetMinBuilder,
-  BalanceBuilder,
-  ExtrinsicBuilder,
-  XcmTransferType,
-} from '../../../builders';
+import { ExtrinsicBuilder, XcmTransferType } from '../../../builders';
 
 import {
   extraFee,
@@ -28,16 +22,10 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: dot,
-      balance: BalanceBuilder().substrate().system().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
       },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().system().account(),
-      },
-      min: AssetMinBuilder().assets().asset(),
     },
     destination: {
       chain: hydration,
@@ -54,14 +42,9 @@ const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ksm,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
@@ -85,14 +68,9 @@ const toKusamaAssethub: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: ksm,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
@@ -107,11 +85,6 @@ const toKusamaAssethub: AssetRoute[] = [
   }),
 ];
 
-const toMoonbeam: AssetRoute[] = [
-  toParaStablesTemplate(usdt, moonbeam, 0.25),
-  toParaStablesTemplate(usdc, moonbeam, 0.25),
-];
-
 const toBifrost: AssetRoute[] = [
   toParaStablesTemplate(usdt, bifrost, 0.03),
   toParaStablesTemplate(usdc, bifrost, 0.03),
@@ -121,14 +94,9 @@ const toMythos: AssetRoute[] = [
   new AssetRoute({
     source: {
       asset: myth,
-      balance: BalanceBuilder().substrate().foreignAssets().account(),
       fee: {
         asset: dot,
-        balance: BalanceBuilder().substrate().system().account(),
         extra: extraFee,
-      },
-      destinationFee: {
-        balance: BalanceBuilder().substrate().foreignAssets().account(),
       },
     },
     destination: {
@@ -154,11 +122,5 @@ export const assetHubCexConfig = new ChainRoutes({
 
 export const assetHubConfig = new ChainRoutes({
   chain: assetHub,
-  routes: [
-    ...toHydration,
-    ...toKusamaAssethub,
-    ...toMoonbeam,
-    ...toBifrost,
-    ...toMythos,
-  ],
+  routes: [...toHydration, ...toKusamaAssethub, ...toBifrost, ...toMythos],
 });

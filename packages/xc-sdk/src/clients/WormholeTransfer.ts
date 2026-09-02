@@ -1,27 +1,53 @@
-import { acc } from '@galacticcouncil/common';
 import {
-  mrl,
+  addr,
+  Abi,
   AnyChain,
+  AnyEvmChain,
   ConfigService,
-  ChainType,
-  EvmChain,
   EvmParachain,
+  Ntt,
+  NttTokenDef,
   Parachain,
-  Precompile,
   SolanaChain,
+  SuiChain,
   Wormhole,
 } from '@galacticcouncil/xc-core';
 
-import { encoding } from '@wormhole-foundation/sdk-base';
-import { keccak256 } from '@wormhole-foundation/sdk-connect';
-import { deserialize } from '@wormhole-foundation/sdk-definitions';
+import { big } from '@galacticcouncil/common';
 
-import { EvmClaim, SolanaClaim, SubstrateClaim } from '../platforms';
+import { keccak256 } from 'viem';
+
+import { encoding } from '@wormhole-foundation/sdk-base';
+
+import { EvmClaim, SolanaClaim, SubstrateClaim, SuiClaim } from '../platforms';
 
 import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
 
-const REDEEM_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+const { EvmAddr } = addr;
+
+type NttContext = {
+  chain: AnyChain;
+  assetKey: string;
+  def: NttTokenDef;
+};
+
+/** Hex addresses match case-insensitive. */
+const isSameAddress = (a: string, b: string): boolean =>
+  a.toLowerCase() === b.toLowerCase();
+
+/**
+ * Wormhole vaa hash, the identity a transceiver marks as consumed.
+ *
+ * Double keccak of the body alone - the signatures are stripped, so the
+ * hash is stable no matter which guardian subset attested.
+ */
+function getVaaHash(vaaRaw: string): `0x${string}` {
+  const vaa = encoding.b64.decode(vaaRaw);
+  const signatures = vaa[5];
+  const body = vaa.subarray(6 + signatures * 66);
+  return keccak256(keccak256(body));
+}
 
 export class WormholeTransfer {
   private parachainId: number;
@@ -58,162 +84,240 @@ export class WormholeTransfer {
     };
   }
 
-  async getWithdraws(address: string): Promise<WhTransfer[]> {
-    const mda = acc.getMultilocationDerivatedAccount(
-      this.parachainId,
-      address,
-      1,
-      true
+  private get parachain(): EvmParachain {
+    const chain = this.chains.find(
+      (c) => c instanceof Parachain && c.parachainId === this.parachainId
     );
-
-    const operations = await this.whScan.getOperations({
-      ...this.filters,
-      address: mda,
-    });
-
-    const result = operations.map(async (o) => {
-      const { content } = o;
-      const { payload, standarizedProperties } = content;
-
-      const status = this.getStatus(o);
-
-      const fromChain = this.chains.find(
-        (c) => c instanceof Parachain && c.parachainId === this.parachainId
-      )!;
-
-      const { toAddress, tokenAddress } = standarizedProperties;
-      const toChain = this.chains.find(
-        (c) =>
-          Wormhole.isKnown(c) &&
-          Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-      )!;
-
-      let redeem;
-      if (status === WhStatus.VaaEmitted && o.vaa) {
-        const { timestamp } = this.getVaaHeader(o.vaa.raw);
-        const vaaRaw = o.vaa.raw;
-
-        if (this.isStuck(timestamp)) {
-          switch (toChain.getType()) {
-            case ChainType.EvmChain:
-              const evmClaim = new EvmClaim(toChain as EvmChain);
-              redeem = async (from: string) => evmClaim.redeem(from, vaaRaw);
-              break;
-            case ChainType.SolanaChain:
-              const solanaClaim = new SolanaClaim(toChain as SolanaChain);
-              redeem = async (from: string) => solanaClaim.redeem(from, vaaRaw);
-              break;
-          }
-        }
-      }
-
-      return {
-        asset: tokenAddress,
-        assetSymbol: o.data.symbol,
-        amount: o.data.tokenAmount,
-        from: address,
-        fromChain: fromChain,
-        to: toAddress,
-        toChain: toChain,
-        status: status,
-        redeem: redeem,
-        operation: o,
-      };
-    });
-
-    return Promise.all(result);
+    return chain as EvmParachain;
   }
 
-  async getDeposits(address: string, to = 'hydration'): Promise<WhTransfer[]> {
-    const operations = await this.whScan.getOperations({
-      ...this.filters,
-      address: Precompile.Bridge,
-      pageSize: '100',
-    });
+  /**
+   * Get NTT transfers sent from parachain (via wormhole).
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole withdrawals
+   */
+  async getWithdraws(address: string): Promise<WhTransfer[]> {
+    const chainWh = Wormhole.fromChain(this.parachain);
+    const transfers = await this.getTransfers(address);
+    return transfers.filter(
+      (t) => t.operation.emitterChain === chainWh.getWormholeId()
+    );
+  }
 
-    const toChain = this.config.chains.get(to);
-    if (!toChain) {
-      return [];
+  /**
+   * Get NTT transfers received on parachain (via wormhole).
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole deposits
+   */
+  async getDeposits(address: string): Promise<WhTransfer[]> {
+    const chainWh = Wormhole.fromChain(this.parachain);
+    const transfers = await this.getTransfers(address);
+    return transfers.filter(
+      (t) =>
+        t.operation.content.standarizedProperties.toChain ===
+        chainWh.getWormholeId()
+    );
+  }
+
+  /**
+   * Get all NTT transfers of given user.
+   *
+   * Transfers are matched against the NTT token registry by the VAA
+   * emitter (source transceiver) address.
+   *
+   * @param address - parachain user address (ss58 or H160)
+   * @returns pending & completed wormhole transfers
+   */
+  async getTransfers(address: string): Promise<WhTransfer[]> {
+    const h160 = await this.parachain.getDerivatedAddress(address);
+    const chainId = Wormhole.fromChain(this.parachain)
+      .getWormholeId()
+      .toString();
+
+    // Scoped by chain, not by `address`: wormholescan matches that filter
+    // against the sender it extracted from the source transaction, which is
+    // never the receiver and is left empty for parachain emitted operations.
+    // Both directions are matched on the addresses the operation carries.
+    const [sent, received] = await Promise.all([
+      this.whScan.getOperations({ ...this.filters, sourceChain: chainId }),
+      this.whScan.getOperations({ ...this.filters, targetChain: chainId }),
+    ]);
+
+    const operations = new Map<string, Operation>();
+    sent
+      .filter((o) =>
+        isSameAddress(o.content.standarizedProperties.fromAddress, h160)
+      )
+      .forEach((o) => operations.set(o.id, o));
+    received
+      .filter((o) =>
+        isSameAddress(o.content.standarizedProperties.toAddress, h160)
+      )
+      .forEach((o) => operations.set(o.id, o));
+
+    const transfers = await Promise.all(
+      Array.from(operations.values()).map((o) => this.toTransfer(o))
+    );
+    return transfers.filter((t): t is WhTransfer => !!t);
+  }
+
+  private async toTransfer(
+    operation: Operation
+  ): Promise<WhTransfer | undefined> {
+    const { content, data, emitterChain, emitterAddress } = operation;
+    const { standarizedProperties } = content;
+
+    const emitter = emitterAddress.native ?? '0x' + emitterAddress.hex;
+
+    const source = this.findNttByEmitter(emitterChain, emitter);
+    if (!source) {
+      return undefined;
     }
 
-    const toParachain = toChain as Parachain;
-    const payload = await mrl.createPayload(toParachain, address);
-    const payloadHex = payload.toHex();
-    const result = operations
-      .filter((o) => {
-        const { content } = o;
-        const { payload } = content;
-        return (
-          payload.payloadType === 3 &&
-          payload.toChain === 16 &&
-          '0x' + payload.payload === payloadHex
-        );
-      })
-      .map(async (o) => {
-        const { content, sourceChain } = o;
-        const { payload, standarizedProperties } = content;
+    const toChain = this.findChainByWormholeId(standarizedProperties.toChain);
+    if (!toChain) {
+      return undefined;
+    }
 
-        const status = this.getStatus(o);
-        const { tokenAddress } = standarizedProperties;
+    let status = this.getStatus(operation);
 
-        const fromChain = this.chains.find(
-          (c) =>
-            Wormhole.isKnown(c) &&
-            Wormhole.fromChain(c).getWormholeId() === payload.tokenChain
-        )!;
-
-        const viaChain = this.chains.find(
-          (c) =>
-            Wormhole.isKnown(c) &&
-            Wormhole.fromChain(c).getWormholeId() === payload.toChain
-        )!;
-
-        let redeem;
-        if (status === WhStatus.VaaEmitted && o.vaa) {
-          const { timestamp } = this.getVaaHeader(o.vaa.raw);
-          const vaaRaw = o.vaa.raw;
-
-          if (this.isStuck(timestamp)) {
-            const claim = new SubstrateClaim(viaChain as EvmParachain);
-            redeem = async (address: string) =>
-              claim.redeemMrlViaXcm(address, vaaRaw);
+    let redeem;
+    const destination = this.findDestinationNtt(source, toChain);
+    if (status === WhStatus.VaaEmitted && operation.vaa && destination) {
+      const vaaRaw = operation.vaa.raw;
+      if (await this.isRedeemed(toChain, destination, vaaRaw)) {
+        status = WhStatus.Completed;
+      } else {
+        redeem = async (from: string) => {
+          if (toChain instanceof SolanaChain) {
+            const claim = new SolanaClaim(toChain);
+            return claim.redeem(from, vaaRaw, destination);
           }
-        }
-
-        return {
-          asset: tokenAddress,
-          assetSymbol: o.data.symbol,
-          amount: o.data.tokenAmount,
-          from: sourceChain.from,
-          fromChain: fromChain,
-          to: address,
-          toChain: toChain,
-          status: status,
-          redeem: redeem,
-          operation: o,
+          if (toChain instanceof SuiChain) {
+            const claim = new SuiClaim(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
+          if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
+            const claim = await SubstrateClaim.create(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
+          const claim = new EvmClaim();
+          return claim.redeem(from, vaaRaw, destination);
         };
-      });
+      }
+    }
 
-    return Promise.all(result);
-  }
+    // Only the indexer's enriched `data` carries a formatted amount & symbol,
+    // and it stays empty for parachain emitted operations - fall back to the
+    // transfer's own properties and the registry key.
+    const asset = this.config.assets.get(source.assetKey);
 
-  private isStuck(emittedAt: number) {
-    const now = Date.now();
-    return now >= emittedAt * 1000 + REDEEM_THRESHOLD;
-  }
-
-  private getVaaHeader(vaaRaw: string) {
-    const vaaBytes = encoding.b64.decode(vaaRaw);
-    const vaa = deserialize('Uint8Array', vaaBytes);
     return {
-      timestamp: vaa.timestamp,
-      emitterChain: vaa.emitterChain,
-      emitterAddress: vaa.emitterAddress.toString(),
-      sequence: vaa.sequence,
-      payload: vaa.payload,
-      hash: vaa.hash,
-      id: keccak256(vaa.hash),
+      asset: standarizedProperties.tokenAddress,
+      assetSymbol: data?.symbol ?? asset?.originSymbol ?? source.assetKey,
+      amount:
+        data?.tokenAmount ??
+        big.toDecimal(
+          BigInt(standarizedProperties.amount),
+          standarizedProperties.normalizedDecimals
+        ),
+      from: standarizedProperties.fromAddress,
+      fromChain: source.chain,
+      to: standarizedProperties.toAddress,
+      toChain: toChain,
+      status: status,
+      redeem: redeem,
+      operation: operation,
     };
+  }
+
+  /**
+   * Whether the destination transceiver already consumed the vaa.
+   *
+   * Wormholescan doesn't observe the redeem on every chain (`targetChain`
+   * stays empty for hydration), so a delivered transfer would otherwise
+   * keep offering a claim that reverts. Evm destinations only - solana &
+   * sui still rely on the indexer.
+   */
+  private async isRedeemed(
+    toChain: AnyChain,
+    ntt: NttTokenDef,
+    vaaRaw: string
+  ): Promise<boolean> {
+    if (!toChain.isEvmChain() && !toChain.isEvmParachain()) {
+      return false;
+    }
+
+    const { evmClient } = toChain as AnyEvmChain;
+    const consumed = await evmClient.getProvider().readContract({
+      abi: Abi.WormholeTransceiver,
+      address: ntt.transceiver.wormhole as `0x${string}`,
+      args: [getVaaHash(vaaRaw)],
+      functionName: 'isVAAConsumed',
+    });
+    return consumed as boolean;
+  }
+
+  private findChainByWormholeId(wormholeId: number): AnyChain | undefined {
+    return this.chains.find(
+      (c) =>
+        Wormhole.isKnown(c) &&
+        Wormhole.fromChain(c).getWormholeId() === wormholeId
+    );
+  }
+
+  /**
+   * NTT deployment of the transferred token on the destination chain.
+   *
+   * The emitter identifies the token by its key on the **source** chain,
+   * which is not necessarily the key it carries on the destination (`dai`
+   * on ethereum, `dai_wh` on hydration). The registered route holds that
+   * mapping, so resolve through it when the key doesn't carry over.
+   */
+  private findDestinationNtt(
+    source: NttContext,
+    toChain: AnyChain
+  ): NttTokenDef | undefined {
+    const direct = Ntt.find(toChain, source.assetKey);
+    if (direct) {
+      return direct;
+    }
+
+    const asset = this.config.assets.get(source.assetKey);
+    if (!asset) {
+      return undefined;
+    }
+
+    const routes = this.config.getAssetRoutesOrEmpty(
+      asset,
+      source.chain,
+      toChain
+    );
+    for (const route of routes) {
+      const def = Ntt.find(toChain, route.destination.asset.key);
+      if (def) {
+        return def;
+      }
+    }
+    return undefined;
+  }
+
+  private findNttByEmitter(
+    wormholeId: number,
+    emitter: string
+  ): NttContext | undefined {
+    const chain = this.findChainByWormholeId(wormholeId);
+    if (!chain) {
+      return undefined;
+    }
+
+    const entry = Ntt.findByEmitter(chain, emitter);
+    if (entry) {
+      return { chain, ...entry };
+    }
+    return undefined;
   }
 
   private getStatus(operation: Operation) {

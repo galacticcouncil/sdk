@@ -1,29 +1,19 @@
 import { Asset, AssetRoute } from '@galacticcouncil/xc-core';
 
 import { eth } from '../../../assets';
-import {
-  BalanceBuilder,
-  ContractBuilder,
-  FeeAmountBuilder,
-} from '../../../builders';
-import { hydration, moonbeam, assetHub } from '../../../chains';
+import { ContractBuilder, FeeAmountBuilder } from '../../../builders';
+import { hydration, assetHub } from '../../../chains';
 import { Tag } from '../../../tags';
 
-export function toHydrationViaWormholeTemplate(
+export function toHydrationViaNttTemplate(
   assetIn: Asset,
   assetOut: Asset
 ): AssetRoute {
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        asset: assetIn,
-        balance: BalanceBuilder().evm().erc20(),
       },
     },
     destination: {
@@ -31,15 +21,80 @@ export function toHydrationViaWormholeTemplate(
       asset: assetOut,
       fee: {
         amount: 0,
-        asset: assetOut,
+        // Ntt delivers the full amount - nothing is taken on the far side.
+        // Denominated in the source asset: the destination fee balance is
+        // read on the source chain, where assetOut may not be registered.
+        asset: assetIn,
       },
     },
-    contract: ContractBuilder()
-      .Wormhole()
-      .TokenBridge()
-      .transferTokensWithPayload()
-      .viaMrl({ moonchain: moonbeam }),
-    tags: [Tag.Mrl, Tag.Wormhole],
+    contract: ContractBuilder().Wormhole().Ntt().transfer(),
+    tags: [Tag.Wormhole, Tag.Ntt],
+  });
+}
+
+/**
+ * Executor-delivered variant, offered alongside the self-redeem route above
+ * for the same pair - the sender pays for delivery instead of signing a
+ * redeem on the destination.
+ *
+ * The cost is native gas on the source chain, declared as the destination fee
+ * because an erc20 source pays it from a balance the amount never competes
+ * for (which is why EvmPlatform.estimateFee leaves the call value out there).
+ */
+export function toHydrationViaNttExecutorTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: {
+        asset: eth,
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Wormhole().quoteExecutorCost(),
+        asset: eth,
+      },
+    },
+    contract: ContractBuilder().Wormhole().Ntt().transferWithExecutor(),
+    tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
+  });
+}
+
+/**
+ * Executor-delivered ntt out of a native gas source.
+ *
+ * The delivery price & executor cost come out of the very balance being
+ * bridged, so they are already folded into the source fee - declaring them
+ * as a destination fee too would charge the user twice.
+ */
+export function toHydrationViaNttExecutorNativeTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: {
+        asset: eth,
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: 0,
+        // Denominated in the source asset: the destination fee balance is
+        // read on the source chain, where assetOut may not be registered.
+        asset: assetIn,
+      },
+    },
+    contract: ContractBuilder().Wormhole().Ntt().transferWithExecutor(),
+    tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
   });
 }
 
@@ -50,13 +105,8 @@ export function toHydrationViaSnowbridgeTemplate(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {
@@ -84,13 +134,8 @@ export function toHydrationViaSnowbridgeV1Template(
   return new AssetRoute({
     source: {
       asset: assetIn,
-      balance: BalanceBuilder().evm().erc20(),
       fee: {
         asset: eth,
-        balance: BalanceBuilder().evm().native(),
-      },
-      destinationFee: {
-        balance: BalanceBuilder().evm().native(),
       },
     },
     destination: {

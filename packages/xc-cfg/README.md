@@ -13,5 +13,5 @@ Install with [npm](https://www.npmjs.com/):
 ## Supported protocols
 
 - **XCM**
-- **Wormhole** (via MRL)
+- **Wormhole** (NTT)
 - **Snowbridge**
