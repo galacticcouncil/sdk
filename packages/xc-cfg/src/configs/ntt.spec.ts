@@ -19,7 +19,7 @@ describe('ntt route configs', () => {
       ['hydration -> ethereum', hydrationConfig, usdc_wh, ethereum, usdc],
       ['hydration -> base', hydrationConfig, eurc_wh, base, eurc],
     ])('%s exposes both delivery models', (_, config, from, to, target) => {
-      // Other bridges can serve the same pair (base eurc is also Basejump),
+      // Other bridges can serve the same pair (ethereum usdc is also Basejump),
       // so narrow to ntt before splitting on the delivery model.
       const routes = config
         .getAssetDestinationRoutes(from, to)
