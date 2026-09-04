@@ -146,6 +146,9 @@ export const ethereum = new EvmChain({
     'https://ethereum-rpc.publicnode.com',
     'https://cosmopolitan-dimensional-diagram.quiknode.pro',
   ],
+  basejump: {
+    address: '0xa72e2bf29c840eb93adbb9ee1aa41580f01c9944',
+  },
   snowbridge: {
     id: 1,
     gateway: '0x27ca963c279c93801941e1eb8799c23f407d68e7',
