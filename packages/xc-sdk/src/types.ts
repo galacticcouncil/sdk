@@ -70,3 +70,17 @@ export interface Transfer {
   ): Promise<AssetAmount>;
   validate(fee?: bigint): Promise<TransferValidationReport[]>;
 }
+
+/**
+ * Chain balances snapshot
+ *
+ * @interface ChainBalancesResult
+ * @member {string} chainKey Chain the balances were read from
+ * @member {AssetAmount[]} balances Balances read, empty if the read failed
+ * @member {Error} error Reason the chain could not be read
+ */
+export interface ChainBalancesResult {
+  chainKey: string;
+  balances: AssetAmount[];
+  error?: Error;
+}

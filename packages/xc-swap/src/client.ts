@@ -8,12 +8,18 @@ import {
   tokenToAsset,
   toOriginAsset,
   DEFAULT_QUOTER_URL,
+  DEFAULT_RAIL_TTL_MS,
   DEFAULT_RELAY_MARGIN_PCT,
   DEFAULT_SLIPPAGE_PCT,
-  DEFAULT_XCM_FEE,
 } from './registry';
 import { configureOneClick, fetchOneClickTokens } from './quote/oneClick';
 import { swap } from './trade/swap';
+import {
+  fetchRailConfig,
+  fetchRailState,
+  type RailConfig,
+  type RailState,
+} from './trade/rail';
 import type { SwapContext } from './trade/types';
 import type {
   XcSwapAsset,
@@ -34,13 +40,15 @@ export class XcSwapClient {
   private readonly quoterUrl: string;
   private readonly relayMargin: number;
   private readonly slippage: number;
-  private readonly xcmFee: bigint;
+  private readonly railTtl: number;
   private readonly oneClick: { baseUrl?: string; jwt?: string };
   /** 1Click asset ids exposed as destinations. */
   private readonly destinationAssetIds: string[];
 
   private tokens?: Promise<TokenResponse[]>;
   private assets?: Promise<Map<number, SdkAsset>>;
+  private railConfig?: Promise<RailConfig>;
+  private rail?: { at: number; state: Promise<RailState> };
 
   constructor(opts: XcSwapOpts) {
     this.sdk = opts.sdk;
@@ -48,7 +56,7 @@ export class XcSwapClient {
     this.quoterUrl = opts.quoterUrl ?? DEFAULT_QUOTER_URL;
     this.relayMargin = opts.relayMargin ?? DEFAULT_RELAY_MARGIN_PCT;
     this.slippage = opts.slippage ?? DEFAULT_SLIPPAGE_PCT;
-    this.xcmFee = opts.xcmFee ?? DEFAULT_XCM_FEE;
+    this.railTtl = opts.railTtl ?? DEFAULT_RAIL_TTL_MS;
     this.oneClick = opts.oneClick ?? {};
     this.destinationAssetIds =
       opts.destinationAssets ?? DEFAULT_DESTINATION_ASSET_IDS;
@@ -96,8 +104,48 @@ export class XcSwapClient {
       quoterUrl: this.quoterUrl,
       relayMarginPct: this.relayMargin,
       slippagePct: this.slippage,
-      xcmFee: this.xcmFee,
+      rail: () => this.getRail(),
     };
+  }
+
+  /**
+   * Memoized settlement contracts, read from the emitter.
+   *
+   * - Owner-set config, so it is resolved once per client
+   * - A failed read is not cached, letting the next estimate retry
+   */
+  private getRailConfig(): Promise<RailConfig> {
+    if (!this.railConfig) {
+      const config = fetchRailConfig(
+        this.sdk.client.evm.getProvider(),
+        this.emitter
+      );
+      this.railConfig = config;
+      config.catch(() => {
+        if (this.railConfig === config) this.railConfig = undefined;
+      });
+    }
+    return this.railConfig;
+  }
+
+  /**
+   * Rail state behind a short TTL.
+   *
+   * - Keeps pause and capacity fresh without an RPC read per estimate
+   * - A failed read is not cached, letting the next estimate retry
+   */
+  private getRail(): Promise<RailState> {
+    const now = Date.now();
+    if (!this.rail || now - this.rail.at > this.railTtl) {
+      const state = this.getRailConfig().then((config) =>
+        fetchRailState(this.sdk.client.evm.getProvider(), config)
+      );
+      this.rail = { at: now, state };
+      state.catch(() => {
+        if (this.rail?.state === state) this.rail = undefined;
+      });
+    }
+    return this.rail.state;
   }
 
   /** Memoized Hydration asset registry (runtime ids), from sdk-next. */

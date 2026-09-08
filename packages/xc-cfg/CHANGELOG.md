@@ -1,5 +1,27 @@
 # @galacticcouncil/xc-cfg
 
+## 2.6.0
+
+### Minor Changes
+
+- xc: settlement breakdown. zcash, near support
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xc-core@2.5.0
+
+## 2.5.0
+
+### Minor Changes
+
+- 4e62a17: feat(xc-sdk): multichain balances
+
+### Patch Changes
+
+- Updated dependencies [4e62a17]
+  - @galacticcouncil/xc-core@2.4.0
+
 ## 2.4.1
 
 ### Patch Changes

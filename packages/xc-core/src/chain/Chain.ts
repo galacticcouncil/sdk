@@ -31,6 +31,8 @@ export enum ChainEcosystem {
   Kusama = 'Kusama',
   Solana = 'Solana',
   Sui = 'Sui',
+  Near = 'Near',
+  Zcash = 'Zcash',
 }
 
 export type ChainRpcs = {
@@ -44,6 +46,8 @@ export enum ChainType {
   'EvmChain' = 'evm-chain',
   'SolanaChain' = 'solana-chain',
   'SuiChain' = 'sui-chain',
+  'NearChain' = 'near-chain',
+  'ZecChain' = 'zec-chain',
 }
 
 /**
@@ -166,6 +170,14 @@ export abstract class Chain<
     return this.getType() === ChainType.SuiChain;
   }
 
+  isNear(): boolean {
+    return this.getType() === ChainType.NearChain;
+  }
+
+  isZec(): boolean {
+    return this.getType() === ChainType.ZecChain;
+  }
+
   isEvmChain(): boolean {
     return this.getType() === ChainType.EvmChain;
   }
@@ -176,6 +188,29 @@ export abstract class Chain<
 
   isParachain(): boolean {
     return this.getType() === ChainType.Parachain;
+  }
+
+  /**
+   * Whether this chain can hold balances for a given address.
+   *
+   * - Answers the address space the chain accepts, not whether it is funded
+   * - Overridden per platform
+   *
+   * @param address - address to check
+   */
+  isValidAddress(address: string): boolean {
+    return false;
+  }
+
+  /**
+   * The account this chain keys balances under for a given address.
+   *
+   * - Identity here, overridden where an address needs deriving
+   *
+   * @param address - address valid on this chain
+   */
+  getNormalizedAddress(address: string): string {
+    return address;
   }
 
   getAsset(key: string): Asset | undefined {

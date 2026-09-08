@@ -7,6 +7,7 @@ export const SYSTEM_ASSET_ID = 0;
 export const SYSTEM_ASSET_DECIMALS = 12;
 
 // Chain
+export const BLOCK_TIME_TARGET = 2_000;
 export const HYDRATION_PARACHAIN_ID = 2034;
 export const HYDRATION_OMNIPOOL_ADDRESS =
   '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1';

@@ -17,34 +17,18 @@ import { LiquidityMiningClient } from './LiquidityMiningClient';
 import { MultiCurrencyContainer } from './MultiCurrencyContainer';
 import { RewardClaimSimulator } from './RewardClaimSimulator';
 
-import { DEFAULT_ORACLE_PRICE, DEFAULT_BLOCK_TIME } from './const';
+import { DEFAULT_ORACLE_PRICE, RELAY_BLOCK_TIME } from './const';
 import { Farm, OmnipoolFarm, YieldFarmEntry } from './types';
 
 const secondsInYear = Big(365.2425).times(24).times(60).times(60);
 
-export type LiquidityMiningOptions = {
-  blockTime?: number;
-};
-
 export class LiquidityMiningApi {
   private readonly balance: BalanceClient;
   private readonly client: LiquidityMiningClient;
-  private readonly options: LiquidityMiningOptions;
 
-  constructor(
-    client: LiquidityMiningClient,
-    balanceClient: BalanceClient,
-    options: LiquidityMiningOptions = {}
-  ) {
+  constructor(client: LiquidityMiningClient, balanceClient: BalanceClient) {
     this.client = client;
     this.balance = balanceClient;
-    this.options = Object.freeze({
-      blockTime: options.blockTime ?? DEFAULT_BLOCK_TIME,
-    });
-  }
-
-  get blockTime(): number {
-    return this.options.blockTime!;
   }
 
   async getOraclePrice(
@@ -155,7 +139,7 @@ export class LiquidityMiningApi {
     );
 
     const periodsPerYear = secondsInYear
-      .div(Big(this.blockTime).div(1000).times(blocks_per_period))
+      .div(Big(RELAY_BLOCK_TIME).div(1000).times(blocks_per_period))
       .toString();
 
     let apr: string;

@@ -1,5 +1,6 @@
 import type { evm, sor } from '@galacticcouncil/sdk-next';
 
+import type { RailState } from './rail';
 import type { XcSwapAsset } from '../types';
 
 /** Resolved configuration the swap orchestration needs (defaults applied). */
@@ -17,7 +18,8 @@ export interface SwapContext {
   relayMarginPct: number;
   /** Default slippage tolerance, percent (1 = 1%). */
   slippagePct: number;
-  xcmFee: bigint;
+  /** Live NTT rail state — cost and viability. Cached by the client. */
+  rail: () => Promise<RailState>;
 }
 
 /** Inputs to {@link buildCalls}. */
@@ -32,19 +34,15 @@ export interface BuildCallsParams {
   assetIn: number;
   /** Amount of A to swap (smallest unit). */
   amountIn: bigint;
-  /** Slippage floor on the bridged WETH. */
+  /** Slippage floor on the settled WETH, net of the rail's cost. */
   minEthOut: bigint;
-  /** Upper bound of A spent buying the GLMR fee. */
-  maxFeeIn: bigint;
-  /** UI correlation hash carried in the bridge payload. */
-  intentId: `0x${string}`;
   /** Ethereum deposit address the bridged ETH lands at. */
-  intentDepositAddress: string;
-  /** Relay fee ceiling carried in the payload. */
+  depositAddress: string;
+  /** Relay fee ceiling carried in the forwarding instruction. */
   maxRelayFee: bigint;
   /**
    * Whether the emitter already has sufficient allowance over A. When `true`
-   * the `approve` call is omitted and only `swapAndBridge` is returned.
+   * the `approve` call is omitted and only `placeOrder` is returned.
    */
   approved: boolean;
 }

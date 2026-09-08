@@ -67,7 +67,6 @@ export interface TradeOrder extends Humanizer {
 export enum TradeOrderType {
   Dca = 'Dca',
   TwapSell = 'TwapSell',
-  TwapBuy = 'TwapBuy',
 }
 
 export enum TradeOrderError {

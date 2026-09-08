@@ -12,6 +12,7 @@ const options = {
     'src/redeem.ts',
     'src/scan.ts',
     'src/circuitbreaker.ts',
+    'src/balances.ts',
   ],
   bundle: true,
   format: 'esm',
