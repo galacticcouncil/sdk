@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 2.2.0
+
+### Minor Changes
+
+- 2f0929e: add uniswap v3 as a router venue
+
 ## 2.1.1
 
 ### Patch Changes
