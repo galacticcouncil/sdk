@@ -4,6 +4,7 @@ import { StableSwap, StableSwapBase } from './amm/stable';
 import { XykPool } from './amm/xyk';
 import { AavePool } from './amm/aave';
 import { HsmPool, HsmPoolBase } from './amm/hsm';
+import { UniswapV3Pool, UniswapV3PoolBase } from './amm/uniswapv3';
 
 import { Pool, PoolBase, PoolType } from './types';
 
@@ -22,6 +23,8 @@ export class PoolFactory {
         return StableSwap.fromPool(pool as StableSwapBase);
       case PoolType.HSM:
         return HsmPool.fromPool(pool as HsmPoolBase);
+      case PoolType.V3:
+        return UniswapV3Pool.fromPool(pool as UniswapV3PoolBase);
       default: {
         throw new Error('Pool type ' + pool.type + ' is not supported yet');
       }

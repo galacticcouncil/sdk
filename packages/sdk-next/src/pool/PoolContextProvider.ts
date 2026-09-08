@@ -14,6 +14,7 @@ import { LbpPoolClient } from './amm/lbp';
 import { OmniPoolClient } from './amm/omni';
 import { XykPoolClient } from './amm/xyk';
 import { StableSwapClient } from './amm/stable';
+import { UniswapV3PoolClient } from './amm/uniswapv3';
 import {
   IPoolCtxProvider,
   Pool,
@@ -37,9 +38,19 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   readonly hsm: HsmPoolClient;
   readonly xyk: XykPoolClient;
   readonly lbp: LbpPoolClient;
+  readonly uniswapv3: UniswapV3PoolClient;
 
   private readonly active: Set<PoolType> = new Set([]);
   private readonly pools: Map<string, PoolBase> = new Map([]);
+
+  /**
+   * Venues whose pool set the map already holds.
+   *
+   * - Empty counts: a venue with no pools here emits nothing, so emissions
+   *   alone cannot tell "none" from "not read yet"
+   * - A failed load never joins, so the next read tries again
+   */
+  private readonly loaded: Set<PoolType> = new Set([]);
   private readonly clients: (
     | AavePoolClient
     | OmniPoolClient
@@ -47,6 +58,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     | HsmPoolClient
     | XykPoolClient
     | LbpPoolClient
+    | UniswapV3PoolClient
   )[] = [];
 
   private aaveSub: Subscription = Subscription.EMPTY;
@@ -55,8 +67,9 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
   private hsmSub: Subscription = Subscription.EMPTY;
   private xykSub: Subscription = Subscription.EMPTY;
   private lbpSub: Subscription = Subscription.EMPTY;
+  private v3Sub: Subscription = Subscription.EMPTY;
 
-  private isReady: boolean = false;
+  private pending?: Promise<PoolBase[]>;
   private isDestroyed = new Subject<boolean>();
 
   constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
@@ -68,6 +81,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     this.hsm = new HsmPoolClient(client, evm, this.stableswap, at);
     this.xyk = new XykPoolClient(client, evm, at);
     this.lbp = new LbpPoolClient(client, evm, at);
+    this.uniswapv3 = new UniswapV3PoolClient(client, evm, at);
     this.clients = [
       this.aave,
       this.omnipool,
@@ -75,6 +89,7 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       this.hsm,
       this.xyk,
       this.lbp,
+      this.uniswapv3,
     ];
   }
 
@@ -91,10 +106,31 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       .getSubscriber()
       .pipe(takeUntil(this.isDestroyed))
       .subscribe((pools: T[]) => {
-        pools.forEach((p) => {
-          this.pools.set(p.address, p);
-        });
+        this.absorb(client.getPoolType(), pools);
       });
+  }
+
+  /** Fold a venue's pools into the map and record that it has been read */
+  private absorb(type: PoolType, pools: readonly PoolBase[]): void {
+    for (const pool of pools) {
+      this.pools.set(pool.address, pool);
+    }
+    this.loaded.add(type);
+  }
+
+  /**
+   * Whether the map holds every active venue.
+   *
+   * - A partial set served as complete routes around a venue that is merely
+   *   slow, and the quote still looks healthy
+   * - A fixed block has no subscription, so it is never ready
+   */
+  private get isReady(): boolean {
+    if (this.isSnapshot) return false;
+    for (const type of this.active) {
+      if (!this.loaded.has(type)) return false;
+    }
+    return true;
   }
 
   public withAave(): this {
@@ -145,12 +181,20 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
     return this;
   }
 
+  public withV3(): this {
+    this.v3Sub.unsubscribe();
+    this.v3Sub = this.subscribe(this.uniswapv3);
+    this.active.add(PoolType.V3);
+    return this;
+  }
+
   public destroy(): void {
     this.isDestroyed.next(true);
     this.isDestroyed.complete();
     this.active.clear();
     this.pools.clear();
-    this.isReady = false;
+    this.loaded.clear();
+    this.pending = undefined;
   }
 
   public async getPools(at: BlockAt = this.at): Promise<PoolBase[]> {
@@ -158,17 +202,38 @@ export class PoolContextProvider extends Papi implements IPoolCtxProvider {
       const pools = this.pools.values();
       return Array.from(pools);
     }
+    return this.loadAll(at);
+  }
 
-    const pools = await Promise.all(
-      this.clients
-        .filter((client) => this.active.has(client.getPoolType()))
-        .map((client) => client.getPools(at))
+  /**
+   * Read every active venue at one block.
+   *
+   * - Concurrent callers share one pass
+   * - Folds the result in directly, rather than via the venue's subscription
+   *
+   * @param at - block to read at
+   */
+  private loadAll(at: BlockAt): Promise<PoolBase[]> {
+    if (this.pending) return this.pending;
+
+    const clients = this.clients.filter((client) =>
+      this.active.has(client.getPoolType())
     );
-    /**
-     * Only a subscription keeps the map fresh; a fixed target reads every time.
-     */
-    this.isReady = !this.isSnapshot;
-    return pools.flat();
+
+    this.pending = Promise.all(clients.map((client) => client.getPools(at)))
+      .then((sets) => {
+        if (!this.isSnapshot) {
+          clients.forEach((client, i) =>
+            this.absorb(client.getPoolType(), sets[i])
+          );
+        }
+        return sets.flat();
+      })
+      .finally(() => {
+        this.pending = undefined;
+      });
+
+    return this.pending;
   }
 
   public async getPoolFees(poolPair: PoolPair, pool: Pool): Promise<PoolFees> {

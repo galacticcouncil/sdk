@@ -374,8 +374,8 @@ export abstract class PoolClient<T extends PoolBase> extends Papi {
         seed: this.seedCount++,
         block: block.number,
       });
-    } catch {
-      this.log.error('pool_seed_error', { seed: this.seedCount });
+    } catch (e) {
+      this.log.error('pool_seed_error', { seed: this.seedCount }, e);
     }
   }
 

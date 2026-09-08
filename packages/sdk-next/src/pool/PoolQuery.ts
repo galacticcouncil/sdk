@@ -8,8 +8,8 @@ import { EvmClient } from '../evm';
 import { Balance } from '../types';
 import { QueryCache, QueryTally } from '../utils';
 
-type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
-type TAssetLocation =
+export type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
+export type TAssetLocation =
   HydrationQueries['AssetRegistry']['AssetLocations']['Value'];
 
 /**
