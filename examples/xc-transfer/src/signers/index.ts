@@ -52,7 +52,13 @@ export async function signEvm(
   const account = H160.fromAny(call.from);
 
   const wallet = client.getSigner(account);
-  await wallet.switchChain({ id: client.chain.id });
+  // A chain the wallet does not ship with (robinhood) rejects the switch
+  // until it is added; adding switches to it as well.
+  try {
+    await wallet.switchChain({ id: client.chain.id });
+  } catch {
+    await wallet.addChain({ chain: client.chain });
+  }
   await wallet.request({ method: 'eth_requestAccounts' });
 
   // Resolve once the tx is CONFIRMED so callers can `await` and chain txs

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Claim</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Claim</h1>
+        <p class="lede">
+          Finish a Wormhole NTT transfer that was never redeemed. The signed
+          message names its own destination and recipient, so anyone can pay for
+          the claim - a self-redeem transfer, or one whose relayer gave up.
+        </p>
+      </header>
+
+      <section class="card">
+        <form id="claim-form" novalidate>
+          <label class="field">
+            <span class="label">Transfer</span>
+            <textarea
+              id="vaa"
+              name="vaa"
+              rows="3"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="wormholescan link, chain/emitter/sequence, source tx hash, or the signed vaa"
+              required
+            ></textarea>
+            <span class="hint"
+              >Anything that identifies the message. A transaction hash is
+              looked up on wormholescan, so it needs the guardians to have
+              signed already.</span
+            >
+          </label>
+
+          <button id="submit" class="btn-primary" type="submit">
+            <span class="btn-label">Read</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <div id="result"></div>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/claim.js"></script>
+  </body>
+</html>

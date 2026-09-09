@@ -20,6 +20,7 @@ import {
   ewt,
   glmr,
   hdx,
+  hollar,
   ibtc,
   intr,
   ksm,
@@ -64,6 +65,7 @@ import {
   mythos,
   neuroweb,
   pendulum,
+  robinhood,
   solana,
   sui_chain,
   unique,
@@ -253,6 +255,12 @@ const toEthereumViaNtt: AssetRoute[] = [
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
+const toRobinhoodViaNtt: AssetRoute[] = [
+  viaNttTemplate(hdx, hdx, robinhood),
+  viaNttTemplate(hollar, hollar, robinhood),
+  viaNttTemplate(weth_wh, eth, robinhood),
+];
+
 const toSolanaViaNtt: AssetRoute[] = [
   viaNttTemplate(sol, sol, solana),
   viaNttTemplate(jito_sol, jito_sol, solana),
@@ -270,6 +278,9 @@ const viaNttExecutor: AssetRoute[] = [
   viaNttExecutorTemplate(wbtc_wh, wbtc, ethereum),
   viaNttExecutorTemplate(weth_wh, eth, ethereum),
   viaNttExecutorTemplate(eurc_wh, eurc, base),
+  viaNttExecutorTemplate(hdx, hdx, robinhood),
+  viaNttExecutorTemplate(hollar, hollar, robinhood),
+  viaNttExecutorTemplate(weth_wh, eth, robinhood),
   viaNttExecutorTemplate(sol, wsol, solana),
   viaNttExecutorTemplate(jito_sol, jito_sol, solana),
   viaNttExecutorTemplate(prime, prime, solana),
@@ -333,6 +344,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toBaseViaNtt,
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
+    ...toRobinhoodViaNtt,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,
     ...viaNttExecutor,

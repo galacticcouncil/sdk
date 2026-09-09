@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Circuit Breakers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./breakers.css" />
+  </head>
+
+  <body>
+    <main class="container container-wide">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Circuit Breakers</h1>
+        <p class="lede">
+          Why a bridge transfer that looks ready still reverts. Hydration meters
+          withdrawals globally and deposits per asset, and every Wormhole NTT
+          manager meters its own legs on top. The bars show what a transfer can
+          still take right now.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Now</h2>
+          <div class="head-tools">
+            <input
+              id="filter"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="filter by asset, chain or leg"
+            />
+            <button id="refresh" class="btn-ghost" type="button">
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div id="summary" class="stats"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Global withdraw limit</h2>
+        </div>
+        <div id="global"></div>
+        <div class="table-foot">
+          <span class="hint">
+            One bucket over every transfer out of hydration, in HDX value.
+            Decays linearly over the window; a lockdown rejects every withdrawal
+            until it lifts.
+          </span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Per-asset deposit lockdown</h2>
+          <span id="assets-sub" class="sub"></span>
+        </div>
+        <div class="table-wrap scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Status</th>
+                <th>Class</th>
+                <th class="num">Net change</th>
+                <th class="num">Limit</th>
+                <th>Usage</th>
+                <th>Window</th>
+              </tr>
+            </thead>
+            <tbody id="assets"></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span class="hint">
+            A claim on hydration mints, so it counts against the asset's limit
+            for the period. Locked assets first, then by usage.
+          </span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>NTT rate limits</h2>
+        </div>
+        <div class="table-wrap scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Leg</th>
+                <th>Asset</th>
+                <th>Send headroom / limit</th>
+                <th>Receive headroom / limit</th>
+                <th>Window</th>
+              </tr>
+            </thead>
+            <tbody id="ntt"></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span class="hint">
+            Headroom refills linearly over the window. The line under each bar
+            is what the last transfer took out of the bucket, and how long ago.
+            Tightest legs first.
+          </span>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/breakers.js"></script>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · Dispatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./dispatch.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>Dispatch</h1>
+        <p class="lede">
+          Run any substrate call from an EVM account. The call goes through the
+          EVM dispatch precompile with the account's own origin, so it is what
+          an account without a substrate key uses for governance, committee
+          proposals, or anything else built off chain. Sign with Rabby or
+          MetaMask, Trezor through Rabby.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Wallet</h2>
+          <div class="head-tools">
+            <button id="connect" class="btn-primary" type="button">
+              Connect
+            </button>
+          </div>
+        </div>
+        <div id="wallet"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Call</h2>
+        </div>
+        <label class="field">
+          <span class="label">Calldata</span>
+          <textarea
+            id="calldata"
+            rows="6"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="SCALE-encoded call, 0x…"
+          ></textarea>
+          <span class="hint"
+            >Built off chain (papi, polkadot.js apps). Decode first to see what
+            it is; a committee proposal also shows the hash it will be voted
+            under. Every call is decoded back against the live metadata before
+            the wallet is asked to sign.</span
+          >
+        </label>
+        <div id="preview"></div>
+        <div class="actions">
+          <button id="decode" class="btn-ghost" type="button">Decode</button>
+          <label
+            class="check"
+            title="Needed for operational-class calls (collective, scheduler); harmless for the rest"
+          >
+            <input id="wrap" type="checkbox" checked />
+            <span class="hint">wrap in Dispatcher.dispatch_with_extra_gas</span>
+          </label>
+          <label class="field inline">
+            <span class="label">Gas</span>
+            <input id="gas" type="number" min="100000" step="100000" />
+          </label>
+          <button id="dispatch" class="btn-primary" type="button">
+            Dispatch
+          </button>
+        </div>
+      </section>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/dispatch.js"></script>
+  </body>
+</html>

@@ -3,7 +3,14 @@ import { jest } from '@jest/globals';
 import { SolanaChain } from '@galacticcouncil/xc-core';
 
 import { sol } from '../../assets';
-import { base, ethereum, hydration, solana, sui_chain } from '../../chains';
+import {
+  base,
+  ethereum,
+  hydration,
+  robinhood,
+  solana,
+  sui_chain,
+} from '../../chains';
 
 import { nttClient } from './index';
 
@@ -31,6 +38,7 @@ describe('nttClient.getRedeemBudget', () => {
     it.each([
       ['ethereum', ethereum],
       ['base', base],
+      ['robinhood', robinhood],
       ['hydration', hydration],
     ])('should budget no value for %s', async (_, chain) => {
       const budget = await nttClient(chain).getRedeemBudget();

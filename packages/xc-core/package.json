@@ -56,6 +56,6 @@
     "@galacticcouncil/descriptors": ">=2.0.0",
     "polkadot-api": "^2.1.7",
     "rxjs": "^7.8.0",
-    "viem": "^2.38.3"
+    "viem": "^2.55.4"
   }
 }
