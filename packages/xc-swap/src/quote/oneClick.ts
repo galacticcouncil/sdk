@@ -56,8 +56,7 @@ export interface OneClickQuoteParams {
 /**
  * Request a 1Click quote for the ETH → destination leg, sized to the net that
  * lands at the deposit address. Uses `FLEX_INPUT` so the swap consumes whatever
- * actually arrives (the unspent relay-fee headroom is converted, not refunded),
- * matching `nirViaWtt.ts`.
+ * actually arrives (the unspent relay-fee headroom is converted, not refunded).
  */
 export async function getOneClickQuote(
   params: OneClickQuoteParams
