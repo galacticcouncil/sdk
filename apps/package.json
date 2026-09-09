@@ -16,12 +16,12 @@
   "dependencies": {
     "@galacticcouncil/common": "^1.2.0",
     "@galacticcouncil/descriptors": "^2.7.0",
-    "@galacticcouncil/sdk-next": "^2.0.0",
+    "@galacticcouncil/sdk-next": "^2.2.0",
     "@galacticcouncil/xc": "^2.1.0",
-    "@galacticcouncil/xc-cfg": "^2.4.0",
-    "@galacticcouncil/xc-core": "^2.3.0",
-    "@galacticcouncil/xc-sdk": "^2.3.0",
-    "polkadot-api": "^2.1.7",
-    "viem": "^2.38.3"
+    "@galacticcouncil/xc-cfg": "^2.6.0",
+    "@galacticcouncil/xc-core": "^2.5.0",
+    "@galacticcouncil/xc-sdk": "^2.4.1",
+    "polkadot-api": "^2.2.2",
+    "viem": "^2.56.3"
   }
 }

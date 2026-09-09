@@ -81,9 +81,8 @@ type Voting = {
 
 /** Open proposals with their tally, oldest first. */
 export async function loadProposals(): Promise<Proposal[]> {
-  const hashes = (await api.query.TechnicalCommittee.Proposals.getValue()) as {
-    asHex(): string;
-  }[];
+  const hashes =
+    (await api.query.TechnicalCommittee.Proposals.getValue()) as string[];
 
   const rows = await Promise.all(
     hashes.map(async (hash) => {
@@ -93,7 +92,7 @@ export async function loadProposals(): Promise<Proposal[]> {
       ])) as [Call | undefined, Voting | undefined];
       if (!voting) return undefined;
       return {
-        hash: hash.asHex(),
+        hash: hash,
         index: Number(voting.index),
         label: proposal ? callLabel(proposal) : 'unknown',
         threshold: Number(voting.threshold),
