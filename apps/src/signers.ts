@@ -101,16 +101,7 @@ export async function signEvm(
   chain: AnyEvmChain,
   events: SignEvents = {}
 ) {
-  const client = chain.evmClient;
-  const account = H160.fromAny(call.from);
-
-  const wallet = client.getSigner(account);
-  try {
-    await wallet.switchChain({ id: client.chain.id });
-  } catch {
-    await wallet.addChain({ chain: client.chain });
-  }
-  await wallet.request({ method: 'eth_requestAccounts' });
+  const wallet = await evmWallet(chain, H160.fromAny(call.from));
 
   return new Promise<void>((resolve, reject) => {
     new EvmSigner(chain, wallet)
@@ -129,25 +120,9 @@ export async function signEvm(
   });
 }
 
-/**
- * Send an evm call the node already refused to simulate.
- *
- * Lands on chain as a reverted transaction: gas is spent, nothing is
- * minted, and the vaa stays unconsumed - so the claim is still replayable
- * afterwards. Only worth it as proof that the revert is real.
- *
- * @param gas - fixed limit; the node never quotes one for a call it refuses
- */
-export async function sendForced(
-  call: EvmCall,
-  chain: AnyEvmChain,
-  events: SignEvents = {},
-  gas = 2_000_000n
-) {
+/** Wallet on `chain`, switched to it (added first when unknown). */
+async function evmWallet(chain: AnyEvmChain, account: string) {
   const client = chain.evmClient;
-  const provider = client.getProvider();
-  const account = call.from as `0x${string}`;
-
   const wallet = client.getSigner(account);
   try {
     await wallet.switchChain({ id: client.chain.id });
@@ -155,6 +130,48 @@ export async function sendForced(
     await wallet.addChain({ chain: client.chain });
   }
   await wallet.request({ method: 'eth_requestAccounts' });
+  return wallet;
+}
+
+/** Ask the injected wallet for its account, on `chain`. */
+export async function connectEvm(chain: AnyEvmChain): Promise<string> {
+  const provider = (window as any).ethereum;
+  if (!provider) {
+    throw new Error('No evm wallet found - install one and reload.');
+  }
+  const [address] = (await provider.request({
+    method: 'eth_requestAccounts',
+  })) as string[];
+  if (!address) {
+    throw new Error('No account selected in the wallet.');
+  }
+  await evmWallet(chain, address);
+  return address;
+}
+
+export type EvmTx = {
+  from: string;
+  to: string;
+  data: string;
+  /** Fixed limit - set when the node cannot be asked for one */
+  gas: bigint;
+};
+
+/**
+ * Send a raw evm transaction at a fixed gas limit.
+ *
+ * For calls the node will not estimate: one it refuses to simulate, or a
+ * dispatch precompile call whose weight it cannot see.
+ */
+export async function sendEvm(
+  chain: AnyEvmChain,
+  tx: EvmTx,
+  events: SignEvents = {}
+) {
+  const client = chain.evmClient;
+  const provider = client.getProvider();
+  const account = tx.from as `0x${string}`;
+  const wallet = await evmWallet(chain, account);
 
   // The base fee drifts up every block - a tx priced at the bare quote is
   // signed, handed back as a hash, then dropped from the pool.
@@ -164,9 +181,9 @@ export async function sendForced(
   const txHash = await wallet.sendTransaction({
     account: account,
     chain: client.chain,
-    data: call.data as `0x${string}`,
-    to: call.to,
-    gas: gas,
+    data: tx.data as `0x${string}`,
+    to: tx.to as `0x${string}`,
+    gas: tx.gas,
     maxFeePerGas: gasPriceSurplus,
     maxPriorityFeePerGas: gasPriceSurplus,
   });
@@ -179,6 +196,26 @@ export async function sendForced(
       receipt.blockNumber +
       ', gas used ' +
       receipt.gasUsed
+  );
+}
+
+/**
+ * Send an evm call the node already refused to simulate.
+ *
+ * Lands on chain as a reverted transaction: gas is spent, nothing is
+ * minted, and the vaa stays unconsumed - so the claim is still replayable
+ * afterwards. Only worth it as proof that the revert is real.
+ */
+export async function sendForced(
+  call: EvmCall,
+  chain: AnyEvmChain,
+  events: SignEvents = {},
+  gas = 2_000_000n
+) {
+  return sendEvm(
+    chain,
+    { from: call.from, to: call.to, data: call.data, gas },
+    events
   );
 }
 

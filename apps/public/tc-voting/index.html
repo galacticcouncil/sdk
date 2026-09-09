@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · TC Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./tc-voting.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>TC Voting</h1>
+        <p class="lede">
+          Technical Committee actions from a seat held by an EVM account. Such
+          an account has no substrate key, so every call goes through the EVM
+          dispatch precompile - wrapped in
+          <code>Dispatcher.dispatch_with_extra_gas</code>, since the precompile
+          only admits normal-class calls and collective calls are operational.
+          Sign with Rabby or MetaMask, Trezor through Rabby.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Wallet</h2>
+          <div class="head-tools">
+            <button id="refresh" class="btn-ghost" type="button">
+              Refresh
+            </button>
+            <button id="connect" class="btn-primary" type="button">
+              Connect
+            </button>
+          </div>
+        </div>
+        <div id="wallet"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Open proposals</h2>
+        </div>
+        <div id="proposals"></div>
+        <div class="table-foot">
+          <span class="hint">
+            Close executes the proposal once the threshold is met, or rejects it
+            after the voting period ends. Every call is decoded back against the
+            live metadata before the wallet is asked to sign.
+          </span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Propose</h2>
+        </div>
+        <label class="field">
+          <span class="label">Calldata</span>
+          <textarea
+            id="calldata"
+            rows="6"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="SCALE-encoded TechnicalCommittee.propose, starts with 0x1902"
+          ></textarea>
+          <span class="hint"
+            >Built off chain (papi, polkadot.js apps). Decode first to see the
+            proposal and the hash it will get.</span
+          >
+        </label>
+        <div id="preview"></div>
+        <div class="actions">
+          <button id="decode" class="btn-ghost" type="button">Decode</button>
+          <label class="field inline">
+            <span class="label">Gas</span>
+            <input id="gas" type="number" min="100000" step="100000" />
+          </label>
+          <button id="propose" class="btn-primary" type="button">
+            Propose
+          </button>
+        </div>
+      </section>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/tc-voting.js"></script>
+  </body>
+</html>

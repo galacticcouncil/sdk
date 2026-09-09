@@ -5,7 +5,6 @@ import { tags } from '@galacticcouncil/xc-cfg';
 import { sign } from './signers';
 import { xc } from './setup';
 import { claimDeposits, claimWithdraws } from './utils/claim';
-import { claimVaa } from './utils/vaa';
 import { getStatus, waitForDelivery } from './utils/executor';
 
 const { config, wallet } = xc;
@@ -198,17 +197,6 @@ async function transfer({ source, route, executor }: NttRoute, amount: string) {
 const claim = {
   in: () => claimDeposits(HYDRATION_ADDRESS, addressOf, log),
   out: () => claimWithdraws(HYDRATION_ADDRESS, addressOf, log),
-  // Anything the two above never list - a transfer addressed to someone
-  // else, or one whose emitter matches no registry entry. Hydration is paid
-  // by the h160 rather than the ss58 addressOf hands out, so the claim is a
-  // plain receiveMessage rather than an EVM.call dispatch.
-  vaa: (input: string, force = false) =>
-    claimVaa(
-      input,
-      (chain) => (chain.isEvmParachain() ? EVM_ADDRESS : addressOf(chain)),
-      log,
-      force
-    ),
 };
 
 /**
@@ -284,12 +272,6 @@ groups.forEach((entries, chain) => {
 // chain they target.
 bind(document.getElementById('claim-in') as HTMLButtonElement, claim.in);
 bind(document.getElementById('claim-out') as HTMLButtonElement, claim.out);
-
-const vaaInput = document.getElementById('vaa') as HTMLTextAreaElement;
-const vaaForce = document.getElementById('vaa-force') as HTMLInputElement;
-bind(document.getElementById('claim-vaa') as HTMLButtonElement, () =>
-  claim.vaa(vaaInput.value, vaaForce.checked)
-);
 
 log(
   'Ready.',

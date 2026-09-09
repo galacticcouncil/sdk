@@ -129,30 +129,6 @@
       </button>
     </div>
 
-    <!-- Escape hatch for a transfer the two above never list - addressed to
-         another account, or emitted by something the registry doesn't match.
-         The vaa names its own destination, so the claim is routed by the
-         message: one receiveMessage on evm, a jito bundle on solana, a ptb
-         on sui. -->
-    <div class="row">
-      <textarea
-        id="vaa"
-        rows="3"
-        style="width: 100%; max-width: 68ch; resize: vertical"
-        spellcheck="false"
-        placeholder="signed vaa (base64 or 0x hex), a wormholescan link, or chain/emitter/sequence"
-      ></textarea>
-    </div>
-    <div class="row">
-      <button id="claim-vaa">Claim VAA</button>
-      <label
-        title="Evm destinations only. Send even when the call reverts in simulation - spends gas, mints nothing, leaves the vaa replayable"
-      >
-        <input id="vaa-force" type="checkbox" style="width: auto" />
-        send anyway
-      </label>
-    </div>
-
     <pre id="log"></pre>
 
     <script>

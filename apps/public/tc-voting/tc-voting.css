@@ -1,0 +1,105 @@
+/* TC voting page - proposal cards on top of the shared styles. */
+
+.head-tools {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge.is-ok {
+  border-color: transparent;
+  background: rgba(18, 183, 106, 0.12);
+  color: var(--success);
+}
+
+.badge.is-bad {
+  border-color: transparent;
+  background: rgba(217, 45, 32, 0.12);
+  color: var(--danger);
+}
+
+.global-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.kv {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.kv-term {
+  flex: 0 0 120px;
+  color: var(--text-muted);
+}
+
+.kv-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-soft);
+  word-break: break-all;
+}
+
+.proposal {
+  padding: 12px 0;
+  border-top: 1px solid var(--border-strong);
+}
+
+.proposal:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.proposal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.field.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.field.inline input {
+  width: 12ch;
+}
+
+.table-foot {
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.table-foot .hint {
+  font-size: 11px;
+}

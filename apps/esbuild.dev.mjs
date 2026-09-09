@@ -10,6 +10,7 @@ const options = {
     { in: 'src/amm/app.ts', out: 'amm' },
     { in: 'src/claim/app.ts', out: 'claim' },
     { in: 'src/breakers/app.ts', out: 'breakers' },
+    { in: 'src/tc-voting/app.ts', out: 'tc-voting' },
   ],
   bundle: true,
   format: 'esm',
