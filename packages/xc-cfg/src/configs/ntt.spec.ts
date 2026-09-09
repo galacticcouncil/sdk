@@ -1,11 +1,22 @@
 import { AssetRoute } from '@galacticcouncil/xc-core';
 
-import { eth, eurc, eurc_wh, usdc, usdc_wh, weth_wh } from '../assets';
-import { base, ethereum, hydration } from '../chains';
+import {
+  eth,
+  eurc,
+  eurc_wh,
+  hdx,
+  hollar,
+  weth,
+  usdc,
+  usdc_wh,
+  weth_wh,
+} from '../assets';
+import { base, ethereum, hydration, robinhood } from '../chains';
 import { Tag } from '../tags';
 
 import { baseConfig } from './evm/base';
 import { ethereumConfig } from './evm/ethereum';
+import { robinhoodConfig } from './evm/robinhood';
 import { hydrationConfig } from './polkadot/hydration';
 
 const isExecutor = (route: AssetRoute) => route.tags?.includes(Tag.NttExecutor);
@@ -16,8 +27,21 @@ describe('ntt route configs', () => {
       ['ethereum erc20', ethereumConfig, usdc, hydration, usdc_wh],
       ['ethereum native', ethereumConfig, eth, hydration, weth_wh],
       ['base erc20', baseConfig, eurc, hydration, eurc_wh],
+      ['robinhood hdx', robinhoodConfig, hdx, hydration, hdx],
+      ['robinhood hollar', robinhoodConfig, hollar, hydration, hollar],
+      ['robinhood erc20', robinhoodConfig, weth, hydration, weth_wh],
+      ['robinhood native', robinhoodConfig, eth, hydration, weth_wh],
       ['hydration -> ethereum', hydrationConfig, usdc_wh, ethereum, usdc],
       ['hydration -> base', hydrationConfig, eurc_wh, base, eurc],
+      ['hydration -> robinhood hdx', hydrationConfig, hdx, robinhood, hdx],
+      [
+        'hydration -> robinhood hollar',
+        hydrationConfig,
+        hollar,
+        robinhood,
+        hollar,
+      ],
+      ['hydration -> robinhood weth', hydrationConfig, weth_wh, robinhood, eth],
     ])('%s exposes both delivery models', (_, config, from, to, target) => {
       // Other bridges can serve the same pair (base eurc is also Basejump),
       // so narrow to ntt before splitting on the delivery model.
@@ -35,6 +59,7 @@ describe('ntt route configs', () => {
     const executorRoutes = [
       ...ethereumConfig.getRoutes(),
       ...baseConfig.getRoutes(),
+      ...robinhoodConfig.getRoutes(),
       ...hydrationConfig.getRoutes(),
     ].filter(isExecutor);
 
@@ -62,6 +87,7 @@ describe('ntt route configs', () => {
     it.each([
       ['ethereum', ethereumConfig, ethereum, eth],
       ['base', baseConfig, base, eth],
+      ['robinhood', robinhoodConfig, robinhood, eth],
       ['hydration', hydrationConfig, hydration, weth_wh],
     ])(
       'should charge %s gas in its evm native asset',

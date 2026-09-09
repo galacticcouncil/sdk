@@ -14,9 +14,11 @@ import {
   SuiClaim,
 } from '@galacticcouncil/xc-sdk';
 
-import { chainToChainId, encoding } from '@wormhole-foundation/sdk-base';
-import { deserialize } from '@wormhole-foundation/sdk-definitions';
-import { register } from '@wormhole-foundation/sdk-definitions-ntt';
+import {
+  deserializeLayout,
+  encoding,
+  type Layout,
+} from '@wormhole-foundation/sdk-base';
 
 import { sign, signSolanaAll } from '../signers';
 import { xc } from '../setup';
@@ -26,9 +28,61 @@ import { getWormholeChainById } from './wh';
 
 const { EvmAddr } = addr;
 
-// The ntt payload layouts stopped registering on import in 7.2.0, they are
-// opt-in now - `deserialize` throws without this. Idempotent.
-register();
+const bytes32 = { binary: 'bytes', size: 32 } as const;
+const nttTransferVaaLayout = [
+  { name: 'version', binary: 'uint', size: 1 },
+  { name: 'guardianSet', binary: 'uint', size: 4 },
+  {
+    name: 'signatures',
+    binary: 'array',
+    lengthSize: 1,
+    layout: { binary: 'bytes', size: 66 },
+  },
+  { name: 'timestamp', binary: 'uint', size: 4 },
+  { name: 'nonce', binary: 'uint', size: 4 },
+  { name: 'emitterChain', binary: 'uint', size: 2 },
+  { name: 'emitterAddress', ...bytes32 },
+  { name: 'sequence', binary: 'uint', size: 8 },
+  { name: 'consistencyLevel', binary: 'uint', size: 1 },
+  {
+    name: 'prefix',
+    binary: 'bytes',
+    custom: Uint8Array.from([0x99, 0x45, 0xff, 0x10]),
+    omit: true,
+  },
+  { name: 'sourceNttManager', ...bytes32 },
+  { name: 'recipientNttManager', ...bytes32 },
+  {
+    name: 'nttManagerPayload',
+    binary: 'bytes',
+    lengthSize: 2,
+    layout: [
+      { name: 'id', ...bytes32 },
+      { name: 'sender', ...bytes32 },
+      {
+        name: 'payload',
+        binary: 'bytes',
+        lengthSize: 2,
+        layout: [
+          {
+            name: 'prefix',
+            binary: 'bytes',
+            custom: Uint8Array.from([0x99, 0x4e, 0x54, 0x54]),
+            omit: true,
+          },
+          { name: 'decimals', binary: 'uint', size: 1 },
+          { name: 'amount', binary: 'uint', size: 8 },
+          { name: 'sourceToken', ...bytes32 },
+          { name: 'recipientAddress', ...bytes32 },
+          { name: 'recipientChain', binary: 'uint', size: 2 },
+          // Optional trailer, 2 byte length prefixed when present.
+          { name: 'additionalPayload', binary: 'bytes' },
+        ],
+      },
+    ],
+  },
+  { name: 'transceiverPayload', binary: 'bytes', lengthSize: 2 },
+] as const satisfies Layout;
 
 export type NttClaim = {
   /** `chain/emitter/sequence`, rebuilt from the vaa header */
@@ -58,23 +112,30 @@ function asVaaId(input: string): string | undefined {
 /**
  * Whatever was pasted, as the base64 the claim apis take.
  *
- * Three things get pasted in practice: a wormholescan link, the bare vaa id
- * it ends with, or the signed bytes themselves - base64 as the guardians
- * issue them, or the 0x hex some explorers render.
+ * Four things get pasted in practice: a wormholescan link, the bare vaa id
+ * it ends with, the source transaction hash, or the signed bytes themselves
+ * - base64 as the guardians issue them, or the 0x hex some explorers render.
  */
 async function resolveVaa(input: string): Promise<string> {
   const trimmed = input.trim().replace(/\s+/g, '');
   if (!trimmed) {
-    throw new Error('Paste a vaa, or a wormholescan link to one');
+    throw new Error('Paste a vaa, a tx hash, or a wormholescan link');
   }
+
+  const { whScan } = xc.wormhole.transfer;
 
   const id = asVaaId(trimmed);
   if (id) {
-    const operation = await xc.wormhole.transfer.whScan.getOperation(id);
+    const operation = await whScan.getOperation(id);
     if (!operation.vaa) {
       throw new Error(id + ' has no signed vaa yet');
     }
     return operation.vaa.raw;
+  }
+
+  if (/^0x[0-9a-fA-F]{64}$/.test(trimmed)) {
+    const vaa = await whScan.getVaaByTxHash(trimmed);
+    return vaa.vaa;
   }
 
   if (/^(0x)?[0-9a-fA-F]+$/.test(trimmed) && trimmed.length > 200) {
@@ -122,7 +183,7 @@ function toDisplayAddress(chain: AnyChain, universal: string): string {
 export function readVaa(vaaRaw: string): NttClaim {
   let vaa;
   try {
-    vaa = deserialize('Ntt:WormholeTransfer', encoding.b64.decode(vaaRaw));
+    vaa = deserializeLayout(nttTransferVaaLayout, encoding.b64.decode(vaaRaw));
   } catch (e) {
     throw new Error(
       'Not a signed ntt transfer vaa - ' +
@@ -130,19 +191,18 @@ export function readVaa(vaaRaw: string): NttClaim {
     );
   }
 
-  const { recipientNttManager, nttManagerPayload } = vaa.payload;
-  const { recipientAddress, recipientChain, trimmedAmount } =
+  const { recipientNttManager, nttManagerPayload } = vaa;
+  const { recipientAddress, recipientChain, decimals, amount } =
     nttManagerPayload.payload;
 
-  const wormholeId = chainToChainId(recipientChain);
-  const chain = getWormholeChainById(wormholeId);
+  const chain = getWormholeChainById(recipientChain);
   if (!chain) {
     throw new Error(
-      'Vaa targets ' + recipientChain + ' (wormhole ' + wormholeId + '), not configured here'
+      'Vaa targets wormhole chain ' + recipientChain + ', not configured here'
     );
   }
 
-  const manager = recipientNttManager.toString();
+  const manager = encoding.hex.encode(recipientNttManager, true);
   const ntt = findNtt(chain, manager);
   if (!ntt) {
     throw new Error(
@@ -152,14 +212,17 @@ export function readVaa(vaaRaw: string): NttClaim {
 
   return {
     id: [
-      chainToChainId(vaa.emitterChain),
-      vaa.emitterAddress.toString().replace(/^0x/, ''),
+      vaa.emitterChain,
+      encoding.hex.encode(vaa.emitterAddress),
       vaa.sequence,
     ].join('/'),
     chain: chain,
     ntt: ntt,
-    recipient: toDisplayAddress(chain, recipientAddress.toString()),
-    amount: String(Number(trimmedAmount.amount) / 10 ** trimmedAmount.decimals),
+    recipient: toDisplayAddress(
+      chain,
+      encoding.hex.encode(recipientAddress, true)
+    ),
+    amount: String(Number(amount) / 10 ** decimals),
   };
 }
 

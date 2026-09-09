@@ -86,6 +86,7 @@ describe('chain address space', () => {
     'mythos',
     'ethereum',
     'base',
+    'robinhood',
     'solana',
     'sui',
   ];
@@ -100,6 +101,7 @@ describe('chain address space', () => {
       'mythos',
       'ethereum',
       'base',
+      'robinhood',
     ]);
   });
 
@@ -132,5 +134,6 @@ describe('chain address normalization', () => {
     );
     expect(chainsMap.get('ethereum')!.getNormalizedAddress(EVM)).toEqual(EVM);
     expect(chainsMap.get('base')!.getNormalizedAddress(EVM)).toEqual(EVM);
+    expect(chainsMap.get('robinhood')!.getNormalizedAddress(EVM)).toEqual(EVM);
   });
 });

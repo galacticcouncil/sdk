@@ -19,7 +19,7 @@ import { EvmClient, EvmResolver } from '../evm';
 import { addr } from '../utils';
 
 const { EvmAddr, Ss58Addr } = addr;
-const { H160 } = h160;
+const { H160, isEvmAccount } = h160;
 
 type EvmParachainBalanceType = SubstrateBalanceType | EvmBalanceType;
 
@@ -126,13 +126,23 @@ export class EvmParachain extends Parachain<EvmParachainBalanceType> {
   }
 
   /**
-   * EVM parachains key balances by the derived h160 account when the asset's
-   * balance id is an evm address, and by the normalized account otherwise.
+   * Account a balance is keyed by.
+   *
+   * - Substrate storages take the normalized account
+   * - Evm storages (a contract balance id) take the h160 the runtime reads
+   *   erc20 balances at: the bound address of an ETH\0 account, the truncated
+   *   public key of any other - bound or not, that is where its tokens sit
    */
   private async resolveAccount(asset: Asset, address: string): Promise<string> {
     const assetId = this.getBalanceAssetId(asset);
-    return EvmAddr.isValid(assetId.toString())
-      ? this.getDerivatedAddress(address)
-      : this.getNormalizedAddress(address);
+    if (!EvmAddr.isValid(assetId.toString())) {
+      return this.getNormalizedAddress(address);
+    }
+    if (EvmAddr.isValid(address)) {
+      return address;
+    }
+    return isEvmAccount(address)
+      ? H160.fromAccount(address)
+      : H160.fromSS58(address);
   }
 }

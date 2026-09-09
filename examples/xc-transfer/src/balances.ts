@@ -8,6 +8,7 @@ const CHAINS = [
   'assethub',
   'ethereum',
   'base',
+  'robinhood',
   'solana',
   'sui',
 ];

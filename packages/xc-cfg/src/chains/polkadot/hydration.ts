@@ -1,5 +1,6 @@
 import {
   ChainEcosystem as Ecosystem,
+  EvmBalanceType,
   EvmParachain,
   SubstrateBalanceType,
 } from '@galacticcouncil/xc-core';
@@ -22,6 +23,7 @@ import {
   ewt,
   glmr,
   hdx,
+  hollar,
   ibtc,
   intr,
   jito_sol,
@@ -110,6 +112,7 @@ export const hydration = new EvmParachain({
   assetsData: [
     {
       asset: hdx,
+      decimals: 12,
       id: 0,
       xcmLocation: {
         parents: 0,
@@ -368,6 +371,26 @@ export const hydration = new EvmParachain({
             },
             {
               PalletInstance: 10,
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: hollar,
+      decimals: 18,
+      id: 222,
+      balanceId: '0x531a654d1696ED52e7275A8cede955E82620f99a',
+      min: 0.02,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X1: [
+            {
+              AccountKey20: {
+                network: null,
+                key: '0x531a654d1696ed52e7275a8cede955e82620f99a',
+              },
             },
           ],
         },
@@ -1269,6 +1292,7 @@ export const hydration = new EvmParachain({
   balance: SubstrateBalanceType.Tokens,
   balanceOverrides: {
     [hdx.key]: SubstrateBalanceType.System,
+    [hollar.key]: EvmBalanceType.Erc20,
   },
   ecosystem: Ecosystem.Polkadot,
   evmChain: evmChain,
@@ -1286,6 +1310,7 @@ export const hydration = new EvmParachain({
     executor: '0xd633d8d1ceee8c8252196d44857c0f41b8dcb0d9',
     nttExecutor: '0xd3Dda7c8608Ea251C42c6E0A2A686aDc5e9C0C03',
     // Burning managers - token is the erc20 precompile of the asset id.
+    // Hub legs (hdx, hollar) lock instead.
     ntt: {
       [dai_wh.key]: {
         token: '0x0000000000000000000000000000000100000012',
@@ -1299,6 +1324,20 @@ export const hydration = new EvmParachain({
         manager: '0x8dd1286A29dF5a2785FB638d6fB1598144Cfbc4C',
         transceiver: {
           wormhole: '0x2e84fac378D67Dc2e11026fB4919E80263a87375',
+        },
+      },
+      [hdx.key]: {
+        token: '0x0000000000000000000000000000000100000000',
+        manager: '0x16Ac5B8d9078ed4cf5A522F907fd9dDb6C8841f1',
+        transceiver: {
+          wormhole: '0xdDE268D8B89834f6EF213002651D0586Ced646b9',
+        },
+      },
+      [hollar.key]: {
+        token: '0x531a654d1696ED52e7275A8cede955E82620f99a',
+        manager: '0x4188f147eec68921C1ee2d72898a263722a76844',
+        transceiver: {
+          wormhole: '0xE1d75C3c712BC61eBE892312F3455A67EC5D4799',
         },
       },
       [jito_sol.key]: {

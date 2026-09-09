@@ -21,7 +21,7 @@ const { Tag } = tags;
  *    once `claim` is run against the destination chain.
  *  - executor — the sender pays the Executor to redeem on the far side, so
  *    there is nothing to claim. Costs source native gas on top of the
- *    transfer (weth on hydration, eth on ethereum/base).
+ *    transfer (weth on hydration, eth on ethereum/base/robinhood).
  *
  * The executor routes carry both tags, so `Tag.NttExecutor` picks one
  * unambiguously. Plain `Tag.Ntt` resolves to whichever route the config
@@ -31,7 +31,6 @@ const { Tag } = tags;
 
 // Evm chains sign with the h160; hydration takes an ss58 (bound on chain,
 // see EnsureAddressTruncated) or the same h160.
-//
 // The two hydration routes are NOT equivalent for wormhole: an ss58 signs
 // one batched `EVM.call` extrinsic, whose logs are missing from the ethereum
 // view of some hydration rpcs - including the one the guardians read - so the
@@ -156,7 +155,7 @@ async function transfer({ source, route, executor }: NttRoute, amount: string) {
   }
 
   // The executor indexes whichever call emits RequestForExecution, and that
-  // is always the last one - the shim transfer on ethereum/base, the separate
+  // is always the last one - the shim transfer on evm chains, the separate
   // requestExecution on the hydration bypass. Everything ahead of it is a
   // wrap/approve prerequisite whose hash the executor knows nothing of.
   let txHash: string | undefined;
