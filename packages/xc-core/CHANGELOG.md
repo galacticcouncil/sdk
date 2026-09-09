@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-core
 
+## 2.5.1
+
+### Patch Changes
+
+- c761409: Adding robinhood chain support
+
 ## 2.5.0
 
 ### Minor Changes

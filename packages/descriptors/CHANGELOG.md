@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.8.0
+
+### Minor Changes
+
+- fdfc9c4: bump to latest metadata (runtime 443)
+
 ## 2.7.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 2.6.1
+
+### Patch Changes
+
+- c761409: Adding robinhood chain support
+- Updated dependencies [c761409]
+  - @galacticcouncil/xc-core@2.5.1
+
 ## 2.6.0
 
 ### Minor Changes
