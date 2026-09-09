@@ -83,23 +83,3 @@
   gap: 10px;
   margin-top: 12px;
 }
-
-.field.inline {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.field.inline input {
-  width: 12ch;
-}
-
-.table-foot {
-  margin-top: 12px;
-  padding-top: 12px;
-}
-
-.table-foot .hint {
-  font-size: 11px;
-}
