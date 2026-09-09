@@ -1,0 +1,222 @@
+/* Circuit breakers page - meters & badges on top of the shared table. */
+
+.container-wide {
+  max-width: 1180px;
+}
+
+.head-tools {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.head-tools input[type='search'] {
+  flex: 0 1 320px;
+  min-width: 160px;
+  padding: 9px 12px;
+}
+
+/* Summary strip */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 4px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.stat.is-bad .stat-value {
+  color: var(--danger);
+}
+
+.stat.is-warn .stat-value {
+  color: #b54708;
+}
+
+/* Health badges. `none` is the neutral pill. */
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badge.is-ok {
+  border-color: transparent;
+  background: rgba(18, 183, 106, 0.12);
+  color: var(--success);
+}
+
+.badge.is-warn {
+  border-color: transparent;
+  background: rgba(247, 144, 9, 0.14);
+  color: #b54708;
+}
+
+.badge.is-bad {
+  border-color: transparent;
+  background: rgba(217, 45, 32, 0.12);
+  color: var(--danger);
+}
+
+/* Meters: a thin bar with its numbers underneath */
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.meter-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--success);
+  transition: width 0.3s ease;
+}
+
+.meter.is-warn .meter-fill {
+  background: #f79009;
+}
+
+.meter.is-bad .meter-fill {
+  background: var(--danger);
+}
+
+.meter.is-none .meter-fill {
+  background: var(--border-strong);
+}
+
+.meter.is-info .meter-fill {
+  background: var(--accent);
+}
+
+.meter-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+.global-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.global-head .meter {
+  flex: 1 1 auto;
+  max-width: 480px;
+}
+
+/* Key / value rows under the global meter */
+.kv {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.kv-term {
+  flex: 0 0 160px;
+  color: var(--text-muted);
+}
+
+.kv-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+/* Table tweaks */
+.card-head .sub {
+  flex: 1 1 auto;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.table td.num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.table td.delta {
+  color: #b54708;
+}
+
+.table-wrap.scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.table-wrap.scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table td.kind {
+  font-weight: 500;
+}
+
+.table td.wide {
+  min-width: 200px;
+}
+
+.table td .last {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.table tr.is-locked td {
+  background: rgba(217, 45, 32, 0.05);
+}
+
+.soft {
+  color: var(--text-muted);
+}
+
+.table-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.table-foot .hint {
+  font-size: 11px;
+}

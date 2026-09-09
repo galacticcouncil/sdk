@@ -7,6 +7,8 @@ const options = {
   entryPoints: [
     { in: 'src/rescue/app.ts', out: 'rescue' },
     { in: 'src/amm/app.ts', out: 'amm' },
+    { in: 'src/claim/app.ts', out: 'claim' },
+    { in: 'src/breakers/app.ts', out: 'breakers' },
   ],
   bundle: true,
   format: 'esm',
