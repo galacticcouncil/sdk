@@ -6,7 +6,7 @@ import { Binary, Enum } from 'polkadot-api';
 
 import { config } from '../setup';
 
-const { H160 } = h160;
+const { H160, isEvmAddress } = h160;
 
 export const hydration = config.getChain('hydration') as EvmParachain;
 
@@ -96,10 +96,14 @@ export async function scan(owner: string): Promise<Scan> {
     balances.unshift({ id: 0, free: system.data.free });
   }
 
+  // An evm owner has no substrate origin to dry run as - and needs none,
+  // the account above is its own.
   const held = await Promise.all(
     balances.map(async (row) => ({
       ...row,
-      ...(await preflight(owner, row.id)),
+      ...(isEvmAddress(owner)
+        ? { ok: false, reason: 'evm address - spend from the evm wallet' }
+        : await preflight(owner, row.id)),
     }))
   );
 

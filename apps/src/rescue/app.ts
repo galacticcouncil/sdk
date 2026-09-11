@@ -1,3 +1,5 @@
+import { h160 } from '@galacticcouncil/common';
+
 import { signSubstrate } from '../signers';
 import {
   fmt,
@@ -9,6 +11,8 @@ import {
   stranded,
   sweep,
 } from './rescue';
+
+const { isEvmAddress } = h160;
 
 const form = document.getElementById('scan-form') as HTMLFormElement;
 const addressEl = document.getElementById('address') as HTMLInputElement;
@@ -37,6 +41,7 @@ const events = {
   onConfirmed: (info: string) => setStatus('Confirmed', info),
   onError: (e: unknown) =>
     setStatus('Failed', e instanceof Error ? e.message : String(e)),
+  onInfo: (line: string) => setStatus('Retrying…', line),
 };
 
 function el(tag: string, className?: string, text?: string) {
@@ -157,6 +162,22 @@ function renderSweeps(owner: string, state: Scan) {
   resultEl.append(card);
 }
 
+function renderEvmOwner() {
+  const card = el('div', 'notice');
+  card.append(
+    el(
+      'p',
+      undefined,
+      'This is an evm address. Its account above is the one it already ' +
+        'controls - anything sent to the address is spendable from the ' +
+        'evm wallet directly, nothing is stranded. Phantom rescue is for a ' +
+        'substrate account whose deposits landed on its truncated address: ' +
+        'scan with that substrate address instead.'
+    )
+  );
+  resultEl.append(card);
+}
+
 function renderBound() {
   const card = el('div', 'notice notice-danger');
   card.append(
@@ -218,6 +239,11 @@ async function render(owner: string) {
 
   if (state.bound) {
     renderBound();
+    return;
+  }
+
+  if (isEvmAddress(owner)) {
+    renderEvmOwner();
     return;
   }
 
