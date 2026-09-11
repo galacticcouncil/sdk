@@ -2,7 +2,6 @@ import { signSubstrate } from '../signers';
 import {
   fmt,
   fundGas,
-  GAS_ASSET,
   hydration,
   meta,
   scan,
@@ -65,32 +64,45 @@ async function submit(job: () => Promise<void>) {
 }
 
 function renderGas(owner: string, state: Scan) {
-  const gas = state.held.find((h) => h.id === GAS_ASSET);
-  if (gas && gas.free >= state.gasCost) {
+  const failing = state.held.filter((h) => !h.ok);
+  if (!failing.length) {
     return;
   }
 
+  const { symbol, decimals } = meta(state.feeAsset);
   const card = el('div', 'notice');
   card.append(
     el(
       'p',
       undefined,
-      `The phantom account pays its own gas, in WETH, and holds ` +
-        `${fmt(gas?.free ?? 0n, 18)} of the ${fmt(state.gasCost, 18)} a ` +
-        `sweep costs. Top it up first.`
+      `The phantom account pays its own gas in ${symbol}. ` +
+        `${failing.length} of ${state.held.length} sweeps would fail right ` +
+        `now - most often because it cannot cover the gas. Top it up, then ` +
+        `scan again.`
     )
+  );
+  failing.forEach(({ id, reason }) =>
+    card.append(el('p', 'hint', `${meta(id).symbol}: ${reason}`))
   );
 
   const input = el('input') as HTMLInputElement;
   input.type = 'text';
-  input.value = fmt(state.gasCost * 2n, 18);
+  input.placeholder = `${symbol} amount`;
 
-  const button = el('button', 'btn-secondary', 'Send WETH');
+  const button = el('button', 'btn-secondary', `Send ${symbol}`);
   button.addEventListener('click', () =>
     submit(async () => {
-      const amount = BigInt(Math.round(Number(input.value) * 1e18));
-      setStatus('Funding…', input.value + ' WETH');
-      await signSubstrate(await fundGas(owner, amount), hydration, events);
+      const amount = BigInt(Math.round(Number(input.value) * 10 ** decimals));
+      if (amount <= 0n) {
+        throw new Error('Enter an amount.');
+      }
+      setStatus('Funding…', `${input.value} ${symbol}`);
+      await signSubstrate(
+        await fundGas(owner, state.feeAsset, amount),
+        hydration,
+        events
+      );
+      await refresh(owner);
     })
   );
 
@@ -113,34 +125,30 @@ function renderSweeps(owner: string, state: Scan) {
     )
   );
 
-  state.held.forEach(({ id, free }) => {
+  // The fee asset goes last: every other sweep is paid out of it, and its
+  // own sweep leaves only the gas refund behind.
+  const ordered = [...state.held].sort(
+    (a, b) => Number(a.id === state.feeAsset) - Number(b.id === state.feeAsset)
+  );
+
+  ordered.forEach(({ id, free, ok }) => {
     const { symbol, decimals } = meta(id);
+    const isFeeAsset = id === state.feeAsset;
 
-    // Gas is charged in WETH, upfront, out of this same balance - sweeping
-    // all of it leaves the transfer short by exactly the fee and the whole
-    // call reverts. Reserve it, which also strands that much for good.
-    const amount = id === GAS_ASSET ? free - state.gasCost : free;
-    if (amount <= 0n) {
-      card.append(
-        el(
-          'p',
-          'hint',
-          `${symbol} covers little more than the gas it would cost to move ` +
-            `it - nothing to sweep.`
-        )
-      );
-      return;
-    }
-
+    // `transfer_all` moves whatever is free once gas is withdrawn, so the
+    // fee asset lands short of `free` by the charge - the label says so.
     const button = el(
       'button',
       'btn-primary',
-      `Sweep ${fmt(amount, decimals)} ${symbol}`
-    );
+      `Sweep all ${symbol} (${fmt(free, decimals)}` +
+        (isFeeAsset ? ' less gas - sweep last)' : ')')
+    ) as HTMLButtonElement;
+    button.disabled = !ok;
     button.addEventListener('click', () =>
       submit(async () => {
-        setStatus('Sweeping…', `${fmt(amount, decimals)} ${symbol} → ${owner}`);
-        await signSubstrate(await sweep(owner, id, amount), hydration, events);
+        setStatus('Sweeping…', `${symbol} → ${owner}`);
+        await signSubstrate(await sweep(owner, id), hydration, events);
+        await refresh(owner);
       })
     );
     card.append(button);
@@ -165,11 +173,26 @@ function renderBound() {
   resultEl.append(card);
 }
 
+/**
+ * Re-scan after a confirmed transaction, keeping the status log.
+ *
+ * Verdicts are per scan: sweeping the fee asset clears the phantom's fee
+ * currency, so what the other buttons promised may no longer hold.
+ */
+async function refresh(owner: string) {
+  setStatus('Rescanning…');
+  resultEl.replaceChildren();
+  await render(owner);
+}
+
 async function run(owner: string) {
   resultEl.replaceChildren();
   statusEl.hidden = true;
   statusLog.textContent = '';
+  await render(owner);
+}
 
+async function render(owner: string) {
   const state = await scan(owner);
 
   const summary = el('div', 'card');
@@ -177,6 +200,7 @@ async function run(owner: string) {
   summary.append(line('EVM address', state.h160));
   summary.append(line('Holds funds as', state.account));
   summary.append(line('Bound', state.bound ? 'yes' : 'no'));
+  summary.append(line('Pays gas in', meta(state.feeAsset).symbol));
 
   if (!state.held.length) {
     summary.append(
