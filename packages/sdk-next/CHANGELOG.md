@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 2.3.0
+
+### Minor Changes
+
+- fix: remove block derivation from stableswap
+
 ## 2.2.0
 
 ### Minor Changes
