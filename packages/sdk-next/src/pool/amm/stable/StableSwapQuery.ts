@@ -25,7 +25,6 @@ const MM_ORACLE_TTL = 10 * 60 * 1000;
  *   projects from the cached value, an event replaces it
  */
 export class StableSwapQuery extends PoolQuery {
-  private params = new ChainParams(this.client);
   private mmOracle = new MmOracleClient(this.evm);
 
   /** Every pool's config (assets, fee, amplification ramp) */
@@ -88,8 +87,7 @@ export class StableSwapQuery extends PoolQuery {
   /** Managed/DIA oracle price, read over EVM */
   readonly mmOracles = this.cache.scope<[string], MmOracleEntry>(
     'MmOracle',
-    async (_at, h160) =>
-      this.mmOracle.getData(h160, await this.params.getBlockTime()),
+    async (_at, h160) => this.mmOracle.getData(h160),
     (h160) => h160.toLowerCase(),
     MM_ORACLE_TTL
   );
