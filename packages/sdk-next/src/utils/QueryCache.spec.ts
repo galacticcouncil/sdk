@@ -53,6 +53,18 @@ describe('QueryCache getMany', () => {
     expect(cache.tally.memo).toBe(1);
   });
 
+  it('joins a get issued while the batch is still in flight', async () => {
+    const { reads, scope } = setup();
+
+    const batch = scope.getMany(AT, [[1], [2]]);
+    const value = scope.get(AT, 2);
+
+    expect(await value).toBe(20);
+    expect(await batch).toEqual([10, 20]);
+    expect(reads.single).toEqual([]);
+    expect(reads.many).toEqual([[1, 2]]);
+  });
+
   it('batches only what live and memo do not hold', async () => {
     const { reads, scope } = setup();
 
