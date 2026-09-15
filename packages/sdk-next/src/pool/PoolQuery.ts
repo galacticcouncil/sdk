@@ -93,11 +93,16 @@ export abstract class PoolQuery extends Papi {
     'persistent'
   );
 
-  /** An account's balance of one asset */
+  /**
+   * An account's balance of one asset.
+   *
+   * - `getMany` reads a whole set in a few storage reads
+   */
   readonly assetBalance = this.cache.scope<[string, number], Balance>(
     'CurrenciesApi.account',
     (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
     (address, assetId) => `${address}:${assetId}`,
-    'block'
+    'block',
+    (at, pairs) => this.balance.getBalancesAt(pairs, at)
   );
 }

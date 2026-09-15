@@ -185,6 +185,16 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     this.indexPegs(pegs, assetsByPool);
     this.mmRouting.build(this.mmKeys);
 
+    // One batched read of every reserve; the per-token reads below hit its memo
+    await this.query.assetBalance.getMany(
+      at,
+      pools.flatMap(({ keyArgs: [id], value }) =>
+        value.assets.map(
+          (asset) => [this.getPoolAddress(id), asset] as [string, number]
+        )
+      )
+    );
+
     const entries = pools.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const address = this.getPoolAddress(id);
