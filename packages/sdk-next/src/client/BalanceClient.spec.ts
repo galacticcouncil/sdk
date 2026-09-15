@@ -14,8 +14,9 @@ const ERC20_EVM_FREE = 777n;
  * - Native reads `System.Account`, any other asset `Tokens.Accounts`
  * - An Erc20 asset's free balance comes from the EVM, not from storage
  * - A missing entry reads as zero
+ * - `holdRegistry` keeps the registry read pending until `release()`
  */
-function chain() {
+function chain({ holdRegistry = false } = {}) {
   const system = new Map<string, Data>([
     ['alice', { free: 100n, reserved: 10n, frozen: 30n }],
   ]);
@@ -29,6 +30,11 @@ function chain() {
     [ERC20_ID, 'Erc20'],
   ]);
   const calls = { runtime: 0, registry: 0, system: 0, tokens: 0 };
+
+  let open = () => {};
+  const registryGate = holdRegistry
+    ? new Promise<void>((resolve) => (open = resolve))
+    : Promise.resolve();
 
   const api = {
     apis: {
@@ -48,6 +54,7 @@ function chain() {
         Assets: {
           getValues: async (keys: [number][]) => {
             calls.registry++;
+            await registryGate;
             return keys.map(([id]) =>
               types.has(id)
                 ? { asset_type: { type: types.get(id) } }
@@ -79,7 +86,7 @@ function chain() {
     Object.create(BalanceClient.prototype),
     { api }
   );
-  return { client, calls };
+  return { client, calls, release: () => open() };
 }
 
 describe('BalanceClient getBalancesAt', () => {
@@ -118,6 +125,19 @@ describe('BalanceClient getBalancesAt', () => {
     await client.getBalancesAt(pairs, AT);
 
     expect(calls).toEqual({ runtime: 1, registry: 1, system: 1, tokens: 1 });
+  });
+
+  it('starts the storage reads without waiting for the registry', async () => {
+    const { client, calls, release } = chain({ holdRegistry: true });
+
+    const pending = client.getBalancesAt(pairs, AT);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(calls).toEqual({ runtime: 0, registry: 1, system: 1, tokens: 1 });
+
+    release();
+    await pending;
+    expect(calls.runtime).toBe(1);
   });
 
   it('skips the reads a set does not need', async () => {
