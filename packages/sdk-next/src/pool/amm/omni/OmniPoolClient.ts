@@ -63,23 +63,29 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const hubAssetId = await this.query.hubAssetId();
     const poolAddress = this.getPoolAddress();
 
-    const [states, hubAssetTradeability, assets, hubAssetBalance, limits] =
-      await Promise.all([
-        this.query.assetStates.get(at),
-        this.query.hubTradability.get(at),
-        this.query.assets.get(at),
-        this.query.assetBalance.get(at, poolAddress, hubAssetId),
-        this.query.limits(),
+    const [states, hubAssetTradeability, assets, limits] = await Promise.all([
+      this.query.assetStates.get(at),
+      this.query.hubTradability.get(at),
+      this.query.assets.get(at),
+      this.query.limits(),
+    ]);
+
+    const [hubAssetBalance, ...balances] =
+      await this.query.assetBalance.getMany(at, [
+        [poolAddress, hubAssetId],
+        ...states.map(
+          ({ keyArgs: [id] }) => [poolAddress, id] as [string, number]
+        ),
       ]);
 
     const hubAssetMeta = assets.get(hubAssetId);
 
-    const poolTokens = states.map(async ({ keyArgs, value }) => {
+    const tokens = states.map(({ keyArgs, value }, i) => {
       const [id] = keyArgs;
       const { hub_reserve, shares, tradable, cap, protocol_shares } = value;
 
       const meta = assets.get(id);
-      const balance = await this.query.assetBalance.get(at, poolAddress, id);
+      const balance = balances[i];
 
       return {
         id: id,
@@ -94,8 +100,6 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
         type: meta?.asset_type.type,
       } as OmniPoolToken;
     });
-
-    const tokens = await Promise.all(poolTokens);
 
     // Adding LRNA info
     tokens.push({

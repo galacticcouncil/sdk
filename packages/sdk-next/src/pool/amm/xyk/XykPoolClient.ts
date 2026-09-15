@@ -52,17 +52,23 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       this.query.limits(),
     ]);
 
-    const pools = entries.map(async ({ keyArgs, value }) => {
+    const balances = await this.query.assetBalance.getMany(
+      at,
+      entries.flatMap(({ keyArgs: [id], value: [x, y] }) => [
+        [id, x] as [string, number],
+        [id, y] as [string, number],
+      ])
+    );
+
+    return entries.map(({ keyArgs, value }, i) => {
       const [id] = keyArgs;
       const [x, y] = value;
 
       const xMeta = assets.get(x);
       const yMeta = assets.get(y);
 
-      const [xBalance, yBalance] = await Promise.all([
-        this.query.assetBalance.get(at, id, x),
-        this.query.assetBalance.get(at, id, y),
-      ]);
+      const xBalance = balances[2 * i];
+      const yBalance = balances[2 * i + 1];
 
       return {
         address: id,
@@ -86,7 +92,6 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         ...limits,
       } as PoolBase;
     });
-    return Promise.all(pools);
   }
 
   async getPoolFees(): Promise<PoolFees> {

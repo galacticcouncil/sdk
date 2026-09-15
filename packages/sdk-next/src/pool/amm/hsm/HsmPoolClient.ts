@@ -103,7 +103,14 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       facilitatorH160
     );
 
-    const pools = collaterals.map(async ({ keyArgs, value }) => {
+    const collateralBalances = await this.query.assetBalance.getMany(
+      at,
+      collaterals.map(
+        ({ keyArgs: [id] }) => [facilitator, id] as [string, number]
+      )
+    );
+
+    const pools = collaterals.map(async ({ keyArgs, value }, i) => {
       const [id] = keyArgs;
 
       const {
@@ -118,11 +125,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       const stablePool = stablePools.find((p) => p.id === pool_id);
       if (stablePool) {
         const address = this.getPoolId(pool_id);
-        const collateralBalance = await this.query.assetBalance.get(
-          at,
-          facilitator,
-          id
-        );
+        const collateralBalance = collateralBalances[i];
 
         return {
           ...stablePool,

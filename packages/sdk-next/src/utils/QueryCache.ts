@@ -42,6 +42,7 @@ export interface QueryTally extends Record<QueryTier, number> {
  * - `live`: values set from events; authoritative, read-your-writes, persistent
  * - `cache`: on-demand fetches at a block, request-coalesced (shared promise)
  * - `get` prefers live, then cache, then fetches at `at`
+ * - `getMany` resolves each key the same way; misses share one batched read
  * - A read at a TAG is never memoized: the key would never change while the
  *   block under it does, pinning the first value read for good
  */
@@ -102,12 +103,14 @@ export class QueryCache {
    * @param fetch - reads the value at a given block `at`
    * @param toKey - stable cache key from the args (never includes `at`)
    * @param invalidation - fetch-tier freshness policy (default `'persistent'`)
+   * @param fetchMany - reads many values at `at` in one go, in input order
    */
   scope<K extends any[], V>(
     name: string,
     fetch: (at: string, ...args: K) => Promise<V>,
     toKey: (...args: K) => string,
-    invalidation: QueryInvalidation = 'persistent'
+    invalidation: QueryInvalidation = 'persistent',
+    fetchMany?: (at: string, args: K[]) => Promise<V[]>
   ) {
     const live = new Map<string, V>();
     const cache =
@@ -168,6 +171,75 @@ export class QueryCache {
       return fetchAt(at, ...args);
     };
 
+    /**
+     * Get many values; what no tier holds is read in one batch.
+     *
+     * - Each key resolves like `get`: live, then memo, then the chain
+     * - Misses share one `fetchMany` read, memoized per key like a fetch
+     * - Without `fetchMany`, one `get` per key
+     */
+    const getMany = (at: string, list: K[]): Promise<V[]> => {
+      if (!fetchMany) {
+        return Promise.all(list.map((args) => get(at, ...args)));
+      }
+
+      const pinned = isPinned(at);
+
+      // Drop last block's fetches when the read moves to a new block.
+      if (pinned && invalidation === 'block' && at !== gen) {
+        gen = at;
+        cache.release();
+      }
+
+      const values = new Map<string, Promise<V>>();
+      const misses = new Map<string, K>();
+
+      for (const args of list) {
+        const key = toKey(...args);
+        if (values.has(key) || misses.has(key)) continue;
+
+        if (live.has(key)) {
+          this.served('live', name, key);
+          values.set(key, Promise.resolve(live.get(key)!));
+        } else if (pinned && cache.has(key)) {
+          this.served('memo', name, key);
+          values.set(key, cache.get(key)!);
+        } else {
+          misses.set(key, args);
+        }
+      }
+
+      if (misses.size > 0) {
+        const keys = [...misses.keys()];
+        const batch = withTimeout(
+          fetchMany(at, [...misses.values()]),
+          QUERY_TIMEOUT,
+          `${name}[${keys.length} keys] stalled at ${at}`
+        );
+
+        keys.forEach((key, i) => {
+          const value = batch.then((vs) => vs[i]);
+
+          // A tag moves under a fixed key, read through, never memoize.
+          if (!pinned) {
+            this.served('unpinned', name, key);
+            values.set(key, value);
+            return;
+          }
+
+          this.served('fetch', name, key);
+          const p = value.catch((err) => {
+            cache.delete(key);
+            throw err;
+          });
+          cache.set(key, p);
+          values.set(key, p);
+        });
+      }
+
+      return Promise.all(list.map((args) => values.get(toKey(...args))!));
+    };
+
     /** Promote a value an event already carries to live, no read */
     const set = (v: V, ...args: K) => {
       const key = toKey(...args);
@@ -201,6 +273,7 @@ export class QueryCache {
 
     return {
       get,
+      getMany,
       set,
       refresh,
       clear,
