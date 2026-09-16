@@ -1,6 +1,7 @@
 import { CompatibilityLevel } from 'polkadot-api';
 
 import { BlockRef } from '../../../api';
+import { AccountAsset } from '../../../types';
 
 import {
   PoolEventEffect,
@@ -54,9 +55,9 @@ export class XykPoolClient extends PoolClient<PoolBase> {
 
     const balances = await this.query.assetBalance.getMany(
       at,
-      entries.flatMap(({ keyArgs: [id], value: [x, y] }) => [
-        [id, x] as [string, number],
-        [id, y] as [string, number],
+      entries.flatMap(({ keyArgs: [id], value: [x, y] }): AccountAsset[] => [
+        [id, x],
+        [id, y],
       ])
     );
 
