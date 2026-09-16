@@ -1,4 +1,8 @@
-/** Asset id -> the EVM address the runtime uses for it; structural inputs only */
+import { erc20 } from '@galacticcouncil/common';
+
+const { ERC20 } = erc20;
+
+/** Asset id <-> the EVM address the runtime uses for it; structural inputs only */
 
 /**
  * The `0x…01 ++ id` precompile alias.
@@ -74,4 +78,43 @@ export function assetAddress(
     viaContract: false,
     problem: `asset ${id} is Erc20 but carries no AccountKey20 location`,
   };
+}
+
+/**
+ * Registry contract index: lowercased H160 -> asset id.
+ *
+ * - Covers every asset whose location carries an `AccountKey20`
+ * - Feeds {@link assetIdFromAddress} for the non-alias branch
+ *
+ * @param locations - asset locations, keyed by id
+ */
+export function contractIndex(
+  locations: Iterable<[number, AssetLocationLike]>
+): Map<string, number> {
+  const byContract = new Map<string, number>();
+  for (const [id, location] of locations) {
+    const contract = contractFromLocation(location);
+    if (contract) byContract.set(contract, id);
+  }
+  return byContract;
+}
+
+/**
+ * The asset an EVM address denotes, as `HydraErc20Mapping::address_to_asset`
+ * resolves it.
+ *
+ * - An alias (`0x…01 ++ id`) decodes directly and wins over any contract entry
+ * - Anything else resolves through the registry contract index
+ * - Unknown addresses yield `undefined`
+ *
+ * @param address - the H160 to resolve, any case
+ * @param byContract - the index from {@link contractIndex}
+ */
+export function assetIdFromAddress(
+  address: string,
+  byContract: ReadonlyMap<string, number>
+): number | undefined {
+  const alias = ERC20.toAssetId(address);
+  if (alias !== null) return alias;
+  return byContract.get(address.toLowerCase());
 }

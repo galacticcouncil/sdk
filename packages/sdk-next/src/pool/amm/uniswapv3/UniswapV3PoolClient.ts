@@ -5,7 +5,7 @@ import { PoolFees, PoolPair, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
 import { TAssetDetails, TAssetLocation } from '../../PoolQuery';
 
-import { assetAddress } from './assetAddress';
+import { assetAddress } from '../assetAddress';
 import { V3PoolConfig, V3_POOLS } from './const';
 import { UniswapV3Query, V3PoolSlice } from './UniswapV3Query';
 import { UniswapV3PoolBase, UniswapV3PoolFees } from './types';
