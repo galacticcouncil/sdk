@@ -72,7 +72,7 @@ export class IntentOrderTxBuilder extends TxBuilder {
       amount_in: tradeAmountIn,
       amount_out: assetOutEd,
       slippage: this.slippagePct * 10000,
-      budget: amountIn,
+      budget: amountIn || undefined,
       period: tradePeriod,
     });
 
