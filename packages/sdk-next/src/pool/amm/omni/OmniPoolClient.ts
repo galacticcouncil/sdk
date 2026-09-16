@@ -7,6 +7,7 @@ import { TEmaPair } from '../../../oracle';
 import { fmt } from '../../../utils';
 
 import { BlockRef } from '../../../api';
+import { AccountAsset } from '../../../types';
 
 import { PoolEventEffect, PoolEventHandler, PoolMutation } from '../../events';
 import { PoolType, PoolToken, PoolPair } from '../../types';
@@ -73,9 +74,7 @@ export class OmniPoolClient extends PoolClient<OmniPoolBase> {
     const [hubAssetBalance, ...balances] =
       await this.query.assetBalance.getMany(at, [
         [poolAddress, hubAssetId],
-        ...states.map(
-          ({ keyArgs: [id] }) => [poolAddress, id] as [string, number]
-        ),
+        ...states.map(({ keyArgs: [id] }): AccountAsset => [poolAddress, id]),
       ]);
 
     const hubAssetMeta = assets.get(hubAssetId);

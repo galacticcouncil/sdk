@@ -4,8 +4,9 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { Papi } from '../api';
 import { BalanceClient } from '../client';
+import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
-import { Balance } from '../types';
+import { AccountAsset, Balance } from '../types';
 import { QueryCache, QueryTally } from '../utils';
 
 export type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
@@ -93,16 +94,47 @@ export abstract class PoolQuery extends Papi {
     'persistent'
   );
 
-  /**
-   * An account's balance of one asset.
-   *
-   * - `getMany` reads a whole set in a few storage reads
-   */
-  readonly assetBalance = this.cache.scope<[string, number], Balance>(
+  /** An account's balance of one asset */
+  readonly assetBalance = this.cache.scope<AccountAsset, Balance>(
     'CurrenciesApi.account',
     (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
     (address, assetId) => `${address}:${assetId}`,
     'block',
-    (at, pairs) => this.balance.getBalancesAt(pairs, at)
+    (at, accountAssets) => this.readBalances(at, accountAssets)
   );
+
+  /**
+   * Many balances at `at`, each equal to `getBalanceAt`.
+   *
+   * - Native and token balances: batched storage reads
+   * - Erc20 or unregistered asset: one runtime call each
+   *
+   * @param at - block to read at
+   * @param accountAssets - `[account, assetId]` to read
+   */
+  private async readBalances(
+    at: string,
+    accountAssets: AccountAsset[]
+  ): Promise<Balance[]> {
+    const assets = await this.assets.get(at);
+    const inStorage = ([, id]: AccountAsset) => {
+      const type = assets.get(id)?.asset_type.type;
+      return id === SYSTEM_ASSET_ID || (type !== undefined && type !== 'Erc20');
+    };
+
+    const [stored, runtime] = await Promise.all([
+      this.balance.getBalancesAt(accountAssets.filter(inStorage), at),
+      Promise.all(
+        accountAssets
+          .filter((a) => !inStorage(a))
+          .map(([account, id]) => this.balance.getBalanceAt(account, id, at))
+      ),
+    ]);
+
+    let s = 0;
+    let r = 0;
+    return accountAssets.map((a) =>
+      inStorage(a) ? stored[s++] : runtime[r++]
+    );
+  }
 }

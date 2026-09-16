@@ -6,7 +6,7 @@ import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { BlockAt, BlockRef } from '../../../api';
 import { EvmClient } from '../../../evm';
 import { GhoTokenLog } from '../../../gho';
-import { XcmV3Multilocation } from '../../../types';
+import { AccountAsset, XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
 import { PoolEventHandler, PoolMutation } from '../../events';
@@ -105,12 +105,10 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
 
     const collateralBalances = await this.query.assetBalance.getMany(
       at,
-      collaterals.map(
-        ({ keyArgs: [id] }) => [facilitator, id] as [string, number]
-      )
+      collaterals.map(({ keyArgs: [id] }): AccountAsset => [facilitator, id])
     );
 
-    const pools = collaterals.map(async ({ keyArgs, value }, i) => {
+    const pools = collaterals.map(({ keyArgs, value }, i) => {
       const [id] = keyArgs;
 
       const {
@@ -146,8 +144,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         } as PoolBase;
       }
     });
-    const results = await Promise.all(pools);
-    return results.filter((pool): pool is HsmPoolBase => pool !== null);
+    return pools.filter((pool): pool is HsmPoolBase => pool !== null);
   }
 
   async getPoolFees(): Promise<PoolFees> {

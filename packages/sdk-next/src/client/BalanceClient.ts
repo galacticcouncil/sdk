@@ -29,7 +29,7 @@ import {
 import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { decodeErc20Transfer } from '../evm';
-import { AssetBalance, Balance } from '../types';
+import { AccountAsset, AssetBalance, Balance } from '../types';
 import { Erc20Client } from './Erc20Client';
 
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
@@ -72,74 +72,44 @@ export class BalanceClient extends Papi {
   }
 
   /**
-   * Many balances at one block, each equal to {@link getBalanceAt}.
+   * Many balances at one block, read from storage.
    *
    * - Native: one `System.Account` multi-key read
-   * - Erc20: `CurrenciesApi.account` per pair, the only source of its EVM balance
    * - Any other asset: one `Tokens.Accounts` multi-key read
-   * - The asset kind is read from the registry at the same block
-   * - Storage reads start with the registry read; an erc20 pair is re-read once
-   *   the registry names it
+   * - An erc20 balance lives in the EVM, not in storage; read it with
+   *   {@link getBalanceAt}
    *
-   * @param pairs - `[account, assetId]` to read
+   * @param accountAssets - `[account, assetId]` to read
    * @param at - block to read at
-   * @returns balances in `pairs` order
+   * @returns balances in `accountAssets` order
    */
   async getBalancesAt(
-    pairs: [string, number][],
+    accountAssets: AccountAsset[],
     at: BlockAt
   ): Promise<Balance[]> {
-    const tokenIds = [
-      ...new Set(
-        pairs.map(([, id]) => id).filter((id) => id !== SYSTEM_ASSET_ID)
-      ),
-    ];
-    const system: number[] = [];
-    const tokens: number[] = [];
-    pairs.forEach(([, id], i) => {
-      (id === SYSTEM_ASSET_ID ? system : tokens).push(i);
-    });
+    const isSystem = ([, id]: AccountAsset) => id === SYSTEM_ASSET_ID;
+    const system = accountAssets.filter(isSystem);
+    const tokens = accountAssets.filter((a) => !isSystem(a));
 
-    const [details, systemData, tokenData] = await Promise.all([
-      tokenIds.length
-        ? this.api.query.AssetRegistry.Assets.getValues(
-            tokenIds.map((id) => [id] as [number]),
-            { at }
-          )
-        : [],
+    const [systemData, tokenData] = await Promise.all([
       system.length
         ? this.api.query.System.Account.getValues(
-            system.map((i) => [pairs[i][0]] as [string]),
+            system.map(([account]) => [account] as [string]),
             { at }
           )
         : [],
       tokens.length
-        ? this.api.query.Tokens.Accounts.getValues(
-            tokens.map((i) => pairs[i]),
-            { at }
-          )
+        ? this.api.query.Tokens.Accounts.getValues(tokens, { at })
         : [],
     ]);
 
-    const erc20 = new Set(
-      tokenIds.filter((_, i) => details[i]?.asset_type.type === 'Erc20')
+    let s = 0;
+    let t = 0;
+    return accountAssets.map((a) =>
+      isSystem(a)
+        ? this.getBreakdown(systemData[s++].data)
+        : this.getBreakdown(tokenData[t++])
     );
-    const erc20s = tokens.filter((i) => erc20.has(pairs[i][1]));
-    const erc20Balances = await Promise.all(
-      erc20s.map((i) => this.getBalanceAt(pairs[i][0], pairs[i][1], at))
-    );
-
-    const balances: Balance[] = new Array(pairs.length);
-    system.forEach((p, i) => {
-      balances[p] = this.getBreakdown(systemData[i].data);
-    });
-    tokens.forEach((p, i) => {
-      balances[p] = this.getBreakdown(tokenData[i]);
-    });
-    erc20s.forEach((p, i) => {
-      balances[p] = erc20Balances[i];
-    });
-    return balances;
   }
 
   async getSystemBalance(account: string): Promise<Balance> {
