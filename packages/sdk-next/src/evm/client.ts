@@ -62,7 +62,12 @@ export class EvmClient {
     });
   }
 
-  getRPCAdapter(): EvmRpcAdapter {
-    return new EvmRpcAdapter(this.client, this.at);
+  /**
+   * Block-pinned EVM reads through the runtime's `EthereumRuntimeRPCApi`.
+   *
+   * @param at - block hash every read pins to; defaults to the client's own
+   */
+  getRPCAdapter(at: BlockAt = this.at): EvmRpcAdapter {
+    return new EvmRpcAdapter(this.client, at);
   }
 }

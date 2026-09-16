@@ -1,19 +1,20 @@
-import { AccountId } from 'polkadot-api';
-import { toHex } from '@polkadot-api/utils';
+import { erc20 } from '@galacticcouncil/common';
 
-import { erc20, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
-
-import { AaveLog } from '../../../aave';
+import { AAVE_POOL_PROXY, AaveLog } from '../../../aave';
 
 import { BlockRef } from '../../../api';
 
 import { PoolEventHandler, PoolMutation } from '../../events';
-import { PoolBase, PoolFees, PoolLimits, PoolType } from '../../types';
+import { PoolBase, PoolFees, PoolType } from '../../types';
 import { PoolClient } from '../../PoolClient';
+import { TAssetLocation } from '../../PoolQuery';
+
+import { contractIndex } from '../assetAddress';
 
 import { AavePoolToken } from './AavePool';
 import { AaveQuery } from './AaveQuery';
-import { TRouterEvent, TRouterExecutedPayload } from './types';
+import { pairReserves, toAavePool } from './AaveReserves';
+import { TAavePools, TRouterEvent, TRouterExecutedPayload } from './types';
 
 const { ERC20 } = erc20;
 
@@ -30,63 +31,85 @@ export class AavePoolClient extends PoolClient<PoolBase> {
     return true;
   }
 
-  private getPoolId(reserve: number, atoken: number) {
-    const id = reserve + '/' + atoken;
-    const nameU8a = new TextEncoder().encode(id.padEnd(32, '\0'));
-    const nameHex = toHex(nameU8a);
-    return AccountId(HYDRATION_SS58_PREFIX).dec(nameHex);
-  }
-
-  private getPoolLimits(): PoolLimits {
-    return {
-      maxInRatio: 0n,
-      maxOutRatio: 0n,
-      minTradingLimit: 0n,
-    } as PoolLimits;
-  }
-
   async loadPools(block: BlockRef): Promise<PoolBase[]> {
     const at = block.hash;
 
-    const [entries, assets, locations] = await Promise.all([
+    const [pairs, assets, locations] = await Promise.all([
       this.query.pools.get(at),
       this.query.assets.get(at),
       this.query.assetLocations.get(at),
     ]);
 
-    const pools = entries.map(
-      async ({ reserve, atoken, liqudity_in, liqudity_out }) => {
-        const reserveMeta = assets.get(reserve);
-        const reserveLocation = locations.get(reserve);
-        const aTokenMeta = assets.get(atoken);
-        const aTokenLocation = locations.get(atoken);
+    const entries =
+      pairs.length > 0
+        ? pairs
+        : await this.loadPairsFromMarket(block, locations);
 
-        return {
-          address: this.getPoolId(reserve, atoken),
-          type: PoolType.Aave,
-          tokens: [
-            {
-              id: reserve,
-              decimals: reserveMeta?.decimals,
-              existentialDeposit: reserveMeta?.existential_deposit,
-              balance: liqudity_in,
-              location: reserveLocation,
-              type: reserveMeta?.asset_type.type,
-            } as AavePoolToken,
-            {
-              id: atoken,
-              decimals: aTokenMeta?.decimals,
-              existentialDeposit: aTokenMeta?.existential_deposit,
-              balance: liqudity_out,
-              location: aTokenLocation,
-              type: aTokenMeta?.asset_type.type,
-            } as AavePoolToken,
-          ],
-          ...this.getPoolLimits(),
-        } as PoolBase;
-      }
+    return entries.map(({ reserve, atoken, liqudity_in, liqudity_out }) =>
+      toAavePool(
+        { reserveId: reserve, atokenId: atoken },
+        { liqudity_in, liqudity_out },
+        assets,
+        locations
+      )
     );
-    return Promise.all(pools);
+  }
+
+  /**
+   * Reserve pairs read from the money market itself.
+   *
+   * - `AaveTradeExecutor.pools` walks the reserve list under a fixed view gas
+   *   budget and returns nothing once the list outgrows it
+   * - The reserve list and each aToken come from the pool contract through
+   *   the adapter, pinned at the same block with its full gas budget
+   * - Liquidity comes from the per-pair runtime call, which is unaffected
+   * - A pair the registry does not know, or whose read fails, is skipped
+   *
+   * @param block - the block every read pins to
+   * @param locations - registry locations, keyed by id
+   */
+  private async loadPairsFromMarket(
+    block: BlockRef,
+    locations: Map<number, TAssetLocation>
+  ): Promise<TAavePools> {
+    const at = block.hash;
+    const pool = AAVE_POOL_PROXY.toLowerCase() as `0x${string}`;
+
+    const reserves = await this.query.reserves.get(at, pool);
+    const atokens = new Map(
+      await Promise.all(
+        reserves.map(
+          async (reserve) =>
+            [
+              reserve,
+              await this.query.reserveAToken.get(at, pool, reserve),
+            ] as const
+        )
+      )
+    );
+
+    const { pairs, skipped } = pairReserves(
+      reserves,
+      atokens,
+      contractIndex(locations)
+    );
+
+    const results = await Promise.allSettled(
+      pairs.map(({ reserveId, atokenId }) =>
+        this.query.pool.get(at, reserveId, atokenId)
+      )
+    );
+
+    const pools = results
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => r.value);
+
+    this.log.info('pool_fallback', {
+      reserves: reserves.length,
+      skipped: skipped.length,
+      pools: pools.length,
+    });
+    return pools;
   }
 
   private async getPoolDelta(
