@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 2.3.1
+
+### Patch Changes
+
+- 6dfc7b7: fix for open budget dca send none instead of 0
+
 ## 2.3.0
 
 ### Minor Changes

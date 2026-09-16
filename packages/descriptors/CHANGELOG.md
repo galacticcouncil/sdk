@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.9.0
+
+### Minor Changes
+
+- 1323cc7: Update descriptors whitelist
+
 ## 2.8.0
 
 ### Minor Changes
