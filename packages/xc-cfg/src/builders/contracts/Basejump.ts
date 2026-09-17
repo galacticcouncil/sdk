@@ -33,7 +33,7 @@ const bridgeViaWormhole = (): ContractConfigBuilder => ({
       new ContractConfig({
         abi: Abi.Basejump,
         address: ctxBj.getAddress(),
-        args: [parseAssetId(assetId), amount, toAccountId32(address)],
+        args: [parseAssetId(assetId), amount, toAccountId32(address), '0x'],
         func: 'bridgeViaWormhole',
         module: 'Basejump',
       }),

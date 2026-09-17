@@ -1,20 +1,26 @@
-import { Abi, ContractConfigBuilderParams } from '@galacticcouncil/xc-core';
+import {
+  Abi,
+  ContractConfig,
+  ContractConfigBuilderParams,
+} from '@galacticcouncil/xc-core';
 import { h160 } from '@galacticcouncil/common';
 
-import { eurc } from '../../assets';
-import { base, hydration } from '../../chains';
+import { usdc } from '../../assets';
+import { ethereum, hydration } from '../../chains';
 
 import { Basejump } from './Basejump';
 
 const { H160 } = h160;
 
+const EMITTER = '0xa72e2bf29c840eb93adbb9ee1aa41580f01c9944';
+
 const buildCtx = (address: string) => {
   return {
     address,
     amount: 1000000n,
-    asset: eurc,
+    asset: usdc,
     sender: '0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0',
-    source: { chain: base },
+    source: { chain: ethereum },
     destination: { chain: hydration },
   } as ContractConfigBuilderParams;
 };
@@ -62,13 +68,17 @@ describe('Basejump contract builder', () => {
       );
     });
 
-    it('should produce correct contract config', async () => {
+    it('should call the ethereum emitter', async () => {
       const ctx = buildCtx('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
       const [config] = await Basejump().bridgeViaWormhole().build(ctx);
 
-      expect(config.func).toBe('bridgeViaWormhole');
-      expect(config.module).toBe('Basejump');
-      expect(config.args).toHaveLength(3);
+      expect(config).toMatchObject({
+        address: EMITTER,
+        func: 'bridgeViaWormhole',
+        module: 'Basejump',
+        type: 'Evm',
+      } as ContractConfig);
+      expect(config.args).toHaveLength(4);
     });
 
     it('should pass asset address as first arg', async () => {
@@ -77,8 +87,18 @@ describe('Basejump contract builder', () => {
 
       // First arg is the asset ERC20 address on the source chain
       const assetArg = (config.args[0] as string).toLowerCase();
-      const expectedAssetId = base.getAssetId(eurc)?.toString().toLowerCase();
+      const expectedAssetId = ethereum
+        .getAssetId(usdc)
+        ?.toString()
+        .toLowerCase();
       expect(assetArg).toBe(expectedAssetId);
+    });
+
+    it('should send no data for a plain transfer', async () => {
+      const ctx = buildCtx('0x71FeB8b2849101a6E62e3369eaAfDc6154CD0Bc0');
+      const [config] = await Basejump().bridgeViaWormhole().build(ctx);
+
+      expect(config.args[3]).toBe('0x');
     });
   });
 
@@ -96,18 +116,20 @@ describe('Basejump contract builder', () => {
       expect(inputs[0].name).toBe('asset');
     });
 
-    it('bridgeViaWormhole should accept (address, uint256, bytes32)', () => {
+    it('bridgeViaWormhole should be payable & accept (address, uint256, bytes32, bytes)', () => {
       const abi = Abi.Basejump as readonly Record<string, unknown>[];
       const fn = abi.find(
         (e) => e.type === 'function' && e.name === 'bridgeViaWormhole'
       ) as Record<string, unknown> | undefined;
 
       expect(fn).toBeDefined();
+      expect(fn!.stateMutability).toBe('payable');
       const inputs = fn!.inputs as { type: string }[];
       expect(inputs.map((i) => i.type)).toEqual([
         'address',
         'uint256',
         'bytes32',
+        'bytes',
       ]);
     });
   });
