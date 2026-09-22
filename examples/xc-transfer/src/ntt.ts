@@ -76,7 +76,19 @@ const ROUTES: NttRoute[] = Array.from(config.routes.values())
 
 const out = document.getElementById('log')!;
 const amountInput = document.getElementById('amount') as HTMLInputElement;
+const maxBtn = document.getElementById('max') as HTMLButtonElement;
 const routesEl = document.getElementById('routes')!;
+
+// Max is a property of the built transfer, not a number to type in: it
+// depends on the route (an executor route reserves its delivery cost). The
+// toggle defers the amount until the transfer is built.
+let useMax = false;
+maxBtn.addEventListener('click', () => {
+  useMax = !useMax;
+  maxBtn.setAttribute('aria-pressed', String(useMax));
+  maxBtn.className = useMax ? 'primary' : '';
+  amountInput.disabled = useMax;
+});
 
 const stringify = (v: unknown) =>
   typeof v === 'string'
@@ -95,7 +107,10 @@ function log(...args: unknown[]) {
 const fmt = (amount: { toDecimal(): string; originSymbol: string }) =>
   [amount.toDecimal(), amount.originSymbol].join(' ');
 
-async function transfer({ source, route, executor }: NttRoute, amount: string) {
+async function transfer(
+  { source, route, executor }: NttRoute,
+  requested: string
+) {
   const destination = route.destination.chain;
   const asset = route.source.asset;
 
@@ -104,7 +119,7 @@ async function transfer({ source, route, executor }: NttRoute, amount: string) {
     source.key,
     '->',
     destination.key,
-    amount,
+    useMax ? 'max' : requested,
     asset.originSymbol,
     executor ? '(executor)' : '(self-redeem)'
   );
@@ -125,7 +140,16 @@ async function transfer({ source, route, executor }: NttRoute, amount: string) {
 
   log('Balance:', fmt(transfer.source.balance));
   log('Max:', fmt(transfer.source.max));
-  log('Validations:', await transfer.validate());
+
+  // Max only exists once the transfer is built, so it is resolved here and
+  // written back so the page shows what is about to be signed.
+  const amount = useMax ? transfer.source.max.toDecimal() : requested;
+  if (useMax) {
+    amountInput.value = amount;
+  }
+
+  // With the amount, so the rate-limit & custody checks see it too.
+  log('Validations:', await transfer.validate(undefined, amount));
 
   const [calls, fee] = await Promise.all([
     transfer.buildCalls(amount),

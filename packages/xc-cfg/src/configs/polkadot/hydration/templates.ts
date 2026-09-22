@@ -243,6 +243,7 @@ export function viaNttExecutorTemplate(
       fee: {
         amount: FeeAmountBuilder().Wormhole().quoteExecutorCost(),
         asset: weth_wh,
+        prepaid: true,
       },
     },
     contract: transfer,
