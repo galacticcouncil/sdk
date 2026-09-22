@@ -162,13 +162,22 @@ const nttRows = await Promise.all(
     const leg = `${source.name} → ${destination.name}`;
 
     try {
-      const [out, inbound] = await Promise.all([
+      const receiver = nttClient(destination, received);
+      const [out, inbound, custody] = await Promise.all([
         nttClient(source, sent).getOutboundLimit(),
-        nttClient(destination, received).getInboundLimit(source),
+        receiver.getInboundLimit(source),
+        receiver.getCustody(),
       ]);
 
       const sentDecimals = source.getAssetDecimals(sent) ?? 0;
       const receivedDecimals = destination.getAssetDecimals(received) ?? 0;
+
+      // What a locking destination can release right now; a burning one
+      // mints and has no ceiling.
+      const release =
+        custody === undefined
+          ? 'mints'
+          : `${fmt(custody, receivedDecimals)} ${received.originSymbol}`;
 
       return {
         leg: leg,
@@ -177,6 +186,7 @@ const nttRows = await Promise.all(
         sendLast: lastTx(out, sentDecimals),
         receive: headroom(inbound, receivedDecimals),
         receiveLast: lastTx(inbound, receivedDecimals),
+        release: release,
         window: hours(out.windowMs),
       };
     } catch (e) {

@@ -187,6 +187,19 @@ export const NTT_MANAGER = [
   },
   {
     inputs: [],
+    name: 'mode',
+    outputs: [
+      {
+        internalType: 'enum IManagerBase.Mode',
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'rateLimitDuration',
     outputs: [
       {

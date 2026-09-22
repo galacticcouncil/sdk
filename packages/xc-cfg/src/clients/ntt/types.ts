@@ -39,6 +39,7 @@ export interface NttClient {
    * the budget assumes the worst case rather than reading chain.
    */
   getRedeemBudget(recipient?: string): Promise<ExecutorBudget>;
+  getCustody(): Promise<bigint | undefined>;
 }
 
 export const UNMETERED: NttRateLimit = {

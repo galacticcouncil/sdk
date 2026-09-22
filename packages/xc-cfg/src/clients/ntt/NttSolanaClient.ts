@@ -39,6 +39,28 @@ const RATE_LIMIT_DURATION = 60 * 60 * 24;
 const OUTBOX_RATE_LIMIT_OFFSET = 8;
 const INBOX_RATE_LIMIT_OFFSET = 8 + 1;
 
+// ntt_messages::mode::Mode - Locking = 0, Burning = 1.
+const MODE_LOCKING = 0;
+
+/**
+ * Fields of the manager `Config` account this client reads.
+ *
+ * - Borsh layout of `config.rs`: discriminator, bump, owner,
+ *   pending_owner (Option<Pubkey>), mint, token_program, mode, chain_id,
+ *   next_transceiver_id, threshold, enabled_transceivers (u128), paused,
+ *   custody
+ * - Only the option makes the offsets variable
+ */
+function decodeConfig(data: Uint8Array): { mode: number; custody: PublicKey } {
+  let offset = 8 + 1 + 32;
+  offset += data[offset] === 1 ? 1 + 32 : 1;
+  offset += 32 + 32;
+  const mode = data[offset];
+  offset += 1 + 2 + 1 + 1 + 16 + 1;
+  const custody = new PublicKey(data.subarray(offset, offset + 32));
+  return { mode, custody };
+}
+
 function decodeRateLimit(data: Uint8Array, offset: number) {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   return {
@@ -95,6 +117,32 @@ export class NttSolanaClient implements NttClient {
 
     const rent = await getMinimumBalanceForRentExemptAccount(connection);
     return { ...budget, msgValue: budget.msgValue + BigInt(rent) };
+  }
+
+  /**
+   * Custody is the token account named by the manager config, released
+   * balance-based - same account a plain spl transfer tops up.
+   */
+  async getCustody(): Promise<bigint | undefined> {
+    const { connection } = this.chain;
+    const programId = new PublicKey(nttDef(this.chain, this.asset).manager);
+    const [config] = PublicKey.findProgramAddressSync(
+      [new TextEncoder().encode('config')],
+      programId
+    );
+
+    const account = await connection.getAccountInfo(config);
+    if (!account) {
+      throw new Error('Ntt config missing for ' + programId.toBase58());
+    }
+
+    const { mode, custody } = decodeConfig(account.data);
+    if (mode !== MODE_LOCKING) {
+      return undefined;
+    }
+
+    const { value } = await connection.getTokenAccountBalance(custody);
+    return BigInt(value.amount);
   }
 
   private async getLimit(from?: number): Promise<NttRateLimit> {

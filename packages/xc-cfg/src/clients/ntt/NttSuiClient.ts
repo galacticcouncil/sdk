@@ -67,6 +67,17 @@ export class NttSuiClient implements NttClient {
     return { gasLimit: GAS_LIMIT, msgValue: 0n };
   }
 
+  /** Custody is the `balance` field of a locking manager's `State`. */
+  async getCustody(): Promise<bigint | undefined> {
+    const manager = nttDef(this.chain, this.asset).manager;
+    const state = await suiPkg.getObject(this.chain.client, manager);
+
+    if (state.fields['mode']?.variant !== 'Locking') {
+      return undefined;
+    }
+    return BigInt(state.fields['balance']);
+  }
+
   private async getLimit(from?: number): Promise<NttRateLimit> {
     const client = this.chain.client;
     const manager = nttDef(this.chain, this.asset).manager;

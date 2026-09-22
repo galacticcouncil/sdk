@@ -13,6 +13,8 @@ import { NttClient, NttRateLimit, nttDef, UNMETERED } from './types';
 // Upstream DEFAULT_EXECUTOR_GAS_LIMIT (evm/ts/src/executorGasLimits.ts).
 const GAS_LIMIT = 500_000n;
 
+const MODE_LOCKING = 0;
+
 // TrimmedAmount is a uint72 - `amount << 8 | decimals`.
 function untrim(packed: bigint, decimals: number): bigint {
   const amount = packed >> 8n;
@@ -37,6 +39,32 @@ export class NttEvmClient implements NttClient {
   /** An evm redeem holds nothing - receiveMessage moves no value. */
   async getRedeemBudget(): Promise<ExecutorBudget> {
     return { gasLimit: GAS_LIMIT, msgValue: 0n };
+  }
+
+  /**
+   * Custody of a locking manager is its own token balance - unlock is a
+   * plain `safeTransfer` out of it, with no separate counter.
+   */
+  async getCustody(): Promise<bigint | undefined> {
+    const provider = this.chain.evmClient.getProvider();
+    const { manager, token } = nttDef(this.chain, this.asset);
+
+    const mode = (await provider.readContract({
+      abi: Abi.NttManager,
+      address: manager as `0x${string}`,
+      functionName: 'mode',
+    })) as number;
+
+    if (mode !== MODE_LOCKING) {
+      return undefined;
+    }
+
+    return provider.readContract({
+      abi: Abi.Erc20,
+      address: token as `0x${string}`,
+      args: [manager],
+      functionName: 'balanceOf',
+    }) as Promise<bigint>;
   }
 
   private async getLimit(from?: number): Promise<NttRateLimit> {

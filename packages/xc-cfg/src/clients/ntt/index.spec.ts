@@ -1,8 +1,10 @@
 import { jest } from '@jest/globals';
 
-import { SolanaChain } from '@galacticcouncil/xc-core';
+import { EvmChain, SolanaChain, SuiChain } from '@galacticcouncil/xc-core';
 
-import { sol } from '../../assets';
+import { PublicKey } from '@solana/web3.js';
+
+import { eth, sol, sui } from '../../assets';
 import {
   base,
   ethereum,
@@ -109,6 +111,105 @@ describe('nttClient.getRedeemBudget', () => {
         RECIPIENT
       );
       expect(msgValue).toBeLessThan(30_000_000n);
+    });
+  });
+});
+
+describe('nttClient.getCustody', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  const mockEvm = (results: unknown[]) => {
+    const readContract = jest.fn<any>();
+    results.forEach((r) => readContract.mockResolvedValueOnce(r));
+    jest.spyOn(EvmChain.prototype, 'evmClient', 'get').mockReturnValue({
+      getProvider: () => ({ readContract }),
+    } as any);
+    return readContract;
+  };
+
+  // Custody of an evm locking manager is its own token balance.
+  describe('evm destination', () => {
+    it('should read the manager token balance of a locking manager', async () => {
+      const readContract = mockEvm([0, 5_635_000_000_000_000n]);
+      await expect(nttClient(ethereum, eth).getCustody()).resolves.toBe(
+        5_635_000_000_000_000n
+      );
+      expect(readContract).toHaveBeenLastCalledWith(
+        expect.objectContaining({ functionName: 'balanceOf' })
+      );
+    });
+
+    it('should not read custody of a burning manager', async () => {
+      const readContract = mockEvm([1]);
+      await expect(
+        nttClient(ethereum, eth).getCustody()
+      ).resolves.toBeUndefined();
+      expect(readContract).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // Config account of the sol manager, as laid out on mainnet with no
+  // pending owner: mode at 106, custody at 128.
+  describe('solana destination', () => {
+    const custody = new PublicKey(
+      '4Z2n3D6szuyPkg2uRbm6NwvjpXzKifKQ8HvxhykknyvF'
+    );
+
+    const configData = (mode: number) => {
+      const data = new Uint8Array(160);
+      let offset = 8 + 1 + 32 + 1 + 32 + 32;
+      data[offset] = mode;
+      offset += 1 + 2 + 1 + 1 + 16 + 1;
+      data.set(custody.toBytes(), offset);
+      return data;
+    };
+
+    const mockSolanaConfig = (mode: number) =>
+      jest.spyOn(SolanaChain.prototype, 'connection', 'get').mockReturnValue({
+        getAccountInfo: async () => ({ data: configData(mode) }),
+        getTokenAccountBalance: async (account: PublicKey) => ({
+          value: { amount: account.equals(custody) ? '7174284500550' : '0' },
+        }),
+      } as any);
+
+    it('should read the custody account of a locking manager', async () => {
+      mockSolanaConfig(0);
+      await expect(nttClient(solana, sol).getCustody()).resolves.toBe(
+        7_174_284_500_550n
+      );
+    });
+
+    it('should not read custody of a burning manager', async () => {
+      mockSolanaConfig(1);
+      await expect(
+        nttClient(solana, sol).getCustody()
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('sui destination', () => {
+    const mockSui = (variant: string, balance: string) =>
+      jest.spyOn(SuiChain.prototype, 'client', 'get').mockReturnValue({
+        getObject: async () => ({
+          data: {
+            type: 'State',
+            content: { fields: { mode: { variant }, balance } },
+          },
+        }),
+      } as any);
+
+    it('should read the state balance of a locking manager', async () => {
+      mockSui('Locking', '15998416600490');
+      await expect(nttClient(sui_chain, sui).getCustody()).resolves.toBe(
+        15_998_416_600_490n
+      );
+    });
+
+    it('should not read custody of a burning manager', async () => {
+      mockSui('Burning', '15998416600490');
+      await expect(
+        nttClient(sui_chain, sui).getCustody()
+      ).resolves.toBeUndefined();
     });
   });
 });
