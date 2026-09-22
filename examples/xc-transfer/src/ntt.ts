@@ -141,8 +141,6 @@ async function transfer(
   log('Balance:', fmt(transfer.source.balance));
   log('Max:', fmt(transfer.source.max));
 
-  // Max only exists once the transfer is built, so it is resolved here and
-  // written back so the page shows what is about to be signed.
   const amount = useMax ? transfer.source.max.toDecimal() : requested;
   if (useMax) {
     amountInput.value = amount;

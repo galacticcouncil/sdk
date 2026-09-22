@@ -19,7 +19,6 @@ export interface TransferCtx {
     chain: AnyChain;
     destinationFee: AssetAmount;
     destinationFeeBalance: AssetAmount;
-    /** Destination fee charged on source on top of the amount */
     destinationFeePrepaid?: boolean;
     destinationFeeSwap?: SwapCtx;
     fee: AssetAmount;

@@ -147,8 +147,6 @@ export class Wallet {
     const dstEd = await dst.getEd();
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
-    // A prepaid destination fee is paid on source on top of the amount, so
-    // it competes with the amount when both come out of the same balance.
     const srcEd = await src.getEd();
     const max = calculateMax(
       srcBalance,
@@ -206,12 +204,17 @@ export class Wallet {
         return fee;
       },
       async validate(fee, amount): Promise<TransferValidationReport[]> {
-        const copyCtx = Object.assign({}, ctx);
-        const srcFeeAmount = fee || srcFee.amount;
-        copyCtx.source.fee = srcFee.copyWith({ amount: srcFeeAmount });
-        if (amount !== undefined) {
-          copyCtx.amount = big.toBigInt(amount, srcBalance.decimals);
-        }
+        const copyCtx: TransferCtx = {
+          ...ctx,
+          amount:
+            amount === undefined
+              ? ctx.amount
+              : big.toBigInt(amount, srcBalance.decimals),
+          source: {
+            ...ctx.source,
+            fee: srcFee.copyWith({ amount: fee || srcFee.amount }),
+          },
+        };
         return validator.validate(copyCtx);
       },
     } as Transfer;

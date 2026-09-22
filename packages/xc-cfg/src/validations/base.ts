@@ -45,8 +45,6 @@ export class DestFeeValidation extends TransferValidation {
     const { amount, asset, source } = ctx;
     const { chain, destinationFee, destinationFeeBalance } = source;
 
-    // A prepaid fee in the transfer asset is paid from the balance the
-    // amount leaves behind.
     const reserved = asset.isEqual(destinationFee) ? amount : 0n;
 
     const min = await this.getMin(chain, destinationFee);
