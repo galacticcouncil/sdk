@@ -24,13 +24,22 @@ describe('calculateMax', () => {
   // Executor cost on hydration: paid in weth on top of a weth transfer.
   it('should reserve a prepaid fee sharing the balance asset', () => {
     const prepaid = amount(weth, WETH / 100n);
-    const max = calculateMax(balance, fee, min, undefined, prepaid);
+    const max = calculateMax(balance, fee, min, undefined, [prepaid]);
     expect(max.amount).toBe(10n * WETH - WETH / 100n);
   });
 
-  it('should ignore a prepaid fee in another asset', () => {
+  it('should ignore a reserve in another asset', () => {
     const prepaid = amount(eth, WETH / 100n);
-    const max = calculateMax(balance, fee, min, undefined, prepaid);
+    const max = calculateMax(balance, fee, min, undefined, [prepaid]);
     expect(max.amount).toBe(10n * WETH);
+  });
+
+  // Fee currency equal to the transfer asset: the destination fee swap sells
+  // the asset being bridged, on top of the transaction fee in it.
+  it('should reserve every cost paid out of the balance', () => {
+    const sameAssetFee = amount(weth, WETH / 1000n);
+    const swapIn = amount(weth, WETH / 200n);
+    const max = calculateMax(balance, sameAssetFee, min, undefined, [swapIn]);
+    expect(max.amount).toBe(10n * WETH - WETH / 1000n - WETH / 200n);
   });
 });

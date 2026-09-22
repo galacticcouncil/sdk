@@ -16,8 +16,8 @@ import Big from 'big.js';
  * @param fee - source chain transfer fee
  * @param min - source chain minimum
  * @param ed - source chain existential deposit (opt)
- * @param prepaidFee - destination fee paid on source on top of the
- * amount (opt), reserved when it shares the balance asset
+ * @param reserves - other costs the transfer pays out of the source
+ * balance (opt), each reserved when it shares the balance asset
  * @returns - maximum allowed amount of tokens to send or zero in
  * case of not enough funds
  */
@@ -26,7 +26,7 @@ export function calculateMax(
   fee: AssetAmount,
   min: AssetAmount,
   ed?: AssetAmount,
-  prepaidFee?: AssetAmount
+  reserves: AssetAmount[] = []
 ): AssetAmount {
   let result = balance
     .toBig()
@@ -37,10 +37,10 @@ export function calculateMax(
     result = result.minus(balance.isSame(ed) ? ed.toBig() : new Big(0));
   }
 
-  if (prepaidFee) {
-    result = result.minus(
-      balance.isSame(prepaidFee) ? prepaidFee.toBig() : new Big(0)
-    );
+  for (const reserve of reserves) {
+    if (balance.isSame(reserve)) {
+      result = result.minus(reserve.toBig());
+    }
   }
 
   return balance.copyWith({
