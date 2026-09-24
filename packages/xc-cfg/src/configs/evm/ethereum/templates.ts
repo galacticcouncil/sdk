@@ -152,3 +152,28 @@ export function toHydrationViaSnowbridgeV1Template(
     tags: [Tag.Snowbridge, Tag.SnowbridgeV1],
   });
 }
+
+export function toHydrationViaBasejumpTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: {
+        asset: eth,
+      },
+      destinationFee: assetIn,
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Basejump().quoteFee(),
+        asset: assetIn,
+      },
+    },
+    contract: ContractBuilder().Basejump().bridgeViaWormhole(),
+    tags: [Tag.Basejump],
+  });
+}
