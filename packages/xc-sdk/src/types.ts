@@ -68,7 +68,17 @@ export interface Transfer {
   estimateDestinationFee(
     amount: bigint | number | string
   ): Promise<AssetAmount>;
-  validate(fee?: bigint): Promise<TransferValidationReport[]>;
+  /**
+   * Run the transfer validations.
+   *
+   * @param fee - source fee to validate against, the estimate by default
+   * @param amount - amount to validate, without it amount-bound checks
+   * (rate limits, custody) see zero and pass
+   */
+  validate(
+    fee?: bigint,
+    amount?: bigint | number | string
+  ): Promise<TransferValidationReport[]>;
 }
 
 /**

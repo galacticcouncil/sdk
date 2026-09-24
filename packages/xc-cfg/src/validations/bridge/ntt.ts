@@ -18,13 +18,36 @@ function unreachable(asset: Asset, chain: AnyChain): never {
   });
 }
 
+function custodyUnreachable(asset: Asset, chain: AnyChain): never {
+  throw new TransferValidationError('Ntt_Custody_Unreachable', {
+    asset: asset.originSymbol,
+    chain: chain.name,
+    error: 'ntt.custodyUnreachable',
+  });
+}
+
+/** Both ends ntt-registered - the destination asset key names the route. */
+function isNttTransfer(ctx: TransferCtx): boolean {
+  const { asset, destination, source } = ctx;
+  return (
+    NttRegistry.isKnown(source.chain, asset) &&
+    NttRegistry.isKnown(destination.chain, destination.balance)
+  );
+}
+
+/** Amount as it lands, in destination decimals. */
+function delivered(ctx: TransferCtx): bigint {
+  const { amount, destination, source } = ctx;
+  return big.convertDecimals(
+    amount,
+    source.balance.decimals,
+    destination.balance.decimals
+  );
+}
+
 export class NttRateLimitValidation extends TransferValidation {
   protected skipFor(ctx: TransferCtx): boolean {
-    const { asset, destination, source } = ctx;
-    return (
-      !NttRegistry.isKnown(source.chain, asset) ||
-      !NttRegistry.isKnown(destination.chain, destination.balance)
-    );
+    return !isNttTransfer(ctx);
   }
 
   async validate(ctx: TransferCtx) {
@@ -55,13 +78,7 @@ export class NttRateLimitValidation extends TransferValidation {
       });
     }
 
-    const delivered = big.convertDecimals(
-      amount,
-      source.balance.decimals,
-      destination.balance.decimals
-    );
-
-    if (inbound.windowMs > 0 && delivered > inbound.capacity) {
+    if (inbound.windowMs > 0 && delivered(ctx) > inbound.capacity) {
       throw new TransferValidationError('Ntt_Inbound_Limit_Exceeded', {
         asset: destination.balance.originSymbol,
         chain: destination.chain.name,
@@ -70,6 +87,46 @@ export class NttRateLimitValidation extends TransferValidation {
         limit: inbound.limit,
         windowMs: inbound.windowMs,
         error: 'ntt.inboundLimitExceeded',
+      });
+    }
+  }
+}
+
+/**
+ * A locking destination releases only what it previously locked.
+ *
+ * - The source burn goes through regardless, so an over-custody transfer
+ *   leaves a VAA every redeem reverts on until custody grows
+ * - Burning destinations mint and are not checked
+ * - Unreadable custody fails closed, like the rate limits
+ */
+export class NttCustodyValidation extends TransferValidation {
+  protected skipFor(ctx: TransferCtx): boolean {
+    return !isNttTransfer(ctx);
+  }
+
+  async validate(ctx: TransferCtx) {
+    if (this.skipFor(ctx)) {
+      return;
+    }
+
+    const { destination } = ctx;
+
+    const custody = await nttClient(destination.chain, destination.balance)
+      .getCustody()
+      .catch(() => custodyUnreachable(destination.balance, destination.chain));
+
+    if (custody === undefined) {
+      return;
+    }
+
+    if (delivered(ctx) > custody) {
+      throw new TransferValidationError('Ntt_Custody_Exceeded', {
+        asset: destination.balance.originSymbol,
+        chain: destination.chain.name,
+        decimals: destination.balance.decimals,
+        headroom: custody,
+        error: 'ntt.custodyExceeded',
       });
     }
   }

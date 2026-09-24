@@ -119,6 +119,7 @@ export class Wallet {
         feeBalance: srcFeeBalance,
         destinationFee: srcDestinationFee.fee,
         destinationFeeBalance: srcDestinationFeeBalance,
+        destinationFeePrepaid: destination.fee.prepaid,
       },
     };
 
@@ -146,8 +147,20 @@ export class Wallet {
     const dstEd = await dst.getEd();
     const min = calculateMin(dstBalance, dstFee, dstMin, dstEd);
 
+    // Costs paid from the source balance next to the amount: a prepaid
+    // destination fee, and what a destination fee swap sells when the fee
+    // currency is the transfer asset. The swap input carries the same margin
+    // as the re-estimated fee - the router takes the price at execution.
+    const reserves: AssetAmount[] = [];
+    if (destination.fee.prepaid) {
+      reserves.push(srcDestinationFee.fee);
+    }
+    if (srcDestinationFeeSwap?.enabled) {
+      reserves.push(srcDestinationFeeSwap.aIn.padByPct(5n));
+    }
+
     const srcEd = await src.getEd();
-    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd);
+    const max = calculateMax(srcBalance, srcFee, srcMin, srcEd, reserves);
 
     ctx.amount = 0n;
     ctx.source.fee = srcFee;
@@ -196,10 +209,18 @@ export class Wallet {
         transfer.source.destinationFee = fee;
         return fee;
       },
-      async validate(fee): Promise<TransferValidationReport[]> {
-        const copyCtx = Object.assign({}, ctx);
-        const srcFeeAmount = fee || srcFee.amount;
-        copyCtx.source.fee = srcFee.copyWith({ amount: srcFeeAmount });
+      async validate(fee, amount): Promise<TransferValidationReport[]> {
+        const copyCtx: TransferCtx = {
+          ...ctx,
+          amount:
+            amount === undefined
+              ? ctx.amount
+              : big.toBigInt(amount, srcBalance.decimals),
+          source: {
+            ...ctx.source,
+            fee: srcFee.copyWith({ amount: fee || srcFee.amount }),
+          },
+        };
         return validator.validate(copyCtx);
       },
     } as Transfer;

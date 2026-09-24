@@ -51,6 +51,7 @@ export function toHydrationViaNttExecutorTemplate(
       fee: {
         amount: FeeAmountBuilder().Wormhole().quoteExecutorCost(),
         asset: eth,
+        prepaid: true,
       },
     },
     contract: ContractBuilder().Wormhole().Ntt().transferWithExecutor(),

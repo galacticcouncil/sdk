@@ -28,7 +28,10 @@ export class DestFeeValidation extends TransferValidation {
     const { asset, source } = ctx;
     const { enabled } = source.destinationFeeSwap || {};
 
-    const isSufficientFeeAsset = asset.isEqual(source.destinationFee);
+    // A fee sharing the transfer asset comes out of what lands - unless the
+    // route prepays it on top of the amount, out of the same balance.
+    const isSufficientFeeAsset =
+      asset.isEqual(source.destinationFee) && !source.destinationFeePrepaid;
     const isFeeSwap = !!enabled;
     return isSufficientFeeAsset || isFeeSwap;
   }
@@ -39,12 +42,14 @@ export class DestFeeValidation extends TransferValidation {
       return;
     }
 
-    const { source } = ctx;
+    const { amount, asset, source } = ctx;
     const { chain, destinationFee, destinationFeeBalance } = source;
+
+    const reserved = asset.isEqual(destinationFee) ? amount : 0n;
 
     const min = await this.getMin(chain, destinationFee);
     const minBalance = destinationFee.copyWith({
-      amount: destinationFee.amount + min,
+      amount: destinationFee.amount + min + reserved,
     });
 
     if (destinationFeeBalance.amount < minBalance.amount) {

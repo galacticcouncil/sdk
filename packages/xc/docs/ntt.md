@@ -235,6 +235,32 @@ A limit that can't be read at all (rpc down) fails closed as `Ntt_Limit_Unreacha
 naming the side that failed — the inbound outcome is bad enough not to wave through a
 transfer whose headroom is unknown.
 
+## Custody
+
+A **locking** manager releases only what it previously locked; nothing on the source side
+knows that. The burn goes through, the VAA is emitted, and every redeem reverts on the
+destination's token transfer until custody grows — an executor relay included, after the
+sender has paid for it. WETH → Robinhood is the live case: Robinhood's manager locks (WETH is
+its gas, it cannot be minted), and its custody is only what Robinhood users sent the other
+way.
+
+[NttCustodyValidation](packages/xc-cfg/src/validations/bridge/ntt.ts) reads the destination
+through `NttClient.getCustody()` and rejects an amount above it as `Ntt_Custody_Exceeded`
+(`headroom` = custody, in destination decimals). Burning destinations return `undefined` and
+are not checked; an unreadable custody fails closed as `Ntt_Custody_Unreachable`.
+
+| Destination | Mode read | Custody read |
+| --- | --- | --- |
+| evm | `NttManager.mode()` (`0` = locking) | `token.balanceOf(manager)` |
+| solana | `Config.mode` (borsh, `config` pda) | `getTokenAccountBalance(Config.custody)` |
+| sui | `State.mode.variant == 'Locking'` | `State.balance` |
+
+Topping up is a plain token transfer to the manager (evm) or its custody account (solana),
+never `manager.transfer()` — see `ops/CUSTODY.md` in the ntt repo.
+
+Both this and the rate-limit checks are amount-bound; `Transfer.validate(fee, amount)` has to
+be given the amount, without it they see zero and pass.
+
 ## Tracking & claim
 
 [WormholeTransfer](packages/xc-sdk/src/clients/WormholeTransfer.ts) queries wormholescan
@@ -403,6 +429,14 @@ route's destination fee via `FeeAmountBuilder().Wormhole().quoteExecutorCost()`
 amount never competes for — which is exactly why `EvmPlatform.estimateFee` leaves the
 call value out there.
 
+The executor templates declare that fee `prepaid: true`: it is charged on source **on top of**
+the amount, not out of what lands. The flag only changes behaviour where the fee shares the
+transfer asset — hydration's `weth_wh` routes — where the sdk would otherwise treat the fee
+as self-funding: `calculateMax` reserves it and `DestFeeValidation` checks
+`balance >= amount + fee + min` instead of skipping. Without it a bridge-everything transfer
+burns the whole balance, `Executor.requestExecution` fails `OutOfFund` inside `EVM.call`,
+`Utility.batch_all` still reports success, and the VAA is left to a manual claim.
+
 A **native gas source is the exception**: its value is already folded into the source fee
 (see above), so `toHydrationViaNttExecutorNativeTemplate` declares no destination fee.
 Charging both would double-count and inflate the route minimum. Ethereum's
@@ -483,13 +517,6 @@ route lines once the deployment lands.
   polls it in `src/utils/executor.ts`.
 - Solana & Sui **source** executor wiring — both shims exist upstream (above) but the
   program/move builders still emit the self-redeem call.
-- Hydration `weth_wh → eth` is the one executor route whose transfer asset equals its
-  destination fee asset (both `weth_wh`), so `DestFeeValidation.skipFor` treats it as
-  self-funding and skips the check — while `calculateMax` only ever subtracts the
-  *source* fee. `max` therefore overstates by `deliveryPrice + estimatedCost` and a
-  bridge-everything transfer reverts. The skip is right for xcm routes that pay the
-  destination fee out of the delivered amount; this one pays it separately from the
-  same balance, which the sdk has no shape for yet.
 - SUI deployment — the only token with no NttManager pair (`ops/tokens` in the
   native-token-transfers fork has none). Registry entries + the two commented routes are
   what it unblocks.
