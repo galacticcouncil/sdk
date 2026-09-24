@@ -1,5 +1,20 @@
 # @galacticcouncil/xc-sdk
 
+## 2.5.0
+
+### Minor Changes
+
+- 5e09fe5: Guard ntt transfers against the two ways they strand on a locking destination
+  - executor routes declare their delivery cost as prepaid, so max and the fee check reserve it when it shares the transfer asset
+  - new custody validation rejects amounts a locking destination cannot release
+  - transfer validate accepts the amount, so amount-bound checks are reachable
+
+### Patch Changes
+
+- Updated dependencies [f527d96]
+- Updated dependencies [5e09fe5]
+  - @galacticcouncil/xc-core@2.6.0
+
 ## 2.4.1
 
 ### Patch Changes
