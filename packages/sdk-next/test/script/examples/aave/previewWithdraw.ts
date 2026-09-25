@@ -1,23 +1,20 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { big } from '@galacticcouncil/common';
-
 import { createSdkContext } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
 import { ApiUrl } from '../../types';
 
-class GetMaxWithdrawAll extends PapiExecutor {
+class PreviewWithdraw extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
 
     const { api } = sdk;
 
-    const all = await api.aave.getMaxWithdrawAll(BENEFICIARY);
-    for (const [aTokenId, { amount, decimals }] of all) {
-      console.log(aTokenId, big.toDecimal(amount, decimals));
-    }
+    // aBIL: checked against the BIL market
+    const preview = await api.aave.previewWithdraw(BENEFICIARY, 55, '10');
+    console.log(preview);
 
     return () => {
       sdk.destroy();
@@ -26,7 +23,4 @@ class GetMaxWithdrawAll extends PapiExecutor {
   }
 }
 
-new GetMaxWithdrawAll(
-  ApiUrl.Hydration,
-  'Get max withdraw of every aToken'
-).run();
+new PreviewWithdraw(ApiUrl.Hydration, 'Health factor after withdraw').run();

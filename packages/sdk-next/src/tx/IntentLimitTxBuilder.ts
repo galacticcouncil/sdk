@@ -87,8 +87,7 @@ export class IntentLimitTxBuilder extends TxBuilder {
       },
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 

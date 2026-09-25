@@ -64,7 +64,7 @@ export async function createSdkContext(
   const farmClient = new LiquidityMiningClient(client);
 
   // Initialize APIs
-  const aave = new AaveUtils(evm);
+  const aave = new AaveUtils(evm, balance.erc20);
   const router = new TradeRouter(poolCtx);
   const scheduler = new TradeScheduler(poolCtx, {
     minBudgetInNative: minOrderBudget,
@@ -91,7 +91,7 @@ export async function createSdkContext(
     ctx: {
       pool: poolCtx,
     },
-    tx: new TxBuilderFactory(client, evm, at),
+    tx: new TxBuilderFactory(client, evm, at, aave),
     destroy: () => {
       poolCtx.destroy();
     },

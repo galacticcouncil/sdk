@@ -1,3 +1,6 @@
+/** A 20-byte EVM address, hex encoded */
+export type H160 = `0x${string}`;
+
 export type EvmLogEvent = [
   log: {
     address: `0x${string}`;
