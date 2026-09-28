@@ -26,10 +26,7 @@ const ASSETS_CHAINS = ['assethub', 'assethub_cex', 'astar'];
 /**
  * Chains using the ForeignAssets pallet
  */
-const FOREIGN_ASSETS_CHAINS = [
-  'assethub',
-  'assethub_cex',
-];
+const FOREIGN_ASSETS_CHAINS = ['assethub', 'assethub_cex'];
 
 /**
  * Chains using the OrmlTokens pallet (named `ormlTokens` in runtime)
@@ -212,11 +209,16 @@ const populateTokens = (
   assets: ParachainAssetData[],
   decimals: number
 ) => {
-  return assets.map((a) => {
-    const assetId = chain.getBalanceAssetId(a.asset);
-    const balance = useNormalizedBalance(chain, decimals, a.asset);
-    return [[address, assetId], { free: balance }];
-  });
+  return (
+    assets
+      .map((a) => [a.asset, chain.getBalanceAssetId(a.asset)] as const)
+      // An erc20 balance (hollar) is keyed by its contract, not a Tokens id.
+      .filter(([_, assetId]) => !assetId.toString().startsWith('0x'))
+      .map(([asset, assetId]) => {
+        const balance = useNormalizedBalance(chain, decimals, asset);
+        return [[address, assetId], { free: balance }];
+      })
+  );
 };
 
 const populateSystem = (address: string, decimals: number) => {
