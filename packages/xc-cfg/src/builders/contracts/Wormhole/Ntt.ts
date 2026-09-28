@@ -16,6 +16,7 @@ import {
   NTT_TRIMMED_DECIMALS,
 } from '../../../bridges/wormhole';
 import { executorClient, nttClient } from '../../../clients';
+import { floorToPrecision } from '../../utils';
 
 /**
  * Everything both transfer paths resolve identically - the deployment, the
@@ -44,12 +45,11 @@ const resolveTransfer = async (params: ContractConfigBuilderParams) => {
 
   // NTT trims amounts to 8 decimals & manager reverts on sub-trim
   // dust (TransferAmountHasDust). Floor the amount upfront.
-  const decimals = ctx.getAssetDecimals(asset) ?? 0;
-  let transferAmount = amount;
-  if (decimals > NTT_TRIMMED_DECIMALS) {
-    const dust = 10n ** BigInt(decimals - NTT_TRIMMED_DECIMALS);
-    transferAmount = amount - (amount % dust);
-  }
+  const transferAmount = floorToPrecision(
+    amount,
+    ctx.getAssetDecimals(asset) ?? 0,
+    NTT_TRIMMED_DECIMALS
+  );
 
   return {
     ctx,

@@ -28,10 +28,17 @@ export class HydrationClient extends BaseClient<typeof hydration> {
     return response.is_sufficient || false;
   }
 
+  /**
+   * Fee currency of an account, `0` (hdx) when it set none.
+   *
+   * - Keyed by the substrate account, an h160 resolves to its own
+   *
+   * @param address - ss58 or h160
+   */
   async getFeeAsset(address: string): Promise<string> {
     const response =
       await this.api().query.MultiTransactionPayment.AccountCurrencyMap.getValue(
-        address
+        this.chain.getNormalizedAddress(address)
       );
 
     if (!response) {
@@ -48,7 +55,9 @@ export class HydrationClient extends BaseClient<typeof hydration> {
   }
 
   async getSystemAccountBalance(address: string): Promise<bigint> {
-    const response = await this.api().query.System.Account.getValue(address);
+    const response = await this.api().query.System.Account.getValue(
+      this.chain.getNormalizedAddress(address)
+    );
     const balance = response.data;
     const { free, frozen } = balance;
     return BigInt(free) - BigInt(frozen);
@@ -60,7 +69,7 @@ export class HydrationClient extends BaseClient<typeof hydration> {
   ): Promise<bigint> {
     const assetId = Number(asset);
     const response = await this.api().query.Tokens.Accounts.getValue(
-      address,
+      this.chain.getNormalizedAddress(address),
       assetId
     );
     const { free, frozen } = response;

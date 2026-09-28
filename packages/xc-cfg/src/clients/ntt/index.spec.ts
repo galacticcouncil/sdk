@@ -1,14 +1,20 @@
 import { jest } from '@jest/globals';
 
-import { EvmChain, SolanaChain, SuiChain } from '@galacticcouncil/xc-core';
+import {
+  EvmChain,
+  NearChain,
+  SolanaChain,
+  SuiChain,
+} from '@galacticcouncil/xc-core';
 
 import { PublicKey } from '@solana/web3.js';
 
-import { eth, sol, sui } from '../../assets';
+import { eth, sol, sui, wnear } from '../../assets';
 import {
   base,
   ethereum,
   hydration,
+  near_testnet,
   robinhood,
   solana,
   sui_chain,
@@ -113,6 +119,14 @@ describe('nttClient.getRedeemBudget', () => {
       expect(msgValue).toBeLessThan(30_000_000n);
     });
   });
+  // Nothing relays to NEAR - the recipient completes the transfer itself.
+  describe('near destination', () => {
+    it('should refuse an executor budget', async () => {
+      await expect(
+        nttClient(near_testnet, wnear).getRedeemBudget()
+      ).rejects.toThrow('No executor');
+    });
+  });
 });
 
 describe('nttClient.getCustody', () => {
@@ -211,5 +225,122 @@ describe('nttClient.getCustody', () => {
         nttClient(sui_chain, sui).getCustody()
       ).resolves.toBeUndefined();
     });
+  });
+  // The contract always locks - custody is its own token balance.
+  describe('near destination', () => {
+    it('should read the contract token balance', async () => {
+      const view = jest.fn<any>().mockResolvedValue('500000000000000000000000');
+      jest
+        .spyOn(NearChain.prototype, 'client', 'get')
+        .mockReturnValue({ view } as any);
+
+      await expect(nttClient(near_testnet, wnear).getCustody()).resolves.toBe(
+        500_000_000_000_000_000_000_000n
+      );
+      expect(view).toHaveBeenCalledWith('wrap.testnet', 'ft_balance_of', {
+        account_id: 'ntt-near.whm-ntt-0bugdc.testnet',
+      });
+    });
+  });
+});
+
+/**
+ * Storage of the whm near-ntt testnet contract, as `view_state` served it:
+ * 0.5 wNEAR sent to hydration against 100 wNEAR limits both ways.
+ */
+describe('nttClient near rate limits', () => {
+  const STATE = Buffer.from(
+    'FgAAAHdobS1udHQtMGJ1Z2RjLnRlc3RuZXQADAAAAHdyYXAudGVzdG5ldBgAAEhWNxk8w0MAAAAAAAAAGQAAAHdvcm1ob2xlLndvcm1ob2xlLnRlc3RuZXQBAAAAAAAAAAEAAAAAAAAA5NIMyNzSt1IAAAAAAAAAgBNcpuDO8U1SAAAAAAA4obVqAAAAAAEAAAABAQAAAAIBAAAAAwEAAAAE',
+    'base64'
+  );
+  const INBOUND = Buffer.from(
+    '000000e4d20cc8dcd2b7520000000000000000e4d20cc8dcd2b752000000000038a1b56a00000000',
+    'hex'
+  );
+
+  const LIMIT = 100n * 10n ** 24n;
+  const SENT = 5n * 10n ** 23n;
+  const LAST_TX_MS = 1_790_288_184_000;
+
+  const mockState = () => {
+    const viewState = jest.fn(async (_contract: string, key: Uint8Array) => {
+      const id = Buffer.from(key).toString('hex');
+      if (id === Buffer.from('STATE').toString('hex')) {
+        return [{ key, value: STATE }];
+      }
+      // StorageKey::Inbound, then chain 73 as u16 le.
+      if (id === '014900') {
+        return [{ key, value: INBOUND }];
+      }
+      return [];
+    });
+    jest
+      .spyOn(NearChain.prototype, 'client', 'get')
+      .mockReturnValue({ viewState } as any);
+    return viewState;
+  };
+
+  afterEach(() => jest.restoreAllMocks());
+
+  // Walks owner, paused, token, decimals, registration, core, seq & peers.
+  it('should read the outbound limit out of the contract state', async () => {
+    mockState();
+    jest.spyOn(Date, 'now').mockReturnValue(LAST_TX_MS);
+
+    await expect(
+      nttClient(near_testnet, wnear).getOutboundLimit()
+    ).resolves.toEqual({
+      capacity: LIMIT - SENT,
+      limit: LIMIT,
+      windowMs: 24 * 60 * 60 * 1000,
+      capacityAtLastTx: LIMIT - SENT,
+      lastTxMs: LAST_TX_MS,
+    });
+  });
+
+  // Linear over 24h - rate_limit::capacity.
+  it('should refill the outbound capacity as the contract does', async () => {
+    mockState();
+    jest.spyOn(Date, 'now').mockReturnValue(LAST_TX_MS + 60 * 1000);
+
+    const { capacity } = await nttClient(
+      near_testnet,
+      wnear
+    ).getOutboundLimit();
+    expect(capacity).toBe(LIMIT - SENT + (LIMIT * 60n) / 86_400n);
+  });
+
+  it('should cap the refilled capacity at the limit', async () => {
+    mockState();
+    jest.spyOn(Date, 'now').mockReturnValue(LAST_TX_MS + 60 * 60 * 1000);
+
+    const { capacity } = await nttClient(
+      near_testnet,
+      wnear
+    ).getOutboundLimit();
+    expect(capacity).toBe(LIMIT);
+  });
+
+  it('should read the inbound limit of the source chain', async () => {
+    const viewState = mockState();
+    jest.spyOn(Date, 'now').mockReturnValue(LAST_TX_MS);
+
+    const inbound = await nttClient(near_testnet, wnear).getInboundLimit(
+      hydration
+    );
+    expect(inbound.limit).toBe(LIMIT);
+    expect(inbound.capacity).toBe(LIMIT);
+    expect(viewState).toHaveBeenCalledWith(
+      'ntt-near.whm-ntt-0bugdc.testnet',
+      Uint8Array.of(1, 73, 0)
+    );
+  });
+
+  it('should not meter a chain the contract has no peer on', async () => {
+    mockState();
+    const inbound = await nttClient(near_testnet, wnear).getInboundLimit(
+      ethereum
+    );
+    expect(inbound.windowMs).toBe(0);
   });
 });

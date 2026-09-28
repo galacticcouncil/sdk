@@ -265,6 +265,11 @@ export const wbtc_wh = new Asset({
   key: 'wbtc_wh',
 });
 
+export const wnear = new Asset({
+  key: 'wnear',
+  originSymbol: 'wNEAR',
+});
+
 export const wsol = new Asset({
   key: 'wsol',
   originSymbol: 'wSOL',
@@ -339,6 +344,7 @@ export const assets: Asset[] = [
   wbtc_wh,
   weth,
   weth_wh,
+  wnear,
   wsol,
   wsteth,
   wud,

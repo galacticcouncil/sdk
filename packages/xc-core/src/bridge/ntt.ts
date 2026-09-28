@@ -11,16 +11,19 @@ import { AnyChain } from '../chain';
  * asset key.
  */
 export type NttTokenDef = {
-  /** Token address: erc20 contract, spl mint or sui coin type */
+  /** Token address: erc20 contract, spl mint, sui coin type or near account */
   token: string;
-  /** NttManager: contract address, program id or sui state object id */
+  /** NttManager: contract address, program id, sui state object id or near account */
   manager: string;
   /** Transceiver addresses, keyed by transceiver kind */
   transceiver: {
-    /** Contract address, program id or sui state object id */
+    /** Contract address, program id, sui state object id or near account */
     wormhole: string;
   };
-  /** VAA emitter, when different from the transceiver address (Solana pda) */
+  /**
+   * VAA emitter, when different from the transceiver address - a Solana pda,
+   * or the hex sha256 of a NEAR account
+   */
   emitter?: string;
 };
 

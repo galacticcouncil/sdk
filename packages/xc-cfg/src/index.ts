@@ -7,5 +7,6 @@ export * as builders from './builders';
 export * as clients from './clients';
 export * as dex from './dex';
 export * as tags from './tags';
+export * as testnet from './testnet';
 
 export { HydrationConfigService } from './configs/HydrationConfigService';
