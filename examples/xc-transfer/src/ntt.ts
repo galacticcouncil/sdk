@@ -3,6 +3,7 @@ import { TransferBuilder } from '@galacticcouncil/xc-sdk';
 import { tags } from '@galacticcouncil/xc-cfg';
 
 import { sign } from './signers';
+import { bind, fmt, log } from './utils/page';
 import { xc } from './setup';
 import { claimDeposits, claimWithdraws } from './utils/claim';
 import { getStatus, waitForDelivery } from './utils/executor';
@@ -74,7 +75,6 @@ const ROUTES: NttRoute[] = Array.from(config.routes.values())
       Number(a.executor) - Number(b.executor)
   );
 
-const out = document.getElementById('log')!;
 const amountInput = document.getElementById('amount') as HTMLInputElement;
 const maxBtn = document.getElementById('max') as HTMLButtonElement;
 const routesEl = document.getElementById('routes')!;
@@ -89,23 +89,6 @@ maxBtn.addEventListener('click', () => {
   maxBtn.className = useMax ? 'primary' : '';
   amountInput.disabled = useMax;
 });
-
-const stringify = (v: unknown) =>
-  typeof v === 'string'
-    ? v
-    : JSON.stringify(v, (_k, val) =>
-        typeof val === 'bigint' ? val.toString() : val
-      );
-
-/** Mirror onto the page so the flow is readable without devtools. */
-function log(...args: unknown[]) {
-  console.log(...args);
-  out.textContent += args.map(stringify).join(' ') + '\n';
-  out.scrollTop = out.scrollHeight;
-}
-
-const fmt = (amount: { toDecimal(): string; originSymbol: string }) =>
-  [amount.toDecimal(), amount.originSymbol].join(' ');
 
 async function transfer(
   { source, route, executor }: NttRoute,
@@ -220,25 +203,6 @@ const claim = {
   in: () => claimDeposits(HYDRATION_ADDRESS, addressOf, log),
   out: () => claimWithdraws(HYDRATION_ADDRESS, addressOf, log),
 };
-
-/**
- * Serialize clicks - every step needs a wallet confirmation. Buttons
- * locked for a missing address stay disabled.
- */
-function bind(el: HTMLButtonElement, run: () => Promise<unknown>) {
-  el.addEventListener('click', async () => {
-    const all = Array.from(document.querySelectorAll('button'));
-    all.forEach((b) => (b.disabled = true));
-    try {
-      await run();
-    } catch (e) {
-      log('Failed:', e instanceof Error ? e.message : String(e));
-      console.error(e);
-    } finally {
-      all.forEach((b) => (b.disabled = b.dataset.locked === 'true'));
-    }
-  });
-}
 
 // Grouped by source chain - a chain pair alone isn't unique, six tokens
 // share hydration -> ethereum.

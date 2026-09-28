@@ -178,6 +178,36 @@ Sui specifics:
 - Fee is whatever the [SuiPlatform](packages/xc-sdk/src/platforms/sui/SuiPlatform.ts)
   dry run reports (computation + storage); the wormhole message fee is 0.
 
+### NEAR source ([functionCalls/Wormhole/Ntt](packages/xc-cfg/src/builders/functionCalls/Wormhole/Ntt.ts))
+
+NEAR has no upstream NTT. The hub is whm's `near-ntt` contract: manager & wormhole
+transceiver in one account, always LOCKING, emitting as the sha256 of its account (the
+digest NEAR's wormhole core uses for emitters). A transfer is one function call on the
+token, `ft_transfer_call(manager, amount, {recipient_chain, recipient})`; the manager locks
+it in `ft_on_transfer` and publishes.
+
+- The route slot is `functionCall` (`FunctionCallConfig`, `CallType.Near`). The
+  [NearPlatform](packages/xc-sdk/src/platforms/near/NearPlatform.ts) merges consecutive
+  calls on one receiver into one transaction, whose actions run atomically.
+- A native `near` source is wrapped in that same transaction: `storage_deposit` if the
+  sender was never registered on the token, then `near_deposit` for the shortfall (a held
+  wNEAR balance is spent first), then the transfer. A refused transfer unwinds the wrap.
+- The amount is floored to 8 decimals like on evm. The contract would not revert on dust -
+  it refunds it - the floor only makes the amount sent the amount that lands.
+- Over the outbound limit, `ft_on_transfer` panics and the token refunds the whole amount;
+  the contract has no outbound queue.
+- Fee is what the sender must hold for the transaction to be accepted: prepaid gas at the
+  current price (150 TGas per transfer, the same as whm's script), attached deposits and the
+  account's own storage stake. Unused gas is refunded, so the settled cost is far lower
+  (~0.001 NEAR per transfer on testnet, against a ~0.017 NEAR estimate).
+- Signing: [NearSigner](packages/xc-sdk/src/platforms/near/NearSigner.ts) takes a
+  wallet-selector style wallet (`signAndSendTransaction({receiverId, actions})`) or a
+  `NearKeyPair`, which signs a borsh transaction encoded in the sdk (pinned byte for byte
+  to near-api-js). A failed receipt is reported as an error, since the transaction itself
+  succeeds around a refunded transfer.
+- Everything is plain json-rpc ([NearClient](packages/xc-core/src/near/NearClient.ts)) -
+  no NEAR client library.
+
 ## Rate limits
 
 Each manager meters volume per direction over a 24h window that refills linearly —
@@ -283,6 +313,11 @@ the destination chain type & claimer address:
   `validate_message` → `ntt::redeem` → `ntt::release`), built with the v1 mysten
   client (the published sui NTT sdk requires @mysten/sui v2 grpc, incompatible with
   this stack).
+- NEAR → [NearClaim](packages/xc-sdk/src/platforms/near/NearClaim.ts) —
+  `complete(vaa, account_id)` on the contract, 0.01 NEAR attached (the recipient's token
+  registration plus the replay entry; the rest is refunded). The vaa names its recipient by
+  sha256 only, so the account goes in plain and is checked against the hash before
+  building. Redeemed-check is the contract's `is_executed` of the ntt message digest.
 
 Claim caveats (inherited from the upstream SDKs, verified against 7.2.0):
 
@@ -495,6 +530,7 @@ from the quoted source fee.
 | Hydration | yes (evm or `EVM.call`-wrapped) | both | yes | yes (`EvmClaim`/`SubstrateClaim`) |
 | Solana | yes (`ProgramBuilder`) | self-redeem | yes (`emitter` pda entry) | yes (`SolanaClaim`) |
 | Sui | builder ready, no deployment | self-redeem | yes | yes (`SuiClaim`) |
+| NEAR (testnet) | yes (`FunctionCallBuilder`) | self-redeem | no (see open items) | yes (`NearClaim`) |
 
 Every evm **source** offers both models side by side; Solana and Sui sources self-redeem
 only (their shims — solana program `nex1gkSWtRBheEJuQZMqHhbMG5A45qPU76KqnCZNVHR`, sui
@@ -507,6 +543,18 @@ Every chain is wired both ways. The Sui legs (sui → hydration in
 hydration config) are the only routes still commented out: no SUI NttManager is deployed
 on either side yet, so both `wormhole.ntt` registries lack the entry. Uncomment the two
 route lines once the deployment lands.
+
+NEAR is wired on testnet only: `near_testnet` (a test chain) carries whm's live
+`ntt-near.whm-ntt-0bugdc.testnet` deployment over `wrap.testnet`. Hydration is on no
+wormhole testnet, so its leg exists only on a chopsticks fork (whm
+`_probeNearNttDelivery.ts`, a fixed deployer, wNEAR as asset 1355) — kept out of the default
+config because 1355 is the id mainnet hands to its next registration.
+`testnet.registerNear(config)` attaches it along with the routes both ways; the
+[near example](examples/xc-transfer/src/near.ts) drives NEAR → Hydration and prints the
+probe command that delivers the signed vaa on a fork. The
+[chopsticks probe](chopsticks/src/probes/nearNtt.ts) (`npm run probe:near`) runs the whole
+loop through the sdk: it forks hydration, deploys the leg, sends from NEAR testnet, claims
+on the fork and sends back.
 
 ## Open items
 
@@ -530,4 +578,13 @@ route lines once the deployment lands.
 - Queued-transfer digest derivation (NTT message digest from the VAA payload) — unlocks
   `completeInboundQueuedTransfer` from transfer history.
 - Wrapping leaves sub-`TrimmedAmount` dust wrapped (≤1e10 wei), as the amount is
-  floored for the manager args but wrapped in full.
+  floored for the manager args but wrapped in full. Same on NEAR (≤1e16 yocto).
+- NEAR tracking — wormholescan does not parse NEAR-emitted ntt messages (testnet
+  `15/34831e4d…/1`: `standarizedProperties` all empty), so the address & `targetChain`
+  filters of `WormholeTransfer` never match them. Needs matching on the vaa payload itself.
+- NEAR rate limits — the contract's views return capacity only, so
+  [NttNearClient](packages/xc-cfg/src/clients/ntt/NttNearClient.ts) reads the limits from
+  storage (`view_state`). Rpc nodes refuse that past ~50kB of contract data, which every
+  executed inbound transfer grows. A view returning the full limit is due before mainnet.
+- NEAR mainnet — `near_chain` gets the `wormhole` block & registry, NEAR routes move into
+  the default config, hydration registers the real wNEAR / ZEC assets.

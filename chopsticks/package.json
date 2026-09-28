@@ -13,7 +13,8 @@
   "scripts": {
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
     "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts",
-    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts"
+    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts",
+    "probe:near": "tsx src/probes/nearNtt.ts"
   },
   "devDependencies": {
     "@galacticcouncil/chopsticks": "2.3.0",
