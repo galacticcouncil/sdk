@@ -550,8 +550,10 @@ wormhole testnet, so its leg exists only on a chopsticks fork (whm
 `_probeNearNttDelivery.ts`, a fixed deployer, wNEAR as asset 1355) — kept out of the default
 config because 1355 is the id mainnet hands to its next registration.
 `testnet.registerNear(config)` attaches it along with the routes both ways; the
-[near example](examples/xc-transfer/src/near.ts) drives NEAR → Hydration and prints the
-probe command that delivers the signed vaa on a fork. The
+[near example](examples/xc-transfer/src/near.ts) drives NEAR → Hydration - signed by a
+wallet connected through near-connect (NEAR wallets, or an Ethereum wallet acting for its
+NEP-518 `0x…` account) - and prints the probe command that delivers the signed vaa on a
+fork. The
 [chopsticks probe](chopsticks/src/probes/nearNtt.ts) (`npm run probe:near`) runs the whole
 loop through the sdk: it forks hydration, deploys the leg, sends from NEAR testnet, claims
 on the fork and sends back.

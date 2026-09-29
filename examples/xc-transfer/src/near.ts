@@ -1,13 +1,15 @@
 import { big } from '@galacticcouncil/common';
 import { Asset, NearChain, NearTxOutcome } from '@galacticcouncil/xc-core';
-import {
-  NearCall,
-  NearKeyPair,
-  TransferBuilder,
-} from '@galacticcouncil/xc-sdk';
+import { NearCall, TransferBuilder } from '@galacticcouncil/xc-sdk';
 import { clients, testnet } from '@galacticcouncil/xc-cfg';
 
 import { signNear } from './signers';
+import {
+  connectNear,
+  disconnectNear,
+  NearConnection,
+  reconnectNear,
+} from './signers/nearConnect';
 import { bind, fmt, log } from './utils/page';
 import { xc } from './setup';
 
@@ -36,11 +38,38 @@ const VAA_POLLS = 60;
 const EVM_ADDRESS = '0x23812ff0cDdd7157C4760E3BB2d39f5f323a7D3c';
 
 const accountInput = document.getElementById('account') as HTMLInputElement;
-const keyInput = document.getElementById('key') as HTMLInputElement;
 const recipientInput = document.getElementById('recipient') as HTMLInputElement;
 const amountInput = document.getElementById('amount') as HTMLInputElement;
+const connectButton = document.getElementById('connect') as HTMLButtonElement;
+const transferButtons = ['near', 'wnear'].map(
+  (id) => document.getElementById(id) as HTMLButtonElement
+);
 
 recipientInput.value = EVM_ADDRESS;
+
+/** The connected wallet signs; transfers stay locked without one. */
+let connection: NearConnection | undefined;
+
+function setConnection(next: NearConnection | undefined) {
+  connection = next;
+  connectButton.textContent = next ? 'Disconnect' : 'Connect wallet';
+  accountInput.value = next?.accountId ?? '';
+  for (const button of transferButtons) {
+    button.dataset.locked = String(!next);
+    button.disabled = !next;
+  }
+}
+
+async function toggleWallet() {
+  if (connection) {
+    await disconnectNear();
+    setConnection(undefined);
+    log('Disconnected.');
+    return;
+  }
+  setConnection(await connectNear());
+  log('Connected:', connection!.accountId);
+}
 
 const toWnear = (amount: bigint) => big.toDecimal(amount, 24) + ' wNEAR';
 
@@ -72,8 +101,10 @@ async function waitForVaa(emitter: string, seq: number): Promise<boolean> {
 }
 
 async function transfer(asset: Asset) {
-  const account = accountInput.value.trim();
-  const keyPair = NearKeyPair.fromSecretKey(keyInput.value.trim());
+  if (!connection) {
+    throw new Error('Connect a wallet first');
+  }
+  const { accountId: account, wallet: signer } = connection;
   const recipient = recipientInput.value.trim();
   const amount = amountInput.value;
 
@@ -104,8 +135,14 @@ async function transfer(asset: Asset) {
     call.actions.map((a) => a.methodName).join(' + ')
   );
 
-  const outcome = await signNear(call, near, keyPair);
+  if (call.actions.length > 1) {
+    // NEP-518 carries one action per ethereum transaction, so an ethereum
+    // wallet asks once per action; NEAR wallets sign the batch at once.
+    log('Approve in the wallet - once per action for an ethereum wallet.');
+  }
+  const outcome = await signNear(call, near, signer);
   if (!outcome) {
+    log('No outcome returned - a redirecting wallet; check the explorer.');
     return;
   }
 
@@ -157,7 +194,7 @@ async function status() {
   );
   log('Locked:', toWnear(custody ?? 0n));
 
-  const account = accountInput.value.trim();
+  const account = connection?.accountId;
   if (account) {
     const balances = await near.getBalances([native, wnear], account);
     log(account + ':', balances.map(fmt).join(', '));
@@ -171,8 +208,19 @@ bind(document.getElementById('wnear') as HTMLButtonElement, () =>
   transfer(wnear)
 );
 bind(document.getElementById('status') as HTMLButtonElement, status);
+bind(connectButton, toggleWallet);
+setConnection(undefined);
 
 log('Ready.', near.name, '->', hydration.name, 'via ntt.');
+
+reconnectNear()
+  .then((kept) => {
+    if (kept) {
+      setConnection(kept);
+      log('Connected:', kept.accountId);
+    }
+  })
+  .catch((err) => log('Wallet reconnect failed:', String(err)));
 
 (window as any).near = {
   transfer,

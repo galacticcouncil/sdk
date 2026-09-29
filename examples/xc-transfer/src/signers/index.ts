@@ -134,8 +134,8 @@ export async function signSui(call: Call, chain: AnyChain) {
 }
 
 /**
- * No browser wallet is wired for NEAR, so the signer is passed in - a key
- * pair for testnet, or any wallet-selector style wallet.
+ * The NEAR signer is passed in - the wallet connected through near-connect
+ * (`./nearConnect`); a key pair signs the same way for headless runs.
  *
  * @returns final outcome - the wormhole message a transfer published is in
  * its receipt logs, needed to follow the vaa

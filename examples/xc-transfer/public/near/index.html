@@ -106,17 +106,20 @@
     <h1>NTT &mdash; NEAR testnet &rarr; Hydration</h1>
 
     <div class="row">
-      <label for="account">NEAR account</label>
-      <input id="account" class="wide" placeholder="you.testnet" />
+      <button
+        id="connect"
+        title="NEAR wallets, or an Ethereum wallet signing for its 0x… NEAR account (NEP-518)"
+      >
+        Connect wallet
+      </button>
     </div>
     <div class="row">
-      <label for="key">Secret key</label>
+      <label for="account">NEAR account</label>
       <input
-        id="key"
+        id="account"
         class="wide"
-        type="password"
-        autocomplete="off"
-        placeholder="ed25519:… (testnet only, kept in memory)"
+        placeholder="connect a wallet"
+        readonly
       />
     </div>
     <div class="row">
@@ -149,6 +152,13 @@
       it fail against the mainnet rpc, and a signed vaa is delivered with
       whm&apos;s <code>_probeNearNttDelivery.ts</code> - the command is printed
       once the testnet guardian signs.
+    </p>
+    <p class="legend">
+      Connect wallet lists the NEAR wallets with testnet support and Ethereum
+      wallets: MetaMask signs for the NEAR account with the same 0x&hellip; id,
+      which has to hold testnet NEAR for gas and deposits. An Ethereum wallet
+      approves one action at a time, so the native NEAR route asks three times;
+      wNEAR once.
     </p>
 
     <pre id="log"></pre>
