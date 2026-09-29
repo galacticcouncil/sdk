@@ -3,7 +3,7 @@ import { QueryCache } from './QueryCache';
 const AT = '0x01';
 const NEXT = '0x02';
 
-function setup(batched = true) {
+function setup({ batched = true } = {}) {
   const cache = new QueryCache();
   const reads = { single: [] as number[], many: [] as number[][] };
   let fail = false;
@@ -117,7 +117,7 @@ describe('QueryCache getMany', () => {
   });
 
   it('reads one key at a time without a batch fetch', async () => {
-    const { reads, scope } = setup(false);
+    const { reads, scope } = setup({ batched: false });
 
     const values = await scope.getMany(AT, [[1], [2]]);
 

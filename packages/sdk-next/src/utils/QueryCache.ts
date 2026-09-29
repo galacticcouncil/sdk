@@ -138,14 +138,6 @@ export class QueryCache {
         `${name}[${list.length} keys] stalled at ${at}`
       );
 
-    /** Drop last block's fetches when a pinned read moves to a new block */
-    const turnover = (at: string) => {
-      if (isPinned(at) && invalidation === 'block' && at !== gen) {
-        gen = at;
-        cache.release();
-      }
-    };
-
     /**
      * The fetch tier => memoized per the scope's policy.
      *
@@ -164,7 +156,11 @@ export class QueryCache {
         return load();
       }
 
-      turnover(at);
+      // Drop last block's fetches when the read moves to a new block.
+      if (invalidation === 'block' && at !== gen) {
+        gen = at;
+        cache.release();
+      }
 
       if (cache.has(key)) {
         this.served('memo', name, key);
@@ -207,27 +203,19 @@ export class QueryCache {
      * - Misses share one `fetchMany` read, memoized per key like a fetch
      */
     const getMany = (at: string, list: K[]): Promise<V[]> => {
-      turnover(at);
+      const misses: K[] = [];
+      let readMisses!: (values: Promise<V[]>) => void;
+      const batch = new Promise<V[]>((r) => (readMisses = r));
 
-      const misses = new Map<string, K>();
-      for (const args of list) {
-        const key = toKey(...args);
-        if (!live.has(key) && !(isPinned(at) && cache.has(key))) {
-          misses.set(key, args);
-        }
-      }
-
-      const index = new Map([...misses.keys()].map((key, i) => [key, i]));
-      const batch = misses.size ? readMany(at, [...misses.values()]) : null;
-
-      const load = (args: K) => {
-        const i = index.get(toKey(...args));
-        return i === undefined ? read(at, ...args) : batch!.then((vs) => vs[i]);
-      };
-
-      return Promise.all(
-        list.map((args) => resolve(at, args, () => load(args)))
+      const values = list.map((args) =>
+        resolve(at, args, () => {
+          const i = misses.push(args) - 1;
+          return batch.then((vs) => vs[i]);
+        })
       );
+
+      readMisses(misses.length ? readMany(at, misses) : Promise.resolve([]));
+      return Promise.all(values);
     };
 
     /** Promote a value an event already carries to live, no read */

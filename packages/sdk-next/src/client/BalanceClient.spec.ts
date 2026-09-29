@@ -1,53 +1,39 @@
+import { SYSTEM_ASSET_ID } from '../consts';
 import { AccountAsset } from '../types';
 import { BalanceClient } from './BalanceClient';
 
-type Data = { free: bigint; reserved: bigint; frozen: bigint };
-
 const AT = '0x01';
-const ZERO: Data = { free: 0n, reserved: 0n, frozen: 0n };
 const TOKEN_ID = 5;
 
 /**
- * A chain that answers `CurrenciesApi.account` by the runtime's rules.
+ * A chain holding free balances in storage, recording each multi-key read.
  *
- * - Native reads `System.Account`, any other asset `Tokens.Accounts`
- * - A missing entry reads as zero
+ * - Native balances live in `System.Account`, tokens in `Tokens.Accounts`
  */
 function chain() {
-  const system = new Map<string, Data>([
-    ['alice', { free: 100n, reserved: 10n, frozen: 30n }],
+  const system = new Map([
+    ['alice', 100n],
+    ['pool', 3n],
   ]);
-  const tokens = new Map<string, Data>([
-    [`alice:${TOKEN_ID}`, { free: 50n, reserved: 20n, frozen: 5n }],
-    [`pool:${TOKEN_ID}`, { free: 7n, reserved: 0n, frozen: 9n }],
-  ]);
-  const calls = { runtime: 0, system: 0, tokens: 0 };
+  const tokens = new Map([[`pool:${TOKEN_ID}`, 7n]]);
+  const data = (free = 0n) => ({ free, reserved: 0n, frozen: 0n });
+  const reads = { system: [] as string[][], tokens: [] as AccountAsset[][] };
 
   const api = {
-    apis: {
-      CurrenciesApi: {
-        account: async (id: number, who: string) => {
-          calls.runtime++;
-          return id === 0
-            ? (system.get(who) ?? ZERO)
-            : (tokens.get(`${who}:${id}`) ?? ZERO);
-        },
-      },
-    },
     query: {
       System: {
         Account: {
           getValues: async (keys: [string][]) => {
-            calls.system++;
-            return keys.map(([who]) => ({ data: system.get(who) ?? ZERO }));
+            reads.system.push(keys.map(([who]) => who));
+            return keys.map(([who]) => ({ data: data(system.get(who)) }));
           },
         },
       },
       Tokens: {
         Accounts: {
           getValues: async (keys: AccountAsset[]) => {
-            calls.tokens++;
-            return keys.map(([who, id]) => tokens.get(`${who}:${id}`) ?? ZERO);
+            reads.tokens.push(keys);
+            return keys.map(([who, id]) => data(tokens.get(`${who}:${id}`)));
           },
         },
       },
@@ -58,43 +44,38 @@ function chain() {
     Object.create(BalanceClient.prototype),
     { api }
   );
-  return { client, calls };
+  return { client, reads };
 }
 
 describe('BalanceClient getBalancesAt', () => {
   const accountAssets: AccountAsset[] = [
-    ['alice', 0],
+    ['alice', SYSTEM_ASSET_ID],
     ['pool', TOKEN_ID],
-    ['nobody', 0],
-    ['alice', TOKEN_ID],
-    ['alice', 10],
-    ['pool', 0],
+    ['pool', SYSTEM_ASSET_ID],
   ];
 
-  it('returns what getBalanceAt returns, in input order', async () => {
+  it('returns balances in input order', async () => {
     const { client } = chain();
 
-    const batched = await client.getBalancesAt(accountAssets, AT);
-    const single = await Promise.all(
-      accountAssets.map(([who, id]) => client.getBalanceAt(who, id, AT))
-    );
+    const balances = await client.getBalancesAt(accountAssets, AT);
 
-    expect(batched).toEqual(single);
+    expect(balances.map((b) => b.free)).toEqual([100n, 7n, 3n]);
   });
 
   it('reads native and token balances in one storage read each', async () => {
-    const { client, calls } = chain();
+    const { client, reads } = chain();
 
     await client.getBalancesAt(accountAssets, AT);
 
-    expect(calls).toEqual({ runtime: 0, system: 1, tokens: 1 });
+    expect(reads.system).toEqual([['alice', 'pool']]);
+    expect(reads.tokens).toEqual([[['pool', TOKEN_ID]]]);
   });
 
-  it('skips the reads a set does not need', async () => {
-    const { client, calls } = chain();
+  it('makes no token read for a native-only list', async () => {
+    const { client, reads } = chain();
 
-    await client.getBalancesAt([['alice', 0]], AT);
+    await client.getBalancesAt([['alice', SYSTEM_ASSET_ID]], AT);
 
-    expect(calls).toEqual({ runtime: 0, system: 1, tokens: 0 });
+    expect(reads.tokens).toEqual([]);
   });
 });

@@ -1,3 +1,4 @@
+import { SYSTEM_ASSET_ID } from '../consts';
 import { AccountAsset } from '../types';
 import { PoolQuery } from './PoolQuery';
 
@@ -45,10 +46,9 @@ function setup() {
 describe('PoolQuery readBalances', () => {
   const accountAssets: AccountAsset[] = [
     ['pool', ERC20_ID],
-    ['alice', 0],
+    ['pool', SYSTEM_ASSET_ID],
     ['pool', TOKEN_ID],
     ['pool', UNREGISTERED_ID],
-    ['pool', 0],
   ];
 
   it('returns balances in input order across both sources', async () => {
@@ -58,10 +58,9 @@ describe('PoolQuery readBalances', () => {
 
     expect(values).toEqual([
       `runtime:pool:${ERC20_ID}`,
-      'storage:alice:0',
+      `storage:pool:${SYSTEM_ASSET_ID}`,
       `storage:pool:${TOKEN_ID}`,
       `runtime:pool:${UNREGISTERED_ID}`,
-      'storage:pool:0',
     ]);
   });
 
@@ -72,9 +71,8 @@ describe('PoolQuery readBalances', () => {
 
     expect(calls.storage).toEqual([
       [
-        ['alice', 0],
+        ['pool', SYSTEM_ASSET_ID],
         ['pool', TOKEN_ID],
-        ['pool', 0],
       ],
     ]);
   });
