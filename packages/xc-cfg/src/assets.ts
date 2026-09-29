@@ -90,6 +90,11 @@ export const hollar = new Asset({
   originSymbol: 'HOLLAR',
 });
 
+export const hype = new Asset({
+  key: 'hype',
+  originSymbol: 'HYPE',
+});
+
 export const ibtc = new Asset({
   key: 'ibtc',
   originSymbol: 'IBTC',
@@ -265,6 +270,11 @@ export const wbtc_wh = new Asset({
   key: 'wbtc_wh',
 });
 
+export const whype = new Asset({
+  key: 'whype',
+  originSymbol: 'WHYPE',
+});
+
 export const wnear = new Asset({
   key: 'wnear',
   originSymbol: 'wNEAR',
@@ -309,6 +319,7 @@ export const assets: Asset[] = [
   glmr,
   hdx,
   hollar,
+  hype,
   ibtc,
   intr,
   ksm,
@@ -344,6 +355,7 @@ export const assets: Asset[] = [
   wbtc_wh,
   weth,
   weth_wh,
+  whype,
   wnear,
   wsol,
   wsteth,
