@@ -7,9 +7,10 @@ import { BalanceClient } from '../client';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
 import { AccountAsset, Balance } from '../types';
-import { QueryCache, QueryTally } from '../utils';
+import { async, QueryCache, QueryTally } from '../utils';
 
-export type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
+export type TAssetDetails =
+  HydrationQueries['AssetRegistry']['Assets']['Value'];
 export type TAssetLocation =
   HydrationQueries['AssetRegistry']['AssetLocations']['Value'];
 
@@ -122,19 +123,16 @@ export abstract class PoolQuery extends Papi {
       return id === SYSTEM_ASSET_ID || (type !== undefined && type !== 'Erc20');
     };
 
-    const [stored, runtime] = await Promise.all([
-      this.balance.getBalancesAt(accountAssets.filter(inStorage), at),
-      Promise.all(
-        accountAssets
-          .filter((a) => !inStorage(a))
-          .map(([account, id]) => this.balance.getBalanceAt(account, id, at))
-      ),
-    ]);
-
-    let s = 0;
-    let r = 0;
-    return accountAssets.map((a) =>
-      inStorage(a) ? stored[s++] : runtime[r++]
+    return async.readPartitioned(
+      accountAssets,
+      inStorage,
+      (stored) => this.balance.getBalancesAt(stored, at),
+      (runtime) =>
+        Promise.all(
+          runtime.map(([account, id]) =>
+            this.balance.getBalanceAt(account, id, at)
+          )
+        )
     );
   }
 }

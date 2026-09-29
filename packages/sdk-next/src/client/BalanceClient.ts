@@ -30,6 +30,7 @@ import { BlockAt, Papi } from '../api';
 import { SYSTEM_ASSET_ID } from '../consts';
 import { decodeErc20Transfer } from '../evm';
 import { AccountAsset, AssetBalance, Balance } from '../types';
+import { async } from '../utils';
 import { Erc20Client } from './Erc20Client';
 
 type TSystemAccount = HydrationQueries['System']['Account']['Value'];
@@ -87,28 +88,22 @@ export class BalanceClient extends Papi {
     accountAssets: AccountAsset[],
     at: BlockAt
   ): Promise<Balance[]> {
-    const isSystem = ([, id]: AccountAsset) => id === SYSTEM_ASSET_ID;
-    const system = accountAssets.filter(isSystem);
-    const tokens = accountAssets.filter((a) => !isSystem(a));
-
-    const [systemData, tokenData] = await Promise.all([
-      system.length
-        ? this.api.query.System.Account.getValues(
-            system.map(([account]) => [account] as [string]),
-            { at }
-          )
-        : [],
-      tokens.length
-        ? this.api.query.Tokens.Accounts.getValues(tokens, { at })
-        : [],
-    ]);
-
-    let s = 0;
-    let t = 0;
-    return accountAssets.map((a) =>
-      isSystem(a)
-        ? this.getBreakdown(systemData[s++].data)
-        : this.getBreakdown(tokenData[t++])
+    return async.readPartitioned(
+      accountAssets,
+      ([, id]) => id === SYSTEM_ASSET_ID,
+      async (system) => {
+        const keys = system.map(([account]): [string] => [account]);
+        const values = await this.api.query.System.Account.getValues(keys, {
+          at,
+        });
+        return values.map(({ data }) => this.getBreakdown(data));
+      },
+      async (tokens) => {
+        const values = await this.api.query.Tokens.Accounts.getValues(tokens, {
+          at,
+        });
+        return values.map((data) => this.getBreakdown(data));
+      }
     );
   }
 
