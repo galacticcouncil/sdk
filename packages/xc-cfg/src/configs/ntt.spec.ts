@@ -1,4 +1,4 @@
-import { AssetRoute } from '@galacticcouncil/xc-core';
+import { AssetRoute, EvmBalanceType } from '@galacticcouncil/xc-core';
 
 import {
   eth,
@@ -6,16 +6,20 @@ import {
   eurc_wh,
   hdx,
   hollar,
+  hype,
+  spy,
   weth,
+  whype,
   usdc,
   usdc_wh,
   weth_wh,
 } from '../assets';
-import { base, ethereum, hydration, robinhood } from '../chains';
+import { base, ethereum, hydration, hyperevm, robinhood } from '../chains';
 import { Tag } from '../tags';
 
 import { baseConfig } from './evm/base';
 import { ethereumConfig } from './evm/ethereum';
+import { hyperevmConfig } from './evm/hyperevm';
 import { robinhoodConfig } from './evm/robinhood';
 import { hydrationConfig } from './polkadot/hydration';
 
@@ -31,6 +35,9 @@ describe('ntt route configs', () => {
       ['robinhood hollar', robinhoodConfig, hollar, hydration, hollar],
       ['robinhood erc20', robinhoodConfig, weth, hydration, weth_wh],
       ['robinhood native', robinhoodConfig, eth, hydration, weth_wh],
+      ['robinhood spy', robinhoodConfig, spy, hydration, spy],
+      ['hyperevm native', hyperevmConfig, hype, hydration, hype],
+      ['hyperevm erc20', hyperevmConfig, whype, hydration, hype],
       ['hydration -> ethereum', hydrationConfig, usdc_wh, ethereum, usdc],
       ['hydration -> base', hydrationConfig, eurc_wh, base, eurc],
       ['hydration -> robinhood hdx', hydrationConfig, hdx, robinhood, hdx],
@@ -42,6 +49,8 @@ describe('ntt route configs', () => {
         hollar,
       ],
       ['hydration -> robinhood weth', hydrationConfig, weth_wh, robinhood, eth],
+      ['hydration -> robinhood spy', hydrationConfig, spy, robinhood, spy],
+      ['hydration -> hyperevm', hydrationConfig, hype, hyperevm, hype],
     ])('%s exposes both delivery models', (_, config, from, to, target) => {
       // Other bridges can serve the same pair (ethereum usdc is also Basejump),
       // so narrow to ntt before splitting on the delivery model.
@@ -57,25 +66,32 @@ describe('ntt route configs', () => {
 
   describe('executor routes', () => {
     const executorRoutes = [
-      ...ethereumConfig.getRoutes(),
-      ...baseConfig.getRoutes(),
-      ...robinhoodConfig.getRoutes(),
-      ...hydrationConfig.getRoutes(),
-    ].filter(isExecutor);
+      ethereumConfig,
+      baseConfig,
+      hyperevmConfig,
+      robinhoodConfig,
+      hydrationConfig,
+    ]
+      .flatMap((config) =>
+        config.getRoutes().map((route) => ({ chain: config.chain, route }))
+      )
+      .filter(({ route }) => isExecutor(route));
 
     it('should be tagged as ntt too, so ntt consumers still match them', () => {
-      for (const route of executorRoutes) {
+      for (const { route } of executorRoutes) {
         expect(route.tags).toContain(Tag.Ntt);
         expect(route.tags).toContain(Tag.Wormhole);
       }
     });
 
     it('should charge a destination fee, except from a native gas source', () => {
-      for (const route of executorRoutes) {
+      for (const { chain, route } of executorRoutes) {
         const { fee } = route.destination;
-        // eth on ethereum is the only native gas ntt source - its cost is
-        // already folded into the source fee by EvmPlatform.estimateFee.
-        const isNativeSource = route.source.asset.key === eth.key;
+        // An evm chain's native gas as the source (eth, hype) has its cost
+        // folded into the source fee by EvmPlatform.estimateFee already.
+        const isNativeSource =
+          chain.isEvmChain() &&
+          chain.getBalanceType(route.source.asset) === EvmBalanceType.Native;
         expect(fee.amount === 0).toBe(isNativeSource);
       }
     });
@@ -87,6 +103,7 @@ describe('ntt route configs', () => {
     it.each([
       ['ethereum', ethereumConfig, ethereum, eth],
       ['base', baseConfig, base, eth],
+      ['hyperevm', hyperevmConfig, hyperevm, hype],
       ['robinhood', robinhoodConfig, robinhood, eth],
       ['hydration', hydrationConfig, hydration, weth_wh],
     ])(

@@ -175,6 +175,11 @@ export const sol = new Asset({
   originSymbol: 'SOL',
 });
 
+export const spy = new Asset({
+  key: 'spy',
+  originSymbol: 'SPY',
+});
+
 export const sui = new Asset({
   key: 'sui',
   originSymbol: 'SUI',
@@ -336,6 +341,7 @@ export const assets: Asset[] = [
   prime,
   sky,
   sol,
+  spy,
   sui,
   susde,
   susds,

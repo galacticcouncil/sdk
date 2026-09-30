@@ -21,7 +21,8 @@ const { Tag } = tags;
  *    once `claim` is run against the destination chain.
  *  - executor — the sender pays the Executor to redeem on the far side, so
  *    there is nothing to claim. Costs source native gas on top of the
- *    transfer (weth on hydration, eth on ethereum/base/robinhood).
+ *    transfer (weth on hydration, eth on ethereum/base/robinhood, hype on
+ *    hyperevm).
  *
  * The executor routes carry both tags, so `Tag.NttExecutor` picks one
  * unambiguously. Plain `Tag.Ntt` resolves to whichever route the config

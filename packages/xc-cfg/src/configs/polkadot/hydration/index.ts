@@ -21,6 +21,7 @@ import {
   glmr,
   hdx,
   hollar,
+  hype,
   ibtc,
   intr,
   ksm,
@@ -31,6 +32,7 @@ import {
   paxg,
   pen,
   sol,
+  spy,
   sky,
   sui,
   susde,
@@ -62,6 +64,7 @@ import {
   energywebx,
   ethereum,
   hydration,
+  hyperevm,
   mythos,
   neuroweb,
   pendulum,
@@ -255,9 +258,12 @@ const toEthereumViaNtt: AssetRoute[] = [
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
+const toHyperevmViaNtt: AssetRoute[] = [viaNttTemplate(hype, hype, hyperevm)];
+
 const toRobinhoodViaNtt: AssetRoute[] = [
   viaNttTemplate(hdx, hdx, robinhood),
   viaNttTemplate(hollar, hollar, robinhood),
+  viaNttTemplate(spy, spy, robinhood),
   viaNttTemplate(weth_wh, eth, robinhood),
 ];
 
@@ -278,8 +284,10 @@ const viaNttExecutor: AssetRoute[] = [
   viaNttExecutorTemplate(wbtc_wh, wbtc, ethereum),
   viaNttExecutorTemplate(weth_wh, eth, ethereum),
   viaNttExecutorTemplate(eurc_wh, eurc, base),
+  viaNttExecutorTemplate(hype, hype, hyperevm),
   viaNttExecutorTemplate(hdx, hdx, robinhood),
   viaNttExecutorTemplate(hollar, hollar, robinhood),
+  viaNttExecutorTemplate(spy, spy, robinhood),
   viaNttExecutorTemplate(weth_wh, eth, robinhood),
   viaNttExecutorTemplate(sol, wsol, solana),
   viaNttExecutorTemplate(jito_sol, jito_sol, solana),
@@ -344,6 +352,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toBaseViaNtt,
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
+    ...toHyperevmViaNtt,
     ...toRobinhoodViaNtt,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,

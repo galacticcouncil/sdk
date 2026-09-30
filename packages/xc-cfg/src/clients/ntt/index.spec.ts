@@ -14,6 +14,7 @@ import {
   base,
   ethereum,
   hydration,
+  hyperevm,
   near_testnet,
   robinhood,
   solana,
@@ -46,6 +47,7 @@ describe('nttClient.getRedeemBudget', () => {
     it.each([
       ['ethereum', ethereum],
       ['base', base],
+      ['hyperevm', hyperevm],
       ['robinhood', robinhood],
       ['hydration', hydration],
     ])('should budget no value for %s', async (_, chain) => {
