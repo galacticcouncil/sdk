@@ -3,4 +3,5 @@ export enum CallType {
   Substrate = 'Substrate',
   Solana = 'Solana',
   Sui = 'Sui',
+  Near = 'Near',
 }

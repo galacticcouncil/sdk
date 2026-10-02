@@ -1,0 +1,173 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XC Transfer Example - NEAR NTT</title>
+    <style>
+      body {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: 0;
+        padding: 24px;
+        background: #14161c;
+        color: #e6e8ee;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 13px;
+        opacity: 0.7;
+      }
+      input {
+        font: inherit;
+        width: 96px;
+        padding: 6px 8px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        padding: 8px 14px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: #4c8dff;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      /* Executor delivery. Amber rather than the hover blue, so the two
+         delivery models stay apart from the hover state itself. */
+      button.primary {
+        border-color: #6b5426;
+        background: #241d12;
+        color: #f0c674;
+      }
+      button.primary:hover:not(:disabled) {
+        border-color: #e0a44a;
+      }
+      h2 {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.5;
+        margin: 16px 0 8px;
+      }
+      .legend {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.6;
+        max-width: 68ch;
+        margin: 16px 0;
+      }
+      pre {
+        margin: 16px 0 0;
+        padding: 12px;
+        border: 1px solid #333844;
+        border-radius: 6px;
+        background: #1c1f27;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 60vh;
+        overflow: auto;
+      }
+      input.wide {
+        width: 44ch;
+        max-width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <h1>NTT &mdash; NEAR testnet &rarr; Hydration</h1>
+
+    <div class="row">
+      <button
+        id="connect"
+        title="NEAR wallets, or an Ethereum wallet signing for its 0x… NEAR account (NEP-518)"
+      >
+        Connect wallet
+      </button>
+    </div>
+    <div class="row">
+      <label for="account">NEAR account</label>
+      <input
+        id="account"
+        class="wide"
+        placeholder="connect a wallet"
+        readonly
+      />
+    </div>
+    <div class="row">
+      <label for="recipient">Hydration recipient</label>
+      <input id="recipient" class="wide" placeholder="0x… or ss58" />
+    </div>
+    <div class="row">
+      <label for="amount">Amount</label>
+      <input id="amount" value="0.1" />
+    </div>
+
+    <div class="row">
+      <button
+        id="near"
+        title="Native near, wrapped into wrap.testnet in the same transaction"
+      >
+        NEAR &rarr; Hydration
+      </button>
+      <button id="wnear" title="wrap.testnet held already">
+        wNEAR &rarr; Hydration
+      </button>
+      <button id="status" title="Balances, rate limits & custody">
+        Status
+      </button>
+    </div>
+
+    <p class="legend">
+      The NEAR half is the live testnet deployment. Hydration is not on wormhole
+      testnet, so its leg exists only on a chopsticks fork: validations reading
+      it fail against the mainnet rpc, and a signed vaa is delivered with
+      whm&apos;s <code>_probeNearNttDelivery.ts</code> - the command is printed
+      once the testnet guardian signs.
+    </p>
+    <p class="legend">
+      Connect wallet lists the NEAR wallets with testnet support and Ethereum
+      wallets: MetaMask signs for the NEAR account with the same 0x&hellip; id,
+      which has to hold testnet NEAR for gas and deposits. An Ethereum wallet
+      approves one action at a time, so the native NEAR route asks three times;
+      wNEAR once.
+    </p>
+
+    <pre id="log"></pre>
+
+    <script>
+      new EventSource('/esbuild').addEventListener('change', () =>
+        location.reload()
+      );
+    </script>
+    <script type="module" src="/out/near.js"></script>
+  </body>
+</html>

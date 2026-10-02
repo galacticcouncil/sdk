@@ -194,7 +194,10 @@ export const runXc = (
       );
       c.log('🥢 ' + name + ' complete.');
     },
-    2 * 60 * 1000
+    // A cold fork spends over a minute on each chain's first block, fetching
+    // state lazily - the source, relay and destination blocks of one transfer
+    // alone outrun two minutes.
+    10 * 60 * 1000
   );
 };
 

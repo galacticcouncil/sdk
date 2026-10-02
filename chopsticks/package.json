@@ -13,11 +13,11 @@
   "scripts": {
     "spec:calldata": "NODE_OPTIONS=--experimental-vm-modules jest --silent call.spec.ts",
     "spec:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --silent e2e.spec.ts",
-    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts"
+    "spec:omni": "NODE_OPTIONS=--experimental-vm-modules jest --silent omni-tear.spec.ts",
+    "probe:near": "tsx src/probes/nearNtt.ts"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^1.4.0",
-    "@acala-network/chopsticks-testing": "^1.4.0",
+    "@galacticcouncil/chopsticks": "2.3.0",
     "@polkadot-labs/hdkd": "^0.0.19",
     "@polkadot-labs/hdkd-helpers": "^0.0.19"
   },

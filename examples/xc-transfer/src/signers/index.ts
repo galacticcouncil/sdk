@@ -3,6 +3,9 @@ import {
   SubstrateCall,
   SubstrateSigner,
   EvmSigner,
+  NearKeyPair,
+  NearSigner,
+  NearWallet,
   SolanaSigner,
   SuiSigner,
 } from '@galacticcouncil/xc-sdk';
@@ -11,6 +14,8 @@ import {
   AnyEvmChain,
   AnyParachain,
   CallType,
+  NearChain,
+  NearTxOutcome,
   SolanaChain,
   SuiChain,
 } from '@galacticcouncil/xc-core';
@@ -126,6 +131,39 @@ export async function signSui(call: Call, chain: AnyChain) {
       throw error;
     },
   });
+}
+
+/**
+ * The NEAR signer is passed in - the wallet connected through near-connect
+ * (`./nearConnect`); a key pair signs the same way for headless runs.
+ *
+ * @returns final outcome - the wormhole message a transfer published is in
+ * its receipt logs, needed to follow the vaa
+ */
+export async function signNear(
+  call: Call,
+  chain: AnyChain,
+  wallet: NearWallet | NearKeyPair
+): Promise<NearTxOutcome | undefined> {
+  let outcome: NearTxOutcome | undefined;
+  let failure: unknown;
+  await new NearSigner(chain as NearChain, wallet).signAndSend(call, {
+    onTransactionSend: (hash) => {
+      console.log('TxHash: ' + hash);
+    },
+    onStatus: (status) => {
+      outcome = status;
+    },
+    // NearSigner reports a failed receipt after the outcome - rethrow, or a
+    // refunded transfer still reads as sent.
+    onError: (error) => {
+      failure = error;
+    },
+  });
+  if (failure) {
+    throw failure;
+  }
+  return outcome;
 }
 
 /**

@@ -2,17 +2,19 @@ import {
   AnyChain,
   AnyEvmChain,
   Asset,
+  NearChain,
   SolanaChain,
   SuiChain,
 } from '@galacticcouncil/xc-core';
 
 import { NttEvmClient } from './NttEvmClient';
+import { NttNearClient } from './NttNearClient';
 import { NttSolanaClient } from './NttSolanaClient';
 import { NttSuiClient } from './NttSuiClient';
 import { NttClient } from './types';
 
 export * from './types';
-export { NttEvmClient, NttSolanaClient, NttSuiClient };
+export { NttEvmClient, NttNearClient, NttSolanaClient, NttSuiClient };
 
 /**
  * Ntt deployment on a chain, for an asset.
@@ -30,6 +32,9 @@ export function nttClient(chain: AnyChain, asset?: Asset): NttClient {
   }
   if (chain instanceof SuiChain) {
     return new NttSuiClient(chain, asset);
+  }
+  if (chain instanceof NearChain) {
+    return new NttNearClient(chain, asset);
   }
   return new NttEvmClient(chain as AnyEvmChain, asset);
 }

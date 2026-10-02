@@ -24,26 +24,35 @@ import {
   glmr,
   hdx,
   hollar,
+  hype,
   ibtc,
   intr,
   jito_sol,
   ksm,
+  lbtc,
   ldo,
   link,
   myth,
+  neuro,
   paxg,
   pen,
   prime,
-  neuro,
+  sky,
+  sol,
+  spy,
   sui,
+  susde,
+  susds,
+  susds_wh,
+  tbtc,
   trac,
   unq,
   usdc,
-  usdc_wh,
   usdc_eth,
+  usdc_wh,
   usdt,
-  usdt_wh,
   usdt_eth,
+  usdt_wh,
   vastr,
   vdot,
   wbtc,
@@ -52,13 +61,6 @@ import {
   weth_wh,
   wsteth,
   wud,
-  susde,
-  susds,
-  susds_wh,
-  sol,
-  sky,
-  tbtc,
-  lbtc,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -397,6 +399,34 @@ export const hydration = new EvmParachain({
       },
     },
     {
+      asset: hype,
+      decimals: 18,
+      id: 1001355,
+      min: 0.000114285714285714,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X3: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+            {
+              GeneralIndex: 47,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000005555555555555555555555555555555555555555',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       asset: ibtc,
       decimals: 8,
       id: 11,
@@ -728,6 +758,34 @@ export const hydration = new EvmParachain({
               GeneralKey: {
                 length: 32,
                 data: '0x069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f00000000001',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      asset: spy,
+      decimals: 18,
+      id: 1001356,
+      min: 0.000013061480386097,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X3: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+            {
+              GeneralIndex: 72,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000117cc2133c37b721f49de2a7a74833232b3b4c0c',
               },
             },
           ],
@@ -1340,6 +1398,13 @@ export const hydration = new EvmParachain({
           wormhole: '0xE1d75C3c712BC61eBE892312F3455A67EC5D4799',
         },
       },
+      [hype.key]: {
+        token: '0x00000000000000000000000000000001000f478b',
+        manager: '0x76FA328577Ee8A0E1872eD182c1bcd0A2dB47750',
+        transceiver: {
+          wormhole: '0xe74f52D5816174D070Dc7DC0ef8cC80dd6eFc160',
+        },
+      },
       [jito_sol.key]: {
         token: '0x0000000000000000000000000000000100000028',
         manager: '0xcE73C15B9ED02413066DE5B904A36F8e8f9B5331',
@@ -1359,6 +1424,13 @@ export const hydration = new EvmParachain({
         manager: '0x9e200C0f28D92D296b201D96C8269d3CAFFfA9FF',
         transceiver: {
           wormhole: '0x2F04AcF249091425d51e67EeA3C3161ccE283202',
+        },
+      },
+      [spy.key]: {
+        token: '0x00000000000000000000000000000001000f478c',
+        manager: '0x4382cC762FdbB90d756FF5F2f099a76281f1A2aF',
+        transceiver: {
+          wormhole: '0x9fAF16E590352B61ab5542af2560D54Fc62E97aA',
         },
       },
       [sui.key]: {

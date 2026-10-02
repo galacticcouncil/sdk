@@ -5,6 +5,7 @@ import {
   AnyEvmChain,
   ConfigService,
   EvmParachain,
+  NearChain,
   Ntt,
   NttTokenDef,
   Parachain,
@@ -19,7 +20,13 @@ import { keccak256 } from 'viem';
 
 import { encoding } from '@wormhole-foundation/sdk-base';
 
-import { EvmClaim, SolanaClaim, SubstrateClaim, SuiClaim } from '../platforms';
+import {
+  EvmClaim,
+  NearClaim,
+  SolanaClaim,
+  SubstrateClaim,
+  SuiClaim,
+} from '../platforms';
 
 import { Operation, WormholeScan } from './WormholeScan';
 import { WhTransfer, WhStatus } from './types';
@@ -199,6 +206,10 @@ export class WormholeTransfer {
             const claim = new SuiClaim(toChain);
             return claim.redeem(from, vaaRaw, destination);
           }
+          if (toChain instanceof NearChain) {
+            const claim = new NearClaim(toChain);
+            return claim.redeem(from, vaaRaw, destination);
+          }
           if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
             const claim = await SubstrateClaim.create(toChain);
             return claim.redeem(from, vaaRaw, destination);
@@ -238,14 +249,18 @@ export class WormholeTransfer {
    *
    * Wormholescan doesn't observe the redeem on every chain (`targetChain`
    * stays empty for hydration), so a delivered transfer would otherwise
-   * keep offering a claim that reverts. Evm destinations only - solana &
-   * sui still rely on the indexer.
+   * keep offering a claim that reverts. Evm & near destinations only -
+   * solana & sui still rely on the indexer.
    */
   private async isRedeemed(
     toChain: AnyChain,
     ntt: NttTokenDef,
     vaaRaw: string
   ): Promise<boolean> {
+    if (toChain instanceof NearChain) {
+      return new NearClaim(toChain).isRedeemed(vaaRaw, ntt);
+    }
+
     if (!toChain.isEvmChain() && !toChain.isEvmParachain()) {
       return false;
     }

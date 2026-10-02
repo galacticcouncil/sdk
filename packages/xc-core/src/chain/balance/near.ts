@@ -7,20 +7,6 @@ import { pollBalance } from './utils';
 
 import type { NearChain } from '../NearChain';
 
-/** NEAR reports an account that was never created as an error, not as zero. */
-const UNKNOWN_ACCOUNT = 'UNKNOWN_ACCOUNT';
-
-interface ViewAccount {
-  amount: string;
-  locked: string;
-  storage_usage: number;
-}
-
-interface RpcError {
-  cause?: { name?: string };
-  message?: string;
-}
-
 /**
  * Reads near balances over the chain's JSON-RPC. Owned by {@link NearChain}.
  */
@@ -32,18 +18,9 @@ export class NearBalanceClient {
     account: string,
     type: NearBalanceType
   ): Promise<AssetAmount> {
-    switch (type) {
-      case NearBalanceType.Native: {
-        const decimals = this.chain.getAssetDecimals(asset) ?? 24;
-        const view = await this.viewAccount(account);
-        return AssetAmount.fromAsset(asset, {
-          amount: view ? BigInt(view.amount) : 0n,
-          decimals,
-        });
-      }
-      default:
-        throw new Error('Unsupported near balance type: ' + type);
-    }
+    const decimals = this.chain.getAssetDecimals(asset) ?? 24;
+    const amount = await this.readBalance(asset, account, type);
+    return AssetAmount.fromAsset(asset, { amount, decimals });
   }
 
   subscribe(
@@ -59,45 +36,35 @@ export class NearBalanceClient {
   }
 
   /**
-   * Read an account's on-chain state.
+   * Raw balance of an account.
    *
-   * - Returns `undefined` for an account that does not exist
-   * - An unfunded recipient reads as zero rather than blanking the balance
+   * - An account that does not exist reads as zero rather than blanking
+   *   the balance, as does one the token never registered
    *
+   * @param asset - native near, or a token keyed by its contract account
    * @param account - NEAR account id
+   * @param type - balance storage of the asset
    */
-  private async viewAccount(account: string): Promise<ViewAccount | undefined> {
-    const res = await fetch(this.chain.rpc, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 'xc-balance',
-        method: 'query',
-        params: {
-          request_type: 'view_account',
-          finality: 'final',
-          account_id: account,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`near rpc ${res.status}: ${await res.text()}`);
-    }
-
-    const body = (await res.json()) as {
-      result?: ViewAccount;
-      error?: RpcError;
-    };
-
-    if (body.error) {
-      if (body.error.cause?.name === UNKNOWN_ACCOUNT) {
-        return undefined;
+  private async readBalance(
+    asset: Asset,
+    account: string,
+    type: NearBalanceType
+  ): Promise<bigint> {
+    const { client } = this.chain;
+    switch (type) {
+      case NearBalanceType.Native: {
+        const view = await client.viewAccount(account);
+        return view ? BigInt(view.amount) : 0n;
       }
-      throw new Error(`near rpc: ${body.error.message ?? 'query failed'}`);
+      case NearBalanceType.Ft: {
+        const token = this.chain.getBalanceAssetId(asset).toString();
+        const balance = await client.view<string>(token, 'ft_balance_of', {
+          account_id: account,
+        });
+        return BigInt(balance);
+      }
+      default:
+        throw new Error('Unsupported near balance type: ' + type);
     }
-
-    return body.result;
   }
 }
