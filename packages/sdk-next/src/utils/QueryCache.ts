@@ -1,14 +1,6 @@
 import { TLRUCache } from '@thi.ng/cache';
 
-import { withTimeout } from './async';
-
-/**
- * Deadline for one read.
- *
- * - A dropped chainHead operation never rejects, so an unguarded read wedges its
- *   caller for good; this turns that silence into a named error
- */
-const QUERY_TIMEOUT = 15_000;
+import { READ_TIMEOUT, withTimeout } from './async';
 
 /**
  * Freshness policy for a scope's on-demand fetch tier.
@@ -121,7 +113,7 @@ export class QueryCache {
     const read = (at: string, ...args: K): Promise<V> =>
       withTimeout(
         fetch(at, ...args),
-        QUERY_TIMEOUT,
+        READ_TIMEOUT,
         `${name}[${toKey(...args)}] stalled at ${at}`
       );
 

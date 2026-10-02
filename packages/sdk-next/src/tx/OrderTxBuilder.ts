@@ -95,8 +95,7 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 
@@ -136,8 +135,7 @@ export class OrderTxBuilder extends TxBuilder {
       start_execution_block: undefined,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 

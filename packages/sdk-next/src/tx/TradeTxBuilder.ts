@@ -51,13 +51,16 @@ export class TradeTxBuilder extends TxBuilder {
 
     const { assetIn } = swaps[0];
 
-    const balance = await this.balance.getBalance(this.beneficiary, assetIn);
+    const [balance, extraGas] = await Promise.all([
+      this.balance.getBalance(this.beneficiary, assetIn),
+      this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn),
+    ]);
     const isMax = amountIn >= balance.transferable - 5n;
 
     if (isMax) {
-      return this.buildSellAllTx();
+      return this.buildSellAllTx(extraGas);
     }
-    return this.buildSellTx();
+    return this.buildSellTx(extraGas);
   }
 
   private async buildBuyTx(): Promise<Tx> {
@@ -90,15 +93,19 @@ export class TradeTxBuilder extends TxBuilder {
       });
     }
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 
     return this.wrapTx('RouterBuy', tx);
   }
 
-  private async buildSellTx(): Promise<Tx> {
+  /**
+   * Sell of the exact trade amount.
+   *
+   * @param extraGas - moving `assetIn` runs Aave's health factor check
+   */
+  private async buildSellTx(extraGas: boolean): Promise<Tx> {
     const { amountIn, amountOut, swaps } = this.trade;
 
     const firstSwap = swaps[0];
@@ -128,15 +135,19 @@ export class TradeTxBuilder extends TxBuilder {
       });
     }
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (extraGas) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 
     return this.wrapTx('RouterSell', tx);
   }
 
-  private async buildSellAllTx(): Promise<Tx> {
+  /**
+   * Sell of the whole transferable balance.
+   *
+   * @param extraGas - moving `assetIn` runs Aave's health factor check
+   */
+  private async buildSellAllTx(extraGas: boolean): Promise<Tx> {
     const { amountOut, swaps } = this.trade;
 
     const firstSwap = swaps[0];
@@ -154,8 +165,7 @@ export class TradeTxBuilder extends TxBuilder {
       route: TradeRouteBuilder.build(swaps) as any,
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (extraGas) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 

@@ -1,22 +1,21 @@
 import { PolkadotClient } from 'polkadot-api';
 
-import { big } from '@galacticcouncil/common';
-
 import { createSdkContext } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
 import { BENEFICIARY } from '../../const';
 import { ApiUrl } from '../../types';
 
-class GetMaxWithdrawAll extends PapiExecutor {
+class RequiresExtraGas extends PapiExecutor {
   async script(client: PolkadotClient) {
     const sdk = await createSdkContext(client);
 
     const { api } = sdk;
 
-    const all = await api.aave.getMaxWithdrawAll(BENEFICIARY);
-    for (const [aTokenId, { amount, decimals }] of all) {
-      console.log(aTokenId, big.toDecimal(amount, decimals));
+    // aDOT (main market), aBIL (BIL market)
+    for (const asset of [1001, 55]) {
+      const required = await api.aave.requiresExtraGas(BENEFICIARY, asset);
+      console.log(asset, required);
     }
 
     return () => {
@@ -26,7 +25,4 @@ class GetMaxWithdrawAll extends PapiExecutor {
   }
 }
 
-new GetMaxWithdrawAll(
-  ApiUrl.Hydration,
-  'Get max withdraw of every aToken'
-).run();
+new RequiresExtraGas(ApiUrl.Hydration, 'Aave extra gas per asset').run();

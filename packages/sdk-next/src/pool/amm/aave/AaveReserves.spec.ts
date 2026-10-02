@@ -1,3 +1,5 @@
+import { H160 } from '../../../evm';
+
 import { PoolType } from '../../types';
 
 import { aavePoolId, pairReserves, toAavePool } from './AaveReserves';
@@ -23,7 +25,6 @@ const byContract = new Map<string, number>([
   [ADOT.contract, ADOT.id],
 ]);
 
-type H160 = `0x${string}`;
 const h = (s: string) => s as H160;
 
 describe('pairReserves', () => {
