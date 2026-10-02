@@ -6,7 +6,7 @@ import { h160, HYDRATION_SS58_PREFIX } from '@galacticcouncil/common';
 import { BlockAt, BlockRef } from '../../../api';
 import { EvmClient } from '../../../evm';
 import { GhoTokenLog } from '../../../gho';
-import { XcmV3Multilocation } from '../../../types';
+import { AccountAsset, XcmV3Multilocation } from '../../../types';
 import { fmt } from '../../../utils';
 
 import { PoolEventHandler, PoolMutation } from '../../events';
@@ -103,7 +103,20 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       facilitatorH160
     );
 
-    const pools = collaterals.map(async ({ keyArgs, value }) => {
+    // A collateral is only tradeable through its stable pool
+    const backed = collaterals.flatMap((collateral) => {
+      const stablePool = stablePools.find(
+        (p) => p.id === collateral.value.pool_id
+      );
+      return stablePool ? [{ ...collateral, stablePool }] : [];
+    });
+
+    const collateralBalances = await this.query.assetBalance.getMany(
+      at,
+      backed.map(({ keyArgs: [id] }): AccountAsset => [facilitator, id])
+    );
+
+    return backed.map(({ keyArgs, value, stablePool }, i) => {
       const [id] = keyArgs;
 
       const {
@@ -115,36 +128,27 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
         buyback_rate,
       } = value;
 
-      const stablePool = stablePools.find((p) => p.id === pool_id);
-      if (stablePool) {
-        const address = this.getPoolId(pool_id);
-        const collateralBalance = await this.query.assetBalance.get(
-          at,
-          facilitator,
-          id
-        );
+      const address = this.getPoolId(pool_id);
+      const collateralBalance = collateralBalances[i];
 
-        return {
-          ...stablePool,
-          address: address,
-          type: PoolType.HSM,
-          tokens: stablePool.tokens.filter((t) => t.id !== pool_id),
-          hsmAddress: facilitator,
-          hsmMintCapacity: hsmMintCapacity,
-          hollarId: hollarId,
-          hollarH160: hollarH160,
-          collateralId: id,
-          collateralBalance: collateralBalance.transferable,
-          maxBuyPriceCoefficient: max_buy_price_coefficient,
-          maxInHolding: max_in_holding,
-          purchaseFee: FeeUtils.fromPermill(purchase_fee),
-          buyBackFee: FeeUtils.fromPermill(buy_back_fee),
-          buyBackRate: FeeUtils.fromPerbill(buyback_rate),
-        } as PoolBase;
-      }
+      return {
+        ...stablePool,
+        address: address,
+        type: PoolType.HSM,
+        tokens: stablePool.tokens.filter((t) => t.id !== pool_id),
+        hsmAddress: facilitator,
+        hsmMintCapacity: hsmMintCapacity,
+        hollarId: hollarId,
+        hollarH160: hollarH160,
+        collateralId: id,
+        collateralBalance: collateralBalance.transferable,
+        maxBuyPriceCoefficient: max_buy_price_coefficient,
+        maxInHolding: max_in_holding,
+        purchaseFee: FeeUtils.fromPermill(purchase_fee),
+        buyBackFee: FeeUtils.fromPermill(buy_back_fee),
+        buyBackRate: FeeUtils.fromPerbill(buyback_rate),
+      } as HsmPoolBase;
     });
-    const results = await Promise.all(pools);
-    return results.filter((pool): pool is HsmPoolBase => pool !== null);
   }
 
   async getPoolFees(): Promise<PoolFees> {
