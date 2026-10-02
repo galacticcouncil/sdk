@@ -1,5 +1,11 @@
 # @galacticcouncil/sdk-next
 
+## 2.3.3
+
+### Patch Changes
+
+- 004df0f: sdk: route atBTC, aPAXG, GETH & GSOL hollar pools via uniswap v3
+
 ## 2.3.2
 
 ### Patch Changes
