@@ -4,11 +4,13 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { Papi } from '../api';
 import { BalanceClient } from '../client';
+import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
-import { Balance } from '../types';
-import { QueryCache, QueryTally } from '../utils';
+import { AccountAsset, Balance } from '../types';
+import { async, QueryCache, QueryTally } from '../utils';
 
-export type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
+export type TAssetDetails =
+  HydrationQueries['AssetRegistry']['Assets']['Value'];
 export type TAssetLocation =
   HydrationQueries['AssetRegistry']['AssetLocations']['Value'];
 
@@ -94,10 +96,43 @@ export abstract class PoolQuery extends Papi {
   );
 
   /** An account's balance of one asset */
-  readonly assetBalance = this.cache.scope<[string, number], Balance>(
+  readonly assetBalance = this.cache.scope<AccountAsset, Balance>(
     'CurrenciesApi.account',
     (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
     (address, assetId) => `${address}:${assetId}`,
-    'block'
+    'block',
+    (at, accountAssets) => this.readBalances(at, accountAssets)
   );
+
+  /**
+   * Many balances at `at`, each equal to `getBalanceAt`.
+   *
+   * - Native and token balances: batched storage reads
+   * - Erc20 or unregistered asset: one runtime call each
+   *
+   * @param at - block to read at
+   * @param accountAssets - `[account, assetId]` to read
+   */
+  private async readBalances(
+    at: string,
+    accountAssets: AccountAsset[]
+  ): Promise<Balance[]> {
+    const assets = await this.assets.get(at);
+    const inStorage = ([, id]: AccountAsset) => {
+      const type = assets.get(id)?.asset_type.type;
+      return id === SYSTEM_ASSET_ID || (type !== undefined && type !== 'Erc20');
+    };
+
+    return async.readPartitioned(
+      accountAssets,
+      inStorage,
+      (stored) => this.balance.getBalancesAt(stored, at),
+      (runtime) =>
+        Promise.all(
+          runtime.map(([account, id]) =>
+            this.balance.getBalanceAt(account, id, at)
+          )
+        )
+    );
+  }
 }
