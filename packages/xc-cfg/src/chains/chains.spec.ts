@@ -87,6 +87,7 @@ describe('chain address space', () => {
     'ethereum',
     'base',
     'robinhood',
+    'hyperevm',
     'solana',
     'sui',
   ];
@@ -102,6 +103,7 @@ describe('chain address space', () => {
       'ethereum',
       'base',
       'robinhood',
+      'hyperevm',
     ]);
   });
 
@@ -129,11 +131,10 @@ describe('chain address normalization', () => {
 
   it('should keep address as is on single address space chains', () => {
     expect(chainsMap.get('mythos')!.getNormalizedAddress(EVM)).toEqual(EVM);
-    expect(chainsMap.get('assethub')!.getNormalizedAddress(SS58)).toEqual(
-      SS58
-    );
+    expect(chainsMap.get('assethub')!.getNormalizedAddress(SS58)).toEqual(SS58);
     expect(chainsMap.get('ethereum')!.getNormalizedAddress(EVM)).toEqual(EVM);
     expect(chainsMap.get('base')!.getNormalizedAddress(EVM)).toEqual(EVM);
     expect(chainsMap.get('robinhood')!.getNormalizedAddress(EVM)).toEqual(EVM);
+    expect(chainsMap.get('hyperevm')!.getNormalizedAddress(EVM)).toEqual(EVM);
   });
 });

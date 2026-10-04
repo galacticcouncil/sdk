@@ -20,6 +20,7 @@ const { config } = xc;
 
 const ethereum = config.getChain('ethereum') as EvmChain;
 const base = config.getChain('base') as EvmChain;
+const hyperevm = config.getChain('hyperevm') as EvmChain;
 const robinhood = config.getChain('robinhood') as EvmChain;
 const hydration = config.getChain('hydration') as EvmParachain;
 const solana = config.getChain('solana') as SolanaChain;
@@ -55,6 +56,8 @@ export const redeem = {
     new EvmClaim().redeem(address, vaa, nttOf(ethereum, asset)),
   base: (address: string, vaa: string, asset: string) =>
     new EvmClaim().redeem(address, vaa, nttOf(base, asset)),
+  hyperevm: (address: string, vaa: string, asset: string) =>
+    new EvmClaim().redeem(address, vaa, nttOf(hyperevm, asset)),
   robinhood: (address: string, vaa: string, asset: string) =>
     new EvmClaim().redeem(address, vaa, nttOf(robinhood, asset)),
   hydra: (address: string, vaa: string, asset: string) =>

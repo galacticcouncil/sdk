@@ -12,8 +12,10 @@ import {
 
 import { AccountId } from '@polkadot-api/substrate-bindings';
 
-import { aave, eth, sol, usdc, usdc_wh } from '../../../assets';
-import { ethereum, hydration, solana } from '../../../chains';
+import { createHash } from 'node:crypto';
+
+import { aave, eth, sol, usdc, usdc_wh, wnear } from '../../../assets';
+import { ethereum, hydration, near_testnet, solana } from '../../../chains';
 
 import { encodeNttRequest } from '../../../bridges/wormhole';
 
@@ -94,13 +96,39 @@ const buildSolanaTransferCtx = () => {
   } as ContractConfigBuilderParams;
 };
 
+// Hydration -> NEAR: the recipient is a NEAR account id, not an address.
+const buildNearTransferCtx = () => {
+  return {
+    address: 'bob.testnet',
+    amount: 1500000000000000000000000n,
+    asset: wnear,
+    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+    source: {
+      chain: hydration,
+    },
+    destination: {
+      chain: near_testnet,
+    },
+  } as ContractConfigBuilderParams;
+};
+
+const WNEAR_NTT = {
+  token: '0x000000000000000000000000000000010000054b',
+  manager: '0x7777777777777777777777777777777777777777',
+  transceiver: {
+    wormhole: '0x8888888888888888888888888888888888888888',
+  },
+};
+
 const ethereumNtt = Wormhole.fromChain(ethereum).ntt;
+const hydrationNtt = Wormhole.fromChain(hydration).ntt;
 
 describe('Ntt contract builder', () => {
   beforeAll(() => {
     ethereumNtt[usdc.key] = USDC_NTT;
     ethereumNtt[aave.key] = AAVE_NTT;
     ethereumNtt[eth.key] = ETH_NTT;
+    hydrationNtt[wnear.key] = WNEAR_NTT;
     const evmClient = {
       getProvider: () => ({
         readContract: async ({ functionName }: { functionName: string }) =>
@@ -132,6 +160,7 @@ describe('Ntt contract builder', () => {
     delete ethereumNtt[usdc.key];
     delete ethereumNtt[aave.key];
     delete ethereumNtt[eth.key];
+    delete hydrationNtt[wnear.key];
     jest.restoreAllMocks();
   });
 
@@ -181,6 +210,16 @@ describe('Ntt contract builder', () => {
       await expect(Ntt().transfer().build(ctx)).rejects.toThrow(
         'is not an EVM'
       );
+    });
+
+    // The NEAR contract pays out only the account whose sha256 the message
+    // names, the account id itself never goes on the wire.
+    it('should name a NEAR recipient by the sha256 of its account', async () => {
+      const [config] = await Ntt().transfer().build(buildNearTransferCtx());
+      const hash = createHash('sha256').update('bob.testnet').digest('hex');
+      expect(config.address).toBe(WNEAR_NTT.manager);
+      expect(config.args[1]).toBe(15);
+      expect(config.args[2]).toBe('0x' + hash);
     });
   });
 

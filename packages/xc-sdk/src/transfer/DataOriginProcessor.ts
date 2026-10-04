@@ -181,7 +181,7 @@ export class DataOriginProcessor extends DataProcessor {
    */
   private async getTransfer(ctx: TransferCtx): Promise<BaseConfig[]> {
     const { chain, route } = this.config;
-    const { contract, extrinsic, program, move } = route;
+    const { contract, extrinsic, functionCall, program, move } = route;
 
     if (extrinsic && !(contract && EvmAddr.isValid(ctx.sender))) {
       const { address, amount, asset, sender } = ctx;
@@ -200,7 +200,7 @@ export class DataOriginProcessor extends DataProcessor {
       ];
     }
 
-    const callable = contract || program || move;
+    const callable = contract || program || move || functionCall;
     if (callable) {
       return callable.build({
         ...ctx,
@@ -208,7 +208,7 @@ export class DataOriginProcessor extends DataProcessor {
     }
 
     throw new Error(
-      'AssetRoute transfer config is invalid! Specify contract, extrinsic, move or program instructions.'
+      'AssetRoute transfer config is invalid! Specify contract, extrinsic, function call, move or program instructions.'
     );
   }
 }

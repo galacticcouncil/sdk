@@ -4,12 +4,14 @@ import {
   AssetAmount,
   BaseConfig,
   ChainType,
+  NearChain,
   Parachain,
   SolanaChain,
   SuiChain,
 } from '@galacticcouncil/xc-core';
 
 import { EvmPlatform } from './evm';
+import { NearPlatform } from './near';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
 import { SuiPlatform } from './sui';
@@ -36,6 +38,9 @@ export class PlatformAdapter {
       case ChainType.SuiChain:
         this.registerSui(chain);
         break;
+      case ChainType.NearChain:
+        this.registerNear(chain);
+        break;
       default:
         throw new Error('Unsupported platform: ' + chain.getType());
     }
@@ -54,6 +59,11 @@ export class PlatformAdapter {
   private registerSui(chain: AnyChain) {
     const suiChain = chain as SuiChain;
     this.platform.Sui = new SuiPlatform(suiChain);
+  }
+
+  private registerNear(chain: AnyChain) {
+    const nearChain = chain as NearChain;
+    this.platform.Near = new NearPlatform(nearChain);
   }
 
   private registerSubstrate(chain: AnyChain) {

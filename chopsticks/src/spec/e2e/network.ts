@@ -3,8 +3,7 @@ import {
   connectVertical,
   setupWithServer,
   BuildBlockMode,
-} from '@acala-network/chopsticks';
-import { createConfig } from '@acala-network/chopsticks-testing';
+} from '@galacticcouncil/chopsticks';
 import { Parachain } from '@galacticcouncil/xc-core';
 
 import { createClient } from 'polkadot-api';
@@ -19,12 +18,17 @@ export async function createNetwork(
   parachain: Parachain,
   wasmOverrides?: Record<string, string>
 ): Promise<SetupCtx> {
-  const wasm = wasmOverrides?.[parachain.key];
-
-  const config = wasm
-    ? createConfig({ endpoint: parachain.ws, wasmOverride: wasm })
-    : createConfig({ endpoint: parachain.ws });
-  const { chain, addr, close } = await setupWithServer(config);
+  // What chopsticks-testing's `createConfig` sets: a random port (chopsticks
+  // moves on when it is taken), signatures mocked so storage can be driven
+  // directly, blocks built on demand.
+  const { chain, addr, close } = await setupWithServer({
+    endpoint: parachain.ws,
+    port: Math.floor(Math.random() * 10000) + 10000,
+    'mock-signature-host': true,
+    'build-block-mode': BuildBlockMode.Manual,
+    'max-memory-block-count': 100,
+    'wasm-override': wasmOverrides?.[parachain.key],
+  });
 
   const url = `ws://${addr}`;
   const provider = getWsProvider(url);
@@ -44,7 +48,12 @@ export async function createNetwork(
     client.getFinalizedBlock(),
     new Promise((_, reject) =>
       setTimeout(
-        () => reject(new Error(`${parachain.name} chainHead timed out after ${CHAIN_HEAD_TIMEOUT / 1000}s`)),
+        () =>
+          reject(
+            new Error(
+              `${parachain.name} chainHead timed out after ${CHAIN_HEAD_TIMEOUT / 1000}s`
+            )
+          ),
         CHAIN_HEAD_TIMEOUT
       )
     ),

@@ -10,6 +10,8 @@ import {
   ChainType,
 } from './Chain';
 
+import { Wormhole, WormholeDef } from '../bridge';
+import { NearClient } from '../near';
 import { addr } from '../utils';
 
 const { NearAddr } = addr;
@@ -17,30 +19,45 @@ const { NearAddr } = addr;
 const NEAR_NATIVE = 'NEAR';
 const NEAR_DECIMALS = 24;
 
-export interface NearChainParams
-  extends ChainParams<ChainAssetData, NearBalanceType> {
+export interface NearChainParams extends ChainParams<
+  ChainAssetData,
+  NearBalanceType
+> {
   /** JSON-RPC endpoint. */
   rpc: string;
   /** Balance poll period, ms. Defaults to the shared interval. */
   pollInterval?: number;
+  wormhole?: WormholeDef;
 }
 
 /**
- * NEAR mainnet, as a standalone chain.
+ * NEAR, as a standalone chain.
  *
- * - Balances and address validation only; it carries no transfer routes
- * - Reads over plain JSON-RPC, so it pulls in no NEAR client library
+ * - Transfers only where a wormhole deployment is declared (ntt)
+ * - Reads and submits over plain JSON-RPC, so it pulls in no NEAR client
+ *   library
  */
 export class NearChain extends Chain<ChainAssetData, NearBalanceType> {
   private readonly balanceClient = new NearBalanceClient(this);
 
+  private clientCache?: NearClient;
+
   readonly rpc: string;
   readonly pollInterval?: number;
+  readonly wormhole?: Wormhole;
 
-  constructor({ rpc, pollInterval, ...others }: NearChainParams) {
+  constructor({ rpc, pollInterval, wormhole, ...others }: NearChainParams) {
     super({ ...others });
     this.rpc = rpc;
     this.pollInterval = pollInterval;
+    this.wormhole = wormhole && new Wormhole(wormhole);
+  }
+
+  get client(): NearClient {
+    if (!this.clientCache) {
+      this.clientCache = new NearClient(this.rpc);
+    }
+    return this.clientCache;
   }
 
   getType(): ChainType {

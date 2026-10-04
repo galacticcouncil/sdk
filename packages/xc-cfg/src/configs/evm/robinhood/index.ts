@@ -1,6 +1,6 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import { eth, hdx, hollar, weth, weth_wh } from '../../../assets';
+import { eth, hdx, hollar, spy, weth, weth_wh } from '../../../assets';
 import { robinhood } from '../../../chains';
 import {
   toHydrationViaNttExecutorNativeTemplate,
@@ -11,6 +11,7 @@ import {
 const toHydrationViaNtt: AssetRoute[] = [
   toHydrationViaNttTemplate(hdx, hdx),
   toHydrationViaNttTemplate(hollar, hollar),
+  toHydrationViaNttTemplate(spy, spy),
   toHydrationViaNttTemplate(weth, weth_wh),
   toHydrationViaNttTemplate(eth, weth_wh),
 ];
@@ -18,6 +19,7 @@ const toHydrationViaNtt: AssetRoute[] = [
 const toHydrationViaNttExecutor: AssetRoute[] = [
   toHydrationViaNttExecutorTemplate(hdx, hdx),
   toHydrationViaNttExecutorTemplate(hollar, hollar),
+  toHydrationViaNttExecutorTemplate(spy, spy),
   toHydrationViaNttExecutorTemplate(weth, weth_wh),
   toHydrationViaNttExecutorNativeTemplate(eth, weth_wh),
 ];

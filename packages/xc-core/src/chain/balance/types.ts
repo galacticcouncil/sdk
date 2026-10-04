@@ -27,6 +27,8 @@ export enum SuiBalanceType {
 /** Near balance storages. Owned by {@link NearChain}. */
 export enum NearBalanceType {
   Native = 'NearNative',
+  /** NEP-141 fungible token, keyed by its contract account. */
+  Ft = 'NearFt',
 }
 
 /**

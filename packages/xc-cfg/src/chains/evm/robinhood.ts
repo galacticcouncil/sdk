@@ -4,7 +4,7 @@ import {
   EvmBalanceType,
 } from '@galacticcouncil/xc-core';
 
-import { eth, hdx, hollar, weth } from '../../assets';
+import { eth, hdx, hollar, spy, weth } from '../../assets';
 import { robinhood as evmChain } from 'viem/chains';
 
 export const robinhood = new EvmChain({
@@ -31,6 +31,11 @@ export const robinhood = new EvmChain({
       asset: hollar,
       decimals: 18,
       id: '0xD1dc3517732c98502b5c1ba2389AcA9E9016d89a',
+    },
+    {
+      asset: spy,
+      decimals: 18,
+      id: '0x117cc2133c37B721F49dE2A7a74833232B3B4C0C',
     },
   ],
   balance: EvmBalanceType.Erc20,
@@ -74,6 +79,14 @@ export const robinhood = new EvmChain({
         manager: '0xB1A2ABCbC1FA276212f6eD239645161DeeA9861a',
         transceiver: {
           wormhole: '0x1352881a04cb9f9f5fB8442bc925e99EC15D3642',
+        },
+      },
+      // Locking manager - spy is escrowed here, minted on hydration.
+      [spy.key]: {
+        token: '0x117cc2133c37B721F49dE2A7a74833232B3B4C0C',
+        manager: '0x963835C20884dE59E6988030eB49D4D0eA24a26d',
+        transceiver: {
+          wormhole: '0x283B14B5Dd352e32154Df014EA96834F395E04b6',
         },
       },
     },

@@ -9,6 +9,7 @@ const CHAINS = [
   'ethereum',
   'base',
   'robinhood',
+  'hyperevm',
   'solana',
   'sui',
 ];
