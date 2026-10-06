@@ -15,7 +15,7 @@ import { EvmRpcAdapter } from './adapter';
 import { BlockAt } from '../api';
 
 export class EvmClient {
-  private client: PolkadotClient;
+  readonly client: PolkadotClient;
   private at: BlockAt;
 
   readonly chain: Chain;

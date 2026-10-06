@@ -14,9 +14,9 @@ class GetMaxWithdrawAll extends PapiExecutor {
 
     const { api } = sdk;
 
-    const all = await api.aave.getMaxWithdrawAll(BENEFICIARY);
-    for (const [aTokenId, { amount, decimals }] of all) {
-      console.log(aTokenId, big.toDecimal(amount, decimals));
+    const result = await api.aave.getMaxWithdrawAll(BENEFICIARY);
+    for (const [key, value] of Object.entries(result)) {
+      console.log(key, '=>', big.toDecimal(value.amount, value.decimals));
     }
 
     return () => {
@@ -26,7 +26,4 @@ class GetMaxWithdrawAll extends PapiExecutor {
   }
 }
 
-new GetMaxWithdrawAll(
-  ApiUrl.Hydration,
-  'Get max withdraw of every aToken'
-).run();
+new GetMaxWithdrawAll(ApiUrl.Hydration, 'Get max withdraw all').run();

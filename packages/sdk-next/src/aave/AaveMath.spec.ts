@@ -1,37 +1,31 @@
 import {
   INVALID_HF,
   accrueBalance,
+  healthFactorFromBalances,
   isBorrowingAny,
   isUsingAsCollateral,
   maxWithdraw,
   projectHealthFactor,
-  toHealthFactor,
   toRef,
 } from './AaveMath';
-import { AaveMarketReserve, AaveMarketSummary } from './types';
+import { AaveReserveData, AaveSummary } from './types';
 
 /** 2 decimals, price 1: one whole token (100 native) is worth 1 reference unit */
-const reserve = (over: Partial<AaveMarketReserve> = {}): AaveMarketReserve => ({
-  aToken: '0x00000000000000000000000000000000000000a1',
-  aTokenId: 1001,
-  underlying: '0x0000000000000000000000000000000100000005',
-  underlyingId: 5,
+const reserve = (over: Partial<AaveReserveData> = {}): AaveReserveData => ({
   aTokenBalance: 100_000n,
   availableLiquidity: 1_000_000n,
   decimals: 2,
-  priceInRef: 1n,
-  liquidationThreshold: 0.8,
   isCollateral: true,
+  priceInRef: 1n,
+  reserveId: 5,
+  reserveAsset: '0x0000000000000000000000000000000100000005',
+  reserveLiquidationThreshold: 0.8,
+  aToken: '0x00000000000000000000000000000000000000a1',
   isCollateralOnSupply: true,
   ...over,
 });
 
-const summary = (over: Partial<AaveMarketSummary> = {}): AaveMarketSummary => ({
-  market: {
-    pool: '0x00000000000000000000000000000000000000b1',
-    provider: '0x00000000000000000000000000000000000000c1',
-    tradeable: true,
-  },
+const summary = (over: Partial<AaveSummary> = {}): AaveSummary => ({
   healthFactor: 2,
   currentLiquidationThreshold: 0.8,
   totalCollateral: 2_500n,
@@ -55,13 +49,19 @@ describe('user configuration', () => {
   });
 });
 
-describe('toHealthFactor', () => {
+describe('healthFactorFromBalances', () => {
   it('reports INVALID_HF without debt', () => {
-    expect(toHealthFactor(0n, 2n ** 256n - 1n)).toBe(INVALID_HF);
+    expect(healthFactorFromBalances(0n, 2_500n, 8_000n)).toBe(INVALID_HF);
   });
 
-  it('decodes the wad health factor', () => {
-    expect(toHealthFactor(1_000n, 1_234_567_000_000_000_000n)).toBe(1.234567);
+  it('weighs collateral by the liquidation threshold', () => {
+    // 2500 x 0.8 / 1000
+    expect(healthFactorFromBalances(1_000n, 2_500n, 8_000n)).toBe(2);
+  });
+
+  it('truncates to the threshold precision', () => {
+    // 1235 x 0.8001 / 1000 = 0.98812...
+    expect(healthFactorFromBalances(1_000n, 1_235n, 8_001n)).toBe(0.9881);
   });
 });
 
@@ -135,7 +135,7 @@ describe('projectHealthFactor', () => {
     const hf = projectHealthFactor(summary(), [
       { reserve: reserve(), amount: -25_000n },
       {
-        reserve: reserve({ liquidationThreshold: 0.5 }),
+        reserve: reserve({ reserveLiquidationThreshold: 0.5 }),
         amount: 25_000n,
       },
     ]);
@@ -160,7 +160,10 @@ describe('maxWithdraw', () => {
   it('caps collateral so the health factor stays at 1.01', () => {
     // (2.01 - 1.01) x 1000 / 0.5 = 2000 ref = 200000 native
     const s = summary({ healthFactor: 2.01 });
-    const r = reserve({ liquidationThreshold: 0.5, aTokenBalance: 1_000_000n });
+    const r = reserve({
+      reserveLiquidationThreshold: 0.5,
+      aTokenBalance: 1_000_000n,
+    });
     expect(maxWithdraw(s, r)).toEqual({ amount: 200_000n, decimals: 2 });
   });
 

@@ -14,11 +14,7 @@ class GetMaxWithdraw extends PapiExecutor {
 
     const { api } = sdk;
 
-    // aDOT: capped by the main market's health factor and liquidity
-    const { amount, decimals } = await api.aave.getMaxWithdraw(
-      BENEFICIARY,
-      1001
-    );
+    const { amount, decimals } = await api.aave.getMaxWithdraw(BENEFICIARY, 15);
     console.log(big.toDecimal(amount, decimals));
 
     return () => {

@@ -2,7 +2,7 @@ import { AbiDecodingZeroDataError } from 'viem';
 
 import { AaveClient } from './AaveClient';
 import { AAVE_MARKETS } from './const';
-import { AaveAToken, AaveMarket } from './types';
+import { AaveMarket } from './types';
 
 import { Erc20Client } from '../client/Erc20Client';
 import { EvmReadError, H160 } from '../evm';
@@ -10,6 +10,15 @@ import { assetIdFromAddress } from '../pool/amm/assetAddress';
 import { memo } from '../utils/async';
 
 const lower = (a: string) => a.toLowerCase() as H160;
+
+/** An aToken the asset registry knows, with the market it belongs to */
+export type AaveAToken = {
+  aTokenId: number;
+  aToken: H160;
+  underlying: H160;
+  underlyingId: number | null;
+  market: AaveMarket;
+};
 
 /**
  * Whether a failed read settles the question for good.
@@ -50,31 +59,34 @@ export class AaveMarkets {
   }
 
   /**
-   * The listed aToken behind an asset, or `null` when it is not one.
+   * The aToken of a tradeable market behind an asset, or `null` when it is
+   * not one.
    *
    * - A non-`Erc20` asset resolves with no EVM read
    *
    * @param assetId - asset id
-   * @param tradeable - look in tradeable markets only
    */
-  async getAToken(
-    assetId: number,
-    tradeable = false
-  ): Promise<AaveAToken | null> {
+  async getTradeableAToken(assetId: number): Promise<AaveAToken | null> {
     const ids = await this.erc20.getIds();
     if (!ids.includes(assetId)) return null;
-    const aTokens = await this.list(tradeable);
-    return aTokens.find((t) => t.aTokenId === assetId) ?? null;
+    const tradeable = this.markets.filter((m) => m.tradeable);
+    const lists = await Promise.all(tradeable.map((m) => this.list(m)));
+    return lists.flat().find((t) => t.aTokenId === assetId) ?? null;
   }
 
   /**
-   * Every registered aToken across all markets.
+   * The first market listing a reserve, or `null` when none does.
    *
-   * - Rejects rather than returning a partial list when a read fails
+   * - Markets are read in order and the scan stops at the first match
+   *
+   * @param reserve - reserve asset id
    */
-  async getATokens(): Promise<AaveAToken[]> {
-    const aTokens = await this.list(false);
-    return aTokens.sort((a, b) => a.aTokenId - b.aTokenId);
+  async getMarket(reserve: number): Promise<AaveMarket | null> {
+    for (const market of this.markets) {
+      const aTokens = await this.list(market);
+      if (aTokens.some((t) => t.underlyingId === reserve)) return market;
+    }
+    return null;
   }
 
   /**
@@ -115,14 +127,8 @@ export class AaveMarkets {
     }
   }
 
-  private async list(tradeable: boolean): Promise<AaveAToken[]> {
-    const markets = tradeable
-      ? this.markets.filter((m) => m.tradeable)
-      : this.markets;
-    const lists = await Promise.all(
-      markets.map((m) => memo(this.listings, m.provider, () => this.read(m)))
-    );
-    return lists.flat();
+  private list(market: AaveMarket): Promise<AaveAToken[]> {
+    return memo(this.listings, market.provider, () => this.read(market));
   }
 
   /**

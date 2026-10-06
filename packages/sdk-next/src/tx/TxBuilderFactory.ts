@@ -2,7 +2,6 @@ import { PolkadotClient } from 'polkadot-api';
 
 import { AaveUtils } from '../aave';
 import { BlockAt } from '../api';
-import { Erc20Client } from '../client/Erc20Client';
 import { EvmClient } from '../evm';
 import { Trade, TradeOrder } from '../sor';
 
@@ -34,7 +33,7 @@ export class TxBuilderFactory {
     this.client = client;
     this.evmClient = evmClient;
     this.at = at;
-    this.aave = aave ?? new AaveUtils(evmClient, new Erc20Client(client));
+    this.aave = aave ?? new AaveUtils(evmClient);
   }
 
   trade(trade: Trade): TradeTxBuilder {

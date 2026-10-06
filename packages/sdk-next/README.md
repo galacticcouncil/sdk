@@ -130,18 +130,16 @@ No `destroy()` needed — the provider holds no subscriptions.
 
 ### AaveUtils
 
-Every market in `AAVE_MARKETS` is supported, its aTokens listed from the chain. Assets are aToken asset ids.
+Every market in `AAVE_MARKETS` is supported. `reserve` picks the first market listing it (main for shared reserves); without it, the main market is read.
 
 | Method | Description  |
 | :----- | :----------- |
-| `getATokens(): AaveAToken[]` | Every registered aToken with its market. |
-| `requiresExtraGas(user: string, asset: number, assumeCollateral?: boolean): boolean` | Whether trading `asset` away runs Aave's HF check. Tradeable markets only. |
-| `getSummary(user: string, aToken: number): AaveMarketSummary` | User position in the aToken's market. |
-| `getHealthFactor(user: string, aToken: number): number` | HF in the aToken's market, `-1` without debt. |
-| `previewWithdraw(user: string, aToken: number, amount: string): AaveHealthFactorPreview` | HF now and after withdraw. Also the HF Aave checks when the aToken is swapped away. |
-| `previewSupply(user: string, aToken: number, amount: string): AaveHealthFactorPreview` | HF now and after supply. |
-| `getMaxWithdraw(user: string, aToken: number): Amount` | Max safe withdraw, within the free balance. |
-| `getMaxWithdrawAll(user: string): Map<number, Amount>` | Max safe withdraw of every aToken. |
+| `getSummary(user: string, reserve?: number): AaveSummary` | Returns market summary. |
+| `getHealthFactor(user: string, reserve?: number): number` | Calculate HF. |
+| `getHealthFactorAfterWithdraw(user: string, reserve:number, withdrawAmount: string): number` | Calculate HF after withdraw. |
+| `getHealthFactorAfterSupply(user: string, reserve:number, supplyAmount: string): number` | Calculate HF after supply. |
+| `getMaxWithdraw(user: string, reserve:number): Amount` | Get max possible safe withdraw. |
+| `requiresExtraGas(user: string, asset: number): boolean` | Whether trading `asset` away runs Aave's HF check. |
 
 ➡️ For type definitions visit [types.ts](src/aave/types.ts)<br />
 

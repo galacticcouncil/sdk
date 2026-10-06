@@ -2,7 +2,7 @@ import Big from 'big.js';
 
 import { big } from '@galacticcouncil/common';
 
-import { AaveMarketReserve, AaveMarketSummary } from './types';
+import { AaveReserveData, AaveSummary } from './types';
 
 import { Amount } from '../types';
 
@@ -12,21 +12,29 @@ export const INVALID_HF = -1;
 /** Health factor a max withdraw leaves behind */
 export const TARGET_WITHDRAW_HF = 1.01;
 
+/** Decimals of an Aave liquidation threshold (bps) */
+export const LTV_PRECISION = 4;
+
 /**
- * The health factor Aave reports, as a number.
+ * Health factor from a user's aggregate position.
  *
- * - `INVALID_HF` without debt, where Aave reports the max uint256
+ * - `INVALID_HF` without debt
+ * - Truncated to the liquidation threshold precision
+ *
+ * @see https://github.com/aave/aave-utilities/blob/432e283b2e76d9793b20d37bd4cb94aca97ed20e/packages/math-utils/src/pool-math.ts#L139
  *
  * @param totalDebt - the user's debt in the reference currency
- * @param healthFactor - on-chain health factor (wad)
+ * @param totalCollateral - the user's collateral in the reference currency
+ * @param currentLiquidationThreshold - weighted liquidation threshold (bps)
  */
-export function toHealthFactor(
+export function healthFactorFromBalances(
   totalDebt: bigint,
-  healthFactor: bigint
+  totalCollateral: bigint,
+  currentLiquidationThreshold: bigint
 ): number {
-  return totalDebt === 0n
-    ? INVALID_HF
-    : Number(big.toDecimal(healthFactor, 18));
+  if (totalDebt === 0n) return INVALID_HF;
+  const hf = (totalCollateral * currentLiquidationThreshold) / totalDebt;
+  return Number(big.toDecimal(hf, LTV_PRECISION));
 }
 
 const RAY = 10n ** 27n;
@@ -39,7 +47,7 @@ const BORROWING_MASK = BigInt(
 
 /** A signed change of one reserve's aToken balance, in native units */
 export type AaveBalanceDelta = {
-  reserve: AaveMarketReserve;
+  reserve: AaveReserveData;
   amount: bigint;
 };
 
@@ -111,7 +119,7 @@ export function toRef(amount: bigint, price: bigint, decimals: number): bigint {
  * @param deltas - signed balance changes, native units
  */
 export function projectHealthFactor(
-  summary: AaveMarketSummary,
+  summary: AaveSummary,
   deltas: AaveBalanceDelta[]
 ): number {
   const { healthFactor, totalDebt } = summary;
@@ -122,7 +130,9 @@ export function projectHealthFactor(
       amount < 0n ? reserve.isCollateral : reserve.isCollateralOnSupply;
     if (!counts || amount === 0n) return acc;
     const valueRef = toRef(amount, reserve.priceInRef, reserve.decimals);
-    return acc.plus(Big(valueRef.toString()).mul(reserve.liquidationThreshold));
+    return acc.plus(
+      Big(valueRef.toString()).mul(reserve.reserveLiquidationThreshold)
+    );
   }, Big(0));
 
   const projected = Big(healthFactor).plus(
@@ -144,8 +154,8 @@ export function projectHealthFactor(
  * @param freeBalance - unlocked balance, when the aToken is lockable
  */
 export function maxWithdraw(
-  summary: AaveMarketSummary,
-  reserve: AaveMarketReserve,
+  summary: AaveSummary,
+  reserve: AaveReserveData,
   freeBalance?: bigint
 ): Amount {
   const { healthFactor, totalDebt } = summary;
@@ -154,7 +164,7 @@ export function maxWithdraw(
     availableLiquidity,
     decimals,
     priceInRef,
-    liquidationThreshold,
+    reserveLiquidationThreshold,
     isCollateral,
   } = reserve;
 
@@ -165,7 +175,7 @@ export function maxWithdraw(
     if (excessHF.gt(0)) {
       const maxRef = excessHF
         .mul(totalDebt.toString())
-        .div(liquidationThreshold)
+        .div(reserveLiquidationThreshold)
         .toFixed(0, Big.roundDown);
 
       const hfCapped = BigInt(

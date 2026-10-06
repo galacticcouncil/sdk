@@ -5,7 +5,11 @@ import {
   AAVE_POOL_ABI,
   AAVE_POOL_DATA_PROVIDER_ABI,
 } from './abi';
-import { AAVE_POOL_DATA_PROVIDER } from './const';
+import {
+  AAVE_LENDING_POOL_ADDRESS,
+  AAVE_POOL_DATA_PROVIDER,
+  AAVE_POOL_PROXY,
+} from './const';
 
 import { EvmClient, H160 } from '../evm';
 import { READ_TIMEOUT, withTimeout } from '../utils/async';
@@ -36,9 +40,9 @@ export class AaveClient {
   /**
    * Every reserve of a market.
    *
-   * @param provider - market's addresses provider
+   * @param provider - market's addresses provider, main when omitted
    */
-  getReservesData(provider: string) {
+  getReservesData(provider: string = AAVE_LENDING_POOL_ADDRESS) {
     return this.read(
       `getReservesData ${provider}`,
       this.client.readContract({
@@ -54,9 +58,12 @@ export class AaveClient {
    * A user's reserves in a market.
    *
    * @param user - user H160
-   * @param provider - market's addresses provider
+   * @param provider - market's addresses provider, main when omitted
    */
-  getUserReservesData(user: string, provider: string) {
+  getUserReservesData(
+    user: string,
+    provider: string = AAVE_LENDING_POOL_ADDRESS
+  ) {
     return this.read(
       `getUserReservesData ${provider}`,
       this.client.readContract({
@@ -72,9 +79,9 @@ export class AaveClient {
    * A user's aggregate position in a market.
    *
    * @param user - user H160
-   * @param pool - market's pool
+   * @param pool - market's pool, main when omitted
    */
-  getUserAccountData(user: string, pool: string) {
+  getUserAccountData(user: string, pool: string = AAVE_POOL_PROXY) {
     return this.read(
       `getUserAccountData ${pool}`,
       this.client.readContract({

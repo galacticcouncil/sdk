@@ -7,20 +7,23 @@ export const AAVE_POOL_DATA_PROVIDER =
 export const AAVE_LENDING_POOL_ADDRESS =
   '0xf3Ba4D1b50f78301BDD7EAEa9B67822A15FCA691';
 
+/** Main Aave v3 market */
+export const AAVE_MAIN_MARKET: AaveMarket = {
+  pool: AAVE_POOL_PROXY,
+  provider: AAVE_LENDING_POOL_ADDRESS,
+  tradeable: true,
+};
+
 /**
  * Aave v3 markets.
  *
  * - aTokens are listed from each market's reserves, so a new reserve needs
  *   no config
+ * - A reserve listed in several markets resolves to the first; main leads
  * - Only `tradeable` markets count when a trade decides on extra gas
  */
 export const AAVE_MARKETS: readonly AaveMarket[] = [
-  // main
-  {
-    pool: AAVE_POOL_PROXY,
-    provider: AAVE_LENDING_POOL_ADDRESS,
-    tradeable: true,
-  },
+  AAVE_MAIN_MARKET,
   // BIL
   {
     pool: '0x69310FdA58c819aD82df7d2Cb61841C853337a53',
