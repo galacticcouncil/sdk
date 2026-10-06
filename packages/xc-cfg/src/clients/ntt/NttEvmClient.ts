@@ -13,6 +13,16 @@ import { NttClient, NttRateLimit, nttDef, UNMETERED } from './types';
 // Upstream DEFAULT_EXECUTOR_GAS_LIMIT (evm/ts/src/executorGasLimits.ts).
 const GAS_LIMIT = 500_000n;
 
+/**
+ * Executor gas limits that outgrow the default, by destination chain key.
+ *
+ * - robinhood: arbitrum orbit, so the vaa's L1 calldata is billed as gas on
+ *   top of execution; 800k is upstream's arbitrum value
+ */
+const GAS_LIMIT_OVERRIDES: Record<string, bigint> = {
+  robinhood: 800_000n,
+};
+
 const MODE_LOCKING = 0;
 
 // TrimmedAmount is a uint72 - `amount << 8 | decimals`.
@@ -36,9 +46,14 @@ export class NttEvmClient implements NttClient {
     return this.getLimit(Wh.fromChain(from).getWormholeId());
   }
 
-  /** An evm redeem holds nothing - receiveMessage moves no value. */
+  /**
+   * An evm redeem holds nothing - receiveMessage moves no value.
+   *
+   * - Gas is the destination's override, else the upstream default
+   */
   async getRedeemBudget(): Promise<ExecutorBudget> {
-    return { gasLimit: GAS_LIMIT, msgValue: 0n };
+    const gasLimit = GAS_LIMIT_OVERRIDES[this.chain.key] ?? GAS_LIMIT;
+    return { gasLimit: gasLimit, msgValue: 0n };
   }
 
   /**
