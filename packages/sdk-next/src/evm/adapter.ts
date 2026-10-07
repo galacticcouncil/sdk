@@ -10,6 +10,28 @@ import { BlockAt } from '../api';
 
 const GAS_LIMIT = 10_000_000n;
 
+/** Why a runtime EVM read did not succeed */
+export type EvmReadFailure = 'Dispatch' | 'Revert' | 'Error' | 'Fatal';
+
+/**
+ * A runtime EVM read that did not succeed.
+ *
+ * - `reason` is the runtime's exit reason
+ * - A revert is told apart from a transport failure without matching messages
+ * - `Dispatch` means the runtime call itself failed before the EVM ran
+ */
+export class EvmReadError extends Error {
+  readonly functionName: string;
+  readonly reason: EvmReadFailure;
+
+  constructor(functionName: string, reason: EvmReadFailure, detail: string) {
+    super(`Contract read ${reason}: ${functionName} (${detail})`);
+    this.name = 'EvmReadError';
+    this.functionName = functionName;
+    this.reason = reason;
+  }
+}
+
 export class EvmRpcAdapter {
   private api: TypedApi<typeof hydration>;
   private at: BlockAt;
@@ -61,8 +83,7 @@ export class EvmRpcAdapter {
     );
 
     if (!result.success) {
-      console.error(functionName, result.value.type);
-      throw new Error('Contract read failure');
+      throw new EvmReadError(functionName, 'Dispatch', result.value.type);
     }
 
     const { exit_reason, value, used_gas } = result.value;
@@ -79,7 +100,10 @@ export class EvmRpcAdapter {
         data: Binary.toHex(value) as `0x${string}`,
       });
     }
-    console.log(functionName, exit_reason.type, exit_reason.value.type);
-    throw new Error('Contract read error');
+    throw new EvmReadError(
+      functionName,
+      exit_reason.type,
+      exit_reason.value.type
+    );
   }) as PublicClient['readContract'];
 }

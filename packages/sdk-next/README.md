@@ -130,13 +130,16 @@ No `destroy()` needed — the provider holds no subscriptions.
 
 ### AaveUtils
 
+Every market in `AAVE_MARKETS` is supported. `reserve` picks the first market listing it (main for shared reserves); without it, the main market is read.
+
 | Method | Description  |
 | :----- | :----------- |
-| `getSummary(user: string): AaveSummary` | Returns market summary. |
-| `getHealthFactor(user: string): number` | Calculate HF. |
+| `getSummary(user: string, reserve?: number): AaveSummary` | Returns market summary. |
+| `getHealthFactor(user: string, reserve?: number): number` | Calculate HF. |
 | `getHealthFactorAfterWithdraw(user: string, reserve:number, withdrawAmount: string): number` | Calculate HF after withdraw. |
 | `getHealthFactorAfterSupply(user: string, reserve:number, supplyAmount: string): number` | Calculate HF after supply. |
 | `getMaxWithdraw(user: string, reserve:number): Amount` | Get max possible safe withdraw. |
+| `requiresExtraGas(user: string, asset: number): boolean` | Whether trading `asset` away runs Aave's HF check. |
 
 ➡️ For type definitions visit [types.ts](src/aave/types.ts)<br />
 

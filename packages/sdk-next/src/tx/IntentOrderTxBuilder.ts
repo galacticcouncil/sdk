@@ -82,8 +82,7 @@ export class IntentOrderTxBuilder extends TxBuilder {
       },
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 
@@ -119,8 +118,7 @@ export class IntentOrderTxBuilder extends TxBuilder {
       },
     });
 
-    const hasDebt = await this.aaveUtils.hasBorrowPositions(this.beneficiary);
-    if (hasDebt) {
+    if (await this.aaveUtils.requiresExtraGas(this.beneficiary, assetIn)) {
       tx = await this.dispatchWithExtraGas(tx);
     }
 

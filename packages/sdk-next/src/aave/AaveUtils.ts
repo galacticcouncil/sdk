@@ -1,135 +1,82 @@
-import Big from 'big.js';
-
-import { big, erc20, h160 } from '@galacticcouncil/common';
+import { big, h160 } from '@galacticcouncil/common';
 
 import { AaveClient } from './AaveClient';
-import { AaveSummary, AaveReserveData } from './types';
+import { AaveMarkets } from './AaveMarkets';
+import {
+  AaveBalanceDelta,
+  INVALID_HF,
+  LTV_PRECISION,
+  accrueBalance,
+  healthFactorFromBalances,
+  isBorrowingAny,
+  isUsingAsCollateral,
+  maxWithdraw,
+  projectHealthFactor,
+} from './AaveMath';
+import { AAVE_MAIN_MARKET, AAVE_MARKETS } from './const';
+import { AaveMarket, AaveReserveData, AaveSummary } from './types';
 
+import { Erc20Client } from '../client/Erc20Client';
 import { BLOCK_TIME_TARGET } from '../consts';
 import { EvmClient } from '../evm';
+import { assetIdFromAddress } from '../pool/amm/assetAddress';
 import { Amount } from '../types';
 
-const { ERC20 } = erc20;
 const { H160 } = h160;
 
 const BLOCK_TIME_SEC = BLOCK_TIME_TARGET / 1000;
-const TARGET_WITHDRAW_HF = 1.01;
-const SECONDS_PER_YEAR = 31536000n;
-const LTV_PRECISION = 4;
-const INVALID_HF = -1;
 
-const RAY = 10n ** 27n;
+const lower = (a: string) => a.toLowerCase() as `0x${string}`;
 
+/**
+ * Aave money market reads.
+ *
+ * - `reserve` is the reserve on-chain id (registry); it picks the first
+ *   market in `AAVE_MARKETS` listing it, so a shared reserve resolves to main
+ * - An aToken id is not a reserve id: it matches no market and reads main
+ * - Without a `reserve`, reads go to the main market
+ * - Amounts are decimal strings, health factors plain numbers
+ */
 export class AaveUtils {
   private client: AaveClient;
+  private markets: AaveMarkets;
+  private erc20: Erc20Client;
 
-  constructor(evm: EvmClient) {
+  /**
+   * @param evm - EVM client
+   * @param erc20 - registry ERC20 index; one per instance when omitted
+   */
+  constructor(evm: EvmClient, erc20?: Erc20Client) {
     this.client = new AaveClient(evm);
+    this.erc20 = erc20 ?? new Erc20Client(evm.client);
+    this.markets = new AaveMarkets(this.client, this.erc20);
   }
 
-  async getSummary(user: string): Promise<AaveSummary> {
-    const to = H160.fromAny(user);
-
-    const [poolReserves, userReserves, userData, blockTimestamp] =
-      await Promise.all([
-        this.client.getReservesData(),
-        this.client.getUserReservesData(to),
-        this.client.getUserAccountData(to),
-        this.client.getBlockTimestamp(),
-      ]);
-
-    const [pReserves] = poolReserves;
-    const [uReserves, userEmodeCategoryId] = userReserves;
-    const [
-      totalCollateralBase,
-      totalDebtBase,
-      _availableBorrowsBase,
-      currentLiquidationThreshold,
-      _ltv,
-      healthFactor,
-    ] = userData;
-
-    const hf = big.toDecimal(healthFactor, 18);
-
-    const reserves: AaveReserveData[] = [];
-
-    for (const uReserve of uReserves) {
-      const reserveAsset = uReserve.underlyingAsset.toLowerCase();
-
-      const pReserve = pReserves.find(
-        ({ underlyingAsset }) => underlyingAsset.toLowerCase() === reserveAsset
-      );
-
-      if (!pReserve)
-        throw new Error('Missing pool reserve for ' + reserveAsset);
-
-      const scaledABalance = uReserve.scaledATokenBalance;
-      const liquidityIndex = pReserve.liquidityIndex;
-      const liquidityRate = pReserve.liquidityRate;
-      const availableLiquidity = pReserve.availableLiquidity;
-
-      const priceInRef = pReserve.priceInMarketReferenceCurrency;
-
-      const nextBlockTimestamp = blockTimestamp + BLOCK_TIME_SEC;
-      const linearInterest = this.calculateLinearInterest(
-        liquidityRate,
-        pReserve.lastUpdateTimestamp,
-        nextBlockTimestamp
-      );
-
-      const currLiquidityIndex = (liquidityIndex * linearInterest) / RAY;
-      const aTokenBalance = (scaledABalance * currLiquidityIndex) / RAY;
-
-      const userIsInEmode = userEmodeCategoryId !== 0;
-
-      const rawThreshold = Number(
-        userIsInEmode && userEmodeCategoryId === pReserve.eModeCategoryId
-          ? pReserve.eModeLiquidationThreshold
-          : pReserve.reserveLiquidationThreshold
-      );
-
-      const reserveLiquidationThreshold = rawThreshold / 10000;
-
-      const isCollateral =
-        pReserve.usageAsCollateralEnabled &&
-        uReserve.usageAsCollateralEnabledOnUser &&
-        uReserve.scaledATokenBalance > 0n;
-
-      const reserveId = ERC20.toAssetId(reserveAsset);
-
-      reserves.push({
-        aTokenBalance,
-        availableLiquidity,
-        decimals: Number(pReserve.decimals),
-        isCollateral,
-        priceInRef,
-        reserveId,
-        reserveAsset,
-        reserveLiquidationThreshold,
-      });
-    }
-
-    return {
-      healthFactor: Number(hf),
-      currentLiquidationThreshold: Number(
-        big.toDecimal(currentLiquidationThreshold, LTV_PRECISION)
-      ),
-      totalCollateral: totalCollateralBase,
-      totalDebt: totalDebtBase,
-      reserves: reserves,
-    };
+  /**
+   * Get user market summary
+   *
+   * @param user - user address
+   * @param reserve - reserve on-chain id (registry) picking the market
+   * @returns market summary
+   */
+  async getSummary(user: string, reserve?: number): Promise<AaveSummary> {
+    const market = await this.getMarket(reserve);
+    return this.loadSummary(H160.fromAny(user), market);
   }
 
   /**
    * Check if user has active borrow positions
    *
    * @param user - user address
+   * @param reserve - reserve on-chain id (registry) picking the market
    * @returns true if user has debt, otherwise false
    */
-  async hasBorrowPositions(user: string): Promise<boolean> {
-    const to = H160.fromAny(user);
-    const userData = await this.client.getUserAccountData(to);
-    const [_totalCollateralBase, totalDebtBase] = userData;
+  async hasBorrowPositions(user: string, reserve?: number): Promise<boolean> {
+    const { pool } = await this.getMarket(reserve);
+    const [, totalDebtBase] = await this.client.getUserAccountData(
+      H160.fromAny(user),
+      pool
+    );
     return totalDebtBase > 0n;
   }
 
@@ -137,21 +84,15 @@ export class AaveUtils {
    * Get current user health factor
    *
    * @param user - user address
+   * @param reserve - reserve on-chain id (registry) picking the market
    * @returns health factor decimal value
    */
-  async getHealthFactor(user: string): Promise<number> {
-    const to = H160.fromAny(user);
-    const userData = await this.client.getUserAccountData(to);
-    const [
-      totalCollateralBase,
-      totalDebtBase,
-      _availableBorrowsBase,
-      currentLiquidationThreshold,
-      _ltv,
-      _healthFactor,
-    ] = userData;
+  async getHealthFactor(user: string, reserve?: number): Promise<number> {
+    const { pool } = await this.getMarket(reserve);
+    const [totalCollateralBase, totalDebtBase, , currentLiquidationThreshold] =
+      await this.client.getUserAccountData(H160.fromAny(user), pool);
 
-    return this.calculateHealthFactorFromBalances(
+    return healthFactorFromBalances(
       totalDebtBase,
       totalCollateralBase,
       currentLiquidationThreshold
@@ -160,6 +101,9 @@ export class AaveUtils {
 
   /**
    * Estimate health factor after aToken withdraw
+   *
+   * - Also the health factor Aave checks when the aToken is swapped away:
+   *   the router takes it first, and the swap output lands after the check
    *
    * @param user - user address
    * @param reserve - reserve on-chain id (registry)
@@ -171,47 +115,12 @@ export class AaveUtils {
     reserve: number,
     withdrawAmount: string
   ): Promise<number> {
-    const {
-      totalCollateral,
-      totalDebt,
-      reserves,
-      currentLiquidationThreshold,
-    } = await this.getSummary(user);
+    const summary = await this.getSummary(user, reserve);
+    if (summary.totalDebt === 0n) return INVALID_HF;
 
-    if (totalDebt === 0n) return INVALID_HF;
-
-    const reserveAsset = ERC20.fromAssetId(reserve);
-    const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
-
-    if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserveAsset);
-
-    const { decimals, isCollateral, priceInRef, reserveLiquidationThreshold } =
-      reserveCtx;
-
-    const withdrawAmountNative = big.toBigInt(withdrawAmount, decimals);
-
-    // Convert withdraw amount to reference currency units
-    const withdrawRef = isCollateral
-      ? (withdrawAmountNative * priceInRef) / 10n ** BigInt(decimals)
-      : 0n;
-
-    const adjustedCollateral = totalCollateral - withdrawRef;
-
-    // HF = 0 if no collateral
-    if (adjustedCollateral <= 0n) return 0;
-
-    const weightedLT = Big(totalCollateral.toString())
-      .mul(currentLiquidationThreshold)
-      .minus(Big(withdrawRef.toString()).mul(reserveLiquidationThreshold))
-      .div(adjustedCollateral.toString());
-
-    // HF = (C * LT) / B
-    const healthFactor = Big(adjustedCollateral.toString())
-      .mul(weightedLT)
-      .div(totalDebt.toString())
-      .toFixed(6, Big.roundDown);
-
-    return Number(healthFactor);
+    return projectHealthFactor(summary, [
+      this.delta(summary, reserve, withdrawAmount, true),
+    ]);
   }
 
   /**
@@ -227,49 +136,21 @@ export class AaveUtils {
     reserve: number,
     supplyAmount: string
   ): Promise<number> {
-    const {
-      totalCollateral,
-      totalDebt,
-      reserves,
-      currentLiquidationThreshold,
-    } = await this.getSummary(user);
+    const summary = await this.getSummary(user, reserve);
+    if (summary.totalDebt === 0n) return INVALID_HF;
 
-    if (totalDebt === 0n) return INVALID_HF;
-
-    const reserveAsset = ERC20.fromAssetId(reserve);
-    const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
-
-    if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserveAsset);
-
-    const { decimals, priceInRef, reserveLiquidationThreshold } = reserveCtx;
-
-    const supplyAmountNative = big.toBigInt(supplyAmount, decimals);
-
-    // Convert supply amount to reference currency units
-    const supplyRef =
-      (supplyAmountNative * priceInRef) / 10n ** BigInt(decimals);
-
-    const newCollateral = totalCollateral + supplyRef;
-
-    // Avoid division by zero, HF = 0
-    if (newCollateral <= 0n) return 0;
-
-    const weightedLT = Big(totalCollateral.toString())
-      .mul(currentLiquidationThreshold)
-      .plus(Big(supplyRef.toString()).mul(reserveLiquidationThreshold))
-      .div(newCollateral.toString());
-
-    // HF = (C * LT) / B
-    const healthFactor = Big(newCollateral.toString())
-      .mul(weightedLT)
-      .div(totalDebt.toString())
-      .toFixed(6, Big.roundDown);
-
-    return Number(healthFactor);
+    return projectHealthFactor(summary, [
+      this.delta(summary, reserve, supplyAmount, false),
+    ]);
   }
 
   /**
    * Estimate health factor after swapping between reserves
+   *
+   * - Health factor of the `fromReserve` market once both legs settle
+   * - A `toReserve` of another market leaves it unchanged
+   * - Aave checks the health factor before the `toReserve` leg lands;
+   *   `getHealthFactorAfterWithdraw` gives the one it checks
    *
    * @param user - user address
    * @param fromAmount - amount to withdraw (decimal)
@@ -285,189 +166,265 @@ export class AaveUtils {
     toAmount: string,
     toReserve: number
   ): Promise<number> {
-    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+    const [market, toMarket] = await Promise.all([
+      this.getMarket(fromReserve),
+      this.getMarket(toReserve),
+    ]);
 
-    if (totalDebt === 0n) return INVALID_HF;
+    const summary = await this.loadSummary(H160.fromAny(user), market);
+    if (summary.totalDebt === 0n) return INVALID_HF;
 
-    const fromReserveAsset = ERC20.fromAssetId(fromReserve);
-    const toReserveAsset = ERC20.fromAssetId(toReserve);
-
-    const fromReserveCtx = reserves.find(
-      (r) => r.reserveAsset === fromReserveAsset
-    );
-
-    const toReserveCtx = reserves.find(
-      (r) => r.reserveAsset === toReserveAsset
-    );
-
-    if (!fromReserveCtx)
-      throw new Error(`Missing reserve ctx for ${fromReserveAsset}`);
-
-    if (!toReserveCtx) {
-      throw new Error(`Missing reserve ctx for ${toReserveCtx}`);
+    const deltas = [this.delta(summary, fromReserve, fromAmount, true)];
+    if (toMarket === market) {
+      deltas.push(this.delta(summary, toReserve, toAmount, false));
     }
-
-    const fromAmountNative = big.toBigInt(fromAmount, fromReserveCtx.decimals);
-    const toAmountNative = big.toBigInt(toAmount, toReserveCtx.decimals);
-
-    const fromValueInRef =
-      (fromAmountNative * fromReserveCtx.priceInRef) /
-      10n ** BigInt(fromReserveCtx.decimals);
-
-    const toValueInRef =
-      (toAmountNative * toReserveCtx.priceInRef) /
-      10n ** BigInt(toReserveCtx.decimals);
-
-    const fromWeightedCollateral = fromReserveCtx.isCollateral
-      ? Big(fromValueInRef.toString()).mul(
-          fromReserveCtx.reserveLiquidationThreshold
-        )
-      : Big(0);
-
-    const toWeightedCollateral = toReserveCtx.isCollateral
-      ? Big(toValueInRef.toString()).mul(
-          toReserveCtx.reserveLiquidationThreshold
-        )
-      : Big(0);
-
-    const weightedCollateralDelta = toWeightedCollateral.minus(
-      fromWeightedCollateral
-    );
-    const hfDelta = weightedCollateralDelta.div(totalDebt.toString());
-    const hfAfterSwap = Big(healthFactor)
-      .plus(hfDelta)
-      .toFixed(6, Big.roundDown);
-
-    return Number(hfAfterSwap);
+    return projectHealthFactor(summary, deltas);
   }
 
   /**
    * Get MAX withdraw balance for given user reserve
+   *
+   * - Keeps the health factor at 1.01, within available liquidity, and within
+   *   the unlocked balance of a lockable aToken
    *
    * @param user - user address
    * @param reserve - reserve on-chain id (registry)
    * @returns aToken max withdrawable balance
    */
   async getMaxWithdraw(user: string, reserve: number): Promise<Amount> {
-    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
-
-    const reserveAsset = ERC20.fromAssetId(reserve);
-    const reserveCtx = reserves.find((r) => r.reserveAsset === reserveAsset);
-
-    if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserveAsset);
-
-    return this.calculateWithdrawMax(reserveCtx, totalDebt, healthFactor);
+    const to = H160.fromAny(user);
+    const market = await this.getMarket(reserve);
+    const summary = await this.loadSummary(to, market);
+    return this.withdrawMax(to, summary, this.findReserve(summary, reserve));
   }
 
   /**
    * Get MAX withdraw balances for all user reserves
    *
+   * - Covers every market, read in parallel from one block timestamp
+   * - A reserve listed in several markets keeps its main market entry
+   *
    * @param user - user address
    * @returns aTokens max withdrawable balances
    */
   async getMaxWithdrawAll(user: string): Promise<Record<number, Amount>> {
-    const { totalDebt, reserves, healthFactor } = await this.getSummary(user);
+    const to = H160.fromAny(user);
+    const timestamp = await this.client.getBlockTimestamp();
+
+    const summaries = await Promise.all(
+      AAVE_MARKETS.map((market) => this.loadSummary(to, market, timestamp))
+    );
+    const rows = await Promise.all(
+      summaries.flatMap((summary) =>
+        summary.reserves.map(async (reserve) => ({
+          reserveId: reserve.reserveId,
+          amount: await this.withdrawMax(to, summary, reserve),
+        }))
+      )
+    );
 
     const result: Record<number, Amount> = {};
-
-    for (const reserve of reserves) {
-      const amount = this.calculateWithdrawMax(
-        reserve,
-        totalDebt,
-        healthFactor
-      );
-
-      if (reserve.reserveId) {
-        result[reserve.reserveId] = amount;
+    for (const { reserveId, amount } of rows) {
+      if (reserveId !== null && !(reserveId in result)) {
+        result[reserveId] = amount;
       }
     }
     return result;
   }
 
   /**
-   * Calculate maxWithdraw using following formula:
+   * Whether trading an asset away runs Aave's health factor check, so the
+   * transaction needs `AAVE_GAS_LIMIT` extra gas.
    *
-   * maxWithdraw = (HF - 1.01 x totalDebt) / reserveLT
+   * - Aave checks only when the user borrows in that market and uses the
+   *   aToken's reserve as collateral
+   * - Only tradeable markets are read; an aToken of any other market
+   *   resolves `false`
+   * - A non-`Erc20` asset resolves without an EVM read
+   * - The reserve index is read only when the user borrows in that market
+   *
+   * @param user - account moving the asset
+   * @param asset - asset id leaving the account
    */
-  private calculateWithdrawMax(
-    reserve: AaveReserveData,
-    totalDebt: bigint,
-    currentHF: number
-  ) {
-    const {
-      aTokenBalance,
-      availableLiquidity,
-      decimals,
-      priceInRef,
-      reserveLiquidationThreshold,
-      isCollateral,
-    } = reserve;
+  async requiresExtraGas(user: string, asset: number): Promise<boolean> {
+    const aToken = await this.markets.getTradeableAToken(asset);
+    if (!aToken) return false;
 
-    let maxWithdrawableTokens = aTokenBalance;
+    const config = await this.client.getUserConfiguration(
+      H160.fromAny(user),
+      aToken.market.pool
+    );
+    if (!isBorrowingAny(config)) return false;
 
-    // If the asset is used as collateral and user has debt, compute HF-limited max
-    if (isCollateral && totalDebt > 0n) {
-      const excessHF = currentHF - TARGET_WITHDRAW_HF;
-
-      if (excessHF > 0) {
-        const maxCollateralToWithdrawInRef = Big(excessHF)
-          .mul(totalDebt.toString())
-          .div(reserveLiquidationThreshold)
-          .toFixed(0, Big.roundDown);
-
-        const hfCapped = Big(maxCollateralToWithdrawInRef)
-          .div(priceInRef.toString())
-          .mul(10 ** decimals)
-          .toFixed(0, Big.roundDown);
-
-        maxWithdrawableTokens =
-          aTokenBalance < BigInt(hfCapped) ? aTokenBalance : BigInt(hfCapped);
-      } else {
-        maxWithdrawableTokens = 0n;
-      }
-    }
-
-    const maxOrCap =
-      maxWithdrawableTokens < availableLiquidity
-        ? maxWithdrawableTokens
-        : availableLiquidity;
-
-    return {
-      amount: maxOrCap,
-      decimals,
-    } as Amount;
+    const index = await this.markets.getReserveIndex(aToken);
+    return isUsingAsCollateral(config, index);
   }
 
-  private calculateLinearInterest(
-    liquidityRate: bigint,
-    lastUpdateTimestamp: number,
-    currentTimestamp: number
-  ): bigint {
-    const delta = currentTimestamp - lastUpdateTimestamp;
-    if (delta <= 0) return RAY;
+  // =============================================================================
+  // Internals
+  // =============================================================================
 
-    const interest = (liquidityRate * BigInt(delta)) / SECONDS_PER_YEAR;
-    return RAY + interest;
+  /**
+   * The market a reserve picks, main when omitted or listed nowhere.
+   *
+   * @param reserve - reserve on-chain id (registry)
+   */
+  private async getMarket(reserve?: number): Promise<AaveMarket> {
+    if (reserve === undefined) return AAVE_MAIN_MARKET;
+    const market = await this.markets.getMarket(reserve);
+    return market ?? AAVE_MAIN_MARKET;
+  }
+
+  private findReserve(summary: AaveSummary, reserve: number): AaveReserveData {
+    const reserveCtx = summary.reserves.find((r) => r.reserveId === reserve);
+    if (!reserveCtx) throw new Error('Missing reserve ctx for ' + reserve);
+    return reserveCtx;
   }
 
   /**
-   * Original AAVE health factor calculation formula:
-   * @see https://github.com/aave/aave-utilities/blob/432e283b2e76d9793b20d37bd4cb94aca97ed20e/packages/math-utils/src/pool-math.ts#L139
+   * A signed balance change from a decimal amount.
+   *
+   * @param summary - the user's position in the reserve's market
+   * @param reserve - reserve on-chain id (registry)
+   * @param amount - decimal amount
+   * @param out - the amount leaves the position
    */
-  private calculateHealthFactorFromBalances(
-    totalDebt: bigint,
-    totalCollateral: bigint,
-    currentLiquidationThreshold: bigint
-  ): number {
-    if (totalDebt === 0n) {
-      return INVALID_HF;
-    }
+  private delta(
+    summary: AaveSummary,
+    reserve: number,
+    amount: string,
+    out: boolean
+  ): AaveBalanceDelta {
+    const reserveCtx = this.findReserve(summary, reserve);
+    const native = big.toBigInt(amount, reserveCtx.decimals);
+    return { reserve: reserveCtx, amount: out ? -native : native };
+  }
 
-    const hfFromBalances =
-      (totalCollateral * currentLiquidationThreshold) / totalDebt;
+  /**
+   * Max withdraw of a reserve, within the free balance of a held aToken.
+   *
+   * @param user - user H160
+   * @param summary - the user's position in the reserve's market
+   * @param reserve - the reserve to withdraw from
+   */
+  private async withdrawMax(
+    user: string,
+    summary: AaveSummary,
+    reserve: AaveReserveData
+  ): Promise<Amount> {
+    const free =
+      reserve.aTokenBalance > 0n
+        ? await this.markets.getFreeBalance(reserve.aToken, user)
+        : undefined;
+    return maxWithdraw(summary, reserve, free);
+  }
 
-    const hf = big.toDecimal(hfFromBalances, LTV_PRECISION);
+  /**
+   * A user's position in one market, projected to the next block.
+   *
+   * - Ids join through the registry: alias first, then the contract index
+   * - A reserve counts as collateral now when flagged, held and given a
+   *   liquidation threshold, as Aave's own account data does
+   * - A first receipt enables collateral as Aave's automatic rule does:
+   *   LTV set, no debt ceiling, user not in isolation mode
+   *
+   * @param user - user H160
+   * @param market - market to read
+   * @param timestamp - block timestamp to project from; read when omitted
+   */
+  private async loadSummary(
+    user: string,
+    market: AaveMarket,
+    timestamp?: number
+  ): Promise<AaveSummary> {
+    const [poolReserves, userReserves, userData, blockTimestamp, byContract] =
+      await Promise.all([
+        this.client.getReservesData(market.provider),
+        this.client.getUserReservesData(user, market.provider),
+        this.client.getUserAccountData(user, market.pool),
+        timestamp ?? this.client.getBlockTimestamp(),
+        this.erc20.getContracts(),
+      ]);
 
-    return Number(hf);
+    const [pReserves] = poolReserves;
+    const [uReserves, userEmodeCategoryId] = userReserves;
+    const [
+      totalCollateralBase,
+      totalDebtBase,
+      ,
+      currentLiquidationThreshold,
+      ,
+      healthFactor,
+    ] = userData;
+
+    const byUnderlying = new Map(
+      pReserves.map((r) => [lower(r.underlyingAsset), r])
+    );
+
+    const collaterals = uReserves.filter(
+      (u) => u.usageAsCollateralEnabledOnUser
+    );
+    const isolated =
+      collaterals.length === 1 &&
+      (byUnderlying.get(lower(collaterals[0].underlyingAsset))?.debtCeiling ??
+        0n) !== 0n;
+
+    const nextBlockTimestamp = blockTimestamp + BLOCK_TIME_SEC;
+
+    const reserves = uReserves.map((uReserve): AaveReserveData => {
+      const reserveAsset = lower(uReserve.underlyingAsset);
+      const pReserve = byUnderlying.get(reserveAsset);
+      if (!pReserve)
+        throw new Error('Missing pool reserve for ' + reserveAsset);
+
+      const aTokenBalance = accrueBalance(
+        uReserve.scaledATokenBalance,
+        pReserve.liquidityIndex,
+        pReserve.liquidityRate,
+        Number(pReserve.lastUpdateTimestamp),
+        nextBlockTimestamp
+      );
+
+      const inEmode =
+        userEmodeCategoryId !== 0 &&
+        userEmodeCategoryId === pReserve.eModeCategoryId;
+      const reserveLiquidationThreshold =
+        Number(
+          inEmode
+            ? pReserve.eModeLiquidationThreshold
+            : pReserve.reserveLiquidationThreshold
+        ) / 10000;
+
+      const held = uReserve.scaledATokenBalance > 0n;
+      const flagged = uReserve.usageAsCollateralEnabledOnUser;
+      const autoEnables =
+        pReserve.baseLTVasCollateral !== 0n &&
+        pReserve.debtCeiling === 0n &&
+        (collaterals.length === 0 || !isolated);
+      const hasThreshold = reserveLiquidationThreshold > 0;
+
+      return {
+        aTokenBalance,
+        availableLiquidity: pReserve.availableLiquidity,
+        decimals: Number(pReserve.decimals),
+        isCollateral: held && flagged && hasThreshold,
+        priceInRef: pReserve.priceInMarketReferenceCurrency,
+        reserveId: assetIdFromAddress(reserveAsset, byContract) ?? null,
+        reserveAsset,
+        reserveLiquidationThreshold,
+        aToken: lower(pReserve.aTokenAddress),
+        isCollateralOnSupply: hasThreshold && (held ? flagged : autoEnables),
+      };
+    });
+
+    return {
+      healthFactor: Number(big.toDecimal(healthFactor, 18)),
+      currentLiquidationThreshold: Number(
+        big.toDecimal(currentLiquidationThreshold, LTV_PRECISION)
+      ),
+      totalCollateral: totalCollateralBase,
+      totalDebt: totalDebtBase,
+      reserves,
+    };
   }
 }

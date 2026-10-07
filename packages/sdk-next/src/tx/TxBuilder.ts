@@ -19,12 +19,23 @@ export abstract class TxBuilder extends Papi {
   protected readonly balance: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
-  constructor(client: PolkadotClient, evm: EvmClient, at?: BlockAt) {
+  /**
+   * @param client - papi client
+   * @param evm - EVM client
+   * @param at - block to read at
+   * @param aave - shared Aave utils; one per builder when omitted
+   */
+  constructor(
+    client: PolkadotClient,
+    evm: EvmClient,
+    at?: BlockAt,
+    aave?: AaveUtils
+  ) {
     super(client, at);
     this.evm = evm;
     this.evmClient = evm.getWsProvider();
     this.balance = new BalanceClient(client, at);
-    this.aaveUtils = new AaveUtils(evm);
+    this.aaveUtils = aave ?? new AaveUtils(evm, this.balance.erc20);
   }
 
   protected wrapTx(name: string, tx: Transaction): Tx {
