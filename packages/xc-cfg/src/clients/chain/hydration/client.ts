@@ -1,6 +1,8 @@
 import { Asset, AnyParachain } from '@galacticcouncil/xc-core';
+import { h160 } from '@galacticcouncil/common';
 import { hydration } from '@galacticcouncil/descriptors';
 
+import { weth_wh } from '../../../assets';
 import { BaseClient } from '../../base';
 
 import {
@@ -29,22 +31,27 @@ export class HydrationClient extends BaseClient<typeof hydration> {
   }
 
   /**
-   * Fee currency of an account, `0` (hdx) when it set none.
+   * Fee currency of an account, as the runtime resolves it.
    *
    * - Keyed by the substrate account, an h160 resolves to its own
+   * - Without an entry, evm (truncated h160) accounts pay in weth, the
+   *   rest in hdx (`0`)
    *
    * @param address - ss58 or h160
    */
   async getFeeAsset(address: string): Promise<string> {
+    const account = this.chain.getNormalizedAddress(address);
     const response =
       await this.api().query.MultiTransactionPayment.AccountCurrencyMap.getValue(
-        this.chain.getNormalizedAddress(address)
+        account
       );
 
-    if (!response) {
-      return '0';
+    if (response !== undefined) {
+      return response.toString();
     }
-    return response.toString();
+    return h160.isEvmAccount(account)
+      ? this.chain.getAssetId(weth_wh).toString()
+      : '0';
   }
 
   async getAssetBalance(address: string, asset: string): Promise<bigint> {

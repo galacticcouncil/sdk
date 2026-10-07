@@ -48,12 +48,23 @@ describe('nttClient.getRedeemBudget', () => {
       ['ethereum', ethereum],
       ['base', base],
       ['hyperevm', hyperevm],
-      ['robinhood', robinhood],
       ['hydration', hydration],
     ])('should budget no value for %s', async (_, chain) => {
       const budget = await nttClient(chain).getRedeemBudget();
       expect(budget.msgValue).toBe(0n);
       expect(budget.gasLimit).toBe(500_000n);
+    });
+  });
+
+  describe('robinhood destination', () => {
+    it('should clear the observed redeem cost at peak L1 price', async () => {
+      const { gasLimit } = await nttClient(robinhood).getRedeemBudget();
+      expect(gasLimit).toBeGreaterThan(417_000n + 150_000n);
+    });
+
+    it('should budget no value', async () => {
+      const { msgValue } = await nttClient(robinhood).getRedeemBudget();
+      expect(msgValue).toBe(0n);
     });
   });
 

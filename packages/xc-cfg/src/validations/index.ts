@@ -11,6 +11,7 @@ import {
   HubFrozenValidation,
   HydrationDepositLimitValidation,
   HydrationEdValidation,
+  HydrationEvmValueValidation,
   HydrationWithdrawLimitValidation,
 } from './chain';
 
@@ -31,6 +32,7 @@ export const validations: TransferValidation[] = [
   new HydrationEdValidation(Matchers.isAny, Matchers.isHydration),
   new HydrationDepositLimitValidation(Matchers.isAny, Matchers.isHydration),
   new HydrationWithdrawLimitValidation(Matchers.isHydration, Matchers.isAny),
+  new HydrationEvmValueValidation(Matchers.isHydration, Matchers.isAny),
   new NttRateLimitValidation(Matchers.isAny, Matchers.isAny),
   new NttCustodyValidation(Matchers.isAny, Matchers.isAny),
 ];
