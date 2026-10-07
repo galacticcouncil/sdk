@@ -1,5 +1,7 @@
 import Big from 'big.js';
 
+const FEE_PCT_DP = 4;
+
 /**
  * Percentage Difference Formula
  *
@@ -70,7 +72,11 @@ export function calculateSellFee(delta0Y: bigint, deltaY: bigint): number {
   const delta0Yb = Big(delta0Y.toString());
   const deltaYb = Big(deltaY.toString());
 
-  return Big(1).minus(deltaYb.div(delta0Yb)).mul(100).round(2).toNumber();
+  return Big(1)
+    .minus(deltaYb.div(delta0Yb))
+    .mul(100)
+    .round(FEE_PCT_DP)
+    .toNumber();
 }
 
 /**
@@ -88,5 +94,5 @@ export function calculateBuyFee(delta0X: bigint, deltaX: bigint): number {
   const delta0Xb = Big(delta0X.toString());
   const deltaXb = Big(deltaX.toString());
 
-  return deltaXb.div(delta0Xb).minus(1).mul(100).round(2).toNumber();
+  return deltaXb.div(delta0Xb).minus(1).mul(100).round(FEE_PCT_DP).toNumber();
 }
