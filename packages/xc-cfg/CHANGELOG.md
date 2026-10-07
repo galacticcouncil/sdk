@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 2.8.1
+
+### Patch Changes
+
+- 8f1b6b9: Fix executor deliveries from hydration
+  - check the delivery fee against the fee currency
+  - raise the robinhood gas limit to 800k
+
 ## 2.8.0
 
 ### Minor Changes

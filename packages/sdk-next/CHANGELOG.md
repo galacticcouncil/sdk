@@ -1,5 +1,15 @@
 # @galacticcouncil/sdk-next
 
+## 2.4.0
+
+### Minor Changes
+
+- c7a887e: sdk: support every aave money market
+
+### Patch Changes
+
+- d9fc5ce: keep trade fee percentage precision below 0.01%
+
 ## 2.3.3
 
 ### Patch Changes
