@@ -8,6 +8,7 @@ import {
 } from '../../../oracle';
 
 import { ChainParams } from '../../../client';
+import { batchValues } from '../../../utils/async';
 
 import { PoolLimits } from '../../types';
 import { PoolQuery } from '../../PoolQuery';
@@ -26,6 +27,14 @@ const MM_ORACLE_TTL = 10 * 60 * 1000;
  */
 export class StableSwapQuery extends PoolQuery {
   private mmOracle = new MmOracleClient(this.evm);
+
+  private tradabilityValues = batchValues((keys: [number, number][], options) =>
+    this.api.query.Stableswap.AssetTradability.getValues(keys, options)
+  );
+
+  private issuanceValues = batchValues((keys: [number][], options) =>
+    this.api.query.Tokens.TotalIssuance.getValues(keys, options)
+  );
 
   /** Every pool's config (assets, fee, amplification ramp) */
   readonly pools = this.cache.scope(
@@ -51,22 +60,18 @@ export class StableSwapQuery extends PoolQuery {
     'block'
   );
 
-  /** One asset's tradable state in a pool */
+  /** One asset's tradable state in a pool, batched per block */
   readonly tradability = this.cache.scope<[number, number], number>(
     'Stableswap.AssetTradability',
-    (at, poolId, assetId) =>
-      this.api.query.Stableswap.AssetTradability.getValue(poolId, assetId, {
-        at,
-      }),
+    (at, poolId, assetId) => this.tradabilityValues(at, poolId, assetId),
     (poolId, assetId) => `${poolId}:${assetId}`,
     'block'
   );
 
-  /** A pool's share token issuance */
+  /** A pool's share token issuance, batched per block */
   readonly issuance = this.cache.scope<[number], bigint | undefined>(
     'Tokens.TotalIssuance',
-    (at, poolId) =>
-      this.api.query.Tokens.TotalIssuance.getValue(poolId, { at }),
+    (at, poolId) => this.issuanceValues(at, poolId),
     (poolId) => String(poolId),
     'block'
   );
