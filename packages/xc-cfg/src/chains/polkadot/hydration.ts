@@ -107,6 +107,12 @@ const evmChain: Chain = defineChain({
       url: 'https://hydration.subscan.io',
     },
   },
+  contracts: {
+    multicall3: {
+      address: '0x61f69c81D31fd8D47580f738d089105Cf0C995d8',
+      blockCreated: 15_271_520,
+    },
+  },
   testnet: false,
 });
 
