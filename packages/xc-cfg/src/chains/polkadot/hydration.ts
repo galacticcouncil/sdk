@@ -33,6 +33,7 @@ import {
   ldo,
   link,
   myth,
+  near,
   neuro,
   paxg,
   pen,
@@ -61,6 +62,7 @@ import {
   weth_wh,
   wsteth,
   wud,
+  zec,
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
@@ -669,6 +671,34 @@ export const hydration = new EvmParachain({
           X1: {
             Parachain: 3369,
           },
+        },
+      },
+    },
+    {
+      asset: near,
+      decimals: 24,
+      id: 1001358,
+      min: 0.002074688796680498,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X3: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+            {
+              GeneralIndex: 15,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0xb55c490bafb82aeb4b950fa479341c1b5fbfa814f8253b6acdf8426b7cd9d3c0',
+              },
+            },
+          ],
         },
       },
     },
@@ -1346,6 +1376,34 @@ export const hydration = new EvmParachain({
         },
       },
     },
+    {
+      asset: zec,
+      decimals: 8,
+      id: 1001357,
+      min: 0.00000674,
+      xcmLocation: {
+        parents: 0,
+        interior: {
+          X3: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+            {
+              GeneralIndex: 15,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x3174446b8cc98197d6f2c9e504d6d229f0adb00d2b7566af0e54a84a876fef0f',
+              },
+            },
+          ],
+        },
+      },
+    },
   ],
   balance: SubstrateBalanceType.Tokens,
   balanceOverrides: {
@@ -1412,6 +1470,13 @@ export const hydration = new EvmParachain({
           wormhole: '0xF38D9C3bA6999Dc331b32B416083Fd7e02D17B04',
         },
       },
+      [near.key]: {
+        token: '0x00000000000000000000000000000001000f478e',
+        manager: '0x374E5239a2342Be6Bf31B410EC03984D03A8b7dE',
+        transceiver: {
+          wormhole: '0xc74BcE0b4bC1b06D6e31d8EfAf55e7e148f281d1',
+        },
+      },
       [prime.key]: {
         token: '0x000000000000000000000000000000010000002B',
         manager: '0xFCaF4aA069C565d25539028970703F01e47D3E0B',
@@ -1473,6 +1538,13 @@ export const hydration = new EvmParachain({
         manager: '0xB5cEf790D52A57fa619eD96eDd64c5328F3DCFb7',
         transceiver: {
           wormhole: '0x8acce9CA511d5D7213F8C3f813B8916087cd00ae',
+        },
+      },
+      [zec.key]: {
+        token: '0x00000000000000000000000000000001000f478d',
+        manager: '0xe20cED5f5798cD4FeBc7aE182309b9f51345e0cC',
+        transceiver: {
+          wormhole: '0x0dd43A80C6F96019B8f5699Df1890DFa33BdDE85',
         },
       },
     },

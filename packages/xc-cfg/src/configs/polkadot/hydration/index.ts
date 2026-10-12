@@ -28,6 +28,7 @@ import {
   ldo,
   link,
   myth,
+  near,
   neuro,
   paxg,
   pen,
@@ -54,6 +55,8 @@ import {
   wud,
   lbtc,
   susds_wh,
+  wnear,
+  zec,
 } from '../../../assets';
 import {
   assetHub,
@@ -66,6 +69,7 @@ import {
   hydration,
   hyperevm,
   mythos,
+  near_chain,
   neuroweb,
   pendulum,
   robinhood,
@@ -260,6 +264,12 @@ const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
 const toHyperevmViaNtt: AssetRoute[] = [viaNttTemplate(hype, hype, hyperevm)];
 
+// Self-redeem only - no executor serves NEAR
+const toNearViaNtt: AssetRoute[] = [
+  viaNttTemplate(near, wnear, near_chain),
+  viaNttTemplate(zec, zec, near_chain),
+];
+
 const toRobinhoodViaNtt: AssetRoute[] = [
   viaNttTemplate(hdx, hdx, robinhood),
   viaNttTemplate(hollar, hollar, robinhood),
@@ -353,6 +363,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toHyperevmViaNtt,
+    ...toNearViaNtt,
     ...toRobinhoodViaNtt,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,

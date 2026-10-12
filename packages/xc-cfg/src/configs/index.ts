@@ -1,6 +1,7 @@
 import { ChainRoutes } from '@galacticcouncil/xc-core';
 
 import { evmChainsConfig } from './evm';
+import { nearChainsConfig } from './near';
 import { polkadotChainsConfig } from './polkadot';
 import { solanaChainsConfig } from './solana';
 import { suiChainsConfig } from './sui';
@@ -9,6 +10,7 @@ import { kusamaChainsConfig } from './kusama';
 
 export const routes: ChainRoutes[] = [
   ...evmChainsConfig,
+  ...nearChainsConfig,
   ...polkadotChainsConfig,
   ...solanaChainsConfig,
   ...suiChainsConfig,
