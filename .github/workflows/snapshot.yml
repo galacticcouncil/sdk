@@ -38,7 +38,7 @@ jobs:
       - name: 🚀 Publish snapshot
         run: |
           npm whoami
-          npm run changeset -- publish --no-git-tag --snapshot --tag beta
+          npm run changeset -- publish --no-git-tag --tag beta
 
       - name: ✅ Verify release plan
         id: verify
