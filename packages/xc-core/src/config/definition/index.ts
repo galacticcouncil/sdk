@@ -6,5 +6,6 @@ export * from './contract';
 export * from './extrinsic';
 export * from './functionCall';
 export * from './move';
+export * from './payment';
 export * from './program';
 export * from './fee';

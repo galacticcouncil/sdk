@@ -5,6 +5,7 @@ import { ContractConfigBuilder } from './contract';
 import { ExtrinsicConfigBuilder } from './extrinsic';
 import { FeeConfig, DestinationFeeConfig } from './fee';
 import { FunctionCallConfigBuilder } from './functionCall';
+import { PaymentConfigBuilder } from './payment';
 import { ProgramConfigBuilder } from './program';
 import { MoveConfigBuilder } from './move';
 
@@ -29,6 +30,7 @@ export interface AssetRouteParams {
   extrinsic?: ExtrinsicConfigBuilder;
   functionCall?: FunctionCallConfigBuilder;
   move?: MoveConfigBuilder;
+  payment?: PaymentConfigBuilder;
   program?: ProgramConfigBuilder;
   tags?: string[];
 }
@@ -46,6 +48,8 @@ export class AssetRoute {
 
   readonly move?: MoveConfigBuilder;
 
+  readonly payment?: PaymentConfigBuilder;
+
   readonly program?: ProgramConfigBuilder;
 
   readonly tags?: string[];
@@ -57,6 +61,7 @@ export class AssetRoute {
     extrinsic,
     functionCall,
     move,
+    payment,
     program,
     tags,
   }: AssetRouteParams) {
@@ -66,6 +71,7 @@ export class AssetRoute {
     this.extrinsic = extrinsic;
     this.functionCall = functionCall;
     this.move = move;
+    this.payment = payment;
     this.program = program;
     this.tags = tags;
   }
