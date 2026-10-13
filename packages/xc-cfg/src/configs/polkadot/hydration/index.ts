@@ -76,6 +76,7 @@ import {
   solana,
   sui_chain,
   unique,
+  zcash,
 } from '../../../chains';
 import {
   ExtrinsicBuilder,
@@ -92,6 +93,7 @@ import {
   toTransferTemplate,
   viaNttExecutorTemplate,
   viaNttTemplate,
+  viaOneClickTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
 } from './templates';
@@ -270,6 +272,11 @@ const toNearViaNtt: AssetRoute[] = [
   viaNttTemplate(zec, zec, near_chain),
 ];
 
+// Over NEAR, where 1Click withdraws it to Zcash
+const toZcashViaOneClick: AssetRoute[] = [
+  viaOneClickTemplate(zec, zcash, near_chain),
+];
+
 const toRobinhoodViaNtt: AssetRoute[] = [
   viaNttTemplate(hdx, hdx, robinhood),
   viaNttTemplate(hollar, hollar, robinhood),
@@ -364,6 +371,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaSnowbridge,
     ...toHyperevmViaNtt,
     ...toNearViaNtt,
+    ...toZcashViaOneClick,
     ...toRobinhoodViaNtt,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,

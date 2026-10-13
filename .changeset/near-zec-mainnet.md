@@ -11,3 +11,4 @@ NEAR and ZEC mainnet routes, Zcash into hydration through Omni
 - Zcash into hydration: one payment to an Omni deposit address, checked against Omni's minimum and the NEAR limits first
 - xc-swap ships the Omni client, registered on the zcash chain by the integrator
 - xc-swap withdraws ZEC held on NEAR to Zcash through 1Click
+- Hydration ZEC withdraws to Zcash: an ntt transfer to a 1Click deposit address on NEAR, opened by the transfer's `openDeposit`

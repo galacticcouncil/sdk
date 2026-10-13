@@ -39,17 +39,20 @@ export function TransferBuilder(wallet: Wallet) {
                   dstAddress,
                   dstAsset,
                   tag,
+                  refundAddress,
                 }: {
                   srcAddress: string;
                   dstAddress: string;
                   dstAsset?: string | Asset;
                   tag?: string;
+                  refundAddress?: string;
                 }): Promise<Transfer> {
                   const configs = build(dstAsset, tag);
                   return wallet.getTransferData(
                     configs,
                     srcAddress,
-                    dstAddress
+                    dstAddress,
+                    refundAddress
                   );
                 },
               };

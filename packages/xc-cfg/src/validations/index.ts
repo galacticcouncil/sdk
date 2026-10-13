@@ -10,6 +10,7 @@ import {
   NttCustodyValidation,
   NttRateLimitValidation,
   OmniDepositValidation,
+  OneClickWithdrawalValidation,
 } from './bridge';
 import {
   HubEdValidation,
@@ -41,4 +42,5 @@ export const validations: TransferValidation[] = [
   new NttRateLimitValidation(Matchers.isAny, Matchers.isAny),
   new NttCustodyValidation(Matchers.isAny, Matchers.isAny),
   new OmniDepositValidation(near_chain, Matchers.isAny, Matchers.isAny),
+  new OneClickWithdrawalValidation(near_chain, Matchers.isAny, Matchers.isAny),
 ];

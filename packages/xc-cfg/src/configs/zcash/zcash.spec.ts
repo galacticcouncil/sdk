@@ -26,10 +26,6 @@ describe('zcash mainnet routes', () => {
     expect(route.tags).toEqual([Tag.Omni, Tag.Wormhole, Tag.Ntt]);
   });
 
-  it('should not route hydration back to zcash', () => {
-    expect(config.getAssetRoutesOrEmpty(zec, hydration, zcash)).toHaveLength(0);
-  });
-
   it('should fail closed until the integrator registers an omni client', async () => {
     expect(zcash.omniClient).toBeUndefined();
 

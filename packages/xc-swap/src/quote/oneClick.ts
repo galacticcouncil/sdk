@@ -16,6 +16,8 @@ export interface OneClickConfig {
 const DEFAULT_DISTRIBUTION_CHANNEL =
   'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjUtMDEtMTItdjEifQ.eyJ2IjoxLCJrZXlfdHlwZSI6ImRpc3RyaWJ1dGlvbl9jaGFubmVsIiwicGFydG5lcl9pZCI6Imh5ZHJhdGlvbiIsImlhdCI6MTc4MTg3MjQzNywiZXhwIjoxODEzNDA4NDM3fQ.JOLeSM9F4PiyCCpT2xsoLm3hsS77hT4JjyNVxw_8PpENkIKsLFtSpTPUH6eN2cmSXtuAGiJ9UV44anBHL76j19uYvTqZaJNTDoRMB0oUd6WNKiaQJQXs2UmjYOOKNNvBlQU-i8H7bw5tN_yf-rzKuuj-VRNU6TcAhNDkhnWnFChFG4UTd-9V4Ktd5stAFX1VdaWDW9ueBQDkF-dcmrjXBlM44G2UTy3HP65XvzIhYpIRv_CusUkBTipk8nHnkdjXtFBuds2okzI875LLRzf8ANx3HBzdjZsuHbHeBLIPwZcueV2KkkfeEoa2bLRnaXS3IfIhY13N666wyeea0HvUvA';
 
+let isConfigured = false;
+
 /** Apply 1Click client configuration (base URL + optional JWT). */
 export function configureOneClick(config: OneClickConfig = {}): void {
   if (config.baseUrl) OpenAPI.BASE = config.baseUrl;
@@ -24,6 +26,7 @@ export function configureOneClick(config: OneClickConfig = {}): void {
   } else {
     OpenAPI.TOKEN = DEFAULT_DISTRIBUTION_CHANNEL;
   }
+  isConfigured = true;
 }
 
 /** Fetch the 1Click token registry (`GET /v0/tokens`). */
@@ -61,6 +64,9 @@ export interface OneClickQuoteParams {
 export async function getOneClickQuote(
   params: OneClickQuoteParams
 ): Promise<QuoteResponse> {
+  // Quoted outside the swap client, e.g. a withdrawal: the default setup
+  if (!isConfigured) configureOneClick();
+
   const request: QuoteRequest = {
     dry: params.dry ?? true,
     swapType: QuoteRequest.swapType.FLEX_INPUT,

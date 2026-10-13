@@ -6,10 +6,12 @@ import {
   ContractConfigBuilderParams,
   EvmBalanceType,
   EvmParachain,
+  NearChain,
   Ntt as NttRegistry,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
+import { getOneClickClient } from '../../../bridges/oneclick';
 import {
   encodeNttRequest,
   NTT_DEFAULT_INSTRUCTIONS,
@@ -283,10 +285,53 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
   },
 });
 
+/**
+ * Withdrawal through 1Click: an ntt transfer to NEAR, paying the deposit
+ * address 1Click delivers natively from.
+ *
+ * - Pays the deposit address once opened; until then, the sender's own NEAR
+ *   refund account, which they can claim from
+ * - Fails without a NEAR refund account or a registered 1Click client
+ *
+ * @param hub - NEAR chain the transfer lands on
+ */
+const transferViaOneClick = (hub: NearChain): ContractConfigBuilder => {
+  const refundAccount = (address?: string): string => {
+    if (address && hub.isValidAddress(address)) {
+      return address;
+    }
+    throw new Error('A withdrawal through 1Click needs a NEAR refund account');
+  };
+
+  return {
+    build: async (params) => {
+      const { amount, deposit, refundAddress } = params;
+      const recipient =
+        deposit?.amount === amount
+          ? deposit.depositAddress
+          : refundAccount(refundAddress);
+      return transfer().build({
+        ...params,
+        address: recipient,
+        destination: { ...params.destination, chain: hub },
+      });
+    },
+    openDeposit: async ({ address, amount, destination, refundAddress }) => {
+      const deposit = await getOneClickClient(destination.chain).openDeposit({
+        amount,
+        recipient: address,
+        refundTo: refundAccount(refundAddress),
+      });
+      return { ...deposit, amount };
+    },
+  };
+};
+
 export const Ntt = () => {
   return {
     transfer,
     transferWithExecutor,
     transferViaExecutor,
+    transferViaOneClick,
   };
 };

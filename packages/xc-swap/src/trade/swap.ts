@@ -34,6 +34,17 @@ export function mapQuoteError(error: unknown): XcSwapError {
 }
 
 /**
+ * Smallest amount 1Click takes, from its `AmountTooLow` rejection.
+ *
+ * - 1Click names it only in the message: "... try at least 133334"
+ */
+export function quoteMinAmount(error: unknown): bigint | undefined {
+  const body = (error as { body?: { message?: string } } | null)?.body;
+  const [, min] = body?.message?.match(/at least (\d+)/) ?? [];
+  return min ? BigInt(min) : undefined;
+}
+
+/**
  * Estimate a cross-chain swap
  */
 export async function swap(

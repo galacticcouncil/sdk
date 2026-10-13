@@ -3,6 +3,7 @@ export enum Tag {
   Ntt = 'Ntt',
   NttExecutor = 'NttExecutor',
   Omni = 'Omni',
+  OneClick = 'OneClick',
   Wormhole = 'Wormhole',
   Relayer = 'Relayer',
   Snowbridge = 'Snowbridge',
