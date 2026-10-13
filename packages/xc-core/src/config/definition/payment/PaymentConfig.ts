@@ -1,24 +1,15 @@
 import { BaseConfig, BaseConfigParams } from '../base';
 
 export interface PaymentConfigParams extends BaseConfigParams {
-  /** Address paid on the source chain. */
+  /** Address paid. */
   to: string;
-  /** Paid amount, in the asset's smallest unit. */
+  /** Smallest unit. */
   amount: bigint;
-  /** Smallest payable amount, in the asset's smallest unit. */
+  /** Bridge floor, smallest unit; no call is built below it. */
   min?: bigint;
 }
 
-/**
- * A plain payment to an address on a utxo chain.
- *
- * - The address itself carries the delivery: a bridge derives it from an
- *   order it holds, so the payment needs no data of its own
- * - One payment is one transaction, nothing batches
- * - `type` names the platform signing it, the source chain's own
- * - `min` is the bridge's floor: a payment below it is lost, so no call is
- *   built for one
- */
+/** A plain payment to an address a bridge derives from its order. */
 export class PaymentConfig extends BaseConfig {
   readonly to: string;
 

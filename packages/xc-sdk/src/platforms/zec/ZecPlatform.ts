@@ -5,25 +5,15 @@ import { formatZec, toZecCall } from './utils';
 
 import { Platform } from '../types';
 
-/**
- * ZIP-317 conventional fee: 5,000 zatoshi per logical action, two at least.
- * A wallet spending shielded funds to a transparent address, change included,
- * runs about four; it settles the exact fee itself when it builds the
- * transaction.
- */
+/** ZIP-317 marginal fee, zatoshi per logical action. */
 export const ZEC_MARGINAL_FEE = 5_000n;
+/** Actions of a shielded-to-transparent payment, change included. */
 export const ZEC_LOGICAL_ACTIONS = 4n;
 
 export class ZecPlatform implements Platform<PaymentConfig> {
   constructor(_chain: ZecChain) {}
 
-  /**
-   * Build the payments of a transfer, one transaction each.
-   *
-   * - The amount is the config's: the builder priced the order with it
-   * - A payment below its config's floor is refused: the bridge would
-   *   neither deliver nor refund it
-   */
+  /** One payment per config; a payment below its floor is refused. */
   async buildCalls(
     account: string,
     _amount: bigint,
@@ -41,12 +31,7 @@ export class ZecPlatform implements Platform<PaymentConfig> {
     });
   }
 
-  /**
-   * Fee of a transfer, in zec.
-   *
-   * - The conventional fee for the actions a wallet-built payment takes; the
-   *   wallet charges the exact one
-   */
+  /** Conventional fee; the wallet charges the exact one. */
   async estimateFee(
     _account: string,
     _amount: bigint,

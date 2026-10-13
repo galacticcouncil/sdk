@@ -12,13 +12,7 @@ export class ZecSigner {
     this.#wallet = wallet;
   }
 
-  /**
-   * Sign & broadcast a payment in the wallet.
-   *
-   * - The wallet builds the transaction, picks the funds and settles the fee
-   * - Reported sent once the wallet hands back the id; the deposit is not
-   *   followed any further here
-   */
+  /** The wallet builds, signs and broadcasts the payment. */
   async signAndSend(call: Call, observer: ZecTxObserver): Promise<void> {
     const { to, amount } = call as ZecCall;
 

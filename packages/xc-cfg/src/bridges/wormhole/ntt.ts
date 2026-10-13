@@ -3,11 +3,7 @@ import { AnyChain, EvmParachain, Wormhole } from '@galacticcouncil/xc-core';
 /**
  * `msg` of an `ft_transfer_call` into a NEAR ntt manager.
  *
- * - The manager takes the recipient as 32 bytes, an h160 left-padded
- * - An evm parachain recipient given as ss58 is derived to its h160 first
- *
- * @param destination - chain the manager publishes for
- * @param address - recipient on it, in its native format
+ * - Recipient as 32 bytes; an ss58 evm parachain recipient is derived first
  */
 export async function getNearTransferMsg(
   destination: AnyChain,
