@@ -21,7 +21,7 @@ const { ERC20 } = erc20;
 type QuoteResult = { quote?: Quote; error?: XcSwapError };
 
 /** Map a 1Click quote API error to a custom {@link XcSwapError}. */
-function mapQuoteError(error: unknown): XcSwapError {
+export function mapQuoteError(error: unknown): XcSwapError {
   const body = (error as { body?: { message?: string } } | null)?.body;
   const message = (
     body?.message ??
