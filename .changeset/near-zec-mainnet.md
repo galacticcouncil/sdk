@@ -12,3 +12,4 @@ NEAR and ZEC mainnet routes, Zcash into hydration through Omni
 - xc-swap ships the Omni client, registered on the zcash chain by the integrator
 - xc-swap withdraws ZEC held on NEAR to Zcash through 1Click
 - Hydration ZEC withdraws to Zcash: an ntt transfer to a 1Click deposit address on NEAR, opened by the transfer's `openDeposit`
+- The withdrawal publishes its deposit address as the ntt refund address; `NearClaim.findRecipient` reads it back, so any NEAR account can claim it

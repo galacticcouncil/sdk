@@ -64,7 +64,14 @@ const resolveTransfer = async (params: ContractConfigBuilderParams) => {
   };
 };
 
-const transfer = (): ContractConfigBuilder => ({
+/**
+ * Self-redeem transfer, the manager called directly.
+ *
+ * @param refundAddress - ntt refund address (bytes32), emitted in the
+ *   manager's `TransferSent`; the recipient by default, as the short
+ *   `transfer` overload sets it
+ */
+const transfer = (refundAddress?: string): ContractConfigBuilder => ({
   build: async (params) => {
     const {
       ntt,
@@ -75,15 +82,22 @@ const transfer = (): ContractConfigBuilder => ({
       wrapNative,
     } = await resolveTransfer(params);
 
+    const recipient = rcvWh.normalizeAddress(rcvAddress);
+
     return [
       new ContractConfig({
         abi: Abi.NttManager,
         address: ntt.manager,
-        args: [
-          transferAmount,
-          rcvWh.getWormholeId(),
-          rcvWh.normalizeAddress(rcvAddress),
-        ],
+        args: refundAddress
+          ? [
+              transferAmount,
+              rcvWh.getWormholeId(),
+              recipient,
+              refundAddress,
+              false,
+              NTT_DEFAULT_INSTRUCTIONS,
+            ]
+          : [transferAmount, rcvWh.getWormholeId(), recipient],
         token: ntt.token,
         wrapNative: wrapNative,
         value: deliveryPrice,
@@ -286,12 +300,29 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
 });
 
 /**
+ * NEAR implicit account as 32 bytes: the hex of its key is the account id.
+ *
+ * - Throws on any other account: one that can't be published must not be
+ *   paid, the vaa alone can't name it to a claimer
+ */
+const implicitAccountBytes = (account: string): string => {
+  if (!/^[0-9a-f]{64}$/.test(account)) {
+    throw new Error('Not a NEAR implicit account: ' + account);
+  }
+  return '0x' + account;
+};
+
+/**
  * Withdrawal through 1Click: an ntt transfer to NEAR, paying the deposit
  * address 1Click delivers natively from.
  *
  * - Pays the deposit address once opened; until then, the sender's own NEAR
  *   refund account, which they can claim from
- * - Fails without a NEAR refund account or a registered 1Click client
+ * - The vaa names the deposit address by its sha256 only, so the transfer
+ *   publishes it as its ntt refund address, unused on NEAR; any claimer reads
+ *   it back with `NearClaim.findRecipient`
+ * - Fails without a NEAR refund account or a registered 1Click client, or
+ *   on a deposit address that isn't an implicit account
  *
  * @param hub - NEAR chain the transfer lands on
  */
@@ -306,14 +337,21 @@ const transferViaOneClick = (hub: NearChain): ContractConfigBuilder => {
   return {
     build: async (params) => {
       const { amount, deposit, refundAddress } = params;
-      const recipient =
-        deposit?.amount === amount
-          ? deposit.depositAddress
-          : refundAccount(refundAddress);
+      const toHub = { ...params.destination, chain: hub };
+
+      if (deposit?.amount === amount) {
+        const { depositAddress } = deposit;
+        return transfer(implicitAccountBytes(depositAddress)).build({
+          ...params,
+          address: depositAddress,
+          destination: toHub,
+        });
+      }
+
       return transfer().build({
         ...params,
-        address: recipient,
-        destination: { ...params.destination, chain: hub },
+        address: refundAccount(refundAddress),
+        destination: toHub,
       });
     },
     openDeposit: async ({ address, amount, destination, refundAddress }) => {
