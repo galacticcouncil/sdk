@@ -4,7 +4,6 @@ export * from './FeeAmountBuilder';
 export * from './FeeAssetBuilder';
 export * from './FunctionCallBuilder';
 export * from './MoveBuilder';
-export * from './PaymentBuilder';
 export * from './ProgramBuilder';
 
 export { XcmVersion, XcmTransferType } from './extrinsics/xcm';

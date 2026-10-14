@@ -10,7 +10,6 @@ import {
   ChainType,
 } from './Chain';
 
-import { OmniClient, OneClickClient } from '../bridge';
 import { addr } from '../utils';
 
 const { ZecAddr } = addr;
@@ -46,10 +45,6 @@ export class ZecChain extends Chain<ChainAssetData, ZecBalanceType> {
 
   private _balanceReader?: ZecBalanceReader;
 
-  private _omniClient?: OmniClient;
-
-  private _oneClickClient?: OneClickClient;
-
   readonly pollInterval?: number;
 
   constructor({ balanceReader, pollInterval, ...others }: ZecChainParams) {
@@ -69,26 +64,6 @@ export class ZecChain extends Chain<ChainAssetData, ZecBalanceType> {
    */
   registerBalanceReader(reader: ZecBalanceReader): this {
     this._balanceReader = reader;
-    return this;
-  }
-
-  get omniClient(): OmniClient | undefined {
-    return this._omniClient;
-  }
-
-  /** Omni client deposits are ordered through; Omni routes fail without it. */
-  registerOmniClient(client: OmniClient): this {
-    this._omniClient = client;
-    return this;
-  }
-
-  get oneClickClient(): OneClickClient | undefined {
-    return this._oneClickClient;
-  }
-
-  /** 1Click client withdrawals are quoted through; they fail without it. */
-  registerOneClickClient(client: OneClickClient): this {
-    this._oneClickClient = client;
     return this;
   }
 

@@ -5,11 +5,9 @@
 '@galacticcouncil/xc-swap': minor
 ---
 
-NEAR and ZEC mainnet routes, Zcash into hydration through Omni
+NEAR and ZEC mainnet routes, Zcash transfers in xc-swap
 
 - NEAR and ZEC move between NEAR and hydration over ntt, self-redeem on both ends
-- Zcash into hydration: one payment to an Omni deposit address, checked against Omni's minimum and the NEAR limits first
-- xc-swap ships the Omni client, registered on the zcash chain by the integrator
-- xc-swap withdraws ZEC held on NEAR to Zcash through 1Click
-- Hydration ZEC withdraws to Zcash: an ntt transfer to a 1Click deposit address on NEAR, opened by the transfer's `openDeposit`
-- The withdrawal publishes its deposit address as the ntt refund address; `NearClaim.findRecipient` reads it back, so any NEAR account can claim it
+- An ntt transfer to a NEAR implicit account publishes it as the refund address; `NearClaim.findRecipient` reads it back, so any NEAR account can claim it
+- xc-sdk signs Zcash payments (`ZecSigner`, `toZecPaymentUri`); the zcash chain reads balances through a registered reader
+- xc-swap `createZcashTransfers`: hydration ZEC to Zcash through 1Click, Zcash to hydration through Omni, each in the shape of an xc-sdk `Transfer`

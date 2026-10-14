@@ -156,8 +156,8 @@ export class NearClaim {
    * The account a vaa pays out to, as its sender published it on the source
    * chain - what any claimer passes to {@link redeem}.
    *
-   * - A 1Click withdrawal pays a NEAR implicit account and publishes its 32
-   *   bytes as the transfer's ntt refund address
+   * - A transfer to a NEAR implicit account, such as a 1Click deposit
+   *   address, publishes its 32 bytes as the ntt refund address
    * - Read from the manager's `TransferSent` in the blocks stamped with the
    *   vaa's timestamp, and kept only if it hashes to the payee: a transfer
    *   that published nothing carries the payee hash itself there

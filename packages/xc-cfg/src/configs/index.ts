@@ -5,7 +5,6 @@ import { nearChainsConfig } from './near';
 import { polkadotChainsConfig } from './polkadot';
 import { solanaChainsConfig } from './solana';
 import { suiChainsConfig } from './sui';
-import { zcashChainsConfig } from './zcash';
 
 import { kusamaChainsConfig } from './kusama';
 
@@ -15,7 +14,6 @@ export const routes: ChainRoutes[] = [
   ...polkadotChainsConfig,
   ...solanaChainsConfig,
   ...suiChainsConfig,
-  ...zcashChainsConfig,
   ...kusamaChainsConfig,
 ];
 

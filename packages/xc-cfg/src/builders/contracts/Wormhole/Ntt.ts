@@ -11,7 +11,6 @@ import {
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
-import { getOneClickClient } from '../../../bridges/oneclick';
 import {
   encodeNttRequest,
   NTT_DEFAULT_INSTRUCTIONS,
@@ -65,13 +64,21 @@ const resolveTransfer = async (params: ContractConfigBuilderParams) => {
 };
 
 /**
+ * NEAR implicit account as 32 bytes: the hex of its key is the account id.
+ *
+ * - Undefined for a named account, which doesn't fit 32 bytes
+ */
+const implicitAccountBytes = (account: string): string | undefined =>
+  /^[0-9a-f]{64}$/.test(account) ? '0x' + account : undefined;
+
+/**
  * Self-redeem transfer, the manager called directly.
  *
- * @param refundAddress - ntt refund address (bytes32), emitted in the
- *   manager's `TransferSent`; the recipient by default, as the short
- *   `transfer` overload sets it
+ * - A NEAR implicit recipient is published as the ntt refund address, unused
+ *   towards NEAR: the vaa names it by its sha256 only, and any claimer reads
+ *   it back with `NearClaim.findRecipient`
  */
-const transfer = (refundAddress?: string): ContractConfigBuilder => ({
+const transfer = (): ContractConfigBuilder => ({
   build: async (params) => {
     const {
       ntt,
@@ -83,17 +90,21 @@ const transfer = (refundAddress?: string): ContractConfigBuilder => ({
     } = await resolveTransfer(params);
 
     const recipient = rcvWh.normalizeAddress(rcvAddress);
+    const published =
+      params.destination.chain instanceof NearChain
+        ? implicitAccountBytes(rcvAddress)
+        : undefined;
 
     return [
       new ContractConfig({
         abi: Abi.NttManager,
         address: ntt.manager,
-        args: refundAddress
+        args: published
           ? [
               transferAmount,
               rcvWh.getWormholeId(),
               recipient,
-              refundAddress,
+              published,
               false,
               NTT_DEFAULT_INSTRUCTIONS,
             ]
@@ -299,77 +310,10 @@ const transferViaExecutor = (): ContractConfigBuilder => ({
   },
 });
 
-/**
- * NEAR implicit account as 32 bytes: the hex of its key is the account id.
- *
- * - Throws on any other account: one that can't be published must not be
- *   paid, the vaa alone can't name it to a claimer
- */
-const implicitAccountBytes = (account: string): string => {
-  if (!/^[0-9a-f]{64}$/.test(account)) {
-    throw new Error('Not a NEAR implicit account: ' + account);
-  }
-  return '0x' + account;
-};
-
-/**
- * Withdrawal through 1Click: an ntt transfer to NEAR, paying the deposit
- * address 1Click delivers natively from.
- *
- * - Pays the deposit address once opened; until then, the sender's own NEAR
- *   refund account, which they can claim from
- * - The vaa names the deposit address by its sha256 only, so the transfer
- *   publishes it as its ntt refund address, unused on NEAR; any claimer reads
- *   it back with `NearClaim.findRecipient`
- * - Fails without a NEAR refund account or a registered 1Click client, or
- *   on a deposit address that isn't an implicit account
- *
- * @param hub - NEAR chain the transfer lands on
- */
-const transferViaOneClick = (hub: NearChain): ContractConfigBuilder => {
-  const refundAccount = (address?: string): string => {
-    if (address && hub.isValidAddress(address)) {
-      return address;
-    }
-    throw new Error('A withdrawal through 1Click needs a NEAR refund account');
-  };
-
-  return {
-    build: async (params) => {
-      const { amount, deposit, refundAddress } = params;
-      const toHub = { ...params.destination, chain: hub };
-
-      if (deposit?.amount === amount) {
-        const { depositAddress } = deposit;
-        return transfer(implicitAccountBytes(depositAddress)).build({
-          ...params,
-          address: depositAddress,
-          destination: toHub,
-        });
-      }
-
-      return transfer().build({
-        ...params,
-        address: refundAccount(refundAddress),
-        destination: toHub,
-      });
-    },
-    openDeposit: async ({ address, amount, destination, refundAddress }) => {
-      const deposit = await getOneClickClient(destination.chain).openDeposit({
-        amount,
-        recipient: address,
-        refundTo: refundAccount(refundAddress),
-      });
-      return { ...deposit, amount };
-    },
-  };
-};
-
 export const Ntt = () => {
   return {
     transfer,
     transferWithExecutor,
     transferViaExecutor,
-    transferViaOneClick,
   };
 };

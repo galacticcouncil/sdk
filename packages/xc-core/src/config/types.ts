@@ -31,20 +31,6 @@ export interface TransferCtx {
     fee: AssetAmount;
     feeBreakdown: { [key: string]: bigint };
   };
-  /** Account a route paying a deposit address refunds to. */
-  refundAddress?: string;
-  /** Deposit address the transfer opened. */
-  deposit?: TransferDeposit;
-}
-
-/** Deposit address a route pays, for the amount it was opened for. */
-export interface TransferDeposit {
-  /** Smallest unit of the source asset. */
-  amount: bigint;
-  depositAddress: string;
-  correlationId: string;
-  /** ISO timestamp the deposit address stops accepting. */
-  deadline: string;
 }
 
 export interface TransferConfig {

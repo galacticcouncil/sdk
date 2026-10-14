@@ -4,4 +4,3 @@ export * from './rail';
 export * from './swap';
 export * from './types';
 export * from './utils';
-export * from './withdraw';

@@ -4,6 +4,12 @@ import { ZecCall } from './types';
 
 export const ZEC_DECIMALS = 8;
 
+/** ZIP-317 marginal fee, zatoshi per logical action. */
+export const ZEC_MARGINAL_FEE = 5_000n;
+
+/** Actions of a shielded-to-transparent payment, change included. */
+export const ZEC_LOGICAL_ACTIONS = 4n;
+
 export function toZecCall(from: string, to: string, amount: bigint): ZecCall {
   return {
     from,

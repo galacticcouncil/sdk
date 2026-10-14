@@ -8,7 +8,6 @@ import {
   Parachain,
   SolanaChain,
   SuiChain,
-  ZecChain,
 } from '@galacticcouncil/xc-core';
 
 import { EvmPlatform } from './evm';
@@ -16,7 +15,6 @@ import { NearPlatform } from './near';
 import { SolanaPlatform } from './solana';
 import { SubstratePlatform } from './substrate';
 import { SuiPlatform } from './sui';
-import { ZecPlatform } from './zec';
 import { Call, Platform } from './types';
 
 export class PlatformAdapter {
@@ -43,9 +41,6 @@ export class PlatformAdapter {
       case ChainType.NearChain:
         this.registerNear(chain);
         break;
-      case ChainType.ZecChain:
-        this.registerZec(chain);
-        break;
       default:
         throw new Error('Unsupported platform: ' + chain.getType());
     }
@@ -69,11 +64,6 @@ export class PlatformAdapter {
   private registerNear(chain: AnyChain) {
     const nearChain = chain as NearChain;
     this.platform.Near = new NearPlatform(nearChain);
-  }
-
-  private registerZec(chain: AnyChain) {
-    const zecChain = chain as ZecChain;
-    this.platform.Zec = new ZecPlatform(zecChain);
   }
 
   private registerSubstrate(chain: AnyChain) {

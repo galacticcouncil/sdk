@@ -26,7 +26,7 @@ export interface OmniDepositOrder {
   refundAddress: string;
 }
 
-/** Omni bridge client, registered on the source chain by the integrator. */
+/** Omni bridge client: orders deposit addresses, reads the connector. */
 export interface OmniClient {
   getConnector(chain: OmniUtxoChain): OmniConnector;
   getConnectorConfig(chain: OmniUtxoChain): Promise<OmniConnectorConfig>;

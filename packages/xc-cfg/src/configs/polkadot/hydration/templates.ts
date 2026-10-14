@@ -4,7 +4,6 @@ import {
   Asset,
   AssetRoute,
   ExtrinsicConfigBuilderParams,
-  NearChain,
   Parachain,
 } from '@galacticcouncil/xc-core';
 
@@ -175,38 +174,6 @@ export function toParaErc20Template(
         transferType,
       })
     ),
-  });
-}
-
-/**
- * Withdrawal to a chain 1Click delivers natively to, over NEAR.
- *
- * - The ntt transfer pays a 1Click deposit address on NEAR, opened by the
- *   transfer's `openDeposit`; the sender claims it there, 1Click delivers
- * - 1Click's cut is the destination fee
- */
-export function viaOneClickTemplate(
-  asset: Asset,
-  to: AnyChain,
-  hub: NearChain
-): AssetRoute {
-  const transfer = ContractBuilder().Wormhole().Ntt().transferViaOneClick(hub);
-  return new AssetRoute({
-    source: {
-      asset: asset,
-      fee: fee(),
-    },
-    destination: {
-      chain: to,
-      asset: asset,
-      fee: {
-        amount: FeeAmountBuilder().OneClick().quoteFee(),
-        asset: asset,
-      },
-    },
-    contract: transfer,
-    extrinsic: ExtrinsicBuilder().evm().call(transfer),
-    tags: [Tag.Wormhole, Tag.Ntt, Tag.OneClick],
   });
 }
 

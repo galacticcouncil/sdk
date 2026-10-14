@@ -8,7 +8,6 @@ import {
   ConfigService,
   TransferConfigs,
   TransferCtx,
-  TransferDeposit,
   TransferValidator,
   TransferValidation,
   TransferValidationReport,
@@ -62,8 +61,7 @@ export class Wallet {
   async getTransferData(
     configs: TransferConfigs,
     srcAddress: string,
-    dstAddress: string,
-    refundAddress?: string
+    dstAddress: string
   ): Promise<Transfer> {
     const srcConf = configs.origin;
     const { chain: dstChain, asset: dstAsset } = srcConf.route.destination;
@@ -123,7 +121,6 @@ export class Wallet {
         destinationFeeBalance: srcDestinationFeeBalance,
         destinationFeePrepaid: destination.fee.prepaid,
       },
-      refundAddress,
     };
 
     const swap = new FeeSwap(ctx);
@@ -185,19 +182,6 @@ export class Wallet {
         fee: dstFee,
       },
       reversible: configs.reversible,
-      async openDeposit(amount): Promise<TransferDeposit | undefined> {
-        const openDeposit = srcConf.route.contract?.openDeposit;
-        if (!openDeposit) {
-          return undefined;
-        }
-        const target = big.toBigInt(amount, srcBalance.decimals);
-        if (ctx.deposit?.amount !== target) {
-          // On the shared ctx, so every later build of the amount pays it
-          ctx.deposit = await openDeposit({ ...ctx, amount: target });
-          transfer.deposit = ctx.deposit;
-        }
-        return ctx.deposit;
-      },
       async buildCall(amount): Promise<Call> {
         const [call] = await transfer.buildCalls(amount);
         return call;

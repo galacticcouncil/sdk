@@ -37,10 +37,6 @@ import {
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
 } from '../bridges/snowbridge';
-import {
-  getOneClickClient,
-  ONE_CLICK_FEE_QUOTE_AMOUNT,
-} from '../bridges/oneclick';
 import { NTT_DEFAULT_INSTRUCTIONS } from '../bridges/wormhole';
 import {
   BaseClient,
@@ -447,34 +443,9 @@ function Basejump() {
   };
 }
 
-function OneClick() {
-  return {
-    /**
-     * 1Click's cut of a withdrawal, from a dry quote.
-     *
-     * - Flat, so a smaller or unknown amount is quoted at 1 ZEC, which no
-     *   minimum refuses
-     * - Zero when 1Click refuses; the validation reports why
-     */
-    quoteFee: (): FeeAmountConfigBuilder => ({
-      build: async ({ address, amount, destination }) => {
-        const { fee } = await getOneClickClient(destination).quote({
-          amount:
-            amount && amount > ONE_CLICK_FEE_QUOTE_AMOUNT
-              ? amount
-              : ONE_CLICK_FEE_QUOTE_AMOUNT,
-          recipient: address ?? '',
-        });
-        return { amount: fee, breakdown: {} };
-      },
-    }),
-  };
-}
-
 export function FeeAmountBuilder() {
   return {
     Basejump,
-    OneClick,
     XcmPaymentApi,
     Snowbridge,
     Wormhole,

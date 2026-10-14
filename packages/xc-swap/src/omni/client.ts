@@ -1,14 +1,13 @@
-import {
-  addr,
-  NearClient,
-  type OmniClient,
-  type OmniConnector,
-  type OmniConnectorConfig,
-  type OmniDepositOrder,
-  type OmniUtxoChain,
-} from '@galacticcouncil/xc-core';
+import { addr, NearClient } from '@galacticcouncil/xc-core';
 
 import { OMNI_BRIDGE_API, OMNI_CONNECTORS } from './consts';
+import type {
+  OmniClient,
+  OmniConnector,
+  OmniConnectorConfig,
+  OmniDepositOrder,
+  OmniUtxoChain,
+} from './types';
 
 const { ZecAddr } = addr;
 

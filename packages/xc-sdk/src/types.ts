@@ -1,7 +1,6 @@
 import {
   AssetAmount,
   SwapCtx,
-  TransferDeposit,
   TransferValidationReport,
 } from '@galacticcouncil/xc-core';
 
@@ -57,19 +56,6 @@ export interface Transfer {
   source: TransferSourceData;
   destination: TransferDestinationData;
   reversible: boolean;
-  /** Deposit address the transfer pays, once opened. */
-  deposit?: TransferDeposit;
-  /**
-   * Open the deposit address of a route paying one, before signing.
-   *
-   * - Builds for the same amount pay it; until then they pay the refund
-   *   address, the sender's own NEAR account
-   * - Kept for the amount, so opening it again opens nothing new
-   * - Undefined on any other route
-   */
-  openDeposit(
-    amount: bigint | number | string
-  ): Promise<TransferDeposit | undefined>;
   /** Next call the sender has to sign, the head of {@link buildCalls}. */
   buildCall(amount: bigint | number | string): Promise<Call>;
   /**

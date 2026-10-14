@@ -1,9 +1,10 @@
 import { jest } from '@jest/globals';
 
-import { NearClient, type OmniDepositOrder } from '@galacticcouncil/xc-core';
+import { NearClient } from '@galacticcouncil/xc-core';
 
 import { createOmniClient } from './client';
 import { OMNI_BRIDGE_API } from './consts';
+import type { OmniDepositOrder } from './types';
 
 const CONNECTOR = 'zcash-connector.bridge.near';
 const MANAGER = 'ntt-zec.hydration-whm.near';
