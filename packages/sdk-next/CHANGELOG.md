@@ -1,5 +1,14 @@
 # @galacticcouncil/sdk-next
 
+## 2.5.0
+
+### Minor Changes
+
+- 0027729: Fewer RPC requests for EVM reads and pool loading
+  - batch concurrent hydration EVM reads through multicall
+  - skip balance reads for xyk pools that can never route
+  - read stableswap tradability and share issuance in batches
+
 ## 2.4.0
 
 ### Minor Changes
