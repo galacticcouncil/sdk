@@ -17,6 +17,7 @@ import { BlockAt } from '../api';
 export class EvmClient {
   readonly client: PolkadotClient;
   private at: BlockAt;
+  private wsProvider?: PublicClient;
 
   readonly chain: Chain;
 
@@ -45,13 +46,25 @@ export class EvmClient {
     });
   }
 
+  /**
+   * EVM reads over the papi connection.
+   *
+   * - One shared client, so reads issued together share a batch
+   * - A batch goes out as one `aggregate3` call through MultiView
+   * - Batched reads run as `staticcall`, so only view reads belong here
+   */
   getWsProvider(): PublicClient {
-    return createPublicClient({
-      transport: custom({
-        request: ({ method, params }) =>
-          this.client._request(method, params || []),
-      }),
-    });
+    if (!this.wsProvider) {
+      this.wsProvider = createPublicClient({
+        chain: this.chain,
+        batch: { multicall: true },
+        transport: custom({
+          request: ({ method, params }) =>
+            this.client._request(method, params || []),
+        }),
+      });
+    }
+    return this.wsProvider;
   }
 
   getSigner(address: string): WalletClient {

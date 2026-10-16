@@ -44,6 +44,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
     );
   }
 
+  /**
+   * Every pool whose tokens both carry decimals.
+   *
+   * - A pool without them never routes, so its balances are not read
+   * - Same decimals rule as the `hasValidAssets` filter after loading
+   *
+   * @param block - block every read pins to
+   */
   async loadPools(block: BlockRef): Promise<PoolBase[]> {
     const at = block.hash;
     const [entries, assets, limits] = await Promise.all([
@@ -52,7 +60,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
       this.query.limits(),
     ]);
 
-    const pools = entries.map(async ({ keyArgs, value }) => {
+    const decimalsOf = (id: number) =>
+      assets.get(id)?.decimals || this.decimals.get(id);
+
+    const routable = entries.filter(
+      ({ value: [x, y] }) => decimalsOf(x) && decimalsOf(y)
+    );
+
+    const pools = routable.map(async ({ keyArgs, value }) => {
       const [id] = keyArgs;
       const [x, y] = value;
 
@@ -70,14 +85,14 @@ export class XykPoolClient extends PoolClient<PoolBase> {
         tokens: [
           {
             id: x,
-            decimals: xMeta?.decimals || this.decimals.get(x),
+            decimals: decimalsOf(x),
             existentialDeposit: xMeta?.existential_deposit,
             balance: xBalance.transferable,
             type: xMeta?.asset_type.type,
           } as PoolToken,
           {
             id: y,
-            decimals: yMeta?.decimals || this.decimals.get(y),
+            decimals: decimalsOf(y),
             existentialDeposit: yMeta?.existential_deposit,
             balance: yBalance.transferable,
             type: yMeta?.asset_type.type,

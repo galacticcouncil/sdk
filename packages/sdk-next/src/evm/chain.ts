@@ -1,5 +1,9 @@
 import { defineChain, Chain } from 'viem';
 
+/**
+ * MultiView, a read-only Multicall3. */
+const MULTICALL = '0x61f69c81D31fd8D47580f738d089105Cf0C995d8';
+
 const rpcWebsocketList = [
   'https://hydration-rpc.n.dwellir.com',
   'https://rpc.kril.hydration.cloud',
@@ -32,6 +36,12 @@ export const createChain = (): Chain => {
       default: {
         name: 'Hydration Explorer',
         url: 'https://hydration.subscan.io',
+      },
+    },
+    contracts: {
+      multicall3: {
+        address: MULTICALL,
+        blockCreated: 15_271_520,
       },
     },
     testnet: false,
