@@ -9,6 +9,7 @@ import { NTT_MANAGER } from './NttManager';
 import { NTT_MANAGER_WITH_EXECUTOR } from './NttManagerWithExecutor';
 import { POLKADOT_XCM } from './PolkadotXcm';
 import { SNOWBRIDGE } from './Snowbridge';
+import { UTXO_EMITTER } from './UtxoEmitter';
 import { WETH } from './Weth';
 import { WORMHOLE_TRANSCEIVER } from './WormholeTransceiver';
 
@@ -22,6 +23,7 @@ export const Abi: Record<string, TAbi> = {
   NttManagerWithExecutor: NTT_MANAGER_WITH_EXECUTOR,
   PolkadotXcm: POLKADOT_XCM,
   Snowbridge: SNOWBRIDGE,
+  UtxoEmitter: UTXO_EMITTER,
   Weth: WETH,
   WormholeTransceiver: WORMHOLE_TRANSCEIVER,
 };

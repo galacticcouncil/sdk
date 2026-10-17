@@ -2,6 +2,7 @@ import { Asset } from '../../asset';
 import { AnyChain } from '../../chain';
 
 import { ContractConfigBuilder } from './contract';
+import { DepositConfigBuilder } from './deposit';
 import { ExtrinsicConfigBuilder } from './extrinsic';
 import { FeeConfig, DestinationFeeConfig } from './fee';
 import { FunctionCallConfigBuilder } from './functionCall';
@@ -26,6 +27,7 @@ export interface AssetRouteParams {
   source: SourceConfig;
   destination: DestinationConfig;
   contract?: ContractConfigBuilder;
+  deposit?: DepositConfigBuilder;
   extrinsic?: ExtrinsicConfigBuilder;
   functionCall?: FunctionCallConfigBuilder;
   move?: MoveConfigBuilder;
@@ -39,6 +41,8 @@ export class AssetRoute {
   readonly destination: DestinationConfig;
 
   readonly contract?: ContractConfigBuilder;
+
+  readonly deposit?: DepositConfigBuilder;
 
   readonly extrinsic?: ExtrinsicConfigBuilder;
 
@@ -54,6 +58,7 @@ export class AssetRoute {
     source,
     destination,
     contract,
+    deposit,
     extrinsic,
     functionCall,
     move,
@@ -63,6 +68,7 @@ export class AssetRoute {
     this.source = source;
     this.destination = destination;
     this.contract = contract;
+    this.deposit = deposit;
     this.extrinsic = extrinsic;
     this.functionCall = functionCall;
     this.move = move;

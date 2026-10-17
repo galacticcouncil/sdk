@@ -58,6 +58,3 @@ export const WRAP_NEAR_ASSET = 'nep141:wrap.near';
 
 /** Destination asset: ZEC (Zcash). */
 export const ZEC_ASSET = 'nep141:zec.omft.near';
-
-/** Origin asset: ZEC held on NEAR, withdrawn to Zcash. */
-export const NEAR_ZEC_ASSET = '1cs_v1:near:nep141:zec.omft.near';

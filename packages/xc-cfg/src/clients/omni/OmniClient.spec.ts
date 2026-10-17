@@ -2,9 +2,10 @@ import { jest } from '@jest/globals';
 
 import { NearClient } from '@galacticcouncil/xc-core';
 
-import { createOmniClient } from './client';
-import { OMNI_BRIDGE_API } from './consts';
-import type { OmniDepositOrder } from './types';
+import { OMNI_BRIDGE_API } from '../../bridges/omni';
+import { near_chain, zcash } from '../../chains';
+
+import { OmniClient, OmniDepositOrder } from './OmniClient';
 
 const CONNECTOR = 'zcash-connector.bridge.near';
 const MANAGER = 'ntt-zec.hydration-whm.near';
@@ -15,11 +16,13 @@ const MSG =
   '{"recipient_chain":73,"recipient":"0x000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045","refund_to":"hydration.sputnik-dao.near"}';
 
 const ORDER: OmniDepositOrder = {
-  chain: 'zcash',
   recipient: MANAGER,
   msg: MSG,
   refundAddress: SENDER,
 };
+
+const client = (timeoutMs?: number) =>
+  new OmniClient(zcash, near_chain, timeoutMs);
 
 const answered = (body: unknown) =>
   ({
@@ -64,15 +67,21 @@ const mockNear = (views: Record<string, () => Promise<unknown>>) => {
 const derives = (address = DEPOSIT) =>
   mockNear({ get_user_deposit_address: async () => address });
 
-describe('createOmniClient', () => {
+describe('OmniClient', () => {
   afterEach(() => jest.restoreAllMocks());
+
+  it('should refuse a chain without a connector', () => {
+    expect(() => new OmniClient(near_chain, near_chain)).toThrow(
+      'Omni has no connector for NEAR'
+    );
+  });
 
   describe('getDepositAddress', () => {
     it('should register the order with the api, without a public record', async () => {
       const fetch = mockApi(registered());
       derives();
 
-      await createOmniClient().getDepositAddress(ORDER);
+      await client().getDepositAddress(ORDER);
 
       expect(fetch).toHaveBeenCalledTimes(1);
       const [url, init] = fetch.mock.calls[0] as [string, RequestInit];
@@ -96,9 +105,7 @@ describe('createOmniClient', () => {
       mockApi(registered());
       const { view, rpcs } = derives();
 
-      await expect(createOmniClient().getDepositAddress(ORDER)).resolves.toBe(
-        DEPOSIT
-      );
+      await expect(client().getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
       expect(view).toHaveBeenCalledWith(CONNECTOR, 'get_user_deposit_address', {
         deposit_msg: {
           recipient_id: MANAGER,
@@ -106,19 +113,19 @@ describe('createOmniClient', () => {
           refund_address: SENDER,
         },
       });
-      expect(rpcs).toEqual(['https://free.rpc.fastnear.com']);
+      expect(rpcs).toEqual([near_chain.rpc]);
     });
 
     it('should register an order once and reuse its address', async () => {
       const fetch = mockApi(registered());
       const { view } = derives();
-      const client = createOmniClient();
+      const omni = client();
 
       const [first, second] = await Promise.all([
-        client.getDepositAddress(ORDER),
-        client.getDepositAddress({ ...ORDER }),
+        omni.getDepositAddress(ORDER),
+        omni.getDepositAddress({ ...ORDER }),
       ]);
-      const third = await client.getDepositAddress(ORDER);
+      const third = await omni.getDepositAddress(ORDER);
 
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(view).toHaveBeenCalledTimes(1);
@@ -133,11 +140,11 @@ describe('createOmniClient', () => {
           .mockResolvedValueOnce(DEPOSIT)
           .mockResolvedValueOnce(OTHER),
       });
-      const client = createOmniClient();
+      const omni = client();
 
-      await expect(client.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
+      await expect(omni.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
       await expect(
-        client.getDepositAddress({ ...ORDER, refundAddress: OTHER })
+        omni.getDepositAddress({ ...ORDER, refundAddress: OTHER })
       ).resolves.toBe(OTHER);
       expect(fetch).toHaveBeenCalledTimes(2);
     });
@@ -161,24 +168,24 @@ describe('createOmniClient', () => {
       [
         'a non-zcash address',
         registered('bc1qnotazcashaddress'),
-        'Omni deposit address is not a zcash address: bc1qnotazcashaddress',
+        'Omni deposit address is not a Zcash address: bc1qnotazcashaddress',
       ],
       [
         'a mistyped zcash address',
         registered('t1X5xYTgZRQtAnjwYBebHtrjSWBcfEmyLzy'),
-        'Omni deposit address is not a zcash address',
+        'Omni deposit address is not a Zcash address',
       ],
     ])(
       'should reject %s before reading the connector, and retry it',
       async (_case, res, error) => {
         const fetch = mockApi(res, registered());
         const { view } = derives();
-        const client = createOmniClient();
+        const omni = client();
 
-        await expect(client.getDepositAddress(ORDER)).rejects.toThrow(error);
+        await expect(omni.getDepositAddress(ORDER)).rejects.toThrow(error);
         expect(view).not.toHaveBeenCalled();
 
-        await expect(client.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
+        await expect(omni.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
         expect(fetch).toHaveBeenCalledTimes(2);
       }
     );
@@ -186,12 +193,12 @@ describe('createOmniClient', () => {
     it('should reject an address the connector does not derive, and retry it', async () => {
       const fetch = mockApi(registered(OTHER), registered());
       derives(DEPOSIT);
-      const client = createOmniClient();
+      const omni = client();
 
-      await expect(client.getDepositAddress(ORDER)).rejects.toThrow(
+      await expect(omni.getDepositAddress(ORDER)).rejects.toThrow(
         `Omni deposit address ${OTHER} does not derive from the order (${DEPOSIT})`
       );
-      await expect(client.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
+      await expect(omni.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
       expect(fetch).toHaveBeenCalledTimes(2);
     });
 
@@ -203,12 +210,12 @@ describe('createOmniClient', () => {
           .mockRejectedValueOnce(new Error('near rpc 503: unavailable'))
           .mockResolvedValueOnce(DEPOSIT),
       });
-      const client = createOmniClient();
+      const omni = client();
 
-      await expect(client.getDepositAddress(ORDER)).rejects.toThrow(
+      await expect(omni.getDepositAddress(ORDER)).rejects.toThrow(
         'near rpc 503: unavailable'
       );
-      await expect(client.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
+      await expect(omni.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
       expect(fetch).toHaveBeenCalledTimes(2);
     });
 
@@ -220,48 +227,81 @@ describe('createOmniClient', () => {
           .mockReturnValueOnce(new Promise(() => {}))
           .mockResolvedValueOnce(DEPOSIT),
       });
-      const client = createOmniClient({ timeoutMs: 20 });
+      const omni = client(20);
 
-      await expect(client.getDepositAddress(ORDER)).rejects.toThrow(
+      await expect(omni.getDepositAddress(ORDER)).rejects.toThrow(
         `near view ${CONNECTOR}.get_user_deposit_address timed out after 20ms`
       );
-      await expect(client.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
+      await expect(omni.getDepositAddress(ORDER)).resolves.toBe(DEPOSIT);
       expect(fetch).toHaveBeenCalledTimes(2);
     });
-
-    it('should take the api and rpc overrides', async () => {
-      const fetch = mockApi(registered());
-      const { rpcs } = derives();
-
-      await createOmniClient({
-        apiUrl: 'https://omni.test/api',
-        nearRpc: 'https://near.test',
-      }).getDepositAddress(ORDER);
-
-      const [url] = fetch.mock.calls[0] as [string];
-      expect(url).toBe('https://omni.test/api/utxo/get_user_deposit_address');
-      expect(rpcs).toEqual(['https://near.test']);
-    });
   });
 
-  describe('getConnector', () => {
-    it('should give the mainnet zcash connector', () => {
-      expect(createOmniClient().getConnector('zcash')).toEqual({
-        account: CONNECTOR,
-        token: 'zec.omft.near',
-        minDeposit: 100_000n,
+  describe('getWithdrawAccount', () => {
+    // whm utxo-withdraw golden vector, pinned by the contract's unit tests
+    const ADDRESS = 't1KfwsnwJeNRVjQGBDZhwKskpQbih2qx5Ua';
+    const PATH = 'zcash:v1:' + ADDRESS;
+    const KEY = 'ed25519:FhYNkYjdaYj6tAymcRFyRgH8jQNbW5VARJHtvGdEvD3N';
+    const ACCOUNT =
+      'da66533e90179ebb2e9e546afd4410e36f76e8a8b4ec0376b4e2a8825f802e11';
+
+    it('should derive the account under the withdraw contract', async () => {
+      const { view } = mockNear({
+        path_of: async () => PATH,
+        derived_public_key: async () => KEY,
+      });
+
+      await expect(client().getWithdrawAccount(ADDRESS)).resolves.toBe(ACCOUNT);
+      expect(view).toHaveBeenCalledWith(
+        'withdraw-zec.hydration-whm.near',
+        'path_of',
+        { address: ADDRESS }
+      );
+      expect(view).toHaveBeenCalledWith('v1.signer', 'derived_public_key', {
+        path: PATH,
+        predecessor: 'withdraw-zec.hydration-whm.near',
+        domain_id: 1,
       });
     });
+
+    it('should derive an address once', async () => {
+      const { view } = mockNear({
+        path_of: async () => PATH,
+        derived_public_key: async () => KEY,
+      });
+      const omni = client();
+
+      await omni.getWithdrawAccount(ADDRESS);
+      await omni.getWithdrawAccount(ADDRESS);
+      expect(view).toHaveBeenCalledTimes(2);
+    });
   });
 
-  describe('getConnectorConfig', () => {
+  describe('getWithdrawFee', () => {
+    const config = (fee_min: string, fee_rate: number) => ({
+      withdraw_bridge_fee: { fee_min, fee_rate },
+    });
+
+    it('should take the flat bridge fee and the miner fee', async () => {
+      mockNear({ get_config: async () => config('10000', 0) });
+
+      await expect(client().getWithdrawFee(50_000_000n)).resolves.toBe(20_000n);
+    });
+
+    it('should take the rated bridge fee once it tops the minimum', async () => {
+      mockNear({ get_config: async () => config('10000', 10) });
+
+      // 0.1% of 50,000,000 = 50,000 > 10,000
+      await expect(client().getWithdrawFee(50_000_000n)).resolves.toBe(60_000n);
+    });
+  });
+
+  describe('getConfig', () => {
     it('should read the live config off the connector', async () => {
       const config = { min_deposit_amount: '100000', refund_timelock_sec: 1 };
       const { view } = mockNear({ get_config: async () => config });
 
-      await expect(
-        createOmniClient().getConnectorConfig('zcash')
-      ).resolves.toEqual(config);
+      await expect(client().getConfig()).resolves.toEqual(config);
       expect(view).toHaveBeenCalledWith(CONNECTOR, 'get_config', {});
     });
   });

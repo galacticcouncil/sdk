@@ -5,7 +5,6 @@
     "build": {
       "dependsOn": [
         "@galacticcouncil/xc-core#postbuild",
-        "@galacticcouncil/xc-cfg#postbuild",
         "@galacticcouncil/xc-sdk#postbuild",
         "@galacticcouncil/sdk-next#postbuild",
         "^build",

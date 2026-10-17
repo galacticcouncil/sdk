@@ -4,6 +4,7 @@ import {
   Asset,
   AssetRoute,
   ExtrinsicConfigBuilderParams,
+  NearChain,
   Parachain,
 } from '@galacticcouncil/xc-core';
 
@@ -205,6 +206,38 @@ export function viaNttTemplate(
     contract: transfer,
     extrinsic: ExtrinsicBuilder().evm().call(transfer),
     tags: [Tag.Wormhole, Tag.Ntt],
+  });
+}
+
+/**
+ * Withdrawal to a UTXO chain through Omni, over the NEAR hub.
+ *
+ * - One call: the emitter settles to the NEAR account derived from the
+ *   address; bots redeem and withdraw from there
+ * - Emitter, bridge and miner fees come out of what lands
+ */
+export function viaOmniTemplate(
+  asset: Asset,
+  to: AnyChain,
+  hub: NearChain
+): AssetRoute {
+  const transfer = ContractBuilder().Omni().UtxoEmitter().send(hub);
+  return new AssetRoute({
+    source: {
+      asset: asset,
+      fee: fee(),
+    },
+    destination: {
+      chain: to,
+      asset: asset,
+      fee: {
+        amount: FeeAmountBuilder().Omni().withdrawFee(hub),
+        asset: asset,
+      },
+    },
+    contract: transfer,
+    extrinsic: ExtrinsicBuilder().evm().call(transfer),
+    tags: [Tag.Omni, Tag.Wormhole, Tag.Ntt],
   });
 }
 

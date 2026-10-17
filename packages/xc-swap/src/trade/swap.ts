@@ -21,7 +21,7 @@ const { ERC20 } = erc20;
 type QuoteResult = { quote?: Quote; error?: XcSwapError };
 
 /** Map a 1Click quote API error to a custom {@link XcSwapError}. */
-export function mapQuoteError(error: unknown): XcSwapError {
+function mapQuoteError(error: unknown): XcSwapError {
   const body = (error as { body?: { message?: string } } | null)?.body;
   const message = (
     body?.message ??
@@ -31,17 +31,6 @@ export function mapQuoteError(error: unknown): XcSwapError {
   if (message.includes('recipient')) return XcSwapError.RecipientInvalid;
   if (message.includes('too low')) return XcSwapError.AmountTooLow;
   return XcSwapError.QuoteFailed;
-}
-
-/**
- * Smallest amount 1Click takes, from its `AmountTooLow` rejection.
- *
- * - 1Click names it only in the message: "... try at least 133334"
- */
-export function quoteMinAmount(error: unknown): bigint | undefined {
-  const body = (error as { body?: { message?: string } } | null)?.body;
-  const [, min] = body?.message?.match(/at least (\d+)/) ?? [];
-  return min ? BigInt(min) : undefined;
 }
 
 /**

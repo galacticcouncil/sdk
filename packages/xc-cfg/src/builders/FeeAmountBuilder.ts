@@ -5,6 +5,7 @@ import {
   EvmChain,
   FeeAmount,
   FeeAmountConfigBuilder,
+  NearChain,
   Ntt,
   Parachain,
   Snowbridge as Sb,
@@ -44,6 +45,7 @@ import {
   executorClient,
   HydrationClient,
   nttClient,
+  omniClient,
 } from '../clients';
 
 type SendFeeOpts = {
@@ -443,9 +445,42 @@ function Basejump() {
   };
 }
 
+function Omni() {
+  return {
+    /**
+     * Cut of a withdrawal to a UTXO chain, out of what lands.
+     *
+     * - Emitter fee, kept on the source for the bots' NEAR gas
+     * - Omni's bridge fee and the miner fee, taken on the way out
+     *
+     * @param hub - NEAR chain the transfer settles on
+     */
+    withdrawFee: (hub: NearChain): FeeAmountConfigBuilder => ({
+      build: async ({ amount, source, destination }) => {
+        const ctx = source as AnyEvmChain;
+        const omni = omniClient(destination, hub);
+
+        const [emitterFee, omniFee] = await Promise.all([
+          ctx.evmClient.getProvider().readContract({
+            abi: Abi.UtxoEmitter,
+            address: omni.connector.withdrawal.emitter as `0x${string}`,
+            functionName: 'fee',
+          }) as Promise<bigint>,
+          omni.getWithdrawFee(amount ?? 0n),
+        ]);
+        return {
+          amount: emitterFee + omniFee,
+          breakdown: { emitter: emitterFee, omni: omniFee },
+        };
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
     Basejump,
+    Omni,
     XcmPaymentApi,
     Snowbridge,
     Wormhole,
