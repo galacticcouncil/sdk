@@ -22,15 +22,16 @@ const RE_AMOUNT = /^\d+$/;
  *   a refused deposit is lost or refunded by hand only
  * - Building the calls orders the address from Omni, checked against the
  *   connector's own derivation
+ * - A publish the NEAR manager fails refunds `refundTo`, not the connector
  *
- * @param ctx - wallet and Omni client
+ * @param ctx - wallet, NEAR refund account and Omni client
  * @param args - Zcash sender, refunded on a failed mint, and Hydration recipient
  */
 export async function buildDeposit(
   ctx: ZcashCtx,
   { srcAddress, dstAddress }: ZcashTransferArgs
 ): Promise<ZcashTransfer> {
-  const { wallet, omni } = ctx;
+  const { wallet, refundTo, omni } = ctx;
   const zcash = wallet.config.getChain('zec');
   const near = wallet.config.getChain('near');
   const hydration = wallet.config.getChain('hydration');
@@ -181,7 +182,10 @@ export async function buildDeposit(
         );
       }
 
-      const msg = await getNearTransferMsg(hydration, dstAddress);
+      const msg = JSON.stringify({
+        ...JSON.parse(await getNearTransferMsg(hydration, dstAddress)),
+        refund_to: refundTo,
+      });
       const to = await omni.getDepositAddress({
         chain: 'zcash',
         recipient: ntt.manager,

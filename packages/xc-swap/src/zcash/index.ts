@@ -20,14 +20,14 @@ export type {
  * - Kept out of the route config: both bridges only hand out deposit
  *   addresses, the ntt leg is the configured Hydration ↔ NEAR route
  *
- * @param opts - wallet, 1Click refund account and Omni client
+ * @param opts - wallet, NEAR refund account and Omni client
  */
 export function createZcashTransfers(opts: ZcashTransfersOpts): ZcashTransfers {
   const { wallet, refundTo } = opts;
   const config = wallet.config;
 
   if (!config.getChain('near').isValidAddress(refundTo)) {
-    throw new Error('1Click refunds to a NEAR account only: ' + refundTo);
+    throw new Error('Refunds go to a NEAR account only: ' + refundTo);
   }
 
   const ctx = { wallet, refundTo, omni: opts.omni ?? createOmniClient() };

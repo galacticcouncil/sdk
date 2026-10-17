@@ -12,7 +12,7 @@ const SENDER = 't1NyxCchMSJD5bUhKhKFzFnFnqEtvLbxMEG';
 const DEPOSIT = 't1X5xYTgZRQtAnjwYBebHtrjSWBcfEmyLzx';
 const OTHER = 't1QosiKpUQL4fYgmtDQHjxMpHTVT7HciYrQ';
 const MSG =
-  '{"recipient_chain":73,"recipient":"0x000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045"}';
+  '{"recipient_chain":73,"recipient":"0x000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045","refund_to":"hydration.sputnik-dao.near"}';
 
 const ORDER: OmniDepositOrder = {
   chain: 'zcash',

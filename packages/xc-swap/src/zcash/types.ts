@@ -7,7 +7,13 @@ import type { OmniClient } from '../omni';
 export interface ZcashTransfersOpts {
   /** Wallet the Hydration ↔ NEAR leg is built and validated with. */
   wallet: Wallet;
-  /** NEAR account 1Click refunds a failed withdrawal to. */
+  /**
+   * NEAR account a refund on NEAR goes to.
+   *
+   * - 1Click refunds a failed withdrawal
+   * - The NEAR manager refunds a deposit whose publish fails
+   * - Must be registered on `zec.omft.near`, or the refund stays with Omni
+   */
   refundTo: string;
   /** Omni bridge client. Default the mainnet one. */
   omni?: OmniClient;
