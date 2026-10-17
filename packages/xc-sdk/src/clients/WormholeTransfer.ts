@@ -207,8 +207,16 @@ export class WormholeTransfer {
             return claim.redeem(from, vaaRaw, destination);
           }
           if (toChain instanceof NearChain) {
+            // A 1Click withdrawal pays its deposit address, not the claimer
             const claim = new NearClaim(toChain);
-            return claim.redeem(from, vaaRaw, destination);
+            const { chain } = source;
+            const lookup =
+              !claim.isPayee(vaaRaw, from) &&
+              (chain.isEvmChain() || chain.isEvmParachain());
+            const recipient = lookup
+              ? await claim.findRecipient(vaaRaw, chain as AnyEvmChain)
+              : undefined;
+            return claim.redeem(from, vaaRaw, destination, recipient);
           }
           if (!EvmAddr.isValid(from) && toChain instanceof EvmParachain) {
             const claim = await SubstrateClaim.create(toChain);

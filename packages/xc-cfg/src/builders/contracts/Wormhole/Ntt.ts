@@ -6,6 +6,7 @@ import {
   ContractConfigBuilderParams,
   EvmBalanceType,
   EvmParachain,
+  NearChain,
   Ntt as NttRegistry,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
@@ -62,6 +63,21 @@ const resolveTransfer = async (params: ContractConfigBuilderParams) => {
   };
 };
 
+/**
+ * NEAR implicit account as 32 bytes: the hex of its key is the account id.
+ *
+ * - Undefined for a named account, which doesn't fit 32 bytes
+ */
+const implicitAccountBytes = (account: string): string | undefined =>
+  /^[0-9a-f]{64}$/.test(account) ? '0x' + account : undefined;
+
+/**
+ * Self-redeem transfer, the manager called directly.
+ *
+ * - A NEAR implicit recipient is published as the ntt refund address, unused
+ *   towards NEAR: the vaa names it by its sha256 only, and any claimer reads
+ *   it back with `NearClaim.findRecipient`
+ */
 const transfer = (): ContractConfigBuilder => ({
   build: async (params) => {
     const {
@@ -73,15 +89,26 @@ const transfer = (): ContractConfigBuilder => ({
       wrapNative,
     } = await resolveTransfer(params);
 
+    const recipient = rcvWh.normalizeAddress(rcvAddress);
+    const published =
+      params.destination.chain instanceof NearChain
+        ? implicitAccountBytes(rcvAddress)
+        : undefined;
+
     return [
       new ContractConfig({
         abi: Abi.NttManager,
         address: ntt.manager,
-        args: [
-          transferAmount,
-          rcvWh.getWormholeId(),
-          rcvWh.normalizeAddress(rcvAddress),
-        ],
+        args: published
+          ? [
+              transferAmount,
+              rcvWh.getWormholeId(),
+              recipient,
+              published,
+              false,
+              NTT_DEFAULT_INSTRUCTIONS,
+            ]
+          : [transferAmount, rcvWh.getWormholeId(), recipient],
         token: ntt.token,
         wrapNative: wrapNative,
         value: deliveryPrice,

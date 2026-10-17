@@ -4,4 +4,5 @@ export enum CallType {
   Solana = 'Solana',
   Sui = 'Sui',
   Near = 'Near',
+  Zec = 'Zec',
 }

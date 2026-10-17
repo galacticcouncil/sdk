@@ -30,7 +30,8 @@ const RE_SS58_BASE58_32 = /^[1-9A-HJ-NP-Za-km-z]{47,48}$/;
  * - A label is alphanumeric, optionally joined by a single `-` or `_`
  * - Rejects leading, trailing and doubled separators
  */
-const RE_NEAR_ACCOUNT = /^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/;
+const RE_NEAR_ACCOUNT =
+  /^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/;
 
 /** NEAR implicit account — the hex of an ed25519 public key. */
 const RE_NEAR_IMPLICIT = /^[0-9a-f]{64}$/;
@@ -149,6 +150,22 @@ export class NearAddr {
   static isImplicit(address: string): boolean {
     return RE_NEAR_IMPLICIT.test(address);
   }
+
+  /**
+   * Implicit account id of an ed25519 public key.
+   *
+   * - Lowercase hex of the 32 key bytes, no prefix
+   *
+   * @param publicKey - `ed25519:` prefixed base58 public key
+   */
+  static fromPublicKey(publicKey: string): string {
+    const [curve, key] = publicKey.split(':');
+    const bytes = curve === 'ed25519' && key ? base58.decode(key) : undefined;
+    if (!bytes || bytes.length !== 32) {
+      throw new Error('Not an ed25519 public key: ' + publicKey);
+    }
+    return toHex(bytes).slice(2);
+  }
 }
 
 // -------------------- Zcash --------------------
@@ -189,5 +206,22 @@ export class ZecAddr {
     const hash = sha256(sha256(body));
 
     return checksum.every((byte, i) => byte === hash[i]);
+  }
+
+  /**
+   * Payload of a transparent address: 2 version bytes and the 20-byte hash.
+   *
+   * - Checksum dropped, so any payload with a valid version is payable
+   * - Throws on anything {@link isValid} refuses
+   *
+   * @param address - transparent address
+   * @returns 22 bytes, hex
+   */
+  static getPayload(address: string): string {
+    if (!ZecAddr.isValid(address)) {
+      throw new Error('Not a transparent Zcash address: ' + address);
+    }
+    const decoded = base58.decode(address);
+    return toHex(decoded.subarray(0, ZEC_ADDR_BYTES - ZEC_CHECKSUM_BYTES));
   }
 }

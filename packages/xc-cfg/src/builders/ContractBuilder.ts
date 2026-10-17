@@ -1,6 +1,7 @@
 import { Batch } from './contracts/Batch';
 import { Erc20 } from './contracts/Erc20';
 import { Basejump } from './contracts/Basejump';
+import { Omni } from './contracts/Omni';
 import { PolkadotXcm } from './contracts/PolkadotXcm';
 import { Snowbridge } from './contracts/snowbridge';
 import { Wormhole } from './contracts/Wormhole';
@@ -10,6 +11,7 @@ export function ContractBuilder() {
     Batch,
     Erc20,
     Basejump,
+    Omni,
     PolkadotXcm,
     Snowbridge,
     Wormhole,

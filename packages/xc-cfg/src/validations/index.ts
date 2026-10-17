@@ -4,8 +4,13 @@ import {
   TransferValidationConstraint,
 } from '@galacticcouncil/xc-core';
 
+import { near_chain } from '../chains';
 import { FeeValidation, DestFeeValidation } from './base';
-import { NttCustodyValidation, NttRateLimitValidation } from './bridge';
+import {
+  NttCustodyValidation,
+  NttRateLimitValidation,
+  OmniValidation,
+} from './bridge';
 import {
   HubEdValidation,
   HubFrozenValidation,
@@ -35,4 +40,5 @@ export const validations: TransferValidation[] = [
   new HydrationEvmValueValidation(Matchers.isHydration, Matchers.isAny),
   new NttRateLimitValidation(Matchers.isAny, Matchers.isAny),
   new NttCustodyValidation(Matchers.isAny, Matchers.isAny),
+  new OmniValidation(near_chain, Matchers.isAny, Matchers.isAny),
 ];
