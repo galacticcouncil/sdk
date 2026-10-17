@@ -5,6 +5,9 @@ export type Amount = {
   decimals: number;
 };
 
+/** An account and one of its assets */
+export type AccountAsset = [account: string, assetId: number];
+
 export interface AssetBalance {
   id: number;
   balance: Balance;

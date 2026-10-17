@@ -10,6 +10,7 @@ import {
 
 import { BlockAt, BlockRef } from '../../../api';
 import { TRADEABLE_DEFAULT } from '../../../consts';
+import { AccountAsset, Balance } from '../../../types';
 import {
   MmOracleLog,
   MmRouting,
@@ -84,32 +85,36 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     } as Pick<StableSwapBase, 'amplification' | 'isRampPeriod'>;
   }
 
+  /**
+   * A pool's tokens.
+   *
+   * @param reserves - the pool's balance of each asset, in `poolInfo` order
+   */
   private async getPoolTokens(
     poolId: number,
     poolInfo: TStableswap,
+    reserves: Promise<Balance[]>,
     at: BlockAt
   ): Promise<PoolToken[]> {
-    const poolAddress = this.getPoolAddress(poolId);
-    const assets = await this.query.assets.get(at);
+    const [assets, balances, tradeabilities] = await Promise.all([
+      this.query.assets.get(at),
+      reserves,
+      Promise.all(
+        poolInfo.assets.map((id) => this.query.tradability.get(at, poolId, id))
+      ),
+    ]);
 
-    const poolTokens = poolInfo.assets.map(async (id) => {
+    return poolInfo.assets.map((id, i) => {
       const meta = assets.get(id);
-      const [tradeability, balance] = await Promise.all([
-        this.query.tradability.get(at, poolId, id),
-        this.query.assetBalance.get(at, poolAddress, id),
-      ]);
-
       return {
         id: id,
         decimals: meta?.decimals,
         existentialDeposit: meta?.existential_deposit,
-        balance: balance.transferable,
-        tradeable: tradeability,
+        balance: balances[i].transferable,
+        tradeable: tradeabilities[i],
         type: meta?.asset_type.type,
       } as PoolToken;
     });
-
-    return Promise.all(poolTokens);
   }
 
   /**
@@ -185,11 +190,27 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
     this.indexPegs(pegs, assetsByPool);
     this.mmRouting.build(this.mmKeys);
 
-    const entries = pools.map(async ({ keyArgs, value }) => {
+    // One batched read of every reserve, split back per pool
+    const addresses = pools.map(({ keyArgs: [id] }) => this.getPoolAddress(id));
+    const accountAssets = pools.map(({ value }, i) =>
+      value.assets.map((asset): AccountAsset => [addresses[i], asset])
+    );
+    const reserves = this.query.assetBalance
+      .getMany(at, accountAssets.flat())
+      .then((balances) =>
+        accountAssets.map(({ length }) => balances.splice(0, length))
+      );
+
+    const entries = pools.map(async ({ keyArgs, value }, i) => {
       const [id] = keyArgs;
-      const address = this.getPoolAddress(id);
+      const address = addresses[i];
       const [tokens, amplification, pegs, issuance] = await Promise.all([
-        this.getPoolTokens(id, value, at),
+        this.getPoolTokens(
+          id,
+          value,
+          reserves.then((r) => r[i]),
+          at
+        ),
         this.getPoolAmplification(value, block.number),
         this.getPoolPegs(id, value, block),
         this.query.issuance.get(at, id),
