@@ -1,4 +1,5 @@
 import {
+  EvmParachain,
   FunctionCallConfig,
   FunctionCallConfigBuilder,
   NearBalanceType,
@@ -6,12 +7,10 @@ import {
   NearDeposit,
   NearGas,
   Ntt as NttRegistry,
+  Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
 
-import {
-  getNearTransferMsg,
-  NTT_TRIMMED_DECIMALS,
-} from '../../../bridges/wormhole';
+import { NTT_TRIMMED_DECIMALS } from '../../../bridges/wormhole';
 import { floorToPrecision } from '../../utils';
 
 /**
@@ -20,13 +19,21 @@ import { floorToPrecision } from '../../utils';
  * - `ft_transfer_call` hands the token to the manager, which locks it and
  *   publishes the message
  * - A refused transfer (rate limit, pause) is refunded whole by the token
+ * - The manager takes the recipient as 32 bytes, an h160 left-padded
  */
 const transfer = (): FunctionCallConfigBuilder => ({
   build: async (params) => {
     const { address, amount, asset, source, destination } = params;
     const ctx = source.chain as NearChain;
+    const rcv = destination.chain;
 
     const ntt = NttRegistry.fromChain(ctx, asset);
+    const rcvWh = Wh.fromChain(rcv);
+
+    let rcvAddress = address;
+    if (rcv instanceof EvmParachain) {
+      rcvAddress = await rcv.getDerivatedAddress(address);
+    }
 
     // The manager trims to 8 decimals and hands the dust back - floored
     // upfront, so the amount sent is the amount that lands.
@@ -36,7 +43,10 @@ const transfer = (): FunctionCallConfigBuilder => ({
       NTT_TRIMMED_DECIMALS
     );
 
-    const msg = await getNearTransferMsg(destination.chain, address);
+    const msg = {
+      recipient_chain: rcvWh.getWormholeId(),
+      recipient: rcvWh.normalizeAddress(rcvAddress),
+    };
 
     return [
       new FunctionCallConfig({
@@ -44,7 +54,7 @@ const transfer = (): FunctionCallConfigBuilder => ({
         args: {
           receiver_id: ntt.manager,
           amount: transferAmount.toString(),
-          msg: msg,
+          msg: JSON.stringify(msg),
         },
         gas: NearGas.transfer,
         deposit: NearDeposit.oneYocto,

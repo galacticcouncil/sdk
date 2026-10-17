@@ -1,5 +1,9 @@
-import { clients, getNearTransferMsg } from '@galacticcouncil/xc-cfg';
-import { Ntt, type TransferValidationReport } from '@galacticcouncil/xc-core';
+import { clients } from '@galacticcouncil/xc-cfg';
+import {
+  EvmParachain,
+  Ntt,
+  type TransferValidationReport,
+} from '@galacticcouncil/xc-core';
 import {
   ZEC_LOGICAL_ACTIONS,
   ZEC_MARGINAL_FEE,
@@ -9,6 +13,7 @@ import {
 } from '@galacticcouncil/xc-sdk';
 import { big } from '@galacticcouncil/common';
 
+import { getDepositMsg } from './omni';
 import type { ZcashCtx, ZcashTransfer, ZcashTransferArgs } from './types';
 
 const RE_AMOUNT = /^\d+$/;
@@ -34,7 +39,7 @@ export async function buildDeposit(
   const { wallet, refundTo, omni } = ctx;
   const zcash = wallet.config.getChain('zec');
   const near = wallet.config.getChain('near');
-  const hydration = wallet.config.getChain('hydration');
+  const hydration = wallet.config.getChain('hydration') as EvmParachain;
   const zec = wallet.config.getAsset('zec');
   const connector = omni.getConnector('zcash');
 
@@ -182,10 +187,7 @@ export async function buildDeposit(
         );
       }
 
-      const msg = JSON.stringify({
-        ...JSON.parse(await getNearTransferMsg(hydration, dstAddress)),
-        refund_to: refundTo,
-      });
+      const msg = await getDepositMsg(hydration, dstAddress, refundTo);
       const to = await omni.getDepositAddress({
         chain: 'zcash',
         recipient: ntt.manager,

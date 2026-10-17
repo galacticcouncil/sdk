@@ -1,5 +1,4 @@
 export { assetsMap } from './assets';
-export { getNearTransferMsg } from './bridges/wormhole';
 export { chainsMap } from './chains';
 export { routesMap } from './configs';
 export { validations } from './validations';
