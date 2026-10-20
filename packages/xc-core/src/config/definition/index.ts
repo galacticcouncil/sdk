@@ -3,6 +3,7 @@ export * from './ChainRoutes';
 
 export * from './base';
 export * from './contract';
+export * from './deposit';
 export * from './extrinsic';
 export * from './functionCall';
 export * from './move';

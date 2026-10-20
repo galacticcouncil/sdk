@@ -28,6 +28,7 @@ import {
   ldo,
   link,
   myth,
+  near,
   neuro,
   paxg,
   pen,
@@ -54,6 +55,8 @@ import {
   wud,
   lbtc,
   susds_wh,
+  wnear,
+  zec,
 } from '../../../assets';
 import {
   assetHub,
@@ -66,12 +69,14 @@ import {
   hydration,
   hyperevm,
   mythos,
+  near_chain,
   neuroweb,
   pendulum,
   robinhood,
   solana,
   sui_chain,
   unique,
+  zcash,
 } from '../../../chains';
 import {
   ExtrinsicBuilder,
@@ -88,6 +93,7 @@ import {
   toTransferTemplate,
   viaNttExecutorTemplate,
   viaNttTemplate,
+  viaOmniTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
 } from './templates';
@@ -260,6 +266,15 @@ const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
 const toHyperevmViaNtt: AssetRoute[] = [viaNttTemplate(hype, hype, hyperevm)];
 
+// Self-redeem only - no executor serves NEAR
+const toNearViaNtt: AssetRoute[] = [
+  viaNttTemplate(near, wnear, near_chain),
+  viaNttTemplate(zec, zec, near_chain),
+];
+
+// Over NEAR, where Omni's connector withdraws it to Zcash
+const toZcashViaOmni: AssetRoute[] = [viaOmniTemplate(zec, zcash, near_chain)];
+
 const toRobinhoodViaNtt: AssetRoute[] = [
   viaNttTemplate(hdx, hdx, robinhood),
   viaNttTemplate(hollar, hollar, robinhood),
@@ -353,6 +368,8 @@ export const hydrationConfig = new ChainRoutes({
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toHyperevmViaNtt,
+    ...toNearViaNtt,
+    ...toZcashViaOmni,
     ...toRobinhoodViaNtt,
     ...toSolanaViaNtt,
     ...toSuiViaNtt,

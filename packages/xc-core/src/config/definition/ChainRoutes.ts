@@ -24,6 +24,7 @@ export class ChainRoutes {
           source: route.source,
           destination: route.destination,
           contract: route.contract,
+          deposit: route.deposit,
           extrinsic: route.extrinsic,
           functionCall: route.functionCall,
           move: route.move,

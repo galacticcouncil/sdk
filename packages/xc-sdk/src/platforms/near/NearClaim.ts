@@ -1,9 +1,12 @@
 import {
+  AnyEvmChain,
   NearChain,
   NearDeposit,
   NearGas,
   NttTokenDef,
 } from '@galacticcouncil/xc-core';
+
+import { parseAbiItem, type PublicClient } from 'viem';
 
 import { encoding } from '@wormhole-foundation/sdk-base';
 import {
@@ -23,6 +26,69 @@ function parseVaa(vaaRaw: string) {
   // opt-in now - `deserialize` throws without this. Idempotent.
   registerNttPayloads();
   return deserialize('Ntt:WormholeTransfer', encoding.b64.decode(vaaRaw));
+}
+
+const TRANSFER_SENT = parseAbiItem(
+  'event TransferSent(bytes32 indexed recipient, bytes32 indexed refundAddress, uint256 amount, uint256 fee, uint16 recipientChain, uint64 msgSequence)'
+);
+
+/**
+ * Blocks stamped with `timestamp` (seconds), the one a vaa carries.
+ *
+ * - Brackets it stepping back from the head, then interpolates on the block
+ *   timestamps, bisecting where an estimate lands on the bracket
+ * - Widened from the block it hits to every block sharing its timestamp:
+ *   hydration stamps its 2s blocks with a 6s slot clock, three alike
+ * - The gap between two blocks when none carries it exactly
+ */
+async function blocksAt(
+  provider: PublicClient,
+  timestamp: bigint
+): Promise<{ fromBlock: bigint; toBlock: bigint }> {
+  const head = await provider.getBlock();
+  let hi = head;
+  let lo = head;
+  for (let step = 1024n; lo.timestamp > timestamp && lo.number > 0n; ) {
+    hi = lo;
+    lo = await provider.getBlock({
+      blockNumber: lo.number > step ? lo.number - step : 0n,
+    });
+    step *= 4n;
+  }
+
+  let hit = [lo, hi].find((b) => b.timestamp === timestamp);
+  while (!hit && hi.number - lo.number > 1n) {
+    const span = hi.number - lo.number;
+    let n =
+      lo.number +
+      ((timestamp - lo.timestamp) * span) / (hi.timestamp - lo.timestamp);
+    if (n <= lo.number || n >= hi.number) {
+      n = lo.number + span / 2n;
+    }
+    const block = await provider.getBlock({ blockNumber: n });
+    if (block.timestamp === timestamp) {
+      hit = block;
+    } else if (block.timestamp < timestamp) {
+      lo = block;
+    } else {
+      hi = block;
+    }
+  }
+  if (!hit) {
+    return { fromBlock: lo.number, toBlock: hi.number };
+  }
+
+  const stamped = async (blockNumber: bigint) =>
+    (await provider.getBlock({ blockNumber })).timestamp === timestamp;
+  let fromBlock = hit.number;
+  while (fromBlock > 0n && (await stamped(fromBlock - 1n))) {
+    fromBlock--;
+  }
+  let toBlock = hit.number;
+  while (toBlock < head.number && (await stamped(toBlock + 1n))) {
+    toBlock++;
+  }
+  return { fromBlock, toBlock };
 }
 
 export class NearClaim {
@@ -72,6 +138,59 @@ export class NearClaim {
         deposit: NearDeposit.complete,
       },
     ]);
+  }
+
+  /**
+   * Whether the vaa pays out to `account`.
+   *
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param account - NEAR account
+   */
+  isPayee(vaaRaw: string, account: string): boolean {
+    const vaa = parseVaa(vaaRaw);
+    const { recipientAddress } = vaa.payload.nttManagerPayload.payload;
+    return recipientAddress.equals(new UniversalAddress(account, 'sha256'));
+  }
+
+  /**
+   * The account a vaa pays out to, as its sender published it on the source
+   * chain - what any claimer passes to {@link redeem}.
+   *
+   * - A transfer to a NEAR implicit account, such as a 1Click deposit
+   *   address, publishes its 32 bytes as the ntt refund address
+   * - Read from the manager's `TransferSent` in the blocks stamped with the
+   *   vaa's timestamp, and kept only if it hashes to the payee: a transfer
+   *   that published nothing carries the payee hash itself there
+   *
+   * @param vaaRaw - base64 encoded signed VAA (wormholescan raw format)
+   * @param source - evm chain the transfer left from
+   * @returns the account, or undefined when none was published
+   */
+  async findRecipient(
+    vaaRaw: string,
+    source: AnyEvmChain
+  ): Promise<string | undefined> {
+    const vaa = parseVaa(vaaRaw);
+    const { sourceNttManager, nttManagerPayload } = vaa.payload;
+    const { recipientAddress } = nttManagerPayload.payload;
+
+    const provider = source.evmClient.getProvider();
+    const blocks = await blocksAt(provider, BigInt(vaa.timestamp));
+    const manager = sourceNttManager.toUint8Array().subarray(12);
+    const logs = await provider.getLogs({
+      address: encoding.hex.encode(manager, true) as `0x${string}`,
+      event: TRANSFER_SENT,
+      args: { recipient: recipientAddress.toString() as `0x${string}` },
+      ...blocks,
+    });
+
+    return logs
+      .map((log) => log.args.refundAddress?.slice(2))
+      .find(
+        (account) =>
+          !!account &&
+          recipientAddress.equals(new UniversalAddress(account, 'sha256'))
+      );
   }
 
   /**

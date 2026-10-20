@@ -69,6 +69,19 @@ describe('Address utils', () => {
       expect(NearAddr.isImplicit(implicit)).toBeTruthy();
       expect(NearAddr.isImplicit('alice.near')).toBeFalsy();
     });
+    it('should give the implicit account of an ed25519 key', async () => {
+      // whm utxo-withdraw golden vector: t1KfwsnwJeNRVjQGBDZhwKskpQbih2qx5Ua
+      expect(
+        NearAddr.fromPublicKey(
+          'ed25519:FhYNkYjdaYj6tAymcRFyRgH8jQNbW5VARJHtvGdEvD3N'
+        )
+      ).toBe(
+        'da66533e90179ebb2e9e546afd4410e36f76e8a8b4ec0376b4e2a8825f802e11'
+      );
+      expect(() => NearAddr.fromPublicKey('secp256k1:abc')).toThrow(
+        'Not an ed25519 public key'
+      );
+    });
     it('should reject malformed account ids', async () => {
       expect(NearAddr.isValid('Alice.near')).toBeFalsy(); // uppercase
       expect(NearAddr.isValid('.alice.near')).toBeFalsy(); // leading separator
@@ -107,6 +120,19 @@ describe('Address utils', () => {
           'u1l8xunezsvhq8fgzfl7404m450nwnd76zshscn6nfys7vyz2ywyh4cc5d'
         )
       ).toBeFalsy();
+    });
+    it('should give the payload of a transparent address', async () => {
+      expect(ZecAddr.getPayload('t1KfwsnwJeNRVjQGBDZhwKskpQbih2qx5Ua')).toBe(
+        '0x1cb813bbd8bc8df03a5a9cda88103f583aa8bc043e24'
+      );
+      expect(ZecAddr.getPayload('t3Vz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd')).toBe(
+        '0x1cbd7d46a730d31f97b1930d3368a967c309bd4d136a'
+      );
+    });
+    it('should refuse the payload of a mistyped address', async () => {
+      expect(() =>
+        ZecAddr.getPayload('t1KrG29yWzoi7Bs2pvsgXozZYPvGG4D3sGX')
+      ).toThrow('Not a transparent Zcash address');
     });
     it('should reject other chains addresses', async () => {
       expect(

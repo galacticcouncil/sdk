@@ -1,4 +1,5 @@
 export * from './ContractBuilder';
+export * from './DepositBuilder';
 export * from './ExtrinsicBuilder';
 export * from './FeeAmountBuilder';
 export * from './FeeAssetBuilder';

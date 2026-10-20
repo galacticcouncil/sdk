@@ -24,8 +24,10 @@ const ZEC_DECIMALS = 8;
  */
 export type ZecBalanceReader = (address: string) => Promise<bigint>;
 
-export interface ZecChainParams
-  extends ChainParams<ChainAssetData, ZecBalanceType> {
+export interface ZecChainParams extends ChainParams<
+  ChainAssetData,
+  ZecBalanceType
+> {
   /** Indexer-backed balance reader. Balances are unavailable without one. */
   balanceReader?: ZecBalanceReader;
   /** Balance poll period, ms. Defaults to the shared interval. */
@@ -41,13 +43,28 @@ export interface ZecChainParams
 export class ZecChain extends Chain<ChainAssetData, ZecBalanceType> {
   private readonly balanceClient = new ZecBalanceClient(this);
 
-  readonly balanceReader?: ZecBalanceReader;
+  private _balanceReader?: ZecBalanceReader;
+
   readonly pollInterval?: number;
 
   constructor({ balanceReader, pollInterval, ...others }: ZecChainParams) {
     super({ ...others });
-    this.balanceReader = balanceReader;
+    this._balanceReader = balanceReader;
     this.pollInterval = pollInterval;
+  }
+
+  get balanceReader(): ZecBalanceReader | undefined {
+    return this._balanceReader;
+  }
+
+  /**
+   * Supplies the indexer balances are read from.
+   *
+   * - Config ships without one; the integrator registers its own
+   */
+  registerBalanceReader(reader: ZecBalanceReader): this {
+    this._balanceReader = reader;
+    return this;
   }
 
   getType(): ChainType {
