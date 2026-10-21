@@ -4,9 +4,11 @@ import { HydrationQueries } from '@galacticcouncil/descriptors';
 
 import { Papi } from '../api';
 import { BalanceClient } from '../client';
+import { SYSTEM_ASSET_ID } from '../consts';
 import { EvmClient } from '../evm';
 import { Balance } from '../types';
 import { QueryCache, QueryTally } from '../utils';
+import { batchValues } from '../utils/async';
 
 export type TAssetDetails = HydrationQueries['AssetRegistry']['Assets']['Value'];
 export type TAssetLocation =
@@ -93,11 +95,50 @@ export abstract class PoolQuery extends Papi {
     'persistent'
   );
 
-  /** An account's balance of one asset */
+  private systemAccounts = batchValues((keys: [string][], options) =>
+    this.api.query.System.Account.getValues(keys, options)
+  );
+
+  private tokenAccounts = batchValues((keys: [string, number][], options) =>
+    this.api.query.Tokens.Accounts.getValues(keys, options)
+  );
+
+  /** An account's balance of one asset, storage reads batched per block */
   readonly assetBalance = this.cache.scope<[string, number], Balance>(
     'CurrenciesApi.account',
-    (at, address, assetId) => this.balance.getBalanceAt(address, assetId, at),
+    (at, address, assetId) => this.readBalance(at, address, assetId),
     (address, assetId) => `${address}:${assetId}`,
     'block'
   );
+
+  /**
+   * One balance, equal to `getBalanceAt`.
+   *
+   * - Native: `System.Account`, coalesced with the tick's other reads
+   * - Registered non-erc20 asset: `Tokens.Accounts`, coalesced the same way
+   * - Erc20 or unregistered asset: one `CurrenciesApi.account` runtime call
+   *
+   * @param at - block to read at
+   * @param address - account holding the balance
+   * @param assetId - asset to read
+   */
+  private async readBalance(
+    at: string,
+    address: string,
+    assetId: number
+  ): Promise<Balance> {
+    if (assetId === SYSTEM_ASSET_ID) {
+      const { data } = await this.systemAccounts(at, address);
+      return this.balance.getBreakdown(data);
+    }
+
+    const assets = await this.assets.get(at);
+    const type = assets.get(assetId)?.asset_type.type;
+    if (type === undefined || type === 'Erc20') {
+      return this.balance.getBalanceAt(address, assetId, at);
+    }
+
+    const data = await this.tokenAccounts(at, address, assetId);
+    return this.balance.getBreakdown(data);
+  }
 }
