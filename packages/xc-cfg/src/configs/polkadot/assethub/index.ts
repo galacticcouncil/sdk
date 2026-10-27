@@ -39,26 +39,6 @@ const toHydration: AssetRoute[] = [
       transferType: XcmTransferType.LocalReserve,
     }),
   }),
-  new AssetRoute({
-    source: {
-      asset: ksm,
-      fee: {
-        asset: dot,
-        extra: extraFee,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: ksm,
-      fee: {
-        amount: 0.0001,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.LocalReserve,
-    }),
-  }),
   toParaStablesTemplate(usdt, hydration, 0.02),
   toParaStablesTemplate(usdc, hydration, 0.02),
   toHydrationExtTemplate(wud),
