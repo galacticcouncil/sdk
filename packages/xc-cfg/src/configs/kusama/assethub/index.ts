@@ -53,27 +53,6 @@ const toBasilisk = new AssetRoute({
 const toHydration: AssetRoute[] = [
   new AssetRoute({
     source: {
-      asset: ksm,
-      fee: {
-        asset: ksm,
-        extra: extraFee,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: ksm,
-      fee: {
-        amount: 0.04,
-        asset: ksm,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
-      transferType: XcmTransferType.LocalReserve,
-      executionFee: 0.005,
-    }),
-  }),
-  new AssetRoute({
-    source: {
       asset: dot,
       fee: {
         asset: ksm,

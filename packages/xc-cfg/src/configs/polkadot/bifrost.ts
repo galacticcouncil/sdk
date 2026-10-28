@@ -1,17 +1,7 @@
 import { AssetRoute, ChainRoutes } from '@galacticcouncil/xc-core';
 
-import {
-  bnc,
-  dot,
-  usdc,
-  usdt,
-  vdot,
-  vastr,
-  astr,
-  glmr,
-  ibtc,
-} from '../../assets';
-import { assetHub, astar, bifrost, hydration } from '../../chains';
+import { bnc, dot, usdc, usdt, vdot } from '../../assets';
+import { assetHub, bifrost, hydration } from '../../chains';
 import {
   ExtrinsicBuilder,
   FeeAmountBuilder,
@@ -19,20 +9,6 @@ import {
 } from '../../builders';
 
 const toHydration: AssetRoute[] = [
-  new AssetRoute({
-    source: {
-      asset: bnc,
-    },
-    destination: {
-      chain: hydration,
-      asset: bnc,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: bnc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
   new AssetRoute({
     source: {
       asset: vdot,
@@ -46,23 +22,6 @@ const toHydration: AssetRoute[] = [
       fee: {
         amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
         asset: vdot,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: vastr,
-      fee: {
-        asset: bnc,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: vastr,
-      fee: {
-        amount: FeeAmountBuilder().XcmPaymentApi().calculateDestFee(),
-        asset: vastr,
       },
     },
     extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
@@ -87,42 +46,6 @@ const toHydration: AssetRoute[] = [
     extrinsic: ExtrinsicBuilder().polkadotXcm().transferAssetsUsingTypeAndThen({
       transferType: XcmTransferType.RemoteReserve,
     }),
-  }),
-  new AssetRoute({
-    source: {
-      asset: astr,
-      fee: {
-        asset: bnc,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: astr,
-      fee: {
-        amount: FeeAmountBuilder()
-          .XcmPaymentApi()
-          .calculateDestFee({ reserve: astar }),
-        asset: astr,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
-  }),
-  new AssetRoute({
-    source: {
-      asset: ibtc,
-      fee: {
-        asset: bnc,
-      },
-    },
-    destination: {
-      chain: hydration,
-      asset: ibtc,
-      fee: {
-        amount: 0.00000625,
-        asset: ibtc,
-      },
-    },
-    extrinsic: ExtrinsicBuilder().polkadotXcm().limitedReserveTransferAssets(),
   }),
   new AssetRoute({
     source: {
