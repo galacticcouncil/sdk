@@ -1,5 +1,13 @@
 # @galacticcouncil/xc-cfg
 
+## 2.9.1
+
+### Patch Changes
+
+- 902890a: Drop inbound routes for assets no longer accepted as fee currency on hydration
+  - ASTR, BNC, vASTR, IBTC, INTR, NEURO, UNQ and KSM transfers to hydration paid the destination fee in the asset itself and now get trapped
+  - Outbound routes from hydration stay so holders can still withdraw
+
 ## 2.9.0
 
 ### Minor Changes
