@@ -23,6 +23,17 @@ type Ctx = {
   poolsMap: Map<string, Pool>;
 };
 
+// Reference stables used to value `assetIn` depth for the liquidity threshold.
+const REFERENCE_STABLES: Set<number> = new Set([
+  222, // HOLLAR
+  10, // USDT
+  21, // USDC
+]);
+
+// Minimum assetIn depth required for `getSpotPrice` to return a price,
+// 10,000 HOLLAR.
+const MIN_LIQUIDITY: bigint = 10_000n * 10n ** 18n;
+
 export class TradeRouter extends Router {
   private readonly mlr: Map<string, Hop[]>;
 
@@ -495,29 +506,95 @@ export class TradeRouter extends Router {
   }
 
   /**
-   * Calculate and return best possible spot price for assetIn > assetOut pair
+   * Calculate and return best possible spot price for assetIn > assetOut pair.
+   *
+   * Returns `undefined` when the depth of `assetIn` — is below `MIN_LIQUIDITY`.
    *
    * @param {number} assetIn - asset in
    * @param {number} assetOut - asset out
    * @return spot price of given asset pair, or undefined if trade not supported
+   *         or `assetIn` depth is below `MIN_LIQUIDITY`
    */
   async getSpotPrice(
     assetIn: number,
     assetOut: number
   ): Promise<Amount | undefined> {
-    return this.withCtx(assetIn, assetOut, async (ctx) => {
-      const { pools, poolsMap } = ctx;
+    try {
+      const route = await this.getMostLiquidRoute(assetIn, assetOut);
+      const spot = await this.withCtx(assetIn, assetOut, ({ poolsMap }) =>
+        this.computeSpotPrice(route, poolsMap)
+      );
 
-      const routeKey = this.buildRouteKey(assetIn, assetOut, pools);
-      let route = this.mlr.get(routeKey);
-      if (!route) {
-        route = await this.calculateMostLiquidRoute(assetIn, assetOut, ctx);
+      const depth = await this.depthInUsd(assetIn);
+      if (depth !== undefined && depth < MIN_LIQUIDITY) return undefined;
+
+      return spot;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private async computeSpotPrice(
+    route: Hop[],
+    poolsMap: Map<string, Pool>
+  ): Promise<Amount> {
+    const swaps = await this.toSellSwaps('1', route, poolsMap);
+    return { amount: this.getSellSpot(swaps), decimals: RUNTIME_DECIMALS };
+  }
+
+  /**
+   * Depth of `assetId` in 18-decimal USD-equivalent units —
+   *   max single-pool balance × spot[assetId → first reachable reference].
+   */
+  private async depthInUsd(assetId: number): Promise<bigint | undefined> {
+    const pools = await this.getPools();
+
+    const isAaveAtoken = pools.some(
+      (p) => p.type === PoolType.Aave && p.tokens[1]?.id === assetId
+    );
+    if (isAaveAtoken) return undefined;
+
+    const { maxBalance, decimals } = this.assetMetrics(assetId, pools);
+    if (decimals === undefined) return undefined;
+    if (maxBalance === 0n) return 0n;
+
+    if (REFERENCE_STABLES.has(assetId)) {
+      return calc.mulScaled(maxBalance, 1n, decimals, 0, RUNTIME_DECIMALS);
+    }
+
+    for (const ref of REFERENCE_STABLES) {
+      try {
+        const route = await this.getMostLiquidRoute(assetId, ref);
+        const spot = await this.withCtx(assetId, ref, ({ poolsMap }) =>
+          this.computeSpotPrice(route, poolsMap)
+        );
+        return calc.mulSpot(
+          maxBalance,
+          spot.amount,
+          decimals,
+          RUNTIME_DECIMALS
+        );
+      } catch {
+        continue;
       }
+    }
+    return undefined;
+  }
 
-      const swaps = await this.toSellSwaps('1', route, poolsMap);
-      const spotPrice = this.getSellSpot(swaps);
-      return { amount: spotPrice, decimals: RUNTIME_DECIMALS };
-    }).catch(() => undefined);
+  private assetMetrics(
+    assetId: number,
+    pools: PoolBase[]
+  ): { maxBalance: bigint; decimals: number | undefined } {
+    let maxBalance = 0n;
+    let decimals: number | undefined;
+    for (const pool of pools) {
+      for (const token of pool.tokens) {
+        if (token.id !== assetId) continue;
+        if (token.balance > maxBalance) maxBalance = token.balance;
+        if (decimals === undefined) decimals = token.decimals;
+      }
+    }
+    return { maxBalance, decimals };
   }
 
   /**
