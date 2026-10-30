@@ -4,6 +4,8 @@ import { BATCH } from './Batch';
 import { ERC20 } from './Erc20';
 import { EXECUTOR } from './Executor';
 import { BASEJUMP } from './Basejump';
+import { HOLLAR_BASE_FACILITATOR } from './HollarBaseFacilitator';
+import { HOLLAR_BASE_VAULT } from './HollarBaseVault';
 import { META } from './Meta';
 import { NTT_MANAGER } from './NttManager';
 import { NTT_MANAGER_WITH_EXECUTOR } from './NttManagerWithExecutor';
@@ -18,6 +20,8 @@ export const Abi: Record<string, TAbi> = {
   Erc20: ERC20,
   Executor: EXECUTOR,
   Basejump: BASEJUMP,
+  HollarBaseFacilitator: HOLLAR_BASE_FACILITATOR,
+  HollarBaseVault: HOLLAR_BASE_VAULT,
   Meta: META,
   NttManager: NTT_MANAGER,
   NttManagerWithExecutor: NTT_MANAGER_WITH_EXECUTOR,
