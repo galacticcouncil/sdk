@@ -118,26 +118,17 @@ export function isSeat(state: State, address: string): boolean {
   }
 }
 
-/**
- * Ayes a motion needs.
- *
- * - The authority origin is a 2/3 committee super-majority
- * - A lower threshold still closes, then fails its call with `BadOrigin`
- */
-export const ayesNeeded = (state: State) =>
-  Math.ceil((2 * state.seats.length) / 3);
-
 const xcmCall = (call: XcmCall) => Uint8Array.of(P_PARAMETERS, CALLS[call]);
 
 /** `Parameters.suspend_xcm` - the one switch a single seat may throw. */
 export const buildSuspend = () => xcmCall('suspend_xcm');
 
-/** `TechnicalCommittee.propose` of `call`, passing at `ayes`. */
-export function buildMotion(call: XcmCall, ayes: number): Uint8Array {
+/** `TechnicalCommittee.propose` of `call`, passing at 4/7. */
+export function buildMotion(call: XcmCall): Uint8Array {
   const proposal = xcmCall(call);
   return mergeUint8([
     Uint8Array.of(P_TC, C_PROPOSE),
-    compact.enc(ayes),
+    compact.enc(4),
     proposal,
     compact.enc(proposal.length),
   ]);

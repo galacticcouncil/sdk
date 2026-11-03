@@ -10,7 +10,6 @@ import {
 import { connectEvm, sendEvm, signSubstrate } from '../signers';
 import { DISPATCH, DISPATCH_GAS, hydration, wrap } from '../dispatch/dispatch';
 import {
-  ayesNeeded,
   buildMotion,
   buildSuspend,
   check,
@@ -175,10 +174,9 @@ async function settle(
 }
 
 async function suspend() {
-  const s = state ?? (state = await loadState());
   const sure = confirm(
     'Suspend ALL inbound and outbound XCM on Hydration?\n\n' +
-      `Only a committee motion with ${ayesNeeded(s)} of ${s.seats.length} ayes can resume it.`
+      'Only a 4/7 committee motion can resume it.'
   );
   if (!sure) {
     return;
@@ -192,8 +190,7 @@ async function suspend() {
 }
 
 async function propose(call: XcmCall) {
-  state = await loadState();
-  await sign(buildMotion(call, ayesNeeded(state)), call, true);
+  await sign(buildMotion(call), call, true);
   const hash = motionHash(call);
   await settle(
     (s) => s.motions.includes(hash),
@@ -296,11 +293,7 @@ function render() {
   }
 
   motionsEl.replaceChildren(
-    el(
-      'p',
-      'hint',
-      `A motion passes with ${ayesNeeded(s)} of ${s.seats.length} ayes.`
-    ),
+    el('p', 'hint', 'A motion passes with 4/7 ayes.'),
     ...MOTIONS.map((m) => motionRow(s, m))
   );
 }
