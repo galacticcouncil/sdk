@@ -1,5 +1,14 @@
 # @galacticcouncil/descriptors
 
+## 2.10.0
+
+### Minor Changes
+
+- 94b7d5b: Support match-first swap intents
+  - Bump descriptors to latest metadata (runtime 455)
+  - A limit intent can take a match window, during which it is offered only against opposite intents
+  - Once the window ends it fills like a plain swap
+
 ## 2.9.0
 
 ### Minor Changes
