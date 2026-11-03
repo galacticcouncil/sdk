@@ -10,6 +10,7 @@ export class IntentLimitTxBuilder extends TxBuilder {
   private _beneficiary?: string;
   private _minAmountOut?: bigint;
   private _deadline?: bigint;
+  private _matchWindow?: bigint;
   private _partial = true;
 
   setTrade(trade: Trade): this {
@@ -34,6 +35,20 @@ export class IntentLimitTxBuilder extends TxBuilder {
 
   withDeadline(deadline: bigint): this {
     this._deadline = deadline;
+    return this;
+  }
+
+  /**
+   * Submits the swap as a match-first intent.
+   *
+   * - Until the window ends, the solver gets it only against opposite intents
+   * - After that it fills like a plain swap
+   * - The window starts at inclusion and must end before the deadline
+   *
+   * @param window - match window in ms
+   */
+  withMatchWindow(window: bigint): this {
+    this._matchWindow = window;
     return this;
   }
 
@@ -63,6 +78,10 @@ export class IntentLimitTxBuilder extends TxBuilder {
     return this._deadline;
   }
 
+  private get matchWindow(): bigint | undefined {
+    return this._matchWindow;
+  }
+
   async build(): Promise<Tx> {
     const { amountIn, amountOut, swaps } = this.trade;
 
@@ -72,17 +91,23 @@ export class IntentLimitTxBuilder extends TxBuilder {
     const assetIn = firstSwap.assetIn;
     const assetOut = lastSwap.assetOut;
 
-    const swap = Enum('Swap', {
+    const swap = {
       asset_in: assetIn,
       asset_out: assetOut,
       amount_in: amountIn,
       amount_out: this.minAmountOut ?? amountOut,
       partial: this.partial,
-    });
+    };
 
-    let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
+    let tx: Transaction = this.api.tx.Intent.submit_intent({
       intent: {
-        data: swap,
+        data:
+          this.matchWindow === undefined
+            ? Enum('Swap', swap)
+            : Enum('MatchFirstSwap', {
+                swap,
+                match_window: this.matchWindow,
+              }),
         deadline: this.deadline,
       },
     });
