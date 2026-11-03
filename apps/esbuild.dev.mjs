@@ -12,6 +12,7 @@ const options = {
     { in: 'src/breakers/app.ts', out: 'breakers' },
     { in: 'src/tc-voting/app.ts', out: 'tc-voting' },
     { in: 'src/dispatch/app.ts', out: 'dispatch' },
+    { in: 'src/killswitch/app.ts', out: 'killswitch' },
   ],
   bundle: true,
   format: 'esm',
