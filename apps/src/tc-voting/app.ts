@@ -84,7 +84,10 @@ async function dispatch(
   if (!member) {
     throw new Error('Connect the wallet first.');
   }
-  const decoded = await describe(bytes, expected);
+  const decoded = await describe(
+    bytes,
+    expected && 'TechnicalCommittee.' + expected
+  );
   setStatus('Signing…', decoded.label + ' ' + decoded.args);
   await sendEvm(
     hydration,
