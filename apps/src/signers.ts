@@ -16,10 +16,11 @@ import {
 } from '@galacticcouncil/xc-core';
 import { h160 } from '@galacticcouncil/common';
 
-import { AccountId } from 'polkadot-api';
+import { AccountId, PolkadotSigner } from 'polkadot-api';
 import {
   connectInjectedExtension,
   getInjectedExtensions,
+  getPolkadotSignerFromPjs,
 } from 'polkadot-api/pjs-signer';
 
 const { H160 } = h160;
@@ -28,6 +29,8 @@ export type SignEvents = {
   onSubmit?: (id: string) => void;
   onConfirmed?: (info: string) => void;
   onError?: (error: unknown) => void;
+  /** Progress that is neither a submission nor a failure. */
+  onInfo?: (line: string) => void;
 };
 
 /** Same account across ss58 prefixes - compare public keys, not strings. */
@@ -68,26 +71,77 @@ async function signerFor(address: string) {
   throw new Error(address + ' is not in any connected extension.');
 }
 
+/**
+ * Signer that keeps the transaction dapp-built.
+ *
+ * - Asks the wallet for a signature only: `withSignedTransaction` off, and a
+ *   `signedTransaction` returned regardless is dropped
+ * - papi then assembles the extrinsic, metadata hash mode disabled
+ * - For wallets whose self-built transaction the node rejects with
+ *   `BadProof` - their metadata hash disagrees with the runtime's
+ */
+async function rawSignerFor(address: string) {
+  const web3 = ((window as any).injectedWeb3 ?? {}) as Record<string, any>;
+  for (const name of Object.keys(web3)) {
+    const injected = await web3[name].enable?.('galactic-apps');
+    const accounts: { address: string }[] =
+      (await injected?.accounts?.get?.()) ?? [];
+    const account = accounts.find((a) => isSameAccount(a.address, address));
+    if (account && injected.signer?.signPayload) {
+      const { signer } = injected;
+      return getPolkadotSignerFromPjs(
+        account.address,
+        (payload) =>
+          signer
+            .signPayload({ ...payload, withSignedTransaction: false })
+            .then(({ signature }: { signature: string }) => ({ signature })),
+        (raw) => signer.signRaw(raw)
+      );
+    }
+  }
+  throw new Error(address + ' is not in any connected extension.');
+}
+
+const isBadProof = (error: unknown) =>
+  /BadProof/.test(error instanceof Error ? error.message : String(error));
+
+/**
+ * Sign & send a substrate call with the injected wallet.
+ *
+ * - First with the wallet's own signer, which may hand back a transaction it
+ *   built itself
+ * - A `BadProof` rejection is retried once with a dapp-built transaction
+ * - Rejects on failure; reporting it is the caller's
+ */
 export async function signSubstrate(
   call: Call,
   chain: AnyParachain,
   events: SignEvents = {}
 ) {
-  const signer = await signerFor(call.from);
-
-  return new Promise<void>((resolve, reject) => {
-    new SubstrateSigner(chain, signer).signAndSend(call as SubstrateCall, {
-      onTransactionSend: (hash) => events.onSubmit?.(hash),
-      onFinalized: (event) => {
-        events.onConfirmed?.('Block: ' + (event as any).block?.number);
-        resolve();
-      },
-      onError: (error) => {
-        events.onError?.(error);
-        reject(error);
-      },
+  const attempt = (signer: PolkadotSigner) =>
+    new Promise<void>((resolve, reject) => {
+      new SubstrateSigner(chain, signer).signAndSend(call as SubstrateCall, {
+        onTransactionSend: (hash) => events.onSubmit?.(hash),
+        onFinalized: (event) => {
+          events.onConfirmed?.('Block: ' + (event as any).block?.number);
+          resolve();
+        },
+        onError: reject,
+      });
     });
-  });
+
+  try {
+    await attempt(await signerFor(call.from));
+  } catch (error) {
+    if (!isBadProof(error)) {
+      throw error;
+    }
+    events.onInfo?.(
+      'The wallet-built transaction was rejected (BadProof) - retrying ' +
+        'with a dapp-built one.'
+    );
+    await attempt(await rawSignerFor(call.from));
+  }
 }
 
 /**

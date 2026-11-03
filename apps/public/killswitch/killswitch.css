@@ -1,0 +1,98 @@
+/* Kill switch page - switch state and motions on top of the shared styles. */
+
+.head-tools {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge.is-ok {
+  background: rgba(18, 183, 106, 0.12);
+  color: var(--success);
+}
+
+.badge.is-bad {
+  background: rgba(217, 45, 32, 0.12);
+  color: var(--danger);
+}
+
+.global-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.kv {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.kv-term {
+  flex: 0 0 120px;
+  color: var(--text-muted);
+}
+
+.kv-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-soft);
+  word-break: break-all;
+}
+
+#accounts {
+  margin-bottom: 12px;
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.btn-danger {
+  background: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b42318;
+}
+
+.btn-danger:disabled {
+  background: rgba(217, 45, 32, 0.12);
+  color: var(--danger);
+}
+
+.motion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.motion-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}

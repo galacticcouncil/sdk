@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydration · XCM Kill Switch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./killswitch.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="hero">
+        <a class="back" href="../">&larr; Utilities</a>
+        <h1>XCM Kill Switch</h1>
+        <p class="lede">
+          Any single Technical Committee seat can stop all XCM, inbound and
+          outbound, in one call. Resuming, or switching one side only, takes a
+          committee motion passed by a majority. A seat held by an EVM account
+          signs through the dispatch precompile (Rabby, MetaMask, Trezor through
+          Rabby); a substrate seat signs with its extension.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>XCM</h2>
+          <div class="head-tools">
+            <button id="refresh" class="btn-ghost" type="button">
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div id="xcm"><p class="hint">Loading…</p></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Seat</h2>
+          <div class="head-tools">
+            <button id="connect-evm" class="btn-ghost" type="button">
+              Connect EVM
+            </button>
+            <button id="connect-substrate" class="btn-ghost" type="button">
+              Connect substrate
+            </button>
+          </div>
+        </div>
+        <select id="accounts" hidden></select>
+        <div id="wallet"><p class="hint">Not connected.</p></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Kill switch</h2>
+        </div>
+        <p class="hint">
+          Suspends both sides in the block it lands in. Outbound transfers fail
+          and roll back; inbound messages stay queued and run once execution
+          resumes. One seat can throw it, only a motion undoes it.
+        </p>
+        <div id="calls"></div>
+        <div class="actions">
+          <button id="suspend" class="btn-primary btn-danger" type="button">
+            Suspend all XCM
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Committee motions</h2>
+        </div>
+        <div id="motions"></div>
+        <p class="hint">
+          Proposing opens a <code>TechnicalCommittee.propose</code>; vote and
+          close it in <a href="../tc-voting/">TC Voting</a> or your usual tool.
+          Every call is decoded back against the live metadata before the wallet
+          is asked to sign.
+        </p>
+      </section>
+
+      <section class="card status" id="status" hidden>
+        <h2 id="status-title">Status</h2>
+        <pre id="status-log"></pre>
+      </section>
+
+      <footer class="foot">
+        <span>
+          Powered by
+          <a href="https://github.com/galacticcouncil/sdk"
+            >@galacticcouncil/sdk</a
+          >
+        </span>
+      </footer>
+    </main>
+
+    <script type="module" src="/dist/killswitch.js"></script>
+  </body>
+</html>

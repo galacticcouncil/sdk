@@ -72,13 +72,13 @@ export function buildCall(calldata: string, wrapped = true): Uint8Array {
 
 type DecodedCall = { type: string; value: { type: string; value: any } };
 
-async function decodeCall(bytes: Uint8Array): Promise<DecodedCall> {
+export async function decodeCall(bytes: Uint8Array): Promise<DecodedCall> {
   const tx = await api.txFromCallData(Binary.fromHex(toHex(bytes)));
   return tx.decodedCall as DecodedCall;
 }
 
 /** The call inside a wrapper, or the call itself. */
-function unwrap(call: DecodedCall): DecodedCall {
+export function unwrap(call: DecodedCall): DecodedCall {
   return callLabel(call) === 'Dispatcher.dispatch_with_extra_gas'
     ? call.value.value.call
     : call;
@@ -90,15 +90,15 @@ function unwrap(call: DecodedCall): DecodedCall {
  * - Catches a pallet or call index that moved under a runtime upgrade
  * - What it returns is what the wallet is asked to sign
  *
- * @param expected - inner call the bytes must decode to, when known
+ * @param expected - inner call the bytes must decode to, as `Pallet.call`
  */
 export async function describe(
   bytes: Uint8Array,
-  expected?: 'vote' | 'close'
+  expected?: string
 ): Promise<Decoded> {
   const inner = unwrap(await decodeCall(bytes));
   const label = callLabel(inner);
-  if (expected && label !== 'TechnicalCommittee.' + expected) {
+  if (expected && label !== expected) {
     throw new Error('Call decodes as ' + label + ', refusing.');
   }
   return { label: label, args: stringify(inner.value.value) };
