@@ -12,6 +12,7 @@ import {
   Basejump as Bj,
   Wormhole as Wh,
 } from '@galacticcouncil/xc-core';
+import { big } from '@galacticcouncil/common';
 
 import {
   BRIDGE_HUB_ID,
@@ -38,6 +39,7 @@ import {
   SNOWBRIDGE_TOKEN_DELIVERY_GAS,
   SNOWBRIDGE_SUBMIT_GAS,
 } from '../bridges/snowbridge';
+import { PSM_CORRIDORS } from '../bridges/psm';
 import { NTT_DEFAULT_INSTRUCTIONS } from '../bridges/wormhole';
 import {
   BaseClient,
@@ -477,10 +479,50 @@ function Omni() {
   };
 }
 
+function Psm() {
+  return {
+    /**
+     * Vault's cut of a redeem, out of what lands.
+     *
+     * - Rated on the amount floored to usdc units, as the vault rates it
+     * - Its bps ride the breakdown as the redeem's fee cap
+     */
+    redeemFee: (): FeeAmountConfigBuilder => ({
+      build: async ({
+        amount,
+        destination,
+        destinationAsset,
+        source,
+        transferAsset,
+      }) => {
+        const rcv = destination as EvmChain;
+        const psm = PSM_CORRIDORS[rcv.key];
+
+        const bps = (await rcv.evmClient.getProvider().readContract({
+          abi: Abi.HollarBaseVault,
+          address: psm.vault as `0x${string}`,
+          functionName: 'redeemFeeBps',
+        })) as bigint;
+
+        const usdcAsset = destinationAsset ?? transferAsset;
+        const decimals = source.getAssetDecimals(transferAsset) ?? 0;
+        const usdcDecimals = rcv.getAssetDecimals(usdcAsset) ?? 0;
+        const usdc = big.convertDecimals(amount ?? 0n, decimals, usdcDecimals);
+        const fee = (usdc * bps) / 10_000n;
+        return {
+          amount: big.convertDecimals(fee, usdcDecimals, decimals),
+          breakdown: { redeemFeeBps: bps },
+        };
+      },
+    }),
+  };
+}
+
 export function FeeAmountBuilder() {
   return {
     Basejump,
     Omni,
+    Psm,
     XcmPaymentApi,
     Snowbridge,
     Wormhole,

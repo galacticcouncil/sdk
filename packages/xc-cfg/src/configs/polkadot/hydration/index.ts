@@ -94,6 +94,7 @@ import {
   viaNttExecutorTemplate,
   viaNttTemplate,
   viaOmniTemplate,
+  viaPsmTemplate,
   viaSnowbridgeTemplate,
   viaSnowbridgeV1Template,
 } from './templates';
@@ -264,6 +265,8 @@ const toEthereumViaNtt: AssetRoute[] = [
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
 
+const toBaseViaPsm: AssetRoute[] = [viaPsmTemplate(hollar, usdc, base)];
+
 const toHyperevmViaNtt: AssetRoute[] = [viaNttTemplate(hype, hype, hyperevm)];
 
 // Self-redeem only - no executor serves NEAR
@@ -365,6 +368,7 @@ export const hydrationConfig = new ChainRoutes({
     ...toBifrost,
     ...toCex,
     ...toBaseViaNtt,
+    ...toBaseViaPsm,
     ...toEthereumViaNtt,
     ...toEthereumViaSnowbridge,
     ...toHyperevmViaNtt,

@@ -210,6 +210,41 @@ export function viaNttTemplate(
 }
 
 /**
+ * PSM redeem, paid out 1:1 on the evm chain less the vault's fee.
+ *
+ * - HOLLAR burns on hydration, the corridor's vault pays the usdc
+ * - Both signer origins are served, as with ntt
+ *
+ * @param assetIn - HOLLAR on hydration
+ * @param assetOut - usdc paid out
+ * @param to - evm chain of the corridor
+ */
+export function viaPsmTemplate(
+  assetIn: Asset,
+  assetOut: Asset,
+  to: AnyChain
+): AssetRoute {
+  const redeem = ContractBuilder().Psm().redeem();
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: fee(),
+    },
+    destination: {
+      chain: to,
+      asset: assetOut,
+      fee: {
+        amount: FeeAmountBuilder().Psm().redeemFee(),
+        asset: assetIn,
+      },
+    },
+    contract: redeem,
+    extrinsic: ExtrinsicBuilder().evm().call(redeem),
+    tags: [Tag.Psm],
+  });
+}
+
+/**
  * Withdrawal to a UTXO chain through Omni, over the NEAR hub.
  *
  * - One call: the emitter settles to the NEAR account derived from the
