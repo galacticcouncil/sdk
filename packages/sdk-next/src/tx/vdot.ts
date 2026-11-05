@@ -77,21 +77,15 @@ const transact = (call: Uint8Array) =>
   });
 
 /**
- * Returns whatever the hop leaves in holding to `beneficiary`.
+ * Returns the fee asset the hop leaves over to `beneficiary`.
  *
  * - Runs after the hop, failed or not: unused fees are refunded, not trapped
- * - Anything that cannot be deposited stays claimable by `beneficiary`
+ * - Counted to one asset; `All` is weighed as a full holding and fails `PayFees`
  */
 const refundTo = (beneficiary: Location) =>
   XcmV5Instruction.SetAppendix([
-    XcmV5Instruction.SetHints({
-      hints: [Enum('AssetClaimer', { location: beneficiary })],
-    }),
     XcmV5Instruction.RefundSurplus(),
-    XcmV5Instruction.DepositAsset({
-      assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
-      beneficiary,
-    }),
+    XcmV5Instruction.DepositAsset({ assets: allCounted, beneficiary }),
   ]);
 
 export interface VdotMintXcmParams {
