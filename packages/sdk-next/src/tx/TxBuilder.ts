@@ -19,6 +19,9 @@ export abstract class TxBuilder extends Papi {
   protected readonly balance: BalanceClient;
   protected readonly aaveUtils: AaveUtils;
 
+  /** XCM version dry runs report forwarded messages in */
+  protected readonly dryRunXcmVersion: number = 4;
+
   /**
    * @param client - papi client
    * @param evm - EVM client
@@ -62,9 +65,12 @@ export abstract class TxBuilder extends Papi {
 
     const dryRun = await this.client
       .getUnsafeApi()
-      .apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 4, {
-        at: this.at,
-      });
+      .apis.DryRunApi.dry_run_call(
+        origin,
+        tx.decodedCall,
+        this.dryRunXcmVersion,
+        { at: this.at }
+      );
 
     const result = dryRun as DryRunResult;
     const error =
