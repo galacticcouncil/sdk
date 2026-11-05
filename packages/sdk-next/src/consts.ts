@@ -9,6 +9,8 @@ export const SYSTEM_ASSET_DECIMALS = 12;
 // Chain
 export const BLOCK_TIME_TARGET = 2_000;
 export const HYDRATION_PARACHAIN_ID = 2034;
+export const ASSET_HUB_PARACHAIN_ID = 1000;
+export const BIFROST_PARACHAIN_ID = 2030;
 export const HYDRATION_OMNIPOOL_ADDRESS =
   '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1';
 
