@@ -5,7 +5,6 @@ import {
   apyusd,
   astr,
   bnc,
-  cfg_new,
   dai,
   dai_wh,
   dot,
@@ -42,10 +41,8 @@ import {
   unq,
   usdc,
   usdc_wh,
-  usdc_eth,
   usdt,
   usdt_wh,
-  usdt_eth,
   vastr,
   vdot,
   wbtc_wh,
@@ -53,7 +50,6 @@ import {
   wsol,
   wsteth,
   wud,
-  lbtc,
   susds_wh,
   wnear,
   zec,
@@ -94,8 +90,6 @@ import {
   viaNttExecutorTemplate,
   viaNttTemplate,
   viaOmniTemplate,
-  viaSnowbridgeTemplate,
-  viaSnowbridgeV1Template,
 } from './templates';
 
 const toAssetHub: AssetRoute[] = [
@@ -260,6 +254,17 @@ const toEthereumViaNtt: AssetRoute[] = [
   viaNttTemplate(usdt_wh, usdt, ethereum),
   viaNttTemplate(wbtc_wh, wbtc, ethereum),
   viaNttTemplate(weth_wh, eth, ethereum),
+  viaNttTemplate(aave, aave, ethereum),
+  viaNttTemplate(apyusd, apyusd, ethereum),
+  viaNttTemplate(ena, ena, ethereum),
+  viaNttTemplate(ldo, ldo, ethereum),
+  viaNttTemplate(link, link, ethereum),
+  viaNttTemplate(paxg, paxg, ethereum),
+  viaNttTemplate(sky, sky, ethereum),
+  viaNttTemplate(susde, susde, ethereum),
+  viaNttTemplate(tbtc, tbtc, ethereum),
+  viaNttTemplate(trac, trac, ethereum),
+  viaNttTemplate(wsteth, wsteth, ethereum),
 ];
 
 const toBaseViaNtt: AssetRoute[] = [viaNttTemplate(eurc_wh, eurc, base)];
@@ -298,6 +303,17 @@ const viaNttExecutor: AssetRoute[] = [
   viaNttExecutorTemplate(usdt_wh, usdt, ethereum),
   viaNttExecutorTemplate(wbtc_wh, wbtc, ethereum),
   viaNttExecutorTemplate(weth_wh, eth, ethereum),
+  viaNttExecutorTemplate(aave, aave, ethereum),
+  viaNttExecutorTemplate(apyusd, apyusd, ethereum),
+  viaNttExecutorTemplate(ena, ena, ethereum),
+  viaNttExecutorTemplate(ldo, ldo, ethereum),
+  viaNttExecutorTemplate(link, link, ethereum),
+  viaNttExecutorTemplate(paxg, paxg, ethereum),
+  viaNttExecutorTemplate(sky, sky, ethereum),
+  viaNttExecutorTemplate(susde, susde, ethereum),
+  viaNttExecutorTemplate(tbtc, tbtc, ethereum),
+  viaNttExecutorTemplate(trac, trac, ethereum),
+  viaNttExecutorTemplate(wsteth, wsteth, ethereum),
   viaNttExecutorTemplate(eurc_wh, eurc, base),
   viaNttExecutorTemplate(hype, hype, hyperevm),
   viaNttExecutorTemplate(hdx, hdx, robinhood),
@@ -308,47 +324,6 @@ const viaNttExecutor: AssetRoute[] = [
   viaNttExecutorTemplate(jito_sol, jito_sol, solana),
   viaNttExecutorTemplate(prime, prime, solana),
   viaNttExecutorTemplate(sui, sui, sui_chain),
-];
-
-const toEthereumViaSnowbridge: AssetRoute[] = [
-  viaSnowbridgeTemplate(eth, eth, ethereum),
-  viaSnowbridgeTemplate(aave, aave, ethereum),
-  viaSnowbridgeTemplate(apyusd, apyusd, ethereum),
-  viaSnowbridgeTemplate(cfg_new, cfg_new, ethereum),
-  viaSnowbridgeTemplate(ena, ena, ethereum),
-  viaSnowbridgeTemplate(paxg, paxg, ethereum),
-  viaSnowbridgeTemplate(susde, susde, ethereum),
-  viaSnowbridgeTemplate(tbtc, tbtc, ethereum),
-  viaSnowbridgeTemplate(trac, trac, ethereum),
-  viaSnowbridgeTemplate(lbtc, lbtc, ethereum),
-  viaSnowbridgeTemplate(ldo, ldo, ethereum),
-  viaSnowbridgeTemplate(link, link, ethereum),
-  viaSnowbridgeTemplate(sky, sky, ethereum),
-  viaSnowbridgeTemplate(wsteth, wsteth, ethereum),
-  viaSnowbridgeTemplate(usdc_eth, usdc, ethereum),
-  viaSnowbridgeTemplate(usdt_eth, usdt, ethereum),
-];
-
-// Snowbridge V1 (legacy, cheaper) outbound routes. Registered after the V2
-// routes so the default/`Snowbridge`-tag selection still resolves to V2; the
-// V1 route is reached via the `SnowbridgeV1` tag from the UI switch.
-const toEthereumViaSnowbridgeV1: AssetRoute[] = [
-  viaSnowbridgeV1Template(eth, eth, ethereum),
-  viaSnowbridgeV1Template(aave, aave, ethereum),
-  viaSnowbridgeV1Template(apyusd, apyusd, ethereum),
-  viaSnowbridgeV1Template(cfg_new, cfg_new, ethereum),
-  viaSnowbridgeV1Template(ena, ena, ethereum),
-  viaSnowbridgeV1Template(paxg, paxg, ethereum),
-  viaSnowbridgeV1Template(susde, susde, ethereum),
-  viaSnowbridgeV1Template(tbtc, tbtc, ethereum),
-  viaSnowbridgeV1Template(trac, trac, ethereum),
-  viaSnowbridgeV1Template(lbtc, lbtc, ethereum),
-  viaSnowbridgeV1Template(ldo, ldo, ethereum),
-  viaSnowbridgeV1Template(link, link, ethereum),
-  viaSnowbridgeV1Template(sky, sky, ethereum),
-  viaSnowbridgeV1Template(wsteth, wsteth, ethereum),
-  viaSnowbridgeV1Template(usdc_eth, usdc, ethereum),
-  viaSnowbridgeV1Template(usdt_eth, usdt, ethereum),
 ];
 
 const toCex: AssetRoute[] = [
@@ -366,7 +341,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toCex,
     ...toBaseViaNtt,
     ...toEthereumViaNtt,
-    ...toEthereumViaSnowbridge,
     ...toHyperevmViaNtt,
     ...toNearViaNtt,
     ...toZcashViaOmni,
@@ -374,7 +348,6 @@ export const hydrationConfig = new ChainRoutes({
     ...toSolanaViaNtt,
     ...toSuiViaNtt,
     ...viaNttExecutor,
-    ...toEthereumViaSnowbridgeV1,
     ...toEnergywebx,
     ...toKusamaAssethub,
     ...toMythos,
