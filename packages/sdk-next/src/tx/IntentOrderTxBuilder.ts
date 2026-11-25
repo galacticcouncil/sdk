@@ -4,12 +4,14 @@ import { TradeOrder, TradeOrderType } from '../sor';
 import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
-import { Transaction, Tx } from './types';
+import { IntentForward, Transaction, Tx } from './types';
 
 export class IntentOrderTxBuilder extends TxBuilder {
   private _order?: TradeOrder;
   private _beneficiary?: string;
   private _slippagePct = 1;
+  private _minAmountOut?: bigint;
+  private _forward?: IntentForward;
 
   setOrder(order: TradeOrder): this {
     this._order = order;
@@ -23,6 +25,29 @@ export class IntentOrderTxBuilder extends TxBuilder {
 
   withSlippage(slippage: number): this {
     this._slippagePct = slippage;
+    return this;
+  }
+
+  /**
+   * Pins the least output of each TWAP trade.
+   *
+   * - Takes precedence over the slippage-derived floor
+   * - Ignored by DCA, which floors at the output asset's ED
+   *
+   * @param amount - least `asset_out` per trade, in its smallest unit
+   */
+  withMinAmountOut(amount: bigint): this {
+    this._minAmountOut = amount;
+    return this;
+  }
+
+  /**
+   * Calls a contract each time a trade of the order resolves.
+   *
+   * @param forward - contract and calldata
+   */
+  withForward(forward: IntentForward): this {
+    this._forward = forward;
     return this;
   }
 
@@ -76,9 +101,10 @@ export class IntentOrderTxBuilder extends TxBuilder {
       period: tradePeriod,
     });
 
-    let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
+    let tx: Transaction = this.api.tx.Intent.submit_intent({
       intent: {
         data: dca,
+        on_resolved: this.onResolved(this._forward),
       },
     });
 
@@ -100,7 +126,7 @@ export class IntentOrderTxBuilder extends TxBuilder {
     } = this.order;
 
     const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
-    const minAmountOut = tradeAmountOut - slippage;
+    const minAmountOut = this._minAmountOut ?? tradeAmountOut - slippage;
 
     const dca = Enum('Dca', {
       asset_in: assetIn,
@@ -112,9 +138,10 @@ export class IntentOrderTxBuilder extends TxBuilder {
       period: tradePeriod,
     });
 
-    let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
+    let tx: Transaction = this.api.tx.Intent.submit_intent({
       intent: {
         data: dca,
+        on_resolved: this.onResolved(this._forward),
       },
     });
 
