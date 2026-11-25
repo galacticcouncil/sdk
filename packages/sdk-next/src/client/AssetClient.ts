@@ -147,7 +147,8 @@ export class AssetClient extends Papi {
     return {
       id: key,
       name: symbols.join(', '),
-      symbol: (symbol && Binary.toText(symbol)) || (name && Binary.toText(name)),
+      symbol:
+        (symbol && Binary.toText(symbol)) || (name && Binary.toText(name)),
       decimals: 18,
       icon: symbols.join('/'),
       type: asset_type.type,
@@ -213,11 +214,13 @@ export class AssetClient extends Papi {
       switch (asset_type.type) {
         case 'Bond':
           const bond = bonds.get(key);
-          asset = await this.mapBond(key, value, metadata, bond!);
+          if (!bond) continue;
+          asset = await this.mapBond(key, value, metadata, bond);
           break;
         case 'StableSwap':
           const share = shares.get(key);
-          asset = await this.mapShares(key, value, metadata, share!);
+          if (!share) continue;
+          asset = await this.mapShares(key, value, metadata, share);
           break;
         case 'External':
           asset = await this.mapExternal(key, value, external, location);
