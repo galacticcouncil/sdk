@@ -61,3 +61,38 @@ export function toHydrationViaNttExecutorTemplate(
     tags: [Tag.Wormhole, Tag.Ntt, Tag.NttExecutor],
   });
 }
+
+/**
+ * PSM deposit, minted 1:1 on hydration.
+ *
+ * - Usdc stays locked in the source vault
+ * - Tagged Psm only, an erc20 recipient needs no evm binding
+ *
+ * @param assetIn - usdc on the source chain
+ * @param assetOut - asset minted on hydration
+ */
+export function toHydrationViaPsmTemplate(
+  assetIn: Asset,
+  assetOut: Asset
+): AssetRoute {
+  return new AssetRoute({
+    source: {
+      asset: assetIn,
+      fee: {
+        asset: eth,
+      },
+    },
+    destination: {
+      chain: hydration,
+      asset: assetOut,
+      fee: {
+        amount: 0,
+        // Delivered by the PSM relayer, nothing is taken on the far side.
+        // Denominated in the source asset, like ntt.
+        asset: assetIn,
+      },
+    },
+    contract: ContractBuilder().Psm().deposit(),
+    tags: [Tag.Psm],
+  });
+}

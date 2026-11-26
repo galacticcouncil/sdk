@@ -175,7 +175,17 @@ export class Wallet {
         feeBalance: srcFeeBalance,
         feeSwap: srcFeeSwap,
         max,
-        min: srcBalance.copyWith({ amount: min.amount }),
+        // min is reckoned in destination decimals
+        min: srcBalance.copyWith({
+          amount:
+            min.decimals === srcBalance.decimals
+              ? min.amount
+              : big.convertDecimals(
+                  min.amount,
+                  min.decimals,
+                  srcBalance.decimals
+                ),
+        }),
       },
       destination: {
         balance: dstBalance,
