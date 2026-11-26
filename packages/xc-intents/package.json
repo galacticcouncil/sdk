@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/xc-intents",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Cross-chain intents SDK (Hydration → ZEC, BTC, NEAR)",
   "author": "GalacticCouncil",
   "repository": {

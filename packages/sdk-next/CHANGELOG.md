@@ -1,5 +1,13 @@
 # @galacticcouncil/sdk-next
 
+## 2.7.0
+
+### Minor Changes
+
+- prepare tsconfig for typescript 6
+- sdk: require descriptors 2.11.0
+- 1cf1c81: Submit ICE intents on the main Hydration api and let callers pin the least output, set a deadline and forward the resolution to a contract
+
 ## 2.6.1
 
 ### Patch Changes

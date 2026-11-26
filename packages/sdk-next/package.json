@@ -1,6 +1,6 @@
 {
   "name": "@galacticcouncil/sdk-next",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "Galactic next gen sdk (papi)",
   "author": "GalacticCouncil",
   "repository": {
@@ -109,7 +109,7 @@
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.2.0",
-    "@galacticcouncil/descriptors": ">=2.7.0",
+    "@galacticcouncil/descriptors": ">=2.11.0",
     "polkadot-api": "^2.1.7",
     "viem": "^2.38.3"
   }

@@ -1,5 +1,11 @@
 # @galacticcouncil/descriptors
 
+## 2.11.0
+
+### Minor Changes
+
+- desc: drop ice descriptor and update metadata to 458
+
 ## 2.10.0
 
 ### Minor Changes

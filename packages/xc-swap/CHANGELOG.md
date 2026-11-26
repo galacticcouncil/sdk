@@ -1,5 +1,11 @@
 # @galacticcouncil/xc-swap
 
+## 0.10.0
+
+### Minor Changes
+
+- bump 1click sdk to 0.1.26
+
 ## 0.9.0
 
 ### Minor Changes
