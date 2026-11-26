@@ -1,0 +1,49 @@
+{
+  "name": "@galacticcouncil/xc-intents",
+  "version": "0.0.0",
+  "description": "Cross-chain intents SDK (Hydration → ZEC, BTC, NEAR)",
+  "author": "GalacticCouncil",
+  "repository": {
+    "directory": "packages/xc-intents",
+    "type": "git",
+    "url": "git+https://github.com/galacticcouncil/sdk.git"
+  },
+  "keywords": [
+    "hydration",
+    "near",
+    "intents",
+    "ice",
+    "xc",
+    "swap",
+    "twap"
+  ],
+  "bugs": {
+    "url": "https://github.com/galacticcouncil/sdk/issues"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "./build/index.cjs",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && node ./esbuild.dist.mjs",
+    "build:watch": "node ./esbuild.dev.mjs",
+    "postbuild": "tsc --emitDeclarationOnly --outDir build",
+    "clean": "rimraf build",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "link": "npm ln"
+  },
+  "dependencies": {
+    "@defuse-protocol/one-click-sdk-typescript": "^0.1.26"
+  },
+  "peerDependencies": {
+    "@galacticcouncil/common": ">=1.2.0",
+    "@galacticcouncil/descriptors": ">=2.7.0",
+    "@galacticcouncil/sdk-next": ">=2.6.0",
+    "@galacticcouncil/xc-core": ">=2.8.0",
+    "@galacticcouncil/xc-sdk": ">=2.7.0",
+    "polkadot-api": "^2.1.7",
+    "viem": "^2.38.3"
+  }
+}

@@ -6,13 +6,10 @@
       "wsUrl": "wss://hydration-rpc.n.dwellir.com",
       "metadata": ".papi/metadata/hydration.scale",
       "genesis": "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d",
-      "codeHash": "0x358cb9b9d7a38cab07e269a63a4c37ad6a9e0301511e3aa2f3a50bfe73bc75e1"
+      "codeHash": "0xce30e162a538f0682a74b0edbf58ae541f675914232450c85b0203acb3e1be78"
     },
     "hydrationNext": {
       "metadata": ".papi/metadata/hydrationNext.scale"
-    },
-    "hydrationIce": {
-      "metadata": ".papi/metadata/hydrationIce.scale"
     },
     "hub": {
       "chain": "polkadot_asset_hub",

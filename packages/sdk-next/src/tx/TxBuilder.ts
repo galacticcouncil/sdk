@@ -1,4 +1,4 @@
-import { Enum, PolkadotClient } from 'polkadot-api';
+import { Enum, PolkadotClient, SizedHex } from 'polkadot-api';
 
 import { PublicClient } from 'viem';
 
@@ -9,7 +9,7 @@ import { EvmClient } from '../evm';
 import { PoolType } from '../pool';
 import { Swap } from '../sor';
 
-import { DryRunResult, Transaction, Tx } from './types';
+import { DryRunResult, IntentForward, Transaction, Tx } from './types';
 import { enumPath, NestedEnum } from './utils';
 
 export abstract class TxBuilder extends Papi {
@@ -44,6 +44,20 @@ export abstract class TxBuilder extends Papi {
       get: () => tx,
       dryRun: (account: string) => this.dryRun(account, tx),
     };
+  }
+
+  /**
+   * Builds the intent's `on_resolved` callback.
+   *
+   * @param forward - call to make on resolution; none when unset
+   */
+  protected onResolved(forward?: IntentForward) {
+    return forward
+      ? Enum('Forward', {
+          contract: forward.contract as SizedHex<20>,
+          data: forward.data,
+        })
+      : undefined;
   }
 
   protected async dispatchWithExtraGas(tx: Transaction): Promise<Transaction> {

@@ -4,12 +4,15 @@ import { Trade } from '../sor';
 import { calc } from '../utils';
 
 import { TxBuilder } from './TxBuilder';
-import { Transaction, Tx } from './types';
+import { IntentForward, Transaction, Tx } from './types';
 
 export class IntentMarketTxBuilder extends TxBuilder {
   private _trade?: Trade;
   private _beneficiary?: string;
   private _slippagePct = 1;
+  private _minAmountOut?: bigint;
+  private _deadline?: bigint;
+  private _forward?: IntentForward;
 
   setTrade(trade: Trade): this {
     this._trade = trade;
@@ -23,6 +26,38 @@ export class IntentMarketTxBuilder extends TxBuilder {
 
   withSlippage(slippage: number): this {
     this._slippagePct = slippage;
+    return this;
+  }
+
+  /**
+   * Pins the least output the swap accepts.
+   *
+   * - Takes precedence over the slippage-derived floor
+   *
+   * @param amount - least `asset_out`, in its smallest unit
+   */
+  withMinAmountOut(amount: bigint): this {
+    this._minAmountOut = amount;
+    return this;
+  }
+
+  /**
+   * Expires the intent if unresolved by then.
+   *
+   * @param deadline - unix time in ms
+   */
+  withDeadline(deadline: bigint): this {
+    this._deadline = deadline;
+    return this;
+  }
+
+  /**
+   * Calls a contract once the swap resolves.
+   *
+   * @param forward - contract and calldata
+   */
+  withForward(forward: IntentForward): this {
+    this._forward = forward;
     return this;
   }
 
@@ -55,7 +90,7 @@ export class IntentMarketTxBuilder extends TxBuilder {
 
     const slippage = calc.getFraction(amountOut, this.slippagePct);
 
-    const minAmountOut = amountOut - slippage;
+    const minAmountOut = this._minAmountOut ?? amountOut - slippage;
 
     const swap = Enum('Swap', {
       asset_in: assetIn,
@@ -65,9 +100,11 @@ export class IntentMarketTxBuilder extends TxBuilder {
       partial: false,
     });
 
-    let tx: Transaction = this.apiIce.tx.Intent.submit_intent({
+    let tx: Transaction = this.api.tx.Intent.submit_intent({
       intent: {
         data: swap,
+        deadline: this._deadline,
+        on_resolved: this.onResolved(this._forward),
       },
     });
 

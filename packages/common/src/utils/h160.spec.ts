@@ -36,4 +36,22 @@ describe('H160 Utils', () => {
     const result = isEvmAddress(ALITH_SS58);
     expect(result).toStrictEqual(false);
   });
+
+  describe('fromAny', () => {
+    it('keeps an EVM address as is', () => {
+      expect(H160.fromAny(ALITH_H160)).toStrictEqual(ALITH_H160);
+    });
+
+    it('unwraps an ETH-prefixed account to its EVM address', () => {
+      expect(H160.fromAny(ALITH_SS58)).toStrictEqual(ALITH_H160);
+    });
+
+    it('truncates a plain substrate account to its first 20 bytes', () => {
+      expect(H160.fromAny(ALICE)).toStrictEqual(ALICE_H160);
+    });
+
+    it('rejects anything else', () => {
+      expect(() => H160.fromAny('not-an-address')).toThrow();
+    });
+  });
 });
