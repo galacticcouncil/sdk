@@ -3,13 +3,11 @@ import { big } from '@galacticcouncil/common';
 import {
   DCA_TIME_RESERVE,
   ORDER_MIN_BLOCK_PERIOD,
-  DEFAULT_MIN_BUDGET,
   TWAP_EXECUTION_INTERVAL_MS,
   TWAP_MAX_PRICE_IMPACT,
   TWAP_MAX_DURATION,
 } from './const';
 import {
-  Swap,
   TradeDcaOrder,
   TradeOrder,
   TradeOrderError,
@@ -20,18 +18,12 @@ import { TradeRouter } from './TradeRouter';
 
 import { TradeRouteBuilder } from './TradeRouteBuilder';
 
-import {
-  BLOCK_TIME_TARGET,
-  SYSTEM_ASSET_DECIMALS,
-  SYSTEM_ASSET_ID,
-} from '../consts';
+import { BLOCK_TIME_TARGET } from '../consts';
 import { IPoolCtxProvider, PoolType } from '../pool';
-import { calc } from '../utils';
 
 export type TradeSchedulerOptions = {
   blockTime?: number;
   minimalPeriod?: number;
-  minBudgetInNative?: bigint;
 };
 
 /**
@@ -47,7 +39,6 @@ export class TradeScheduler {
 
   readonly blockTime: number;
   readonly minimalPeriod: number;
-  readonly minOrderBudget: bigint;
 
   constructor(ctx: IPoolCtxProvider, options: TradeSchedulerOptions = {}) {
     this.router = new TradeRouter(ctx);
@@ -55,7 +46,6 @@ export class TradeScheduler {
 
     this.blockTime = options.blockTime ?? BLOCK_TIME_TARGET;
     this.minimalPeriod = options.minimalPeriod ?? ORDER_MIN_BLOCK_PERIOD;
-    this.minOrderBudget = options.minBudgetInNative ?? DEFAULT_MIN_BUDGET;
   }
 
   /**
@@ -91,16 +81,22 @@ export class TradeScheduler {
 
     const priceImpact = Math.abs(priceImpactPct);
 
-    const amountInMin = await this.getMinimumOrderBudget(
-      assetIn,
-      assetInDecimals
+    const [assetInEd, assetOutEd] = await Promise.all([
+      this.getAssetEd(firstSwap.poolAddress, firstSwap.assetIn),
+      this.getAssetEd(lastSwap.poolAddress, lastSwap.assetOut),
+    ]);
+
+    const minTradeAmount = this.getMinTradeAmount(
+      amountIn,
+      trade.amountOut,
+      assetInEd,
+      assetOutEd
     );
 
     const optTradeCount = this.getOptimalTradeCount(priceImpact);
-    const maxTradeCount = this.getMaximumTradeCount(
-      amountIn,
-      amountInMin,
-      duration
+    const maxTradeCount = Math.max(
+      this.getMaximumTradeCount(amountIn, minTradeAmount, duration),
+      1
     );
     const tradeCount = noOfTrades || Math.min(optTradeCount, maxTradeCount);
 
@@ -113,14 +109,11 @@ export class TradeScheduler {
       amountInPerTrade
     );
 
-    const isLessThanMinimalAmount = amountIn < amountInMin;
-
     const errors: TradeOrderError[] = [];
-    if (isLessThanMinimalAmount) {
+    if (dca.amountIn < assetInEd || dca.amountOut < assetOutEd) {
       errors.push(TradeOrderError.OrderTooSmall);
     }
 
-    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const amountOut = dca.amountOut * BigInt(tradeCount);
     const tradePeriod = this.toBlockPeriod(frequency);
     const tradeFee = dca.tradeFee * BigInt(tradeCount);
@@ -160,67 +153,50 @@ export class TradeScheduler {
   }
 
   /**
-   * Calculate minimum order budget (amountIn) required for order
-   * execution.
+   * Smallest per-trade amountIn the chain accepts.
    *
-   * @param asset - assetIn id
-   * @param decimals - assetIn decimals
-   * @returns minimum order budget
+   * - Input must cover the assetIn existential deposit
+   * - Output must cover the assetOut existential deposit, priced at the
+   *   order's average rate
+   * - A zero quote fits no trade
+   *
+   * @param amountIn - order budget
+   * @param amountOut - order output at the quoted rate
+   * @param assetInEd - assetIn existential deposit
+   * @param assetOutEd - assetOut existential deposit
+   * @returns minimum per-trade amountIn, at least one unit
    */
-  async getMinimumOrderBudget(
-    asset: number,
-    decimals: number
-  ): Promise<bigint> {
-    if (SYSTEM_ASSET_ID === asset) {
-      return this.minOrderBudget;
-    }
+  protected getMinTradeAmount(
+    amountIn: bigint,
+    amountOut: bigint,
+    assetInEd: bigint,
+    assetOutEd: bigint
+  ): bigint {
+    if (amountOut === 0n) return amountIn + 1n;
 
-    const spot = await this.router.getSpotPrice(SYSTEM_ASSET_ID, asset);
-    if (spot) {
-      return calc.mulSpot(
-        this.minOrderBudget,
-        spot.amount,
-        SYSTEM_ASSET_DECIMALS,
-        decimals
-      );
-    }
-
-    const reverseSpot = await this.router.getSpotPrice(asset, SYSTEM_ASSET_ID);
-    if (reverseSpot) {
-      return calc.divSpot(
-        this.minOrderBudget,
-        reverseSpot.amount,
-        SYSTEM_ASSET_DECIMALS,
-        decimals
-      );
-    }
-
-    throw new Error('Unable to calculate order budget');
+    const outEdIn = (assetOutEd * amountIn + amountOut - 1n) / amountOut;
+    return [assetInEd, outEdIn, 1n].reduce((a, b) => (a > b ? a : b));
   }
 
   /**
    * Calculate maximum number of trades for dca order execution.
    *
-   * Single trade execution amount must be at least 20% of
-   * minimum order budget.
-   *
-   * Block period can't exceed total duration.
+   * - Each trade must be at least the minimum trade amount
+   * - Block period can't exceed total duration
    *
    * @param amountIn - entering / given budget
-   * @param amountInMin - minimal budget to schedule an order
+   * @param minTradeAmount - smallest per-trade amountIn the chain accepts
    * @param duration - order duration in ms
-   *
    * @returns maximum number of trades to execute the order
    */
   protected getMaximumTradeCount(
     amountIn: bigint,
-    amountInMin: bigint,
+    minTradeAmount: bigint,
     duration: number
   ): number {
-    const minAmountIn = (amountInMin * 2n) / 10n;
-    if (minAmountIn === 0n) return 0;
+    if (minTradeAmount === 0n) return 0;
 
-    const maxByBudget = Number(amountIn / minAmountIn);
+    const maxByBudget = Number(amountIn / minTradeAmount);
     const minSpacing = this.blockTime * this.minimalPeriod;
     const maxByTimeRaw = Math.floor(duration / minSpacing);
 
@@ -271,19 +247,16 @@ export class TradeScheduler {
     const { assetInDecimals } = firstSwap;
     const { assetOutDecimals } = lastSwap;
 
-    const amountInMin = await this.getMinimumOrderBudget(
-      assetIn,
-      assetInDecimals
-    );
-
-    const isLessThanMinimalAmount = trade.amountIn < amountInMin;
+    const [assetInEd, assetOutEd] = await Promise.all([
+      this.getAssetEd(firstSwap.poolAddress, firstSwap.assetIn),
+      this.getAssetEd(lastSwap.poolAddress, lastSwap.assetOut),
+    ]);
 
     const errors: TradeOrderError[] = [];
-    if (isLessThanMinimalAmount) {
+    if (trade.amountIn < assetInEd || trade.amountOut < assetOutEd) {
       errors.push(TradeOrderError.OrderTooSmall);
     }
 
-    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const tradePeriod = this.toBlockPeriod(periodMs);
     const tradeRoute = TradeRouteBuilder.build(swaps);
 
@@ -352,8 +325,9 @@ export class TradeScheduler {
 
     const amountInPerTrade = amountIn / BigInt(tradeCount);
 
-    const [amountInMin, twap] = await Promise.all([
-      this.getMinimumOrderBudget(assetIn, assetInDecimals),
+    const [assetInEd, assetOutEd, twap] = await Promise.all([
+      this.getAssetEd(firstSwap.poolAddress, firstSwap.assetIn),
+      this.getAssetEd(lastSwap.poolAddress, lastSwap.assetOut),
       this.router.getBestSell(
         firstSwap.assetIn,
         lastSwap.assetOut,
@@ -362,17 +336,17 @@ export class TradeScheduler {
     ]);
 
     const isSingleTrade = tradeCount === 1;
-    const isLessThanMinimalAmount = amountIn < amountInMin;
+    const isTradeTooSmall =
+      twap.amountIn < assetInEd || twap.amountOut < assetOutEd;
     const isOrderImpactTooBig = twap.priceImpactPct < TWAP_MAX_PRICE_IMPACT;
 
     const errors: TradeOrderError[] = [];
-    if (isLessThanMinimalAmount || isSingleTrade) {
+    if (isTradeTooSmall || isSingleTrade) {
       errors.push(TradeOrderError.OrderTooSmall);
     } else if (isOrderImpactTooBig) {
       errors.push(TradeOrderError.OrderImpactTooBig);
     }
 
-    const assetOutEd = await this.getAssetOutEd(lastSwap);
     const amountOut = twap.amountOut * BigInt(tradeCount);
     const tradeFee = twap.tradeFee * BigInt(tradeCount);
     const tradeRoute = TradeRouteBuilder.build(swaps);
@@ -462,21 +436,27 @@ export class TradeScheduler {
   }
 
   /**
-   * Resolve the on-chain existential deposit of assetOut from the pool
-   * used by the last swap in the trade. Intents (in particular DCA)
-   * require `amount_out >= ED`, so the ED is exposed on the order DTO
-   * so callers can clamp the per-trade minimum accordingly.
+   * Resolve the on-chain existential deposit of an asset from a pool it
+   * trades in.
    *
-   * @param lastSwap - last hop of the resolved trade (holds assetOut)
-   * @returns existential deposit of assetOut (in its smallest unit)
+   * - DCA intents require per-trade `amount_in` and `amount_out` to cover
+   *   the existential deposits of their assets
+   * - An unknown asset or deposit throws
+   *
+   * @param poolAddress - pool holding the asset
+   * @param asset - asset id
+   * @returns existential deposit (in its smallest unit)
    */
-  private async getAssetOutEd(lastSwap: Swap): Promise<bigint> {
+  private async getAssetEd(
+    poolAddress: string,
+    asset: number
+  ): Promise<bigint> {
     const pools = await this.router.getPools();
-    const pool = pools.find((p) => p.address === lastSwap.poolAddress);
-    const token = pool?.tokens.find((t) => t.id === lastSwap.assetOut);
-    if (!token) {
+    const pool = pools.find((p) => p.address === poolAddress);
+    const token = pool?.tokens.find((t) => t.id === asset);
+    if (token?.existentialDeposit === undefined) {
       throw new Error(
-        `Asset ${lastSwap.assetOut} not found in pool ${lastSwap.poolAddress}`
+        `Existential deposit of asset ${asset} not found in pool ${poolAddress}`
       );
     }
     return token.existentialDeposit;

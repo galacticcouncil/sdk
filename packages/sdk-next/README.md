@@ -164,7 +164,6 @@ Every market in `AAVE_MARKETS` is supported. `reserve` picks the first market li
 | Method | Description  |
 | :----- | :----------- |
 | `getDcaOrder(assetIn: number, assetOut: number, amountInTotal: string, duration: number): TradeDcaOrder` | Calculate DCA order. |
-| `getTwapBuyOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP buy order. |
 | `getTwapSellOrder(assetIn: number, assetOut: number, amountInTotal: string): TradeOrder` | Calculate TWAP sell order. |
 
 ➡️ For type definitions visit [types.ts](src/sor/types.ts)<br />

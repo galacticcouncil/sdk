@@ -1,14 +1,12 @@
-import { CompatibilityLevel, PolkadotClient } from 'polkadot-api';
+import { PolkadotClient } from 'polkadot-api';
 
 import { Papi } from '../api';
 import { BLOCK_TIME_TARGET } from '../consts';
-import { DEFAULT_MIN_BUDGET } from '../sor/const';
 
 const BLOCK_TIME_SAMPLE = 100;
 const BLOCK_TIME_TTL = 60 * 60 * 1000;
 
 export class ChainParams extends Papi {
-  private _minOrderBudget?: bigint;
   private _minimalPeriod?: number;
 
   private _blockTime?: number;
@@ -43,25 +41,6 @@ export class ChainParams extends Papi {
       this._minimalPeriod = await this.api.constants.Intent.MinDcaPeriod();
     }
     return this._minimalPeriod;
-  }
-
-  /**
-   * Minimum order budget in native currency.
-   *
-   * - Falls back to the default on runtimes without the DCA pallet
-   */
-  async getMinOrderBudget(): Promise<bigint> {
-    if (this._minOrderBudget === undefined) {
-      const { compat } = await this.api.getStaticApis();
-      const hasDca =
-        compat.constants.DCA.MinBudgetInNativeCurrency.isCompatible(
-          CompatibilityLevel.BackwardsCompatible
-        );
-      this._minOrderBudget = hasDca
-        ? await this.api.constants.DCA.MinBudgetInNativeCurrency()
-        : DEFAULT_MIN_BUDGET;
-    }
-    return this._minOrderBudget;
   }
 
   /**

@@ -45,10 +45,7 @@ export async function createSdkContext(
   const params = new ChainParams(client);
   const evm = new EvmClient(client, at);
 
-  const [minOrderBudget, minimalPeriod] = await Promise.all([
-    params.getMinOrderBudget(),
-    params.getMinimalPeriod(),
-  ]);
+  const minimalPeriod = await params.getMinimalPeriod();
 
   // Initialize pool context
   const poolCtx = new PoolContextProvider(client, evm, at)
@@ -67,7 +64,6 @@ export async function createSdkContext(
   const aave = new AaveUtils(evm, balance.erc20);
   const router = new TradeRouter(poolCtx);
   const scheduler = new TradeScheduler(poolCtx, {
-    minBudgetInNative: minOrderBudget,
     minimalPeriod: minimalPeriod,
   });
 

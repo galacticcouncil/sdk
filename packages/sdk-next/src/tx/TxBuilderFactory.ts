@@ -6,7 +6,6 @@ import { EvmClient } from '../evm';
 import { Trade, TradeOrder } from '../sor';
 
 import { TradeTxBuilder } from './TradeTxBuilder';
-import { OrderTxBuilder } from './OrderTxBuilder';
 
 import { IntentMarketTxBuilder } from './IntentMarketTxBuilder';
 import { IntentLimitTxBuilder } from './IntentLimitTxBuilder';
@@ -43,15 +42,6 @@ export class TxBuilderFactory {
       this.at,
       this.aave
     ).setTrade(trade);
-  }
-
-  order(order: TradeOrder): OrderTxBuilder {
-    return new OrderTxBuilder(
-      this.client,
-      this.evmClient,
-      this.at,
-      this.aave
-    ).setOrder(order);
   }
 
   intentMarket(trade: Trade): IntentMarketTxBuilder {

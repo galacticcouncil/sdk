@@ -94,13 +94,15 @@ export class IntentOrderTxBuilder extends TxBuilder {
       amountIn,
       assetIn,
       assetOut,
+      assetOutEd,
       tradeAmountIn,
       tradeAmountOut,
       tradePeriod,
     } = this.order;
 
     const slippage = calc.getFraction(tradeAmountOut, this.slippagePct);
-    const minAmountOut = tradeAmountOut - slippage;
+    const quotedMinOut = tradeAmountOut - slippage;
+    const minAmountOut = quotedMinOut > assetOutEd ? quotedMinOut : assetOutEd;
 
     const dca = Enum('Dca', {
       asset_in: assetIn,

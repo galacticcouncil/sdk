@@ -1,6 +1,6 @@
 # Intent Tx Builders
 
-Submittable transaction builders for the `Intent` pallet (ICE protocol). All builders are constructed via `TxBuilderFactory` and follow the same fluent API as `TradeTxBuilder` / `OrderTxBuilder`.
+Submittable transaction builders for the `Intent` pallet (ICE protocol). All builders are constructed via `TxBuilderFactory` and follow the same fluent API as `TradeTxBuilder`.
 
 Builders auto-wrap the call with `Dispatcher.dispatch_with_extra_gas` when the beneficiary has active Aave borrow positions.
 
@@ -52,11 +52,10 @@ Emits: `IntentLimitOrder`.
 
 Submits a scheduled intent. Dispatches by `TradeOrder.type`:
 
-| `TradeOrderType` | Tx name                  | Notes                                  |
-|------------------|--------------------------|----------------------------------------|
-| `Dca`            | `IntentDcaSchedule`      | `amount_out = 1n` (no min)             |
-| `TwapSell`       | `IntentDcaSchedule.twap` | `amount_out` derived from slippage     |
-| `TwapBuy`        | `IntentDcaSchedule.twap` | `amount_out` derived from slippage     |
+| `TradeOrderType` | Tx name                  | Notes                                                    |
+|------------------|--------------------------|----------------------------------------------------------|
+| `Dca`            | `IntentDcaSchedule`      | `amount_out` = assetOut existential deposit              |
+| `TwapSell`       | `IntentDcaSchedule.twap` | `amount_out` from slippage, at least the assetOut ED     |
 
 ```ts
 const tx = await factory

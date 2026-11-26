@@ -3,7 +3,7 @@ import { Binary, PolkadotClient } from 'polkadot-api';
 import { createSdkContext } from '../../../../src';
 
 import { PapiExecutor } from '../../PapiExecutor';
-import { BENEFICIARY, HOUR_MS, MAX_RETRIES } from '../../const';
+import { BENEFICIARY, HOUR_MS } from '../../const';
 import { ApiUrl } from '../../types';
 
 class GetOpenBudgetDcaOrder extends PapiExecutor {
@@ -19,9 +19,8 @@ class GetOpenBudgetDcaOrder extends PapiExecutor {
       HOUR_MS
     );
     const orderTx = await tx
-      .order(order)
+      .intentOrder(order)
       .withBeneficiary(BENEFICIARY)
-      .withMaxRetries(MAX_RETRIES)
       .build();
     const orderCall = await orderTx.get().getEncodedData();
     console.log(order.toHuman());
