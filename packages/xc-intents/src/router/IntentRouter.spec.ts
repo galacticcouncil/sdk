@@ -3,7 +3,8 @@ import { base58 } from '@scure/base';
 
 import { RecipientKind } from '../terms/types';
 
-import { IntentsRouter, type NearReader } from './router';
+import { IntentRouter } from './IntentRouter';
+import type { NearReader } from './types';
 
 const ROUTER = 'intents-router.hydration-whm.near';
 const ZEC = 'nep141:zec.omft.near';
@@ -45,10 +46,10 @@ function mockNear(opts: { valid?: string[]; accounts?: string[] } = {}) {
   };
 }
 
-describe('IntentsRouter', () => {
+describe('IntentRouter', () => {
   it('derives A as the lowercase hex of the derived key', async () => {
     const near = mockNear();
-    const router = new IntentsRouter(near, ROUTER, 'v1.signer');
+    const router = new IntentRouter(near, ROUTER, 'v1.signer');
     const path = `0x${'cd'.repeat(32)}`;
     await expect(router.deriveAccount(path)).resolves.toBe('ab'.repeat(32));
     expect(near.view).toHaveBeenCalledWith('v1.signer', 'derived_public_key', {
@@ -60,7 +61,7 @@ describe('IntentsRouter', () => {
 
   it('accepts a ZEC address the withdraw contract takes', async () => {
     const addr = 't1KPVSRgnFHPBWMJLC7taJioN6m5Q6jVBma';
-    const router = new IntentsRouter(mockNear({ valid: [addr] }), ROUTER, 's');
+    const router = new IntentRouter(mockNear({ valid: [addr] }), ROUTER, 's');
     const route = await router.checkRecipient(
       ZEC,
       RecipientKind.Withdraw,
@@ -70,21 +71,21 @@ describe('IntentsRouter', () => {
   });
 
   it('rejects an address the withdraw contract refuses', async () => {
-    const router = new IntentsRouter(mockNear(), ROUTER, 's');
+    const router = new IntentRouter(mockNear(), ROUTER, 's');
     await expect(
       router.checkRecipient(ZEC, RecipientKind.Withdraw, 't1Bad')
     ).rejects.toThrow(/rejects/);
   });
 
   it('rejects a prefix the route does not take', async () => {
-    const router = new IntentsRouter(mockNear(), ROUTER, 's');
+    const router = new IntentRouter(mockNear(), ROUTER, 's');
     await expect(
       router.checkRecipient(BTC, RecipientKind.Withdraw, 'tb1qtestnet')
     ).rejects.toThrow(/takes/);
   });
 
   it('rejects shielded Zcash', async () => {
-    const router = new IntentsRouter(mockNear(), ROUTER, 's');
+    const router = new IntentRouter(mockNear(), ROUTER, 's');
     for (const addr of ['zs1abc', 'u1abc']) {
       await expect(
         router.checkRecipient(ZEC, RecipientKind.Withdraw, addr)
@@ -93,7 +94,7 @@ describe('IntentsRouter', () => {
   });
 
   it('pays NEAR only to an existing account', async () => {
-    const router = new IntentsRouter(
+    const router = new IntentRouter(
       mockNear({ accounts: ['alice.near'] }),
       ROUTER,
       's'
@@ -107,7 +108,7 @@ describe('IntentsRouter', () => {
   });
 
   it('takes any valid account id for an intents transfer', async () => {
-    const router = new IntentsRouter(mockNear(), ROUTER, 's');
+    const router = new IntentRouter(mockNear(), ROUTER, 's');
     await expect(
       router.checkRecipient(ZEC, RecipientKind.IntentsAccount, 'bob.near')
     ).resolves.toBeUndefined();

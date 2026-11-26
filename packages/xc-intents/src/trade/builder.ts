@@ -5,7 +5,7 @@ import { encodeFunctionData } from 'viem';
 
 import { WETH_ERC20 } from '../consts';
 
-import { DISPATCHER_ABI, ERC20_ABI } from './abi';
+import { DISPATCHER_ABI, ERC20_ABI } from '../dispatcher';
 import type { BuildCloseParams, BuildDispatchParams } from './types';
 
 /**

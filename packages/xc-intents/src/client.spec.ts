@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { OneClickService } from '@defuse-protocol/one-click-sdk-typescript';
 import { base58 } from '@scure/base';
 
 import { decodeAbiParameters, getAddress } from 'viem';
@@ -118,18 +119,19 @@ const near = {
   viewAccount: jest.fn(async () => undefined),
 } as any;
 
+/** 1Click deposits crediting `creditsTo`, `A` unless set. */
+function mockOneClick(creditsTo = A) {
+  jest.spyOn(OneClickService, 'getQuote').mockResolvedValue({
+    quoteRequest: { recipient: creditsTo, refundTo: creditsTo },
+    quote: { chainDepositAddresses: [{ blockchain: 'eth', address: DEPOSIT }] },
+  } as any);
+}
+
 function client(
-  opts: { sellOut?: bigint; outPerIn?: bigint; passTo?: string } = {}
+  opts: { sellOut?: bigint; outPerIn?: bigint; creditsTo?: string } = {}
 ) {
-  return new XcIntentsClient({
-    sdk: mockSdk(opts),
-    near,
-    passThrough: async () => ({
-      address: DEPOSIT,
-      recipient: opts.passTo ?? A,
-      refundTo: opts.passTo ?? A,
-    }),
-  });
+  mockOneClick(opts.creditsTo);
+  return new XcIntentsClient({ sdk: mockSdk(opts), near });
 }
 
 const swapParams: SwapParams = {
@@ -156,6 +158,7 @@ describe('XcIntentsClient', () => {
   beforeEach(() => mockCeiling(CEILING));
   afterEach(() => {
     global.fetch = realFetch;
+    jest.restoreAllMocks();
   });
 
   describe('swap estimate', () => {
@@ -295,9 +298,11 @@ describe('XcIntentsClient', () => {
       }
     });
 
-    it('refuses a pass-through to another account', async () => {
-      const trade = await client({ passTo: 'cd'.repeat(32) }).swap(swapParams);
-      await expect(trade.buildCall()).rejects.toThrow(/does not forward/);
+    it('refuses a 1Click deposit crediting another account', async () => {
+      const trade = await client({ creditsTo: 'cd'.repeat(32) }).swap(
+        swapParams
+      );
+      await expect(trade.buildCall()).rejects.toThrow(/does not credit/);
     });
 
     it('refuses when the relay ceiling rose past the order', async () => {

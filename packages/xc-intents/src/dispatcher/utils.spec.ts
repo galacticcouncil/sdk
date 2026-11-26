@@ -3,7 +3,7 @@ import { decodeAbiParameters, size } from 'viem';
 import { encodeTerms } from '../terms/codec';
 import { GOLDEN_ENCODED, GOLDEN_TERMS } from '../terms/fixtures';
 
-import { forwardData } from './forward';
+import { forwardData } from './utils';
 
 const DEPOSIT = `0x${'44'.repeat(20)}` as const;
 

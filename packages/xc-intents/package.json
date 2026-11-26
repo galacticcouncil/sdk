@@ -34,6 +34,9 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "link": "npm ln"
   },
+  "dependencies": {
+    "@defuse-protocol/one-click-sdk-typescript": "^0.1.17"
+  },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.2.0",
     "@galacticcouncil/descriptors": ">=2.7.0",

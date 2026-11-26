@@ -16,8 +16,9 @@ import {
   DESTINATION_DECIMALS,
   PAYOUT_FEES,
 } from './consts';
-import { Dispatcher } from './evm/dispatcher';
-import { IntentsRouter } from './near/router';
+import { IntentDispatcher } from './dispatcher';
+import { configureOneClick } from './quote';
+import { IntentRouter } from './router';
 import { fetchTrade, type ScanTrade } from './scan';
 import { RecipientKind, type Terms } from './terms/types';
 import { closeCalls, swap, twap, type TradeContext } from './trade';
@@ -38,8 +39,8 @@ import type {
  */
 export class XcIntentsClient {
   private readonly sdk: SdkCtx;
-  private readonly dispatcher: Dispatcher;
-  private readonly router: IntentsRouter;
+  private readonly dispatcher: IntentDispatcher;
+  private readonly router: IntentRouter;
   private readonly opts: XcIntentsOpts;
 
   private assets?: Promise<Map<number, Asset>>;
@@ -47,15 +48,16 @@ export class XcIntentsClient {
   constructor(opts: XcIntentsOpts) {
     this.opts = opts;
     this.sdk = opts.sdk;
-    this.dispatcher = new Dispatcher(
+    this.dispatcher = new IntentDispatcher(
       opts.sdk.client.evm.getProvider(),
       (opts.dispatcher ?? DEFAULT_DISPATCHER) as Hex
     );
-    this.router = new IntentsRouter(
+    this.router = new IntentRouter(
       opts.near ?? new NearClient(opts.nearRpc ?? DEFAULT_NEAR_RPC),
       opts.router ?? DEFAULT_ROUTER,
       opts.mpcSigner ?? DEFAULT_MPC_SIGNER
     );
+    configureOneClick(opts.oneClick);
   }
 
   /** Destinations the dispatcher prices now, with live route minimums. */
@@ -137,7 +139,6 @@ export class XcIntentsClient {
       sdk: this.sdk,
       dispatcher: this.dispatcher,
       router: this.router,
-      passThrough: this.opts.passThrough,
       quoterUrl: this.opts.quoterUrl ?? DEFAULT_QUOTER_URL,
       relayMarginBps: this.opts.relayMarginBps ?? DEFAULT_RELAY_MARGIN_BPS,
       getAsset: (id) => this.getAsset(id),

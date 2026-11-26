@@ -1,4 +1,4 @@
-import { floorOut, minOrderWeth } from './sizing';
+import { floorOut, minOrderWeth } from './utils';
 
 const E15 = 10n ** 15n;
 const base = { cost: 10n ** 12n, minOrderAmount: 10n ** 11n };

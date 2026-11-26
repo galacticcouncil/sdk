@@ -3,15 +3,15 @@ import type { EvmCall } from '@galacticcouncil/xc-sdk';
 
 import type { Hex } from 'viem';
 
-import type { NearReader, UtxoRoute } from './near/router';
-import type { PassThroughProvider } from './quote';
+import type { OneClickConfig } from './quote';
+import type { NearReader, UtxoRoute } from './router';
 import type { RecipientKind, Terms } from './terms/types';
 
 export interface XcIntentsOpts {
   /** sdk-next context: router, assets, EVM client, tx builders */
   sdk: SdkCtx;
-  /** Backend making the 1Click pass-through to `A` */
-  passThrough: PassThroughProvider;
+  /** 1Click API config */
+  oneClick?: OneClickConfig;
   /** NEAR reads; a `NearClient` on `nearRpc` when omitted */
   near?: NearReader;
   nearRpc?: string;
@@ -143,7 +143,7 @@ export interface XcIntentsTrade {
    * Fixes the terms and builds what the owner signs.
    *
    * - Re-reads the relay ceiling, which moves with gas
-   * - Calls the pass-through backend
+   * - Makes the 1Click deposit to `A`
    */
   buildCall(): Promise<XcIntentsRequest>;
 }
@@ -156,7 +156,7 @@ export type XcIntentsRequest = {
   authPath: Hex;
   /** Deposit account on NEAR */
   depositAccount: string;
-  /** 1Click pass-through on Ethereum */
+  /** 1Click deposit address on Ethereum, crediting `A` */
   depositAddress: Hex;
   /** Relay ceiling the order carries, wei */
   maxRelayFee: bigint;

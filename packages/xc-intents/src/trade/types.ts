@@ -2,10 +2,8 @@ import type { Asset, SdkCtx, sor, tx } from '@galacticcouncil/sdk-next';
 
 import type { Hex } from 'viem';
 
-import type { Dispatcher } from '../evm/dispatcher';
-import type { IntentsRouter, UtxoRoute } from '../near/router';
-import type { OrderBase } from '../order/sizing';
-import type { PassThroughProvider } from '../quote';
+import type { IntentDispatcher, OrderBase } from '../dispatcher';
+import type { IntentRouter, UtxoRoute } from '../router';
 import type { RecipientKind, Terms } from '../terms/types';
 import type {
   Destination,
@@ -17,9 +15,8 @@ import type {
 /** Resolved configuration the trade flows need (defaults applied). */
 export interface TradeContext {
   sdk: SdkCtx;
-  dispatcher: Dispatcher;
-  router: IntentsRouter;
-  passThrough: PassThroughProvider;
+  dispatcher: IntentDispatcher;
+  router: IntentRouter;
   quoterUrl: string;
   /** Relay ceiling headroom, bps */
   relayMarginBps: number;

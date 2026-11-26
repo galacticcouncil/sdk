@@ -1,22 +1,14 @@
-import type { Hex, PublicClient } from 'viem';
+import type { Hex } from 'viem';
 
-import { DISPATCHER_ABI, ORDER_COST_ABI } from '../trade/abi';
 import { ETHEREUM_WORMHOLE_ID } from '../consts';
-import type { OrderBase } from '../order/sizing';
 import { authPathOf, encodeTerms } from '../terms/codec';
 import type { Terms } from '../terms/types';
 
-/** The viem reads the dispatcher needs. */
-export type EvmReader = Pick<PublicClient, 'readContract'>;
-
-/** Packed terms and their path, agreed on by the SDK and the dispatcher. */
-export interface EncodedTerms {
-  encoded: Hex;
-  authPath: Hex;
-}
+import { DISPATCHER_ABI, ORDER_COST_ABI } from './abi';
+import type { EncodedTerms, EvmReader, OrderBase } from './types';
 
 /** Reads of the intents v2 dispatcher on Hydration EVM. */
-export class Dispatcher {
+export class IntentDispatcher {
   constructor(
     readonly client: EvmReader,
     readonly address: Hex

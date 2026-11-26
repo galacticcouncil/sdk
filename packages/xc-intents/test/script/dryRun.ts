@@ -4,7 +4,6 @@ import { api, createSdkContext, type SdkCtx } from '@galacticcouncil/sdk-next';
 import {
   createXcIntents,
   DESTINATION_ASSETS,
-  type PassThrough,
   type XcIntentsClient,
   type XcIntentsRequest,
   type XcIntentsTrade,
@@ -14,7 +13,7 @@ import {
  * Dry-runs one swap per destination and one TWAP on mainnet state.
  *
  * - Nothing is submitted
- * - `ONECLICK_KEY` set: a real 1Click pass-through; otherwise a stub, which a dry run never reaches
+ * - Each build makes a real 1Click deposit to its `A`; it stays unused
  *
  * Run: `npx tsx test/script/dryRun.ts`
  */
@@ -31,44 +30,6 @@ const RECIPIENTS: Record<string, string> = {
   [DESTINATION_ASSETS.BTC]: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
   [DESTINATION_ASSETS.NEAR]: 'aurora',
 };
-
-async function oneClick(account: string): Promise<PassThrough> {
-  const key = process.env.ONECLICK_KEY;
-  if (!key) {
-    return {
-      address: '0x000000000000000000000000000000000000bEEF',
-      recipient: account,
-      refundTo: account,
-    };
-  }
-  const res = await fetch('https://1click.chaindefuser.com/v0/quote', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': key },
-    body: JSON.stringify({
-      dry: false,
-      swapType: 'ANY_INPUT',
-      originAsset: '1cs_v1:any',
-      depositType: 'INTENTS',
-      destinationAsset: '1cs_v1:original',
-      amount: '0',
-      slippageTolerance: 50,
-      recipient: account,
-      recipientType: 'INTENTS',
-      refundTo: account,
-      refundType: 'INTENTS',
-      deadline: '2038-01-01T00:00:00.000Z',
-    }),
-  });
-  const body = (await res.json()) as any;
-  const address = body.quote?.chainDepositAddresses?.find(
-    (c: any) => c.blockchain === 'eth'
-  )?.address;
-  return {
-    address,
-    recipient: body.quoteRequest?.recipient,
-    refundTo: body.quoteRequest?.refundTo,
-  };
-}
 
 /** Estimates once to learn `leastIn`, then again at 1.5× it. */
 async function sized(
@@ -146,7 +107,7 @@ function base(destination: string) {
 async function main() {
   const client = createClient(api.getWs(RPC));
   const sdk = await createSdkContext(client);
-  const intents = createXcIntents({ sdk, passThrough: oneClick });
+  const intents = createXcIntents({ sdk });
 
   try {
     const destinations = await intents.destinations();

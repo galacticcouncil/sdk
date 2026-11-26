@@ -6,7 +6,6 @@ import {
   PAYOUT_FEES,
   WETH_ASSET_ID,
 } from '../consts';
-import { estimateOut, floorOut, minOrderWeth } from '../order/sizing';
 import { relayFeeCeiling } from '../quote';
 import { floorOf, refundAddress } from '../terms/build';
 import { RecipientKind } from '../terms/types';
@@ -18,7 +17,13 @@ import {
 } from '../types';
 
 import type { Estimate, Schedule, TradeContext } from './types';
-import { underSlippage, wethIn } from './utils';
+import {
+  estimateOut,
+  floorOut,
+  minOrderWeth,
+  underSlippage,
+  wethIn,
+} from './utils';
 
 /**
  * Sizes a swap or a TWAP against live state.
@@ -26,7 +31,7 @@ import { underSlippage, wethIn } from './utils';
  * - Viability problems land in `errors`; config and network failures throw
  * - Every order's floor output reaches the route minimum, so it pays out alone
  * - Reads the rate, route, relay ceiling, order cost and the Hydration sell
- * - Calls no pass-through backend: terms are fixed only in `buildCall`
+ * - Makes no 1Click deposit: terms are fixed only in `buildCall`
  *
  * @param ctx - trade context
  * @param params - what the user asks for

@@ -1,16 +1,14 @@
 import type { Hex } from 'viem';
 
 import { WETH_ASSET_ID, WETH_ERC20 } from '../consts';
-import { forwardData } from '../order/forward';
-import { minOrderWeth } from '../order/sizing';
-import { depositAddressOf, relayFeeCeiling } from '../quote';
+import { ERC20_ABI, forwardData } from '../dispatcher';
+import { depositAddressOf, oneClickDeposit, relayFeeCeiling } from '../quote';
 import { buildTerms } from '../terms/build';
 import type { XcIntentsRequest } from '../types';
 
-import { ERC20_ABI } from './abi';
 import { buildDispatchCalls } from './builder';
 import type { Estimate, IntentPlan, TradeContext } from './types';
-import { forwardOf } from './utils';
+import { forwardOf, minOrderWeth } from './utils';
 
 /**
  * Fixes the terms of an estimate and builds what the owner signs.
@@ -55,12 +53,12 @@ export async function buildRequest(
   const { encoded, authPath } = await ctx.dispatcher.encode(terms);
   const depositAccount = await ctx.router.deriveAccount(authPath);
 
-  const [passThrough, maxRelayFee, orderBase] = await Promise.all([
-    ctx.passThrough(depositAccount),
+  const [deposit, maxRelayFee, orderBase] = await Promise.all([
+    oneClickDeposit(depositAccount),
     relayFeeCeiling(ctx.quoterUrl, ctx.relayMarginBps),
     ctx.dispatcher.orderBase(),
   ]);
-  const depositAddress = depositAddressOf(passThrough, depositAccount);
+  const depositAddress = depositAddressOf(deposit, depositAccount);
 
   const least = minOrderWeth(
     orderBase,

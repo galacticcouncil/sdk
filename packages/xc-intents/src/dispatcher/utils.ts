@@ -8,7 +8,7 @@ import { MAX_FORWARD_DATA } from '../consts';
  * - `abi.encode(depositAddress, maxRelayFee, terms)`
  * - Fits ICE's limit while destination + recipient stay within 265 bytes
  *
- * @param depositAddress - 1Click pass-through on Ethereum
+ * @param depositAddress - 1Click deposit address on Ethereum, crediting `A`
  * @param maxRelayFee - relay ceiling, wei
  * @param terms - packed terms
  * @throws when over ICE's limit
