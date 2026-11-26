@@ -172,10 +172,11 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
 
   protected async loadPools(block: BlockRef): Promise<StableSwapBase[]> {
     const at = block.hash;
-    const [pools, pegs, poolLimits] = await Promise.all([
+    const [pools, pegs, poolLimits, assets] = await Promise.all([
       this.query.pools.get(at),
       this.query.poolPegs.get(at),
       this.query.limits(),
+      this.query.assets.get(at),
     ]);
 
     const assetsByPool = new Map(
@@ -201,6 +202,7 @@ export class StableSwapClient extends PoolClient<StableSwapBase> {
         tradeable: TRADEABLE_DEFAULT,
         balance: issuance,
         decimals: RUNTIME_DECIMALS,
+        existentialDeposit: assets.get(id)?.existential_deposit,
       } as PoolToken);
 
       this.poolsData.set(id, value);

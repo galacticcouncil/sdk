@@ -38,7 +38,7 @@ precompile.
               │  pallet-omnipool (circuit-      │         │ (Aave price oracle,         │
               │   breaker, withdraw limits)     │         │  Stableswap PoolPegs        │
               │  pallet-stableswap (pegs, fees) │         │  evaluator, integrators)    │
-              │  pallet-dca (slippage)          │         └─────────────────────────────┘
+              │  pallet-intent (DCA slippage)   │         └─────────────────────────────┘
               │  router, …                      │
               └─────────────────────────────────┘
 ```

@@ -21,10 +21,10 @@ const MIN_SPACING_6S = BLOCK_TIME_6S * MINIMAL_PERIOD_6S;
 class TestScheduler extends TradeScheduler {
   public maxTradeCount(
     amountIn: bigint,
-    amountInMin: bigint,
+    minTradeAmount: bigint,
     duration: number
   ) {
-    return this.getMaximumTradeCount(amountIn, amountInMin, duration);
+    return this.getMaximumTradeCount(amountIn, minTradeAmount, duration);
   }
 }
 
@@ -39,27 +39,27 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
     minimalPeriod: MINIMAL_PERIOD,
   });
 
-  it('returns 0 when amountInMin is 0 (minPerTrade becomes 0)', () => {
+  it('returns 0 when the minimum trade amount is 0', () => {
     const duration = HOUR;
-    const amountInMin = 0n;
+    const minTradeAmount = 0n;
     const amountIn = 1_000n;
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBe(0);
   });
 
   it('caps by budget for long duration (1 day)', () => {
     const duration = DAY;
-    const amountInMin = 100n; // minPerTrade=20
+    const minTradeAmount = 20n;
     const amountIn = 190n; // maxByBudget=9
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBe(9);
   });
 
   it('caps by time for 1 hour when budget is very large (time dominates)', () => {
     const duration = HOUR;
-    const amountInMin = 100n;
+    const minTradeAmount = 100n;
     const amountIn = 10_000_000n;
 
     const maxByTimeRaw = Math.floor(duration / MIN_SPACING);
@@ -68,7 +68,7 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
       Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
     );
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBe(expected);
 
     /** the cap must be schedulable: every trade needs minimalPeriod blocks */
@@ -77,28 +77,27 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
 
   it('handles exact budget division', () => {
     const duration = DAY;
-    const amountInMin = 100n; // minPerTrade=20
+    const minTradeAmount = 20n;
     const amountIn = 200n; // exactly 10 trade
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBe(10);
   });
 
   it('never exceeds budget-implied maximum trades', () => {
     const duration = DAY;
-    const amountInMin = 100n; // minPerTrade=20
+    const minTradeAmount = 20n;
     const amountIn = 199n; // cap should be 9
 
-    const minPerTrade = (amountInMin * 2n) / 10n;
-    const maxByBudget = Number(amountIn / minPerTrade);
+    const maxByBudget = Number(amountIn / minTradeAmount);
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBeLessThanOrEqual(maxByBudget);
   });
 
   it('never exceeds time-implied maximum trades', () => {
     const duration = HOUR;
-    const amountInMin = 100n;
+    const minTradeAmount = 100n;
     const amountIn = 10_000_000n;
 
     const maxByTimeRaw = Math.floor(duration / MIN_SPACING);
@@ -107,7 +106,7 @@ describe('TradeScheduler.getMaximumTradeCount', () => {
       Math.floor(maxByTimeRaw * (1 - DCA_TIME_RESERVE))
     );
 
-    const res = scheduler.maxTradeCount(amountIn, amountInMin, duration);
+    const res = scheduler.maxTradeCount(amountIn, minTradeAmount, duration);
     expect(res).toBeLessThanOrEqual(maxByTime);
   });
 });
