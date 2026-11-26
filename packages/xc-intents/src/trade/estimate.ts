@@ -24,6 +24,7 @@ import { underSlippage, wethIn } from './utils';
  * Sizes a swap or a TWAP against live state.
  *
  * - Viability problems land in `errors`; config and network failures throw
+ * - Every order's floor output reaches the route minimum, so it pays out alone
  * - Reads the rate, route, relay ceiling, order cost and the Hydration sell
  * - Calls no pass-through backend: terms are fixed only in `buildCall`
  *
@@ -85,7 +86,7 @@ export async function estimate(
     orderBase,
     maxRelayFee,
     minOutPerIn,
-    kind === 'swap' && minOutPerIn > 0n ? routeMin : 0n
+    minOutPerIn > 0n ? routeMin : 0n
   );
 
   const perTrade = schedule.amountInPerTrade;
@@ -114,9 +115,6 @@ export async function estimate(
     tranches * estimateOut(bridged, maxRelayFee, rate, maxSlippageBps);
   const minAmountOut =
     tranches * floorOut(orderBase, maxRelayFee, minOutPerIn, minWethOut);
-  if (kind === 'twap' && routeMin > 0n && minAmountOut < routeMin) {
-    errors.push(XcIntentsError.ScheduleBelowRouteMin);
-  }
 
   const destination = {
     symbol,

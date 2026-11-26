@@ -47,8 +47,8 @@ function twapSchedule(
 /**
  * Estimates a TWAP: `amountIn` over `tranches` trades, `period` blocks apart.
  *
- * - Every trade must pass the dispatcher; tranches under the route minimum batch in `A`
- * - The schedule's floor output must reach the route minimum
+ * - Each trade is sized like a swap: its floor output reaches the route minimum
+ * - So no remainder strands in `A`; a `minDelivery` above it batches payouts
  * - Tranches and period are the user's, so the order is built from one trade's quote
  *
  * @param ctx - trade context

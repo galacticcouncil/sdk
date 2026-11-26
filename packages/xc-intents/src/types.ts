@@ -92,8 +92,6 @@ export enum XcIntentsError {
   BelowExistentialDeposit = 'BelowExistentialDeposit',
   /** Least WETH per order is under `least` */
   OrderTooSmall = 'OrderTooSmall',
-  /** TWAP's floor output can't reach the route minimum */
-  ScheduleBelowRouteMin = 'ScheduleBelowRouteMin',
   /** TWAP payout batch is under the route minimum */
   MinDeliveryBelowRouteMin = 'MinDeliveryBelowRouteMin',
   /** TWAP period is under 15 blocks */

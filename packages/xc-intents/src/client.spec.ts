@@ -214,15 +214,29 @@ describe('XcIntentsClient', () => {
       expect(trade.errors).toContain(error);
     });
 
-    it('reports a TWAP whose whole schedule cannot reach the route minimum', async () => {
-      const probe = await client().twap({ ...swapParams, tranches: 2 });
-      // Each trade clears `least`, but two of them at the floor stay under 100000 zat.
-      const perTrade = (probe.least * 101n) / 99n;
-      const trade = await client({ sellOut: perTrade }).twap({
+    it('sizes every TWAP trade to the route minimum, as a swap', async () => {
+      const swap = await client().swap(swapParams);
+      const twap = await client().twap({ ...swapParams, tranches: 2 });
+      expect(twap.least).toBe(swap.least);
+
+      // Each trade at the floor stays under 100000 zat, though two of them would not.
+      const sellOut = (swap.least * 100n) / 99n - 10n ** 12n;
+      const trade = await client({ sellOut }).twap({
         ...swapParams,
         tranches: 2,
       });
-      expect(trade.errors).toEqual([XcIntentsError.ScheduleBelowRouteMin]);
+      expect(trade.errors).toEqual([XcIntentsError.OrderTooSmall]);
+    });
+
+    it('batches TWAP payouts above the route minimum', async () => {
+      const trade = await client().twap({
+        ...swapParams,
+        tranches: 4,
+        minDelivery: 300_000n,
+      });
+      expect(trade.errors).toEqual([]);
+      const req = await trade.buildCall();
+      expect(req.terms.minDelivery).toBe(300_000n);
     });
 
     it('refuses to build a non-viable trade', async () => {

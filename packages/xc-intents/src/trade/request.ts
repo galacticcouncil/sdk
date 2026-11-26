@@ -66,7 +66,7 @@ export async function buildRequest(
     orderBase,
     maxRelayFee,
     terms.minOutPerIn,
-    est.kind === 'swap' ? destination.routeMin : 0n
+    destination.routeMin
   );
   if (est.minWethOut < least) {
     throw new Error(
