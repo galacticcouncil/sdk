@@ -1,4 +1,4 @@
-import { Balance } from 'types';
+import { Balance } from '../types';
 
 export class MultiCurrencyContainer {
   result = new Map<string, bigint>();

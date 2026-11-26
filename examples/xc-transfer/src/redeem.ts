@@ -14,7 +14,7 @@ import {
 } from '@galacticcouncil/xc-core';
 
 import { xc } from './setup';
-import { signEvm, signSolanaAll } from 'signers';
+import { signEvm, signSolanaAll } from './signers';
 
 const { config } = xc;
 
