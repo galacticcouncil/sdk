@@ -1,6 +1,5 @@
 import {
   HydrationWhitelistEntry,
-  HydrationIceWhitelistEntry,
   HubWhitelistEntry,
   WhitelistEntriesByChain,
 } from './descriptors';
@@ -113,15 +112,6 @@ const hydrationWhitelist: HydrationWhitelistEntry[] = [
   'tx.GigaHdxRewards.*',
 ];
 
-const hydrationIceWhitelist: HydrationIceWhitelistEntry[] = [
-  'const.ICE.*',
-  'const.Intent.*',
-  'query.ICE.*',
-  'query.Intent.*',
-  'tx.ICE.*',
-  'tx.Intent.*',
-];
-
 const hubWhitelist: HubWhitelistEntry[] = [
   'query.ForeignAssets.*',
   'query.Assets.*',
@@ -138,7 +128,6 @@ export const whitelist: WhitelistEntriesByChain = {
     'query.System.*',
     'tx.PolkadotXcm.*',
   ],
-  hydrationIce: hydrationIceWhitelist,
   hydrationNext: hydrationWhitelist,
   hydration: hydrationWhitelist,
   hub: hubWhitelist,
