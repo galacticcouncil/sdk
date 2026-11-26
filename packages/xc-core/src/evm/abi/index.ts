@@ -4,6 +4,7 @@ import { BATCH } from './Batch';
 import { ERC20 } from './Erc20';
 import { EXECUTOR } from './Executor';
 import { BASEJUMP } from './Basejump';
+import { FIAT_TOKEN } from './FiatToken';
 import { HOLLAR_BASE_FACILITATOR } from './HollarBaseFacilitator';
 import { HOLLAR_BASE_VAULT } from './HollarBaseVault';
 import { META } from './Meta';
@@ -20,6 +21,7 @@ export const Abi: Record<string, TAbi> = {
   Erc20: ERC20,
   Executor: EXECUTOR,
   Basejump: BASEJUMP,
+  FiatToken: FIAT_TOKEN,
   HollarBaseFacilitator: HOLLAR_BASE_FACILITATOR,
   HollarBaseVault: HOLLAR_BASE_VAULT,
   Meta: META,

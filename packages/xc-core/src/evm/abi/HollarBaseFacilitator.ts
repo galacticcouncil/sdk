@@ -14,6 +14,13 @@ export const HOLLAR_BASE_FACILITATOR = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'mintPaused',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'uint256', name: 'usdcAmount', type: 'uint256' },
       { internalType: 'address', name: 'baseRecipient', type: 'address' },
