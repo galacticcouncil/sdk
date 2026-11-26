@@ -35,7 +35,7 @@
     "link": "npm ln"
   },
   "dependencies": {
-    "@defuse-protocol/one-click-sdk-typescript": "^0.1.17"
+    "@defuse-protocol/one-click-sdk-typescript": "^0.1.26"
   },
   "peerDependencies": {
     "@galacticcouncil/common": ">=1.2.0",
