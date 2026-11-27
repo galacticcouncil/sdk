@@ -29,6 +29,8 @@ import {
 
 import { mainnet as evmChain } from 'viem/chains';
 
+const NTT_PENDING = '0x0000000000000000000000000000000000000000';
+
 export const ethereum = new EvmChain({
   id: 1,
   key: 'ethereum',
@@ -211,6 +213,83 @@ export const ethereum = new EvmChain({
         manager: '0x283B14B5Dd352e32154Df014EA96834F395E04b6',
         transceiver: {
           wormhole: '0xbA0Cd32131b8206AF4feB79A1A3aaF0AEfe18b48',
+        },
+      },
+      [aave.key]: {
+        token: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [apyusd.key]: {
+        token: '0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [ena.key]: {
+        token: '0x57e114b691db790c35207b2e685d4a43181e6061',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [ldo.key]: {
+        token: '0x5a98fcbea516cf06857215779fd812ca3bef1b32',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [link.key]: {
+        token: '0x514910771af9ca656af840dff83e8264ecf986ca',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [paxg.key]: {
+        token: '0x45804880de22913dafe09f4980848ece6ecbaf78',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [sky.key]: {
+        token: '0x56072c95faa701256059aa122697b133aded9279',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [susde.key]: {
+        token: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [tbtc.key]: {
+        token: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [trac.key]: {
+        token: '0xaA7a9CA87d3694B5755f213B5D04094b8d0F0A6F',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [wsteth.key]: {
+        token: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
         },
       },
     },

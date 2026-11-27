@@ -66,6 +66,8 @@ import {
 } from '../../assets';
 import { HydrationEvmResolver } from '../../resolvers';
 
+const NTT_PENDING = '0x0000000000000000000000000000000000000000';
+
 const evmResolver = new HydrationEvmResolver();
 
 const rpcHttpList = [
@@ -141,20 +143,22 @@ export const hydration = new EvmParachain({
       id: 1000624,
       min: 0.00006,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000007fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
               },
             },
           ],
@@ -225,20 +229,22 @@ export const hydration = new EvmParachain({
       id: 41,
       min: 0.1,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000cccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
               },
             },
           ],
@@ -303,15 +309,25 @@ export const hydration = new EvmParachain({
       id: 34,
       min: 0.0000055,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X1: {
-            GlobalConsensus: {
-              Ethereum: {
-                chain_id: 1,
+          X3: [
+            {
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
-          },
+            {
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+              },
+            },
+          ],
         },
       },
     },
@@ -321,20 +337,22 @@ export const hydration = new EvmParachain({
       id: 46,
       min: 0.0147058823529412,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000038eeb52f0771140d10c4e9a9a72349a329fe8a6a',
               },
             },
           ],
@@ -347,20 +365,22 @@ export const hydration = new EvmParachain({
       id: 38,
       min: 0.037,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x57e114b691db790c35207b2e685d4a43181e6061',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000057e114b691db790c35207b2e685d4a43181e6061',
               },
             },
           ],
@@ -554,20 +574,22 @@ export const hydration = new EvmParachain({
       id: 1000796,
       min: 0.013,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x5a98fcbea516cf06857215779fd812ca3bef1b32',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000005a98fcbea516cf06857215779fd812ca3bef1b32',
               },
             },
           ],
@@ -594,20 +616,22 @@ export const hydration = new EvmParachain({
       id: 1000851,
       min: 0.00000023,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x8236a87084f8b84306f72007f36f2618a5634494',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000008236a87084f8b84306f72007f36f2618a5634494',
               },
             },
           ],
@@ -620,20 +644,22 @@ export const hydration = new EvmParachain({
       id: 1000794,
       min: 0.001,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x514910771af9ca656af840dff83e8264ecf986ca',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000514910771af9ca656af840dff83e8264ecf986ca',
               },
             },
           ],
@@ -646,20 +672,22 @@ export const hydration = new EvmParachain({
       id: 39,
       min: 0.000005,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x45804880de22913dafe09f4980848ece6ecbaf78',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000045804880de22913dafe09f4980848ece6ecbaf78',
               },
             },
           ],
@@ -752,20 +780,22 @@ export const hydration = new EvmParachain({
       id: 1000795,
       min: 0.52,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x56072c95faa701256059aa122697b133aded9279',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000056072c95faa701256059aa122697b133aded9279',
               },
             },
           ],
@@ -862,20 +892,22 @@ export const hydration = new EvmParachain({
       id: 1000625,
       min: 0.01,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497',
               },
             },
           ],
@@ -888,20 +920,22 @@ export const hydration = new EvmParachain({
       id: 1000626,
       min: 0.01,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000a3931d71877c0e7a3148cb7eb4463524fec27fbd',
               },
             },
           ],
@@ -942,20 +976,22 @@ export const hydration = new EvmParachain({
       id: 1000765,
       min: 0.00000023,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x18084fba666a33d37592fa2633fd49a74dd93a88',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x00000000000000000000000018084fba666a33d37592fa2633fd49a74dd93a88',
               },
             },
           ],
@@ -968,20 +1004,22 @@ export const hydration = new EvmParachain({
       id: 35,
       min: 0.028,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xaA7a9CA87d3694B5755f213B5D04094b8d0F0A6F',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000aa7a9ca87d3694b5755f213b5d04094b8d0f0a6f',
               },
             },
           ],
@@ -1086,20 +1124,22 @@ export const hydration = new EvmParachain({
       id: 1000766,
       min: 0.01,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
               },
             },
           ],
@@ -1162,20 +1202,22 @@ export const hydration = new EvmParachain({
       id: 1000767,
       min: 0.01,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
               },
             },
           ],
@@ -1232,20 +1274,22 @@ export const hydration = new EvmParachain({
       id: 1000190,
       min: 0.00000023,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599',
               },
             },
           ],
@@ -1286,20 +1330,22 @@ export const hydration = new EvmParachain({
       id: 1000189,
       min: 0.0000061,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7362000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+              GeneralIndex: 1,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
               },
             },
           ],
@@ -1340,20 +1386,22 @@ export const hydration = new EvmParachain({
       id: 1000809,
       min: 0.00000635,
       xcmLocation: {
-        parents: 2,
+        parents: 0,
         interior: {
-          X2: [
+          X3: [
             {
-              GlobalConsensus: {
-                Ethereum: {
-                  chain_id: 1,
-                },
+              GeneralKey: {
+                length: 2,
+                data: '0x7768000000000000000000000000000000000000000000000000000000000000',
               },
             },
             {
-              AccountKey20: {
-                network: null,
-                key: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+              GeneralIndex: 2,
+            },
+            {
+              GeneralKey: {
+                length: 32,
+                data: '0x0000000000000000000000007f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
               },
             },
           ],
@@ -1537,6 +1585,83 @@ export const hydration = new EvmParachain({
         manager: '0x6BFca089916c045b0Ca4A09B655aF9F926189993',
         transceiver: {
           wormhole: '0x9a8a1ab288f6749Ce5626DEE1B5d59441BdC187F',
+        },
+      },
+      [aave.key]: {
+        token: '0x00000000000000000000000000000001000f44b0',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [apyusd.key]: {
+        token: '0x000000000000000000000000000000010000002e',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [ena.key]: {
+        token: '0x0000000000000000000000000000000100000026',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [ldo.key]: {
+        token: '0x00000000000000000000000000000001000f455c',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [link.key]: {
+        token: '0x00000000000000000000000000000001000f455a',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [paxg.key]: {
+        token: '0x0000000000000000000000000000000100000027',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [sky.key]: {
+        token: '0x00000000000000000000000000000001000f455b',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [susde.key]: {
+        token: '0x00000000000000000000000000000001000f44b1',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [tbtc.key]: {
+        token: '0x00000000000000000000000000000001000f453d',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [trac.key]: {
+        token: '0x0000000000000000000000000000000100000023',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
+        },
+      },
+      [wsteth.key]: {
+        token: '0x00000000000000000000000000000001000f4569',
+        manager: NTT_PENDING,
+        transceiver: {
+          wormhole: NTT_PENDING,
         },
       },
       [weth_wh.key]: {

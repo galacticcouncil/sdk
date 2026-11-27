@@ -1,6 +1,10 @@
 import { AssetRoute, EvmBalanceType } from '@galacticcouncil/xc-core';
 
 import {
+  aave,
+  apyusd,
+  cfg_new,
+  ena,
   eth,
   eurc,
   eurc_wh,
@@ -10,9 +14,22 @@ import {
   spy,
   weth,
   whype,
+  lbtc,
+  ldo,
+  link,
+  paxg,
+  sky,
+  susde,
+  susds,
+  tbtc,
+  trac,
   usdc,
+  usdc_eth,
   usdc_wh,
+  usdt_eth,
+  wbtc,
   weth_wh,
+  wsteth,
 } from '../assets';
 import { base, ethereum, hydration, hyperevm, robinhood } from '../chains';
 import { Tag } from '../tags';
@@ -51,6 +68,16 @@ describe('ntt route configs', () => {
       ['hydration -> robinhood weth', hydrationConfig, weth_wh, robinhood, eth],
       ['hydration -> robinhood spy', hydrationConfig, spy, robinhood, spy],
       ['hydration -> hyperevm', hydrationConfig, hype, hyperevm, hype],
+      ['ethereum tbtc', ethereumConfig, tbtc, hydration, tbtc],
+      ['ethereum wsteth', ethereumConfig, wsteth, hydration, wsteth],
+      ['hydration -> ethereum tbtc', hydrationConfig, tbtc, ethereum, tbtc],
+      [
+        'hydration -> ethereum apyusd',
+        hydrationConfig,
+        apyusd,
+        ethereum,
+        apyusd,
+      ],
     ])('%s exposes both delivery models', (_, config, from, to, target) => {
       // Other bridges can serve the same pair (ethereum usdc is also Basejump),
       // so narrow to ntt before splitting on the delivery model.
@@ -120,5 +147,43 @@ describe('ntt route configs', () => {
         }
       }
     );
+  });
+
+  describe('snowbridge exit', () => {
+    const migrated = [
+      aave,
+      apyusd,
+      cfg_new,
+      ena,
+      eth,
+      lbtc,
+      ldo,
+      link,
+      paxg,
+      sky,
+      susde,
+      susds,
+      tbtc,
+      trac,
+      usdc_eth,
+      usdt_eth,
+      wbtc,
+      wsteth,
+    ].map((a) => a.key);
+
+    it.each([
+      ['ethereum', ethereumConfig],
+      ['hydration', hydrationConfig],
+    ])('%s offers no snowbridge route for the migrated assets', (_, config) => {
+      const snowbridge = config
+        .getRoutes()
+        .filter((r) => r.tags?.includes(Tag.Snowbridge))
+        .filter(
+          (r) =>
+            migrated.includes(r.source.asset.key) ||
+            migrated.includes(r.destination.asset.key)
+        );
+      expect(snowbridge).toHaveLength(0);
+    });
   });
 });
