@@ -12,6 +12,8 @@ import { IntentMarketTxBuilder } from './IntentMarketTxBuilder';
 import { IntentLimitTxBuilder } from './IntentLimitTxBuilder';
 import { IntentOrderTxBuilder } from './IntentOrderTxBuilder';
 
+import { VdotMintSupplyTxBuilder } from './VdotMintSupplyTxBuilder';
+
 export class TxBuilderFactory {
   private client: PolkadotClient;
   private evmClient: EvmClient;
@@ -79,5 +81,21 @@ export class TxBuilderFactory {
       undefined,
       this.aave
     ).setOrder(order);
+  }
+
+  /**
+   * Mints vDOT on Bifrost from DOT on Hydration and supplies it to the money market, in one signature.
+   *
+   * - Needs Asset Hub and Bifrost clients (`withChains`) and the signer (`withBeneficiary`)
+   *
+   * @param amount - DOT to send, in planck
+   */
+  vdotMintSupply(amount: bigint): VdotMintSupplyTxBuilder {
+    return new VdotMintSupplyTxBuilder(
+      this.client,
+      this.evmClient,
+      undefined,
+      this.aave
+    ).setAmount(amount);
   }
 }
