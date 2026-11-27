@@ -332,7 +332,8 @@ export class BalanceClient extends Papi {
     return this.getBreakdown(data);
   }
 
-  private getBreakdown(data: TAccount): Balance {
+  /** Splits raw account data into free, reserved, frozen, total and transferable */
+  getBreakdown(data: TAccount): Balance {
     const freezeExcess = data.frozen - data.reserved;
     const netFreezeConstraint = freezeExcess > 0n ? freezeExcess : 0n;
 
