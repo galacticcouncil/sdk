@@ -144,7 +144,7 @@ export class HsmPoolClient extends PoolClient<HsmPoolBase> {
       }
     });
     const results = await Promise.all(pools);
-    return results.filter((pool): pool is HsmPoolBase => pool !== null);
+    return results.filter((pool): pool is HsmPoolBase => pool !== undefined);
   }
 
   async getPoolFees(): Promise<PoolFees> {
